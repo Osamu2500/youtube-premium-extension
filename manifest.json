@@ -1,0 +1,75 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube Premium Plus",
+    "version": "1.0.0",
+    "description": "Enhance YouTube UI and add features.",
+    "permissions": [
+        "storage",
+        "scripting",
+        "tabs",
+        "alarms"
+    ],
+    "host_permissions": [
+        "*://*.youtube.com/*"
+    ],
+    "icons": {
+        "16": "src/assets/icon.svg",
+        "48": "src/assets/icon.svg",
+        "128": "src/assets/icon.svg"
+    },
+    "action": {
+        "default_popup": "src/popup/popup.html",
+        "default_icon": {
+            "16": "src/assets/icon.svg",
+            "48": "src/assets/icon.svg",
+            "128": "src/assets/icon.svg"
+        }
+    },
+    "background": {
+        "service_worker": "src/background/service-worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.youtube.com/*"
+            ],
+            "css": [
+                "src/content/styles.css"
+            ],
+            "run_at": "document_start",
+            "js": [
+                "src/content/constants.js",
+                "src/content/utils.js",
+                "src/content/features/theme.js",
+                "src/content/features/layout.js",
+                "src/content/features/home-organizer.js",
+                "src/content/features/header-nav.js",
+                "src/content/features/subscriptions-organizer.js",
+                "src/content/features/content-control.js",
+                "src/content/features/advanced-filter.js",
+                "src/content/features/zen-mode.js",
+                "src/content/features/focus-mode.js",
+                "src/content/features/study-mode.js",
+                "src/content/features/player.js",
+                "src/content/features/shorts-tools.js",
+                "src/content/features/player-tools.js",
+                "src/content/features/ad-skipper.js",
+                "src/content/features/sidebar.js",
+                "src/content/features/search-redesign.js",
+                "src/content/feature-manager.js",
+                "src/content/main.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "src/assets/*"
+            ],
+            "matches": [
+                "*://*.youtube.com/*"
+            ]
+        }
+    ]
+}

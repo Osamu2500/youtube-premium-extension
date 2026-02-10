@@ -1,0 +1,82 @@
+/**
+ * Sidebar Manager (Redesign)
+ * Starting fresh to place sidebar on homepage first.
+ */
+window.YPP = window.YPP || {};
+window.YPP.features = window.YPP.features || {};
+
+window.YPP.features.SidebarManager = class SidebarManager {
+    constructor() {
+        this.CONSTANTS = window.YPP.CONSTANTS;
+        this.Utils = window.YPP.Utils;
+        this.isActive = false;
+        this.settings = null;
+
+        // Bind methods for safe event removal
+        this.handleNavigation = this.handleNavigation.bind(this);
+    }
+
+    run(settings) {
+        this.update(settings);
+    }
+
+    update(settings) {
+        this.settings = settings;
+        // Logic: if forceHideSidebar is enabled OR we just want to control it
+        // For now, let's say we always "enable" it to manage visibility, 
+        // unless disabled entirely. 
+        if (settings.forceHideSidebar) {
+            this.enable();
+        } else {
+            this.disable();
+        }
+    }
+
+    enable() {
+        if (this.isActive) {
+            this.ensureSidebarVisible();
+            return;
+        }
+        this.isActive = true;
+        this.Utils.log('Sidebar Manager Enabled', 'SIDEBAR');
+
+        this.ensureSidebarVisible();
+
+        window.addEventListener('yt-page-data-updated', this.handleNavigation);
+        window.addEventListener('yt-navigate-finish', this.handleNavigation);
+    }
+
+    disable() {
+        this.isActive = false;
+        document.body.classList.remove('ypp-hide-sidebar');
+
+        window.removeEventListener('yt-page-data-updated', this.handleNavigation);
+        window.removeEventListener('yt-navigate-finish', this.handleNavigation);
+        this.Utils.log('Sidebar Manager Disabled', 'SIDEBAR');
+    }
+
+    handleNavigation() {
+        if (this.isActive) this.ensureSidebarVisible();
+    }
+
+    ensureSidebarVisible() {
+        if (!this.isActive) return;
+
+        // As per current "Clean Slate", we hide standard sidebars
+        if (document.body) {
+            document.body.classList.add('ypp-hide-sidebar');
+        }
+    }
+
+    toggleGuideIfMissing() {
+        const guide = document.querySelector(this.CONSTANTS.SELECTORS.MAIN_GUIDE);
+        if (!guide) {
+            const btn = document.querySelector(this.CONSTANTS.SELECTORS.GUIDE_BUTTON);
+            if (btn) {
+                btn.click();
+            } else {
+                this.Utils.log('Guide button not found, cannot toggle sidebar.', 'SIDEBAR', 'warn');
+            }
+        }
+    }
+};

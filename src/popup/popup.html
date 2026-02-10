@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Premium+</title>
+    <link rel="stylesheet" href="popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="white">
+                        <path
+                            d="M21.58 7.19c-.23-.86-.91-1.54-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42c-.86.23-1.54.91-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.91 1.54 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42c.86-.23 1.54-.91 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="nav-items">
+                <button class="nav-item active" data-tab="global" title="Global">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                        </path>
+                    </svg>
+                </button>
+                <button class="nav-item" data-tab="navigation" title="Navigation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                </button>
+                <button class="nav-item" data-tab="home" title="Home Feed">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </button>
+                <button class="nav-item" data-tab="search" title="Search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+                <button class="nav-item" data-tab="player" title="Player">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </button>
+                <button class="nav-item bottom" data-tab="settings" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <header class="top-bar">
+                <h1 id="page-title">Global Settings</h1>
+                <div class="status-badge">Premium</div>
+            </header>
+
+            <!-- TAB: GLOBAL -->
+            <section id="tab-global" class="tab-content active">
+                <div class="hero-card">
+                    <h2>Experience</h2>
+                    <p>Core visual & functional tweaks</p>
+                </div>
+
+                <div class="section-title">THEME & UI</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Premium Theme</span>
+                            <span class="desc">Glassmorphism & Modern UI</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="premiumTheme">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">True Black Mode</span>
+                            <span class="desc">OLED Friendly Background</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="trueBlack">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide Scrollbar</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideScrollbar">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-title">FOCUS</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Focus Mode</span>
+                            <span class="desc">Hide Comments & Suggestions</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="enableFocusMode">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide Shorts Globally</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideShorts">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: NAVIGATION (NEW) -->
+            <section id="tab-navigation" class="tab-content">
+                <div class="hero-card">
+                    <h2>Navigation</h2>
+                    <p>Customize your header buttons</p>
+                </div>
+
+                <div class="section-title">HEADER BUTTONS</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Trending</span>
+                            <span class="desc">Show Trending Button</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="navTrending">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Shorts</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="navShorts">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Subscriptions</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="navSubscriptions">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Watch Later</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="navWatchLater">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Playlists</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="navPlaylists">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">History</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="navHistory">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-title">SIDEBAR CONTROL</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Force Hide Sidebar</span>
+                            <span class="desc">Replace standard sidebar with header nav</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="forceHideSidebar">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: HOME -->
+            <section id="tab-home" class="tab-content">
+                <div class="hero-card">
+                    <h2>Home Feed</h2>
+                    <p>Customize your feed</p>
+                </div>
+                <div class="section-title">FEED CONTENT</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hook Free Home</span>
+                            <span class="desc">Hide Recommended Feed Completely</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hookFreeHome">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide Mixes</span>
+                            <span class="desc">Remove Mix Playlists</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideMixes">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide Watched</span>
+                            <span class="desc">Remove Watched Videos</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideWatched">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-title">LAYOUT</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">4x4 Grid Layout</span>
+                            <span class="desc">Force 4 Videos Per Row</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="grid4x4">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: SEARCH -->
+            <section id="tab-search" class="tab-content">
+                <div class="hero-card">
+                    <h2>Search Filter</h2>
+                    <p>Clean up search results</p>
+                </div>
+
+                <div class="section-title">SEARCH LAYOUT</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Grid View</span>
+                            <span class="desc">Display results in a grid</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="searchGrid">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 20px;">FILTERS</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Clean Search</span>
+                            <span class="desc">Hide "For You", "People also watched"</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="cleanSearch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide Shorts in Search</span>
+                            <span class="desc">Remove all Shorts from search results</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideSearchShorts">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Shorts Auto-Scroll</span>
+                            <span class="desc">Auto-play next Short</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="shortsAutoScroll">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: PLAYER -->
+            <section id="tab-player" class="tab-content" style="display: none;">
+                <div class="hero-card">
+                    <h2>Player Tools</h2>
+                    <p>Enhance your viewing experience</p>
+                </div>
+
+                <div class="section-title">ENHANCEMENTS</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Auto-Quality (1080p+)</span>
+                            <span class="desc">Force Highest Quality</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="autoQuality">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Remaining Time</span>
+                            <span class="desc">Show time left in video</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="enableRemainingTime">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Volume Booster</span>
+                            <span class="desc">Boost audio up to 600%</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="volumeBoost">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Custom Speed Control</span>
+                            <span class="desc">Enable speed input in player</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="enableCustomSpeed">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Cinema Filters</span>
+                            <span class="desc">Enable Brightness/Contrast tools</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="enableCinemaFilters">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Grid for smaller toggles -->
+                    <div class="grid-2"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div class="setting-item">
+                            <div class="info"><span class="name">Snapshot</span></div>
+                            <label class="toggle"><input type="checkbox" id="snapshotBtn"><span
+                                    class="slider"></span></label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="info"><span class="name">Loop</span></div>
+                            <label class="toggle"><input type="checkbox" id="loopBtn"><span
+                                    class="slider"></span></label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="info"><span class="name">PiP</span></div>
+                            <label class="toggle"><input type="checkbox" id="enablePiP"><span
+                                    class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top:20px;">MODES</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Zen Mode</span>
+                            <span class="desc">Distraction-free Cinema View</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="zenMode">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Study Mode</span>
+                            <span class="desc">1.25x Speed + Captions</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="studyMode">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Auto Cinema</span>
+                            <span class="desc">Expand player on load</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="autoCinema">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top:20px;">DISTRACTIONS</div>
+                <div class="card-group">
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide Comments</span>
+                            <span class="desc">Remove comments section</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideComments">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="info">
+                            <span class="name">Hide End Screens</span>
+                            <span class="desc">Remove video suggestions</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="hideEndScreens">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: SETTINGS -->
+            <section id="tab-settings" class="tab-content">
+                <div class="section-title">EXTENSION</div>
+                <div class="card-group">
+                    <button id="resetBtn" class="action-btn danger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                        </svg>
+                        Reset to Defaults
+                    </button>
+                    <div class="version-info">
+                        v2.4.0 • Premium Edition
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    <script src="../content/constants.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

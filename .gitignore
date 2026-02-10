@@ -1,0 +1,27 @@
+# .gitignore
+node_modules/
+dist/
+.DS_Store
+*.log
+.vscode/
+
+# --- 3-Layer Architecture ---
+# Environment variables
+.env
+
+# Google OAuth credentials
+credentials.json
+token.json
+
+# Temporary/intermediate files
+tmp/*
+!tmp/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/

@@ -1,0 +1,2189 @@
+/* 
+   YouTube Premium Plus - Glassmorphism Redesign (Optimized)
+   ---------------------------------------------------------
+   A complete visual overhaul for YouTube ensuring a premium, 
+   glass-morphic aesthetic with robust layout logic.
+*/
+
+.yt-premium-plus-theme {
+    /* --- COLOR SYSTEM --- */
+    --ypp-bg-base: #080808;
+    /* Darker base */
+    --ypp-bg-surface: rgba(25, 25, 25, 0.6);
+    --ypp-bg-glass: rgba(10, 10, 10, 0.8);
+    /* Darker glass */
+
+    /* --- YOUTUBE COMPONENT OVERRIDES (Variables pierce Shadow DOM) --- */
+    /* --- YOUTUBE COMPONENTS --- */
+    --ytd-searchbox-background: transparent;
+    --ytd-searchbox-text-color: #ffffff;
+    --ytd-searchbox-border-radius: 12px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 12px 12px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05);
+
+    --ypp-glass-border: rgba(255, 255, 255, 0.08);
+    --ypp-glass-highlight: rgba(255, 255, 255, 0.12);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+
+    --ypp-text-primary: #ffffff;
+    --ypp-text-secondary: rgba(255, 255, 255, 0.75);
+
+    /* --- DIMENSIONS & SPACING --- */
+    --ypp-header-height: 60px;
+    /* Compact header */
+    --ypp-header-margin: 16px;
+
+    --ypp-sidebar-width: 240px;
+    --ypp-sidebar-mini-width: 72px;
+
+    --ypp-sidebar-gap: 16px;
+    --ypp-sidebar-top-gap: 16px;
+    --ypp-content-gap: 32px;
+
+    --ypp-grid-gap: 24px;
+
+    /* --- SHAPE & MOTION --- */
+    --ypp-radius-lg: 20px;
+    --ypp-radius-md: 14px;
+    --ypp-radius-sm: 8px;
+    --ypp-radius-pill: 100px;
+
+    --ypp-blur-high: blur(32px);
+    --ypp-blur-med: blur(20px);
+
+    --ypp-transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.25);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --ypp-shadow-glow: 0 0 24px rgba(62, 166, 255, 0.15);
+
+    /* --- Z-INDEX LAYERS --- */
+    --ypp-z-background: -1;
+    --ypp-z-content: 1;
+    --ypp-z-card-hover: 100;
+    --ypp-z-header: 2200;
+    /* Above YouTube standard (2020) */
+    --ypp-z-chips: 2100;
+    /* Below header but above content */
+    --ypp-z-popup: 2400;
+    /* Above everything */
+}
+
+/* CHIPS / FILTERS ADJUSTMENT - Merged into Section 5 */
+
+/* --- Feature Pack 2.1 Additions --- */
+
+/* Hide Comments */
+.ypp-hide-comments #comments {
+    display: none !important;
+}
+
+/* Hide Sidebar */
+.ypp-hide-sidebar #secondary {
+    display: none !important;
+}
+
+/* Hide End Screens (Videowall) */
+.ypp-hide-endscreens .ytp-ce-element,
+.ypp-hide-endscreens .ytp-endscreen-content {
+    display: none !important;
+}
+
+/* Hide Info Cards */
+.ypp-hide-cards .ytp-cards-button,
+.ypp-hide-cards .ytp-cards-teaser {
+    display: none !important;
+}
+
+/* Hide Merch */
+.ypp-hide-merch #merch-shelf {
+    display: none !important;
+}
+
+/* Hide Scrollbar */
+body.ypp-hide-scrollbar::-webkit-scrollbar {
+    display: none !important;
+}
+
+body.ypp-hide-scrollbar {
+    scrollbar-width: none !important;
+    /* Firefox */
+}
+
+/* ==========================================================================
+   THEME BASE
+   ========================================================================== */
+body.yt-premium-plus-theme {
+    background-color: var(--ypp-bg-base) !important;
+    overflow-x: hidden !important;
+}
+
+/* Custom Scrollbar (Global) */
+::-webkit-scrollbar {
+    width: 8px !important;
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Features Toggles (Helpers) */
+body.ypp-hide-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='start_radio']) {
+    display: none !important;
+}
+
+/* Hide Watched Videos */
+body.ypp-hide-watched ytd-grid-video-renderer[is-watched] {
+    display: none !important;
+}
+
+/* Feature: Advanced Filter Hidden Items */
+.ypp-filter-hidden {
+    display: none !important;
+}
+
+/* Hide Hamburger Menu */
+.yt-premium-plus-theme #guide-button,
+.yt-premium-plus-theme #buttons ytd-button-renderer,
+/* Hide 'Create' text button */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:not(:has(#avatar-btn)) {
+    display: none !important;
+}
+
+/* Ensure Profile Button via Avatar is VISIBLE */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn) {
+    display: flex !important;
+}
+
+/* Logo Area Styling */
+/* Logo Area Styling */
+.yt-premium-plus-theme ytd-topbar-logo-renderer {
+    padding: 0 16px !important;
+    height: 44px !important;
+    /* Match search bar height */
+    display: flex !important;
+    align-items: center !important;
+    border-radius: 12px !important;
+    /* "Cirsquare" */
+    background: transparent !important;
+    /* Removed box background for cleaner look */
+    border: none !important;
+    /* Removed border */
+    margin-right: 16px !important;
+    /* backdrop-filter: blur(8px) !important; */
+    /* Removed blur to make it just the logo */
+}
+
+/* ==========================================================================
+   1. HEADER AREA (Floating Glass)
+   ========================================================================== */
+
+/* Wrapper Fix - Forces entire header assembly to scroll */
+.yt-premium-plus-theme #masthead-container {
+    position: fixed !important;
+    top: 0 !important;
+    z-index: var(--ypp-z-header) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100% !important;
+}
+
+/* Push Page Content Down */
+.yt-premium-plus-theme ytd-page-manager#page-manager {
+    margin-top: 100px !important;
+}
+
+/* Sidebar Internal Scrolling */
+.yt-premium-plus-theme #guide-inner-content {
+    scrollbar-width: none !important;
+}
+
+.yt-premium-plus-theme #guide-inner-content:hover {
+    scrollbar-width: thin !important;
+}
+
+/* Inner Masthead - The Floating Pill */
+.yt-premium-plus-theme ytd-masthead {
+    position: absolute !important;
+    top: 4px !important;
+    left: var(--ypp-header-margin) !important;
+    right: var(--ypp-header-margin) !important;
+    height: var(--ypp-header-height) !important;
+    width: auto !important;
+
+    background: transparent !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    /* Pass clicks through gaps */
+}
+
+/* The Visual Glass Container */
+.yt-premium-plus-theme ytd-masthead #container {
+    /* The Visual Glass Container */
+    pointer-events: auto !important;
+    background: var(--ypp-bg-glass) !important;
+    backdrop-filter: var(--ypp-blur-med) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    /* Top Highlight for 3D Glass Effect */
+    background-image: var(--ypp-glass-shine) !important;
+    border-radius: var(--ypp-radius-pill) !important;
+    box-shadow: var(--ypp-shadow-float) !important;
+    padding: 0 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+    transition: box-shadow 0.3s ease !important;
+}
+
+.yt-premium-plus-theme ytd-masthead #container:hover {
+    box-shadow: var(--ypp-shadow-glow), var(--ypp-shadow-float) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Hide Setup */
+.yt-premium-plus-theme ytd-masthead #background {
+    display: none !important;
+}
+
+/* --- HEADER ELEMENTS --- */
+
+/* --- REDESIGNED SEARCH BAR (Squircle v3) --- */
+
+/* 1. Host Component & Vars */
+.yt-premium-plus-theme ytd-searchbox {
+    margin: 0 16px !important;
+    height: 44px !important;
+    /* Force variables at component level just in case */
+    --ytd-searchbox-background: transparent !important;
+    --ytd-searchbox-border-radius: 12px !important;
+}
+
+/* 2. The Inner Container (The Pill) - NUKE IT */
+.yt-premium-plus-theme ytd-searchbox #container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 3. The Input Field (Left Half) */
+.yt-premium-plus-theme ytd-searchbox #search-form {
+    display: flex !important;
+    height: 100% !important;
+}
+
+.yt-premium-plus-theme ytd-searchbox input#search {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-right: none !important;
+    border-radius: 12px 0 0 12px !important;
+    padding: 0 16px !important;
+    color: white !important;
+    font-size: 16px !important;
+    height: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* 4. The Search Button (Right Half) */
+.yt-premium-plus-theme ytd-searchbox #search-icon-legacy {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: 0 12px 12px 0 !important;
+    width: 60px !important;
+    height: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+
+/* 5. Voice Search Button (Separate) */
+.yt-premium-plus-theme #voice-search-button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: 12px !important;
+    margin-left: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+}
+
+/* 5. The Input Field - FORCE 12px */
+.yt-premium-plus-theme ytd-searchbox input#search {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-right: none !important;
+    border-radius: 12px 0 0 12px !important;
+    padding: 0 16px !important;
+    color: var(--ypp-text-primary) !important;
+    height: 100% !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Voice Search */
+.yt-premium-plus-theme #voice-search-button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+    margin-left: 12px !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+}
+
+/* Profile Avatar & Top Bar Buttons (Squircle/Cirsquare) */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer,
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer,
+.yt-premium-plus-theme #avatar-btn {
+    border-radius: 12px !important;
+    /* Squircle */
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    margin-left: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: var(--ypp-transition) !important;
+    overflow: hidden !important;
+}
+
+/* 'Create' button specific fix if it exists as a text button, otherwise icon buttons covered above */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer #button.ytd-topbar-menu-button-renderer {
+    border-radius: 16px !important;
+}
+
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:hover,
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer:hover,
+.yt-premium-plus-theme #avatar-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: scale(1.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Fix Icon Centering */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer yt-icon,
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer yt-icon {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+.yt-premium-plus-theme #avatar-btn img {
+    border-radius: 16px !important;
+    /* Match parent squircle */
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ==========================================================================
+   2. CATEGORY CHIPS (Floating)
+   ========================================================================== */
+/* ==========================================================================
+   2. CATEGORY CHIPS (Replacing Default)
+   ========================================================================== */
+
+/* Hide Default YouTube Chips */
+ytd-feed-filter-chip-bar-renderer {
+    display: none !important;
+}
+
+/* New Custom Chips Bar */
+.ypp-chips-bar {
+    position: fixed !important;
+    top: calc(var(--ypp-header-height) + 12px) !important;
+    /* Directly below header (60px + gap) */
+    left: var(--ypp-sidebar-width) !important;
+    /* Align with content start if sidebar is visible */
+    right: 0 !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 24px !important;
+    z-index: var(--ypp-z-chips) !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 8px !important;
+    scrollbar-width: none !important;
+    /* Hide scrollbar */
+    pointer-events: auto !important;
+
+    transition: left 0.3s ease !important;
+}
+
+/* Adjust for Collapsed Sidebar */
+body.ypp-sidebar-collapsed .ypp-chips-bar {
+    left: var(--ypp-sidebar-mini-width) !important;
+}
+
+body.ypp-hide-sidebar .ypp-chips-bar {
+    left: 0 !important;
+    justify-content: center !important;
+}
+
+
+/* Chip Styling */
+.ypp-chip {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    /* Matches card radius style */
+    padding: 6px 16px !important;
+    color: var(--ypp-text-secondary) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    user-select: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.ypp-chip:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px) !important;
+    color: var(--ypp-text-primary) !important;
+}
+
+.ypp-chip.active {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.05) !important;
+}
+
+/* Section Dividers in Chips */
+.ypp-chip-divider {
+    width: 1px !important;
+    height: 20px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    margin: 0 8px !important;
+}
+
+
+/* 
+   3. SIDEBAR (Clean Slate - Floating Squircle) - REMOVED
+   --------------------------------------------------------------------------
+   (Content Removed per user request to disable custom sidebar)
+*/
+
+
+/* WATCH PAGE: Hide Sidebar by default */
+ytd-app[is-watch-page] .yt-premium-plus-theme ytd-guide-renderer {
+    display: none !important;
+}
+
+/* SCROLL AREA */
+.yt-premium-plus-theme ytd-guide-renderer #guide-inner-content {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent !important;
+}
+
+/* ==========================================================================
+   5. NO SIDEBAR MODE (Homepage)
+   ========================================================================== */
+
+/* Hide Sidebar Elements */
+/* ONLY hide the Mini Guide (Closed State) and wrapper background */
+body.ypp-hide-sidebar ytd-mini-guide-renderer,
+body.ypp-hide-sidebar #guide-wrapper,
+body.ypp-hide-sidebar #guide-content.ytd-app {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Ensure Main Sidebar (Expanded) is VISIBLE when active */
+body.ypp-hide-sidebar ytd-guide-renderer {
+    display: block !important;
+    /* Let YouTube manage flex/block, or force block */
+    z-index: 2200 !important;
+    /* Ensure on top */
+}
+
+/* GLOBAL OVERRIDE: NO MINI GUIDE EVER */
+ytd-mini-guide-renderer {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+}
+
+/* Reset Grid Layout (Centered) */
+body.ypp-hide-sidebar ytd-rich-grid-renderer {
+    margin-left: 0 !important;
+    width: 100% !important;
+    justify-content: center !important;
+    padding-left: 0 !important;
+}
+
+/* Reset Chips Layout */
+/* CHIPS / FILTERS ADJUSTMENT (No Sidebar Mode) */
+body.ypp-hide-sidebar ytd-feed-filter-chip-bar-renderer {
+    margin: 16px auto !important;
+    /* Use the same fit-content logic */
+    width: fit-content !important;
+    max-width: 95% !important;
+}
+
+/* Wrapper just follows parent centering */
+body.ypp-hide-sidebar #chips-wrapper {
+    width: auto !important;
+    margin: 0 auto !important;
+}
+
+/* FORCE HEADER VISIBILITY */
+body.ypp-hide-sidebar #masthead-container {
+    display: block !important;
+    visibility: visible !important;
+    z-index: 2300 !important;
+    /* Above everything */
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+}
+
+/*
+   SIDEBAR NAV ITEMS & COLLAPSED ADJUSTMENTS - REMOVED
+   --------------------------------------------------------------------------
+   (Content Removed per user request to disable custom sidebar)
+*/
+
+
+/* ==========================================================================
+   4. VIDEO GRID (End-to-End Layout)
+   ========================================================================== */
+
+/* Main Grid Container Adjustment */
+/* Dynamic Grid Positioning */
+/* Layout Adjustments */
+/* When Mini Guide Visible (Custom Class) */
+body.ypp-sidebar-collapsed .yt-premium-plus-theme ytd-rich-grid-renderer {
+    margin-left: 112px !important;
+    /* 72px width + 16px left + 24px gap */
+    width: auto !important;
+}
+
+/* When Main Guide Visible (Default) */
+body:not(.ypp-sidebar-collapsed) .yt-premium-plus-theme ytd-rich-grid-renderer {
+    margin-left: var(--ypp-grid-start-expanded) !important;
+    width: auto !important;
+}
+
+/* Base Override for Grid Container */
+body:not(.ypp-sidebar-collapsed) .yt-premium-plus-theme ytd-app ytd-rich-grid-renderer {
+    margin-left: var(--ypp-grid-start-expanded) !important;
+}
+
+/* Clean up YouTube overrides */
+/* Clean up YouTube overrides */
+.yt-premium-plus-theme ytd-rich-grid-renderer {
+    margin-top: 24px !important;
+    padding-right: 24px !important;
+}
+
+.yt-premium-plus-theme #contents.ytd-rich-grid-renderer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 32px 24px !important;
+}
+
+.yt-premium-plus-theme ytd-rich-grid-row,
+.yt-premium-plus-theme ytd-rich-grid-row>#contents {
+    display: contents !important;
+}
+
+/* === CARD COMPONENT === */
+.yt-premium-plus-theme ytd-rich-item-renderer {
+    width: calc(25% - 24px) !important;
+    margin: 0 !important;
+    margin-bottom: 24px !important;
+
+    background: var(--ypp-bg-surface) !important;
+    backdrop-filter: var(--ypp-blur-med) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
+    box-shadow: var(--ypp-shadow-card) !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+
+    transition: var(--ypp-transition) !important;
+}
+
+.yt-premium-plus-theme ytd-rich-item-renderer:hover {
+    transform: translateY(-6px) scale(1.02) !important;
+    background: rgba(30, 30, 30, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: var(--ypp-shadow-float), 0 0 20px rgba(0, 0, 0, 0.2) !important;
+    z-index: var(--ypp-z-hover) !important;
+}
+
+.yt-premium-plus-theme ytd-rich-item-renderer:hover ytd-thumbnail {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.yt-premium-plus-theme ytd-thumbnail {
+    border-radius: var(--ypp-radius-md) !important;
+    overflow: hidden !important;
+    width: 100% !important;
+}
+
+/* Responsive Grid */
+@media (max-width: 1400px) {
+    .yt-premium-plus-theme ytd-rich-item-renderer {
+        width: calc(33.33% - 24px) !important;
+    }
+}
+
+@media (max-width: 1000px) {
+    .yt-premium-plus-theme ytd-rich-item-renderer {
+        width: calc(50% - 24px) !important;
+    }
+}
+
+
+/* ==========================================================================
+   5. POPUPS & OVERLAYS
+   ========================================================================== */
+.yt-premium-plus-theme ytd-multi-page-menu-renderer,
+.yt-premium-plus-theme ytd-simple-menu-header-renderer,
+.yt-premium-plus-theme ytd-active-account-header-renderer,
+.yt-premium-plus-theme ytd-voice-search-dialog-renderer {
+    background: rgba(30, 30, 30, 0.95) !important;
+    backdrop-filter: var(--ypp-blur-high) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
+    box-shadow: var(--ypp-shadow-float) !important;
+}
+
+/* Z-Index Fix for Popups */
+.yt-premium-plus-theme ytd-popup-container {
+    z-index: var(--ypp-z-popup) !important;
+}
+
+/* ==========================================================================
+   6. ANIMATIONS
+   ========================================================================== */
+@keyframes ypp-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.yt-premium-plus-theme ytd-rich-item-renderer {
+    animation: ypp-fade-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+/* ZEN MODE */
+body.ypp-zen-mode #masthead-container,
+body.ypp-zen-mode ytd-mini-guide-renderer,
+body.ypp-zen-mode ytd-guide-renderer,
+body.ypp-zen-mode #related,
+body.ypp-zen-mode #comments,
+body.ypp-zen-mode #merch-shelf {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.5s ease !important;
+}
+
+body.ypp-zen-mode #secondary {
+    opacity: 0;
+    /* Hide sidebar recommendations */
+}
+
+/* --- Player Controls --- */
+.ypp-player-controls {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+    gap: 8px;
+}
+
+.ypp-action-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 6px !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.2s, transform 0.1s;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ypp-action-btn:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ypp-action-btn:active {
+    transform: scale(0.95);
+}
+
+.ypp-action-btn svg {
+    width: 100%;
+    height: 100%;
+    fill: white;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.ypp-action-btn.active svg {
+    fill: #3ea6ff;
+}
+
+/* Speed Controls */
+.ypp-speed-controls {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    margin-left: 8px;
+}
+
+.ypp-speed-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.ypp-speed-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ypp-speed-btn.active {
+    color: #0f0f0f;
+    background: #3ea6ff;
+    font-weight: 700;
+}
+
+/* --- Video Title & Metadata Redesign --- */
+
+/* Title */
+ytd-watch-metadata #title h1,
+#below #title h1 {
+    font-family: 'Inter', 'Roboto', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 2.2rem !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.5px !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 8px !important;
+}
+
+/* Zen Mode Title Override */
+body.ypp-zen-mode ytd-watch-metadata #title h1 {
+    font-size: 2.6rem !important;
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+    text-align: left;
+    /* Keep left aligned */
+}
+
+/* Metadata Row (Owner, Subscribe, Actions) */
+ytd-watch-metadata #top-row,
+#below #top-row {
+    margin-top: 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
+}
+
+/* Owner Block (Channel Info) */
+ytd-watch-metadata #owner {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 16px 8px 8px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+}
+
+ytd-watch-metadata #owner:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Action Buttons (Like, Share, etc.) */
+ytd-watch-metadata #actions button,
+ytd-watch-metadata #actions ytd-button-renderer {
+    margin-left: 8px !important;
+}
+
+ytd-menu-renderer ytd-button-renderer {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 20px !important;
+    /* Soften the pills */
+}
+
+/* Description */
+#description-inner {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 16px !important;
+    padding: 16px !important;
+    margin-top: 16px !important;
+    font-size: 1.05rem !important;
+}
+
+/* Zen Mode Specific Tweaks for Metadata */
+body.ypp-zen-mode ytd-watch-metadata #top-row {
+    justify-content: space-between;
+}
+
+body.ypp-zen-mode #columns {
+    max-width: 1400px !important;
+}
+
+/* ==========================================================================
+   ADVANCED HOMEPAGE FILTER & CHIPS REFINEMENTS
+   ========================================================================== */
+
+/* --- 1. Filter Trigger Button (Injected into Chip Bar) --- */
+.ypp-filter-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 16px;
+    margin-right: 12px;
+    /* Space from first chip */
+
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+
+    color: var(--ypp-text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.ypp-filter-trigger:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ypp-filter-trigger svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    opacity: 0.8;
+}
+
+/* --- 2. Filter Drawer (Floating Panel) --- */
+.ypp-filter-drawer {
+    /* Fixed positioning handled by JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: min(500px, 90vw);
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 24px rgba(0, 0, 0, 0.2);
+    border-radius: 24px;
+
+    padding: 24px;
+    z-index: 9999;
+    /* Highest priority */
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px) scale(0.98);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.ypp-filter-drawer.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+/* Drawer Sections */
+.ypp-filter-section h4 {
+    color: var(--ypp-text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 12px 4px;
+    font-weight: 600;
+}
+
+.ypp-filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ==========================================================================
+   HEADER NAVIGATION BUTTONS (Sidebar Replacement)
+   ==========================================================================*/
+/* --- Header Navigation Buttons --- */
+.ypp-nav-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: 16px !important;
+    /* Critical for clickability */
+    pointer-events: auto !important;
+    z-index: 2202 !important;
+    position: relative !important;
+}
+
+.ypp-nav-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    /* Squircle */
+
+    background: rgba(255, 255, 255, 0.03) !important;
+    /* Subtle glass base */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    /* Subtle crisp border */
+    backdrop-filter: blur(4px) !important;
+
+    color: var(--ypp-text-secondary) !important;
+
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.ypp-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ypp-nav-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ypp-nav-btn.active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.1) !important;
+}
+
+.ypp-nav-icon {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    display: block;
+}
+
+.ypp-nav-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    opacity: 0.9;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.ypp-nav-btn:hover svg {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+    /* Glow effect */
+}
+
+/* MATCHING STYLES FOR EXISTING BUTTONS (Search & Voice) */
+.yt-premium-plus-theme #voice-search-button,
+.yt-premium-plus-theme #search-icon-legacy {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 12px !important;
+    /* Update radius to match */
+}
+
+.yt-premium-plus-theme #voice-search-button:hover,
+.yt-premium-plus-theme #search-icon-legacy:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* --- Layout Shift: Search Bar Left --- */
+
+/* 1. Pull the Center Container Left */
+.yt-premium-plus-theme ytd-masthead #container {
+    padding-left: 0 !important;
+    /* Remove default padding if any */
+}
+
+.yt-premium-plus-theme #center.ytd-masthead {
+    margin-left: 0 !important;
+    /* Reset auto margin */
+    margin-right: 0 !important;
+    /* Allow taking full width */
+    justify-content: flex-start !important;
+    /* Align content start */
+    flex: 1 !important;
+    /* Take remaining space */
+    max-width: none !important;
+    /* Uncap width */
+    display: flex !important;
+}
+
+/* 2. Search Form Sizing - Expanded */
+.yt-premium-plus-theme #search-form {
+    max-width: 850px !important;
+    /* Expand search bar */
+    flex: 1 1 auto !important;
+    /* Grow to fill space until max-width */
+    margin-left: 0 !important;
+}
+
+/* --- 3. Filter Pills (Options) --- */
+.ypp-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--ypp-text-secondary);
+
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ypp-pill:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ypp-text-primary);
+    transform: translateY(-1px);
+}
+
+.ypp-pill.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+/* --- 4. Chips Refinements (Overrides) --- */
+/* Ensure the chip bar container is centered and nice */
+.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer {
+    height: 56px !important;
+    align-items: center !important;
+    padding: 0 8px !important;
+}
+
+/* Better Chip Styling */
+.yt-premium-plus-theme yt-chip-cloud-chip-renderer {
+    height: 36px !important;
+    /* Slightly taller */
+    border-radius: 12px !important;
+    /* Softer corners */
+    margin: 0 6px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected] {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ==========================================================================
+   6. SEARCH PAGE REDESIGN (Grid Mode)
+   ========================================================================== */
+
+
+/* Structure: Horizontal Flex -> Grid */
+/* We must target the Item Section's content, not the higher level Section List */
+body.ypp-search-grid-mode ytd-item-section-renderer>#contents {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    max-width: 100% !important;
+}
+
+/* Ensure the Section List allows width */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer,
+body.ypp-search-grid-mode ytd-section-list-renderer,
+body.ypp-search-grid-mode ytd-item-section-renderer {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Card Sizing */
+body.ypp-search-grid-mode ytd-video-renderer,
+body.ypp-search-grid-mode ytd-channel-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer {
+    width: calc(25% - 12px) !important;
+    /* 4 per row, smaller gap */
+    margin-bottom: 24px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    /* Thumb Top, Text Bottom */
+
+    background: var(--ypp-bg-surface) !important;
+    backdrop-filter: var(--ypp-blur-med) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
+    box-shadow: var(--ypp-shadow-card) !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+
+    transition: var(--ypp-transition) !important;
+}
+
+/* Hover Effect */
+body.ypp-search-grid-mode ytd-video-renderer:hover,
+body.ypp-search-grid-mode ytd-channel-renderer:hover,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover,
+body.ypp-search-grid-mode ytd-radio-renderer:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    background: rgba(40, 40, 40, 0.8) !important;
+    box-shadow: var(--ypp-shadow-float) !important;
+    z-index: 10 !important;
+}
+
+/* Reset Internal Flex (Video Renderer) */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #content,
+body.ypp-search-grid-mode ytd-radio-renderer #content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+}
+
+/* Thumbnail Styling */
+body.ypp-search-grid-mode ytd-thumbnail {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16/9 !important;
+    margin-right: 0 !important;
+    margin-bottom: 12px !important;
+    border-radius: var(--ypp-radius-md) !important;
+    overflow: hidden !important;
+    flex: none !important;
+    /* Prevent shrinking */
+}
+
+/* Text Container */
+body.ypp-search-grid-mode .text-wrapper,
+body.ypp-search-grid-mode .metadata-snippet-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Title */
+body.ypp-search-grid-mode #video-title {
+    font-size: 1.1rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+    max-height: 3.2rem !important;
+    /* Limit lines */
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    line-clamp: 2 !important;
+}
+
+/* Metadata (Channel, Views, Time) */
+body.ypp-search-grid-mode #metadata-line,
+body.ypp-search-grid-mode #channel-info {
+    font-size: 0.9rem !important;
+    color: var(--ypp-text-secondary) !important;
+    padding: 0 !important;
+}
+
+/* Hide Description Snippet (Too cluttered for grid) */
+body.ypp-search-grid-mode .metadata-snippet-container {
+    display: none !important;
+}
+
+/* Hide Badges / Extensions inside grid that break layout */
+body.ypp-search-grid-mode ytd-badges-renderer {
+    margin-top: 4px !important;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1400px) {
+
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-grid-mode ytd-channel-renderer,
+    body.ypp-search-grid-mode ytd-playlist-renderer,
+    body.ypp-search-grid-mode ytd-radio-renderer {
+        width: calc(33.33% - 12px) !important;
+    }
+}
+
+@media (max-width: 1000px) {
+
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-grid-mode ytd-channel-renderer,
+    body.ypp-search-grid-mode ytd-playlist-renderer,
+    body.ypp-search-grid-mode ytd-radio-renderer {
+        width: calc(50% - 12px) !important;
+    }
+}
+
+/* Hide Vertical List Dividers/Separators */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+    border-bottom: none !important;
+}
+
+body.ypp-search-grid-mode #continuations {
+    width: 100% !important;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ypp-pill:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ypp-text-primary);
+    transform: translateY(-1px);
+}
+
+.ypp-pill.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+/* --- 4. Chips Refinements (Overrides) --- */
+/* Removed duplicate rule */
+
+/* Better Chip Styling */
+.yt-premium-plus-theme yt-chip-cloud-chip-renderer {
+    height: 36px !important;
+    /* Slightly taller */
+    border-radius: 12px !important;
+    /* Softer corners */
+    margin: 0 6px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected] {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ==========================================================================
+   6. SEARCH PAGE REDESIGN (Grid Mode)
+   ========================================================================== */
+
+
+/* Structure: Horizontal Flex -> Grid */
+/* We must target the Item Section's content, not the higher level Section List */
+body.ypp-search-grid-mode ytd-item-section-renderer>#contents {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    max-width: 100% !important;
+}
+
+/* Ensure the Section List allows width */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer,
+body.ypp-search-grid-mode ytd-section-list-renderer,
+body.ypp-search-grid-mode ytd-item-section-renderer {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Card Sizing */
+body.ypp-search-grid-mode ytd-video-renderer,
+body.ypp-search-grid-mode ytd-channel-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer {
+    width: calc(25% - 12px) !important;
+    /* 4 per row, smaller gap */
+    margin-bottom: 24px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    /* Thumb Top, Text Bottom */
+
+    background: var(--ypp-bg-surface) !important;
+    backdrop-filter: var(--ypp-blur-med) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
+    box-shadow: var(--ypp-shadow-card) !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+
+    transition: var(--ypp-transition) !important;
+}
+
+/* Hover Effect */
+body.ypp-search-grid-mode ytd-video-renderer:hover,
+body.ypp-search-grid-mode ytd-channel-renderer:hover,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover,
+body.ypp-search-grid-mode ytd-radio-renderer:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    background: rgba(40, 40, 40, 0.8) !important;
+    box-shadow: var(--ypp-shadow-float) !important;
+    z-index: 10 !important;
+}
+
+/* Reset Internal Flex (Video Renderer) */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #content,
+body.ypp-search-grid-mode ytd-radio-renderer #content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+}
+
+/* Thumbnail Styling */
+body.ypp-search-grid-mode ytd-thumbnail {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16/9 !important;
+    margin-right: 0 !important;
+    margin-bottom: 12px !important;
+    border-radius: var(--ypp-radius-md) !important;
+    overflow: hidden !important;
+    flex: none !important;
+    /* Prevent shrinking */
+}
+
+/* Text Container */
+body.ypp-search-grid-mode .text-wrapper,
+body.ypp-search-grid-mode .metadata-snippet-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Title */
+body.ypp-search-grid-mode #video-title {
+    font-size: 1.1rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+    max-height: 3.2rem !important;
+    /* Limit lines */
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    line-clamp: 2 !important;
+}
+
+/* Metadata (Channel, Views, Time) */
+body.ypp-search-grid-mode #metadata-line,
+body.ypp-search-grid-mode #channel-info {
+    font-size: 0.9rem !important;
+    color: var(--ypp-text-secondary) !important;
+    padding: 0 !important;
+}
+
+/* Hide Description Snippet (Too cluttered for grid) */
+body.ypp-search-grid-mode .metadata-snippet-container {
+    display: none !important;
+}
+
+/* Hide Badges / Extensions inside grid that break layout */
+body.ypp-search-grid-mode ytd-badges-renderer {
+    margin-top: 4px !important;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1400px) {
+
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-grid-mode ytd-channel-renderer,
+    body.ypp-search-grid-mode ytd-playlist-renderer,
+    body.ypp-search-grid-mode ytd-radio-renderer {
+        width: calc(33.33% - 12px) !important;
+    }
+}
+
+@media (max-width: 1000px) {
+
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-grid-mode ytd-channel-renderer,
+    body.ypp-search-grid-mode ytd-playlist-renderer,
+    body.ypp-search-grid-mode ytd-radio-renderer {
+        width: calc(50% - 12px) !important;
+    }
+}
+
+/* Hide Vertical List Dividers/Separators */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+    border-bottom: none !important;
+}
+
+body.ypp-search-grid-mode #continuations {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    padding: 24px !important;
+}
+
+/* SEARCH: Hide Shorts Shelf */
+body.ypp-hide-search-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-search-shorts ytd-rich-shelf-renderer[is-shorts],
+body.ypp-hide-search-shorts ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
+body.ypp-hide-search-shorts ytd-item-section-renderer:has(span#title[aria-label="Shorts"]),
+/* Aggressive Text Matching if :has is supported (it is in modern chrome) */
+body.ypp-hide-search-shorts ytd-shelf-renderer:has(#title:contains("Shorts")) {
+    display: none !important;
+}
+
+/* Fallback for "Shorts" text in headers if :has isn't perfect */
+body.ypp-hide-search-shorts #titles:has(#title:contains("Shorts")) {
+    display: none !important;
+}
+
+/* SEARCH: Hide "People also..." text/headers if they slip through JS */
+body.ypp-search-grid-mode ytd-shelf-renderer #title-container {
+    /* We rely on JS for full removal, but we can style them to fit grid if they remain */
+    margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   7. SEARCH REDESIGN - 4x4 GRID LAYOUT (ENHANCED)
+   ========================================================================== */
+
+/* Force Grid Container */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px 16px !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Video Cards - Strict Grid Items */
+body.ypp-search-grid-mode ytd-video-renderer {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    /* Enhanced Premium Card Styling */
+    display: flex !important;
+    flex-direction: column !important;
+    background: rgba(18, 18, 18, 0.7) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
+    padding: 14px !important;
+    box-sizing: border-box !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow: hidden !important;
+}
+
+/* Premium Hover Effect */
+body.ypp-search-grid-mode ytd-video-renderer:hover {
+    transform: translateY(-4px) !important;
+    border-color: rgba(62, 166, 255, 0.4) !important;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(62, 166, 255, 0.3) !important;
+}
+
+/* Glow effect on hover */
+body.ypp-search-grid-mode ytd-video-renderer:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top, rgba(58, 134, 255, 0.1), transparent 70%);
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+/* Thumbnail Container */
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16/9 !important;
+    border-radius: var(--ypp-radius-md) !important;
+    overflow: hidden !important;
+    margin-right: 0 !important;
+    margin-bottom: 12px !important;
+}
+
+/* Text Content Container */
+body.ypp-search-grid-mode ytd-video-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-video-renderer #dismissible .text-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Meta Block (Title + Metadata) */
+body.ypp-search-grid-mode ytd-video-renderer #meta {
+    padding-right: 0 !important;
+}
+
+/* Title Styling */
+body.ypp-search-grid-mode ytd-video-renderer #video-title {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+    font-weight: 500 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Channel Info Compact */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Metadata Line */
+body.ypp-search-grid-mode ytd-video-renderer #metadata-line {
+    font-size: 12px !important;
+    color: var(--ypp-text-secondary) !important;
+    opacity: 0.7 !important;
+}
+
+/* Hide Description Snippet (Too cluttered for grid) */
+body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container {
+    display: none !important;
+}
+
+/* Channel Icon in Video Card */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+    padding: 8px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
+    width: 24px !important;
+    height: 24px !important;
+    margin-right: 8px !important;
+}
+
+/* --- GRID LAYOUT DISCRIMINATION (FIX: Issue #3) --- */
+/* Force non-video renderers to span full width */
+body.ypp-search-grid-mode ytd-channel-renderer,
+body.ypp-search-grid-mode ytd-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+body.ypp-search-grid-mode ytd-rich-section-renderer {
+    grid-column: 1 / -1 !important;
+    /* Span all columns */
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* --- CHANNEL RESULT CARD --- */
+body.ypp-search-grid-mode ytd-channel-renderer {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
+    padding: 24px !important;
+    margin-bottom: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #content-section {
+    display: flex !important;
+    align-items: center !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
+    margin-right: 32px !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer img#img {
+    width: 100px !important;
+    height: 100px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* --- SHORTS SHELF IN SEARCH --- */
+body.ypp-search-grid-mode ytd-reel-shelf-renderer {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 24px !important;
+    background: transparent !important;
+}
+
+/* ===================================
+   AGGRESSIVE SHORTS HIDING 
+   Complete grid flow isolation + Universal suppression
+   =================================== */
+
+/* Primary: Remove ALL known Shorts renderer types from flow */
+body.ypp-hide-search-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-search-shorts ytd-shelf-renderer[is-shorts],
+body.ypp-hide-search-shorts ytd-rich-shelf-renderer[is-shorts],
+body.ypp-hide-search-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-search-shorts ytd-grid-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-search-shorts [is-shorts],
+body.ypp-hide-search-shorts [data-shorts] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    pointer-events: none !important;
+}
+
+/* Secondary: Video/Compact renderers containing Shorts (URL-based safety net) */
+body.ypp-hide-search-shorts ytd-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-search-shorts ytd-compact-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-search-shorts ytd-rich-section-renderer:has(a[href*="/shorts/"]) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Tertiary: Shelves by title ("Shorts", "Recently uploaded Shorts", etc.) */
+body.ypp-hide-search-shorts ytd-shelf-renderer:has(#title-text:is([title="Shorts"],
+        [title="shorts"],
+        [aria-label*="Shorts"],
+        [aria-label*="shorts"])),
+body.ypp-hide-search-shorts ytd-rich-shelf-renderer:has(#title-text:is([title="Shorts"],
+        [title="shorts"])),
+body.ypp-hide-search-shorts ytd-shelf-renderer:has(yt-formatted-string:is([title*="Shorts"],
+        [title*="shorts"])) {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+}
+
+/* Quaternary: Horizontal Shorts containers */
+body.ypp-hide-search-shorts ytd-horizontal-card-list-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-search-shorts ytd-item-section-renderer:has(ytd-reel-shelf-renderer) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+}
+
+/* Quinary: Badge indicators and overlays */
+body.ypp-hide-search-shorts [overlay-style="SHORTS"],
+body.ypp-hide-search-shorts [badge-style="SHORTS"],
+body.ypp-hide-search-shorts ytd-thumbnail-overlay-time-status-renderer[overlay-style*="SHORTS"] {
+    display: none !important;
+}
+
+/* Universal Safety Net: ANY link to /shorts/ within search results */
+body.ypp-hide-search-shorts ytd-search a[href*="/shorts/"] {
+    pointer-events: none !important;
+    opacity: 0 !important;
+}
+
+/* Universal Safety Net: ANY parent containing Shorts links */
+body.ypp-hide-search-shorts ytd-search *:has(> a[href*="/shorts/"]) {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* CRITICAL: Ensure grid NEVER applies to Shorts shelves */
+body.ypp-search-grid-mode.ypp-hide-search-shorts ytd-reel-shelf-renderer,
+body.ypp-search-grid-mode.ypp-hide-search-shorts ytd-shelf-renderer[is-shorts],
+body.ypp-search-grid-mode.ypp-hide-search-shorts ytd-rich-shelf-renderer[is-shorts],
+body.ypp-search-grid-mode.ypp-hide-search-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]) {
+    display: none !important;
+    grid-column: initial !important;
+    grid-row: initial !important;
+    contain: size layout !important;
+    /* Prevent layout participation */
+}
+
+/* ===================================
+   EMPTY SHORTS CONTAINER COLLAPSE
+   Nuclear option: Remove ALL Shorts shelf renderers
+   =================================== */
+
+/* CRITICAL: Remove ALL reel shelf renderers (these are ALWAYS Shorts) */
+body.ypp-hide-search-shorts ytd-reel-shelf-renderer {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    pointer-events: none !important;
+}
+
+/* Remove rich shelves that contain Shorts indicators */
+body.ypp-hide-search-shorts ytd-rich-shelf-renderer:has([title*="Shorts"]),
+body.ypp-hide-search-shorts ytd-rich-shelf-renderer:has([title*="shorts"]),
+body.ypp-hide-search-shorts ytd-shelf-renderer:has([title*="Shorts"]),
+body.ypp-hide-search-shorts ytd-shelf-renderer:has([title*="shorts"]) {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+}
+
+/* Remove any shelf with no video renderers (likely empty Shorts shelf) */
+body.ypp-hide-search-shorts ytd-shelf-renderer:not(:has(ytd-video-renderer)) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove horizontal card lists with no watch links */
+body.ypp-hide-search-shorts ytd-horizontal-card-list-renderer:not(:has(a[href*="/watch"])) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+}
+
+/* ===================================
+   CSS-ONLY HIDING CLASSES (Performance Optimization)
+   Zero layout thrashing - single class application
+   =================================== */
+
+/* Hidden Shorts class (applied by JS) */
+.ypp-hidden-short {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Hidden clutter class (applied by JS) */
+.ypp-hidden-clutter {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+
+/* --- UTILITY / CLEANUP --- */
+
+/* Hide Promoted/Ad Content if possible (classes vary, this is weak) */
+body.ypp-search-grid-mode ytd-ad-slot-renderer {
+    display: none !important;
+}
+
+/* Spacer/Loader Fixes */
+body.ypp-search-grid-mode ytd-continuation-item-renderer {
+    width: 100% !important;
+    flex-basis: 100% !important;
+    margin-top: 24px !important;
+}
+
+/* Responsive Breakpoints for Grid */
+@media (max-width: 1600px) {
+    body.ypp-search-grid-mode ytd-video-renderer {
+        width: calc(25% - 18px) !important;
+        /* Keep 4x4 */
+        min-width: calc(25% - 18px) !important;
+        max-width: calc(25% - 18px) !important;
+        flex: 0 0 calc(25% - 18px) !important;
+    }
+}
+
+@media (max-width: 1400px) {
+    body.ypp-search-grid-mode ytd-video-renderer {
+        width: calc(33.33% - 16px) !important;
+        /* 3 columns */
+        min-width: calc(33.33% - 16px) !important;
+        max-width: calc(33.33% - 16px) !important;
+        flex: 0 0 calc(33.33% - 16px) !important;
+    }
+}
+
+@media (max-width: 1000px) {
+    body.ypp-search-grid-mode ytd-video-renderer {
+        width: calc(50% - 12px) !important;
+        max-width: calc(50% - 12px) !important;
+        flex: 1 1 calc(50% - 12px) !important;
+    }
+}
+
+/* ===================================
+   CRITICAL FIX: Force Grid on ALL Section Types
+   Targets special sections like "From related searches", "Previously watched", etc.
+   =================================== */
+
+/* Force shelf renderers to display their contents in grid */
+body.ypp-search-grid-mode ytd-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer {
+    /* Shelf itself takes full width */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 32px !important;
+}
+
+/* Shelf title styling */
+body.ypp-search-grid-mode ytd-shelf-renderer #title-container,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer #title-container {
+    margin-bottom: 16px !important;
+}
+
+/* Force shelf CONTENTS into grid layout */
+body.ypp-search-grid-mode ytd-shelf-renderer #contents,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer #contents {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Force rich-item-renderer (used in special sections) into grid cards */
+body.ypp-search-grid-mode ytd-rich-item-renderer {
+    width: calc(25% - 12px) !important;
+    margin-bottom: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+
+    background: var(--ypp-bg-surface) !important;
+    backdrop-filter: var(--ypp-blur-med) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
+    box-shadow: var(--ypp-shadow-card) !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+    transition: var(--ypp-transition) !important;
+}
+
+/* Override any flex-direction from YouTube */
+body.ypp-search-grid-mode ytd-rich-item-renderer #content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+}
+
+/* Hide horizontal scroll containers that break grid */
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer {
+    width: 100% !important;
+}
+
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #contents {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    overflow-x: visible !important;
+}
+
+/* Responsive for shelf items */
+@media (max-width: 1400px) {
+    body.ypp-search-grid-mode ytd-rich-item-renderer {
+        width: calc(33.33% - 12px) !important;
+    }
+}
+
+@media (max-width: 1000px) {
+    body.ypp-search-grid-mode ytd-rich-item-renderer {
+        width: calc(50% - 12px) !important;
+    }
+}
+
+/* ===================================
+   ENHANCED SHORTS REMOVAL
+   Absolutely nuclear - covers all edge cases
+   =================================== */
+
+/* Remove all Shorts section headers */
+body.ypp-hide-search-shorts ytd-shelf-renderer:has(#title:is([title*="Shorts"], [title*="shorts"])),
+body.ypp-hide-search-shorts ytd-rich-shelf-renderer:has(#title-text:is([title*="Shorts"], [title*="shorts"])),
+body.ypp-hide-search-shorts ytd-shelf-renderer:has(#title-text:is([aria-label*="Shorts"], [aria-label*="shorts"])) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Remove section headers that only say "Shorts" */
+body.ypp-hide-search-shorts span#title[aria-label="Shorts"],
+body.ypp-hide-search-shorts h2#title:has([aria-label="Shorts"]) {
+    display: none !important;
+}
+
+/* Remove parent containers of Shorts headers */
+body.ypp-hide-search-shorts ytd-item-section-renderer:has(span#title[aria-label="Shorts"]) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+}
+/* ===================================
+   CUSTOM GRID RENDERER
+   Extract  Normalize  Render Architecture
+   =================================== */
+
+/* Main grid container */
+.ypp-custom-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Custom cards (unified for all types) */
+.ypp-custom-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--ypp-bg-surface);
+    backdrop-filter: var(--ypp-blur-med);
+    border: 1px solid var(--ypp-glass-border);
+    border-radius: var(--ypp-radius-lg);
+    padding: 12px;
+    box-shadow: var(--ypp-shadow-card);
+    transition: var(--ypp-transition);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+}
+
+.ypp-custom-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--ypp-shadow-float);
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(40, 40, 40, 0.9);
+}
+
+/* Card thumbnail */
+.ypp-card-thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--ypp-radius-md);
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.ypp-card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Duration badge */
+.ypp-duration {
+    position: absolute;
+    bottom:6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* Card content */
+.ypp-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Card title */
+.ypp-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ypp-text-primary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Metadata */
+.ypp-meta {
+    font-size: 12px;
+    color: var(--ypp-text-secondary);
+    margin: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ypp-channel {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.ypp-stats,
+.ypp-subscribers,
+.ypp-count {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+}
+
+.ypp-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+}
+
+/* Channel card specific */
+.ypp-card-channel .ypp-card-thumbnail {
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+.ypp-card-channel .ypp-card-thumbnail img {
+    border-radius: 50%;
+}
+
+/* Playlist card badge */
+.ypp-card-playlist .ypp-card-thumbnail::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1600px) {
+    .ypp-custom-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .ypp-custom-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 900px) {
+    .ypp-custom-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    .ypp-custom-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+}
+
+/* Mode class for enabling custom grid */
+body.ypp-custom-grid-mode .ypp-custom-grid {
+    display: grid;
+}
+
+body:not(.ypp-custom-grid-mode) .ypp-custom-grid {
+    display: none;
+}
