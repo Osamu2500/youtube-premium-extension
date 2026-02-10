@@ -1,4 +1,7 @@
-// Theme Manager
+/**
+ * Theme Manager - Handles visual theming and content visibility features
+ * @class ThemeManager
+ */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -7,43 +10,67 @@ window.YPP.features.Theme = class ThemeManager {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
         this.shortsObserver = null;
+        this.watchedObserver = null;
+        
+        // Constants
+        this.WATCHED_THRESHOLD = 85; // Percentage threshold for marking videos as watched
+        this.SHORTS_OBSERVER_DEBOUNCE = 100; // ms
+        this.WATCHED_OBSERVER_DEBOUNCE = 500; // ms
     }
 
-    // New Standard Lifecycle
+    /**
+     * Enable theme features with provided settings
+     * @param {Object} settings - User settings object
+     */
     enable(settings) {
         this.run(settings);
     }
 
+    /**
+     * Disable all theme features and clean up observers
+     */
     disable() {
-        this.toggleTheme(false);
-        this.applyTrueBlack(false);
-        this.applyHideScrollbar(false);
-        this.applyProgressBarColor(null);
-        this.applyProgressBarColor(null);
-        this.manageShortsObserver(false);
-        this.manageWatchedObserver(false);
+        try {
+            this.toggleTheme(false);
+            this.applyTrueBlack(false);
+            this.applyHideScrollbar(false);
+            this.applyProgressBarColor(null);
+            this.manageShortsObserver(false);
+            this.manageWatchedObserver(false);
 
-        // Disable other visibility toggles
-        const classes = [
-            this.CONSTANTS.CSS_CLASSES.HIDE_SHORTS,
-            this.CONSTANTS.CSS_CLASSES.HIDE_MIXES,
-            this.CONSTANTS.CSS_CLASSES.HIDE_WATCHED,
-            this.CONSTANTS.CSS_CLASSES.HIDE_MERCH,
-            this.CONSTANTS.CSS_CLASSES.HIDE_COMMENTS,
-            this.CONSTANTS.CSS_CLASSES.HIDE_ENDSCREENS,
-            this.CONSTANTS.CSS_CLASSES.BLUE_PROGRESS,
-            this.CONSTANTS.CSS_CLASSES.HOOK_FREE,
-            'ypp-clean-search',
-            'ypp-hide-search-shorts',
-            'ypp-search-grid'
-        ];
-        document.body.classList.remove(...classes);
+            // Disable other visibility toggles
+            const classes = [
+                this.CONSTANTS.CSS_CLASSES.HIDE_SHORTS,
+                this.CONSTANTS.CSS_CLASSES.HIDE_MIXES,
+                this.CONSTANTS.CSS_CLASSES.HIDE_WATCHED,
+                this.CONSTANTS.CSS_CLASSES.HIDE_MERCH,
+                this.CONSTANTS.CSS_CLASSES.HIDE_COMMENTS,
+                this.CONSTANTS.CSS_CLASSES.HIDE_ENDSCREENS,
+                this.CONSTANTS.CSS_CLASSES.BLUE_PROGRESS,
+                this.CONSTANTS.CSS_CLASSES.HOOK_FREE,
+                'ypp-clean-search',
+                'ypp-hide-search-shorts',
+                'ypp-search-grid'
+            ];
+            document.body.classList.remove(...classes);
+        } catch (error) {
+            this.Utils?.log(`Error disabling theme: ${error.message}`, 'THEME', 'error');
+        }
     }
 
+    /**
+     * Update theme with new settings
+     * @param {Object} settings - Updated settings object
+     */
     update(settings) {
         this.run(settings);
     }
 
+    /**
+     * Apply all theme settings
+     * @param {Object} settings - Settings object with theme preferences
+     * @private
+     */
     run(settings) {
         this.toggleTheme(settings.premiumTheme);
         this.applyVisibilitySettings(settings);
@@ -235,56 +262,74 @@ window.YPP.features.Theme = class ThemeManager {
         }
     }
 
+    /**
+     * Detects and marks videos as watched based on progress bar percentage
+     * @private
+     */
     processWatchedVideos() {
-        // Use generic selector from constants
-        const selector = this.CONSTANTS.SELECTORS.WATCHED_OVERLAY || 'ytd-thumbnail-overlay-resume-playback-renderer #progress';
-        const progressBars = document.querySelectorAll(selector);
-        progressBars.forEach(bar => {
-            const width = bar.style.width;
-            if (!width) return;
+        try {
+            const selector = this.CONSTANTS?.SELECTORS?.WATCHED_OVERLAY || 
+                           'ytd-thumbnail-overlay-resume-playback-renderer #progress';
+            const progressBars = document.querySelectorAll(selector);
+            
+            if (!progressBars || progressBars.length === 0) return;
+            
+            progressBars.forEach(bar => {
+                try {
+                    const width = bar?.style?.width;
+                    if (!width) return;
 
-            const percent = parseFloat(width);
-            if (isNaN(percent)) return;
+                    const percent = parseFloat(width);
+                    if (isNaN(percent)) return;
 
-            // Threshold for "Watched": 85%
-            const isWatched = percent > 85;
+                    const isWatched = percent > this.WATCHED_THRESHOLD;
 
-            const container = bar.closest('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer');
-            if (container) {
-                if (isWatched) {
-                    container.setAttribute('is-watched', '');
-                } else {
-                    container.removeAttribute('is-watched');
+                    const container = bar.closest('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer');
+                    if (container) {
+                        if (isWatched) {
+                            container.setAttribute('is-watched', '');
+                        } else {
+                            container.removeAttribute('is-watched');
+                        }
+                    }
+                } catch (err) {
+                    // Silently skip this element if there's an error
                 }
-            }
-        });
+            });
+        } catch (error) {
+            this.Utils?.log(`Error processing watched videos: ${error.message}`, 'THEME', 'error');
+        }
     }
 
     /**
-     * Determine if a container looks like a Shorts shelf.
-     * @param {HTMLElement} container 
-     * @returns {boolean}
+     * Determine if a container looks like a Shorts shelf
+     * @param {HTMLElement} container - Element to check
+     * @returns {boolean} True if container appears to be a Shorts shelf
+     * @private
      */
     isShortsContainer(container) {
         if (!container) return false;
 
-        // Fast checks
-        if (container.tagName === 'YTD-REEL-SHELF-RENDERER') return true;
-        if (container.hasAttribute('is-shorts')) return true;
+        try {
+            // Fast checks - element type and attributes
+            if (container.tagName === 'YTD-REEL-SHELF-RENDERER') return true;
+            if (container.hasAttribute('is-shorts')) return true;
 
-        // Title Check
-        const titleEl = container.querySelector('#title');
-        if (titleEl && titleEl.textContent) {
-            const title = titleEl.textContent.trim().toLowerCase();
-            if (title === 'shorts') return true;
+            // Title Check - look for "Shorts" text
+            const titleEl = container.querySelector('#title');
+            if (titleEl?.textContent) {
+                const title = titleEl.textContent.trim().toLowerCase();
+                if (title === 'shorts' || title.includes('shorts')) return true;
+            }
+
+            // Aria-label check
+            const ariaLabel = container.getAttribute('aria-label');
+            if (ariaLabel?.toLowerCase().includes('shorts')) return true;
+
+            return false;
+        } catch (error) {
+            this.Utils?.log(`Error checking shorts container: ${error.message}`, 'THEME', 'error');
+            return false;
         }
-
-        // Icon Check (Shorts icon is usually distinct)
-        const icon = container.querySelector('yt-icon');
-        if (icon) {
-            // Check paths or accessibility labels if available
-        }
-
-        return false;
     }
 };

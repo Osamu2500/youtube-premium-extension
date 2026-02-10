@@ -3,8 +3,11 @@
  * Adds auto-scroll functionality to YouTube Shorts.
  */
 window.YPP = window.YPP || {};
-window.YPP.features = window.YPP.features || {};
-
+/**
+ * Shorts Tools
+ * Adds auto-scroll functionality to YouTube Shorts.
+ * @class ShortsTools
+ */
 window.YPP.features.ShortsTools = class ShortsTools {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
@@ -15,12 +18,20 @@ window.YPP.features.ShortsTools = class ShortsTools {
         this.videoRef = null;
         this.autoScrollTimer = null;
         this.isScrolling = false;
+
+        // Bind event handlers once to allow proper cleanup
+        this._boundHandleEnded = this.handleVideoEnded.bind(this);
+        this._boundHandleTimeUpdate = this.handleTimeUpdate.bind(this);
     }
 
     run(settings) {
         this.update(settings);
     }
 
+    /**
+     * Update settings
+     * @param {Object} settings - Updated settings
+     */
     update(settings) {
         this.settings = settings;
         if (settings.shortsAutoScroll) {
@@ -30,6 +41,9 @@ window.YPP.features.ShortsTools = class ShortsTools {
         }
     }
 
+    /**
+     * Enable Shorts auto-scroll
+     */
     enable() {
         if (this.isActive) return;
         this.isActive = true;
@@ -37,6 +51,9 @@ window.YPP.features.ShortsTools = class ShortsTools {
         this.monitorShorts();
     }
 
+    /**
+     * Disable Shorts auto-scroll and cleanup
+     */
     disable() {
         this.isActive = false;
         this.stopMonitoring();
@@ -46,11 +63,23 @@ window.YPP.features.ShortsTools = class ShortsTools {
         // We need to continuously check if we are on a Shorts page and if a video is playing
         if (this.observer) return;
 
+        // Target specific Shorts container for better performance
+        const container = document.querySelector('ytd-shorts') ||
+            document.querySelector('#shorts-container') ||
+            document.body;  // Fallback to body if specific container not found
+
         this.observer = new MutationObserver(() => {
             this.checkForVideo();
         });
 
-        this.observer.observe(document.body, { childList: true, subtree: true });
+        // Only observe subtree if we're using the fallback (document.body)
+        const observeSubtree = container === document.body;
+        this.observer.observe(container, {
+            childList: true,
+            subtree: observeSubtree
+        });
+
+        this.Utils.log(`Monitoring Shorts (container: ${container.tagName}, subtree: ${observeSubtree})`, 'SHORTS');
         this.checkForVideo();
     }
 
@@ -97,16 +126,15 @@ window.YPP.features.ShortsTools = class ShortsTools {
 
     addVideoListeners() {
         if (!this.videoRef) return;
-        this.videoRef.addEventListener('ended', this.handleVideoEnded.bind(this));
-        // Also listen for timeupdate to catch near-end if 'ended' is unreliable on loop
-        this.videoRef.addEventListener('timeupdate', this.handleTimeUpdate.bind(this));
+        this.videoRef.addEventListener('ended', this._boundHandleEnded);
+        this.videoRef.addEventListener('timeupdate', this._boundHandleTimeUpdate);
         this.videoRef.loop = false; // Force loop off to allow 'ended' event
     }
 
     removeVideoListeners() {
         if (this.videoRef) {
-            this.videoRef.removeEventListener('ended', this.handleVideoEnded.bind(this));
-            this.videoRef.removeEventListener('timeupdate', this.handleTimeUpdate.bind(this));
+            this.videoRef.removeEventListener('ended', this._boundHandleEnded);
+            this.videoRef.removeEventListener('timeupdate', this._boundHandleTimeUpdate);
             this.videoRef = null;
         }
     }

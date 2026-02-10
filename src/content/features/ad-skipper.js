@@ -3,13 +3,24 @@
  * Uses mutation observation and periodic checks to detect and fast-forward through ads.
  */
 window.YPP = window.YPP || {};
-window.YPP.features = window.YPP.features || {};
-
+/**
+ * Ad Skipper
+ * Automatically skips or fast-forwards through YouTube video advertisements.
+ * @class AdSkipper
+ */
 window.YPP.features.AdSkipper = class AdSkipper {
+    /**
+     * Initialize Ad Skipper
+     */
     constructor() {
         this.observer = null;
         this.interval = null;
         this.isActive = false;
+        this.Utils = window.YPP.Utils;
+
+        // Performance constants
+        this.POLL_INTERVAL = 1000;      // ms - Check for ads every second (reduced from 500ms)
+        this.MAX_AD_SPEED = 16;         // Maximum playback speed for ads
 
         // Comprehensive list of ad selectors
         this.adSelectors = {
@@ -27,6 +38,11 @@ window.YPP.features.AdSkipper = class AdSkipper {
     }
 
     /**
+     * Enable ad skipping with settings
+     * @param {Object} settings - User settings
+     */
+
+    /**
      * Enable ad skipping.
      * @param {Object} settings 
      */
@@ -38,6 +54,9 @@ window.YPP.features.AdSkipper = class AdSkipper {
         }
     }
 
+    /**
+     * Disable ad skipping and cleanup
+     */
     disable() {
         this.stop();
     }
@@ -49,15 +68,22 @@ window.YPP.features.AdSkipper = class AdSkipper {
         if (this.isActive) return;
         this.isActive = true;
 
-        console.log('[YPP:AD] Ad Skipper Enabled');
+        this.Utils?.log('Ad Skipper Enabled', 'AD');
 
-        // Check frequently (every 500ms) - Lightweight check
-        this.interval = setInterval(() => this.checkAndSkip(), 500);
+        // Check every second (reduced from 500ms for better performance)
+        this.interval = setInterval(() => this.checkAndSkip(), this.POLL_INTERVAL);
 
         // Also check on video mutations (e.g. src change)
         const player = document.querySelector('#movie_player') || document.body;
         if (player) {
-            this.observer = new MutationObserver(() => this.checkAndSkip());
+            this.observer = new MutationObserver(() => {
+                try {
+                    this.checkAndSkip();
+                } catch (error) {
+                    console.warn('[YPP:AD] Observer error:', error);
+                    // Observer continues working despite errors
+                }
+            });
             this.observer.observe(player, { attributes: true, subtree: true, attributeFilter: ['class', 'src'] });
         }
     }
@@ -81,6 +107,9 @@ window.YPP.features.AdSkipper = class AdSkipper {
     /**
      * Check for ads and execute skip logic.
      */
+    /**
+     * Check for ads and attempt to skip them
+     */
     checkAndSkip() {
         const video = document.querySelector('video');
         if (!video) return;
@@ -93,9 +122,9 @@ window.YPP.features.AdSkipper = class AdSkipper {
                 // 1. Mute
                 video.muted = true;
 
-                // 2. Speed Up (16x is usually safe limit, sometimes Infinity works but 16 is consistent)
-                if (video.playbackRate < 16) {
-                    video.playbackRate = 16;
+                // 2. Speed Up (16x is usually safe limit)
+                if (video.playbackRate < this.MAX_AD_SPEED) {
+                    video.playbackRate = this.MAX_AD_SPEED;
                 }
 
                 // 3. Click Skip Button if available
@@ -110,6 +139,10 @@ window.YPP.features.AdSkipper = class AdSkipper {
     /**
      * Heuristics to determine if an ad is currently active.
      * @returns {boolean}
+     */
+    /**
+     * Check if an ad is currently playing
+     * @returns {boolean} True if ad is detected
      */
     isAdPlaying() {
         // 1. Class on player container (Most reliable)

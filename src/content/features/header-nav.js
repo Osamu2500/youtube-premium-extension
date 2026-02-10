@@ -1,4 +1,7 @@
-// Header Navigation Buttons (Replacements for Sidebar)
+/**
+ * Header Navigation Manager - Creates custom navigation buttons in the header
+ * @class HeaderNav
+ */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -44,24 +47,25 @@ window.YPP.features.HeaderNav = class HeaderNav {
     }
 
     run(settings) {
-        this.update(settings);
+        this.enable(settings);
     }
 
-    update(settings) {
+    /**
+     * Initialize header navigation
+     * @param {Object} settings - User settings object
+     */
+    enable(settings) {
         this.settings = settings;
         const shouldRun = settings.navTrending || settings.navShorts ||
             settings.navSubscriptions || settings.navWatchLater ||
             settings.navPlaylists || settings.navHistory ||
             settings.forceHideSidebar;
 
-        if (shouldRun) {
-            this.enable();
-        } else {
+        if (!shouldRun) {
             this.disable();
+            return;
         }
-    }
 
-    enable() {
         if (this.isActive) {
             this.handleSidebarState();
             // Re-inject if context changed
@@ -74,6 +78,9 @@ window.YPP.features.HeaderNav = class HeaderNav {
         this.observeHeader();
     }
 
+    /**
+     * Disable header navigation and clean up
+     */
     disable() {
         this.isActive = false;
         if (this.observer) {
@@ -119,100 +126,104 @@ window.YPP.features.HeaderNav = class HeaderNav {
         });
     }
 
+    /**
+     * Inject navigation buttons into the header
+     * @private
+     */
     injectButtons(centerSection) {
-        // Prevent duplicates
-        if (document.querySelector('.ypp-nav-group-right')) return;
-
-        // Remove old group if it exists roughly in the wrong place
-        const oldGroup = document.querySelector('.ypp-nav-group');
-        if (oldGroup) oldGroup.remove();
-
-        const navGroup = document.createElement('div');
-        navGroup.className = 'ypp-nav-group ypp-nav-group-right';
-
-        // 1. Subscriptions
-        if (this.settings.navSubscriptions) {
-            this.createButton(navGroup, 'Subscriptions', '/feed/subscriptions', HeaderNav.ICONS.Subscriptions);
+        if (!centerSection) {
+            this.Utils?.log('Center section not found', 'HEADERNAV', 'warn');
+            return;
         }
 
-        // 2. Shorts
-        if (this.settings.navShorts) {
-            this.createButton(navGroup, 'Shorts', '/shorts', HeaderNav.ICONS.Shorts);
+        try {
+            // Prevent duplicates
+            if (document.querySelector('.ypp-nav-group-right')) return;
+
+            // Remove old group if it exists roughly in the wrong place
+            const oldGroup = document.querySelector('.ypp-nav-group');
+            if (oldGroup) oldGroup.remove();
+
+            const navGroup = document.createElement('div');
+            navGroup.className = 'ypp-nav-group ypp-nav-group-right';
+
+            // 1. Subscriptions
+            if (this.settings.navSubscriptions) {
+                this.createButton(navGroup, 'Subscriptions', '/feed/subscriptions', HeaderNav.ICONS.Subscriptions);
+            }
+
+            // 2. Shorts
+            if (this.settings.navShorts) {
+                this.createButton(navGroup, 'Shorts', '/shorts', HeaderNav.ICONS.Shorts);
+            }
+
+            // 3. Watch Later
+            if (this.settings.navWatchLater) {
+                this.createButton(navGroup, 'Watch Later', '/playlist?list=WL', HeaderNav.ICONS.WatchLater);
+            }
+
+            // 4. Playlists
+            if (this.settings.navPlaylists) {
+                this.createButton(navGroup, 'Playlists', '/feed/playlists', HeaderNav.ICONS.Playlists);
+            }
+
+            // 5. History
+            if (this.settings.navHistory) {
+                this.createButton(navGroup, 'History', '/feed/history', HeaderNav.ICONS.History);
+            }
+
+            // 6. Trending
+            if (this.settings.navTrending) {
+                this.createButton(navGroup, 'Trending', '/feed/trending', HeaderNav.ICONS.Trending);
+            }
+
+            // Place after search
+            const searchForm = centerSection.querySelector('#search-form');
+            const micBtn = centerSection.querySelector('#voice-search-button');
+
+            if (micBtn && micBtn.nextSibling) {
+                centerSection.insertBefore(navGroup, micBtn.nextSibling);
+            } else if (searchForm && searchForm.nextSibling) {
+                centerSection.insertBefore(navGroup, searchForm.nextSibling);
+            } else {
+                centerSection.appendChild(navGroup);
+            }
+
+            this._updateActiveStates();
+        } catch (error) {
+            this.Utils?.log(`Error injecting buttons: ${error.message}`, 'HEADERNAV', 'error');
         }
-
-        // 3. Watch Later
-        if (this.settings.navWatchLater) {
-            this.createButton(navGroup, 'Watch Later', '/playlist?list=WL', HeaderNav.ICONS.WatchLater);
-        }
-
-        // 4. Playlists
-        if (this.settings.navPlaylists) {
-            this.createButton(navGroup, 'Playlists', '/feed/playlists', HeaderNav.ICONS.Playlists);
-        }
-
-        // 5. History
-        if (this.settings.navHistory) {
-            this.createButton(navGroup, 'History', '/feed/history', HeaderNav.ICONS.History);
-        }
-
-        // 6. Trending
-        if (this.settings.navTrending) {
-            this.createButton(navGroup, 'Trending', '/feed/trending', HeaderNav.ICONS.Trending);
-        }
-
-        // Place after search
-        const searchForm = centerSection.querySelector('#search-form');
-        const micBtn = centerSection.querySelector('#voice-search-button');
-
-        if (micBtn && micBtn.nextSibling) {
-            centerSection.insertBefore(navGroup, micBtn.nextSibling);
-        } else if (searchForm && searchForm.nextSibling) {
-            centerSection.insertBefore(navGroup, searchForm.nextSibling);
-        } else {
-            centerSection.appendChild(navGroup);
-        }
-
-        this._updateActiveStates();
     }
 
+    /**
+     * Create a single navigation button
+     * @param {HTMLElement} container - Container to append button to
+     * @param {string} label - Button label/title
+     * @param {string} url - Navigation URL
+     * @param {string} svgContent - SVG icon content
+     * @private
+     */
     createButton(container, label, url, svgContent) {
-        const btn = document.createElement('div'); // Div to avoid default anchor drag issues
-        btn.className = 'ypp-nav-btn';
-        btn.title = label;
-        btn.dataset.url = url;
-        btn.innerHTML = `
+        try {
+            const btn = document.createElement('div'); // Div to avoid default anchor drag issues
+            btn.className = 'ypp-nav-btn';
+            btn.title = label;
+            btn.dataset.url = url;
+            btn.innerHTML = `
             <svg viewBox="0 0 24 24" class="ypp-nav-icon">${svgContent}</svg>
         `;
 
-        // Reliable Navigation
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent propagation to masthead
-            e.preventDefault();
+            // Reliable Navigation
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.pathname = url;
+            });
 
-            // Visual feedback
-            const ripple = document.createElement('div');
-            // (Simple click effect can be added via CSS :active)
-
-            // Navigate
-            if (window.location.pathname === url) return; // Already there
-
-            // Try to use YouTube's app navigation if exposed, otherwise standard
-            const navEvent = document.querySelector('yt-app');
-            if (navEvent && navEvent.navigate) {
-                // Experimental: Try using standard link click simulation for SPA
-                const a = document.createElement('a');
-                a.href = url;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } else {
-                // Fallback
-                window.location.href = url;
-            }
-        });
-
-        container.appendChild(btn);
+            container.appendChild(btn);
+        } catch (error) {
+            this.Utils?.log(`Error creating button ${label}: ${error.message}`, 'HEADERNAV', 'error');
+        }
     }
 
     _updateActiveStates() {

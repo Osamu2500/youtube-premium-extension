@@ -3,8 +3,11 @@
  * Starting fresh to place sidebar on homepage first.
  */
 window.YPP = window.YPP || {};
-window.YPP.features = window.YPP.features || {};
-
+/**
+ * Sidebar Manager
+ * Controls sidebar visibility and ensures proper state management.
+ * @class SidebarManager
+ */
 window.YPP.features.SidebarManager = class SidebarManager {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
@@ -20,6 +23,10 @@ window.YPP.features.SidebarManager = class SidebarManager {
         this.update(settings);
     }
 
+    /**
+     * Update settings and apply changes
+     * @param {Object} settings - Updated settings
+     */
     update(settings) {
         this.settings = settings;
         // Logic: if forceHideSidebar is enabled OR we just want to control it
@@ -32,6 +39,9 @@ window.YPP.features.SidebarManager = class SidebarManager {
         }
     }
 
+    /**
+     * Enable sidebar management
+     */
     enable() {
         if (this.isActive) {
             this.ensureSidebarVisible();
@@ -46,6 +56,9 @@ window.YPP.features.SidebarManager = class SidebarManager {
         window.addEventListener('yt-navigate-finish', this.handleNavigation);
     }
 
+    /**
+     * Disable sidebar management and cleanup
+     */
     disable() {
         this.isActive = false;
         document.body.classList.remove('ypp-hide-sidebar');
@@ -59,15 +72,19 @@ window.YPP.features.SidebarManager = class SidebarManager {
         if (this.isActive) this.ensureSidebarVisible();
     }
 
+    /**
+     * Ensure sidebar visibility class is applied
+     */
     ensureSidebarVisible() {
         if (!this.isActive) return;
-
-        // As per current "Clean Slate", we hide standard sidebars
-        if (document.body) {
-            document.body.classList.add('ypp-hide-sidebar');
-        }
+        document.body.classList.add('ypp-hide-sidebar');
     }
 
+    /**
+     * Toggle the guide sidebar if it's missing
+     * @private
+     * @reserved - Reserved for future sidebar toggle feature
+     */
     toggleGuideIfMissing() {
         const guide = document.querySelector(this.CONSTANTS.SELECTORS.MAIN_GUIDE);
         if (!guide) {

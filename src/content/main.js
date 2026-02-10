@@ -13,82 +13,96 @@
     Utils.log('Script Loading...', 'MAIN');
 
     /**
-     * Main Application Controller
-     * Manages extension lifecycle, settings, and feature coordination
+     * Main Entry Point - YouTube Premium Plus Extension
+     * @description Initializes the feature manager and coordinates all extension features
      */
-    class App {
-        constructor() {
-            /** @type {window.YPP.FeatureManager} */
-            this.featureManager = new window.YPP.FeatureManager();
-            /** @type {Object|null} User settings */
-            this.settings = null;
-            /** @type {boolean} Initialization state */
-            this.isInitialized = false;
-        }
+    window.YPP = window.YPP || {};
+
+    // Define a default settings object if not already present
+    window.YPP.getDefaultSettings = window.YPP.getDefaultSettings || function () {
+        // This should ideally be defined in CONSTANTS or a dedicated settings module
+        // For now, return a basic empty object or a minimal default
+        return window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
+    };
+
+    const YPPMainApp = {
+        /** @type {window.YPP.FeatureManager|null} */
+        featureManager: null,
+        /** @type {Object} User settings */
+        settings: {},
+        /** @type {Object} Current page context (e.g., isWatchPage) */
+        context: {},
+        /** @type {boolean} Initialization state */
+        isInitialized: false,
+        /** @type {number} Maximum retry attempts for operations like loading settings */
+        MAX_RETRY_ATTEMPTS: 3,
+        /** @type {number} Delay between retry attempts in milliseconds */
+        RETRY_DELAY: 500, // ms
 
         /**
-         * Main start sequence. Loads settings, initializes features, and sets up event listeners.
-         * @returns {Promise<void>}
+         * Initialize the extension
+         * @async
          */
         async start() {
-            if (this.isInitialized) return;
+            if (this.isInitialized) {
+                Utils.log('App already initialized.', 'MAIN');
+                return;
+            }
 
             try {
                 Utils.log('Starting App...', 'MAIN');
                 await this.loadSettings();
 
-                // Initialize all features with loaded settings
+                // Initialize feature manager after settings are loaded
+                this.featureManager = new window.YPP.FeatureManager();
+                this.updateContext(); // Initial context update
                 this.featureManager.init(this.settings);
-
                 this.setupEvents();
-
-                // Visual confirmation
-                Utils.createToast('YouTube Premium+ Ready');
+                this.isInitialized = true;
+                Utils.log('Extension Initialized Successfully', 'MAIN');
+                this.showReadyToast();
 
                 // Add class for global CSS scoping
                 document.documentElement.classList.add('ypp-loaded');
-                this.isInitialized = true;
-            } catch (err) {
-                Utils.log(`Critical Bootstrap Error: ${err.message}`, 'MAIN', 'error');
-                console.error(err);
+            } catch (error) {
+                Utils.log(`Critical Bootstrap Error: ${error.message}`, 'MAIN', 'error');
+                console.error('[YPP:MAIN] Initialization failed:', error);
+                this.handleInitializationError(error);
             }
-        }
+        },
 
         /**
-         * Load settings from Chrome Storage with defaults fallback.
-         * Handles errors gracefully and falls back to DEFAULT_SETTINGS.
-         * @returns {Promise<void>}
+         * Load settings from Chrome storage with retry logic.
+         * Falls back to default settings if storage fails after retries.
+         * @async
+         * @param {number} attempt - Current attempt number (for retry)
          */
-        async loadSettings() {
-            return new Promise((resolve) => {
-                try {
-                    // Defensive: Ensure chrome.storage exists
-                    if (!chrome?.storage?.local) {
-                        Utils.log('Chrome storage API not available', 'MAIN', 'error');
-                        this.settings = window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
-                        resolve();
-                        return;
-                    }
-
-                    chrome.storage.local.get('settings', (data) => {
-                        // Check for Chrome API errors
-                        if (chrome.runtime.lastError) {
-                            Utils.log(`Storage API Error: ${chrome.runtime.lastError.message}`, 'MAIN', 'error');
-                            this.settings = window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
-                            resolve();
-                            return;
-                        }
-
-                        this.settings = data.settings || window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
-                        resolve();
-                    });
-                } catch (e) {
-                    Utils.log(`Settings Load Error: ${e?.message || 'Unknown error'}`, 'MAIN', 'error');
-                    this.settings = window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
-                    resolve();
+        async loadSettings(attempt = 1) {
+            try {
+                // Defensive: Ensure chrome.storage exists
+                if (!chrome?.storage?.local) {
+                    Utils.log('Chrome storage API not available. Using default settings.', 'MAIN', 'warn');
+                    this.settings = window.YPP.getDefaultSettings();
+                    return;
                 }
-            });
-        }
+
+                const data = await chrome.storage.local.get('settings');
+                this.settings = data.settings || window.YPP.getDefaultSettings();
+                Utils.log('Settings Loaded', 'MAIN', 'debug', this.settings);
+            } catch (error) {
+                Utils.log(`Error loading settings (attempt ${attempt}): ${error.message}`, 'MAIN', 'error');
+
+                if (attempt < this.MAX_RETRY_ATTEMPTS) {
+                    Utils.log(`Retrying settings load in ${this.RETRY_DELAY}ms...`, 'MAIN');
+                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
+                    return this.loadSettings(attempt + 1);
+                }
+
+                // Fallback to defaults after all retries
+                Utils.log('Using default settings after retry failure', 'MAIN', 'warn');
+                this.settings = window.YPP.getDefaultSettings();
+            }
+        },
 
         /**
          * Set up global event listeners for SPA navigation and settings changes.
@@ -104,51 +118,84 @@
                 this.featureManager.init(this.settings);
             });
 
-            // Initial context check
-            this.updateContext();
-
             // Listen for settings changes from Popup
-            chrome.storage.onChanged.addListener((changes, area) => {
-                try {
-                    if (area === 'local' && changes.settings) {
-                        this.settings = changes.settings.newValue;
-                        Utils.log('Settings changed', 'MAIN');
-                        this.featureManager.init(this.settings);
+            if (chrome?.storage?.onChanged) {
+                chrome.storage.onChanged.addListener((changes, area) => {
+                    try {
+                        if (area === 'local' && changes.settings) {
+                            this.settings = changes.settings.newValue;
+                            Utils.log('Settings changed', 'MAIN', 'debug', this.settings);
+                            this.featureManager.init(this.settings);
+                        }
+                    } catch (e) {
+                        Utils.log(`Error handling settings change: ${e.message}`, 'MAIN', 'error');
                     }
-                } catch (e) {
-                    Utils.log(`Error handling settings change: ${e.message}`, 'MAIN', 'error');
-                }
-            });
-        }
+                });
+            } else {
+                Utils.log('chrome.storage.onChanged API not available.', 'MAIN', 'warn');
+            }
+        },
 
         /**
-         * Update body classes based on current URL path.
-         * Adds 'ypp-watch-page' class when on /watch page.
-         * @returns {void}
+         * Update the current page context and apply relevant body classes.
+         * Populates `this.context` with boolean flags for different page types.
          */
         updateContext() {
-            const path = window.location.pathname;
-            const isWatchPage = path === '/watch';
+            try {
+                const pathname = window.location.pathname;
+                this.context = {
+                    isHome: pathname === '/' || pathname === '/feed/subscriptions',
+                    isWatch: pathname.startsWith('/watch'),
+                    isSearch: pathname.startsWith('/results'),
+                    isChannel: pathname.startsWith('/@') || pathname.startsWith('/channel'),
+                };
 
-            if (isWatchPage) {
-                document.body.classList.add('ypp-watch-page');
-            } else {
-                document.body.classList.remove('ypp-watch-page');
+                // Apply/remove body classes based on context
+                if (this.context.isWatch) {
+                    document.body.classList.add('ypp-watch-page');
+                } else {
+                    document.body.classList.remove('ypp-watch-page');
+                }
+                Utils.log('Context updated', 'MAIN', 'debug', this.context);
+            } catch (error) {
+                Utils.log(`Error updating context: ${error.message}`, 'MAIN', 'error');
+                this.context = {}; // Reset context on error
             }
+        },
+
+        /**
+         * Displays a toast notification indicating the extension is ready.
+         */
+        showReadyToast() {
+            try {
+                Utils.createToast('YouTube Premium+ Ready');
+            } catch (error) {
+                Utils.log(`Error showing ready toast: ${error.message}`, 'MAIN', 'error');
+            }
+        },
+
+        /**
+         * Handles critical initialization errors.
+         * @param {Error} error - The error object.
+         */
+        handleInitializationError(error) {
+            // Potentially display a persistent error message to the user
+            // or disable certain functionalities.
+            Utils.createToast('YouTube Premium+ failed to load!', 'error');
+            Utils.log('Further actions for critical error handling can be implemented here.', 'MAIN', 'error');
         }
-    }
+    };
 
     // --- Bootstrap Execution ---
     try {
-        const app = new App();
-
         // Wait for DOM if it's not ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => app.start());
+            document.addEventListener('DOMContentLoaded', () => YPPMainApp.start());
         } else {
-            app.start();
+            YPPMainApp.start();
         }
     } catch (e) {
         console.error('[YPP] Fatal Bootstrap Error:', e);
+        Utils.createToast('YouTube Premium+ encountered a fatal error!', 'error');
     }
 })();

@@ -1,4 +1,8 @@
-// Study Mode Feature
+/**
+ * Study Mode Feature - Optimizes playback for learning
+ * @description Sets speed to 1.25x and enables captions automatically
+ * @class StudyMode
+ */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -7,8 +11,14 @@ window.YPP.features.StudyMode = class StudyMode {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
         this.studyInterval = null;
+        this.STUDY_SPEED = 1.25;
+        this.ENFORCE_INTERVAL = 5000; // ms
     }
 
+    /**
+     * Apply study mode settings
+     * @param {Object} settings - Settings object
+     */
     run(settings) {
         if (settings.studyMode) {
             this.enable();
@@ -17,44 +27,84 @@ window.YPP.features.StudyMode = class StudyMode {
         }
     }
 
+    /**
+     * Update study mode settings
+     * @param {Object} settings - Updated settings
+     */
+    update(settings) {
+        this.run(settings);
+    }
+
+    /**
+     * Enable study mode with speed and captions
+     */
     enable() {
         if (this.studyInterval) return;
 
-        this.Utils.createToast('Study Mode: Speed 1.25x & Captions');
+        try {
+            this.Utils?.createToast('Study Mode: Speed 1.25x & Captions');
 
-        // Initial set
-        this._enforceState();
+            // Initial enforcement
+            this._enforceState();
 
-        // Enforce periodically (robustness against manual changes/ads)
-        this.studyInterval = setInterval(() => this._enforceState(), 5000);
+            // Periodic enforcement to handle ads and manual changes
+            this.studyInterval = setInterval(() => this._enforceState(), this.ENFORCE_INTERVAL);
+        } catch (error) {
+            this.Utils?.log(`Error enabling study mode: ${error.message}`, 'STUDY', 'error');
+        }
     }
 
+    /**
+     * Disable study mode and restore normal playback
+     */
     disable() {
-        if (this.studyInterval) {
+        if (!this.studyInterval) return;
+
+        try {
             clearInterval(this.studyInterval);
             this.studyInterval = null;
 
-            // Revert Speed
+            // Revert playback speed
             const video = document.querySelector('video');
-            if (video && video.playbackRate === 1.25) {
+            if (video?.playbackRate === this.STUDY_SPEED) {
                 video.playbackRate = 1.0;
-                this.Utils.createToast('Study Mode Disabled');
+                this.Utils?.createToast('Study Mode Disabled');
             }
+        } catch (error) {
+            this.Utils?.log(`Error disabling study mode: ${error.message}`, 'STUDY', 'error');
         }
     }
 
+    /**
+     * Enforce study mode state (speed and captions)
+     * @private
+     */
     _enforceState() {
-        const video = document.querySelector('video');
-        if (video) {
-            if (video.playbackRate !== 1.25) video.playbackRate = 1.25;
-            this._enableCaptions();
+        try {
+            const video = document.querySelector('video');
+            if (video) {
+                if (video.playbackRate !== this.STUDY_SPEED) {
+                    video.playbackRate = this.STUDY_SPEED;
+                }
+                this._enableCaptions();
+            }
+        } catch (error) {
+            // Silently fail - video might not be ready
         }
     }
 
+    /**
+     * Enable captions if not already enabled
+     * @private
+     */
     _enableCaptions() {
-        const subtitlesBtn = document.querySelector('.ytp-subtitles-button');
-        if (subtitlesBtn && subtitlesBtn.getAttribute('aria-pressed') === 'false') {
-            subtitlesBtn.click();
+        try {
+            const subtitlesBtn = document.querySelector('.ytp-subtitles-button');
+            if (subtitlesBtn?.getAttribute('aria-pressed') === 'false') {
+                subtitlesBtn.click();
+            }
+        } catch (error) {
+            // Silently fail - button might not be available
         }
     }
 };

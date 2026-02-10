@@ -3,17 +3,33 @@
  * Enforces a 4x4 grid layout on the YouTube Home and Channel pages.
  */
 window.YPP = window.YPP || {};
-window.YPP.features = window.YPP.features || {};
-
+/**
+ * Grid Layout Manager
+ * Enforces a 4x4 grid layout on the YouTube Home and Channel pages.
+ * @class GridLayoutManager
+ */
 window.YPP.features.Layout = class GridLayoutManager {
+    /**
+     * Initialize Grid Layout Manager
+     */
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
         this.isActive = false;
         this.observer = null;
         this.resizeListener = null;
+
+        // Fallback if debounce not available
+        const debounce = this.Utils?.debounce || ((fn, wait) => {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), wait);
+            };
+        });
+
         // Debounce apply to prevent layout thrashing
-        this.debouncedApply = this.Utils.debounce(() => this.applyGridLayout(), 300);
+        this.debouncedApply = debounce(() => this.applyGridLayout(), 300);
     }
 
     /**
@@ -33,32 +49,34 @@ window.YPP.features.Layout = class GridLayoutManager {
      */
     disable() {
         if (!this.isActive) return;
-        this.isActive = false;
 
         this.stopObserver();
         this.removeResizeListener();
 
-        // Revert Styles
-        requestAnimationFrame(() => {
-            const items = document.querySelectorAll(this.CONSTANTS.SELECTORS.VIDEO_ITEM);
-            items.forEach(item => {
-                item.style.width = '';
-                item.style.maxWidth = '';
-                item.style.minWidth = '';
-                item.style.flex = '';
-                item.style.margin = '';
-                item.style.boxSizing = '';
-            });
-
-            const contents = document.querySelector(this.CONSTANTS.SELECTORS.GRID_CONTENTS);
-            if (contents) {
-                contents.style.display = '';
-                contents.style.flexWrap = '';
-                contents.style.justifyContent = '';
-                contents.style.width = '';
-            }
+        // Synchronous cleanup to prevent race conditions
+        const items = document.querySelectorAll(this.CONSTANTS.SELECTORS.VIDEO_ITEM);
+        items.forEach(item => {
+            item.style.width = '';
+            item.style.maxWidth = '';
+            item.style.minWidth = '';
+            item.style.flex = '';
+            item.style.margin = '';
+            item.style.boxSizing = '';
         });
 
+        const contents = document.querySelector(this.CONSTANTS.SELECTORS.GRID_CONTENTS);
+        if (contents) {
+            contents.style.display = '';
+            contents.style.gridTemplateColumns = '';
+            contents.style.gap = '';
+            contents.style.flexWrap = '';
+            contents.style.justifyContent = '';
+            contents.style.width = '';
+            contents.style.padding = '';
+        }
+
+        // Set flag AFTER cleanup completes
+        this.isActive = false;
         this.Utils.log('Grid Layout Disabled', 'LAYOUT');
     }
 
@@ -67,7 +85,7 @@ window.YPP.features.Layout = class GridLayoutManager {
      */
     init() {
         if (this.isActive) return;
-        this.Utils.log('Initializing 4x4 grid...', 'LAYOUT');
+        this.Utils?.log('Initializing 4x4 grid...', 'LAYOUT');
         this.isActive = true;
 
         // Initial Apply
@@ -93,24 +111,25 @@ window.YPP.features.Layout = class GridLayoutManager {
             const gridRenderer = document.querySelector(this.CONSTANTS.SELECTORS.GRID_RENDERER);
             if (!gridRenderer) return;
 
-            // Force container styles
+            // Force CSS Grid on contents container
             const contents = gridRenderer.querySelector(this.CONSTANTS.SELECTORS.GRID_CONTENTS);
             if (contents) {
-                contents.style.display = 'flex';
-                contents.style.flexWrap = 'wrap';
-                contents.style.justifyContent = 'flex-start';
+                contents.style.display = 'grid';
+                contents.style.gridTemplateColumns = 'repeat(4, 1fr)';
+                contents.style.gap = `${this.CONSTANTS.GRID.ROW_GAP || 24}px ${this.CONSTANTS.GRID.ITEM_GAP || 16}px`;
                 contents.style.width = '100%';
+                contents.style.padding = '0';
             }
 
-            // Force item styles
+            // Style individual items for grid
             const items = document.querySelectorAll(this.CONSTANTS.SELECTORS.VIDEO_ITEM);
             items.forEach(item => this._styleVideoItem(item));
 
-            // Hide rows wrapper to allow flex items to flow naturally
+            // Force rows to use display: contents for grid
             const rows = document.querySelectorAll(this.CONSTANTS.SELECTORS.GRID_ROW);
             rows.forEach(row => row.style.display = 'contents');
         } catch (error) {
-            console.error('[YPP:LAYOUT] Apply error:', error);
+            this.Utils?.log('Apply error:', error, 'LAYOUT', 'error');
         }
     }
 
@@ -119,19 +138,13 @@ window.YPP.features.Layout = class GridLayoutManager {
      * @param {HTMLElement} item 
      */
     _styleVideoItem(item) {
-        // Calculate width based on 4 items per row accounting for gaps
-        const gap = this.CONSTANTS.GRID.ITEM_GAP || 16;
-        const rowGap = this.CONSTANTS.GRID.ROW_GAP || 40;
-
-        // Use calc for fluid width: (100% - (3 * gap)) / 4
-        const width = `calc(25% - ${gap}px)`;
-
-        item.style.width = width;
-        item.style.maxWidth = width;
-        item.style.minWidth = `${this.CONSTANTS.GRID.MIN_ITEM_WIDTH || 200}px`;
-        item.style.flex = `0 0 ${width}`;
-        // Standardize margins
-        item.style.margin = `0 ${gap / 2}px ${rowGap}px ${gap / 2}px`;
+        // For CSS Grid, items don't need width calculations
+        // Just ensure proper sizing and remove any YouTube defaults
+        item.style.width = 'auto';
+        item.style.maxWidth = 'none';
+        item.style.minWidth = 'auto';
+        item.style.flex = 'none';
+        item.style.margin = '0';
         item.style.boxSizing = 'border-box';
     }
 

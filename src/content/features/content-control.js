@@ -3,20 +3,36 @@
  * Manages visibility of distraction elements (Shorts, comments, etc.).
  */
 window.YPP = window.YPP || {};
-window.YPP.features = window.YPP.features || {};
-
+/**
+ * Content Control Manager
+ * Manages visibility of distraction elements and handles Shorts redirects.
+ * @class ContentControl
+ */
 window.YPP.features.ContentControl = class ContentControl {
+    /**
+     * Initialize Content Control
+     */
     constructor() {
         this.observer = null;
         this.settings = null;
+        this._redirectListenerAdded = false;
+        this.Utils = window.YPP.Utils;
         // Bind methods for safe event listener removal
         this.checkRedirect = this.checkRedirect.bind(this);
     }
+
+    /**
+     * Enable content control with settings
+     * @param {Object} settings - User settings
+     */
 
     enable(settings) {
         this.run(settings);
     }
 
+    /**
+     * Disable content control and cleanup
+     */
     disable() {
         // Revert all CSS classes
         document.body.classList.remove(
@@ -32,7 +48,10 @@ window.YPP.features.ContentControl = class ContentControl {
         if (style) style.remove();
 
         // Remove listeners
-        window.removeEventListener('yt-navigate-start', this.checkRedirect);
+        if (this._redirectListenerAdded) {
+            window.removeEventListener('yt-navigate-start', this.checkRedirect);
+            this._redirectListenerAdded = false;
+        }
     }
 
     /**
@@ -106,10 +125,11 @@ window.YPP.features.ContentControl = class ContentControl {
         // Immediate check
         this.checkRedirect();
 
-        // Check on navigation
-        // Ensure we don't add duplicate listeners (although bound instance helps)
-        window.removeEventListener('yt-navigate-start', this.checkRedirect);
-        window.addEventListener('yt-navigate-start', this.checkRedirect);
+        // Add listener only once to avoid duplicates
+        if (!this._redirectListenerAdded) {
+            window.addEventListener('yt-navigate-start', this.checkRedirect);
+            this._redirectListenerAdded = true;
+        }
     }
 
     /**
@@ -117,11 +137,15 @@ window.YPP.features.ContentControl = class ContentControl {
      */
     checkRedirect() {
         if (location.pathname.startsWith('/shorts/')) {
-            const videoId = location.pathname.split('/shorts/')[1];
-            if (videoId) {
-                // Use history.replaceState or location.replace to avoid history pollution
-                console.log('[YPP] Redirecting Short to Watch:', videoId);
+            // Extract video ID and validate format
+            const videoId = location.pathname.split('/shorts/')[1]?.split('/')[0];
+
+            // YouTube video IDs are exactly 11 characters: alphanumeric, underscore, hyphen
+            if (videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+                this.Utils?.log('Redirecting Short to Watch:', videoId, 'CONTENT');
                 location.replace('/watch?v=' + videoId);
+            } else if (videoId) {
+                this.Utils?.log('Invalid video ID format:', videoId, 'CONTENT', 'warn');
             }
         }
     }
