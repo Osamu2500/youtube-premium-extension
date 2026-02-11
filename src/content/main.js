@@ -50,16 +50,25 @@
             }
 
             try {
+                const startTime = performance.now();
                 Utils.log('Starting App...', 'MAIN');
                 await this.loadSettings();
 
                 // Initialize feature manager after settings are loaded
+                // Defensive check for FeatureManager existence
+                if (!window.YPP.FeatureManager) {
+                    throw new Error('FeatureManager class not found. Scripts may have loaded out of order.');
+                }
+
                 this.featureManager = new window.YPP.FeatureManager();
                 this.updateContext(); // Initial context update
                 this.featureManager.init(this.settings);
                 this.setupEvents();
                 this.isInitialized = true;
-                Utils.log('Extension Initialized Successfully', 'MAIN');
+
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                Utils.log(`Extension Initialized Successfully in ${loadTime}ms`, 'MAIN');
+
                 this.showReadyToast();
 
                 // Add class for global CSS scoping
@@ -140,6 +149,10 @@
          * Update the current page context and apply relevant body classes.
          * Populates `this.context` with boolean flags for different page types.
          */
+        /**
+         * Update the current page context and apply relevant body classes.
+         * Populates `this.context` with boolean flags for different page types.
+         */
         updateContext() {
             try {
                 const pathname = window.location.pathname;
@@ -148,14 +161,14 @@
                     isWatch: pathname.startsWith('/watch'),
                     isSearch: pathname.startsWith('/results'),
                     isChannel: pathname.startsWith('/@') || pathname.startsWith('/channel'),
+                    isShorts: pathname.startsWith('/shorts/'),
                 };
 
                 // Apply/remove body classes based on context
-                if (this.context.isWatch) {
-                    document.body.classList.add('ypp-watch-page');
-                } else {
-                    document.body.classList.remove('ypp-watch-page');
-                }
+                document.body.classList.toggle('ypp-watch-page', this.context.isWatch);
+                document.body.classList.toggle('ypp-shorts-page', this.context.isShorts);
+                document.body.classList.toggle('ypp-home-page', this.context.isHome);
+
                 Utils.log('Context updated', 'MAIN', 'debug', this.context);
             } catch (error) {
                 Utils.log(`Error updating context: ${error.message}`, 'MAIN', 'error');

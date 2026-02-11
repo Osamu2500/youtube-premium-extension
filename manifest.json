@@ -37,7 +37,7 @@
             "css": [
                 "src/content/styles.css"
             ],
-            "run_at": "document_start",
+            "run_at": "document_idle",
             "js": [
                 "src/content/constants.js",
                 "src/content/utils.js",

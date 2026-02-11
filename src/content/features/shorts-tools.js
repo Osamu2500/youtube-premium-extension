@@ -12,11 +12,13 @@ window.YPP.features.ShortsTools = class ShortsTools {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
-        this.isActive = false;
+        /** @type {boolean} Internal state tracking if the manager is active */
+        this.isEnabled = false;
+        /** @type {Object|null} Current user settings */
         this.settings = null;
         this.observer = null;
+        /** @type {HTMLVideoElement|null} Reference to the currently active video */
         this.videoRef = null;
-        this.autoScrollTimer = null;
         this.isScrolling = false;
 
         // Bind event handlers once to allow proper cleanup
@@ -45,8 +47,8 @@ window.YPP.features.ShortsTools = class ShortsTools {
      * Enable Shorts auto-scroll
      */
     enable() {
-        if (this.isActive) return;
-        this.isActive = true;
+        if (this.isEnabled) return;
+        this.isEnabled = true;
         this.Utils.log('Enabled Shorts Tools', 'SHORTS');
         this.monitorShorts();
     }
@@ -55,8 +57,11 @@ window.YPP.features.ShortsTools = class ShortsTools {
      * Disable Shorts auto-scroll and cleanup
      */
     disable() {
-        this.isActive = false;
+        if (!this.isEnabled) return;
+
+        this.isEnabled = false;
         this.stopMonitoring();
+        this.Utils.log('Disabled Shorts Tools', 'SHORTS');
     }
 
     monitorShorts() {
@@ -69,7 +74,7 @@ window.YPP.features.ShortsTools = class ShortsTools {
             document.body;  // Fallback to body if specific container not found
 
         this.observer = new MutationObserver(() => {
-            this.checkForVideo();
+            if (this.isEnabled) this.checkForVideo();
         });
 
         // Only observe subtree if we're using the fallback (document.body)
@@ -97,60 +102,84 @@ window.YPP.features.ShortsTools = class ShortsTools {
             return;
         }
 
-        // Find the ACTIVELY PLAYING video
-        // Shorts usually has multiple video elements, but only one actives
-        const videos = document.querySelectorAll('video');
-        let activeVideo = null;
-
-        videos.forEach(v => {
-            // Heuristic: The one that is playing and visible
-            if (!v.paused && v.offsetWidth > 0) {
-                activeVideo = v;
-            }
-        });
-
-        // Fallback: If no video is playing (just loaded), usually the first one or the one in the active ytd-reel-video-renderer
-        if (!activeVideo) {
+        try {
+            // Find the ACTIVELY PLAYING video
+            // Shorts usually has multiple ytd-reel-video-renderer elements, but only one is is-active
             const activeRenderer = document.querySelector('ytd-reel-video-renderer[is-active]');
-            if (activeRenderer) {
-                activeVideo = activeRenderer.querySelector('video');
-            }
-        }
+            let activeVideo = activeRenderer ? activeRenderer.querySelector('video') : null;
 
-        if (activeVideo && activeVideo !== this.videoRef) {
-            this.removeVideoListeners();
-            this.videoRef = activeVideo;
-            this.addVideoListeners();
+            // Fallback: Check all videos for playing state if specific structure not found
+            if (!activeVideo) {
+                const videos = document.querySelectorAll('video');
+                for (const v of videos) {
+                    if (!v.paused && v.offsetWidth > 0 && v.offsetHeight > 0) {
+                        activeVideo = v;
+                        break;
+                    }
+                }
+            }
+
+            if (activeVideo && activeVideo !== this.videoRef) {
+                this.removeVideoListeners();
+                this.videoRef = activeVideo;
+                this.addVideoListeners();
+            }
+        } catch (error) {
+            this.Utils.log(`Error checking for video: ${error.message}`, 'SHORTS', 'error');
         }
     }
 
     addVideoListeners() {
         if (!this.videoRef) return;
-        this.videoRef.addEventListener('ended', this._boundHandleEnded);
-        this.videoRef.addEventListener('timeupdate', this._boundHandleTimeUpdate);
-        this.videoRef.loop = false; // Force loop off to allow 'ended' event
+        try {
+            this.videoRef.addEventListener('ended', this._boundHandleEnded);
+            this.videoRef.addEventListener('timeupdate', this._boundHandleTimeUpdate);
+            // NOTE: Do NOT force loop = false here. It conflicts with YouTube's native 'Loop' context menu option.
+            // Instead, we handle the loop behavior logically in handleTimeUpdate.
+        } catch (error) {
+            this.Utils.log(`Error adding video listeners: ${error.message}`, 'SHORTS', 'error');
+        }
     }
 
     removeVideoListeners() {
         if (this.videoRef) {
-            this.videoRef.removeEventListener('ended', this._boundHandleEnded);
-            this.videoRef.removeEventListener('timeupdate', this._boundHandleTimeUpdate);
+            try {
+                this.videoRef.removeEventListener('ended', this._boundHandleEnded);
+                this.videoRef.removeEventListener('timeupdate', this._boundHandleTimeUpdate);
+            } catch (error) {
+                // Ignore removal errors
+            }
             this.videoRef = null;
         }
     }
 
     handleVideoEnded() {
-        if (!this.isActive || !this.settings.shortsAutoScroll) return;
+        if (!this.isEnabled || !this.settings.shortsAutoScroll) return;
         this.scrollToNext();
     }
 
     handleTimeUpdate() {
-        if (!this.isActive || !this.settings.shortsAutoScroll || !this.videoRef) return;
+        if (!this.isEnabled || !this.settings.shortsAutoScroll || !this.videoRef) return;
 
-        // Some shorts loop automatically before firing 'ended'.
-        // If we are within 0.5s of end, and loop is true, we might want to manually intervene
-        // But simply setting loop = false in addVideoListeners should handle it.
-        if (this.videoRef.loop) this.videoRef.loop = false;
+        // Native Loop Support:
+        // YouTube videos have a 'loop' property. If it's true, the video will replay.
+        // We should respect this if the user explicitly enabled loop via right-click.
+        // However, standard Shorts behavior is to loop by default.
+        // If we want Auto-Scroll, we effectively want to BREAK that loop.
+
+        // Check for specific "near end" condition to simulate 'ended' if loop is active
+        // But only if we are confident we should scroll.
+        // For now, let's rely on 'ended' event which fires if loop is false.
+
+        // If the video loops, 'ended' might not fire.
+        // We can check if currentTime is very close to duration and loop is true
+        if (this.videoRef.loop) {
+            const timeRemaining = this.videoRef.duration - this.videoRef.currentTime;
+            if (timeRemaining < 0.3 && !this.isScrolling) {
+                // Optimization: Instead of forcing loop=false, just trigger scroll
+                this.scrollToNext();
+            }
+        }
     }
 
     scrollToNext() {
@@ -159,19 +188,25 @@ window.YPP.features.ShortsTools = class ShortsTools {
 
         this.Utils.log('Auto-scrolling to next Short...', 'SHORTS');
 
-        // Strategy 1: Simulate Down Arrow Key (Most reliable for YouTube's strict event handling)
-        const event = new KeyboardEvent('keydown', {
-            key: 'ArrowDown',
-            code: 'ArrowDown',
-            keyCode: 40,
-            bubbles: true,
-            cancelable: true
-        });
-        document.body.dispatchEvent(event);
-
-        // Strategy 2: Click the "Next" button if available (floating down button)
-        const nextBtn = document.querySelector('ytd-reel-video-renderer[is-active] #navigation-button-down button');
-        if (nextBtn) nextBtn.click();
+        try {
+            // Strategy 1: Click the "Next" button (Best practice - mimics user interaction)
+            const nextBtn = document.querySelector('ytd-reel-video-renderer[is-active] #navigation-button-down button');
+            if (nextBtn) {
+                nextBtn.click();
+            } else {
+                // Strategy 2: Simulate Down Arrow Key (Fallback)
+                const event = new KeyboardEvent('keydown', {
+                    key: 'ArrowDown',
+                    code: 'ArrowDown',
+                    keyCode: 40,
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.body.dispatchEvent(event);
+            }
+        } catch (e) {
+            this.Utils.log(`Error scrolling: ${e.message}`, 'SHORTS', 'error');
+        }
 
         setTimeout(() => {
             this.isScrolling = false;

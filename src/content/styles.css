@@ -37,9 +37,9 @@
   /* YouTube Component Overrides (pierce Shadow DOM) */
   --ytd-searchbox-background: transparent;
   --ytd-searchbox-text-color: #ffffff;
-  --ytd-searchbox-border-radius: 12px;
+  --ytd-searchbox-border-radius: 18px;
   --ytd-searchbox-height: 44px;
-  --ytd-searchbox-legacy-button-border-radius: 0 12px 12px 0;
+  --ytd-searchbox-legacy-button-border-radius: 0 18px 18px 0;
   --ytd-searchbox-legacy-button-width: 60px;
   --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05);
 
@@ -226,6 +226,19 @@ body.ypp-hide-watched ytd-grid-video-renderer[is-watched] {
   display: flex;
 }
 
+/* Hide Create Button */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer[aria-label*="Create"],
+.yt-premium-plus-theme ytd-button-renderer:has(a[href*="/upload"]),
+.yt-premium-plus-theme #buttons ytd-topbar-model-builder-renderer,
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has([aria-label*="Create"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
 /* Logo Area */
 .yt-premium-plus-theme ytd-topbar-logo-renderer {
   padding: 0 16px;
@@ -327,7 +340,7 @@ ytd-mini-guide-renderer {
   margin: 0 16px;
   height: 44px;
   --ytd-searchbox-background: transparent;
-  --ytd-searchbox-border-radius: 12px;
+  --ytd-searchbox-border-radius: 18px;
 }
 
 .yt-premium-plus-theme ytd-searchbox #container {
@@ -350,7 +363,7 @@ ytd-mini-guide-renderer {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--ypp-glass-border);
   border-right: none;
-  border-radius: 12px 0 0 12px;
+  border-radius: 18px 0 0 18px !important;
   padding: 0 16px;
   color: var(--ypp-text-primary);
   font-size: 16px;
@@ -364,7 +377,7 @@ ytd-mini-guide-renderer {
 .yt-premium-plus-theme ytd-searchbox #search-icon-legacy {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--ypp-glass-border);
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 18px 18px 0 !important;
   width: 60px;
   height: 100%;
   margin: 0;
@@ -384,7 +397,7 @@ ytd-mini-guide-renderer {
 .yt-premium-plus-theme #voice-search-button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--ypp-glass-border);
-  border-radius: 12px;
+  border-radius: 18px !important;
   margin-left: 12px;
   width: 44px;
   height: 44px;
@@ -454,7 +467,7 @@ ytd-mini-guide-renderer {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(4px);
@@ -984,7 +997,199 @@ body.ypp-zen-mode #columns {
   overflow: hidden;
 }
 
-/* Popups & Overlays */
+
+/* ===================================================================================
+   10. SEARCH GRID REDESIGN (STRICT OWNERSHIP)
+   =================================================================================== */
+
+/* 1. Container Ownership */
+body.ypp-search-grid-mode ytd-section-list-renderer #contents {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 24px !important;
+  align-items: start !important;
+  margin-top: 16px !important;
+}
+
+/* FLATTEN Renderers to allow Grid Flow */
+body.ypp-search-grid-mode ytd-section-list-renderer #contents>ytd-item-section-renderer,
+body.ypp-search-grid-mode ytd-section-list-renderer #contents>ytd-item-section-renderer>#contents {
+  display: contents !important;
+}
+
+/* 2. Strict Item Classification */
+/* Default: EVERYTHING spans full width */
+body.ypp-search-grid-mode .ypp-full-width-item {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin-bottom: 16px !important;
+  max-width: none !important;
+}
+
+/* Exception: Video Renderers get Grid Slots */
+body.ypp-search-grid-mode .ypp-grid-item {
+  grid-column: auto !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin-bottom: 0 !important;
+  max-width: none !important;
+}
+
+/* 3. Hide Shorts & Cleanup */
+ytd-reel-shelf-renderer.ypp-hidden-short,
+ytd-rich-shelf-renderer.ypp-hidden-short,
+ytd-shelf-renderer.ypp-hidden-short,
+ytd-video-renderer.ypp-hidden-short {
+  display: none !important;
+}
+
+/* 
+   Video Card Internal Styling (Vertical Layout) 
+*/
+
+/* Thumbnail */
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  margin-right: 0 !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Text Wrapper (Title + Meta) */
+body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
+  width: 100% !important;
+  max-width: none !important;
+  margin-top: 10px !important;
+  margin-left: 0 !important;
+  padding: 0 !important;
+}
+
+/* Title */
+body.ypp-search-grid-mode ytd-video-renderer #video-title {
+  font-size: 1.6rem !important;
+  line-height: 2.2rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: auto !important;
+  max-height: 4.4rem !important;
+  /* 2 lines */
+}
+
+/* Metadata (Channel Name, Views, Date) */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+  padding: 0 !important;
+  margin: 4px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #metadata-line {
+  font-size: 1.3rem !important;
+  color: var(--ypp-text-secondary) !important;
+  display: block !important;
+}
+
+/* Cleanup: Hide Description Snippet in Grid to save space */
+body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container,
+body.ypp-search-grid-mode ytd-video-renderer ytd-badge-supported-renderer {
+  display: none !important;
+}
+
+/* Global Hidden Helper */
+.ypp-hidden-short {
+  display: none !important;
+}
+
+/* Fallback: Hide Shorts Shelves if JS misses them */
+ytd-reel-shelf-renderer,
+ytd-shelf-renderer:has(span#title[aria-label*="Shorts"]),
+ytd-rich-shelf-renderer[is-shorts] {
+  display: none !important;
+}
+
+/* ===================================================================================
+   11. SEARCH VIEW TOGGLE
+   =================================================================================== */
+
+.ypp-view-mode-toggle {
+  display: flex;
+  gap: 4px;
+  margin-right: 16px;
+  align-self: center;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.ypp-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--yt-spec-text-secondary, #aaa);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.ypp-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--yt-spec-text-primary, #fff);
+}
+
+.ypp-toggle-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--yt-spec-text-primary, #fff);
+}
+
+/* ===================================================================================
+   12. COMPACT LIST MODE
+   =================================================================================== */
+
+/* Reset grid overrides when in list mode */
+body.ypp-search-list-mode ytd-item-section-renderer #contents {
+  display: block !important;
+}
+
+/* Compact spacing for list items */
+body.ypp-search-list-mode ytd-video-renderer {
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
+  padding: 12px 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Ensure thumbnails stay standard size in list mode (override any grid leaks) */
+body.ypp-search-list-mode ytd-video-renderer ytd-thumbnail {
+  width: 360px !important;
+  /* Standard-ish list width or let YT decide? Let's check. */
+  max-width: 360px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Clean up metadata in list mode too */
+body.ypp-search-list-mode ytd-video-renderer .metadata-snippet-container {
+  display: block !important;
+  /* Show snippets in list mode for readability? User said "clean vertical" */
+  /* Let's keep it standard but clean */
+}
+
 .yt-premium-plus-theme ytd-multi-page-menu-renderer,
 .yt-premium-plus-theme ytd-simple-menu-header-renderer,
 .yt-premium-plus-theme ytd-active-account-header-renderer,
@@ -1103,7 +1308,9 @@ body.ypp-search-grid-mode ytd-continuation-item-renderer {
   width: 100%;
   flex-basis: 100%;
   margin-top: 24px;
-}/* ===================================================================================
+}
+
+/* ===================================================================================
    ENHANCED HOVER EFFECTS
    =================================================================================== */
 
@@ -1112,9 +1319,9 @@ body.ypp-search-grid-mode ytd-continuation-item-renderer {
 body.yt-premium-plus-theme ytd-rich-item-renderer,
 body.yt-premium-plus-theme ytd-video-renderer,
 body.ypp-search-grid-mode ytd-video-renderer {
-  transition: transform var(--ypp-transition), 
-              box-shadow var(--ypp-transition),
-              border-color var(--ypp-transition);
+  transition: transform var(--ypp-transition),
+    box-shadow var(--ypp-transition),
+    border-color var(--ypp-transition);
   will-change: transform, box-shadow;
 }
 
@@ -1123,7 +1330,7 @@ body.yt-premium-plus-theme ytd-rich-item-renderer:hover,
 body.yt-premium-plus-theme ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-video-renderer:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 
+  box-shadow:
     var(--ypp-shadow-float),
     var(--ypp-shadow-accent-glow);
   border-color: rgba(255, 255, 255, 0.15);
@@ -1152,11 +1359,9 @@ body.ypp-search-grid-mode ytd-video-renderer:hover {
 
 /* Active Navigation Item with Accent */
 .ypp-nav-btn.active {
-  background: linear-gradient(
-    135deg,
-    rgba(62, 166, 255, 0.15),
-    rgba(62, 166, 255, 0.05)
-  );
+  background: linear-gradient(135deg,
+      rgba(62, 166, 255, 0.15),
+      rgba(62, 166, 255, 0.05));
   border-color: var(--ypp-accent-blue);
   box-shadow: 0 0 16px rgba(62, 166, 255, 0.2);
 }
@@ -1225,7 +1430,7 @@ body.yt-premium-plus-theme ytd-rich-item-renderer #details {
 /* Card hover effects for grid items */
 body.yt-premium-plus-theme ytd-rich-item-renderer:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 
+  box-shadow:
     var(--ypp-shadow-float),
     var(--ypp-shadow-accent-glow);
 }
@@ -1269,4 +1474,3 @@ body.yt-premium-plus-theme ytd-continuation-item-renderer {
   width: 100% !important;
   margin-top: 24px !important;
 }
-

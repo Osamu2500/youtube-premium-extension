@@ -1,10 +1,12 @@
 /**
- * YouTube Search Grid - Production-Hardened Layout Ownership
+ * YouTube Search Grid - Stable Container Ownership
  * 
- * Fixes:
- * 1. Comprehensive Shorts coverage (all renderer types)
- * 2. Observer performance (node caching, debouncing)
- * 3. Renderer classification (grid vs non-grid items)
+ * DESIGN STRATEGY:
+ * 1. Own the Container: Target `ytd-section-list-renderer > #contents`
+ * 2. Flatten Layout: Use CSS `display: contents` on wrapper sections
+ * 3. Strict Grid: Apply CSS Grid to the main container
+ * 4. Deterministic Processing: Single debounced pass to classify items
+ * 5. Robust Shorts Removal: Hide by renderer type and URL/metadata
  */
 
 window.YPP = window.YPP || {};
@@ -14,339 +16,208 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
-        this.isActive = false;
-        this.isSearchPage = false;
+
+        this.isEnabled = false;
         this.settings = null;
         this.observer = null;
-        this.gridContainer = null;
-        this.ytSearchRoot = null;
-
-        // Performance: Track processed nodes
-        this.processedNodes = new WeakSet();
         this.debounceTimer = null;
+        this.isGridMode = true;
+
+        this._boundProcessLayout = this.processLayout.bind(this);
+        this._boundCheckPage = this.checkPage.bind(this);
     }
 
-    /**
-     * Initialize feature
-     */
     run(settings) {
-        this.update(settings);
-    }
-
-    /**
-     * Update settings
-     */
-    update(settings) {
         this.settings = settings;
-
-        if (settings?.searchGrid || settings?.hideSearchShorts || settings?.cleanSearch) {
+        if (settings?.searchGrid || settings?.hideSearchShorts) {
             this.enable();
         } else {
             this.disable();
         }
     }
 
-    /**
-     * Enable feature
-     */
     enable() {
-        console.log('[YPP:GRID] Enabling production-hardened grid');
-
-        if (this.isActive) {
-            this.checkPage();
-            return;
-        }
-
-        this.isActive = true;
-        this.Utils.log('Production grid system enabled', 'GRID');
+        if (this.isEnabled) return;
+        this.isEnabled = true;
+        this.Utils.log('Search Grid Redesign: Activated', 'GRID');
 
         this.checkPage();
-        window.addEventListener('yt-navigate-finish', () => this.checkPage());
+        window.addEventListener('yt-navigate-finish', this._boundCheckPage);
     }
 
-    /**
-     * Check if on search page
-     */
+    disable() {
+        this.isEnabled = false;
+        this.disconnectObserver();
+        document.body.classList.remove('ypp-search-grid-mode', 'ypp-search-list-mode');
+        window.removeEventListener('yt-navigate-finish', this._boundCheckPage);
+    }
+
     checkPage() {
-        const wasSearchPage = this.isSearchPage;
-        this.isSearchPage = window.location.pathname === '/results';
+        if (!this.isEnabled) return;
 
-        if (this.isSearchPage && !wasSearchPage) {
-            this.activateGrid();
-        } else if (!this.isSearchPage && wasSearchPage) {
-            this.deactivateGrid();
-        }
-    }
-
-    /**
-     * Activate grid layout
-     */
-    activateGrid() {
-        console.log('[YPP:GRID] Activating grid');
-
-        // Wait for YouTube to render
-        setTimeout(() => {
-            this.initializeGrid();
-            this.normalizeLayout();
-            this.startObserver();
-        }, 500);
-    }
-
-    /**
-     * Initialize grid container
-     */
-    initializeGrid() {
-        console.log('[YPP:GRID] Initializing grid');
-
-        // Find YouTube's search root - try multiple selectors
-        this.ytSearchRoot = document.querySelector('ytd-item-section-renderer[page-subtype="search"] #contents') ||
-            document.querySelector('ytd-search ytd-item-section-renderer #contents') ||
-            document.querySelector('ytd-search #contents');
-
-        if (!this.ytSearchRoot) {
-            console.error('[YPP:GRID] YouTube search root not found');
-            return false;
-        }
-
-        console.log('[YPP:GRID] Found search root');
-
-        // Create grid container
-        if (!document.getElementById('ypp-grid-root')) {
-            this.gridContainer = document.createElement('div');
-            this.gridContainer.id = 'ypp-grid-root';
-            this.gridContainer.className = 'ypp-grid-root';
-
-            this.ytSearchRoot.insertBefore(this.gridContainer, this.ytSearchRoot.firstChild);
-            console.log('[YPP:GRID] ✅ Grid container created');
+        // Strict Page Detection
+        if (window.location.pathname === '/results') {
+            this.applyModeClasses();
+            this.waitForContainer();
+            this.injectViewToggle();
         } else {
-            this.gridContainer = document.getElementById('ypp-grid-root');
+            this.disconnectObserver();
+            document.body.classList.remove('ypp-search-grid-mode', 'ypp-search-list-mode');
         }
-
-        document.body.classList.add('ypp-grid-active');
-        return true;
     }
 
-    /**
-     * Normalize layout - move items into grid
-     */
-    normalizeLayout() {
-        if (!this.gridContainer || !this.ytSearchRoot) {
-            console.error('[YPP:GRID] Cannot normalize - not initialized');
-            return;
-        }
+    applyModeClasses() {
+        document.body.classList.toggle('ypp-search-grid-mode', this.isGridMode);
+        document.body.classList.toggle('ypp-search-list-mode', !this.isGridMode);
+    }
 
-        console.log('[YPP:GRID] Normalizing layout');
+    waitForContainer() {
+        // Find the true video list container
+        // Structure: ytd-two-column-search-results-renderer -> #primary -> ytd-section-list-renderer -> #contents
+        const selector = 'ytd-section-list-renderer #contents';
 
-        // Get all children (except our grid)
-        const allItems = Array.from(this.ytSearchRoot.children).filter(
-            child => child.id !== 'ypp-grid-root'
-        );
-
-        let movedCount = 0;
-        let removedCount = 0;
-        let skippedCount = 0;
-
-        allItems.forEach(item => {
-            // Skip already processed nodes
-            if (this.processedNodes.has(item)) {
-                skippedCount++;
-                return;
+        this.Utils.waitForElement(selector).then(container => {
+            if (container) {
+                this.ownContainer(container);
             }
-
-            // Mark as processed
-            this.processedNodes.add(item);
-
-            if (this.shouldRemoveShorts(item)) {
-                // Hide Shorts completely
-                console.log('[YPP:GRID] Hiding Shorts:', item.tagName);
-                item.style.display = 'none';
-                removedCount++;
-            } else if (this.isGridEligible(item)) {
-                // Move to grid
-                this.gridContainer.appendChild(item);
-                movedCount++;
-            }
-            // Else: leave in place (channels, playlists, etc.)
         });
-
-        console.log(`[YPP:GRID] ✅ Moved: ${movedCount}, Hidden: ${removedCount}, Skipped: ${skippedCount}`);
     }
 
-    /**
-     * Check if item is eligible for grid (videos only)
-     */
-    isGridEligible(item) {
-        const tagName = item.tagName;
+    ownContainer(container) {
+        if (this.observer) this.disconnectObserver();
 
-        // Only videos in grid
-        if (tagName === 'YTD-VIDEO-RENDERER') {
-            return !this.isShortVideo(item);
-        }
+        this.Utils.log('Search Grid: Taking container ownership', 'GRID');
 
-        // Rich items if they're videos
-        if (tagName === 'YTD-RICH-ITEM-RENDERER') {
-            const link = item.querySelector('a');
-            return link && !link.href.includes('/shorts/');
-        }
+        // Initial Pass
+        this.processLayout(container);
 
-        return false;
-    }
-
-    /**
-     * Comprehensive Shorts detection
-     */
-    shouldRemoveShorts(item) {
-        const tagName = item.tagName;
-
-        // Shorts shelves (Fix #1: comprehensive coverage)
-        if (tagName === 'YTD-SHELF-RENDERER') {
-            const hasReelShelf = item.querySelector('ytd-reel-shelf-renderer') !== null;
-            const titleText = item.textContent || '';
-            const hasShortsTitle = /shorts|#shorts/i.test(titleText);
-
-            if (hasReelShelf || hasShortsTitle) {
-                return true;
-            }
-        }
-
-        // Direct reel shelf renderers
-        if (tagName === 'YTD-REEL-SHELF-RENDERER') {
-            return true;
-        }
-
-        // Rich shelf renderers marked as Shorts
-        if (tagName === 'YTD-RICH-SHELF-RENDERER') {
-            if (item.hasAttribute('is-shorts') || /shorts/i.test(item.textContent || '')) {
-                return true;
-            }
-        }
-
-        // Secondary shelf renderers
-        if (tagName === 'YTD-HORIZONTAL-CARD-LIST-RENDERER') {
-            if (/shorts/i.test(item.textContent || '')) {
-                return true;
-            }
-        }
-
-        // Individual Short videos
-        if (tagName === 'YTD-VIDEO-RENDERER' || tagName === 'YTD-RICH-ITEM-RENDERER') {
-            return this.isShortVideo(item);
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if individual video is a Short
-     */
-    isShortVideo(item) {
-        // URL check
-        const link = item.querySelector('a#thumbnail, a#video-title, a.yt-simple-endpoint');
-        if (link?.href?.includes('/shorts/')) {
-            return true;
-        }
-
-        // Badge check
-        const badges = item.querySelectorAll('.badge-style-type-simple, ytd-badge-supported-renderer');
-        for (const badge of badges) {
-            if (/shorts/i.test(badge.textContent || '')) {
-                return true;
-            }
-        }
-
-        // Accessibility label check
-        const ariaLabel = item.getAttribute('aria-label') || '';
-        if (/shorts/i.test(ariaLabel)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Start mutation observer with performance optimization
-     */
-    startObserver() {
-        if (!this.ytSearchRoot) return;
-
-        console.log('[YPP:GRID] Starting optimized observer');
-
-        // Fix #2: Debounced, efficient observer
-        this.observer = new MutationObserver((mutations) => {
-            // Only care about added nodes
-            const hasNewNodes = mutations.some(m =>
-                m.type === 'childList' && m.addedNodes.length > 0
-            );
-
-            if (!hasNewNodes) return;
-
-            // Clear existing timer
+        // Single Debounced Observer on Container
+        this.observer = new MutationObserver(() => {
             clearTimeout(this.debounceTimer);
-
-            // Debounce: wait for mutations to settle
             this.debounceTimer = setTimeout(() => {
-                if (this.isSearchPage && this.isActive) {
-                    console.log('[YPP:GRID] New content detected, normalizing');
-                    this.normalizeLayout();
-                }
-            }, 300);
+                this.processLayout(container);
+            }, 50); // Debounce to stabilize infinite scroll
         });
 
-        // Only watch direct children of search root
-        this.observer.observe(this.ytSearchRoot, {
+        this.observer.observe(container, {
             childList: true,
-            subtree: false // Don't watch deep changes
+            subtree: true // Needed to catch items loading inside sections
         });
-
-        console.log('[YPP:GRID] ✅ Observer started');
     }
 
-    /**
-     * Deactivate grid
-     */
-    deactivateGrid() {
-        console.log('[YPP:GRID] Deactivating');
-
-        // Clean up observer
+    disconnectObserver() {
         if (this.observer) {
             this.observer.disconnect();
             this.observer = null;
         }
-
-        // Clear debounce timer
         clearTimeout(this.debounceTimer);
-
-        // Move items back
-        if (this.gridContainer && this.ytSearchRoot) {
-            const items = Array.from(this.gridContainer.children);
-            items.forEach(item => {
-                this.ytSearchRoot.appendChild(item);
-            });
-
-            this.gridContainer.remove();
-            this.gridContainer = null;
-        }
-
-        // Restore hidden Shorts
-        const hiddenItems = this.ytSearchRoot?.querySelectorAll('[style*="display: none"]');
-        hiddenItems?.forEach(item => {
-            item.style.display = '';
-        });
-
-        document.body.classList.remove('ypp-grid-active');
-
-        // Clear processed nodes cache
-        this.processedNodes = new WeakSet();
-
-        this.ytSearchRoot = null;
     }
 
     /**
-     * Disable feature
+     * CORE LOGIC: Single processing pass
+     * Scans all relevant items, classifies them, and hides shorts.
+     * No caching, no complexity. Stability first.
      */
-    disable() {
-        this.deactivateGrid();
-        this.isActive = false;
-        this.isSearchPage = false;
+    processLayout(container) {
+        // Select logic: Flattening approach
+        // We look for all direct renderers that might be inside sections
+        const items = container.querySelectorAll(
+            'ytd-video-renderer, ytd-channel-renderer, ytd-playlist-renderer, ytd-shelf-renderer, ytd-reel-shelf-renderer, ytd-radio-renderer'
+        );
+
+        items.forEach(item => {
+            // 1. Shorts Prevention (Kill it first)
+            if (this.isShorts(item)) {
+                item.style.display = 'none';
+                item.classList.add('ypp-hidden-short');
+                return;
+            }
+
+            // 2. Classification
+            const tagName = item.tagName;
+
+            if (tagName === 'YTD-VIDEO-RENDERER') {
+                // It's a grid item (Video)
+                item.classList.add('ypp-grid-item');
+                item.classList.remove('ypp-full-width-item');
+                // Ensure internal styles are reset for grid
+                item.style.display = '';
+                item.style.width = '';
+            } else {
+                // It's everything else (Channel, Playlist, etc.) -> Full Width
+                item.classList.add('ypp-full-width-item');
+                item.classList.remove('ypp-grid-item');
+
+                // Special check for mixed shelves (Recently uploaded shorts leak)
+                if (tagName === 'YTD-SHELF-RENDERER') {
+                    if (this.containsShorts(item)) {
+                        item.classList.add('ypp-hidden-short');
+                        item.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
+
+    isShorts(node) {
+        const tagName = node.tagName;
+
+        // Structural Removal
+        if (tagName === 'YTD-REEL-SHELF-RENDERER') return true;
+
+        // Videos
+        if (tagName === 'YTD-VIDEO-RENDERER') {
+            // URL Check
+            const link = node.querySelector('a#thumbnail[href*="/shorts/"]');
+            if (link) return true;
+
+            // Metadata Checks
+            if (node.querySelector('ytd-thumbnail-overlay-time-status-renderer[overlay-style="SHORTS"]')) return true;
+            if (node.querySelector('[aria-label*="Shorts" i]')) return true;
+        }
+
+        return false;
+    }
+
+    containsShorts(shelf) {
+        const title = shelf.querySelector('#title')?.textContent || '';
+        if (/Shorts|Reels/i.test(title)) return true;
+        if (shelf.querySelector('ytd-reel-shelf-renderer')) return true;
+        // Check grid children
+        if (shelf.querySelector('ytd-grid-video-renderer[is-short]')) return true;
+        return false;
+    }
+
+    async injectViewToggle() {
+        if (document.getElementById('ypp-view-toggle')) return;
+
+        const filterHeader = await this.Utils.waitForElement('ytd-search-sub-menu-renderer', 5000);
+        if (!filterHeader) return;
+
+        const toggleBtn = document.createElement('div');
+        toggleBtn.id = 'ypp-view-toggle';
+        toggleBtn.className = 'ypp-view-mode-toggle';
+        toggleBtn.innerHTML = `
+            <button class="ypp-toggle-btn ${this.isGridMode ? 'active' : ''}" data-mode="grid" title="Grid View">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z" fill="currentColor"/></svg>
+            </button>
+            <button class="ypp-toggle-btn ${!this.isGridMode ? 'active' : ''}" data-mode="list" title="Compact List">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" fill="currentColor"/></svg>
+            </button>
+        `;
+
+        filterHeader.appendChild(toggleBtn);
+
+        toggleBtn.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = e.currentTarget.dataset.mode;
+                this.isGridMode = (mode === 'grid');
+                this.applyModeClasses();
+
+                toggleBtn.querySelectorAll('.ypp-toggle-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.mode === mode);
+                });
+            });
+        });
     }
 };
