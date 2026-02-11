@@ -186,6 +186,6 @@ function saveSettings(keys) {
             }
         }
     });
-    console.log('[YPP:POPUP] Saving settings');
+    console.log('[YPP:POPUP] Settings saved:', settings);
     chrome.storage.local.set({ settings });
 }

@@ -36,7 +36,7 @@ window.YPP.features.ShortsTools = class ShortsTools {
      */
     update(settings) {
         this.settings = settings;
-        if (settings.shortsAutoScroll) {
+        if (settings?.shortsAutoScroll) {
             this.enable();
         } else {
             this.disable();

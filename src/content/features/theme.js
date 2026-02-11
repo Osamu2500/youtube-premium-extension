@@ -85,8 +85,6 @@ window.YPP.features.Theme = class ThemeManager {
             this.applyProgressBarColor(null); // Remove if disabled
         }
 
-
-
         // Specific Shorts Logic
         const hideShorts = settings.hideShorts || settings.hideSearchShorts;
         this.manageShortsObserver(hideShorts);
@@ -136,8 +134,6 @@ window.YPP.features.Theme = class ThemeManager {
             }
         `;
     }
-
-
 
     toggleTheme(enable) {
         document.body.classList.toggle(this.CONSTANTS.CSS_CLASSES.THEME_ENABLED, enable);

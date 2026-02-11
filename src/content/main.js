@@ -149,10 +149,6 @@
          * Update the current page context and apply relevant body classes.
          * Populates `this.context` with boolean flags for different page types.
          */
-        /**
-         * Update the current page context and apply relevant body classes.
-         * Populates `this.context` with boolean flags for different page types.
-         */
         updateContext() {
             try {
                 const pathname = window.location.pathname;

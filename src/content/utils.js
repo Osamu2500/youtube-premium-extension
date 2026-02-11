@@ -79,7 +79,12 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         // Force reflow
         void toast.offsetWidth;
 
-        const TIMINGS = window.YPP.CONSTANTS.TIMINGS;
+        // Defensive: Safe access to timing constants with fallbacks
+        const TIMINGS = window.YPP?.CONSTANTS?.TIMINGS || {
+            TOAST_DISPLAY: 3000,
+            TOAST_FADE: 300
+        };
+        
         requestAnimationFrame(() => {
             toast.classList.add('show');
             setTimeout(() => {
@@ -226,9 +231,11 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
     constructor() {
         this.callbacks = new Map();
         this.observer = null;
+        // Defensive: Safe access to timing constants with fallback
+        const debounceDelay = window.YPP?.CONSTANTS?.TIMINGS?.DEBOUNCE_DEFAULT || 50;
         this.debouncedProcess = this._debounce(
             this._processMutations.bind(this),
-            window.YPP.CONSTANTS.TIMINGS.DEBOUNCE_DEFAULT
+            debounceDelay
         );
         this.start();
     }

@@ -999,35 +999,31 @@ body.ypp-zen-mode #columns {
 
 
 /* ===================================================================================
-   10. SEARCH GRID REDESIGN (STRICT OWNERSHIP)
+   10. SEARCH GRID REDESIGN (LAYERED STABILIZATION)
    =================================================================================== */
 
-/* 1. Container Ownership */
-body.ypp-search-grid-mode ytd-section-list-renderer #contents {
+/* 1. Scoped Container */
+.ypp-search-grid-container {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
   gap: 24px !important;
   align-items: start !important;
   margin-top: 16px !important;
+  padding-bottom: 40px !important;
 }
 
-/* FLATTEN Renderers to allow Grid Flow */
-body.ypp-search-grid-mode ytd-section-list-renderer #contents>ytd-item-section-renderer,
-body.ypp-search-grid-mode ytd-section-list-renderer #contents>ytd-item-section-renderer>#contents {
-  display: contents !important;
-}
+/* 2. Layered Item Application */
 
-/* 2. Strict Item Classification */
-/* Default: EVERYTHING spans full width */
-body.ypp-search-grid-mode .ypp-full-width-item {
+/* TYPE A: TRULY FULL WIDTH (Channels, Shelves, Playlists) */
+.ypp-search-grid-container>.ypp-full-width-item {
   grid-column: 1 / -1 !important;
   width: 100% !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 24px !important;
   max-width: none !important;
 }
 
-/* Exception: Video Renderers get Grid Slots */
-body.ypp-search-grid-mode .ypp-grid-item {
+/* TYPE B: GRID ITEMS (Videos, Playlists, Mixes) */
+.ypp-search-grid-container>.ypp-grid-item {
   grid-column: auto !important;
   width: 100% !important;
   display: flex !important;
@@ -1036,11 +1032,25 @@ body.ypp-search-grid-mode .ypp-grid-item {
   max-width: none !important;
 }
 
-/* 3. Hide Shorts & Cleanup */
-ytd-reel-shelf-renderer.ypp-hidden-short,
-ytd-rich-shelf-renderer.ypp-hidden-short,
-ytd-shelf-renderer.ypp-hidden-short,
-ytd-video-renderer.ypp-hidden-short {
+/* Normalize Playlist Cards */
+body.ypp-search-grid-mode ytd-playlist-renderer.ypp-grid-item {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Normalize Mix/Radio Cards (prevent hero sizing) */
+body.ypp-search-grid-mode ytd-radio-renderer.ypp-grid-item {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Override YouTube's inline width styles */
+body.ypp-search-grid-mode .ypp-grid-item[style*="width"] {
+  width: 100% !important;
+}
+
+/* TYPE C: SHORTS & HIDDEN */
+.ypp-hidden-short {
   display: none !important;
 }
 
@@ -1108,6 +1118,26 @@ body.ypp-search-grid-mode ytd-video-renderer #metadata-line {
 body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container,
 body.ypp-search-grid-mode ytd-video-renderer ytd-badge-supported-renderer {
   display: none !important;
+}
+
+/* ===================================================================================
+   PLAYLIST & MIX CARD NORMALIZATION
+   =================================================================================== */
+
+/* Ensure playlist thumbnails fit grid */
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
+  width: 100% !important;
+  max-width: none !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 12px !important;
+}
+
+/* Playlist metadata */
+body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* Global Hidden Helper */

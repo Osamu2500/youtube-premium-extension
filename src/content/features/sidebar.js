@@ -27,28 +27,26 @@ window.YPP.features.SidebarManager = class SidebarManager {
      */
     update(settings) {
         this.settings = settings;
-        // Logic: if forceHideSidebar is enabled OR we just want to control it
-        // For now, let's say we always "enable" it to manage visibility,
-        // unless disabled entirely.
+        // Logic: if forceHideSidebar is enabled, hide the sidebar
         if (settings.forceHideSidebar) {
-            this.enable();
+            this.enable(); // Enable manager to hide sidebar
         } else {
-            this.disable();
+            this.disable(); // Disable to show sidebar normally
         }
     }
 
     /**
-     * Enable sidebar management
+     * Enable sidebar management to hide sidebar
      */
     enable() {
         if (this.isEnabled) {
-            this.ensureSidebarVisible();
+            this.ensureSidebarHidden();
             return;
         }
         this.isEnabled = true;
-        this.Utils.log('Sidebar Manager Enabled', 'SIDEBAR');
+        this.Utils.log('Sidebar Manager Enabled (Hiding Sidebar)', 'SIDEBAR');
 
-        this.ensureSidebarVisible();
+        this.ensureSidebarHidden();
 
         window.addEventListener('yt-page-data-updated', this.handleNavigation);
         window.addEventListener('yt-navigate-finish', this.handleNavigation);
@@ -72,13 +70,13 @@ window.YPP.features.SidebarManager = class SidebarManager {
      * Handle navigation events to re-apply sidebar state
      */
     handleNavigation() {
-        if (this.isEnabled) this.ensureSidebarVisible();
+        if (this.isEnabled) this.ensureSidebarHidden();
     }
 
     /**
-     * Ensure sidebar visibility class is applied
+     * Ensure the hide-sidebar CSS class is applied
      */
-    ensureSidebarVisible() {
+    ensureSidebarHidden() {
         if (!this.isEnabled) return;
 
         // Use requestAnimationFrame to ensure DOM is ready and avoid layout thrashing

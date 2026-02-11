@@ -41,11 +41,6 @@ window.YPP.features.AdSkipper = class AdSkipper {
      * Enable ad skipping with settings
      * @param {Object} settings - User settings
      */
-
-    /**
-     * Enable ad skipping.
-     * @param {Object} settings 
-     */
     enable(settings) {
         if (settings.adSkipper) {
             this.start();
@@ -105,9 +100,6 @@ window.YPP.features.AdSkipper = class AdSkipper {
     }
 
     /**
-     * Check for ads and execute skip logic.
-     */
-    /**
      * Check for ads and attempt to skip them
      */
     checkAndSkip() {
@@ -136,10 +128,6 @@ window.YPP.features.AdSkipper = class AdSkipper {
         }
     }
 
-    /**
-     * Heuristics to determine if an ad is currently active.
-     * @returns {boolean}
-     */
     /**
      * Check if an ad is currently playing
      * @returns {boolean} True if ad is detected
