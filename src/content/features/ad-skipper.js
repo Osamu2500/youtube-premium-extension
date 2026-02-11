@@ -1,164 +1,290 @@
 /**
  * Ad Skipper Module
- * Uses mutation observation and periodic checks to detect and fast-forward through ads.
+ * Automatically detects and fast-forwards through YouTube video advertisements
+ * Uses centralized constants for configuration
  */
 window.YPP = window.YPP || {};
+
 /**
  * Ad Skipper
- * Automatically skips or fast-forwards through YouTube video advertisements.
+ * Automatically skips or fast-forwards through YouTube video advertisements
  * @class AdSkipper
  */
 window.YPP.features.AdSkipper = class AdSkipper {
     /**
      * Initialize Ad Skipper
+     * @constructor
      */
     constructor() {
-        this.observer = null;
-        this.interval = null;
-        this.isActive = false;
-        this.Utils = window.YPP.Utils;
-
-        // Performance constants
-        this.POLL_INTERVAL = 1000;      // ms - Check for ads every second (reduced from 500ms)
-        this.MAX_AD_SPEED = 16;         // Maximum playback speed for ads
-
-        // Comprehensive list of ad selectors
-        this.adSelectors = {
-            container: ['.ad-showing', '.ad-interrupting'],
-            skipButtons: [
-                '.ytp-ad-skip-button',
-                '.ytp-ad-skip-button-modern',
-                '.ytp-skip-ad-button',
-                '.videoAdUiSkipButton',
-                'button[id^="skip-button"]',
-                '.ytp-ad-overlay-close-button' // Close button for overlay ads
-            ],
-            overlay: '.ytp-ad-module'
-        };
+        this._initConstants();
+        this._initState();
     }
 
     /**
-     * Enable ad skipping with settings
+     * Initialize constants from centralized config
+     * @private
+     */
+    _initConstants() {
+        this._CONSTANTS = window.YPP.CONSTANTS || {};
+        this._SELECTORS = this._CONSTANTS.SELECTORS || {};
+        this._TIMINGS = this._CONSTANTS.TIMINGS || {};
+        this._POLL_INTERVAL = this._TIMINGS.AD_SKIPPER_INTERVAL || 1000;
+        this._MAX_AD_SPEED = this._TIMINGS.AD_PLAYBACK_SPEED || 16;
+    }
+
+    /**
+     * Initialize internal state
+     * @private
+     */
+    _initState() {
+        this._observer = null;
+        this._intervalId = null;
+        this._isActive = false;
+        this._isEnabled = false;
+        this._Utils = window.YPP.Utils || {};
+        this._boundCheckAndSkip = this._checkAndSkip.bind(this);
+        this._boundHandleMutation = this._onMutation.bind(this);
+    }
+
+    /**
+     * Enable ad skipping
      * @param {Object} settings - User settings
      */
     enable(settings) {
-        if (settings.adSkipper) {
-            this.start();
+        if (settings?.adSkipper) {
+            this._start();
         } else {
-            this.stop();
+            this._stop();
         }
     }
 
     /**
-     * Disable ad skipping and cleanup
+     * Disable ad skipping
      */
     disable() {
-        this.stop();
+        this._stop();
+    }
+
+    // =========================================================================
+    // PRIVATE METHODS
+    // =========================================================================
+
+    /**
+     * Start the ad detection loops
+     * @private
+     */
+    _start() {
+        if (this._isActive) return;
+
+        this._isActive = true;
+        this._isEnabled = true;
+        this._Utils.log?.('Ad Skipper Enabled', 'AD');
+
+        // Start polling interval
+        this._intervalId = setInterval(this._boundCheckAndSkip, this._POLL_INTERVAL);
+
+        // Set up mutation observer for player changes
+        this._setupObserver();
     }
 
     /**
-     * Start the detection loops.
+     * Stop the ad detection loops
+     * @private
      */
-    start() {
-        if (this.isActive) return;
-        this.isActive = true;
+    _stop() {
+        if (!this._isActive) return;
 
-        this.Utils?.log('Ad Skipper Enabled', 'AD');
+        this._isActive = false;
+        this._isEnabled = false;
 
-        // Check every second (reduced from 500ms for better performance)
-        this.interval = setInterval(() => this.checkAndSkip(), this.POLL_INTERVAL);
+        // Clear interval
+        if (this._intervalId) {
+            clearInterval(this._intervalId);
+            this._intervalId = null;
+        }
 
-        // Also check on video mutations (e.g. src change)
-        const player = document.querySelector('#movie_player') || document.body;
-        if (player) {
-            this.observer = new MutationObserver(() => {
-                try {
-                    this.checkAndSkip();
-                } catch (error) {
-                    console.warn('[YPP:AD] Observer error:', error);
-                    // Observer continues working despite errors
-                }
+        // Disconnect observer
+        this._cleanupObserver();
+
+        this._Utils.log?.('Ad Skipper Disabled', 'AD');
+    }
+
+    /**
+     * Set up mutation observer
+     * @private
+     */
+    _setupObserver() {
+        try {
+            const player = document.querySelector(this._SELECTORS.AD_PLAYER) || document.body;
+            if (!player) return;
+
+            this._observer = new MutationObserver(this._boundHandleMutation);
+
+            this._observer.observe(player, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['class', 'src']
             });
-            this.observer.observe(player, { attributes: true, subtree: true, attributeFilter: ['class', 'src'] });
+        } catch (error) {
+            this._Utils.log?.(`Observer setup error: ${error.message}`, 'AD', 'error');
         }
     }
 
-    stop() {
-        if (!this.isActive) return;
-        this.isActive = false;
-
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
+    /**
+     * Cleanup mutation observer
+     * @private
+     */
+    _cleanupObserver() {
+        if (this._observer) {
+            this._observer.disconnect();
+            this._observer = null;
         }
+    }
 
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+    /**
+     * Handle mutation events
+     * @private
+     * @param {MutationRecord[]} mutations
+     */
+    _onMutation(mutations) {
+        try {
+            // Only process if we might be in an ad
+            this._boundCheckAndSkip();
+        } catch (error) {
+            // Continue running despite errors
+            this._Utils.log?.(`Mutation handler error: ${error.message}`, 'AD', 'warn');
         }
-        console.log('[YPP:AD] Ad Skipper Disabled');
     }
 
     /**
      * Check for ads and attempt to skip them
+     * @private
      */
-    checkAndSkip() {
-        const video = document.querySelector('video');
+    _checkAndSkip() {
+        if (!this._isEnabled) return;
+
+        const video = document.querySelector(this._SELECTORS.VIDEO);
         if (!video) return;
 
-        // Detection: Is an ad playing?
-        const isAd = this.isAdPlaying();
-
-        if (isAd) {
-            try {
-                // 1. Mute
-                video.muted = true;
-
-                // 2. Speed Up (16x is usually safe limit)
-                if (video.playbackRate < this.MAX_AD_SPEED) {
-                    video.playbackRate = this.MAX_AD_SPEED;
-                }
-
-                // 3. Click Skip Button if available
-                this.clickSkipButton();
-
-            } catch (e) {
-                // Ignore transient errors
+        try {
+            // Check if ad is playing
+            if (this._isAdPlaying()) {
+                this._skipAd(video);
             }
+        } catch (error) {
+            this._Utils.log?.(`Ad check error: ${error.message}`, 'AD', 'error');
         }
     }
 
     /**
      * Check if an ad is currently playing
-     * @returns {boolean} True if ad is detected
+     * @private
+     * @returns {boolean}
      */
-    isAdPlaying() {
-        // 1. Class on player container (Most reliable)
-        const player = document.querySelector('.html5-video-player');
-        if (player && this.adSelectors.container.some(cls => player.matches(cls))) return true;
+    _isAdPlaying() {
+        // Check player container class (most reliable method)
+        const player = document.querySelector(this._SELECTORS.AD_PLAYER);
+        if (player) {
+            const adClasses = this._SELECTORS.AD_CONTAINER || [];
+            if (adClasses.some(cls => player.matches?.(cls))) {
+                return true;
+            }
+        }
 
-        // 2. Skip button present
-        if (this.adSelectors.skipButtons.some(sel => document.querySelector(sel))) return true;
+        // Check for skip button
+        if (this._hasSkipButton()) {
+            return true;
+        }
 
-        // 3. Ad showing in video preview (sometimes distinct from player class)
-        if (document.querySelector('.ytp-ad-player-overlay')) return true;
+        // Check for ad overlay
+        if (document.querySelector(this._SELECTORS.AD_PLAYER_OVERLAY)) {
+            return true;
+        }
 
         return false;
     }
 
     /**
-     * Attempt to click any visible skip buttons.
-     * @returns {boolean} True if clicked
+     * Check if skip button is present
+     * @private
+     * @returns {boolean}
      */
-    clickSkipButton() {
-        for (const selector of this.adSelectors.skipButtons) {
+    _hasSkipButton() {
+        const skipButtons = this._SELECTORS.AD_SKIP_BUTTON || [];
+        return skipButtons.some(selector => document.querySelector(selector));
+    }
+
+    /**
+     * Skip the current ad
+     * @private
+     * @param {HTMLVideoElement} video
+     */
+    _skipAd(video) {
+        // Mute the ad
+        video.muted = true;
+
+        // Increase playback speed
+        if (video.playbackRate < this._MAX_AD_SPEED) {
+            video.playbackRate = this._MAX_AD_SPEED;
+        }
+
+        // Try to click skip button
+        this._clickSkipButton();
+    }
+
+    /**
+     * Attempt to click any visible skip buttons
+     * @private
+     * @returns {boolean}
+     */
+    _clickSkipButton() {
+        const skipButtons = this._SELECTORS.AD_SKIP_BUTTON || [];
+
+        for (const selector of skipButtons) {
             const btn = document.querySelector(selector);
-            if (btn && btn.offsetParent !== null) { // Check visibility
-                btn.click();
-                console.log('[YPP:AD] Clicked Skip Button');
-                return true;
+            if (btn && this._isVisible(btn)) {
+                try {
+                    btn.click();
+                    this._Utils.log?.('Clicked skip button', 'AD', 'debug');
+                    return true;
+                } catch (error) {
+                    this._Utils.log?.(`Click error: ${error.message}`, 'AD', 'warn');
+                }
             }
         }
+
         return false;
+    }
+
+    /**
+     * Check if element is visible
+     * @private
+     * @param {Element} element
+     * @returns {boolean}
+     */
+    _isVisible(element) {
+        if (!element) return false;
+        return element.offsetParent !== null &&
+               !element.hasAttribute?.('hidden') &&
+               getComputedStyle(element).display !== 'none';
+    }
+
+    // =========================================================================
+    // PUBLIC API
+    // =========================================================================
+
+    /**
+     * Check if ad skipper is active
+     * @returns {boolean}
+     */
+    isActive() {
+        return this._isActive;
+    }
+
+    /**
+     * Manually trigger ad check
+     */
+    checkNow() {
+        this._boundCheckAndSkip();
     }
 };

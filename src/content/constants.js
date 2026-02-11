@@ -1,47 +1,98 @@
-// Constants for YouTube Premium Plus
+/**
+ * Constants for YouTube Premium Plus
+ * Centralized configuration, selectors, and settings
+ */
 window.YPP = window.YPP || {};
 
 window.YPP.CONSTANTS = {
+    // =========================================================================
+    // DOM SELECTORS
+    // =========================================================================
     SELECTORS: {
+        // Grid & Layout
         GRID_RENDERER: 'ytd-rich-grid-renderer',
-        GRID_CONTENTS: '#contents.ytd-rich-grid-renderer',
+        GRID_CONTENTS: '#contents',
         GRID_ROW: 'ytd-rich-grid-row',
         VIDEO_ITEM: 'ytd-rich-item-renderer',
+
+        // Search Grid
+        SEARCH_GRID_CONTENTS: '#contents.ytd-two-column-search-results-renderer',
+        SEARCH_VIDEO_RENDERER: 'ytd-video-renderer',
+
+        // Header & Navigation
         MASTHEAD: 'ytd-masthead',
         CHIPS_BAR: 'ytd-feed-filter-chip-bar-renderer',
         CHIPS_WRAPPER: '#chips-wrapper',
+
+        // Shorts
         SHORTS_SECTION: 'ytd-rich-section-renderer[is-shorts]',
         SHORTS_LINK: 'a[title="Shorts"]',
         SHORTS_SHELF: 'ytd-reel-shelf-renderer',
-        // Common Shorts selectors
         SHORTS_TAB: 'ytd-guide-entry-renderer a[title="Shorts"]',
         SHORTS_MINI_GUIDE: 'ytd-mini-guide-entry-renderer[aria-label="Shorts"]',
+        SHORTS_CONTAINER: 'ytd-shorts',
+        SHORTS_CONTAINER_ALT: '#shorts-container',
 
+        // Player
         THEATER_BUTTON: '.ytp-size-button',
         WATCH_FLEXY: 'ytd-watch-flexy',
+        PLAYER: '.html5-video-player',
+        PLAYER_CONTAINER: '#player-container-outer',
+        PLAYER_OUTER: '#ytd-player',
+        VIDEO: 'video',
+        VIDEO_CONTROLS: '.ytp-right-controls',
+        SUBTITLES_BTN: '.ytp-subtitles-button',
+
+        // Content
         COMMENTS_SECTION: 'ytd-comments',
         MERCH_SHELF: 'ytd-merch-shelf-renderer',
         RELATED_ITEMS: '#related',
         END_SCREENS: '.ytp-ce-element',
 
-        PLAYER_CONTROLS: '.ytp-right-controls',
-        VIDEO_ELEMENT: 'video',
-        TITLE_ELEMENT: '#below #title',
-        WATCHED_OVERLAY: 'ytd-thumbnail-overlay-resume-playback-renderer #progress',
-
-        // Sidebar Selectors
+        // Sidebar
         GUIDE_BUTTON: '#guide-button',
         GUIDE_ICON: '#guide-icon',
         APP: 'ytd-app',
         MAIN_GUIDE: 'ytd-guide-renderer',
-        MINI_GUIDE: 'ytd-mini-guide-renderer'
+        MINI_GUIDE: 'ytd-mini-guide-renderer',
+
+        // Search
+        SEARCH_CONTAINER: 'ytd-search',
+        SECTION_RENDERER: 'ytd-item-section-renderer',
+        SEARCH_CONTENTS: '#contents',
+        VIDEO_RENDERER: 'ytd-video-renderer',
+        PLAYLIST_RENDERER: 'ytd-playlist-renderer',
+        RADIO_RENDERER: 'ytd-radio-renderer',
+        CHANNEL_RENDERER: 'ytd-channel-renderer',
+        SHELF_RENDERER: 'ytd-shelf-renderer',
+        RICH_SHELF_RENDERER: 'ytd-rich-shelf-renderer',
+        REEL_SHELF_RENDERER: 'ytd-reel-shelf-renderer',
+        RICH_ITEM_RENDERER: 'ytd-rich-item-renderer',
+        BACKGROUND_PROMO: 'ytd-background-promo-renderer',
+        HORIZONTAL_CAROUSEL: 'ytd-horizontal-card-list-renderer',
+        FILTER_HEADER: 'ytd-search-sub-menu-renderer',
+
+        // Watched
+        WATCHED_OVERLAY: 'ytd-thumbnail-overlay-resume-playback-renderer #progress',
+
+        // Ad Skipper
+        AD_PLAYER: '.html5-video-player',
+        AD_CONTAINER: ['.ad-showing', '.ad-interrupting'],
+        AD_SKIP_BUTTON: [
+            '.ytp-ad-skip-button',
+            '.ytp-ad-skip-button-modern',
+            '.ytp-skip-ad-button',
+            '.videoAdUiSkipButton',
+            'button[id^="skip-button"]',
+            '.ytp-ad-overlay-close-button'
+        ],
+        AD_OVERLAY: '.ytp-ad-module',
+        AD_PLAYER_OVERLAY: '.ytp-ad-player-overlay'
     },
-    GRID: {
-        DESKTOP_COLUMNS: 4,
-        ITEM_GAP: 16,
-        ROW_GAP: 32,
-        MIN_ITEM_WIDTH: 280
-    },
+
+    // =========================================================================
+    // CSS CLASSES
+    // =========================================================================
     CSS_CLASSES: {
         THEME_ENABLED: 'yt-premium-plus-theme',
         HIDE_SHORTS: 'ypp-hide-shorts',
@@ -54,34 +105,81 @@ window.YPP.CONSTANTS = {
         ZEN_MODE: 'ypp-zen-mode',
         HOOK_FREE: 'ypp-hook-free-home',
         BLUE_PROGRESS: 'ypp-blue-progress',
-        SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed'
+        SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed',
+
+        // Search Redesign
+        SEARCH_GRID_MODE: 'ypp-search-grid-mode',
+        SEARCH_LIST_MODE: 'ypp-search-list-mode',
+        GRID_CONTAINER: 'ypp-search-grid-container',
+        GRID_ITEM: 'ypp-grid-item',
+        FULL_WIDTH: 'ypp-full-width-item',
+        HIDDEN_SHORT: 'ypp-hidden-short',
+
+        // View Toggle
+        VIEW_TOGGLE: 'ypp-view-mode-toggle',
+        TOGGLE_BTN: 'ypp-toggle-btn',
+
+        // Focus Mode
+        FOCUS_MODE: 'ypp-focus-mode',
+        CINEMA_MODE: 'ypp-cinema-mode',
+        MINIMAL_MODE: 'ypp-minimal-mode',
+        DOPAMINE_DETOX_STYLE: 'ypp-detox-style',
+        CINEMA_STYLE: 'ypp-cinema-style',
+        MINIMAL_STYLE: 'ypp-minimal-style',
+
+        // Zen Mode
+        ZEN_TOAST: 'ypp-zen-toast',
+
+        // Toast
+        TOAST: 'ypp-toast',
+
+        // Page Context
+        WATCH_PAGE: 'ypp-watch-page',
+        SHORTS_PAGE: 'ypp-shorts-page',
+        HOME_PAGE: 'ypp-home-page',
+
+        // Player Tools
+        PLAYER_TOOLS: 'ypp-player-tools',
+        FILTER_PANEL: 'ypp-filter-panel'
     },
+
+    // =========================================================================
+    // DEFAULT SETTINGS
+    // =========================================================================
     DEFAULT_SETTINGS: {
+        // Theme
         premiumTheme: true,
+        trueBlack: false,
+        hideScrollbar: false,
+        customProgressBar: false,
+        progressBarColor: '#ff0000',
+
+        // Layout
         grid4x4: true,
+
+        // Visibility
         hideShorts: false,
-        autoCinema: false,
         hideSearchShorts: true,
-        hideComments: false,
-        hideMerch: false,
-        hideEndScreens: false,
-        blueProgress: false,
-        zenMode: false,
-        enableSnapshot: true,
-        enableLoop: true,
-        hookFreeHome: false,
-        studyMode: false,
         hideMixes: false,
         hideWatched: false,
+        hideMerch: false,
+        hideComments: false,
+        hideEndScreens: false,
+        hookFreeHome: false,
+
+        // Player
+        autoCinema: false,
+        blueProgress: false,
         enablePiP: true,
         enableTranscript: true,
-        dopamineDetox: false,
+        enableSnapshot: true,
+        enableLoop: true,
 
-        // Search Redesign Defaults
+        // Search Redesign
         searchGrid: true,
         cleanSearch: true,
 
-        // Navigation Defaults
+        // Navigation
         navTrending: true,
         navShorts: true,
         navSubscriptions: true,
@@ -90,33 +188,126 @@ window.YPP.CONSTANTS = {
         navHistory: true,
         forceHideSidebar: false,
 
-        // New Feature Defaults
+        // Shorts Tools
         shortsAutoScroll: false,
+
+        // Player Tools
         enableCustomSpeed: true,
         enableCinemaFilters: true,
         filterBrightness: 100,
-        filterContrast: 100
-    },
-
-    /**
-     * Timing Constants (milliseconds)
-     * Centralized timing values for consistency and easy tuning
-     */
-    TIMINGS: {
-        // Waits and Timeouts
-        ELEMENT_WAIT_DEFAULT: 10000,      // Default timeout for waitForElement
-        TOAST_DISPLAY: 3000,               // Toast notification duration
-        TOAST_FADE: 300,                   // Toast fade out animation
-
-        // Polling and Intervals
-        AD_SKIPPER_INTERVAL: 500,          // How often to check for ads
-        PLAYER_TOOLS_INTERVAL: 1000,       // Player controls injection check
-
-        // Debounce Delays
-        DEBOUNCE_DEFAULT: 50,              // Default DOM observer debounce
-        DEBOUNCE_SEARCH: 500,              // Search results processing debounce
+        filterContrast: 100,
 
         // Ad Skipper
-        AD_PLAYBACK_SPEED: 16              // Speed multiplier for ad fast-forward
+        adSkipper: true,
+
+        // Zen Mode
+        zenMode: false,
+
+        // Focus Mode
+        dopamineDetox: false,
+        enableFocusMode: false,
+        cinemaMode: false,
+        minimalMode: false,
+
+        // Study Mode
+        studyMode: false
+    },
+
+    // =========================================================================
+    // GRID CONFIGURATION
+    // =========================================================================
+    GRID: {
+        DESKTOP_COLUMNS: 4,
+        ITEM_GAP: 16,
+        ROW_GAP: 32,
+        MIN_ITEM_WIDTH: 280,
+        RESPONSIVE_BREAKPOINTS: {
+            LARGE: 1600,
+            MEDIUM: 1200,
+            SMALL: 900,
+            MOBILE: 640
+        }
+    },
+
+    // =========================================================================
+    // TIMING CONSTANTS (milliseconds)
+    // =========================================================================
+    TIMINGS: {
+        // Waits and Timeouts
+        ELEMENT_WAIT_DEFAULT: 10000,
+        TOAST_DISPLAY: 3000,
+        TOAST_FADE: 300,
+
+        // Polling and Intervals
+        AD_SKIPPER_INTERVAL: 500,
+        PLAYER_TOOLS_INTERVAL: 1000,
+        SHORTS_CHECK_INTERVAL: 500,
+        STUDY_ENFORCE_INTERVAL: 5000,
+
+        // Debounce Delays
+        DEBOUNCE_DEFAULT: 50,
+        DEBOUNCE_SEARCH: 500,
+        DEBOUNCE_RESIZE: 150,
+        DEBOUNCE_NAVIGATION: 200,
+
+        // Animation
+        TRANSITION_FAST: 150,
+        TRANSITION_MEDIUM: 300,
+        TRANSITION_SLOW: 500,
+
+        // Ad Skipper
+        AD_PLAYBACK_SPEED: 16
+    },
+
+    // =========================================================================
+    // STUDY MODE
+    // =========================================================================
+    STUDY: {
+        DEFAULT_SPEED: 1.25,
+        MIN_SPEED: 0.1,
+        MAX_SPEED: 5.0,
+        SPEED_STEP: 0.1
+    },
+
+    // =========================================================================
+    // PLAYER TOOLS
+    // =========================================================================
+    PLAYER: {
+        SPEED_MIN: 0.1,
+        SPEED_MAX: 5.0,
+        SPEED_STEP: 0.1,
+        FILTER_MIN: 50,
+        FILTER_MAX: 200,
+        FILTER_DEFAULT: 100
+    },
+
+    // =========================================================================
+    // AMBIENT MODE
+    // =========================================================================
+    AMBIENT: {
+        FPS: 10,
+        SAMPLE_STEP: 10,
+        GLOW_SIZE: 150,
+        GLOW_BLUR: 30,
+        OPACITY: 0.5,
+        CANVAS_SIZE: 50
+    },
+
+    // =========================================================================
+    // VIDEO THUMBNAIL
+    // =========================================================================
+    THUMBNAIL: {
+        ASPECT_RATIO: '16/9',
+        BORDER_RADIUS: '12px'
+    },
+
+    // =========================================================================
+    // TYPOGRAPHY
+    // =========================================================================
+    TYPOGRAPHY: {
+        TITLE_FONT_SIZE: '1.6rem',
+        TITLE_LINE_HEIGHT: '2.2rem',
+        TITLE_MAX_LINES: 2,
+        METADATA_FONT_SIZE: '1.3rem'
     }
 };

@@ -1,103 +1,145 @@
 /**
  * Theme Manager - Handles visual theming and content visibility features
- * @class ThemeManager
+ * Uses centralized constants for configuration
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
+/**
+ * Theme Manager
+ * @class ThemeManager
+ */
 window.YPP.features.Theme = class ThemeManager {
+    /**
+     * Initialize Theme Manager
+     * @constructor
+     */
     constructor() {
-        this.CONSTANTS = window.YPP.CONSTANTS;
-        this.Utils = window.YPP.Utils;
-        this.shortsObserver = null;
-        this.watchedObserver = null;
-        
-        // Constants
-        this.WATCHED_THRESHOLD = 85; // Percentage threshold for marking videos as watched
-        this.SHORTS_OBSERVER_DEBOUNCE = 100; // ms
-        this.WATCHED_OBSERVER_DEBOUNCE = 500; // ms
+        this._initConstants();
+        this._initState();
     }
 
     /**
-     * Enable theme features with provided settings
-     * @param {Object} settings - User settings object
+     * Initialize constants from centralized config
+     * @private
+     */
+    _initConstants() {
+        this._CONSTANTS = window.YPP.CONSTANTS || {};
+        this._SELECTORS = this._CONSTANTS.SELECTORS || {};
+        this._CSS_CLASSES = this._CONSTANTS.CSS_CLASSES || {};
+        this._GRID = this._CONSTANTS.GRID || {};
+        this._TIMINGS = this._CONSTANTS.TIMINGS || {};
+        this._Utils = window.YPP.Utils || {};
+    }
+
+    /**
+     * Initialize internal state
+     * @private
+     */
+    _initState() {
+        this._isActive = false;
+        this._settings = null;
+        this._shortsObserver = null;
+        this._watchedObserver = null;
+        this._progressBarStyle = null;
+        this._WATCHED_THRESHOLD = 85;
+        this._SHORTS_DEBOUNCE = this._TIMINGS.DEBOUNCE_DEFAULT || 100;
+        this._WATCHED_DEBOUNCE = this._TIMINGS.DEBOUNCE_SEARCH || 500;
+    }
+
+    /**
+     * Enable theme features
+     * @param {Object} settings - User settings
      */
     enable(settings) {
-        this.run(settings);
+        this._run(settings);
     }
 
     /**
-     * Disable all theme features and clean up observers
+     * Disable all theme features
      */
     disable() {
         try {
-            this.toggleTheme(false);
-            this.applyTrueBlack(false);
-            this.applyHideScrollbar(false);
-            this.applyProgressBarColor(null);
-            this.manageShortsObserver(false);
-            this.manageWatchedObserver(false);
+            this._toggleTheme(false);
+            this._applyTrueBlack(false);
+            this._applyHideScrollbar(false);
+            this._applyProgressBarColor(null);
+            this._manageShortsObserver(false);
+            this._manageWatchedObserver(false);
+            this._cleanupClasses();
 
-            // Disable other visibility toggles
-            const classes = [
-                this.CONSTANTS.CSS_CLASSES.HIDE_SHORTS,
-                this.CONSTANTS.CSS_CLASSES.HIDE_MIXES,
-                this.CONSTANTS.CSS_CLASSES.HIDE_WATCHED,
-                this.CONSTANTS.CSS_CLASSES.HIDE_MERCH,
-                this.CONSTANTS.CSS_CLASSES.HIDE_COMMENTS,
-                this.CONSTANTS.CSS_CLASSES.HIDE_ENDSCREENS,
-                this.CONSTANTS.CSS_CLASSES.BLUE_PROGRESS,
-                this.CONSTANTS.CSS_CLASSES.HOOK_FREE,
-                'ypp-clean-search',
-                'ypp-hide-search-shorts',
-                'ypp-search-grid'
-            ];
-            document.body.classList.remove(...classes);
+            this._isActive = false;
         } catch (error) {
-            this.Utils?.log(`Error disabling theme: ${error.message}`, 'THEME', 'error');
+            this._Utils.log?.(`Error disabling theme: ${error.message}`, 'THEME', 'error');
         }
     }
 
     /**
      * Update theme with new settings
-     * @param {Object} settings - Updated settings object
+     * @param {Object} settings - Updated settings
      */
     update(settings) {
-        this.run(settings);
+        this._run(settings);
+    }
+
+    // =========================================================================
+    // PRIVATE METHODS
+    // =========================================================================
+
+    /**
+     * Run theme application
+     * @private
+     * @param {Object} settings
+     */
+    _run(settings) {
+        this._settings = settings || {};
+        this._isActive = true;
+
+        try {
+            // Apply theme
+            this._toggleTheme(this._settings.premiumTheme);
+
+            // Apply visibility settings
+            this._applyVisibilitySettings();
+
+            // Apply UI customization
+            this._applyTrueBlack(this._settings.trueBlack);
+            this._applyHideScrollbar(this._settings.hideScrollbar);
+
+            // Progress bar
+            if (this._settings.customProgressBar) {
+                this._applyProgressBarColor(this._settings.progressBarColor || '#ff0000');
+            } else {
+                this._applyProgressBarColor(null);
+            }
+
+            // Shorts management
+            const hideShorts = this._settings.hideShorts || this._settings.hideSearchShorts;
+            this._manageShortsObserver(hideShorts);
+
+            // Watched videos
+            this._manageWatchedObserver(this._settings.hideWatched);
+
+        } catch (error) {
+            this._Utils.log?.(`Error running theme: ${error.message}`, 'THEME', 'error');
+        }
     }
 
     /**
-     * Apply all theme settings
-     * @param {Object} settings - Settings object with theme preferences
+     * Toggle premium theme
      * @private
+     * @param {boolean} enable
      */
-    run(settings) {
-        this.toggleTheme(settings.premiumTheme);
-        this.applyVisibilitySettings(settings);
-
-        // UI Customization
-        this.applyTrueBlack(settings.trueBlack);
-        this.applyHideScrollbar(settings.hideScrollbar);
-
-        if (settings.customProgressBar) {
-            this.applyProgressBarColor(settings.progressBarColor || '#ff0000');
-        } else {
-            this.applyProgressBarColor(null); // Remove if disabled
-        }
-
-        // Specific Shorts Logic
-        const hideShorts = settings.hideShorts || settings.hideSearchShorts;
-        this.manageShortsObserver(hideShorts);
-
-        // Watched Logic
-        this.manageWatchedObserver(settings.hideWatched);
+    _toggleTheme(enable) {
+        document.body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
     }
 
-    applyHideScrollbar(enable) {
-        document.body.classList.toggle('ypp-hide-scrollbar', enable);
-    }
-
-    applyTrueBlack(enable) {
+    /**
+     * Apply true black theme
+     * @private
+     * @param {boolean} enable
+     */
+    _applyTrueBlack(enable) {
         const root = document.documentElement.style;
         if (enable) {
             root.setProperty('--yt-spec-base-background', '#000000', 'important');
@@ -110,7 +152,21 @@ window.YPP.features.Theme = class ThemeManager {
         }
     }
 
-    applyProgressBarColor(color) {
+    /**
+     * Apply hide scrollbar
+     * @private
+     * @param {boolean} enable
+     */
+    _applyHideScrollbar(enable) {
+        document.body.classList.toggle('ypp-hide-scrollbar', enable);
+    }
+
+    /**
+     * Apply custom progress bar color
+     * @private
+     * @param {string|null} color
+     */
+    _applyProgressBarColor(color) {
         const styleId = 'ypp-progress-bar-color';
         let style = document.getElementById(styleId);
 
@@ -135,92 +191,126 @@ window.YPP.features.Theme = class ThemeManager {
         `;
     }
 
-    toggleTheme(enable) {
-        document.body.classList.toggle(this.CONSTANTS.CSS_CLASSES.THEME_ENABLED, enable);
-    }
+    /**
+     * Apply visibility settings
+     * @private
+     */
+    _applyVisibilitySettings() {
+        const toggle = (cls, state) => {
+            if (cls) document.body.classList.toggle(cls, !!state);
+        };
 
-    applyVisibilitySettings(settings) {
-        const toggle = (cls, state) => document.body.classList.toggle(cls, !!state);
+        toggle(this._CSS_CLASSES.HIDE_SHORTS, this._settings.hideShorts);
+        toggle(this._CSS_CLASSES.HIDE_MIXES, this._settings.hideMixes);
+        toggle(this._CSS_CLASSES.HIDE_WATCHED, this._settings.hideWatched);
+        toggle(this._CSS_CLASSES.HIDE_MERCH, this._settings.hideMerch);
+        toggle(this._CSS_CLASSES.HIDE_COMMENTS, this._settings.hideComments);
+        toggle(this._CSS_CLASSES.HIDE_ENDSCREENS, this._settings.hideEndScreens);
+        toggle(this._CSS_CLASSES.BLUE_PROGRESS, this._settings.blueProgress);
+        toggle(this._CSS_CLASSES.HOOK_FREE, this._settings.hookFreeHome);
 
-        toggle(this.CONSTANTS.CSS_CLASSES.HIDE_SHORTS, settings.hideShorts);
-        toggle(this.CONSTANTS.CSS_CLASSES.HIDE_MIXES, settings.hideMixes);
-        toggle(this.CONSTANTS.CSS_CLASSES.HIDE_WATCHED, settings.hideWatched);
-        toggle(this.CONSTANTS.CSS_CLASSES.HIDE_MERCH, settings.hideMerch);
-        toggle(this.CONSTANTS.CSS_CLASSES.HIDE_COMMENTS, settings.hideComments);
-        toggle(this.CONSTANTS.CSS_CLASSES.HIDE_ENDSCREENS, settings.hideEndScreens);
-        toggle(this.CONSTANTS.CSS_CLASSES.BLUE_PROGRESS, settings.blueProgress);
-        toggle(this.CONSTANTS.CSS_CLASSES.HOOK_FREE, settings.hookFreeHome);
-
-        // Search Specific
-        toggle('ypp-clean-search', settings.cleanSearch);
-        toggle('ypp-hide-search-shorts', settings.hideSearchShorts);
-        toggle('ypp-search-grid', settings.searchGrid);
+        // Search specific
+        toggle('ypp-clean-search', this._settings.cleanSearch);
+        toggle('ypp-hide-search-shorts', this._settings.hideSearchShorts);
+        toggle('ypp-search-grid-mode', this._settings.searchGrid);
     }
 
     /**
-     * Start observing for Shorts to hide them dynamically.
-     * @param {boolean} enable 
+     * Cleanup CSS classes
+     * @private
      */
-    manageShortsObserver(enable) {
-        this.hideShortsElements(enable);
+    _cleanupClasses() {
+        const classes = [
+            this._CSS_CLASSES.THEME_ENABLED,
+            this._CSS_CLASSES.HIDE_SHORTS,
+            this._CSS_CLASSES.HIDE_MIXES,
+            this._CSS_CLASSES.HIDE_WATCHED,
+            this._CSS_CLASSES.HIDE_MERCH,
+            this._CSS_CLASSES.HIDE_COMMENTS,
+            this._CSS_CLASSES.HIDE_ENDSCREENS,
+            this._CSS_CLASSES.BLUE_PROGRESS,
+            this._CSS_CLASSES.HOOK_FREE,
+            'ypp-clean-search',
+            'ypp-hide-search-shorts',
+            'ypp-search-grid-mode',
+            'ypp-hide-scrollbar'
+        ];
+
+        document.body.classList.remove(...classes);
+    }
+
+    // =========================================================================
+    // SHORTS MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Manage shorts observer
+     * @private
+     * @param {boolean} enable
+     */
+    _manageShortsObserver(enable) {
+        this._hideShortsElements(enable);
 
         if (enable) {
-            if (!this.shortsObserver) {
-                const processMutations = () => this.hideShortsElements(true);
-                const debouncedProcess = this.Utils.debounce(processMutations, 100);
+            if (!this._shortsObserver) {
+                const processMutations = () => this._hideShortsElements(true);
+                const debouncedProcess = this._Utils.debounce?.(processMutations, this._SHORTS_DEBOUNCE) || debounce(processMutations, this._SHORTS_DEBOUNCE);
 
-                this.shortsObserver = new MutationObserver((mutations) => {
+                this._shortsObserver = new MutationObserver((mutations) => {
                     const hasRelevantMutation = mutations.some(m =>
                         m.addedNodes.length > 0 &&
-                        (m.target.tagName.includes('YTD') || m.target.id === 'contents')
+                        (m.target.tagName?.includes('YTD') || m.target.id === 'contents')
                     );
 
                     if (hasRelevantMutation) {
                         debouncedProcess();
                     }
                 });
-                this.shortsObserver.observe(document.body, { childList: true, subtree: true });
+
+                this._shortsObserver.observe(document.body, { childList: true, subtree: true });
             }
         } else {
-            if (this.shortsObserver) {
-                this.shortsObserver.disconnect();
-                this.shortsObserver = null;
+            if (this._shortsObserver) {
+                this._shortsObserver.disconnect();
+                this._shortsObserver = null;
             }
-            this.hideShortsElements(false);
+            this._hideShortsElements(false);
         }
     }
 
     /**
-     * Hide or Show Shorts elements based on selectors.
-     * @param {boolean} enable 
+     * Hide or show shorts elements
+     * @private
+     * @param {boolean} enable
      */
-    hideShortsElements(enable) {
-        // defined selectors for shorts elements
+    _hideShortsElements(enable) {
         const selectors = [
-            this.CONSTANTS.SELECTORS.SHORTS_SECTION || 'ytd-rich-section-renderer[is-shorts]',
-            'ytd-reel-shelf-renderer',
+            this._SELECTORS.SHORTS_SECTION || 'ytd-rich-section-renderer[is-shorts]',
+            this._SELECTORS.SHORTS_SHELF,
             'ytd-rich-shelf-renderer[is-shorts]',
             'ytd-secondary-search-container-renderer',
-            'a[href^="/shorts"]' // Aggressive link hiding if needed, but usually container is better
+            'a[href^="/shorts"]'
         ];
 
-        // 1. Tag based / Attribute based hiding
         selectors.forEach(sel => {
-            const elements = document.querySelectorAll(sel);
-            elements.forEach(el => {
-                // Determine if we should hide specific links or just containers
-                if (el.tagName === 'A' && !el.closest('ytd-rich-item-renderer')) return; // Don't hide links in weird places
-                el.style.display = enable ? 'none' : '';
-            });
+            try {
+                const elements = document.querySelectorAll(sel);
+                elements.forEach(el => {
+                    if (el.tagName === 'A' && !el.closest('ytd-rich-item-renderer')) return;
+                    el.style.display = enable ? 'none' : '';
+                });
+            } catch (error) {
+                // Skip invalid selectors
+            }
         });
 
-        // 2. Content Heuristics (for items that don't have explicit tags yet)
+        // Content heuristics for containers
         if (enable) {
             const potentialContainers = document.querySelectorAll(
                 'ytd-shelf-renderer, ytd-rich-shelf-renderer, ytd-item-section-renderer'
             );
             potentialContainers.forEach(container => {
-                if (this.isShortsContainer(container)) {
+                if (this._isShortsContainer(container)) {
                     container.style.display = 'none';
                 }
             });
@@ -228,48 +318,80 @@ window.YPP.features.Theme = class ThemeManager {
     }
 
     /**
-     * Start observing for Watched videos to mark them.
+     * Detect if container is shorts
+     * @private
+     * @param {HTMLElement} container
+     * @returns {boolean}
+     */
+    _isShortsContainer(container) {
+        if (!container) return false;
+
+        try {
+            // Check tag
+            if (container.tagName === 'YTD-REEL-SHELF-RENDERER') return true;
+            if (container.hasAttribute('is-shorts')) return true;
+
+            // Check title
+            const titleEl = container.querySelector('#title');
+            if (titleEl?.textContent) {
+                const title = titleEl.textContent.trim().toLowerCase();
+                if (title === 'shorts' || title.includes('shorts')) return true;
+            }
+
+            // Check aria-label
+            const ariaLabel = container.getAttribute('aria-label');
+            if (ariaLabel?.toLowerCase().includes('shorts')) return true;
+
+            return false;
+        } catch (error) {
+            this._Utils.log?.(`Error checking shorts container: ${error.message}`, 'THEME', 'warn');
+            return false;
+        }
+    }
+
+    // =========================================================================
+    // WATCHED VIDEOS
+    // =========================================================================
+
+    /**
+     * Manage watched observer
+     * @private
      * @param {boolean} enable
      */
-    manageWatchedObserver(enable) {
-        this.processWatchedVideos(); // Run once immediately
+    _manageWatchedObserver(enable) {
+        this._processWatchedVideos();
 
         if (enable) {
-            if (!this.watchedObserver) {
-                const process = () => this.processWatchedVideos();
-                const debouncedProcess = this.Utils.debounce(process, 500);
+            if (!this._watchedObserver) {
+                const process = () => this._processWatchedVideos();
+                const debouncedProcess = this._Utils.debounce?.(process, this._WATCHED_DEBOUNCE) || debounce(process, this._WATCHED_DEBOUNCE);
 
-                this.watchedObserver = new MutationObserver((mutations) => {
-                    // Check if relevant things changed
+                this._watchedObserver = new MutationObserver((mutations) => {
                     const relevant = mutations.some(m => m.addedNodes.length > 0 || m.type === 'attributes');
                     if (relevant) debouncedProcess();
                 });
 
-                // Observe body for dynamic loading
-                this.watchedObserver.observe(document.body, { childList: true, subtree: true });
+                this._watchedObserver.observe(document.body, { childList: true, subtree: true });
             }
         } else {
-            if (this.watchedObserver) {
-                this.watchedObserver.disconnect();
-                this.watchedObserver = null;
+            if (this._watchedObserver) {
+                this._watchedObserver.disconnect();
+                this._watchedObserver = null;
             }
-            // Optional: Remove is-watched attributes if disabled? 
-            // Might be expensive to crawl everything, usually fine to leave attributes if CSS class is removed.
         }
     }
 
     /**
-     * Detects and marks videos as watched based on progress bar percentage
+     * Process and mark watched videos
      * @private
      */
-    processWatchedVideos() {
+    _processWatchedVideos() {
         try {
-            const selector = this.CONSTANTS?.SELECTORS?.WATCHED_OVERLAY || 
-                           'ytd-thumbnail-overlay-resume-playback-renderer #progress';
+            const selector = this._SELECTORS.WATCHED_OVERLAY || 'ytd-thumbnail-overlay-resume-playback-renderer #progress';
             const progressBars = document.querySelectorAll(selector);
-            
-            if (!progressBars || progressBars.length === 0) return;
-            
+
+            if (!progressBars?.length) return;
+
             progressBars.forEach(bar => {
                 try {
                     const width = bar?.style?.width;
@@ -278,7 +400,7 @@ window.YPP.features.Theme = class ThemeManager {
                     const percent = parseFloat(width);
                     if (isNaN(percent)) return;
 
-                    const isWatched = percent > this.WATCHED_THRESHOLD;
+                    const isWatched = percent > this._WATCHED_THRESHOLD;
 
                     const container = bar.closest('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer');
                     if (container) {
@@ -289,43 +411,52 @@ window.YPP.features.Theme = class ThemeManager {
                         }
                     }
                 } catch (err) {
-                    // Silently skip this element if there's an error
+                    // Skip individual element errors
                 }
             });
         } catch (error) {
-            this.Utils?.log(`Error processing watched videos: ${error.message}`, 'THEME', 'error');
+            this._Utils.log?.(`Error processing watched videos: ${error.message}`, 'THEME', 'error');
         }
+    }
+
+    // =========================================================================
+    // PUBLIC API
+    // =========================================================================
+
+    /**
+     * Check if theme is active
+     * @returns {boolean}
+     */
+    isActive() {
+        return this._isActive;
     }
 
     /**
-     * Determine if a container looks like a Shorts shelf
-     * @param {HTMLElement} container - Element to check
-     * @returns {boolean} True if container appears to be a Shorts shelf
-     * @private
+     * Get current settings
+     * @returns {Object}
      */
-    isShortsContainer(container) {
-        if (!container) return false;
+    getSettings() {
+        return { ...this._settings };
+    }
 
-        try {
-            // Fast checks - element type and attributes
-            if (container.tagName === 'YTD-REEL-SHELF-RENDERER') return true;
-            if (container.hasAttribute('is-shorts')) return true;
-
-            // Title Check - look for "Shorts" text
-            const titleEl = container.querySelector('#title');
-            if (titleEl?.textContent) {
-                const title = titleEl.textContent.trim().toLowerCase();
-                if (title === 'shorts' || title.includes('shorts')) return true;
-            }
-
-            // Aria-label check
-            const ariaLabel = container.getAttribute('aria-label');
-            if (ariaLabel?.toLowerCase().includes('shorts')) return true;
-
-            return false;
-        } catch (error) {
-            this.Utils?.log(`Error checking shorts container: ${error.message}`, 'THEME', 'error');
-            return false;
+    /**
+     * Toggle a setting dynamically
+     * @param {string} key - Setting key
+     * @param {boolean} value - New value
+     */
+    setSetting(key, value) {
+        if (this._settings) {
+            this._settings[key] = value;
+            this._run(this._settings);
         }
     }
 };
+
+// Helper debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}

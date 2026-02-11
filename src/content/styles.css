@@ -521,33 +521,129 @@ ytd-mini-guide-renderer {
 .yt-premium-plus-theme ytd-rich-grid-renderer {
   margin-top: 24px;
   padding-right: 24px;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
-.yt-premium-plus-theme #contents.ytd-rich-grid-renderer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 32px 24px;
+/* Grid Contents - Use CSS Grid instead of Flex */
+/* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
+.yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 24px 16px !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-wrap: nowrap !important;
 }
 
+/* Grid Rows */
 .yt-premium-plus-theme ytd-rich-grid-row,
-.yt-premium-plus-theme ytd-rich-grid-row>#contents {
-  display: contents;
+.yt-premium-plus-theme ytd-rich-grid-row > #contents {
+  display: contents !important;
 }
 
-/* Video Cards */
+/* Individual Video Items - Restore Card Styling Here */
 .yt-premium-plus-theme ytd-rich-item-renderer {
-  width: calc(25% - 24px);
-  margin: 0 0 24px 0;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
   background: var(--ypp-bg-surface);
   backdrop-filter: var(--ypp-blur-med);
   border: 1px solid var(--ypp-glass-border);
   border-radius: var(--ypp-radius-lg);
   box-shadow: var(--ypp-shadow-card);
-  padding: 16px;
-  box-sizing: border-box;
+  padding: 16px !important;
+  box-sizing: border-box !important;
   transition: var(--ypp-transition);
 }
+
+/* Video Cards - Reset Child Styling (Since parent now has card style) */
+.yt-premium-plus-theme ytd-rich-item-renderer ytd-video-renderer,
+.yt-premium-plus-theme ytd-rich-item-renderer ytd-rich-grid-media {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Thumbnail */
+.yt-premium-plus-theme ytd-rich-item-renderer ytd-thumbnail {
+  width: 100% !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.yt-premium-plus-theme ytd-rich-item-renderer ytd-thumbnail img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Video Title */
+.yt-premium-plus-theme ytd-rich-item-renderer #video-title {
+  font-size: 1.6rem !important;
+  line-height: 2.2rem !important;
+  font-weight: 500 !important;
+  margin: 12px 0 4px 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-height: 4.4rem !important;
+  color: var(--ypp-text-primary) !important;
+}
+
+/* Metadata */
+.yt-premium-plus-theme ytd-rich-item-renderer #metadata-line,
+.yt-premium-plus-theme ytd-rich-item-renderer #channel-name {
+  font-size: 1.3rem !important;
+  color: var(--ypp-text-secondary) !important;
+  line-height: 1.5 !important;
+}
+
+/* Hover Effect */
+.yt-premium-plus-theme ytd-rich-item-renderer:hover {
+  transform: translateY(-4px);
+  border-color: rgba(62, 166, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(62, 166, 255, 0.3);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1600px) {
+  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px 14px !important;
+  }
+}
+
+@media (max-width: 1400px) {
+  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px 12px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px 10px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 .yt-premium-plus-theme ytd-rich-item-renderer:hover {
   transform: translateY(-6px) scale(1.02);

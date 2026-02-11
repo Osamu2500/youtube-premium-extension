@@ -197,7 +197,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
 
             this._updateActiveStates();
         } catch (error) {
-            this.Utils.log(`Error injecting buttons: ${error.message}`, 'HEADERNAV', 'error');
+            this.Utils?.log(`Error injecting buttons: ${error.message}`, 'HEADERNAV', 'error');
         }
     }
 
@@ -211,52 +211,102 @@ window.YPP.features.HeaderNav = class HeaderNav {
      */
     createButton(container, label, url, svgContent) {
         try {
-            const btn = document.createElement('div'); // Div to avoid default anchor drag issues
+            const btn = document.createElement('div');
             btn.className = 'ypp-nav-btn';
             btn.title = label;
             btn.dataset.url = url;
             btn.innerHTML = `
-            <svg viewBox="0 0 24 24" class="ypp-nav-icon">${svgContent}</svg>
-        `;
+                <svg viewBox="0 0 24 24" class="ypp-nav-icon">${svgContent}</svg>
+            `;
 
-            // Reliable Navigation
-            btn.addEventListener('click', (e) => {
+            // Reliable Navigation with keyboard support
+            const handleClick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Only navigate if different to avoid reloading
-                if (window.location.pathname !== url && !(url === '/shorts' && window.location.pathname.startsWith('/shorts'))) {
-                    // Use YouTube's navigation event if possible/known, otherwise standard location set
-                    // Standard location set is safest for external scripts
-                    window.location.href = url;
+                // Check if already on the page
+                if (this.isCurrentPage(url)) {
+                    this.Utils?.log(`Already on ${label} page`, 'HEADERNAV');
+                    return;
+                }
+
+                // Navigate using YouTube's navigation if possible
+                this.navigateTo(url);
+            };
+
+            btn.addEventListener('click', handleClick);
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleClick(e);
                 }
             });
 
+            // Make button focusable
+            btn.setAttribute('tabindex', '0');
+            btn.setAttribute('role', 'button');
+
             container.appendChild(btn);
         } catch (error) {
-            this.Utils.log(`Error creating button ${label}: ${error.message}`, 'HEADERNAV', 'error');
+            this.Utils?.log(`Error creating button ${label}: ${error.message}`, 'HEADERNAV', 'error');
         }
     }
 
+    /**
+     * Check if the given URL is the current page
+     * @param {string} url - URL to check
+     * @returns {boolean}
+     */
+    isCurrentPage(url) {
+        const currentPath = window.location.pathname;
+        
+        if (url === '/shorts') {
+            return currentPath.startsWith('/shorts/');
+        }
+        
+        if (url.includes('?')) {
+            return currentPath.includes(url.split('?')[0]);
+        }
+        
+        return currentPath === url || currentPath === url + '/';
+    }
+
+    /**
+     * Navigate to a URL using YouTube's navigation system
+     * @param {string} url - URL to navigate to
+     */
+    navigateTo(url) {
+        try {
+            // Try using yt-navigate CSS class for smooth navigation
+            const link = document.createElement('a');
+            link.href = url;
+            link.click();
+        } catch (error) {
+            // Fallback to direct navigation
+            this.Utils?.log(`Using fallback navigation to ${url}`, 'HEADERNAV');
+            window.location.href = url;
+        }
+    }
+
+    /**
+     * Update active states for navigation buttons
+     * @private
+     */
     _updateActiveStates() {
         const btns = document.querySelectorAll('.ypp-nav-btn');
         btns.forEach(btn => {
             const url = btn.dataset.url;
-            const currentPath = this._currentUrl;
-
-            let isActive = false;
-
-            if (url === '/shorts') {
-                isActive = currentPath.startsWith('/shorts/');
-            } else if (url.includes('?')) {
-                // Exact match for query params (like Watch Later)
-                isActive = currentPath.includes(url);
-            } else {
-                // Path match
-                isActive = currentPath === url || currentPath === url + '/';
-            }
-
+            const isActive = this.isCurrentPage(url);
             btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive);
         });
+    }
+
+    /**
+     * Refresh navigation - re-check current page and update states
+     */
+    refresh() {
+        this._currentUrl = window.location.pathname + window.location.search;
+        this._updateActiveStates();
     }
 };
