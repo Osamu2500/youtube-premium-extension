@@ -122,12 +122,17 @@ window.YPP.features.PlayerTools = class PlayerTools {
     _checkForPlayer() {
         if (!this._isActive) return;
 
+        // Cache video element lookup
+        if (!this._videoRef || !this._videoRef.isConnected) {
+            this._videoRef = document.querySelector(this._SELECTORS.VIDEO);
+        }
+
         const rightControls = document.querySelector(this._SELECTORS.VIDEO_CONTROLS);
         if (rightControls && !document.querySelector(`#${this._CSS_CLASSES.PLAYER_TOOLS}`)) {
             this._injectControls(rightControls);
         }
 
-        // Continuously apply filters
+        // Continuously apply filters (only if needed)
         this._applyFilters();
     }
 
@@ -418,16 +423,21 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @private
      */
     _applyFilters() {
-        const video = document.querySelector(this._SELECTORS.VIDEO);
+        // Use cached reference if available
+        const video = this._videoRef || document.querySelector(this._SELECTORS.VIDEO);
         if (!video) return;
 
         const brightness = this._settings?.filterBrightness || 100;
         const contrast = this._settings?.filterContrast || 100;
 
-        if (brightness === 100 && contrast === 100) {
-            video.style.filter = '';
-        } else {
-            video.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+        // Optimization: Create filter string once
+        const filterString = (brightness === 100 && contrast === 100) 
+            ? '' 
+            : `brightness(${brightness}%) contrast(${contrast}%)`;
+
+        // Only update if changed (Browser optimization usually handles this, but good to be explicit)
+        if (video.style.filter !== filterString) {
+            video.style.filter = filterString;
         }
     }
 

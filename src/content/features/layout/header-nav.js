@@ -138,8 +138,16 @@ window.YPP.features.HeaderNav = class HeaderNav {
     scheduleInjection() {
         // Use requestAnimationFrame for safer DOM access
         requestAnimationFrame(() => {
-            const centerSection = document.querySelector('ytd-masthead #center');
-            if (centerSection) this.injectButtons(centerSection);
+            // Try specific selectors first, then broader ones
+            const centerSection = document.querySelector('ytd-masthead #center') || 
+                                document.querySelector('ytd-masthead #container') ||
+                                document.querySelector('ytd-masthead');
+            
+            if (centerSection) {
+                 this.injectButtons(centerSection);
+            } else {
+                this.Utils?.log('Header injection target not found (yet)', 'HEADERNAV', 'debug');
+            }
         });
     }
 
@@ -163,6 +171,11 @@ window.YPP.features.HeaderNav = class HeaderNav {
 
             const navGroup = document.createElement('div');
             navGroup.className = 'ypp-nav-group ypp-nav-group-right';
+            
+            // Force visibility styles inline to prevent overrides
+            navGroup.style.display = 'flex';
+            navGroup.style.opacity = '1';
+            navGroup.style.visibility = 'visible';
 
             // Define button config for cleaner iteration
             const buttons = [
@@ -174,25 +187,38 @@ window.YPP.features.HeaderNav = class HeaderNav {
                 { setting: 'navTrending', label: 'Trending', url: '/feed/trending', icon: HeaderNav.ICONS.Trending }
             ];
 
+            let addedCount = 0;
             buttons.forEach(btnConfig => {
                 if (this.settings[btnConfig.setting]) {
                     this.createButton(navGroup, btnConfig.label, btnConfig.url, btnConfig.icon);
+                    addedCount++;
                 }
             });
 
+            if (addedCount === 0) {
+                this.Utils?.log('No nav buttons enabled in settings', 'HEADERNAV', 'warn');
+                return;
+            }
+
             // Intelligent Placement
-            const searchForm = centerSection.querySelector('#search-form');
+            const searchBox = centerSection.querySelector('ytd-searchbox');
             const micBtn = centerSection.querySelector('#voice-search-button');
+            
+            this.Utils?.log(`Injecting nav buttons: SearchBox=${!!searchBox}, MicBtn=${!!micBtn}`, 'HEADERNAV', 'debug');
 
             // Robust insertion logic
             if (micBtn && micBtn.nextSibling) {
                 centerSection.insertBefore(navGroup, micBtn.nextSibling);
             } else if (micBtn) {
                 centerSection.appendChild(navGroup);
-            } else if (searchForm && searchForm.nextSibling) {
-                centerSection.insertBefore(navGroup, searchForm.nextSibling);
+            } else if (searchBox && searchBox.nextSibling) {
+                centerSection.insertBefore(navGroup, searchBox.nextSibling);
+            } else if (searchBox) {
+               centerSection.appendChild(navGroup);
             } else {
+                // Fallback: just append to center section
                 centerSection.appendChild(navGroup);
+                this.Utils?.log('Using fallback append for nav buttons', 'HEADERNAV', 'warn');
             }
 
             this._updateActiveStates();
@@ -277,10 +303,14 @@ window.YPP.features.HeaderNav = class HeaderNav {
      */
     navigateTo(url) {
         try {
-            // Try using yt-navigate CSS class for smooth navigation
+            // Create a specialized event for YouTube navigation if possible, 
+            // otherwise standard link click is the best way to trigger router.
             const link = document.createElement('a');
             link.href = url;
+            link.style.display = 'none';
+            document.body.appendChild(link);
             link.click();
+            setTimeout(() => link.remove(), 100);
         } catch (error) {
             // Fallback to direct navigation
             this.Utils?.log(`Using fallback navigation to ${url}`, 'HEADERNAV');

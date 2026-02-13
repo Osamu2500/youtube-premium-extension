@@ -278,10 +278,12 @@
          * @private
          */
         updateContext() {
+            Utils?.startPerf('updateContext');
             try {
                 const pathname = window.location.pathname;
-                const search = window.location.search;
-
+                
+                // Cache previous context for comparison (optional optimization, but classList.toggle is cheap)
+                
                 this.context = {
                     isHome: pathname === '/' || pathname === '/index' || pathname === '/feed/subscriptions',
                     isWatch: pathname.startsWith('/watch'),
@@ -296,13 +298,15 @@
                     isHistory: pathname === '/feed/history'
                 };
 
+                const body = document.body;
                 // Apply context classes to body
                 if (body) {
                     // Update context classes
                     body.classList.toggle('ypp-watch-page', this.context.isWatch);
-                    body.classList.toggle('ypp-shorts-page', this.context.isShorts);
+                    body.classList.toggle('ypp-shorts-page', this.context.isShortsPage); // Fix: use isShortsPage for specific styling
                     body.classList.toggle('ypp-home-page', this.context.isHome);
                     body.classList.toggle('ypp-search-page', this.context.isSearch);
+                    body.classList.toggle('ypp-channel-page', this.context.isChannel); // Added channel class
 
                     // Re-apply premium theme class (critical for layout)
                     if (this.settings?.premiumTheme) {
@@ -322,6 +326,8 @@
                     isChannel: false,
                     isShorts: false
                 };
+            } finally {
+                Utils?.endPerf('updateContext');
             }
         },
 

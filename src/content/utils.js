@@ -28,7 +28,48 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         };
         const style = styles[level] || styles.info;
         const consoleMethod = console[level] || console.log;
+        
+        // Filter debug logs in production if needed
+        if (level === 'debug' && !window.YPP_DEBUG) return;
+
         consoleMethod(prefix, style, msg);
+    },
+
+    /**
+     * Start a performance measurement
+     * @param {string} label - Unique label for the measurement
+     */
+    startPerf: (label) => {
+        if (!label) return;
+        performance.mark(`ypp-start-${label}`);
+    },
+
+    /**
+     * End a performance measurement and log the duration
+     * @param {string} label - Unique label for the measurement
+     * @param {string} [context] - Context for logging
+     */
+    endPerf: (label, context = 'PERF') => {
+        if (!label) return;
+        const startMark = `ypp-start-${label}`;
+        const endMark = `ypp-end-${label}`;
+        
+        try {
+            performance.mark(endMark);
+            const measure = performance.measure(label, startMark, endMark);
+            
+            // Only log if it took significant time (> 10ms)
+            if (measure.duration > 10) {
+                window.YPP.Utils.log(`${label} took ${measure.duration.toFixed(2)}ms`, context, 'debug');
+            }
+            
+            // Cleanup
+            performance.clearMarks(startMark);
+            performance.clearMarks(endMark);
+            performance.clearMeasures(label);
+        } catch (e) {
+            // Ignore performance measurement errors
+        }
     },
 
     // =====================================================================
