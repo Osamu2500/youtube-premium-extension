@@ -162,10 +162,36 @@ export class SearchRedesign {
             this._applyViewMode();
             this._injectViewToggle();
             this._startObserver();
+            this._applyDefaultFilter();
         } else {
             this._disconnectObserver();
             this._removeClasses();
         }
+    }
+
+    /**
+     * Automatically select "Videos" filter if no filter is active
+     * @private
+     */
+    _applyDefaultFilter() {
+        // 1. Check if we already have a filter param (sp=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('sp')) return;
+
+        // 2. Poll for chips to click "Videos"
+        this._pollForElement('yt-chip-cloud-chip-renderer', () => {
+             // Re-check params in case they changed during poll
+             if (new URLSearchParams(window.location.search).has('sp')) return;
+
+             const chips = Array.from(document.querySelectorAll('yt-chip-cloud-chip-renderer'));
+             const videoChip = chips.find(c => c.textContent.trim() === 'Videos' || c.querySelector('#text')?.textContent.trim() === 'Videos');
+
+             if (videoChip && !videoChip.hasAttribute('selected')) {
+                 this._log('Applying default "Videos" filter', 'info');
+                 // Try native click on the web component
+                 videoChip.click();
+             }
+        });
     }
 
     /**
@@ -460,12 +486,26 @@ export class SearchRedesign {
 
         const tag = node.tagName.toLowerCase();
 
+        const _hideNode = (el) => {
+            el.classList.add('ypp-hidden-short');
+            el.style.display = 'none';
+            // Also hide parent section if this is the only content
+            const parentSection = el.closest('ytd-item-section-renderer');
+            if (parentSection) {
+                parentSection.style.display = 'none';
+            }
+        };
+
         // A. SHORTS DETECTION (Hide them)
         if (this._isShorts(node)) {
-            node.classList.add('ypp-hidden-short');
-            // Force display none inline to be safe against specificity wars
-            node.style.display = 'none';
+            _hideNode(node);
             return;
+        }
+
+        // Special handling for Shelf Renderers (Container of Shorts)
+        if (tag === 'ytd-shelf-renderer' && this._isShortsShelf(node)) {
+             _hideNode(node);
+             return;
         }
 
         // B. LAYOUT NORMALIZATION (For Grid Mode)
@@ -502,8 +542,33 @@ export class SearchRedesign {
         
         // "SHORTS" overlay style is a strong signal on some card types
         if (node.querySelector('[overlay-style="SHORTS"]')) return true;
+
+        // 3. Header/Title detection (For Shelves)
+        // Check if shelf title mentions "Shorts"
+        const title = node.querySelector('#title-container #title')?.textContent?.trim() || '';
+        if (title.includes('Shorts')) return true;
         
         return false;
+    }
+
+    /**
+     * Determine if a shelf renderer contains Shorts
+     * @private
+     * @param {Element} node
+     * @returns {boolean}
+     */
+    _isShortsShelf(node) {
+         // Check title text
+         const title = node.querySelector('#title-container #title')?.textContent?.trim() || '';
+         if (/shorts/i.test(title)) return true;
+
+         // Check for Shorts icon
+         if (node.querySelector('ytd-icon-button-renderer[aria-label="Shorts"]')) return true;
+
+         // Check for content (vertical videos)
+         if (node.querySelector('a[href*="/shorts/"]')) return true;
+
+         return false;
     }
 
     /**

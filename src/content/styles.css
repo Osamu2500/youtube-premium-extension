@@ -188,6 +188,12 @@ body.ypp-hide-shorts [is-shorts],
 body.ypp-hide-shorts ytd-guide-entry-renderer:has(a[title="Shorts"]),
 body.ypp-hide-shorts ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
 body.ypp-hide-shorts ytm-reel-shelf-renderer,
+/* Search specific - Target Header Text via Attributes */
+body.ypp-hide-shorts ytd-shelf-renderer:has(span#title[aria-label*="Shorts"]),
+body.ypp-hide-shorts ytd-shelf-renderer:has(div#title-container h2 span[aria-label*="Shorts"]),
+body.ypp-hide-shorts ytd-shelf-renderer:has(a[href*="/shorts/"]),
+/* Fallback for icon presence */
+body.ypp-hide-shorts ytd-shelf-renderer:has(ytd-icon-button-renderer[aria-label="Shorts"]),
 body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='start_radio']) {
   display: none !important;
 }
@@ -1442,6 +1448,14 @@ body.yt-premium-plus-theme ytd-rich-item-renderer {
   min-width: auto !important;
   margin: 0 !important;
   flex: none !important;
+}
+
+/* Hide parent section of Shorts shelves to prevent gaps */
+body.ypp-hide-shorts ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
+body.ypp-hide-shorts ytd-item-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+body.ypp-hide-shorts ytd-item-section-renderer:has(ytd-shelf-renderer[is-shorts]),
+body.ypp-hide-shorts ytd-item-section-renderer:has(ytd-shelf-renderer span#title[aria-label*="Shorts"]) {
+  display: none !important;
 }
 
 /* Ensure video thumbnails scale properly */
