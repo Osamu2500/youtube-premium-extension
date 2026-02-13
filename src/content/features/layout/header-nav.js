@@ -8,30 +8,12 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.HeaderNav = class HeaderNav {
 
     static ICONS = {
-        Subscriptions: `
-            <path d="M20 6H4V4h16v2zM18 10H6v-2h12v2zM4 14v6c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-6H4zm8 5l-3-1.73V13.8L12 15.54 l3-1.73v3.46L12 19z" fill="currentColor" opacity="0.9"></path>
-            <path d="M12 19l3-1.73v-3.46L12 15.54l-3-1.73V17.27L12 19z" fill="currentColor" fill-opacity="0.3"></path>
-        `,
-        Shorts: `
-             <path d="M17.77 10.32l-1.2-3.5c-0.18-0.52-0.65-0.9-1.2-0.96c-0.55-0.08-1.1 0.16-1.42 0.6L12 9.5l-2-3 c-0.8-1.2-2.4-1.6-3.7-0.9C4.8 6.4 4 8.1 4.5 9.6l1.2 3.5c0.18 0.52 0.65 0.9 1.2 0.96c0.55 0.08 1.1-0.16 1.42-0.6L10 10.5l2 3 c0.8 1.2 2.4 1.6 3.7 0.9C17.2 13.6 18 11.9 17.5 10.4z M10 14.65V10.7l3.43 1.98L10 14.65z" fill="currentColor"></path>
-             <path d="M10 14.65l3.43-1.98L10 10.7v3.95z" fill="white"></path>
-        `,
-        WatchLater: `
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.3"></path>
-            <path d="M13 7h-2v5.41l4.29 2.51l1-1.66l-3.29-1.92V7z" fill="currentColor"></path>
-        `,
-        Playlists: `
-            <path d="M3 13h18v-2H3v2zm0-4h18V7H3v2zm0 8h12v-2H3v2zm16-2v6l5-3-5-3z" fill="currentColor"></path>
-            <path d="M19 17v6l5-3z" fill="currentColor" opacity="0.5"></path>
-        `,
-        History: `
-            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z" fill="currentColor" opacity="0.5"></path>
-            <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"></path>
-        `,
-        Trending: `
-           <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" fill="currentColor"></path>
-           <circle cx="19.5" cy="9.5" r="1.5" fill="currentColor" opacity="0.5"></circle>
-        `,
+        Subscriptions: '<path d="M20 7H4V6h16v1zm-2 4H6v-1h12v1zm4 11v-8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8h20zM10 17l6-3.5-6-3.5v7z" fill="currentColor"></path>',
+        Shorts: '<path d="M17.77 10.32l-1.2-3.5c-0.18-0.52-0.65-0.9-1.2-0.96c-0.55-0.08-1.1 0.16-1.42 0.6L12 9.5l-2-3 c-0.8-1.2-2.4-1.6-3.7-0.9C4.8 6.4 4 8.1 4.5 9.6l1.2 3.5c0.18 0.52 0.65 0.9 1.2 0.96c0.55 0.08 1.1-0.16 1.42-0.6L10 10.5l2 3 c0.8 1.2 2.4 1.6 3.7 0.9C17.2 13.6 18 11.9 17.5 10.4z M10 14.65V10.7l3.43 1.98L10 14.65z" fill="currentColor"></path>',
+        WatchLater: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"></path>',
+        Playlists: '<path d="M19 9H2v2h17V9zm0-4H2v2h17V5zM2 15h13v-2H2v2zm15-2v6l5-3-5-3z" fill="currentColor"></path>',
+        History: '<path d="M13 3a9 9 0 109 9 9 9 0 00-9-9zm0 16a7 7 0 117-7 7 7 0 01-7 7zm1-11h-2v5.41l4.29 2.51.71-1.22-3-1.78z" fill="currentColor"></path>',
+        Trending: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z" fill="currentColor"></path>'
     };
 
     constructor() {
@@ -68,6 +50,9 @@ window.YPP.features.HeaderNav = class HeaderNav {
             return;
         }
 
+        // Inject styles consistently
+        this._injectStyles();
+
         if (this.isEnabled) {
             this.handleSidebarState();
             // Re-inject if context changed
@@ -93,12 +78,84 @@ window.YPP.features.HeaderNav = class HeaderNav {
         const navGroup = document.querySelector('.ypp-nav-group');
         if (navGroup) navGroup.remove();
 
+        this.Utils.removeStyle('ypp-header-nav-style');
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
     }
 
     handleSidebarState() {
         // Toggle body class based on setting
         document.body.classList.toggle('ypp-hide-sidebar', !!this.settings.forceHideSidebar);
+    }
+
+    _injectStyles() {
+        const css = `
+            .ypp-nav-group {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-left: 16px;
+                margin-right: 16px;
+                height: 40px;
+            }
+            .ypp-nav-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: var(--yt-spec-text-primary);
+                transition: background-color 0.2s;
+                position: relative;
+            }
+            .ypp-nav-btn:hover {
+                background-color: var(--yt-spec-badge-chip-background);
+            }
+            .ypp-nav-btn.active {
+                background-color: var(--yt-spec-text-primary);
+                color: var(--yt-spec-text-primary-inverse);
+            }
+            .ypp-nav-btn svg {
+                width: 24px;
+                height: 24px;
+                fill: currentColor;
+            }
+            /* Tooltip integration (simple title for now) */
+            .ypp-nav-btn::after {
+                content: attr(title);
+                position: absolute;
+                bottom: -30px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s;
+                z-index: 2000;
+            }
+            .ypp-nav-btn:hover::after {
+                opacity: 1;
+            }
+            /* Hide Sidebar Support */
+            body.ypp-hide-sidebar ytd-mini-guide-renderer, 
+            body.ypp-hide-sidebar app-drawer, 
+            body.ypp-hide-sidebar #guide {
+                display: none !important;
+            }
+            body.ypp-hide-sidebar ytd-app {
+                --ytd-mini-guide-width: 0px !important;
+            }
+            body.ypp-hide-sidebar #content {
+                margin-left: 0 !important;
+            }
+        `;
+        this.Utils.addStyle(css, 'ypp-header-nav-style');
     }
 
     observeHeader() {
@@ -171,11 +228,6 @@ window.YPP.features.HeaderNav = class HeaderNav {
 
             const navGroup = document.createElement('div');
             navGroup.className = 'ypp-nav-group ypp-nav-group-right';
-            
-            // Force visibility styles inline to prevent overrides
-            navGroup.style.display = 'flex';
-            navGroup.style.opacity = '1';
-            navGroup.style.visibility = 'visible';
 
             // Define button config for cleaner iteration
             const buttons = [
@@ -218,7 +270,6 @@ window.YPP.features.HeaderNav = class HeaderNav {
             } else {
                 // Fallback: just append to center section
                 centerSection.appendChild(navGroup);
-                this.Utils?.log('Using fallback append for nav buttons', 'HEADERNAV', 'warn');
             }
 
             this._updateActiveStates();
@@ -239,7 +290,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
         try {
             const btn = document.createElement('div');
             btn.className = 'ypp-nav-btn';
-            btn.title = label;
+            btn.title = label; // Used by CSS tooltip
             btn.dataset.url = url;
             btn.innerHTML = `
                 <svg viewBox="0 0 24 24" class="ypp-nav-icon">${svgContent}</svg>

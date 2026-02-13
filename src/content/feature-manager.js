@@ -56,7 +56,6 @@ window.YPP.FeatureManager = class FeatureManager {
             focusMode: 'FocusMode',
             player: 'Player',
             contentControl: 'ContentControl',
-            adSkipper: 'AdSkipper',
             sidebar: 'SidebarManager',
             headerNav: 'HeaderNav',
             searchRedesign: 'SearchRedesign',

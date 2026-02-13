@@ -54,7 +54,6 @@
                 "src/content/features/watch/player.js",
                 "src/content/features/home/shorts-tools.js",
                 "src/content/features/watch/player-tools.js",
-                "src/content/features/watch/ad-skipper.js",
                 "src/content/features/layout/sidebar.js",
                 "src/content/features/search/search-redesign.js",
                 "src/content/feature-manager.js",

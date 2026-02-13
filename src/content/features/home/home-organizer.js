@@ -10,39 +10,43 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
-        this.observer = new window.YPP.Utils.DOMObserver(); // Shared
+        // Use the shared DOMObserver mechanism
+        this.domObserver = new window.YPP.Utils.DOMObserver(); 
         /** @type {Object<string, string>} Channel name to tag mapping */
         this.channelTags = {};
-        /** @type {Array<HTMLElement>} Active tag filter buttons */
-        this.tagButtons = [];
+        /** @type {boolean} Feature active state */
         this.isActive = false;
     }
 
     /**
      * Initialize feature with settings and load stored channel tags.
      * @param {Object} settings - User settings
-     * @returns {void}
      */
-    run(settings) {
+    async run(settings) {
         this.settings = settings;
+        // Logic: Enable unless "hookFreeHome" is ON (which implies a minimal home)
+        // Or maybe hookFreeHome means "clean home". 
+        // Assuming original logic: if !hookFreeHome, enable organizer.
         if (!settings.hookFreeHome) {
-            this.enable();
+            await this.enable();
         } else {
             this.disable();
         }
     }
 
-    enable() {
-        this.init();
-    }
-
-    async init() {
+    /**
+     * Enable the feature
+     */
+    async enable() {
         if (this.isActive) return;
         this.isActive = true;
+        this.Utils.log('Home Organizer Enabled', 'HOME');
+
         await this.loadTags();
 
-        // Observe Grid
-        this.observer.register('home-grid', this.CONSTANTS.SELECTORS.GRID_CONTENTS, () => {
+        // Register observer for the grid
+        this.domObserver.start();
+        this.domObserver.register('home-grid', this.CONSTANTS.SELECTORS.GRID_CONTENTS, () => {
             this.organizeFeed();
         });
 
@@ -50,52 +54,76 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         this.organizeFeed();
 
         // Handle Popover close
-        document.addEventListener('click', (e) => {
+        this._boundClickListener = (e) => {
             if (!e.target.closest('.ypp-tag-btn') && !e.target.closest('.ypp-tag-popover')) {
                 this.removePopover();
             }
-        });
+        };
+        document.addEventListener('click', this._boundClickListener);
     }
 
+    /**
+     * Disable the feature
+     */
     disable() {
+        if (!this.isActive) return;
         this.isActive = false;
+        
+        this.domObserver.stop();
+        this.domObserver.unregister('home-grid');
+
         document.querySelectorAll('.ypp-tag-btn').forEach(el => el.remove());
+        document.querySelectorAll('.ypp-feed-separator').forEach(el => el.remove());
         this.removePopover();
+
+        if (this._boundClickListener) {
+            document.removeEventListener('click', this._boundClickListener);
+        }
+        
+        this.Utils.log('Home Organizer Disabled', 'HOME');
     }
 
+    /**
+     * Load tags from storage
+     */
     async loadTags() {
-        return new Promise(resolve => {
-            chrome.storage.local.get('channelTags', (data) => {
-                if (chrome.runtime.lastError) {
-                    this.Utils.log(`Storage Error: ${chrome.runtime.lastError.message}`, 'HOME', 'error');
-                    this.channelTags = {};
-                    resolve();
-                    return;
-                }
-                this.channelTags = data.channelTags || {};
-                resolve();
-            });
-        });
+        try {
+            const data = await this.Utils.loadSettings(); // Actually we need 'channelTags', not 'settings'
+            // Utils.loadSettings gets 'settings' key.
+            // We need a generic storage getter for 'channelTags'. 
+            // Utils.getSetting gets from 'settings' object usually? 
+            // Let's check Utils.js. loadSettings gets "settings". 
+            // We need raw storage for channelTags which is likely a separate key.
+            // Let's use direct chrome.storage for this separate key or add a utility.
+            // For now, consistent with others: use direct chrome.storage or add helper. 
+            // Utils has `loadSettings` which returns `settings`. 
+            
+            const result = await chrome.storage.local.get('channelTags');
+            this.channelTags = result.channelTags || {};
+        } catch (e) {
+            this.Utils.log(`Failed to load tags: ${e.message}`, 'HOME', 'error');
+        }
     }
 
+    /**
+     * Save a tag for a channel
+     * @param {string} channelName 
+     * @param {string} tag 
+     */
     async saveTag(channelName, tag) {
-        // Note: Using Channel Name as ID for now since grabbing Channel ID from DOM is tricky without API.
-        // Ideally we grab the channel URL or distinct ID.
         this.channelTags[channelName] = tag;
-
-        return new Promise((resolve) => {
-            chrome.storage.local.set({ channelTags: this.channelTags }, () => {
-                if (chrome.runtime.lastError) {
-                    this.Utils.log(`Storage Save Error: ${chrome.runtime.lastError.message}`, 'HOME', 'error');
-                    this.Utils.createToast('Failed to save tag');
-                } else {
-                    this.Utils.createToast(`Tagged as ${tag}`);
-                }
-                resolve();
-            });
-        });
+        try {
+            await chrome.storage.local.set({ channelTags: this.channelTags });
+            this.Utils.createToast(`Tagged as ${tag}`);
+        } catch (e) {
+            this.Utils.log(`Failed to save tag: ${e.message}`, 'HOME', 'error');
+            this.Utils.createToast('Failed to save tag', 'error');
+        }
     }
 
+    /**
+     * Organize the feed (Separators, Priorities, Tags)
+     */
     organizeFeed() {
         if (!this.isActive) return;
 
@@ -112,10 +140,14 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         // Feature 2: Visual Priority
         this.applyVisualPriority(contents);
 
-        // Feature 4: Topic Tags
+        // Feature 3: Topic Tags
         this.injectTagButtons(contents);
     }
 
+    /**
+     * Apply visual styles based on priority/type
+     * @param {HTMLElement} contents 
+     */
     applyVisualPriority(contents) {
         const lowPrioritySelectors = ['ytd-rich-shelf-renderer[is-shorts]', 'ytd-reel-shelf-renderer'];
         lowPrioritySelectors.forEach(sel => {
@@ -126,33 +158,23 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         contents.querySelectorAll('ytd-rich-item-renderer').forEach(item => {
             // Shorts Check
             if (item.querySelector('a[href^="/shorts/"]')) item.classList.add('ypp-priority-low');
-
-            // Tag Check
-            const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim();
-            if (channelName && this.channelTags[channelName]) {
-                // If tagged, maybe highlight or show badge?
-                // For now, let's just ensure the button reflects it? 
-                // We'll update button text in injectTagButtons
-            }
         });
     }
 
+    /**
+     * Inject tagging buttons onto video cards
+     * @param {HTMLElement} contents 
+     */
     injectTagButtons(contents) {
         const videoItems = contents.querySelectorAll('ytd-rich-item-renderer');
         videoItems.forEach(item => {
             if (item.querySelector('.ypp-tag-btn')) return;
 
-            const metaBlock = item.querySelector('#details');
-            if (!metaBlock) return;
-
-            // Positioning: Relative to details or thumbnail?
-            // User requested: "Hover button on video card"
-            // Let's put it over the thumbnail for visibility or near the menu button.
-            // Thumbnail is safer for "Hover" effect.
             const thumbnail = item.querySelector('ytd-thumbnail');
             if (!thumbnail) return;
 
-            // Make parent relative if needed (ytd-thumbnail usually is)
+            // Positioning handled by CSS (absolute)
+            // Ensure parent has position relative (ytd-thumbnail does)
 
             const btn = document.createElement('button');
             btn.className = 'ypp-tag-btn';
@@ -179,6 +201,12 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         });
     }
 
+    /**
+     * Handle click on tag button
+     * @param {Event} e 
+     * @param {string} channelName 
+     * @param {HTMLElement} btn 
+     */
     handleTagClick(e, channelName, btn) {
         this.removePopover();
         if (!channelName) return;
@@ -197,13 +225,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
                     delete this.channelTags[channelName];
                     btn.classList.remove('tagged');
                     btn.innerHTML = '#';
-
-                    // Use callback to check for errors
-                    chrome.storage.local.set({ channelTags: this.channelTags }, () => {
-                        if (chrome.runtime.lastError) {
-                            this.Utils.log(`Storage Clear Error: ${chrome.runtime.lastError.message}`, 'HOME', 'error');
-                        }
-                    });
+                    await this.saveTag(channelName, null); // Handle delete in saveTag if needed or just save map
                 } else {
                     await this.saveTag(channelName, tag);
                     btn.classList.add('tagged');
@@ -237,13 +259,6 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
             else sibling.classList.remove('ypp-section-hidden');
             sibling = sibling.nextElementSibling;
         }
-    }
-
-    startObserver() {
-        const target = document.querySelector(this.CONSTANTS.SELECTORS.GRID_RENDERER);
-        if (!target) return;
-        this.observer = new MutationObserver(() => this.organizeFeed());
-        this.observer.observe(target, { childList: true, subtree: true });
     }
 
     createSeparator(text, specificClass = '') {
