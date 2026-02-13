@@ -696,8 +696,8 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
   width: 100%;
   padding: 0;
   margin: 0;
@@ -709,35 +709,44 @@ body.ypp-search-grid-mode ytd-video-renderer {
   max-width: 100%;
   min-width: 0;
   margin: 0;
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  background: rgba(18, 18, 18, 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
+  position: relative;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer:hover {
-  transform: translateY(-4px);
-  border-color: rgba(62, 166, 255, 0.4);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(62, 166, 255, 0.3);
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(30, 30, 30, 0.7);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(62, 166, 255, 0.15);
+  z-index: 10;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer:hover::before {
+body.ypp-search-grid-mode ytd-video-renderer::after {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at top, rgba(58, 134, 255, 0.1), transparent 70%);
-  border-radius: 16px;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: skewX(-20deg);
+  transition: 0.5s;
   pointer-events: none;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer:hover::after {
+  left: 150%;
+  transition: 0.7s ease-in-out;
 }
 
 /* Thumbnail */
@@ -745,10 +754,19 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
   width: 100%;
   height: auto;
   aspect-ratio: 16/9;
-  border-radius: var(--ypp-radius-md);
+  border-radius: 12px;
   overflow: hidden;
   margin-right: 0;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-thumbnail img {
+  transform: scale(1.05);
 }
 
 /* Text Content */
@@ -763,22 +781,28 @@ body.ypp-search-grid-mode ytd-video-renderer #meta {
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #video-title {
-  font-size: 14px;
-  line-height: 1.3;
-  font-weight: 500;
-  margin-bottom: 8px;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ypp-text-primary);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #channel-info,
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
-  font-size: 12px;
+  font-size: 1.3rem;
   margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #metadata-line {
-  font-size: 12px;
+  font-size: 1.2rem;
   color: var(--ypp-text-secondary);
-  opacity: 0.7;
+  opacity: 0.8;
+  font-weight: 400;
 }
 
 /* Hide Description */
@@ -788,15 +812,17 @@ body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container {
 
 /* Channel Icon */
 body.ypp-search-grid-mode ytd-video-renderer #channel-info {
-  padding: 8px 0;
+  padding: 8px 0 4px 0;
   display: flex;
   align-items: center;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
-  width: 24px;
-  height: 24px;
-  margin-right: 8px;
+  width: 28px;
+  height: 28px;
+  margin-right: 10px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 /* Non-Video Elements Span Full Width */
@@ -854,22 +880,32 @@ body.ypp-hide-search-shorts ytd-video-renderer:has(a[href*="/shorts/"]) {
   overflow: hidden;
 }
 
-/* Responsive Search Grid */
+/* Responsive Search Grid - Enhanced */
 @media (max-width: 1600px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
   }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
   }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
@@ -1071,250 +1107,175 @@ body.ypp-zen-mode #columns {
 
 /* Hidden Short Class */
 .ypp-hidden-short {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  height: 0;
-  width: 0;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  position: absolute;
-  left: -9999px;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  pointer-events: none !important;
 }
 
 /* Hidden Clutter Class */
-.ypp-hidden-clutter {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  height: 0;
-  margin: 0;
-  overflow: hidden;
+.ypp-hidden-clutter,
+.ypp-hidden-empty-container {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 
 /* ===================================================================================
-   10. SEARCH GRID REDESIGN (LAYERED STABILIZATION)
+   10. SEARCH GRID REDESIGN - PREMIUM GLASS
    =================================================================================== */
 
-/* 1. Scoped Container */
-.ypp-search-grid-container {
+/* --- 1. View Mode Toggles --- */
+.ypp-search-grid-mode ytd-search ytd-item-section-renderer #contents.ypp-search-grid-container {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
-  gap: 24px !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important; /* Wider, premium cards */
+  gap: 20px !important;
   align-items: start !important;
   margin-top: 16px !important;
-  padding-bottom: 40px !important;
+  padding-bottom: 60px !important;
 }
 
-/* 2. Layered Item Application */
-
-/* TYPE A: TRULY FULL WIDTH (Channels, Shelves, Playlists) */
-.ypp-search-grid-container>.ypp-full-width-item {
-  grid-column: 1 / -1 !important;
-  width: 100% !important;
-  margin-bottom: 24px !important;
-  max-width: none !important;
+/* List mode reset */
+.ypp-search-list-mode ytd-search ytd-item-section-renderer #contents {
+  display: block !important;
 }
 
-/* TYPE B: GRID ITEMS (Videos, Playlists, Mixes) */
-.ypp-search-grid-container>.ypp-grid-item {
-  grid-column: auto !important;
-  width: 100% !important;
+/* --- 2. Glass Cards (Grid Mode) --- */
+.ypp-search-grid-mode .ypp-grid-item {
   display: flex !important;
   flex-direction: column !important;
-  margin-bottom: 0 !important;
-  max-width: none !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 12px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  backdrop-filter: blur(12px) !important; /* The Glass Effect */
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
+  height: 100% !important; /* Uniform height */
+  position: relative !important;
+  isolation: isolate !important;
 }
 
-/* Normalize Playlist Cards */
-body.ypp-search-grid-mode ytd-playlist-renderer.ypp-grid-item {
-  width: 100% !important;
-  max-width: none !important;
+/* Hover Effect - Lift & Glow */
+.ypp-search-grid-mode .ypp-grid-item:hover {
+  transform: translateY(-6px) scale(1.02) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
+  z-index: 10 !important;
 }
 
-/* Normalize Mix/Radio Cards (prevent hero sizing) */
-body.ypp-search-grid-mode ytd-radio-renderer.ypp-grid-item {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-/* Override YouTube's inline width styles */
-body.ypp-search-grid-mode .ypp-grid-item[style*="width"] {
-  width: 100% !important;
-}
-
-/* TYPE C: SHORTS & HIDDEN */
-.ypp-hidden-short {
-  display: none !important;
-}
-
-/* 
-   Video Card Internal Styling (Vertical Layout) 
-*/
+/* --- 3. Card Internal Layout --- */
 
 /* Thumbnail */
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+.ypp-search-grid-mode .ypp-grid-item ytd-thumbnail {
   width: 100% !important;
-  max-width: none !important;
   height: auto !important;
   aspect-ratio: 16/9 !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-  margin-right: 0 !important;
+  margin: 0 0 12px 0 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-
-/* Text Wrapper (Title + Meta) */
-body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
-  width: 100% !important;
+/* Text Wrapper */
+.ypp-search-grid-mode .ypp-grid-item .text-wrapper {
   max-width: none !important;
-  margin-top: 10px !important;
-  margin-left: 0 !important;
-  padding: 0 !important;
+  width: 100% !important;
 }
 
 /* Title */
-body.ypp-search-grid-mode ytd-video-renderer #video-title {
+.ypp-search-grid-mode .ypp-grid-item #video-title {
+  font-family: "Roboto", "Arial", sans-serif !important;
   font-size: 1.6rem !important;
-  line-height: 2.2rem !important;
-  font-weight: 500 !important;
-  margin-bottom: 4px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  color: #fff !important;
+  margin-bottom: 6px !important;
   display: -webkit-box !important;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  height: auto !important;
-  max-height: 4.4rem !important;
-  /* 2 lines */
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
 }
 
-/* Metadata (Channel Name, Views, Date) */
-body.ypp-search-grid-mode ytd-video-renderer #channel-info {
-  padding: 0 !important;
-  margin: 4px 0 !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-body.ypp-search-grid-mode ytd-video-renderer #metadata-line {
+/* Metadata */
+.ypp-search-grid-mode .ypp-grid-item #metadata-line,
+.ypp-search-grid-mode .ypp-grid-item #channel-info {
   font-size: 1.3rem !important;
-  color: var(--ypp-text-secondary) !important;
-  display: block !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Cleanup: Hide Description Snippet in Grid to save space */
-body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container,
-body.ypp-search-grid-mode ytd-video-renderer ytd-badge-supported-renderer {
+/* Hide descriptions in grid (clutter) */
+.ypp-search-grid-mode .ypp-grid-item .metadata-snippet-container {
   display: none !important;
 }
 
-/* ===================================================================================
-   PLAYLIST & MIX CARD NORMALIZATION
-   =================================================================================== */
-
-/* Ensure playlist thumbnails fit grid */
-body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
-body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
+/* --- 4. Full Width Items (Channels, Shelves) --- */
+.ypp-search-grid-mode .ypp-full-width-item {
+  grid-column: 1 / -1 !important;
   width: 100% !important;
-  max-width: none !important;
-  aspect-ratio: 16/9 !important;
-  border-radius: 12px !important;
+  margin-bottom: 24px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 16px !important;
 }
 
-/* Playlist metadata */
-body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
-body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-/* Global Hidden Helper */
+/* --- 5. Hiding Shorts & Clutter --- */
 .ypp-hidden-short {
   display: none !important;
 }
 
-/* Fallback: Hide Shorts Shelves if JS misses them */
-ytd-reel-shelf-renderer,
-ytd-shelf-renderer:has(span#title[aria-label*="Shorts"]),
-ytd-rich-shelf-renderer[is-shorts] {
-  display: none !important;
-}
-
-/* ===================================================================================
-   11. SEARCH VIEW TOGGLE
-   =================================================================================== */
-
-.ypp-view-mode-toggle {
+/* --- 6. View Toggle Button --- */
+#ypp-view-toggle {
   display: flex;
+  align-items: center;
   gap: 4px;
-  margin-right: 16px;
-  align-self: center;
-  display: inline-flex;
-  vertical-align: middle;
+  margin-left: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ypp-toggle-btn {
   background: transparent;
   border: none;
-  color: var(--yt-spec-text-secondary, #aaa);
-  padding: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 6px;
   border-radius: 50%;
   cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
 }
 
 .ypp-toggle-btn:hover {
+  color: #fff;
   background: rgba(255, 255, 255, 0.1);
-  color: var(--yt-spec-text-primary, #fff);
 }
 
 .ypp-toggle-btn.active {
   background: rgba(255, 255, 255, 0.2);
-  color: var(--yt-spec-text-primary, #fff);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-/* ===================================================================================
-   12. COMPACT LIST MODE
-   =================================================================================== */
-
-/* Reset grid overrides when in list mode */
-body.ypp-search-list-mode ytd-item-section-renderer #contents {
-  display: block !important;
-}
-
-/* Compact spacing for list items */
-body.ypp-search-list-mode ytd-video-renderer {
-  margin-top: 0 !important;
-  margin-bottom: 2px !important;
-  padding: 12px 0 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Ensure thumbnails stay standard size in list mode (override any grid leaks) */
-body.ypp-search-list-mode ytd-video-renderer ytd-thumbnail {
-  width: 360px !important;
-  /* Standard-ish list width or let YT decide? Let's check. */
-  max-width: 360px !important;
-  flex: 0 0 auto !important;
-}
-
-/* Clean up metadata in list mode too */
-body.ypp-search-list-mode ytd-video-renderer .metadata-snippet-container {
-  display: block !important;
-  /* Show snippets in list mode for readability? User said "clean vertical" */
-  /* Let's keep it standard but clean */
-}
 
 .yt-premium-plus-theme ytd-multi-page-menu-renderer,
 .yt-premium-plus-theme ytd-simple-menu-header-renderer,
@@ -1599,4 +1560,38 @@ body.yt-premium-plus-theme ytd-continuation-item-renderer {
   grid-column: 1 / -1 !important;
   width: 100% !important;
   margin-top: 24px !important;
+}
+
+/* ===================================================================================
+   11. SEARCH GRID - STRICT SHORTS SUPPRESSION & LAYOUT HARDENING
+   =================================================================================== */
+
+/* --- 1. Global Shorts Kill Switch --- */
+/* Strictly hide any container that looks like a Shorts shelf or contains Shorts metadata */
+body.ypp-search-grid-mode ytd-reel-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer[is-shorts],
+body.ypp-search-grid-mode ytd-shelf-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="SHORTS"]),
+body.ypp-search-grid-mode ytd-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*="/shorts/"]) {
+  display: none !important;
+}
+
+/* --- 2. Force Full Width for Non-Card Elements --- */
+/*
+   Any renderer that is NOT a card must span the full grid width.
+   We explicitly exclude known card types (.ypp-grid-item targets them in JS).
+*/
+body.ypp-search-grid-mode ytd-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-section-renderer,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+body.ypp-search-grid-mode ytd-channel-renderer {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* --- 3. Header Cleanup --- */
+/* Hide headers that might belong to hidden Shorts shelves */
+body.ypp-search-grid-mode ytd-item-section-renderer:has(ytd-reel-shelf-renderer) #header {
+  display: none !important;
 }

@@ -20,10 +20,18 @@
         return window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
     };
 
+    // Helper for safe logging before Utils is fully loaded
+    const safeLog = (msg, level = 'warn') => {
+        console[level]?.(`[YPP:MAIN] ${msg}`);
+    };
+
     const YPPMainApp = {
         // =========================================================================
         // STATE
         // =========================================================================
+        /** @type {Object} Shortcuts to Utils */
+        get Utils() { return window.YPP.Utils; },
+
         /** @type {window.YPP.FeatureManager|null} */
         featureManager: null,
         /** @type {Object} User settings */
@@ -52,12 +60,12 @@
         async start() {
             // Prevent multiple initialization attempts
             if (this.bootstrapLock) {
-                Utils?.log('Bootstrap already in progress', 'MAIN', 'warn');
+                this.Utils?.log('Bootstrap already in progress', 'MAIN', 'warn');
                 return;
             }
 
             if (this.isInitialized) {
-                Utils?.log('App already initialized', 'MAIN', 'warn');
+                this.Utils?.log('App already initialized', 'MAIN', 'warn');
                 return;
             }
 
@@ -68,7 +76,7 @@
                 await this.waitForDependencies();
 
                 const startTime = performance.now();
-                Utils?.log('Starting App...', 'MAIN');
+                this.Utils?.log('Starting App...', 'MAIN');
 
                 await this.loadSettings();
                 this.initFeatureManager();
@@ -79,7 +87,7 @@
                 this.bootstrapLock = false;
 
                 const loadTime = (performance.now() - startTime).toFixed(2);
-                Utils?.log(`Extension Initialized Successfully in ${loadTime}ms`, 'MAIN');
+                this.Utils?.log(`Extension Initialized Successfully in ${loadTime}ms`, 'MAIN');
 
                 this.showReadyToast();
                 document.documentElement.classList.add('ypp-loaded');
@@ -100,13 +108,13 @@
 
             // Wait for Utils
             if (!window.YPP?.Utils) {
-                Utils?.log('Waiting for Utils...', 'MAIN', 'debug');
+                this.Utils?.log('Waiting for Utils...', 'MAIN', 'debug');
                 await this.waitFor(() => window.YPP?.Utils !== undefined, timeout);
             }
 
             // Wait for CONSTANTS
             if (!window.YPP?.CONSTANTS) {
-                Utils?.log('Waiting for CONSTANTS...', 'MAIN', 'debug');
+                this.Utils?.log('Waiting for CONSTANTS...', 'MAIN', 'debug');
                 await this.waitFor(() => window.YPP?.CONSTANTS !== undefined, timeout);
             }
 
@@ -151,7 +159,7 @@
         initFeatureManager() {
             // Check for FeatureManager
             if (!window.YPP?.FeatureManager) {
-                Utils?.log('FeatureManager not found, checking for inline definition...', 'MAIN', 'warn');
+                this.Utils?.log('FeatureManager not found, checking for inline definition...', 'MAIN', 'warn');
 
                 // FeatureManager might be defined inline in main.js
                 if (typeof YPPMainApp.defineFeatureManager === 'function') {
@@ -182,7 +190,7 @@
             try {
                 // Check for Chrome storage API
                 if (!chrome?.storage?.local) {
-                    Utils?.log('Chrome storage API not available, using defaults', 'MAIN', 'warn');
+                    this.Utils?.log('Chrome storage API not available, using defaults', 'MAIN', 'warn');
                     this.settings = window.YPP.getDefaultSettings();
                     return;
                 }
@@ -190,18 +198,19 @@
                 const data = await chrome.storage.local.get('settings');
                 this.settings = data.settings || window.YPP.getDefaultSettings();
 
-                Utils?.log(`Settings Loaded (attempt ${attempt})`, 'MAIN', 'debug');
+                this.Utils?.log(`Settings Loaded (attempt ${attempt})`, 'MAIN', 'debug');
 
             } catch (error) {
-                Utils?.log(`Error loading settings (attempt ${attempt}): ${error.message}`, 'MAIN', 'error');
+                this.Utils?.log(`Error loading settings (attempt ${attempt}): ${error.message}`, 'MAIN', 'error');
 
                 if (attempt < this.MAX_RETRY_ATTEMPTS) {
-                    await Utils?.timeout(this.RETRY_DELAY);
+                    await // Use this.Utils throughout the file
+timeout(this.RETRY_DELAY);
                     return this.loadSettings(attempt + 1);
                 }
 
                 // Fallback to defaults
-                Utils?.log('Using default settings after retry failure', 'MAIN', 'warn');
+                this.Utils?.log('Using default settings after retry failure', 'MAIN', 'warn');
                 this.settings = window.YPP.getDefaultSettings();
             }
         },
@@ -215,9 +224,9 @@
             try {
                 this.settings = { ...this.settings, ...newSettings };
                 await chrome.storage.local.set({ settings: this.settings });
-                Utils?.log('Settings saved', 'MAIN', 'debug');
+                this.Utils?.log('Settings saved', 'MAIN', 'debug');
             } catch (error) {
-                Utils?.log(`Error saving settings: ${error.message}`, 'MAIN', 'error');
+                this.Utils?.log(`Error saving settings: ${error.message}`, 'MAIN', 'error');
             }
         },
 
@@ -232,7 +241,7 @@
         setupEvents() {
             // Handle YouTube SPA navigation
             const handleNavigation = () => {
-                Utils?.log('Navigation detected', 'MAIN', 'debug');
+                this.Utils?.log('Navigation detected', 'MAIN', 'debug');
                 this.updateContext();
                 if (this.featureManager) {
                     this.featureManager.init(this.settings);
@@ -253,7 +262,7 @@
                             const newSettings = changes.settings.newValue;
                             if (newSettings) {
                                 this.settings = newSettings;
-                                Utils?.log('Settings updated from popup', 'MAIN', 'debug');
+                                this.Utils?.log('Settings updated from popup', 'MAIN', 'debug');
 
                                 if (this.featureManager) {
                                     this.featureManager.init(this.settings);
@@ -261,11 +270,11 @@
                             }
                         }
                     } catch (error) {
-                        Utils?.log(`Error handling settings change: ${error.message}`, 'MAIN', 'error');
+                        this.Utils?.log(`Error handling settings change: ${error.message}`, 'MAIN', 'error');
                     }
                 });
             } else {
-                Utils?.log('chrome.storage.onChanged API not available', 'MAIN', 'warn');
+                this.Utils?.log('chrome.storage.onChanged API not available', 'MAIN', 'warn');
             }
         },
 
@@ -278,12 +287,17 @@
          * @private
          */
         updateContext() {
-            Utils?.startPerf('updateContext');
+            this.Utils?.startPerf('updateContext');
             try {
                 const pathname = window.location.pathname;
+                const body = document.body;
+
+                if (!body) {
+                    // Body might not be ready yet
+                    return;
+                }
                 
-                // Cache previous context for comparison (optional optimization, but classList.toggle is cheap)
-                
+                // Cache previous context for comparison
                 this.context = {
                     isHome: pathname === '/' || pathname === '/index' || pathname === '/feed/subscriptions',
                     isWatch: pathname.startsWith('/watch'),
@@ -298,26 +312,23 @@
                     isHistory: pathname === '/feed/history'
                 };
 
-                const body = document.body;
                 // Apply context classes to body
-                if (body) {
-                    // Update context classes
-                    body.classList.toggle('ypp-watch-page', this.context.isWatch);
-                    body.classList.toggle('ypp-shorts-page', this.context.isShortsPage); // Fix: use isShortsPage for specific styling
-                    body.classList.toggle('ypp-home-page', this.context.isHome);
-                    body.classList.toggle('ypp-search-page', this.context.isSearch);
-                    body.classList.toggle('ypp-channel-page', this.context.isChannel); // Added channel class
+                // Update context classes
+                body.classList.toggle('ypp-watch-page', this.context.isWatch);
+                body.classList.toggle('ypp-shorts-page', this.context.isShortsPage);
+                body.classList.toggle('ypp-home-page', this.context.isHome);
+                body.classList.toggle('ypp-search-page', this.context.isSearch);
+                body.classList.toggle('ypp-channel-page', this.context.isChannel);
 
-                    // Re-apply premium theme class (critical for layout)
-                    if (this.settings?.premiumTheme) {
-                        body.classList.add('yt-premium-plus-theme');
-                    }
+                // Re-apply premium theme class (critical for layout)
+                if (this.settings?.premiumTheme) {
+                    body.classList.add('yt-premium-plus-theme');
                 }
 
-                Utils?.log('Context updated', 'MAIN', 'debug', this.context);
+                this.Utils?.log('Context updated', 'MAIN', 'debug', this.context);
 
             } catch (error) {
-                Utils?.log(`Error updating context: ${error.message}`, 'MAIN', 'error');
+                this.Utils?.log(`Error updating context: ${error.message}`, 'MAIN', 'error');
                 // Reset context on error
                 this.context = {
                     isHome: false,
@@ -327,7 +338,7 @@
                     isShorts: false
                 };
             } finally {
-                Utils?.endPerf('updateContext');
+                this.Utils?.endPerf('updateContext');
             }
         },
 
@@ -342,9 +353,9 @@
          */
         showReadyToast(message = 'YouTube Premium+ Ready') {
             try {
-                Utils?.createToast(message);
+                this.Utils?.createToast(message);
             } catch (error) {
-                Utils?.log(`Error showing ready toast: ${error.message}`, 'MAIN', 'error');
+                this.Utils?.log(`Error showing ready toast: ${error.message}`, 'MAIN', 'error');
             }
         },
 
@@ -358,19 +369,19 @@
          * @param {Error} error - The error object
          */
         handleCriticalError(error) {
-            Utils?.log(`Critical Bootstrap Error: ${error.message}`, 'MAIN', 'error');
+            this.Utils?.log(`Critical Bootstrap Error: ${error.message}`, 'MAIN', 'error');
             console.error('[YPP:MAIN] Initialization failed:', error);
 
             // Show error toast
             try {
-                Utils?.createToast('YouTube Premium+ failed to load!', 'error');
+                this.Utils?.createToast('YouTube Premium+ failed to load!', 'error');
             } catch (e) {
                 // Last resort fallback
                 console.error('[YPP] Fatal error:', error);
             }
 
             // Log suggestions
-            Utils?.log('Check console for details. Extension features may be unavailable.', 'MAIN', 'error');
+            this.Utils?.log('Check console for details. Extension features may be unavailable.', 'MAIN', 'error');
         },
 
         /**
@@ -379,7 +390,7 @@
          * @param {Error} error - The error object
          */
         handleError(component, error) {
-            Utils?.log(`Error in ${component}: ${error.message}`, 'MAIN', 'error');
+            this.Utils?.log(`Error in ${component}: ${error.message}`, 'MAIN', 'error');
             console.error(`[YPP:${component}] Error:`, error);
         },
 
@@ -416,11 +427,11 @@
          */
         reinit() {
             if (!this.isInitialized) {
-                Utils?.log('Cannot reinit: not initialized', 'MAIN', 'warn');
+                this.Utils?.log('Cannot reinit: not initialized', 'MAIN', 'warn');
                 return;
             }
 
-            Utils?.log('Reinitializing features...', 'MAIN');
+            this.Utils?.log('Reinitializing features...', 'MAIN');
             this.updateContext();
             if (this.featureManager) {
                 this.featureManager.init(this.settings);
@@ -431,7 +442,7 @@
          * Cleanup and disable all features
          */
         cleanup() {
-            Utils?.log('Cleaning up...', 'MAIN');
+            this.Utils?.log('Cleaning up...', 'MAIN');
 
             if (this.featureManager) {
                 this.featureManager.disableAll?.();

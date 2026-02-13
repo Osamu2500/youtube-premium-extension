@@ -446,7 +446,8 @@ window.YPP.features.Theme = class ThemeManager {
      */
     setSetting(key, value) {
         if (this._settings) {
-            this._settings[key] = value;
+            // Create a copy to handle frozen objects
+            this._settings = { ...this._settings, [key]: value };
             this._run(this._settings);
         }
     }
