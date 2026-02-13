@@ -44,8 +44,7 @@ window.YPP.features.ContentControl = class ContentControl {
         );
 
         // Remove Shorts CSS
-        const style = document.getElementById('ypp-shorts-css');
-        if (style) style.remove();
+        this.showShortsGlobally();
 
         // Remove listeners
         if (this._redirectListenerAdded) {
@@ -74,9 +73,7 @@ window.YPP.features.ContentControl = class ContentControl {
             this.hideShortsGlobally();
             this.redirectShorts();
         } else {
-            // Revert Shorts specific changes
-            const style = document.getElementById('ypp-shorts-css');
-            if (style) style.remove();
+            this.showShortsGlobally();
             window.removeEventListener('yt-navigate-start', this.checkRedirect);
         }
 
@@ -91,31 +88,17 @@ window.YPP.features.ContentControl = class ContentControl {
     }
 
     /**
-     * Inject global CSS to hide Shorts shelves and tabs.
+     * Helper to toggler global shorts hiding class.
      */
     hideShortsGlobally() {
-        if (!document.getElementById('ypp-shorts-css')) {
-            const style = document.createElement('style');
-            style.id = 'ypp-shorts-css';
-            style.textContent = `
-                /* Home Page Shorts Shelf */
-                ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]) { display: none !important; }
-                
-                /* Sidebar Shorts */
-                ytd-guide-entry-renderer:has(a[title="Shorts"]) { display: none !important; }
-                ytd-mini-guide-entry-renderer:has(a[title="Shorts"]) { display: none !important; }
-                
-                /* Search Results Shorts */
-                ytd-reel-shelf-renderer { display: none !important; }
-                
-                /* Grid Video Shorts */
-                ytd-grid-video-renderer:has(span#text[aria-label="Shorts"]) { display: none !important; }
-                
-                /* Mobile/Other */
-                ytm-reel-shelf-renderer { display: none !important; }
-            `;
-            document.head.appendChild(style);
-        }
+        document.body.classList.add('ypp-hide-shorts');
+    }
+
+    /**
+     * Helper to remove global shorts hiding class.
+     */
+    showShortsGlobally() {
+        document.body.classList.remove('ypp-hide-shorts');
     }
 
     /**

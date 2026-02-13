@@ -462,7 +462,9 @@ export class SearchRedesign {
 
         // A. SHORTS DETECTION (Hide them)
         if (this._isShorts(node)) {
-            node.classList.add(SearchRedesign.CLASSES.HIDDEN_SHORT);
+            node.classList.add('ypp-hidden-short');
+            // Force display none inline to be safe against specificity wars
+            node.style.display = 'none';
             return;
         }
 

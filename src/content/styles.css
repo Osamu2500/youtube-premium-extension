@@ -175,10 +175,21 @@ body.ypp-hide-scrollbar {
   scrollbar-width: none;
 }
 
-/* Hide Shorts & Mixes */
+/* Hide Shorts & Mixes (Global) */
 body.ypp-hide-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-shorts ytd-rich-shelf-renderer[is-shorts],
+body.ypp-hide-shorts ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+body.ypp-hide-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-grid-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-grid-video-renderer:has(span#text[aria-label="Shorts"]),
+body.ypp-hide-shorts ytd-shelf-renderer[is-shorts],
+body.ypp-hide-shorts [is-shorts],
+body.ypp-hide-shorts ytd-guide-entry-renderer:has(a[title="Shorts"]),
+body.ypp-hide-shorts ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
+body.ypp-hide-shorts ytm-reel-shelf-renderer,
 body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='start_radio']) {
-  display: none;
+  display: none !important;
 }
 
 /* Hide Watched Videos */
@@ -947,20 +958,70 @@ body.ypp-search-grid-mode ytd-channel-renderer img#img {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Hide Shorts in Search */
-body.ypp-hide-search-shorts ytd-reel-shelf-renderer,
-body.ypp-hide-search-shorts ytd-shelf-renderer[is-shorts],
-body.ypp-hide-search-shorts ytd-rich-shelf-renderer[is-shorts],
-body.ypp-hide-search-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]),
-body.ypp-hide-search-shorts ytd-grid-video-renderer:has(a[href*="/shorts/"]),
-body.ypp-hide-search-shorts [is-shorts],
-body.ypp-hide-search-shorts ytd-video-renderer:has(a[href*="/shorts/"]) {
-  display: none;
-  visibility: hidden;
-  height: 0;
-  margin: 0;
-  padding: 0;
+
+/* Explicit class applied by JS for individual items */
+.ypp-hidden-short {
+  display: none !important;
+}
+
+
+/* ===================================================================================
+   7. SEARCH FILTERS (CHIPS)
+   =================================================================================== */
+
+/* Chip Container */
+body.ypp-search-grid-mode yt-chip-cloud-renderer {
+  margin-bottom: 24px;
+}
+
+/* Base Chip Style */
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer {
+  height: 36px;
+  border-radius: 18px;
+  margin-right: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ypp-glass-border);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
   overflow: hidden;
+}
+
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Active Chip */
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected],
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+}
+
+/* Chip Text */
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer yt-formatted-string,
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer span {
+  color: var(--ypp-text-secondary);
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 1.4rem;
+  padding: 0 16px;
+}
+
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected] yt-formatted-string,
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected yt-formatted-string {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+/* Next/Prev Buttons */
+body.ypp-search-grid-mode #left-arrow-button,
+body.ypp-search-grid-mode #right-arrow-button {
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(8px);
 }
 
 /* Responsive Search Grid - Enhanced */
