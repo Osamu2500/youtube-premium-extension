@@ -188,6 +188,11 @@
          */
         async loadSettings(attempt = 1) {
             try {
+                // Critical: Check if extension context is valid
+                if (!chrome.runtime?.id) {
+                     throw new Error('Extension context invalidated');
+                }
+
                 // Check for Chrome storage API
                 if (!chrome?.storage?.local) {
                     this.Utils?.log('Chrome storage API not available, using defaults', 'MAIN', 'warn');
@@ -203,9 +208,14 @@
             } catch (error) {
                 this.Utils?.log(`Error loading settings (attempt ${attempt}): ${error.message}`, 'MAIN', 'error');
 
+                if (error.message.includes('context invalidated')) {
+                    // Abort immediately if context is dead
+                    return;
+                }
+
                 if (attempt < this.MAX_RETRY_ATTEMPTS) {
-                    await // Use this.Utils throughout the file
-timeout(this.RETRY_DELAY);
+                    // Wait and retry
+                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
                     return this.loadSettings(attempt + 1);
                 }
 

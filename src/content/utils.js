@@ -495,7 +495,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * Create a standard player control button
      * @param {string} className - Extra CSS classes
      * @param {string} title - Tooltip title
-     * @param {string} svgContent - Inner SVG HTML
+     * @param {string} svgContent - Inner SVG HTML (WARNING: Trusted content only, uses innerHTML)
      * @param {Function} onClick - Click handler
      * @returns {HTMLButtonElement}
      */
@@ -556,9 +556,10 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
-     * Sanitize HTML to prevent XSS
-     * @param {string} str - String to sanitize
-     * @returns {string}
+     * Escapes HTML characters to prevent XSS.
+     * Note: This strictly escapes content, it does not preserve safe HTML tags.
+     * @param {string} str - String to escape
+     * @returns {string} Escaped HTML string
      */
     sanitizeHtml: (str) => {
         if (!str || typeof str !== 'string') return '';

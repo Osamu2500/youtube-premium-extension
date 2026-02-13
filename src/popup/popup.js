@@ -1,8 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- UTILITIES ---
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
+
+    const handleError = (context, error) => {
+        console.error(`[YPP:${context}]`, error);
+        // Optional: Show a toast or UI indication of error
+    };
+
     // --- TAB NAVIGATION ---
     const navItems = document.querySelectorAll('.nav-item[data-tab]');
     const tabs = document.querySelectorAll('.tab-content');
     const pageTitle = document.getElementById('page-title');
+
+    const titles = {
+        'global': 'Global Theme',
+        'navigation': 'Navigation',
+        'feed': 'Feed & Search', // Combined tab title
+        'player': 'Player Tools',
+        'focus': 'Focus Mode',
+        'settings': 'Extension Settings'
+    };
 
     function switchTab(tabId) {
         // Update Nav
@@ -18,24 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
         tabs.forEach(tab => {
             if (tab.id === `tab-${tabId}`) {
                 tab.classList.add('active');
-                // Remove inline display style if present to let CSS handle it
-                tab.style.display = '';
             } else {
                 tab.classList.remove('active');
-                tab.style.display = ''; // Clean up
             }
         });
 
         // Update Title
-        const titles = {
-            'global': 'Global Settings',
-            'navigation': 'Navigation & Sidebar',
-            'home': 'Home Layout',
-            'search': 'Search & Filter',
-            'player': 'Player & Watch',
-            'settings': 'Extension Settings'
-        };
         if (pageTitle) pageTitle.textContent = titles[tabId] || 'Settings';
+        
+        // Save last active tab (optional polish)
+        localStorage.setItem('ypp-last-tab', tabId);
     }
 
     navItems.forEach(item => {
@@ -45,22 +60,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- SETTINGS LOGIC ---
-    // All supported keys in the system - MATCHING HTML IDs
+    // Restore last tab
+    const lastTab = localStorage.getItem('ypp-last-tab');
+    if (lastTab && document.getElementById(`tab-${lastTab}`)) {
+        switchTab(lastTab);
+    }
+
+    // --- SETTINGS CONFIGURATION ---
+    // Must match IDs in popup.html exactly
     const settingKeys = [
         // Global
         'premiumTheme',
         'trueBlack',
+        'hideScrollbar',
         'customProgressBar',
         'progressBarColor',
-        'hideScrollbar',
         'blueProgress',
 
-        // Content Control (Global)
-        'hideShorts',
-        'redirectShorts',
-
-        // Navigation (NEW)
+        // Navigation
         'navTrending',
         'navShorts',
         'navSubscriptions',
@@ -69,78 +86,122 @@ document.addEventListener('DOMContentLoaded', () => {
         'navHistory',
         'forceHideSidebar',
 
-        // Home
+        // Feed & Home
         'hookFreeHome',
         'hideMixes',
-        'hideWatched',
+        'hideWatched', // Also in Search
         'grid4x4',
-
-        // Watch / Player
-        'autoQuality',
-        'enableRemainingTime',
-        'snapshotBtn',
-        'loopBtn',
-        'volumeBoost',
-        'enablePiP', // Added back
-        'enableTranscript', // Added back
-        'zenMode',
-        'studyMode',
-        'autoCinema',
-
-        // Distractions
-        'enableFocusMode',
-        'hideComments',
-        'hideEndScreens',
-        'hideSidebar',
-        'hideMerch',
-        'hideCards',
+        'hideShorts', // Global/Home
 
         // Search
         'searchGrid',
-        'hideSearchShorts',
         'cleanSearch',
-        'shortsAutoScroll', // New
+        'hideSearchShorts',
+        // 'shortsAutoScroll' removed from HTML for simplicity, or re-add if needed
 
-        // New Player Features
+        // Player
+        'autoQuality',
+        'enableRemainingTime',
+        'volumeBoost',
         'enableCustomSpeed',
-        'enableCinemaFilters'
+        'enableCinemaFilters',
+        'snapshotBtn',
+        'loopBtn',
+        'enablePiP',
+        
+        // Modes
+        'zenMode',
+        'studyMode',
+        'autoCinema',
+        
+        // Focus / Distractions
+        'enableFocusMode',
+        'hideComments',
+        'hideEndScreens',
+        'hideCards',
+        'hideMerch',
+        'redirectShorts'
     ];
 
-    // Defaults from Shared Constants
-    const defaultSettings = window.YPP.CONSTANTS.DEFAULT_SETTINGS;
-
+    // --- STORAGE HANDLING ---
+    
     // Load Settings
-    chrome.storage.local.get('settings', (data) => {
-        if (chrome.runtime.lastError) {
-            console.error('[YPP:POPUP] Storage Error:', chrome.runtime.lastError);
-            return;
-        }
-        // Merge with defaults to ensure new keys exist
-        const settings = { ...defaultSettings, ...(data.settings || {}) };
+    const loadSettings = () => {
+        try {
+            chrome.storage.local.get('settings', (data) => {
+                if (chrome.runtime.lastError) {
+                    handleError('LOAD', chrome.runtime.lastError);
+                    return;
+                }
 
+                const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
+                    ? window.YPP.CONSTANTS.DEFAULT_SETTINGS 
+                    : {}; // Fallback if constants not loaded
+                
+                const settings = { ...defaultSettings, ...(data.settings || {}) };
+
+                settingKeys.forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el) {
+                        if (el.type === 'checkbox') {
+                            el.checked = settings[key] !== undefined ? settings[key] : false;
+                        } else if (el.type === 'color' || el.type === 'text') {
+                            el.value = settings[key] || (key === 'progressBarColor' ? '#3ea6ff' : '');
+                        }
+                    }
+                });
+
+                updateDependencyUI();
+            });
+        } catch (e) {
+            handleError('LOAD_CRITICAL', e);
+        }
+    };
+
+    // Save Settings (Debounced)
+    const saveSettings = debounce(() => {
+        const settings = {};
         settingKeys.forEach(key => {
             const el = document.getElementById(key);
             if (el) {
                 if (el.type === 'checkbox') {
-                    el.checked = settings.hasOwnProperty(key) ? settings[key] : defaultSettings[key];
-                } else if (el.type === 'color' || el.type === 'text') {
-                    el.value = settings.hasOwnProperty(key) ? settings[key] : defaultSettings[key];
+                    settings[key] = el.checked;
+                } else {
+                    settings[key] = el.value;
                 }
             }
         });
 
-        // Handle special dependencies if any (e.g. progressBarColor only if customProgressBar is checked)
-        updateDependencyUI();
-    });
+        try {
+            chrome.storage.local.set({ settings }, () => {
+                if (chrome.runtime.lastError) {
+                    handleError('SAVE', chrome.runtime.lastError);
+                } else {
+                    // console.log('[YPP] Settings saved'); 
+                }
+            });
+        } catch (e) {
+            handleError('SAVE_CRITICAL', e);
+        }
+    }, 300); // 300ms debounce
 
-    // Save on Change
+    // --- EVENT LISTENERS ---
+    
     settingKeys.forEach(key => {
         const el = document.getElementById(key);
         if (el) {
             el.addEventListener('change', () => {
-                saveSettings(settingKeys);
+                saveSettings(); // Triggers debounced save
                 updateDependencyUI();
             });
+            // For color picker, also listen to input for real-time responsiveness if needed
+            if (el.type === 'color') {
+                el.addEventListener('input', () => {
+                    // We might not want to save on every pixel drag, but updating UI dependency is fine
+                    updateDependencyUI();
+                    saveSettings(); // Debounce handles the spam
+                });
+            }
         }
     });
 
@@ -148,44 +209,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
-            if (confirm('Reset all settings to default?')) {
+             const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
+                    ? window.YPP.CONSTANTS.DEFAULT_SETTINGS 
+                    : {};
+
+            if (confirm('Are you sure you want to reset all settings to default?')) {
                 chrome.storage.local.set({ settings: defaultSettings }, () => {
-                    settingKeys.forEach(key => {
-                        const el = document.getElementById(key);
-                        if (el) {
-                            if (el.type === 'checkbox') el.checked = defaultSettings[key];
-                            else el.value = defaultSettings[key];
-                        }
-                    });
-                    updateDependencyUI();
+                    loadSettings(); // Reload UI
                 });
             }
         });
     }
 
+    // --- UI DEPENDENCIES ---
     function updateDependencyUI() {
-        // Example: Disable color picker if custom progress bar is off
+        // Custom Progress Bar -> Color Picker
         const customProgress = document.getElementById('customProgressBar');
         const colorPicker = document.getElementById('progressBarColor');
+        
         if (customProgress && colorPicker) {
-            colorPicker.disabled = !customProgress.checked;
-            colorPicker.style.opacity = customProgress.checked ? '1' : '0.5';
+            const isDisabled = !customProgress.checked;
+            colorPicker.disabled = isDisabled;
+            colorPicker.parentElement.style.opacity = isDisabled ? '0.5' : '1';
+            colorPicker.parentElement.style.pointerEvents = isDisabled ? 'none' : 'auto';
+        }
+
+        // Focus Mode -> Sub-toggles (Optional visual hierarchy)
+        const focusMode = document.getElementById('enableFocusMode');
+        const distractionGroups = ['hideComments', 'hideEndScreens', 'hideCards', 'hideMerch'];
+        
+        if (focusMode) {
+             const isFocusOn = focusMode.checked;
+             // Any additional logic for focus mode dependencies
         }
     }
-});
 
-function saveSettings(keys) {
-    const settings = {};
-    keys.forEach(key => {
-        const el = document.getElementById(key);
-        if (el) {
-            if (el.type === 'checkbox') {
-                settings[key] = el.checked;
-            } else {
-                settings[key] = el.value;
-            }
-        }
-    });
-    console.log('[YPP:POPUP] Settings saved:', settings);
-    chrome.storage.local.set({ settings });
-}
+    // Initialize
+    loadSettings();
+});

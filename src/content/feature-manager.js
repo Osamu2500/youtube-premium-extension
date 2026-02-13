@@ -76,7 +76,7 @@ window.YPP.FeatureManager = class FeatureManager {
                 if (typeof window.YPP.features[className] === 'function') {
                     this.features[key] = new window.YPP.features[className]();
                     this.errorCounts[key] = 0;
-                    window.YPP.Utils.log(`Feature Loaded: ${key}`, 'MANAGER');
+                    // window.YPP.Utils.log(`Feature Loaded: ${key}`, 'MANAGER'); // reduce noise
                 } else {
                     window.YPP.Utils.log(`Feature class '${className}' not found. Check file inclusion.`, 'MANAGER', 'warn');
                 }
@@ -135,14 +135,12 @@ window.YPP.FeatureManager = class FeatureManager {
      * Prevents one broken feature from crashing the entire extension.
      * Disables features after MAX_ERRORS consecutive failures.
      * @param {string} name - Feature name for error tracking
-     * @param {Function} fn - Async function to execute
+     * @param {Function} fn - Async or Sync function to execute
      * @returns {Promise<void>}
      */
     async safeRun(name, fn) {
         try {
             await fn();
-            // Reset error count on successful run (optional, or keep cumulative?)
-            // keeping cumulative is safer for flaky features that fail intermittently
         } catch (e) {
             this.errorCounts[name] = (this.errorCounts[name] || 0) + 1;
             window.YPP.Utils.log(`Error in feature '${name}' (${this.errorCounts[name]}/${this.MAX_ERRORS}): ${e.message}`, 'MANAGER', 'error');

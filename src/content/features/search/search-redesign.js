@@ -273,7 +273,21 @@ export class SearchRedesign {
         btn.className = SearchRedesign.CLASSES.TOGGLE_BTN;
         btn.title = title;
         btn.dataset.mode = mode;
-        btn.innerHTML = iconSvg; // SVG is safe here as it's from our constants
+        
+        // Safety: Use DOMParser to avoid direct innerHTML assignment
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
+            if (doc.documentElement && doc.documentElement.tagName === 'svg') {
+                btn.appendChild(doc.documentElement);
+            } else {
+                throw new Error('Invalid SVG');
+            }
+        } catch (e) {
+            // Fallback for safety (though constants should be valid)
+            btn.textContent = title;
+            this._log('Error parsing SVG icon: ' + e.message, 'warn');
+        }
         
         btn.addEventListener('click', (e) => {
             // Prevent default YouTube navigation if any
@@ -367,19 +381,23 @@ export class SearchRedesign {
      * @param {MutationRecord[]} mutations 
      */
     _processMutations(mutations) {
-        let shouldProcess = false;
-        // Efficiently check if relevant nodes were added
-        for (const m of mutations) {
-            if (m.addedNodes.length > 0) {
-                shouldProcess = true;
-                break; // Optimization: one match is enough to trigger process
+        try {
+            let shouldProcess = false;
+            // Efficiently check if relevant nodes were added
+            for (const m of mutations) {
+                if (m.addedNodes.length > 0) {
+                    shouldProcess = true;
+                    break; // Optimization: one match is enough to trigger process
+                }
             }
-        }
 
-        if (shouldProcess) {
-            // Debounce processing to avoid layout thrashing
-            if (this._debounceTimer) clearTimeout(this._debounceTimer);
-            this._debounceTimer = setTimeout(() => this._processAll(), 50);
+            if (shouldProcess) {
+                // Debounce processing to avoid layout thrashing
+                if (this._debounceTimer) clearTimeout(this._debounceTimer);
+                this._debounceTimer = setTimeout(() => this._processAll(), 50);
+            }
+        } catch (error) {
+            this._log('Error processing mutations: ' + error.message, 'error');
         }
     }
 
@@ -405,22 +423,26 @@ export class SearchRedesign {
     _processAll() {
         if (!this._isEnabled) return;
 
-        // 1. Identify Grid Containers (Section Contents)
-        const itemSections = document.querySelectorAll(SearchRedesign.SELECTORS.ITEM_SECTION);
-        itemSections.forEach(section => {
-            const contents = section.querySelector(SearchRedesign.SELECTORS.CONTENTS);
-            
-            // Validate: Only treat as grid if it contains video renderers
-            // This prevents styling non-result sections incorrectly
-            if (contents && contents.querySelector('ytd-video-renderer')) {
-                if (!contents.classList.contains(SearchRedesign.CLASSES.GRID_CONTAINER)) {
-                    contents.classList.add(SearchRedesign.CLASSES.GRID_CONTAINER);
-                }
+        try {
+            // 1. Identify Grid Containers (Section Contents)
+            const itemSections = document.querySelectorAll(SearchRedesign.SELECTORS.ITEM_SECTION);
+            itemSections.forEach(section => {
+                const contents = section.querySelector(SearchRedesign.SELECTORS.CONTENTS);
                 
-                // 2. Process Children within the verified container
-                Array.from(contents.children).forEach(child => this._processNode(child));
-            }
-        });
+                // Validate: Only treat as grid if it contains video renderers
+                // This prevents styling non-result sections incorrectly
+                if (contents && contents.querySelector('ytd-video-renderer')) {
+                    if (!contents.classList.contains(SearchRedesign.CLASSES.GRID_CONTAINER)) {
+                        contents.classList.add(SearchRedesign.CLASSES.GRID_CONTAINER);
+                    }
+                    
+                    // 2. Process Children within the verified container
+                    Array.from(contents.children).forEach(child => this._processNode(child));
+                }
+            });
+        } catch (error) {
+            this._log('Error in _processAll: ' + error.message, 'error');
+        }
     }
 
     /**

@@ -703,106 +703,201 @@ body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   margin: 0;
 }
 
-/* Video Cards in Grid */
-body.ypp-search-grid-mode ytd-video-renderer {
+/* Video Cards in Grid - Ported from Homepage (ytd-rich-item-renderer) */
+
+body.ypp-search-grid-mode ytd-video-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer {
   width: 100%;
   max-width: 100%;
   min-width: 0;
   margin: 0;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important; /* Ensure children fill width */
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-med);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  box-shadow: var(--ypp-shadow-card);
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: var(--ypp-transition);
   box-sizing: border-box;
   position: relative;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(30, 30, 30, 0.7);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(62, 166, 255, 0.15);
+body.ypp-search-grid-mode ytd-video-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #dismissible,
+body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important; /* Allow height to fit content */
+}
+
+/* Hover Effects */
+body.ypp-search-grid-mode ytd-video-renderer:hover,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover,
+body.ypp-search-grid-mode ytd-radio-renderer:hover {
+  transform: translateY(-4px);
+  border-color: rgba(62, 166, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(62, 166, 255, 0.3);
   z-index: 10;
+  background: var(--ypp-bg-surface);
 }
 
+/* Remove the "Search Specific" skew effect */
 body.ypp-search-grid-mode ytd-video-renderer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-  transform: skewX(-20deg);
-  transition: 0.5s;
-  pointer-events: none;
-}
-
-body.ypp-search-grid-mode ytd-video-renderer:hover::after {
-  left: 150%;
-  transition: 0.7s ease-in-out;
+  display: none;
 }
 
 /* Thumbnail */
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16/9 !important;
+  flex: none !important; /* Prevent flex shrinking */
+  border-radius: var(--ypp-radius-md);
+  margin-right: 0 !important;
+  margin-bottom: 12px !important;
+  box-shadow: none;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
   width: 100%;
-  height: auto;
-  aspect-ratio: 16/9;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-right: 0;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-body.ypp-search-grid-mode ytd-video-renderer:hover ytd-thumbnail img {
-  transform: scale(1.05);
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Text Content */
 body.ypp-search-grid-mode ytd-video-renderer .text-wrapper,
 body.ypp-search-grid-mode ytd-video-renderer #dismissible .text-wrapper {
-  width: 100%;
-  max-width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 !important;
+  min-width: 0 !important;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #meta {
-  padding-right: 0;
+  padding: 0 !important;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer #video-title {
-  font-family: 'Inter', 'Roboto', sans-serif;
-  font-size: 1.5rem;
-  line-height: 1.4;
-  font-weight: 600;
-  margin-bottom: 6px;
+/* Title - Match Homepage Typography */
+body.ypp-search-grid-mode ytd-video-renderer #video-title,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.6rem !important;
+  line-height: 2.2rem !important; /* Match Homepage */
+  font-weight: 500 !important; /* Match Homepage */
+  margin: 0 0 4px 0 !important;
   color: var(--ypp-text-primary);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: none;
+  max-height: 4.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer #channel-info,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
-  font-size: 1.3rem;
-  margin-bottom: 4px;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
+/* Metadata - Clean Flex Row */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 0 4px 0 !important;
+  margin: 0 !important;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer #metadata-line {
-  font-size: 1.2rem;
-  color: var(--ypp-text-secondary);
-  opacity: 0.8;
-  font-weight: 400;
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background-color: rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #channel-name {
+  font-size: 1.3rem !important;
+  font-weight: 500 !important;
+  color: var(--ypp-text-secondary) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
+  font-size: 1.2rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  margin-top: 4px !important;
+  line-height: 1.4 !important;
+}
+
+/* Hide Description Snippet (Clutter) */
+body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container {
+  display: none !important;
+}
+
+/* Hide Badges in Text Area */
+body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
+  display: none !important;
+}
+
+/* Glass Badges (Duration, Quality) on Thumbnail */
+body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
+body.ypp-search-grid-mode ytd-thumbnail-overlay-resume-playback-renderer {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 2px 4px !important;
+  margin: 4px !important;
+}
+
+body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Hover-Only Menu Button */
+body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-menu-renderer {
+  opacity: 1;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer yt-icon-button,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer yt-icon-button,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer yt-icon-button {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+  background: rgba(0,0,0,0.4) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 50% !important;
 }
 
 /* Hide Description */
@@ -810,20 +905,8 @@ body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container {
   display: none;
 }
 
-/* Channel Icon */
-body.ypp-search-grid-mode ytd-video-renderer #channel-info {
-  padding: 8px 0 4px 0;
-  display: flex;
-  align-items: center;
-}
 
-body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
-  width: 28px;
-  height: 28px;
-  margin-right: 10px;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
+
 
 /* Non-Video Elements Span Full Width */
 body.ypp-search-grid-mode ytd-channel-renderer,
@@ -1133,112 +1216,7 @@ body.ypp-zen-mode #columns {
 }
 
 
-/* ===================================================================================
-   10. SEARCH GRID REDESIGN - PREMIUM GLASS
-   =================================================================================== */
-
-/* --- 1. View Mode Toggles --- */
-.ypp-search-grid-mode ytd-search ytd-item-section-renderer #contents.ypp-search-grid-container {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important; /* Wider, premium cards */
-  gap: 20px !important;
-  align-items: start !important;
-  margin-top: 16px !important;
-  padding-bottom: 60px !important;
-}
-
-/* List mode reset */
-.ypp-search-list-mode ytd-search ytd-item-section-renderer #contents {
-  display: block !important;
-}
-
-/* --- 2. Glass Cards (Grid Mode) --- */
-.ypp-search-grid-mode .ypp-grid-item {
-  display: flex !important;
-  flex-direction: column !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 16px !important;
-  padding: 12px !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-  backdrop-filter: blur(12px) !important; /* The Glass Effect */
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
-  height: 100% !important; /* Uniform height */
-  position: relative !important;
-  isolation: isolate !important;
-}
-
-/* Hover Effect - Lift & Glow */
-.ypp-search-grid-mode .ypp-grid-item:hover {
-  transform: translateY(-6px) scale(1.02) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
-  z-index: 10 !important;
-}
-
-/* --- 3. Card Internal Layout --- */
-
-/* Thumbnail */
-.ypp-search-grid-mode .ypp-grid-item ytd-thumbnail {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 16/9 !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
-  margin: 0 0 12px 0 !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-}
-
-/* Text Wrapper */
-.ypp-search-grid-mode .ypp-grid-item .text-wrapper {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-/* Title */
-.ypp-search-grid-mode .ypp-grid-item #video-title {
-  font-family: "Roboto", "Arial", sans-serif !important;
-  font-size: 1.6rem !important;
-  font-weight: 600 !important;
-  line-height: 1.3 !important;
-  color: #fff !important;
-  margin-bottom: 6px !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
-}
-
-/* Metadata */
-.ypp-search-grid-mode .ypp-grid-item #metadata-line,
-.ypp-search-grid-mode .ypp-grid-item #channel-info {
-  font-size: 1.3rem !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-/* Hide descriptions in grid (clutter) */
-.ypp-search-grid-mode .ypp-grid-item .metadata-snippet-container {
-  display: none !important;
-}
-
-/* --- 4. Full Width Items (Channels, Shelves) --- */
-.ypp-search-grid-mode .ypp-full-width-item {
-  grid-column: 1 / -1 !important;
-  width: 100% !important;
-  margin-bottom: 24px !important;
-  border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  padding: 16px !important;
-}
-
-/* --- 5. Hiding Shorts & Clutter --- */
-.ypp-hidden-short {
-  display: none !important;
-}
+/* [Legacy Search Grid Styles Removed - Consolidated into Section 6] */
 
 /* --- 6. View Toggle Button --- */
 #ypp-view-toggle {
@@ -1292,98 +1270,7 @@ body.ypp-zen-mode #columns {
   z-index: var(--ypp-z-popup);
 }
 
-/* Advanced Filter Drawer */
-.ypp-filter-drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: min(500px, 90vw);
-  background: rgba(18, 18, 18, 0.95);
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 24px rgba(0, 0, 0, 0.2);
-  border-radius: 24px;
-  padding: 24px;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-10px) scale(0.98);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.ypp-filter-drawer.open {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0) scale(1);
-}
-
-.ypp-filter-section h4 {
-  color: var(--ypp-text-secondary);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin: 0 0 12px 4px;
-  font-weight: 600;
-}
-
-.ypp-filter-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-/* Filter Pills */
-.ypp-pill {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--ypp-text-secondary);
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.ypp-pill:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--ypp-text-primary);
-  transform: translateY(-1px);
-}
-
-.ypp-pill.active {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  font-weight: 600;
-}
-
-/* Chips Bar Refinements */
-.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer {
-  height: 56px;
-  align-items: center;
-  padding: 0 8px;
-}
-
-.yt-premium-plus-theme yt-chip-cloud-chip-renderer {
-  height: 36px;
-  border-radius: 12px;
-  margin: 0 6px;
-  font-size: 14px;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected] {
-  background: #fff;
-  color: #000;
-  border: none;
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25);
-}
+/* [Unused Filter Drawer Styles Removed] */
 
 /* Ad Hiding */
 body.ypp-search-grid-mode ytd-ad-slot-renderer {
