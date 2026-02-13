@@ -705,19 +705,34 @@ body.ypp-hide-sidebar ytd-rich-grid-renderer {
    6. SEARCH REDESIGN
    =================================================================================== */
 
-/* Search Grid Mode */
+/* Search Grid Mode - Container Overrides */
+body.ypp-search-grid-mode ytd-search,
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer,
 body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
-  width: 100%;
-  max-width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
+/* Search Grid Layout */
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  /* Optimized for density and screen usage */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 16px; 
   width: 100%;
-  padding: 0;
-  margin: 0;
+  max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
+  padding: 0 24px; /* Balanced padding */
+  margin: 0 auto; /* Center the container itself */
+  box-sizing: border-box;
+  justify-content: center; /* Ensure grid items are centered if they don't fill row */
+}
+
+/* Ensure the main wrapper is also centered */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
+  display: flex !important;
+  justify-content: center !important;
 }
 
 /* Video Cards in Grid - Ported from Homepage (ytd-rich-item-renderer) */
