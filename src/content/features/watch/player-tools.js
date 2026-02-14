@@ -162,6 +162,26 @@ window.YPP.features.PlayerTools = class PlayerTools {
                 text-align: center;
                 pointer-events: auto;
             }
+            .ypp-toast-mini {
+                position: absolute;
+                top: 10%;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                pointer-events: none;
+                z-index: 1000;
+                animation: fadeInOut 2s forwards;
+            }
+            @keyframes fadeInOut {
+                0% { opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { opacity: 0; }
+            }
         `;
         this._Utils.addStyle(css, 'ypp-player-tools-style');
     }

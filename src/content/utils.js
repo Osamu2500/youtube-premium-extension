@@ -117,6 +117,38 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     // =====================================================================
 
     /**
+     * Safely query a single element
+     * @param {string} selector 
+     * @param {Element} [parent=document] 
+     * @returns {Element|null}
+     */
+    safeQuerySelector: (selector, parent = document) => {
+        if (!selector || typeof selector !== 'string') return null;
+        try {
+            return parent.querySelector(selector);
+        } catch (e) {
+            Utils?.log(`Invalid selector: ${selector}`, 'UTILS', 'warn');
+            return null;
+        }
+    },
+
+    /**
+     * Safely query multiple elements
+     * @param {string} selector 
+     * @param {Element} [parent=document] 
+     * @returns {NodeList|Array}
+     */
+    safeQuerySelectorAll: (selector, parent = document) => {
+        if (!selector || typeof selector !== 'string') return [];
+        try {
+            return parent.querySelectorAll(selector);
+        } catch (e) {
+            Utils?.log(`Invalid selector: ${selector}`, 'UTILS', 'warn');
+            return [];
+        }
+    },
+
+    /**
      * Wait for an element to appear in the DOM
      * @param {string} selector - CSS selector
      * @param {number} [timeout] - Timeout in ms (default: from CONSTANTS)
@@ -128,30 +160,53 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             return Promise.resolve(null);
         }
 
-        const element = document.querySelector(selector);
-        if (element) return Promise.resolve(element);
+        // Try distinct lookup first
+        try {
+            const existing = document.querySelector(selector);
+            if (existing) return Promise.resolve(existing);
+        } catch (e) {
+            return Promise.resolve(null);
+        }
 
         return new Promise((resolve) => {
             let resolved = false;
             let timeoutId = null;
+            let observer = null;
 
-            const observer = new MutationObserver(() => {
-                const el = document.querySelector(selector);
-                if (el && !resolved) {
-                    resolved = true;
+            const cleanup = () => {
+                if (observer) {
                     observer.disconnect();
-                    if (timeoutId) clearTimeout(timeoutId);
-                    resolve(el);
+                    observer = null;
                 }
-            });
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+            };
 
+            const check = () => {
+                try {
+                    const el = document.querySelector(selector);
+                    if (el) {
+                        resolved = true;
+                        cleanup();
+                        resolve(el);
+                        return true;
+                    }
+                } catch (e) {
+                    // Ignore selector errors during wait
+                }
+                return false;
+            };
+
+            observer = new MutationObserver(check);
             observer.observe(document.documentElement, { childList: true, subtree: true });
 
             if (timeout > 0) {
                 timeoutId = setTimeout(() => {
                     if (!resolved) {
                         resolved = true;
-                        observer.disconnect();
+                        cleanup();
                         resolve(null);
                     }
                 }, timeout);
@@ -726,7 +781,7 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
      * Start observing
      */
     start() {
-        if (this.isRunning) return;
+        if (this.isRunning || this.observer) return;
         this.isRunning = true;
 
         this._init();
@@ -736,7 +791,12 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
             return;
         }
 
-        this.observer.observe(document.body, { childList: true, subtree: true });
+        try {
+            this.observer.observe(document.body, { childList: true, subtree: true });
+        } catch (e) {
+            console.error('[DOMObserver] Failed to start:', e);
+            this.isRunning = false;
+        }
     }
 
     /**

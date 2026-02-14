@@ -45,7 +45,8 @@ window.YPP.features.ShortsTools = class ShortsTools {
 
         // Bound event handlers for proper cleanup
         this._boundHandleEnded = this._onVideoEnded.bind(this);
-        this._boundHandleTimeUpdate = this._onTimeUpdate.bind(this);
+        // Throttle time update to run at most every 200ms
+        this._boundHandleTimeUpdate = this._Utils.throttle(this._onTimeUpdate.bind(this), 200);
         this._boundCheckForVideo = this._checkForVideo.bind(this);
     }
 
@@ -266,10 +267,20 @@ window.YPP.features.ShortsTools = class ShortsTools {
     _onTimeUpdate() {
         if (!this._isEnabled || !this._settings?.shortsAutoScroll || !this._videoRef) return;
 
+        const currentTime = this._videoRef.currentTime;
+        const duration = this._videoRef.duration;
+
+        // Auto-skip long shorts (placeholder structure)
+        if (this._settings?.shortsAutoSkipDuration && duration > this._settings.shortsAutoSkipDuration) {
+             // Logic to skip if user wants to skip long shorts
+             // Not active by default, but structure is here
+        }
+
         // Handle looped videos
         if (this._videoRef.loop) {
-            const timeRemaining = this._videoRef.duration - this._videoRef.currentTime;
-            if (timeRemaining < 0.3 && !this._isScrolling) {
+            const timeRemaining = duration - currentTime;
+            // Looped videos don't fire 'ended', so we check proximity to end
+            if (timeRemaining < 0.25 && !this._isScrolling) {
                 this._scrollToNext();
             }
         }
@@ -290,7 +301,7 @@ window.YPP.features.ShortsTools = class ShortsTools {
         this._Utils.log?.('Auto-scrolling to next Short...', 'SHORTS');
 
         try {
-            // Strategy 1: Click next button
+            // Strategy 1: Click next button (Most reliable for SPA state)
             const nextBtn = document.querySelector('ytd-reel-video-renderer[is-active] #navigation-button-down button');
             if (nextBtn) {
                 nextBtn.click();
@@ -298,15 +309,25 @@ window.YPP.features.ShortsTools = class ShortsTools {
                 return;
             }
 
-            // Strategy 2: Simulate down arrow key
+            // Strategy 2: Simulate Wheel Event (often used by YouTube's own listeners)
+            const container = this._getShortsContainer();
+            container.dispatchEvent(new WheelEvent('wheel', {
+                bubbles: true,
+                deltaY: 100,
+                view: window
+            }));
+
+            // Strategy 3: Simulate down arrow key (Fallback)
             const event = new KeyboardEvent('keydown', {
                 key: 'ArrowDown',
                 code: 'ArrowDown',
                 keyCode: 40,
                 bubbles: true,
-                cancelable: true
+                cancelable: true,
+                view: window
             });
             document.body.dispatchEvent(event);
+            
         } catch (error) {
             this._Utils.log?.(`Scroll error: ${error.message}`, 'SHORTS', 'error');
         }

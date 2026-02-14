@@ -395,35 +395,39 @@ export class SearchRedesign {
             // Process existing content immediately
             this._processAll();
 
-            // Setup observer
+            // Setup observer with specific config for performance
             this._observer = new MutationObserver(this._processMutations);
-            this._observer.observe(target, { childList: true, subtree: true });
+            this._observer.observe(target, { 
+                childList: true, 
+                subtree: true,
+                attributes: false // We only care about new nodes
+            });
         });
     }
 
     /**
-     * Handle mutation records
+     * Handle mutation records with optimized batching
      * @private
      * @param {MutationRecord[]} mutations 
      */
     _processMutations(mutations) {
-        try {
-            let shouldProcess = false;
-            // Efficiently check if relevant nodes were added
-            for (const m of mutations) {
-                if (m.addedNodes.length > 0) {
-                    shouldProcess = true;
-                    break; // Optimization: one match is enough to trigger process
-                }
+        if (this._batching) return;
+        
+        let shouldProcess = false;
+        for (const m of mutations) {
+            if (m.addedNodes.length > 0) {
+                shouldProcess = true;
+                break;
             }
+        }
 
-            if (shouldProcess) {
-                // Debounce processing to avoid layout thrashing
-                if (this._debounceTimer) clearTimeout(this._debounceTimer);
-                this._debounceTimer = setTimeout(() => this._processAll(), 50);
-            }
-        } catch (error) {
-            this._log('Error processing mutations: ' + error.message, 'error');
+        if (shouldProcess) {
+            this._batching = true;
+            // Use requestAnimationFrame for smoother UI updates
+            requestAnimationFrame(() => {
+                this._processAll();
+                this._batching = false;
+            });
         }
     }
 
@@ -548,6 +552,13 @@ export class SearchRedesign {
         const title = node.querySelector('#title-container #title')?.textContent?.trim() || '';
         if (title.includes('Shorts')) return true;
         
+        // 4. Metadata Badge detection (New)
+        // Look for specific metadata badges often found on Shorts in search
+        const metadata = node.querySelectorAll('ytd-badge-supported-renderer');
+        for (const badge of metadata) {
+            if (badge.textContent.trim() === 'Shorts') return true;
+        }
+
         return false;
     }
 

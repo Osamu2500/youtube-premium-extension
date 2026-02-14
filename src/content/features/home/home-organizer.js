@@ -142,6 +142,11 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
 
         // Feature 3: Topic Tags
         this.injectTagButtons(contents);
+
+        // Feature 4: Hide Watched Videos
+        if (this.settings?.hideWatched) {
+            this._hideWatchedVideos(contents);
+        }
     }
 
     /**
@@ -266,5 +271,25 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         div.className = `ypp-feed-separator ${specificClass}`;
         div.textContent = text;
         return div;
+    }
+
+    /**
+     * Hide videos that have been watched (>80% progress)
+     * @param {HTMLElement} contents 
+     */
+    _hideWatchedVideos(contents) {
+        const items = contents.querySelectorAll('ytd-rich-item-renderer');
+        items.forEach(item => {
+            const progressBar = item.querySelector('ytd-thumbnail-overlay-resume-playback-renderer #progress');
+            if (progressBar) {
+                // width is percentage e.g. "100%"
+                const widthStyle = progressBar.style.width; 
+                const percentage = parseFloat(widthStyle);
+                if (!isNaN(percentage) && percentage > 80) {
+                    item.style.display = 'none';
+                    // Optional: Log or count hidden items
+                }
+            }
+        });
     }
 };

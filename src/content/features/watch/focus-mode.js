@@ -5,6 +5,11 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
+// Helpers
+const waitForElement = (selector, timeout = 5000) => {
+    return window.YPP.Utils.waitForElement(selector, timeout);
+};
+
 /**
  * Focus Mode
  * @class FocusMode
@@ -286,6 +291,26 @@ window.YPP.features.FocusMode = class FocusMode {
         }
 
         this._Utils.log?.(`Cinema mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
+
+        // Logic to trigger YouTube's native theater mode if requested
+        // This coordinates with the CSS class to ensure the player expands
+        if (enable) {
+            this._ensureTheaterMode();
+        }
+    }
+
+    async _ensureTheaterMode() {
+        try {
+            const btn = await waitForElement('.ytp-size-button', 2000);
+            if (!btn) return;
+            
+            const isTheater = document.querySelector('ytd-watch-flexy[theater]');
+            if (!isTheater) {
+                btn.click();
+            }
+        } catch (e) {
+            // Ignore if fails, visual CSS fallback still applies
+        }
     }
 
     /**

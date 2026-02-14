@@ -12,6 +12,15 @@ window.YPP.features.Player = class Player {
         this.source = null;
         this.gainNode = null;
         this.isLooping = false;
+        this.currentFilterIndex = 0;
+        this.filters = [
+            { name: 'Normal', value: 'none' },
+            { name: 'Sepia', value: 'sepia(100%)' },
+            { name: 'Grayscale', value: 'grayscale(100%)' },
+            { name: 'High Contrast', value: 'contrast(150%)' },
+            { name: 'Invert', value: 'invert(100%)' },
+            { name: 'Saturate', value: 'saturate(200%)' }
+        ];
         this.waitForPlayerInterval = null;
         this.injectedButtons = false;
         this._boundTimeUpdate = null;
@@ -131,6 +140,15 @@ window.YPP.features.Player = class Player {
         // 3. Speed Controls
         container.appendChild(this._createSpeedControls(video));
 
+        // 4. Picture-in-Picture
+        if (document.pictureInPictureEnabled) {
+            container.appendChild(this._createPiPButton(video));
+        }
+
+        // 5. Cinema Filters
+        container.appendChild(this._createFilterButton(video));
+
+
         // Insert at the beginning of right controls
         controls.insertBefore(container, controls.firstChild);
         this.injectedButtons = true;
@@ -174,6 +192,56 @@ window.YPP.features.Player = class Player {
             container.appendChild(btn);
         });
         return container;
+    }
+
+    _createPiPButton(video) {
+        const icon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M19 11h-8v6h8v-6zm4 8V4.98C23 3.88 22.1 3 21 3H3c-1.1 0-2 .88-2 1.98V19c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2zm-2 .02H3V4.97h18v14.05z"/></svg>`;
+        const btn = this.createButton(icon, 'Picture-in-Picture', async () => {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await video.requestPictureInPicture();
+                }
+            } catch (e) {
+                console.error('[YPP:PLAYER] PiP failed', e);
+            }
+        });
+        
+        // Listen for PiP changes to update button state if needed (optional)
+        video.addEventListener('enterpictureinpicture', () => btn.classList.add('active'));
+        video.addEventListener('leavepictureinpicture', () => btn.classList.remove('active'));
+        
+        return btn;
+    }
+
+    _createFilterButton(video) {
+        const icon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M17.66 7.93L12 2.27 6.34 7.93c-3.12 3.12-3.12 8.19 0 11.31C7.9 20.8 9.95 21.58 12 21.58c2.05 0 4.1-.78 5.66-2.34 3.12-3.12 3.12-8.19 0-11.31zM12 19.59c-1.6 0-3.11-.62-4.24-1.76C6.62 16.69 6 15.19 6 13.59s.62-3.11 1.76-4.24L12 5.1v14.49z"/></svg>`;
+        const btn = this.createButton(icon, 'Cinema Filters: Normal', () => this.cycleFilters(video, btn));
+        return btn;
+    }
+
+    cycleFilters(video, btn) {
+        this.currentFilterIndex = (this.currentFilterIndex + 1) % this.filters.length;
+        const filter = this.filters[this.currentFilterIndex];
+        
+        // Apply filter to video stream
+        video.style.filter = filter.value;
+        btn.title = `Cinema Filters: ${filter.name}`;
+        
+        // Visual feedback
+        if (filter.value !== 'none') {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+        
+        // Show temp toast
+        const toast = document.createElement('div');
+        toast.className = 'ypp-toast-mini';
+        toast.textContent = `Filter: ${filter.name}`;
+        video.parentElement.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
     }
 
     createButton(svgContent, title, onClick) {
@@ -241,6 +309,8 @@ window.YPP.features.Player = class Player {
     setVolume(multiplier) {
         if (this.gainNode) {
             this.gainNode.gain.value = multiplier;
+             // Visual feedback on volume slider or similar if we had unauthorized access, 
+             // but here we just rely on audio.
         }
     }
 
@@ -252,9 +322,21 @@ window.YPP.features.Player = class Player {
 
     applyAutoQuality() {
         const player = document.getElementById('movie_player');
-        // Check for function existence to avoid errors
-        if (player && typeof player.setPlaybackQualityRange === 'function') {
-            player.setPlaybackQualityRange('hd1080');
+        if (!player || typeof player.getAvailableQualityLevels !== 'function') return;
+
+        const available = player.getAvailableQualityLevels();
+        // Preferred qualities in order
+        const preferred = ['highres', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];
+        
+        // Find best match that is available
+        const best = preferred.find(q => available.includes(q));
+        
+        if (best && typeof player.setPlaybackQualityRange === 'function') {
+            const current = player.getPlaybackQuality();
+            if (current !== best) {
+                player.setPlaybackQualityRange(best);
+                // console.log('[YPP] Auto Quality set to:', best);
+            }
         }
     }
 

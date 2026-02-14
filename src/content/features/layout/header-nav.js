@@ -292,9 +292,30 @@ window.YPP.features.HeaderNav = class HeaderNav {
             btn.className = 'ypp-nav-btn';
             btn.title = label; // Used by CSS tooltip
             btn.dataset.url = url;
-            btn.innerHTML = `
-                <svg viewBox="0 0 24 24" class="ypp-nav-icon">${svgContent}</svg>
-            `;
+            
+            // Safer SVG injection
+            // Create a temporary container to parse SVG safely
+            try {
+                const range = document.createRange();
+                const frag = range.createContextualFragment(svgContent);
+                const svg = frag.querySelector('svg') || frag.querySelector('path');
+                
+                if (svg) {
+                    const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    iconSvg.setAttribute('viewBox', '0 0 24 24');
+                    iconSvg.classList.add('ypp-nav-icon');
+                    
+                    if (svg.tagName.toLowerCase() === 'path') {
+                        iconSvg.appendChild(svg.cloneNode(true));
+                    } else {
+                        // If it's already an SVG, copy its children
+                        Array.from(svg.children).forEach(child => iconSvg.appendChild(child.cloneNode(true)));
+                    }
+                    btn.appendChild(iconSvg);
+                }
+            } catch (e) {
+                btn.textContent = label[0]; // Fallback
+            }
 
             // Reliable Navigation with keyboard support
             const handleClick = (e) => {

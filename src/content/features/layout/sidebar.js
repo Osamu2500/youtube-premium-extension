@@ -81,7 +81,9 @@ window.YPP.features.SidebarManager = class SidebarManager {
 
         // Use requestAnimationFrame to ensure DOM is ready and avoid layout thrashing
         requestAnimationFrame(() => {
-            document.body.classList.add('ypp-hide-sidebar');
+            if (document.body && !document.body.classList.contains('ypp-hide-sidebar')) {
+                document.body.classList.add('ypp-hide-sidebar');
+            }
         });
     }
 

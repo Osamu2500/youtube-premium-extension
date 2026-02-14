@@ -58,21 +58,23 @@ window.YPP.features.ZenMode = class ZenMode {
     /**
      * Automatically switch player to "Cinema" (Theater) mode if not already.
      */
-    autoCinema() {
+    async autoCinema() {
         try {
-            const btn = document.querySelector('.ytp-size-button') || document.querySelector('[aria-label="Cinema mode"]');
-            const isTheater = document.querySelector('ytd-watch-flexy[theater]');
+            // Wait for the button to ensure DOM is ready
+            const btn = await this.Utils.waitForElement('.ytp-size-button, [aria-label="Cinema mode"]', 5000);
+            if (!btn) return;
 
-            if (btn && !isTheater) {
-                // Initial click
-                btn.click();
+            const checkAndClick = () => {
+                const isTheater = document.querySelector('ytd-watch-flexy[theater]');
+                if (!isTheater) {
+                    btn.click();
+                }
+            };
 
-                // Double check in case of race condition / SPA transition
-                setTimeout(() => {
-                    const isTheaterNow = document.querySelector('ytd-watch-flexy[theater]');
-                    if (!isTheaterNow) btn.click();
-                }, 1000);
-            }
+            checkAndClick();
+            
+            // Double check for SPA/race conditions
+            setTimeout(checkAndClick, 1000);
         } catch (e) {
             console.error('[YPP] AutoCinema error', e);
         }
@@ -96,8 +98,9 @@ window.YPP.features.ZenMode = class ZenMode {
         // Reuse canvas if exists
         if (!this.canvas) {
             this.canvas = document.createElement('canvas');
-            this.canvas.width = 50;
-            this.canvas.height = 50;
+            // Optimization: Small size is enough for ambient average
+            this.canvas.width = 10;
+            this.canvas.height = 10;
             this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         }
 
@@ -108,14 +111,20 @@ window.YPP.features.ZenMode = class ZenMode {
         const loop = (timestamp) => {
             if (!this.ambientActive) return;
 
+            // Performance: Don't compute if tab is hidden
+            if (document.hidden) {
+                this.animationFrame = requestAnimationFrame(loop);
+                return;
+            }
+
             if (timestamp - lastUpdate > interval) {
                 lastUpdate = timestamp;
 
                 if (video && !video.paused && !video.ended && video.readyState >= 2) {
                     try {
-                        this.ctx.drawImage(video, 0, 0, 50, 50);
-                        const frame = this.ctx.getImageData(0, 0, 50, 50);
-                        const [r, g, b] = this._getAverageColor(frame.data); // Keep existing simple algo
+                        this.ctx.drawImage(video, 0, 0, 10, 10);
+                        const frame = this.ctx.getImageData(0, 0, 10, 10);
+                        const [r, g, b] = this._getAverageColor(frame.data);
 
                         this._updateGlow(`rgba(${r}, ${g}, ${b}, 0.5)`);
                     } catch (e) {
