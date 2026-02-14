@@ -310,6 +310,26 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         }
     },
 
+    /**
+     * Create an SVG element safely
+     * @param {string} viewBox - SVG viewbox
+     * @param {string} pathData - SVG path data (d attribute)
+     * @param {string} [className] - CSS class
+     * @returns {SVGElement}
+     */
+    createSVG: (viewBox, pathData, className = '') => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', viewBox);
+        if (className) svg.setAttribute('class', className);
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathData);
+        path.setAttribute('fill', 'currentColor');
+        
+        svg.appendChild(path);
+        return svg;
+    },
+
     // =====================================================================
     // EVENT UTILITIES
     // =====================================================================
@@ -558,7 +578,16 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         const btn = document.createElement('button');
         btn.className = `ytp-button ${className || ''}`;
         btn.title = title || '';
-        btn.innerHTML = svgContent || '';
+        
+        // Safety: standardized SVG injection
+        // If svgContent is a string starting with <svg, use innerHTML (trusted source assumed)
+        // If it's an element, append it.
+        if (typeof svgContent === 'string' && svgContent.trim().startsWith('<svg')) {
+           btn.innerHTML = svgContent;
+        } else if (svgContent instanceof Element) {
+            btn.appendChild(svgContent);
+        }
+        
         btn.onclick = onClick;
         return btn;
     },
@@ -592,9 +621,11 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @returns {boolean}
      */
     isValidNumber: (value, min = null, max = null) => {
-        if (typeof value !== 'number' || isNaN(value)) return false;
-        if (min !== null && value < min) return false;
-        if (max !== null && value > max) return false;
+        let num = Number(value);
+        if (isNaN(num)) return false;
+        
+        if (min !== null && num < min) return false;
+        if (max !== null && num > max) return false;
         return true;
     },
 

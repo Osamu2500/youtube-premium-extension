@@ -32,12 +32,23 @@ window.YPP.FeatureManager = class FeatureManager {
         // Defensive: Ensure settings exist, fallback to defaults
         this.settings = settings || window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
 
+        // Self-Healing: Reset error counts on re-initialization (e.g., settings change or navigation)
+        // This allows features to recover if they crashed due to transient issues or bad settings
+        this.resetErrors();
+
         if (!this.instantiated) {
             this.instantiateFeatures();
             this.instantiated = true;
         }
 
         this.applyFeatures();
+    }
+
+    /**
+     * Reset error counts to allow features to retry
+     */
+    resetErrors() {
+        this.errorCounts = {};
     }
 
     /**
@@ -60,7 +71,14 @@ window.YPP.FeatureManager = class FeatureManager {
             headerNav: 'HeaderNav',
             searchRedesign: 'SearchRedesign',
             shortsTools: 'ShortsTools',
-            playerTools: 'PlayerTools'
+            playerTools: 'PlayerTools',
+            // New Features
+            playlistDuration: 'PlaylistDuration',
+            statsVisualizer: 'StatsVisualizer',
+            watchHistory: 'WatchHistoryTracker',
+            historyTracker: 'HistoryTracker',
+            historyRedesign: 'HistoryRedesign',
+            playlistRedesign: 'PlaylistRedesign'
         };
 
         // Defensive: Ensure window.YPP.features exists
@@ -146,7 +164,7 @@ window.YPP.FeatureManager = class FeatureManager {
             console.error(e);
 
             if (this.errorCounts[name] >= this.MAX_ERRORS) {
-                window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors.`, 'MANAGER', 'error');
+                window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors.`, 'MANAGER', 'warn');
                 if (window.YPP.events) {
                     window.YPP.events.emit('feature:disabled', { name, error: e.message });
                 }

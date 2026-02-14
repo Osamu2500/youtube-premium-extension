@@ -57,6 +57,12 @@
                 "src/content/features/layout/sidebar.js",
                 "src/content/features/search/search-redesign.js",
                 "src/content/feature-manager.js",
+                "src/content/features/watch-history.js",
+                "src/content/features/history/history-tracker.js",
+                "src/content/features/playlist/duration-calculator.js",
+                "src/content/features/stats/stats-visualizer.js",
+                "src/content/features/history/history-redesign.js",
+                "src/content/features/playlist/playlist-redesign.js",
                 "src/content/main.js"
             ]
         }
@@ -64,7 +70,8 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "src/assets/*"
+                "src/assets/*",
+                "src/inject/*"
             ],
             "matches": [
                 "*://*.youtube.com/*"
