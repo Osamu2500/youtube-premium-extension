@@ -148,11 +148,8 @@ window.YPP.features.Layout = class GridLayoutManager {
         }
 
         // Apply CSS Grid
-        contents.style.display = 'grid';
-        contents.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        contents.style.gap = `${this._GRID.ROW_GAP || 24}px ${this._GRID.ITEM_GAP || 16}px`;
-        contents.style.width = '100%';
-        contents.style.padding = '0';
+        // Use CSS class for performance
+        contents.classList.add('ypp-grid-container');
 
         // Apply item styles
         const items = contents.querySelectorAll(this._SELECTORS.VIDEO_ITEM);
@@ -195,12 +192,8 @@ window.YPP.features.Layout = class GridLayoutManager {
         if (!item) return;
 
         // For CSS Grid, items don't need width calculations
-        item.style.width = 'auto';
-        item.style.maxWidth = 'none';
-        item.style.minWidth = 'auto';
-        item.style.flex = 'none';
-        item.style.margin = '0';
-        item.style.boxSizing = 'border-box';
+        // Use CSS class for performance
+        item.classList.add('ypp-grid-item');
     }
 
     /**
@@ -322,24 +315,30 @@ window.YPP.features.Layout = class GridLayoutManager {
         // Cleanup items
         const items = document.querySelectorAll(this._SELECTORS.VIDEO_ITEM);
         items.forEach(item => {
-            item.style.width = '';
-            item.style.maxWidth = '';
-            item.style.minWidth = '';
-            item.style.flex = '';
-            item.style.margin = '';
-            item.style.boxSizing = '';
+            item.classList.remove('ypp-grid-item');
+            
+            // Clean up any residual inline styles just in case
+            item.style.removeProperty('width');
+            item.style.removeProperty('max-width');
+            item.style.removeProperty('min-width');
+            item.style.removeProperty('flex');
+            item.style.removeProperty('margin');
+            item.style.removeProperty('box-sizing');
         });
 
         // Cleanup contents
         const contents = document.querySelector(this._SELECTORS.GRID_CONTENTS);
         if (contents) {
-            contents.style.display = '';
-            contents.style.gridTemplateColumns = '';
-            contents.style.gap = '';
-            contents.style.flexWrap = '';
-            contents.style.justifyContent = '';
-            contents.style.width = '';
-            contents.style.padding = '';
+            contents.classList.remove('ypp-grid-container');
+            
+            // Clean up residual inline styles
+            contents.style.removeProperty('display');
+            contents.style.removeProperty('grid-template-columns');
+            contents.style.removeProperty('gap');
+            contents.style.removeProperty('flex-wrap');
+            contents.style.removeProperty('justify-content');
+            contents.style.removeProperty('width');
+            contents.style.removeProperty('padding');
         }
 
         // Cleanup rows

@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const settings = { ...defaultSettings, ...(data.settings || {}) };
 
                 settingKeys.forEach(key => {
-                    const el = document.getElementById(key);
+                    const el = elements[key];
                     if (el) {
                         if (el.type === 'checkbox') {
                             el.checked = settings[key] !== undefined ? settings[key] : false;
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveSettings = debounce(() => {
         const settings = {};
         settingKeys.forEach(key => {
-            const el = document.getElementById(key);
+            const el = elements[key];
             if (el) {
                 if (el.type === 'checkbox') {
                     settings[key] = el.checked;
@@ -185,10 +185,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 300); // 300ms debounce
 
+    // --- ELEMENT CACHE ---
+    const elements = {};
+    settingKeys.forEach(key => {
+        elements[key] = document.getElementById(key);
+    });
+
     // --- EVENT LISTENERS ---
     
     settingKeys.forEach(key => {
-        const el = document.getElementById(key);
+        const el = elements[key];
         if (el) {
             el.addEventListener('change', () => {
                 saveSettings(); // Triggers debounced save

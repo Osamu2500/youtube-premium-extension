@@ -149,9 +149,8 @@ window.YPP.features.ZenMode = class ZenMode {
             document.querySelector('.html5-video-player');
 
         if (player) {
+            player.classList.add('ypp-zen-shadow');
             player.style.boxShadow = `0 0 150px 30px ${color}`;
-            // Smooth transition handled by CSS class preferably, or inline:
-            player.style.transition = 'box-shadow 0.3s ease-out';
         }
     }
 
@@ -170,8 +169,8 @@ window.YPP.features.ZenMode = class ZenMode {
             document.querySelector('#player-container-outer') ||
             document.querySelector('.html5-video-player');
         if (player) {
+            player.classList.remove('ypp-zen-shadow');
             player.style.boxShadow = '';
-            player.style.transition = '';
         }
     }
 

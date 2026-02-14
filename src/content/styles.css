@@ -1572,3 +1572,62 @@ body.ypp-search-grid-mode ytd-channel-renderer {
 body.ypp-search-grid-mode ytd-item-section-renderer:has(ytd-reel-shelf-renderer) #header {
   display: none !important;
 }
+/* ===================================================================================
+   10. JS-INJECTED UTILITIES (Performance Optimization)
+   =================================================================================== */
+
+/* Grid Layout (Replaces inline styles in layout-manager.js) */
+.ypp-grid-container {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 24px 16px !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-wrap: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+/* Grid Item Reset */
+.ypp-grid-item {
+  width: auto !important;
+  max-width: none !important;
+  min-width: auto !important;
+  flex: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Zen Mode Shadow */
+.ypp-zen-shadow {
+  transition: box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* Toast Notification (Moved from player-tools.js) */
+.ypp-toast-mini {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 2500;
+  animation: ypp-fade-in-out 2s forwards;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+@keyframes ypp-fade-in-out {
+  0% { opacity: 0; transform: translate(-50%, 10px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
