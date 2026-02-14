@@ -78,7 +78,10 @@ window.YPP.FeatureManager = class FeatureManager {
             watchHistory: 'WatchHistoryTracker',
             historyTracker: 'HistoryTracker',
             historyRedesign: 'HistoryRedesign',
-            playlistRedesign: 'PlaylistRedesign'
+            playlistRedesign: 'PlaylistRedesign',
+            ambientMode: 'AmbientMode',
+            audioMode: 'AudioMode',
+            videoControls: 'VideoControls'
         };
 
         // Defensive: Ensure window.YPP.features exists

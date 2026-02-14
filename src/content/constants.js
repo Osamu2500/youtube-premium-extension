@@ -208,6 +208,11 @@ window.YPP.CONSTANTS = {
         enableFocusMode: false,
         cinemaMode: false,
         minimalMode: false,
+        
+        // New Features
+        ambientMode: false,
+        audioModeEnabled: false,
+        videoControlsEnabled: true,
 
         // Study Mode
         studyMode: false

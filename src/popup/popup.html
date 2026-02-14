@@ -39,17 +39,17 @@
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
           </button>
-          
+
           <!-- PLAYER -->
           <button class="nav-item" data-tab="player" title="Player">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
-             >
-               <polygon points="5 3 19 12 5 21 5 3"></polygon>
-             </svg>
+            >
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
           </button>
 
           <!-- SEARCH -->
@@ -60,14 +60,14 @@
               stroke="currentColor"
               stroke-width="2"
             >
-               <circle cx="11" cy="11" r="8"></circle>
-               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </button>
 
           <!-- GLOBAL -->
           <button class="nav-item" data-tab="global" title="Global Settings">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -79,19 +79,19 @@
               ></path>
             </svg>
           </button>
-          
-           <!-- SETTINGS (RESET) -->
+
+          <!-- SETTINGS (RESET) -->
           <button class="nav-item bottom" data-tab="settings" title="Admin">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
-             >
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                <polyline points="16 6 12 2 8 6"></polyline>
-                <line x1="12" y1="2" x2="12" y2="15"></line>
-             </svg>
+            >
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+              <polyline points="16 6 12 2 8 6"></polyline>
+              <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
           </button>
         </div>
       </nav>
@@ -108,6 +108,27 @@
           <div class="hero-card">
             <h2>Home Feed</h2>
             <p>Customize your starting page</p>
+          </div>
+
+          <div class="section-title">SUBSCRIPTIONS</div>
+          <div class="card-group">
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">Subscription Groups</span>
+                <span class="desc">Enable Custom Groups</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="enableSubsManager" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button
+              id="manageSubsBtn"
+              class="action-btn"
+              style="margin-top: 10px"
+            >
+              Manage Groups
+            </button>
           </div>
 
           <div class="section-title">LAYOUT & FEEL</div>
@@ -239,7 +260,7 @@
                   ></span
                 ></label>
               </div>
-               <div class="setting-item">
+              <div class="setting-item">
                 <div class="info"><span class="name">Stats</span></div>
                 <label class="toggle"
                   ><input type="checkbox" id="enableStatsForNerds" /><span
@@ -292,6 +313,36 @@
                 <span class="slider"></span>
               </label>
             </div>
+             <div class="setting-item">
+              <div class="info">
+                <span class="name">Ambient Mode</span>
+                <span class="desc">Ambilight Effect</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="ambientMode" />
+                <span class="slider"></span>
+              </label>
+            </div>
+             <div class="setting-item">
+              <div class="info">
+                <span class="name">Audio Mode</span>
+                <span class="desc">Hide Video, Keep Audio</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="audioModeEnabled" />
+                <span class="slider"></span>
+              </label>
+            </div>
+             <div class="setting-item">
+              <div class="info">
+                <span class="name">Video Controls</span>
+                <span class="desc">Floating Panel</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="videoControlsEnabled" />
+                <span class="slider"></span>
+              </label>
+            </div>
           </div>
 
           <div class="section-title">DISTRACTIONS</div>
@@ -333,7 +384,7 @@
                 <span class="slider"></span>
               </label>
             </div>
-             <div class="setting-item">
+            <div class="setting-item">
               <div class="info">
                 <span class="name">Hide Merch</span>
               </div>
@@ -382,7 +433,7 @@
 
           <div class="section-title">LAYOUT</div>
           <div class="card-group">
-             <div class="setting-item">
+            <div class="setting-item">
               <div class="info">
                 <span class="name">Glass Grid View</span>
                 <span class="desc">Premium Card Layout</span>
@@ -402,7 +453,7 @@
                 <span class="slider"></span>
               </label>
             </div>
-             <div class="setting-item">
+            <div class="setting-item">
               <div class="info">
                 <span class="name">Hide Shorts in Search</span>
               </div>
@@ -465,7 +516,7 @@
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="grid-2" style="margin-top:10px;">
+            <div class="grid-2" style="margin-top: 10px">
               <div class="setting-item">
                 <div class="info"><span class="name">Trending</span></div>
                 <label class="toggle"
@@ -516,44 +567,84 @@
               </div>
             </div>
           </div>
-          
-            <div class="section-title">WATCH HISTORY</div>
-             <div class="card-group">
-                <div id="history-widget" class="history-widget">
-                    <div class="history-summary">
-                        <div class="daily-stat">
-                            <span id="history-today-time">--</span>
-                            <span class="label">Today's Watch Time</span>
-                        </div>
-                        <button id="history-calendar-btn" class="history-expand-btn">
-                            📅 View Calendar
-                        </button>
-                    </div>
-                    
-                    <!-- Mini Heatmap (Last 2 months maybe?) -->
-                    <div id="history-heatmap" class="history-heatmap"></div>
 
-                    <!-- Details Panel -->
-                    <div id="history-details-panel" class="history-details-panel">
-                        <div class="calendar-header" style="display:flex; justify-content:space-between; margin-bottom:8px; color:#fff; font-weight:600;">
-                            <button id="cal-prev" style="background:none; border:none; color:#aaa; cursor:pointer;">&lt;</button>
-                            <span id="cal-month-year">Month</span>
-                            <button id="cal-next" style="background:none; border:none; color:#aaa; cursor:pointer;">&gt;</button>
-                        </div>
-                        <div id="calendar-grid" class="calendar-grid">
-                            <!-- JS Generated -->
-                        </div>
-                        <div class="section-title" style="margin: 8px 0 4px 0;">WATCH LOG</div>
-                        <div id="video-log-list" class="video-log-list">
-                            <!-- JS Generated -->
-                            <div style="text-align:center; color:#666; font-size:11px; padding:10px;">Select a date to view history</div>
-                        </div>
-                    </div>
+          <div class="section-title">WATCH HISTORY</div>
+          <div class="card-group">
+            <div id="history-widget" class="history-widget">
+              <div class="history-summary">
+                <div class="daily-stat">
+                  <span id="history-today-time">--</span>
+                  <span class="label">Today's Watch Time</span>
                 </div>
-             </div>
+                <button id="history-calendar-btn" class="history-expand-btn">
+                  📅 View Calendar
+                </button>
+              </div>
 
-           <div class="section-title">BEHAVIOR</div>
-           <div class="card-group">
+              <!-- Mini Heatmap (Last 2 months maybe?) -->
+              <div id="history-heatmap" class="history-heatmap"></div>
+
+              <!-- Details Panel -->
+              <div id="history-details-panel" class="history-details-panel">
+                <div
+                  class="calendar-header"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 8px;
+                    color: #fff;
+                    font-weight: 600;
+                  "
+                >
+                  <button
+                    id="cal-prev"
+                    style="
+                      background: none;
+                      border: none;
+                      color: #aaa;
+                      cursor: pointer;
+                    "
+                  >
+                    &lt;
+                  </button>
+                  <span id="cal-month-year">Month</span>
+                  <button
+                    id="cal-next"
+                    style="
+                      background: none;
+                      border: none;
+                      color: #aaa;
+                      cursor: pointer;
+                    "
+                  >
+                    &gt;
+                  </button>
+                </div>
+                <div id="calendar-grid" class="calendar-grid">
+                  <!-- JS Generated -->
+                </div>
+                <div class="section-title" style="margin: 8px 0 4px 0">
+                  WATCH LOG
+                </div>
+                <div id="video-log-list" class="video-log-list">
+                  <!-- JS Generated -->
+                  <div
+                    style="
+                      text-align: center;
+                      color: #666;
+                      font-size: 11px;
+                      padding: 10px;
+                    "
+                  >
+                    Select a date to view history
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">BEHAVIOR</div>
+          <div class="card-group">
             <div class="setting-item">
               <div class="info">
                 <span class="name">Redirect Shorts</span>
@@ -564,7 +655,7 @@
                 <span class="slider"></span>
               </label>
             </div>
-           </div>
+          </div>
         </section>
 
         <!-- TAB: SETTINGS -->

@@ -1,0 +1,149 @@
+/* Video Control Panel Styles */
+
+#ypp-video-control-panel {
+    position: absolute;
+    top: 100px;
+    right: 20px;
+    width: 280px;
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    z-index: 2000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#ypp-video-control-panel.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Header */
+.ypp-vcp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    cursor: move; /* Specific area to drag */
+}
+
+.ypp-vcp-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ypp-vcp-close {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.ypp-vcp-close:hover {
+    color: #fff;
+}
+
+/* Control Sections */
+.ypp-vcp-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ypp-vcp-label {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 500;
+}
+
+/* Sliders */
+.ypp-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ypp-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    outline: none;
+}
+
+.ypp-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #3ea6ff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.ypp-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.ypp-value-display {
+    font-size: 12px;
+    color: #fff;
+    min-width: 32px;
+    text-align: right;
+}
+
+/* Toggles / Buttons */
+.ypp-vcp-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.ypp-action-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.ypp-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ypp-action-btn.active {
+    background: rgba(62, 166, 255, 0.2);
+    border-color: #3ea6ff;
+    color: #3ea6ff;
+}
+
+/* Draggable Handle */
+#ypp-video-control-panel.dragging {
+    opacity: 0.8;
+}

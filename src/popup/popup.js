@@ -120,7 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideEndScreens',
         'hideCards',
         'hideMerch',
-        'redirectShorts'
+        'redirectShorts',
+        
+        // New Feature Keys
+        'enableSubsManager',
+        'ambientMode',
+        'audioModeEnabled',
+        'videoControlsEnabled'
     ];
 
     // --- STORAGE HANDLING ---
@@ -210,6 +216,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Manage Subs Button
+    const manageSubsBtn = document.getElementById('manageSubsBtn');
+    if (manageSubsBtn) {
+        manageSubsBtn.addEventListener('click', () => {
+             chrome.tabs.create({ url: 'https://www.youtube.com/feed/subscriptions' });
+        });
+    }
 
     // Reset Button
     const resetBtn = document.getElementById('resetBtn');
