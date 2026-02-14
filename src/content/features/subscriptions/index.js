@@ -7,14 +7,12 @@ window.YPP.features.SubscriptionsOrganizer = class SubscriptionsOrganizer {
     }
 
     async run(settings) {
+        if (!settings.enableSubsManager) return; // Optional check if needed
+        
         this.logger.info('Running Subscriptions Organizer');
         
         // Inject styles
-        const cssUrl = chrome.runtime.getURL('src/content/features/subscriptions/subscriptions.css');
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = cssUrl;
-        document.head.appendChild(link);
+        window.YPP.Utils.injectCSS('src/content/features/subscriptions/subscriptions.css', 'ypp-subs-css');
 
         await this.manager.init();
         this.ui.init();

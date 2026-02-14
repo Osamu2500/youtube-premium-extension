@@ -81,7 +81,10 @@ window.YPP.FeatureManager = class FeatureManager {
             playlistRedesign: 'PlaylistRedesign',
             ambientMode: 'AmbientMode',
             audioMode: 'AudioMode',
-            videoControls: 'VideoControls'
+            videoControls: 'VideoControls',
+            returnYouTubeDislike: 'ReturnYouTubeDislike',
+            sponsorBlock: 'SponsorBlock',
+            contextMenu: 'ContextMenu'
         };
 
         // Defensive: Ensure window.YPP.features exists

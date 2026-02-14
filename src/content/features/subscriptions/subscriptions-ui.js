@@ -21,11 +21,18 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
             } else if (path === '/feed/channels') {
                 this.injectOrganizerButton(); // "Organize" on channels list
                 this.applyGridClass();
+            } else if (path === '/' || path === '/index') {
+                 // Home Feed Support
+                 this.injectFilterBar();
             }
         });
         observer.observe(document.body, { childList: true, subtree: true });
         
         // Initial check
+        this.checkRoute();
+    }
+
+    checkRoute() {
         const path = window.location.pathname;
         if (path === '/feed/subscriptions') {
             this.injectManageButton();
@@ -33,6 +40,8 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         } else if (path === '/feed/channels') {
             this.injectOrganizerButton();
             this.applyGridClass();
+        } else if (path === '/' || path === '/index') {
+            this.injectFilterBar();
         }
     }
 
@@ -73,7 +82,20 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
 
     injectFilterBar() {
         if (document.getElementById('ypp-subs-filter-bar')) return;
-        const container = document.querySelector('ytd-browse[page-subtype="subscriptions"] #contents');
+        
+        let container;
+        const path = window.location.pathname;
+        
+        if (path === '/feed/subscriptions') {
+             container = document.querySelector('ytd-browse[page-subtype="subscriptions"] #contents');
+        } else if (path === '/' || path === '/index') {
+             // Home Feed: Inject above the rich grid
+             const browse = document.querySelector('ytd-browse[page-subtype="home"]');
+             if (browse) {
+                 container = browse.querySelector('#contents');
+             }
+        }
+
         if (!container) return;
 
         const bar = document.createElement('div');
@@ -83,7 +105,12 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         this.renderFilterBar(bar);
         
         const grid = container.querySelector('ytd-rich-grid-renderer');
-        if (grid) container.insertBefore(bar, grid);
+        if (grid) {
+            container.insertBefore(bar, grid);
+        } else {
+            // Fallback for some layouts
+            container.insertBefore(bar, container.firstChild);
+        }
     }
 
     renderFilterBar(container) {
@@ -112,12 +139,17 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         const targetChip = Array.from(chips).find(c => c.textContent === (groupName || 'All'));
         if (targetChip) targetChip.classList.add('active');
 
+        // Handles both Home and Subs feed items
         const videos = document.querySelectorAll('ytd-rich-item-renderer');
         const allowedChannels = groupName ? this.manager.getChannelsInGroup(groupName).map(c => c.name) : null;
 
         videos.forEach(video => {
             if (!video.dataset.yppChannel) {
-                const nameNode = video.querySelector('#text.ytd-channel-name');
+                // Try standard selectors
+                let nameNode = video.querySelector('#text.ytd-channel-name');
+                if (!nameNode) nameNode = video.querySelector('ytd-channel-name #text');
+                if (!nameNode) nameNode = video.querySelector('.ytd-channel-name'); // broader fallback
+                
                 if (nameNode) video.dataset.yppChannel = nameNode.textContent.trim();
             }
             const channelName = video.dataset.yppChannel;
@@ -130,6 +162,9 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
                 video.style.display = 'none';
             }
         });
+        
+        // Also trigger a reflow on the grid if needed by dispatching resize
+        window.dispatchEvent(new Event('resize'));
     }
 
     openOrganizer() {

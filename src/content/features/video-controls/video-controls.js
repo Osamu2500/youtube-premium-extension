@@ -5,27 +5,45 @@ window.YPP.features.VideoControls = class VideoControls {
         this.panel = null;
         this.isActive = false;
         this.isPanelVisible = false;
+        this.listeners = []; // Track listeners for cleanup
     }
 
     run(settings) {
         if (!settings.videoControlsEnabled) return;
 
         this.logger.info('Running Video Controls');
+        this.isActive = true;
         
         // Inject styles
-        const cssUrl = chrome.runtime.getURL('src/content/features/video-controls/video-controls.css');
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = cssUrl;
-        document.head.appendChild(link);
+        this.Utils.injectCSS('src/content/features/video-controls/video-controls.css', 'ypp-video-controls-css');
 
         this.injectToggle();
+    }
+
+    destroy() {
+        this.isActive = false;
+        
+        // Remove Toggle
+        const toggle = document.getElementById('ypp-vcp-toggle');
+        if (toggle) toggle.remove();
+
+        // Remove Panel
+        if (this.panel) {
+            this.panel.remove();
+            this.panel = null;
+        }
+
+        // Cleanup Listeners
+        this.removeListeners();
+
+        // Remove CSS (optional, usually fine to leave)
+        this.Utils.removeStyle('ypp-video-controls-css');
     }
 
     injectToggle() {
         // Wait for player controls
         this.Utils.waitForElement('.ytp-right-controls').then(controls => {
-            if (!controls) return;
+            if (!this.isActive || !controls) return;
             if (controls.querySelector('#ypp-vcp-toggle')) return;
 
             const btn = document.createElement('button');
@@ -116,20 +134,30 @@ window.YPP.features.VideoControls = class VideoControls {
         const video = document.querySelector('video');
         if (!video) return;
 
+        // Helper to track listeners
+        const addListener = (element, event, handler) => {
+            if (element) {
+                element.addEventListener(event, handler);
+                this.listeners.push({ element, event, handler });
+            }
+        };
+
         // Speed
         const speedSlider = this.panel.querySelector('#ypp-speed-slider');
         const speedVal = this.panel.querySelector('#ypp-speed-val');
-        speedSlider.oninput = (e) => {
+        
+        addListener(speedSlider, 'input', (e) => {
             const val = parseFloat(e.target.value);
             video.playbackRate = val;
             speedVal.textContent = val + 'x';
-        };
+        });
 
         // Filters (Brightness/Contrast)
         const updateFilters = () => {
             const b = this.panel.querySelector('#ypp-bright-slider').value;
             const c = this.panel.querySelector('#ypp-contrast-slider').value;
-            const flip = this.panel.querySelector('#ypp-flip-btn').classList.contains('active');
+            const flipBtn = this.panel.querySelector('#ypp-flip-btn');
+            const flip = flipBtn && flipBtn.classList.contains('active');
             
             let filter = `brightness(${b}%) contrast(${c}%)`;
             let transform = flip ? 'scaleX(-1)' : 'none';
@@ -144,70 +172,91 @@ window.YPP.features.VideoControls = class VideoControls {
         const brightSlider = this.panel.querySelector('#ypp-bright-slider');
         const contrastSlider = this.panel.querySelector('#ypp-contrast-slider');
 
-        brightSlider.oninput = updateFilters;
-        contrastSlider.oninput = updateFilters;
+        addListener(brightSlider, 'input', updateFilters);
+        addListener(contrastSlider, 'input', updateFilters);
 
         // Double-click to reset
-        speedSlider.ondblclick = () => {
+        addListener(speedSlider, 'dblclick', () => {
             speedSlider.value = 1;
             video.playbackRate = 1;
             speedVal.textContent = '1.0x';
-        };
+        });
 
-        brightSlider.ondblclick = () => {
+        addListener(brightSlider, 'dblclick', () => {
             brightSlider.value = 100;
             updateFilters();
-        };
+        });
 
-        contrastSlider.ondblclick = () => {
+        addListener(contrastSlider, 'dblclick', () => {
             contrastSlider.value = 100;
             updateFilters();
-        };
+        });
 
         // Flip
-        this.panel.querySelector('#ypp-flip-btn').onclick = (e) => {
+        const flipBtn = this.panel.querySelector('#ypp-flip-btn');
+        addListener(flipBtn, 'click', (e) => {
             e.currentTarget.classList.toggle('active');
             updateFilters();
-        };
+        });
 
         // Loop
-        this.panel.querySelector('#ypp-loop-btn').onclick = (e) => {
+        const loopBtn = this.panel.querySelector('#ypp-loop-btn');
+        addListener(loopBtn, 'click', (e) => {
             const btn = e.currentTarget;
             btn.classList.toggle('active');
             video.loop = btn.classList.contains('active');
-        };
+        });
 
         // Reset
-        this.panel.querySelector('#ypp-reset-btn').onclick = () => {
+        const resetBtn = this.panel.querySelector('#ypp-reset-btn');
+        addListener(resetBtn, 'click', () => {
              video.playbackRate = 1;
              video.style.filter = '';
              video.style.transform = '';
              video.loop = false;
              
              // Reset UI
-             this.panel.querySelector('#ypp-speed-slider').value = 1;
-             this.panel.querySelector('#ypp-speed-val').textContent = '1.0x';
+             speedSlider.value = 1;
+             speedVal.textContent = '1.0x';
              
-             this.panel.querySelector('#ypp-bright-slider').value = 100;
+             brightSlider.value = 100;
              this.panel.querySelector('#ypp-bright-val').textContent = '100%';
              
-             this.panel.querySelector('#ypp-contrast-slider').value = 100;
+             contrastSlider.value = 100;
              this.panel.querySelector('#ypp-contrast-val').textContent = '100%';
              
-             this.panel.querySelector('#ypp-loop-btn').classList.remove('active');
-             this.panel.querySelector('#ypp-flip-btn').classList.remove('active');
-        };
+             loopBtn.classList.remove('active');
+             flipBtn.classList.remove('active');
+        });
 
         // Close
-        this.panel.querySelector('.ypp-vcp-close').onclick = () => this.togglePanel();
+        const closeBtn = this.panel.querySelector('.ypp-vcp-close');
+        addListener(closeBtn, 'click', () => this.togglePanel());
+    }
+
+    removeListeners() {
+        this.listeners.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.listeners = [];
+        
+        // Also clean up draggable listeners on document
+        document.onmousemove = null;
+        document.onmouseup = null;
     }
 
     makeDraggable() {
         const header = this.panel.querySelector('#ypp-vcp-drag');
+        // We attach these to the instance so we can remove them if needed, 
+        // though document.onmousemove is global, which is a bit fragile if multiple features do this.
+        // Better to use addEventListener on document and track it.
+        
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
 
-        header.onmousedown = (e) => {
+        const onMouseDown = (e) => {
             isDragging = true;
             this.panel.classList.add('dragging');
             
@@ -225,7 +274,7 @@ window.YPP.features.VideoControls = class VideoControls {
             this.panel.style.top = initialTop + 'px';
         };
 
-        document.onmousemove = (e) => {
+        const onMouseMove = (e) => {
             if (!isDragging) return;
             
             const dx = e.clientX - startX;
@@ -235,14 +284,26 @@ window.YPP.features.VideoControls = class VideoControls {
             this.panel.style.top = (initialTop + dy) + 'px';
         };
 
-        document.onmouseup = () => {
-            this.panel.classList.remove('dragging');
-            
-            // Save position
-            const left = this.panel.style.left;
-            const top = this.panel.style.top;
-            localStorage.setItem('ypp-vcp-pos', JSON.stringify({ left, top }));
+        const onMouseUp = () => {
+            if (isDragging) {
+                isDragging = false;
+                this.panel.classList.remove('dragging');
+                
+                // Save position
+                const left = this.panel.style.left;
+                const top = this.panel.style.top;
+                localStorage.setItem('ypp-vcp-pos', JSON.stringify({ left, top }));
+            }
         };
+
+        header.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        // Add to listeners for cleanup
+        this.listeners.push({ element: header, event: 'mousedown', handler: onMouseDown });
+        this.listeners.push({ element: document, event: 'mousemove', handler: onMouseMove });
+        this.listeners.push({ element: document, event: 'mouseup', handler: onMouseUp });
     }
     
     restorePosition() {

@@ -1,29 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- UTILITIES ---
-    const debounce = (func, wait) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    };
-
-    const handleError = (context, error) => {
-        console.error(`[YPP:${context}]`, error);
-        // Optional: Show a toast or UI indication of error
-    };
+    // Use shared utils from utils.js
+    const Utils = window.YPP.Utils;
 
     // --- TAB NAVIGATION ---
     const navItems = document.querySelectorAll('.nav-item[data-tab]');
     const tabs = document.querySelectorAll('.tab-content');
     const pageTitle = document.getElementById('page-title');
 
+    // Tab Title Mapping
     const titles = {
-        'home': 'Home Page',
+        'home': 'Home Feed',
         'player': 'Player & Watch',
-        'search': 'Search & Discovery',
+        'shorts': 'Shorts',
+        'subscriptions': 'Subscriptions',
+        'playlists': 'Library & Playlists',
+        'watchlater': 'Watch Later',
+        'history': 'Watch History',
+        'search': 'Search Options',
         'global': 'Global Settings',
-        'settings': 'Admin'
+        'settings': 'Admin Center'
     };
 
     function switchTab(tabId) {
@@ -90,14 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideMixes',
         'hideWatched', // Also in Search
         'grid4x4',
+        'contextMenu', // Subscription Groups Context Menu
+        
+        // Shorts
         'hideShorts', // Global/Home
+        'hideSearchShorts',
+        'redirectShorts',
 
         // Search
         'searchGrid',
         'cleanSearch',
-        'hideSearchShorts',
-        // 'shortsAutoScroll' removed from HTML for simplicity, or re-add if needed
-
+        
         // Player
         'autoQuality',
         'enableRemainingTime',
@@ -107,7 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'snapshotBtn',
         'loopBtn',
         'enablePiP',
-        'enableStatsForNerds',
+        
+        // Smart Features
+        'sponsorBlock',
+        'returnYouTubeDislike',
         
         // Modes
         'zenMode',
@@ -119,8 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideComments',
         'hideEndScreens',
         'hideCards',
-        'hideMerch',
-        'redirectShorts',
+        // 'hideMerch' removed from HTML
         
         // New Feature Keys
         'enableSubsManager',
@@ -136,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             chrome.storage.local.get('settings', (data) => {
                 if (chrome.runtime.lastError) {
-                    handleError('LOAD', chrome.runtime.lastError);
+                    Utils.log('Load Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
                     return;
                 }
 
@@ -160,12 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateDependencyUI();
             });
         } catch (e) {
-            handleError('LOAD_CRITICAL', e);
+            Utils.log('Critical Load Error: ' + e.message, 'POPUP', 'error');
         }
     };
 
     // Save Settings (Debounced)
-    const saveSettings = debounce(() => {
+    const saveSettings = Utils.debounce(() => {
         const settings = {};
         settingKeys.forEach(key => {
             const el = elements[key];
@@ -181,13 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             chrome.storage.local.set({ settings }, () => {
                 if (chrome.runtime.lastError) {
-                    handleError('SAVE', chrome.runtime.lastError);
+                    Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
                 } else {
                     // console.log('[YPP] Settings saved'); 
                 }
             });
         } catch (e) {
-            handleError('SAVE_CRITICAL', e);
+             Utils.log('Critical Save Error: ' + e.message, 'POPUP', 'error');
         }
     }, 300); // 300ms debounce
 

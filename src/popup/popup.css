@@ -51,7 +51,7 @@
 body {
     margin: 0;
     padding: 0;
-    width: 380px;
+    width: 700px; /* Expanded Width */
     height: 600px;
     background-color: var(--ypp-bg-base);
     color: var(--text-primary);

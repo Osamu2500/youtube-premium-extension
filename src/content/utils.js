@@ -544,6 +544,25 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
+     * Inject a CSS file from the extension package
+     * @param {string} path - Relative path to the CSS file
+     * @param {string} [id] - Optional ID for the link element
+     * @returns {void}
+     */
+    injectCSS: (path, id) => {
+        if (!path) return;
+        const fullUrl = chrome.runtime.getURL(path);
+        // Check if already injected
+        if (document.querySelector(`link[href="${fullUrl}"]`)) return;
+        
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = fullUrl;
+        if (id) link.id = id;
+        document.head.appendChild(link);
+    },
+
+    /**
      * Add CSS variable to document root
      * @param {string} name - Variable name (without --)
      * @param {string} value - Variable value

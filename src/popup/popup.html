@@ -51,6 +51,79 @@
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
           </button>
+          
+          <!-- SHORTS -->
+          <button class="nav-item" data-tab="shorts" title="Shorts">
+            <svg 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              stroke-width="2"
+             >
+                <path d="M10 15v4a3 3 0 0 0 6 0v-4"></path>
+                <path d="M10 9l0-2a2 2 0 0 1 2-2l6 0"></path>
+                <line x1="16" y1="13" x2="16" y2="5"></line>
+                <path d="M10 9l-4 0a3 3 0 0 0-3 3v4"></path>
+            </svg>
+          </button>
+          
+          <!-- SUBSCRIPTIONS -->
+          <button class="nav-item" data-tab="subscriptions" title="Subscriptions">
+             <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </button>
+          
+          <!-- PLAYLISTS -->
+          <button class="nav-item" data-tab="playlists" title="Playlists">
+             <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </button>
+          
+          <!-- WATCH LATER -->
+          <button class="nav-item" data-tab="watchlater" title="Watch Later">
+             <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </button>
+          
+          <!-- HISTORY -->
+          <button class="nav-item" data-tab="history" title="History">
+             <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+                <path d="M1 4v6h6"></path>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+          </button>
 
           <!-- SEARCH -->
           <button class="nav-item" data-tab="search" title="Search">
@@ -110,27 +183,6 @@
             <p>Customize your starting page</p>
           </div>
 
-          <div class="section-title">SUBSCRIPTIONS</div>
-          <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Subscription Groups</span>
-                <span class="desc">Enable Custom Groups</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="enableSubsManager" checked />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <button
-              id="manageSubsBtn"
-              class="action-btn"
-              style="margin-top: 10px"
-            >
-              Manage Groups
-            </button>
-          </div>
-
           <div class="section-title">LAYOUT & FEEL</div>
           <div class="card-group">
             <div class="setting-item">
@@ -150,6 +202,15 @@
               </div>
               <label class="toggle">
                 <input type="checkbox" id="grid4x4" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">Hide Scrollbar</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="hideScrollbar" />
                 <span class="slider"></span>
               </label>
             </div>
@@ -195,6 +256,30 @@
           <div class="hero-card">
             <h2>Player & Watch</h2>
             <p>Tools and focus for video playback</p>
+          </div>
+
+          <div class="section-title">SMART FEATURES</div>
+          <div class="card-group">
+            <div class="setting-item">
+                <div class="info">
+                  <span class="name">SponsorBlock</span>
+                  <span class="desc">Auto-skip Sponsors</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="sponsorBlock" />
+                  <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="info">
+                  <span class="name">Return YouTube Dislike</span>
+                  <span class="desc">Show Dislike Count</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="returnYouTubeDislike" />
+                  <span class="slider"></span>
+                </label>
+            </div>
           </div>
 
           <div class="section-title">TOOLS</div>
@@ -412,17 +497,174 @@
               </div>
               <input type="color" id="progressBarColor" value="#3ea6ff" />
             </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Classic Blue</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="blueProgress" />
-                <span class="slider"></span>
-              </label>
-            </div>
           </div>
         </section>
+        
+        <!-- TAB: SHORTS -->
+        <section id="tab-shorts" class="tab-content">
+            <div class="hero-card">
+              <h2>Shorts</h2>
+              <p>Take back control</p>
+            </div>
+  
+            <div class="section-title">BEHAVIOR</div>
+            <div class="card-group">
+              <div class="setting-item">
+                <div class="info">
+                  <span class="name">Redirect Shorts</span>
+                  <span class="desc">Open as normal video</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="redirectShorts" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </section>
+          
+          <!-- TAB: SUBSCRIPTIONS -->
+          <section id="tab-subscriptions" class="tab-content">
+             <div class="hero-card">
+              <h2>Subscriptions</h2>
+              <p>Manage your groups and feeds</p>
+            </div>
+            
+            <div class="section-title">MANAGEMENT</div>
+            <div class="card-group">
+                 <div class="setting-item">
+                  <div class="info">
+                    <span class="name">Subscription Groups</span>
+                    <span class="desc">Enable Custom Groups</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="enableSubsManager" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <div class="info">
+                    <span class="name">Quick Add Menu</span>
+                    <span class="desc">"Add to Group" on Cards</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="contextMenu" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <button
+                  id="manageSubsBtn"
+                  class="action-btn"
+                  style="margin-top: 10px"
+                >
+                  Manage Groups
+                </button>
+            </div>
+          </section>
+          
+          <!-- TAB: PLAYLISTS -->
+          <section id="tab-playlists" class="tab-content">
+             <div class="hero-card">
+              <h2>Library</h2>
+              <p>Your content</p>
+            </div>
+             <div class="card-group" style="text-align:center; padding: 20px;">
+                <p style="color:var(--text-tertiary);">Playlist features coming soon.</p>
+            </div>
+          </section>
+          
+          <!-- TAB: WATCH LATER -->
+          <section id="tab-watchlater" class="tab-content">
+             <div class="hero-card">
+              <h2>Watch Later</h2>
+              <p>Catch up on your queue</p>
+            </div>
+             <div class="card-group" style="text-align:center; padding: 20px;">
+                <p style="color:var(--text-tertiary);">Queue features coming soon.</p>
+            </div>
+          </section>
+          
+          <!-- TAB: HISTORY -->
+          <section id="tab-history" class="tab-content">
+             <div class="hero-card">
+              <h2>Watch History</h2>
+              <p>Track your viewing habits</p>
+            </div>
+            
+            <div class="section-title">WATCH HISTORY</div>
+             <div class="card-group">
+                <div id="history-widget" class="history-widget">
+                  <div class="history-summary">
+                    <div class="daily-stat">
+                      <span id="history-today-time">--</span>
+                      <span class="label">Today's Watch Time</span>
+                    </div>
+                    <button id="history-calendar-btn" class="history-expand-btn">
+                      📅 View Calendar
+                    </button>
+                  </div>
+    
+                  <!-- Mini Heatmap (Last 2 months maybe?) -->
+                  <div id="history-heatmap" class="history-heatmap"></div>
+    
+                  <!-- Details Panel -->
+                  <div id="history-details-panel" class="history-details-panel">
+                    <div
+                      class="calendar-header"
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 8px;
+                        color: #fff;
+                        font-weight: 600;
+                      "
+                    >
+                      <button
+                        id="cal-prev"
+                        style="
+                          background: none;
+                          border: none;
+                          color: #aaa;
+                          cursor: pointer;
+                        "
+                      >
+                        &lt;
+                      </button>
+                      <span id="cal-month-year">Month</span>
+                      <button
+                        id="cal-next"
+                        style="
+                          background: none;
+                          border: none;
+                          color: #aaa;
+                          cursor: pointer;
+                        "
+                      >
+                        &gt;
+                      </button>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid">
+                      <!-- JS Generated -->
+                    </div>
+                    <div class="section-title" style="margin: 8px 0 4px 0">
+                      WATCH LOG
+                    </div>
+                    <div id="video-log-list" class="video-log-list">
+                      <!-- JS Generated -->
+                      <div
+                        style="
+                          text-align: center;
+                          color: #666;
+                          font-size: 11px;
+                          padding: 10px;
+                        "
+                      >
+                        Select a date to view history
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </section>
 
         <!-- TAB: SEARCH -->
         <section id="tab-search" class="tab-content">
@@ -494,15 +736,6 @@
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Scrollbar</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideScrollbar" />
-                <span class="slider"></span>
-              </label>
-            </div>
           </div>
 
           <div class="section-title">NAVIGATION SHORTCUTS</div>
@@ -567,95 +800,6 @@
               </div>
             </div>
           </div>
-
-          <div class="section-title">WATCH HISTORY</div>
-          <div class="card-group">
-            <div id="history-widget" class="history-widget">
-              <div class="history-summary">
-                <div class="daily-stat">
-                  <span id="history-today-time">--</span>
-                  <span class="label">Today's Watch Time</span>
-                </div>
-                <button id="history-calendar-btn" class="history-expand-btn">
-                  📅 View Calendar
-                </button>
-              </div>
-
-              <!-- Mini Heatmap (Last 2 months maybe?) -->
-              <div id="history-heatmap" class="history-heatmap"></div>
-
-              <!-- Details Panel -->
-              <div id="history-details-panel" class="history-details-panel">
-                <div
-                  class="calendar-header"
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 8px;
-                    color: #fff;
-                    font-weight: 600;
-                  "
-                >
-                  <button
-                    id="cal-prev"
-                    style="
-                      background: none;
-                      border: none;
-                      color: #aaa;
-                      cursor: pointer;
-                    "
-                  >
-                    &lt;
-                  </button>
-                  <span id="cal-month-year">Month</span>
-                  <button
-                    id="cal-next"
-                    style="
-                      background: none;
-                      border: none;
-                      color: #aaa;
-                      cursor: pointer;
-                    "
-                  >
-                    &gt;
-                  </button>
-                </div>
-                <div id="calendar-grid" class="calendar-grid">
-                  <!-- JS Generated -->
-                </div>
-                <div class="section-title" style="margin: 8px 0 4px 0">
-                  WATCH LOG
-                </div>
-                <div id="video-log-list" class="video-log-list">
-                  <!-- JS Generated -->
-                  <div
-                    style="
-                      text-align: center;
-                      color: #666;
-                      font-size: 11px;
-                      padding: 10px;
-                    "
-                  >
-                    Select a date to view history
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-title">BEHAVIOR</div>
-          <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Redirect Shorts</span>
-                <span class="desc">Open as normal video</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="redirectShorts" />
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
         </section>
 
         <!-- TAB: SETTINGS -->
@@ -682,6 +826,7 @@
       </main>
     </div>
     <script src="../content/constants.js"></script>
+    <script src="../content/utils.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
