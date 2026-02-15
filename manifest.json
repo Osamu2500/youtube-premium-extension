@@ -82,7 +82,8 @@
         {
             "resources": [
                 "src/assets/*",
-                "src/inject/*"
+                "src/inject/*",
+                "src/content/themes/*.css"
             ],
             "matches": [
                 "*://*.youtube.com/*"

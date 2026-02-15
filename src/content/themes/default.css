@@ -1,0 +1,46 @@
+html.yt-premium-plus-theme, body.yt-premium-plus-theme {
+    /* Default Premium Theme (Ocean-Dark) */
+    --ypp-bg-base: #080808;
+    --ypp-bg-surface: rgba(25, 25, 25, 0.6);
+    --ypp-bg-glass: rgba(10, 10, 10, 0.8);
+    --ypp-glass-border: rgba(255, 255, 255, 0.08);
+    --ypp-glass-highlight: rgba(255, 255, 255, 0.12);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+
+    --ypp-text-primary: #ffffff;
+    --ypp-text-secondary: rgba(255, 255, 255, 0.75);
+
+    --ypp-accent: #3ea6ff;
+    --ypp-accent-hover: #5eb9ff;
+    --ypp-accent-glow: rgba(62, 166, 255, 0.3);
+
+    /* SEMANTIC COLORS */
+    --ypp-success: rgba(15, 157, 88, 0.9);
+    --ypp-error: rgba(220, 38, 38, 0.9);
+    --ypp-warning: rgba(234, 179, 8, 0.9);
+    
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.25);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --ypp-shadow-glow: 0 0 24px rgba(62, 166, 255, 0.15);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: transparent;
+    --ytd-searchbox-text-color: #ffffff;
+    --ytd-searchbox-border-radius: 18px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 18px 18px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05);
+    
+    /* CORE YOUTUBE OVERRIDES */
+    /* We must be aggressive with these to ensure the theme takes hold */
+    --yt-spec-base-background: #080808 !important;
+    --yt-spec-raised-background: #191919 !important;
+    --yt-spec-menu-background: #191919 !important;
+    --yt-spec-inverted-background: #ffffff !important;
+    
+    --yt-spec-text-primary: #ffffff !important;
+    --yt-spec-text-secondary: rgba(255, 255, 255, 0.75) !important;
+}

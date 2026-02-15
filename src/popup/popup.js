@@ -191,7 +191,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (chrome.runtime.lastError) {
                     Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
                 } else {
-                    // console.log('[YPP] Settings saved'); 
+                    // Send instant update to active tab
+                    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        if (tabs[0] && tabs[0].id) {
+                            chrome.tabs.sendMessage(tabs[0].id, { 
+                                action: 'UPDATE_SETTINGS', 
+                                settings: settings 
+                            });
+                        }
+                    });
                 }
             });
         } catch (e) {
@@ -244,27 +252,62 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSetting('activeTheme', newTheme);
             applyThemeToPopup(newTheme, themes);
             
-            // Legacy sync for trueBlack
-            if (newTheme === 'midnight') {
-                updateSetting('trueBlack', true);
-            } else {
-                updateSetting('trueBlack', false);
-            }
+            // If user selects a specific theme, we should probably disable legacy trueBlack
+            // to avoid confusion? Or just leave it as is since theme.js handles it.
+            // Let's rely on theme.js logic.
         });
+
+        const forceBtn = document.getElementById('forceApplyTheme');
+        if (forceBtn) {
+            forceBtn.addEventListener('click', () => {
+                const currentTheme = themeSelect.value;
+                
+                // Visual feedback
+                const originalText = forceBtn.textContent;
+                forceBtn.textContent = 'Applying...';
+                
+                // 1. Update Storage
+                updateSetting('activeTheme', currentTheme);
+                
+                // 2. Send Message to Content Script
+                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    if (tabs[0] && tabs[0].id) {
+                        chrome.tabs.sendMessage(tabs[0].id, { 
+                            action: 'UPDATE_SETTINGS', 
+                            settings: settings 
+                        }, (response) => {
+                            // 3. Also apply to Popup
+                            applyThemeToPopup(currentTheme, themes);
+                            
+                            setTimeout(() => {
+                                forceBtn.textContent = 'Done!';
+                                setTimeout(() => forceBtn.textContent = originalText, 1000);
+                            }, 300);
+                        });
+                    }
+                });
+            });
+        }
     };
 
-    const applyThemeToPopup = (themeKey, themes) => {
-        // Remove all theme classes
-        themes.forEach(t => {
-            const themeClass = `ypp-theme-${t.key}`;
-            if (t.key !== 'default') {
-                 document.body.classList.remove(themeClass);
-            }
-        });
 
-        // Add new theme class
-        if (themeKey !== 'default') {
-            document.body.classList.add(`ypp-theme-${themeKey}`);
+    const applyThemeToPopup = (themeKey, themes) => {
+        const id = 'ypp-active-theme-css';
+        let link = document.getElementById(id);
+
+        // In Popup context, we can use relative paths or runtime URLs
+        // Relative path from src/popup/popup.html to src/content/themes/
+        const cssPath = `../content/themes/${themeKey}.css`;
+
+        if (!link) {
+            link = document.createElement('link');
+            link.id = id;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
+
+        if (link.getAttribute('href') !== cssPath) {
+             link.setAttribute('href', cssPath);
         }
     };
 

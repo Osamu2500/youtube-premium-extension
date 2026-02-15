@@ -1,0 +1,61 @@
+html.yt-premium-plus-theme, body.yt-premium-plus-theme {
+    --ypp-bg-base: #0f1c15;
+    --ypp-bg-surface: #1b2e24;
+    --ypp-bg-glass: rgba(15, 28, 21, 0.95);
+    
+    --ypp-text-primary: #e8f5e9;
+    --ypp-text-secondary: #81c784;
+    
+    --ypp-accent: #66bb6a;
+    --ypp-accent-hover: #81c784;
+    --ypp-accent-glow: rgba(102, 187, 106, 0.3);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.25);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --ypp-shadow-glow: 0 0 24px rgba(102, 187, 106, 0.15);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: transparent;
+    --ytd-searchbox-text-color: #e8f5e9;
+    --ytd-searchbox-border-radius: 18px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 18px 18px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(232, 245, 233, 0.05);
+
+    /* CORE YOUTUBE OVERRIDES */
+    --yt-spec-base-background: #0f1c15 !important;
+    --yt-spec-raised-background: #1b2e24 !important;
+    --yt-spec-menu-background: #1b2e24 !important;
+    --yt-spec-inverted-background: #e8f5e9 !important;
+    --yt-spec-additive-background: rgba(102, 187, 106, 0.1) !important;
+    
+    --yt-spec-text-primary: #e8f5e9 !important;
+    --yt-spec-text-primary-inverse: #0f1c15 !important;
+    --yt-spec-text-secondary: #81c784 !important;
+    --yt-spec-text-disabled: rgba(129, 199, 132, 0.5) !important;
+    
+    --yt-spec-icon-active-other: #66bb6a !important;
+    --yt-spec-icon-inactive: #81c784 !important;
+    --yt-spec-icon-disabled: rgba(129, 199, 132, 0.5) !important;
+    
+    --yt-spec-brand-icon-active: #66bb6a !important;
+    --yt-spec-brand-icon-inactive: #81c784 !important;
+    
+    --yt-spec-general-background-a: #0f1c15 !important;
+    --yt-spec-general-background-b: #1b2e24 !important;
+    --yt-spec-general-background-c: #0f1c15 !important;
+    
+    --yt-spec-10-percent-layer: rgba(102, 187, 106, 0.1) !important;
+    --yt-spec-badge-chip-background: rgba(102, 187, 106, 0.1) !important;
+    --yt-spec-verified-badge-background: #66bb6a !important;
+    
+    /* Paper Elements */
+    --paper-toggle-button-checked-bar-color: #66bb6a !important;
+    --paper-toggle-button-checked-button-color: #66bb6a !important;
+    --paper-dialog-background-color: #1b2e24 !important;
+    --paper-listbox-background-color: #1b2e24 !important;
+    --paper-menu-background-color: #1b2e24 !important;
+}

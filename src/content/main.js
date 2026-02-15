@@ -286,6 +286,18 @@
             } else {
                 this.Utils?.log('chrome.storage.onChanged API not available', 'MAIN', 'warn');
             }
+
+            // Listen for direct messages for instant updates
+            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                if (request.action === 'UPDATE_SETTINGS' && request.settings) {
+                    this.settings = request.settings;
+                    this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
+                    if (this.featureManager) {
+                        this.featureManager.init(this.settings);
+                    }
+                    sendResponse({ success: true });
+                }
+            });
         },
 
         // =========================================================================

@@ -1,0 +1,61 @@
+html.yt-premium-plus-theme, body.yt-premium-plus-theme {
+    --ypp-bg-base: #000000;
+    --ypp-bg-surface: #111111;
+    --ypp-bg-glass: rgba(0, 0, 0, 0.95);
+    
+    --ypp-text-primary: #ffffff;
+    --ypp-text-secondary: #a0a0a0;
+    
+    --ypp-accent: #ffffff;
+    --ypp-accent-hover: #e0e0e0;
+    --ypp-accent-glow: rgba(255, 255, 255, 0.15);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.8);
+    --ypp-shadow-glow: 0 0 24px rgba(255, 255, 255, 0.05);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: #111;
+    --ytd-searchbox-text-color: #ffffff;
+    --ytd-searchbox-border-radius: 18px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 18px 18px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: #222;
+
+    /* CORE YOUTUBE OVERRIDES */
+    --yt-spec-base-background: #000000 !important;
+    --yt-spec-raised-background: #111111 !important;
+    --yt-spec-menu-background: #111111 !important;
+    --yt-spec-inverted-background: #ffffff !important;
+    --yt-spec-additive-background: rgba(255, 255, 255, 0.1) !important;
+    
+    --yt-spec-text-primary: #ffffff !important;
+    --yt-spec-text-primary-inverse: #000000 !important;
+    --yt-spec-text-secondary: #a0a0a0 !important;
+    --yt-spec-text-disabled: #555555 !important;
+    
+    --yt-spec-icon-active-other: #ffffff !important;
+    --yt-spec-icon-inactive: #a0a0a0 !important;
+    --yt-spec-icon-disabled: #555555 !important;
+    
+    --yt-spec-brand-icon-active: #ffffff !important;
+    --yt-spec-brand-icon-inactive: #a0a0a0 !important;
+    
+    --yt-spec-general-background-a: #000000 !important;
+    --yt-spec-general-background-b: #111111 !important;
+    --yt-spec-general-background-c: #000000 !important;
+    
+    --yt-spec-10-percent-layer: rgba(255, 255, 255, 0.1) !important;
+    --yt-spec-badge-chip-background: rgba(255, 255, 255, 0.1) !important;
+    --yt-spec-verified-badge-background: #ffffff !important;
+    
+    /* Paper Elements */
+    --paper-toggle-button-checked-bar-color: #ffffff !important;
+    --paper-toggle-button-checked-button-color: #ffffff !important;
+    --paper-dialog-background-color: #111111 !important;
+    --paper-listbox-background-color: #111111 !important;
+    --paper-menu-background-color: #111111 !important;
+}

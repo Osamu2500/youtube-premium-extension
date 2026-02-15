@@ -130,48 +130,84 @@ window.YPP.features.Theme = class ThemeManager {
      * Handles premium theme, true black (legacy), and new multi-themes.
      * @param {boolean} enable - Whether premium theme is enabled
      */
+    /**
+     * Toggle the theme based on settings.
+     * Handles premium theme, true black (legacy), and new multi-themes.
+     * @param {boolean} enable - Whether premium theme is enabled
+     */
     _toggleTheme(enable) {
+        const root = document.documentElement;
         const body = document.body;
-        const THEMES = this._CONSTANTS.THEMES;
-        
-        // Always remove all theme classes first to prevent conflicts
-        Object.values(THEMES).forEach(theme => {
-            if (theme.class) body.classList.remove(theme.class);
-        });
         
         // Remove base premium class
-        body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
+        root.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
+        if (body) body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
+
+        this._Utils.log(`Toggling theme: ${enable ? 'ON' : 'OFF'}`, 'THEME');
 
         if (enable) {
             // Determine active theme
             let activeThemeKey = this._settings.activeTheme || 'default';
 
             // Legacy support: if trueBlack is on and theme is default, use midnight
-            if (this._settings.trueBlack && activeThemeKey === 'default') {
+            // This ensures users who had "True Black" enabled before the update get the Midnight theme
+            if (this._settings.trueBlack === true && activeThemeKey === 'default') {
+                this._Utils.log('Legacy True Black enabled -> Forcing Midnight theme', 'THEME');
                 activeThemeKey = 'midnight';
             }
-
-            // Find theme definition
-            const themeDef = Object.values(THEMES).find(t => t.key === activeThemeKey);
             
-            // Apply theme class if not default (default uses base variables)
-            if (themeDef && themeDef.class) {
-                body.classList.add(themeDef.class);
-            }
+            this._Utils.log(`Injecting theme file: ${activeThemeKey}`, 'THEME');
+            this._injectThemeFile(activeThemeKey);
+            
+            // Show feedback (only if not initial load to avoid spam)
+            // But for now, let's show it to be sure
+            // if (this._Utils && typeof this._Utils.createToast === 'function') {
+            //     const themeName = Object.values(this._CONSTANTS.THEMES).find(t => t.key === activeThemeKey)?.label || 'Theme';
+            //      this._Utils.createToast(`Applied ${themeName}`);
+            // }
 
-            // Inject themes.css if not already present
-            this._injectThemeStyles();
+        } else {
+            this._removeThemeFile();
         }
     }
 
-    _injectThemeStyles() {
-        if (document.getElementById('ypp-themes-css')) return;
+    /**
+     * Inject specific theme CSS file
+     * @param {string} themeKey 
+     */
+    _injectThemeFile(themeKey) {
+        const id = 'ypp-active-theme-css';
+        let link = document.getElementById(id);
 
-        const link = document.createElement('link');
-        link.id = 'ypp-themes-css';
-        link.rel = 'stylesheet';
-        link.href = chrome.runtime.getURL('src/content/themes.css');
-        document.head.appendChild(link);
+        const timestamp = Date.now();
+        const cssUrl = chrome.runtime.getURL(`src/content/themes/${themeKey}.css`);
+        const fullUrl = `${cssUrl}?t=${timestamp}`;
+
+        if (!link) {
+            link = document.createElement('link');
+            link.id = id;
+            link.rel = 'stylesheet';
+            link.className = 'ypp-theme-link';
+            document.head.appendChild(link);
+        }
+
+        // Always update to ensure we force a repaint/reload if requested
+        link.href = fullUrl;
+
+        // VERIFICATION LOG
+        this._Utils.log(`Injecting Theme: ${themeKey}`, 'THEME');
+        this._Utils.log(`URL: ${fullUrl}`, 'THEME');
+        this._Utils.log(`Ref Check - Root: ${document.documentElement.className}`, 'THEME');
+        this._Utils.log(`Ref Check - Body: ${document.body ? document.body.className : 'NULL'}`, 'THEME');
+    }
+
+    /**
+     * Remove the injected theme file
+     */
+    _removeThemeFile() {
+        const id = 'ypp-active-theme-css';
+        const link = document.getElementById(id);
+        if (link) link.remove();
     }
 
     /**
@@ -266,7 +302,7 @@ window.YPP.features.Theme = class ThemeManager {
             'ypp-hide-scrollbar'
         ];
 
-        document.body.classList.remove(...classes);
+        document.documentElement.classList.remove(...classes);
     }
 
     // =========================================================================
