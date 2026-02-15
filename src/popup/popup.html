@@ -6,7 +6,7 @@
     <title>YouTube Premium+</title>
     <link rel="stylesheet" href="popup.css" />
     <link rel="stylesheet" href="history.css" />
-    <link rel="stylesheet" href="../content/styles.css" />
+    <link rel="stylesheet" href="theme-vars.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -232,6 +232,15 @@
                 <input type="checkbox" id="grid4x4" />
                 <span class="slider"></span>
               </label>
+            </div>
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">Grid Columns</span>
+                <span class="desc">Videos per row: <span id="homeColumnsValue">4</span></span>
+              </div>
+              <div class="range-container">
+                  <input type="range" id="homeColumns" min="1" max="8" step="1" value="4" />
+              </div>
             </div>
             <div class="setting-item">
               <div class="info">
@@ -605,6 +614,15 @@
                     <span class="slider"></span>
                   </label>
                 </div>
+                <div class="setting-item">
+                  <div class="info">
+                    <span class="name">Channel Columns</span>
+                    <span class="desc">Grid width: <span id="channelColumnsValue">4</span></span>
+                  </div>
+                  <div class="range-container">
+                      <input type="range" id="channelColumns" min="2" max="10" step="1" value="4" />
+                  </div>
+                </div>
                 <button
                   id="manageSubsBtn"
                   class="action-btn"
@@ -759,6 +777,15 @@
                 <input type="checkbox" id="searchGrid" />
                 <span class="slider"></span>
               </label>
+            </div>
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">Grid Columns</span>
+                <span class="desc">Videos per row: <span id="searchColumnsValue">4</span></span>
+              </div>
+              <div class="range-container">
+                  <input type="range" id="searchColumns" min="1" max="8" step="1" value="4" />
+              </div>
             </div>
             <div class="setting-item">
               <div class="info">

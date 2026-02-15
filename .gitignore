@@ -25,3 +25,18 @@ __pycache__/
 .Python
 venv/
 env/
+
+# OS
+.Desktop
+Desktop.ini
+Thumbs.db
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary
+temp*

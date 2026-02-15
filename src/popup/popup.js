@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideMixes',
         'hideWatched', // Also in Search
         'grid4x4',
+        'homeColumns', // New
         'contextMenu', // Subscription Groups Context Menu
         
         // Shorts
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Search
         'searchGrid',
+        'searchColumns', // New
         'cleanSearch',
         
         // Player
@@ -134,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'playlistDuration',
 
         // Subscription Manager
-        'enableSubsManager'
+        'enableSubsManager',
+        'channelColumns'
     ];
 
     // --- STORAGE HANDLING ---
@@ -180,8 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Save Settings (Debounced)
-    const saveSettings = Utils.debounce(() => {
+    // Gather current state from UI
+    const gatherSettings = () => {
         const settings = {};
         settingKeys.forEach(key => {
             const el = elements[key];
@@ -195,27 +198,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+        return settings;
+    };
 
+    // Send instant update to content script (Low/No Debounce)
+    const sendPreviewUpdate = Utils.debounce(() => {
+        const settings = gatherSettings();
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0] && tabs[0].id) {
+                chrome.tabs.sendMessage(tabs[0].id, { 
+                    action: 'UPDATE_SETTINGS', 
+                    settings: settings 
+                });
+            }
+        });
+    }, 10); // 10ms for practically instant but prevents thread lock
+
+    // Save to valid storage (Higher Debounce)
+    const persistSettings = Utils.debounce(() => {
+        const settings = gatherSettings();
         try {
             chrome.storage.local.set({ settings }, () => {
                 if (chrome.runtime.lastError) {
                     Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
-                } else {
-                    // Send instant update to active tab
-                    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                        if (tabs[0] && tabs[0].id) {
-                            chrome.tabs.sendMessage(tabs[0].id, { 
-                                action: 'UPDATE_SETTINGS', 
-                                settings: settings 
-                            });
-                        }
-                    });
                 }
             });
         } catch (e) {
              Utils.log('Critical Save Error: ' + e.message, 'POPUP', 'error');
         }
-    }, 300); // 300ms debounce
+    }, 500);
+
+    // Combined Action
+    const saveSettings = () => {
+        sendPreviewUpdate();
+        persistSettings();
+    };
 
     // --- ELEMENT CACHE ---
     const elements = {};
@@ -288,26 +305,47 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim'].forEach(key => {
+    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {
             slider.addEventListener('input', () => {
-                if (display) display.textContent = slider.value + '%';
+                if (display) {
+                     // Special handling for column counts (value is just number)
+                     if (key.includes('Columns')) {
+                         display.textContent = slider.value;
+                     } else {
+                         display.textContent = slider.value + '%';
+                     }
+                }
                 // Trigger save for live preview
-                saveSettings(); // This is debounced
+                saveSettings();
             });
         }
     });
 
     const updateSetting = (key, value) => {
-        const settings = {};
-        settings[key] = value;
-        chrome.storage.local.set({ settings }, () => {
-             // Optional: Handle error
+        chrome.storage.local.get(['settings'], (result) => {
+            const currentSettings = result.settings || {};
+            currentSettings[key] = value;
+            
+            // Validate: Ensure we aren't losing other keys
+            if (Object.keys(currentSettings).length < 2) {
+                 // Utils.log('Warning: Settings object seems too small, potential wipe?', 'POPUP', 'warn');
+                 // For now, trust the get(), but in a real scenario we might want a backup default merge.
+                 const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
+                    ? window.YPP.CONSTANTS.DEFAULT_SETTINGS 
+                    : {};
+                 // If currentSettings is missing defaults, maybe merge them back in?
+                 // Let's keep it simple: just save what we read + update.
+            }
+
+            chrome.storage.local.set({ settings: currentSettings }, () => {
+                if (chrome.runtime.lastError) {
+                    // console.error('Error saving setting:', chrome.runtime.lastError);
+                }
+            });
         });
-        // We also want to update our local state to ensure other saves don't overwrite
-        // But loadSettings reads from storage anyway.
     };
 
     const notifyThemeChange = (newTheme) => {

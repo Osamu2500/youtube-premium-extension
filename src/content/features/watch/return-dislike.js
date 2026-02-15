@@ -135,7 +135,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike {
         dislikeButton.title = `${data.dislikes.toLocaleString()} dislikes`; // Button tooltip
 
         // --- 2. Rating Bar ---
-        this.updateRatingBar(buttons, data);
+        // this.updateRatingBar(buttons, data); // Disabled per user request (unwanted blue line)
     }
 
     updateRatingBar(container, data) {

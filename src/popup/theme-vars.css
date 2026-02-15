@@ -1,0 +1,90 @@
+/* 
+   Popup Theme Variables 
+   Extracted from content/styles.css to ensure isolation 
+*/
+
+.yt-premium-plus-theme {
+  /* Dimensions & Spacing */
+  --ypp-header-height: 56px;
+  --ypp-header-margin: 16px;
+  --ypp-sidebar-width: 240px;
+  --ypp-sidebar-mini-width: 72px;
+  --ypp-sidebar-gap: 16px;
+  --ypp-sidebar-top-gap: 16px;
+  --ypp-content-gap: 24px;
+  --ypp-grid-gap: 16px;
+
+  /* Shape & Motion */
+  --ypp-radius-lg: 20px;
+  --ypp-radius-md: 12px;
+  --ypp-radius-sm: 8px;
+  --ypp-radius-pill: 999px;
+  
+  /* Blurs & Glass */
+  --ypp-blur-subtle: blur(8px);
+  --ypp-blur-med: blur(16px);
+  --ypp-blur-high: blur(24px);
+  
+  /* Transitions */
+  --ypp-transition-fast: 0.15s cubic-bezier(0.2, 0.0, 0.2, 1);
+  --ypp-transition: 0.25s cubic-bezier(0.2, 0.0, 0.2, 1);
+  --ypp-transition-slow: 0.4s cubic-bezier(0.2, 0.0, 0.2, 1);
+
+  /* Z-Index Layers (Popup Internal) */
+  --ypp-z-background: -1;
+  --ypp-z-content: 1;
+  --ypp-z-card-hover: 1000;
+  --ypp-z-chips: 2000;
+  --ypp-z-header: 2020;
+  --ypp-z-modal: 2200;
+  --ypp-z-popup: 9999;
+  --ypp-z-tooltip: 10000;
+
+  /* Base Theme Layer Mappings */
+  
+  /* Backgrounds */
+  --yt-spec-base-background: var(--ypp-bg-base) !important;
+  --yt-spec-raised-background: var(--ypp-bg-surface) !important;
+  --yt-spec-menu-background: var(--ypp-bg-surface) !important;
+  --yt-spec-inverted-background: var(--ypp-text-primary) !important;
+  --yt-spec-additive-background: var(--ypp-glass-highlight) !important;
+  
+  /* Text */
+  --yt-spec-text-primary: var(--ypp-text-primary) !important;
+  --yt-spec-text-primary-inverse: var(--ypp-bg-base) !important;
+  --yt-spec-text-secondary: var(--ypp-text-secondary) !important;
+  --yt-spec-text-disabled: rgba(255, 255, 255, 0.3) !important;
+
+  /* Icons */
+  --yt-spec-icon-active-other: var(--ypp-accent) !important;
+  --yt-spec-icon-inactive: var(--ypp-text-secondary) !important;
+  --yt-spec-icon-disabled: rgba(255, 255, 255, 0.3) !important;
+  --yt-spec-brand-icon-active: var(--ypp-accent) !important;
+  --yt-spec-brand-icon-inactive: var(--ypp-text-secondary) !important;
+
+  /* General Layers */
+  --yt-spec-general-background-a: var(--ypp-bg-base) !important;
+  --yt-spec-general-background-b: var(--ypp-bg-surface) !important;
+  --yt-spec-general-background-c: var(--ypp-bg-base) !important;
+  
+  /* Chips & Badges */
+  --yt-spec-10-percent-layer: var(--ypp-glass-highlight) !important;
+  --yt-spec-badge-chip-background: var(--ypp-glass-highlight) !important;
+  --yt-spec-verified-badge-background: var(--ypp-accent) !important;
+  --yt-spec-button-chip-background-hover: var(--ypp-glass-highlight) !important;
+
+  /* Paper Elements (Legacy but used in popup inputs maybe) */
+  --paper-toggle-button-checked-bar-color: var(--ypp-accent) !important;
+  --paper-toggle-button-checked-button-color: var(--ypp-accent) !important;
+  --paper-dialog-background-color: var(--ypp-bg-surface) !important;
+  --paper-listbox-background-color: var(--ypp-bg-surface) !important;
+  --paper-menu-background-color: var(--ypp-bg-surface) !important;
+}
+
+/* Responsive Grid Variables (Copied for completeness) */
+:root {
+  --ypp-grid-column-min: 280px;
+  --ypp-card-padding: 12px;
+  --ypp-card-radius: 12px;
+  --ypp-grid-gap: 16px;
+}

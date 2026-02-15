@@ -15,6 +15,18 @@ window.YPP.features.ZenMode = class ZenMode {
         this.ctx = null;
     }
 
+    run(settings) {
+        this.update(settings);
+    }
+
+    update(settings) {
+        if (settings.zenMode) {
+            this.enable(settings);
+        } else {
+            this.disable();
+        }
+    }
+
     /**
      * Enable Zen Mode.
      * @param {Object} settings 

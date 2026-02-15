@@ -173,7 +173,10 @@ window.YPP.CONSTANTS = {
         progressBarColor: '#ff0000',
 
         // Layout
-        grid4x4: true,
+        grid4x4: true, // Legacy (can be kept for migration or removed)
+        homeColumns: 4,
+        searchColumns: 4,
+        channelColumns: 4,
 
         // Visibility
         hideShorts: false,
@@ -196,6 +199,7 @@ window.YPP.CONSTANTS = {
         // Search Redesign
         searchGrid: true,
         cleanSearch: true,
+        autoVideoFilter: true,
 
         // Navigation
         navTrending: true,

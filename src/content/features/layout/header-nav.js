@@ -87,89 +87,10 @@ window.YPP.features.HeaderNav = class HeaderNav {
     }
 
     _injectStyles() {
-        const css = `
-            .ypp-nav-group {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-left: 16px;
-                margin-right: 16px;
-                height: 40px;
-            }
-            .ypp-nav-btn {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px; /* Squircle */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                color: var(--yt-spec-text-primary);
-                transition: background-color 0.2s;
-                position: relative;
-            }
-            .ypp-nav-btn:hover {
-                background-color: var(--yt-spec-badge-chip-background);
-            }
-            .ypp-nav-btn.active {
-                background-color: var(--yt-spec-text-primary);
-                color: var(--yt-spec-text-primary-inverse);
-            }
-            .ypp-nav-btn svg {
-                width: 24px;
-                height: 24px;
-                fill: currentColor;
-            }
-            /* Tooltip integration (simple title for now) */
-            .ypp-nav-btn::after {
-                content: attr(title);
-                position: absolute;
-                bottom: -30px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                white-space: nowrap;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.2s;
-                z-index: 2000;
-            }
-            .ypp-nav-btn:hover::after {
-                opacity: 1;
-            }
-            
-            /* --- Topbar Polish --- */
-            /* Center Mic Icon */
-            #voice-search-button {
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                border-radius: 50% !important; /* Ensure circle or match others? User said center in button */
-            }
-            /* Profile Icon Squircle */
-            #avatar-btn,
-            #avatar-btn yt-img-shadow,
-            #avatar-btn img {
-                border-radius: 12px !important;
-            }
-            /* Hide Sidebar Support */
-            body.ypp-hide-sidebar ytd-mini-guide-renderer, 
-            body.ypp-hide-sidebar app-drawer, 
-            body.ypp-hide-sidebar #guide {
-                display: none !important;
-            }
-            body.ypp-hide-sidebar ytd-app {
-                --ytd-mini-guide-width: 0px !important;
-            }
-            body.ypp-hide-sidebar #content {
-                margin-left: 0 !important;
-            }
-        `;
-        this.Utils.addStyle(css, 'ypp-header-nav-style');
+        // Most styles are now in src/content/styles.css for better management and performance.
+        // We only inject essential functional styles here if absolutely necessary, 
+        // but for now, the external stylesheet handles it all.
+        // Keeping this method stub for potential future dynamic styles.
     }
 
     observeHeader() {

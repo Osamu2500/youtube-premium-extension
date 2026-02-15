@@ -32,6 +32,36 @@ window.YPP.features.Layout = class GridLayoutManager {
     }
 
     /**
+     * Update layout settings
+     * @param {Object} settings
+     */
+    update(settings) {
+        if (!settings) return;
+        
+        const root = document.documentElement;
+        
+        // Update CSS Variables for Grid Columns
+        if (settings.homeColumns) {
+            root.style.setProperty('--ypp-home-columns', settings.homeColumns);
+        }
+        
+        if (settings.searchColumns) {
+            root.style.setProperty('--ypp-search-columns', settings.searchColumns);
+        }
+
+        if (settings.channelColumns) {
+            root.style.setProperty('--ypp-channel-columns', settings.channelColumns);
+        }
+
+        // Re-apply if needed
+        if (settings.grid4x4) {
+            this.enable(settings);
+        } else {
+            this.disable();
+        }
+    }
+
+    /**
      * Initialize internal state
      * @private
      */
@@ -87,6 +117,9 @@ window.YPP.features.Layout = class GridLayoutManager {
         this._retryCount = 0;
 
         // Initial Apply with retry
+        // Ensure CSS variables are set
+        this.update(window.YPP.options || window.YPP.MainApp?.settings);
+        
         this._applyWithRetry();
         this.startObserver();
         this.addResizeListener();

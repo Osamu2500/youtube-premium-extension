@@ -88,6 +88,9 @@ export class SearchRedesign {
         
         /** @type {string} Current view mode ('grid' or 'list') */
         this._viewMode = SearchRedesign.MODES.GRID;
+
+        /** @type {string|null} Track last query to distinguish fresh searches */
+        this._lastQuery = null;
         
         // Bind methods to ensure correct 'this' context
         this._handleNavigation = this._handleNavigation.bind(this);
@@ -109,36 +112,15 @@ export class SearchRedesign {
             this._log('Failed to load view preference', 'warn');
         }
 
-        if (this._settings.searchGrid) {
+        // Enable if either Grid or AutoFilter is on
+        if (this._settings.searchGrid || this._settings.autoVideoFilter) {
             this.enable();
         } else {
             this.disable();
         }
     }
 
-    /**
-     * Standard interface for FeatureManager
-     * @param {Object} settings
-     */
-    run(settings) {
-        this.init(settings);
-    }
-
-    /**
-     * Enable the feature and start listening for navigation
-     */
-    enable() {
-        if (this._isEnabled) return;
-        this._isEnabled = true;
-
-        this._log('Search Redesign Enabled', 'info');
-        
-        // Initial Check
-        this._handleNavigation();
-        
-        // Listen for Nav
-        window.addEventListener('yt-navigate-finish', this._handleNavigation);
-    }
+    // ... (run, enable remain same)
 
     /**
      * Disable the feature and perform cleanup
@@ -150,6 +132,7 @@ export class SearchRedesign {
         this._disconnectObserver();
         this._removeClasses();
         this._removeViewToggle();
+        document.body.classList.remove('ypp-filter-pending'); // Cleanup
         window.removeEventListener('yt-navigate-finish', this._handleNavigation);
     }
 
@@ -167,39 +150,112 @@ export class SearchRedesign {
         const isSearch = window.location.pathname === '/results';
         
         if (isSearch) {
-            this._applyViewMode();
-            this._injectViewToggle();
-            this._startObserver();
-            this._applyDefaultFilter();
+            // Apply grid if enabled
+            if (this._settings.searchGrid) {
+                this._applyViewMode();
+                this._injectViewToggle();
+                this._startObserver();
+            }
+
+            // Apply filter logic
+            if (this._settings.autoVideoFilter) {
+                this._checkAndApplyFilter();
+            }
         } else {
             this._disconnectObserver();
             this._removeClasses();
+            this._lastQuery = null; // Reset query on nav away
         }
     }
 
     /**
-     * Automatically select "Videos" filter if no filter is active
+     * Check if we need to auto-apply the filter
      * @private
      */
-    _applyDefaultFilter() {
-        // 1. Check if we already have a filter param (sp=...)
+    _checkAndApplyFilter() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('sp')) return;
+        const currentQuery = urlParams.get('search_query');
+        const hasFilter = urlParams.has('sp');
 
-        // 2. Poll for chips to click "Videos"
-        this._pollForElement('yt-chip-cloud-chip-renderer', () => {
-             // Re-check params in case they changed during poll
-             if (new URLSearchParams(window.location.search).has('sp')) return;
+        if (!currentQuery) return; // Not a valid search
 
-             const chips = Array.from(document.querySelectorAll('yt-chip-cloud-chip-renderer'));
-             const videoChip = chips.find(c => c.textContent.trim() === 'Videos' || c.querySelector('#text')?.textContent.trim() === 'Videos');
+        // Use Session Storage to track if we've already defaulted this specific search
+        // This allows the user to manually switch back to "All" (clearing 'sp') without us fighting them.
+        const lastAutoQuery = sessionStorage.getItem('ypp_last_auto_query');
+        
+        // If this is a NEW query that we haven't handled yet
+        if (currentQuery !== lastAutoQuery) {
+            
+            if (!hasFilter) {
+                // No filter active, apply default
+                this._applyDefaultFilter(currentQuery);
+            } else {
+                // User navigated directly to a filtered URL (e.g. valid bookmark)
+                // Mark as handled so we don't mess with it later
+                sessionStorage.setItem('ypp_last_auto_query', currentQuery);
+            }
+        }
+    }
 
-             if (videoChip && !videoChip.hasAttribute('selected')) {
-                 this._log('Applying default "Videos" filter', 'info');
-                 // Try native click on the web component
-                 videoChip.click();
+    /**
+     * Automatically select "Videos" filter
+     * @private
+     * @param {string} query - The current search query to mark as handled
+     */
+    _applyDefaultFilter(query) {
+        this._log(`Applying default Videos filter for: ${query}`, 'info');
+        
+        // 1. Enter Pending State
+        document.body.classList.add('ypp-filter-pending');
+
+        // 2. Poll for chips with increased tenacity
+        this._pollForElement('ytd-feed-filter-chip-bar-renderer', (bar) => {
+             // Abort if user navigated or filter changed in the meantime
+             const currentParams = new URLSearchParams(window.location.search);
+             if (currentParams.has('sp')) {
+                 document.body.classList.remove('ypp-filter-pending');
+                 sessionStorage.setItem('ypp_last_auto_query', query);
+                 return;
              }
-        });
+
+             const chips = Array.from(bar.querySelectorAll('yt-chip-cloud-chip-renderer'));
+             
+             // Find "Videos" chip
+             const videoChip = chips.find(c => {
+                 const text = c.innerText || c.textContent;
+                 return /^\s*Videos\s*$/i.test(text);
+             });
+
+             if (videoChip) {
+                 // Check if already selected (should have been caught by sp check, but double check)
+                 if (videoChip.hasAttribute('selected') || videoChip.classList.contains('selected')) {
+                     document.body.classList.remove('ypp-filter-pending');
+                     sessionStorage.setItem('ypp_last_auto_query', query);
+                     return; 
+                 }
+
+                 this._log('Clicking Videos chip', 'info');
+                 
+                 // Mark as handled BEFORE clicking to prevent loops if click triggers immediate update
+                 sessionStorage.setItem('ypp_last_auto_query', query);
+
+                 // Trigger Click (Try multiple methods for robustness)
+                 videoChip.click();
+                 if (videoChip.querySelector('button')) videoChip.querySelector('button').click();
+                 
+                 // Remove pending class delay
+                 setTimeout(() => {
+                     document.body.classList.remove('ypp-filter-pending');
+                 }, 500);
+             } else {
+                 // Keep polling if not found (don't remove pending class yet)
+             }
+        }, 50, 200); // 10s timeout
+        
+        // Safety: Remove pending class eventually
+        setTimeout(() => {
+            document.body.classList.remove('ypp-filter-pending');
+        }, 4000);
     }
 
     /**

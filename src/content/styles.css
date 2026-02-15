@@ -350,6 +350,14 @@ ytd-mini-guide-renderer {
   pointer-events: none;
 }
 
+/* Ensure Masthead stays on top */
+.yt-premium-plus-theme ytd-masthead {
+  z-index: var(--ypp-z-header) !important;
+  position: fixed !important;
+  width: 100% !important;
+  transform: none !important; /* Prevent transformation context issues */
+}
+
 /* The Visual Glass Container */
 .yt-premium-plus-theme ytd-masthead #container {
   pointer-events: auto;
@@ -623,14 +631,27 @@ ytd-mini-guide-renderer {
 
 /* Grid Contents - Use CSS Grid instead of Flex */
 /* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
+/* Grid Contents - Use CSS Grid instead of Flex */
+/* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
 .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
   display: grid !important;
+  /* Default fallbacks */
   grid-template-columns: repeat(4, 1fr) !important;
   gap: 24px 16px !important;
   width: 100% !important;
   padding: 0 !important;
   margin: 0 !important;
   flex-wrap: nowrap !important;
+}
+
+/* Home Page specific columns */
+body.ypp-home-page .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(var(--ypp-home-columns, 4), 1fr) !important;
+}
+
+/* Channel Page specific columns */
+body.ypp-channel-page .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(var(--ypp-channel-columns, 4), 1fr) !important;
 }
 
 /* Grid Rows */
@@ -715,7 +736,7 @@ ytd-mini-guide-renderer {
 /* Responsive Breakpoints */
 @media (max-width: 1600px) {
   .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(var(--ypp-home-columns, 4), 1fr) !important;
     gap: 20px 14px !important;
   }
 }
@@ -798,7 +819,8 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
   /* Optimized for density and screen usage */
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  /* Optimized for density and screen usage */
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), 1fr); 
   gap: 16px; 
   width: 100%;
   max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
@@ -1127,28 +1149,28 @@ body.ypp-search-grid-mode #right-arrow-button {
 /* Responsive Search Grid - Enhanced */
 @media (max-width: 1600px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    /* grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); */
     gap: 20px;
   }
 }
 
 @media (max-width: 1200px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    /* grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); */
     gap: 16px;
   }
 }
 
 @media (max-width: 900px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); */
     gap: 12px;
   }
 }
 
 @media (max-width: 600px) {
   body.ypp-search-grid-mode ytd-item-section-renderer #contents {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Force 1 column on mobile */
     gap: 16px;
   }
 }
@@ -1290,7 +1312,102 @@ ytd-menu-renderer ytd-button-renderer {
 }
 
 /* ===================================================================================
-   8. ZEN MODE & FOCUS FEATURES
+   8. HEADER NAVIGATION (Injected Buttons)
+   =================================================================================== */
+
+.ypp-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px;
+}
+
+/* Adjust position based on where we inject */
+#center .ypp-nav-group {
+    margin-left: 24px;
+}
+
+.ypp-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--ypp-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  text-decoration: none; /* Just in case */
+}
+
+.ypp-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ypp-text-primary);
+  transform: translateY(-1px);
+}
+
+.ypp-nav-btn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Active State */
+.ypp-nav-btn.active {
+  color: var(--ypp-accent-blue);
+  background: rgba(62, 166, 255, 0.1);
+}
+
+.ypp-nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 20px;
+  height: 3px;
+  background: var(--ypp-accent-blue);
+  border-radius: 2px;
+}
+
+.ypp-nav-icon {
+  width: 24px !important;
+  height: 24px !important;
+  fill: currentColor !important;
+  display: block;
+}
+
+/* Tooltip (Simple CSS-only) */
+.ypp-nav-btn::before {
+  content: attr(title);
+  position: absolute;
+  bottom: -36px; /* Below button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  padding: 6px 10px;
+  background: rgba(15, 15, 15, 0.95);
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 2200; /* Above typical YouTube modals */
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.ypp-nav-btn:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===================================================================================
+   9. ZEN MODE & FOCUS FEATURES
    =================================================================================== */
 
 /* Zen Mode */
@@ -1378,6 +1495,21 @@ body.ypp-zen-mode #columns {
 
 
 /* [Legacy Search Grid Styles Removed - Consolidated into Section 6] */
+
+/* Filter Pending State (Prevent "All" flicker) */
+body.ypp-filter-pending #contents.ytd-two-column-search-results-renderer {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in;
+}
+
+/* Ensure View Toggle matches aesthetic */
+.ypp-view-mode-toggle {
+    display: flex;
+    gap: 8px;
+    margin-right: 16px;
+    align-items: center;
+}
 
 /* --- 6. View Toggle Button --- */
 #ypp-view-toggle {
@@ -1822,10 +1954,51 @@ body.ypp-search-grid-mode ytd-item-section-renderer:has(ytd-reel-shelf-renderer)
   transition: all 0.15s;
 }
 
-.ypp-tag-option:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--ypp-text-primary);
+
+/* Restored Zen Mode Shadow Transition */
+.ypp-zen-shadow {
+  transition: box-shadow 0.5s ease-out;
 }
+
+/* Zen Mode: Hide Distractions to Center Player */
+body.ypp-zen-mode #masthead-container,
+body.ypp-zen-mode #secondary,
+body.ypp-zen-mode #related,
+body.ypp-zen-mode ytd-merch-shelf-renderer,
+body.ypp-zen-mode #comments,
+body.ypp-zen-mode #info-text,
+body.ypp-zen-mode #super-library {
+  display: none !important;
+}
+
+/* Hide metadata implementation choice - keeping basic frame visible */
+body.ypp-zen-mode #below {
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+
+/* Hover to see metadata */
+body.ypp-zen-mode #columns:hover #below {
+    opacity: 1;
+    pointer-events: auto;
+    height: auto;
+}
+
+body.ypp-zen-mode ytd-watch-flexy[theater] #player-theater-container {
+  width: 100% !important;
+  max-height: 100vh !important;
+}
+
+body.ypp-zen-mode ytd-app,
+body.ypp-zen-mode #page-manager {
+  margin-top: 0 !important;
+  --ytd-masthead-height: 0px !important;
+  background: #000 !important;
+}
+
 
 @keyframes ypp-fade-in {
   from { opacity: 0; transform: translateY(-8px); }
