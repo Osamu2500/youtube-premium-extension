@@ -249,12 +249,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle Change
         themeSelect.addEventListener('change', (e) => {
             const newTheme = e.target.value;
+            // 1. Update Storage (Async)
             updateSetting('activeTheme', newTheme);
+            
+            // 2. Apply to Popup Immediately
             applyThemeToPopup(newTheme, themes);
             
-            // If user selects a specific theme, we should probably disable legacy trueBlack
-            // to avoid confusion? Or just leave it as is since theme.js handles it.
-            // Let's rely on theme.js logic.
+            // 3. Send Instant Message to Content Script
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0] && tabs[0].id) {
+                    // Create minimal settings object for speed, or wait for storage? 
+                    // Better to send what we know changed.
+                    // Main.js expects full settings object in 'UPDATE_SETTINGS' usually, 
+                    // but we can send a partial or just fetch fresh.
+                    // Let's rely on storage for full state but trigger the update.
+                    
+                    // Actually, main.js setupEvents: request.settings -> this.settings = request.settings.
+                    // We must send the FULL settings if we use UPDATE_SETTINGS.
+                    // Since 'settings' object in popup.js is kept up to date:
+                    chrome.tabs.sendMessage(tabs[0].id, { 
+                        action: 'UPDATE_SETTINGS', 
+                        settings: { ...settings, activeTheme: newTheme }
+                    });
+                }
+            });
         });
 
         const forceBtn = document.getElementById('forceApplyTheme');
@@ -273,8 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                     if (tabs[0] && tabs[0].id) {
                         chrome.tabs.sendMessage(tabs[0].id, { 
-                            action: 'UPDATE_SETTINGS', 
-                            settings: settings 
+                            action: 'FORCE_THEME_UPDATE'
                         }, (response) => {
                             // 3. Also apply to Popup
                             applyThemeToPopup(currentTheme, themes);

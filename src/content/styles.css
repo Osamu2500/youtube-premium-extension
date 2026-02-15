@@ -1663,3 +1663,124 @@ body.ypp-search-grid-mode ytd-item-section-renderer:has(ytd-reel-shelf-renderer)
   90% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -10px); }
 }
+
+/* ===================================================================================
+   11. HOME ORGANIZER & TAGGING
+   =================================================================================== */
+
+.ypp-feed-separator {
+  grid-column: 1 / -1; /* Span full width of grid */
+  padding: 24px 0 12px 0;
+  margin-top: 24px;
+  border-bottom: 1px solid var(--ypp-glass-border);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ypp-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.ypp-feed-separator:hover {
+  color: var(--ypp-accent);
+}
+
+.ypp-feed-separator::after {
+  content: '';
+  display: block;
+  margin-left: 12px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.3s;
+}
+
+.ypp-feed-separator.collapsed::after {
+  transform: rotate(-45deg);
+}
+
+.ypp-section-hidden {
+  display: none !important;
+}
+
+/* Tag Button on Thumbnail */
+.yt-premium-plus-theme ytd-thumbnail .ypp-tag-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px; /* Squircle */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.yt-premium-plus-theme ytd-rich-item-renderer:hover .ypp-tag-btn,
+.yt-premium-plus-theme ytd-thumbnail:hover .ypp-tag-btn,
+.ypp-tag-btn.tagged {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ypp-tag-btn:hover {
+  background: var(--ypp-accent);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.ypp-tag-btn.tagged {
+  background: var(--ypp-accent-glow);
+  color: var(--ypp-accent);
+  border-color: var(--ypp-accent);
+}
+
+/* Tag Popover */
+.ypp-tag-popover {
+  position: absolute;
+  background: var(--ypp-bg-surface);
+  /* backdrop-filter: blur(16px); */
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: var(--ypp-shadow-float);
+  z-index: 2300;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: ypp-fade-in 0.15s ease-out;
+}
+
+.ypp-tag-option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--ypp-text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ypp-tag-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ypp-text-primary);
+}
+
+@keyframes ypp-fade-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -156,8 +156,15 @@ window.YPP.features.Theme = class ThemeManager {
                 activeThemeKey = 'midnight';
             }
             
-            this._Utils.log(`Injecting theme file: ${activeThemeKey}`, 'THEME');
-            this._injectThemeFile(activeThemeKey);
+            
+            // Optimization: Only inject if theme changed or not yet injected
+            if (activeThemeKey !== this._currentThemeKey) {
+                this._Utils.log(`Theme changed (${this._currentThemeKey} -> ${activeThemeKey}), injecting...`, 'THEME');
+                this._injectThemeFile(activeThemeKey);
+                this._currentThemeKey = activeThemeKey;
+            } else {
+                 this._Utils.log(`Theme '${activeThemeKey}' already active, skipping injection.`, 'THEME', 'debug');
+            }
             
             // Show feedback (only if not initial load to avoid spam)
             // But for now, let's show it to be sure
@@ -168,20 +175,38 @@ window.YPP.features.Theme = class ThemeManager {
 
         } else {
             this._removeThemeFile();
+            this._currentThemeKey = null;
+        }
+    }
+
+    /**
+     * Force reload the current theme (used by Force Apply button)
+     */
+    forceReload() {
+        if (this._currentThemeKey) {
+            this._Utils.log('Force reloading theme...', 'THEME');
+            this._injectThemeFile(this._currentThemeKey, true);
+        } else {
+             // If no theme active, maybe try to enable based on settings?
+             this._run(this._settings);
         }
     }
 
     /**
      * Inject specific theme CSS file
      * @param {string} themeKey 
+     * @param {boolean} [force=false] - Force cache bust
      */
-    _injectThemeFile(themeKey) {
+    _injectThemeFile(themeKey, force = false) {
         const id = 'ypp-active-theme-css';
         let link = document.getElementById(id);
 
-        const timestamp = Date.now();
         const cssUrl = chrome.runtime.getURL(`src/content/themes/${themeKey}.css`);
-        const fullUrl = `${cssUrl}?t=${timestamp}`;
+        
+        // Only use timestamp if forced, otherwise let Chrome handle caching (or not)
+        // Actually, for local dev/updates, we probably don't need timestamp unless dev is changing files.
+        // But "Force Apply" implies we want to be sure.
+        const fullUrl = force ? `${cssUrl}?t=${Date.now()}` : cssUrl;
 
         if (!link) {
             link = document.createElement('link');
@@ -195,10 +220,8 @@ window.YPP.features.Theme = class ThemeManager {
         link.href = fullUrl;
 
         // VERIFICATION LOG
-        this._Utils.log(`Injecting Theme: ${themeKey}`, 'THEME');
+        this._Utils.log(`Injecting Theme: ${themeKey} (Force: ${force})`, 'THEME');
         this._Utils.log(`URL: ${fullUrl}`, 'THEME');
-        this._Utils.log(`Ref Check - Root: ${document.documentElement.className}`, 'THEME');
-        this._Utils.log(`Ref Check - Body: ${document.body ? document.body.className : 'NULL'}`, 'THEME');
     }
 
     /**

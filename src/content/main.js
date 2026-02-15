@@ -297,6 +297,15 @@
                     }
                     sendResponse({ success: true });
                 }
+                
+                if (request.action === 'FORCE_THEME_UPDATE') {
+                    this.Utils?.log('Force theme update received', 'MAIN', 'info');
+                    const themeManager = this.featureManager?.getFeature('theme');
+                    if (themeManager && typeof themeManager.forceReload === 'function') {
+                        themeManager.forceReload();
+                    }
+                    sendResponse({ success: true });
+                }
             });
         },
 
