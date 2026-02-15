@@ -117,6 +117,14 @@ export class SearchRedesign {
     }
 
     /**
+     * Standard interface for FeatureManager
+     * @param {Object} settings
+     */
+    run(settings) {
+        this.init(settings);
+    }
+
+    /**
      * Enable the feature and start listening for navigation
      */
     enable() {

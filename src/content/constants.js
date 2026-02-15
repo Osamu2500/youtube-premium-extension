@@ -87,7 +87,21 @@ window.YPP.CONSTANTS = {
             '.ytp-ad-overlay-close-button'
         ],
         AD_OVERLAY: '.ytp-ad-module',
-        AD_PLAYER_OVERLAY: '.ytp-ad-player-overlay'
+        AD_PLAYER_OVERLAY: '.ytp-ad-player-overlay',
+
+        // Metadata Selectors (Centralized)
+        METADATA_SELECTORS: {
+            TITLE: [
+                'h1.ytd-watch-metadata',
+                '#title h1',
+                'ytd-shorts-player-overlay-renderer #title'
+            ],
+            CHANNEL: [
+                'ytd-video-owner-renderer #channel-name a',
+                '#channel-name a',
+                'ytd-reel-player-header-renderer #channel-name a'
+            ]
+        }
     },
 
     // =========================================================================
@@ -204,6 +218,10 @@ window.YPP.CONSTANTS = {
         // Ad Skipper
         adSkipper: true,
 
+        // Night Mode
+        blueLight: 0,
+        dim: 0,
+
         // Zen Mode
         zenMode: false,
 
@@ -213,6 +231,9 @@ window.YPP.CONSTANTS = {
         cinemaMode: false,
         minimalMode: false,
         
+        // Auto Actions
+        autoPiP: false,
+        
         // New Features
         ambientMode: false,
         audioModeEnabled: false,
@@ -220,6 +241,54 @@ window.YPP.CONSTANTS = {
 
         // Study Mode
         studyMode: false
+    },
+
+    // =========================================================================
+    // FEATURE MAPPING (Internal Key -> Class Name)
+    // =========================================================================
+    FEATURE_MAP: {
+        // Core
+        theme: 'Theme',
+        layout: 'Layout',
+        sidebar: 'SidebarManager',
+        headerNav: 'HeaderNav',
+
+        // Content Control
+        contentControl: 'ContentControl',
+        searchRedesign: 'SearchRedesign',
+        shortsTools: 'ShortsTools',
+        nightMode: 'NightModeManager',
+
+        // Watch Features
+        player: 'Player',
+        playerTools: 'PlayerTools',
+        zenMode: 'ZenMode',
+        focusMode: 'FocusMode',
+        studyMode: 'StudyMode',
+        ambientMode: 'AmbientMode',
+        audioMode: 'AudioMode',
+        videoControls: 'VideoControls',
+        returnDislike: 'ReturnDislike',
+        miniPlayer: 'MiniPlayer',
+        videoFilters: 'VideoFilters',
+
+        // Subscriptions
+        subscriptionManager: 'SubscriptionManager',
+        subscriptionUI: 'SubscriptionUI',
+
+        // History & Stats
+        watchHistoryTracker: 'WatchHistoryTracker',
+        historyTracker: 'HistoryTracker',
+        statsVisualizer: 'StatsVisualizer',
+        historyRedesign: 'HistoryRedesign',
+
+        // Playlists
+        playlistRedesign: 'PlaylistRedesign',
+        reversePlaylist: 'ReversePlaylist',
+        durationCalculator: 'DurationCalculator',
+
+        // Utilities
+        dataAPI: 'DataAPI'
     },
 
     // =========================================================================
@@ -324,6 +393,7 @@ window.YPP.CONSTANTS = {
     // THEME DEFINITIONS
     // =========================================================================
     THEMES: {
+        SYSTEM: { key: 'system', label: 'System (Auto)', class: '' },
         DEFAULT: { key: 'default', label: 'Default (Premium)', class: '' },
         OCEAN: { key: 'ocean', label: 'Ocean Blue', class: 'ypp-theme-ocean' },
         SUNSET: { key: 'sunset', label: 'Sunset Glow', class: 'ypp-theme-sunset' },
@@ -368,6 +438,7 @@ window.YPP.CONSTANTS = {
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
         dataAPI: 'DataAPI',
-        contextMenu: 'ContextMenu'
+        contextMenu: 'ContextMenu',
+        nightMode: 'NightModeManager'
     }
 };

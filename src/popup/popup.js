@@ -112,8 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Visuals
         'enableCinemaFilters', // Presets
+        'blueLight',
+        'dim',
         'zenMode',
         'autoCinema',
+        'autoPiP',
         'studyMode',
         'ambientMode',
         'audioModeEnabled',
@@ -156,6 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (el) {
                         if (el.type === 'checkbox') {
                             el.checked = settings[key] !== undefined ? settings[key] : false;
+                        } else if (el.type === 'range') {
+                            el.value = settings[key] || 0;
+                            // Update display text if exists
+                            const display = document.getElementById(key + 'Value');
+                            if (display) display.textContent = el.value + '%';
                         } else if (el.type === 'color' || el.type === 'text') {
                             el.value = settings[key] || (key === 'progressBarColor' ? '#3ea6ff' : '');
                         }
@@ -180,6 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (el) {
                 if (el.type === 'checkbox') {
                     settings[key] = el.checked;
+                } else if (el.type === 'range') {
+                    settings[key] = Number(el.value);
                 } else {
                     settings[key] = el.value;
                 }
@@ -213,119 +223,119 @@ document.addEventListener('DOMContentLoaded', () => {
         elements[key] = document.getElementById(key);
     });
 
-    // --- THEME SELECTOR ---
+    // --- THEME SELECTOR GRID ---
     const initThemeSelector = (currentTheme) => {
-        const themeSelect = document.getElementById('activeTheme');
-        if (!themeSelect) return;
+        const themeGrid = document.getElementById('themeGrid');
+        if (!themeGrid) return;
+        themeGrid.innerHTML = '';
 
-        // Clear existing options
-        themeSelect.innerHTML = '';
-
-        // Define themes (Should match constants.js, but duplicated here for popup speed/independence)
         const themes = [
-            { key: 'default', label: 'Default (Premium)' },
-            { key: 'ocean', label: 'Ocean Blue' },
-            { key: 'sunset', label: 'Sunset Glow' },
-            { key: 'dracula', label: 'Dracula' },
-            { key: 'forest', label: 'Forest' },
-            { key: 'midnight', label: 'Midnight (OLED)' },
-            { key: 'cherry', label: 'Cherry Blossom' }
+            { key: 'system', label: 'System Auto', meta: 'Follows OS', color: 'split' },
+            { key: 'default', label: 'YouTube Dark', meta: 'Default', color: '#0f0f0f' }, // Generic dark
+            { key: 'ocean', label: 'Ocean Blue', meta: 'Deep Blue', color: '#051421' },
+            { key: 'sunset', label: 'Sunset Glow', meta: 'Warm', color: '#1a0b1a' },
+            { key: 'dracula', label: 'Dracula', meta: 'High Contrast', color: '#282a36' },
+            { key: 'midnight', label: 'Midnight', meta: 'OLED Black', color: '#000000' },
+            { key: 'forest', label: 'Forest', meta: 'Green', color: '#0f1c15' },
+            { key: 'cherry', label: 'Cherry', meta: 'Pink', color: '#26181b' }
         ];
 
-        // Populate dropdown
         themes.forEach(theme => {
-            const option = document.createElement('option');
-            option.value = theme.key;
-            option.textContent = theme.label;
-            if (theme.key === currentTheme) {
-                option.selected = true;
-            }
-            themeSelect.appendChild(option);
-        });
-
-        // Apply initial theme to popup
-        applyThemeToPopup(currentTheme, themes);
-
-        // Handle Change
-        themeSelect.addEventListener('change', (e) => {
-            const newTheme = e.target.value;
-            // 1. Update Storage (Async)
-            updateSetting('activeTheme', newTheme);
+            const btn = document.createElement('div');
+            btn.className = `theme-btn ${theme.key === currentTheme ? 'active' : ''}`;
+            btn.dataset.theme = theme.key;
             
-            // 2. Apply to Popup Immediately
-            applyThemeToPopup(newTheme, themes);
+            // Create Preview Circle
+            const preview = document.createElement('div');
+            preview.className = `theme-preview ${theme.key === 'system' ? 'split' : ''}`;
+            if (theme.key !== 'system') preview.style.backgroundColor = theme.color;
             
-            // 3. Send Instant Message to Content Script
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs[0] && tabs[0].id) {
-                    // Create minimal settings object for speed, or wait for storage? 
-                    // Better to send what we know changed.
-                    // Main.js expects full settings object in 'UPDATE_SETTINGS' usually, 
-                    // but we can send a partial or just fetch fresh.
-                    // Let's rely on storage for full state but trigger the update.
-                    
-                    // Actually, main.js setupEvents: request.settings -> this.settings = request.settings.
-                    // We must send the FULL settings if we use UPDATE_SETTINGS.
-                    // Since 'settings' object in popup.js is kept up to date:
-                    chrome.tabs.sendMessage(tabs[0].id, { 
-                        action: 'UPDATE_SETTINGS', 
-                        settings: { ...settings, activeTheme: newTheme }
-                    });
-                }
-            });
-        });
+            // Info
+            const info = document.createElement('div');
+            info.className = 'theme-info';
+            info.innerHTML = `
+                <span class="theme-name">${theme.label}</span>
+                <span class="theme-meta">${theme.meta}</span>
+            `;
 
-        const forceBtn = document.getElementById('forceApplyTheme');
-        if (forceBtn) {
-            forceBtn.addEventListener('click', () => {
-                const currentTheme = themeSelect.value;
-                
-                // Visual feedback
-                const originalText = forceBtn.textContent;
-                forceBtn.textContent = 'Applying...';
+            btn.appendChild(preview);
+            btn.appendChild(info);
+
+            // Click Handler
+            btn.addEventListener('click', () => {
+                // Visual Update
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Logic Update
+                const newTheme = theme.key;
                 
                 // 1. Update Storage
-                updateSetting('activeTheme', currentTheme);
+                updateSetting('activeTheme', newTheme);
                 
-                // 2. Send Message to Content Script
-                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                    if (tabs[0] && tabs[0].id) {
-                        chrome.tabs.sendMessage(tabs[0].id, { 
-                            action: 'FORCE_THEME_UPDATE'
-                        }, (response) => {
-                            // 3. Also apply to Popup
-                            applyThemeToPopup(currentTheme, themes);
-                            
-                            setTimeout(() => {
-                                forceBtn.textContent = 'Done!';
-                                setTimeout(() => forceBtn.textContent = originalText, 1000);
-                            }, 300);
-                        });
-                    }
-                });
+                // 2. Apply to Popup
+                applyThemeToPopup(newTheme);
+                
+                // 3. Notify Content Script
+                notifyThemeChange(newTheme);
+            });
+
+            themeGrid.appendChild(btn);
+        });
+        
+        // Initial Popup Theme Apply
+        applyThemeToPopup(currentTheme);
+    };
+
+    // --- RANGE SLIDER LISTENERS (Live Preview) ---
+    ['blueLight', 'dim'].forEach(key => {
+        const slider = elements[key];
+        const display = document.getElementById(key + 'Value');
+        if (slider) {
+            slider.addEventListener('input', () => {
+                if (display) display.textContent = slider.value + '%';
+                // Trigger save for live preview
+                saveSettings(); // This is debounced
             });
         }
+    });
+
+    const updateSetting = (key, value) => {
+        const settings = {};
+        settings[key] = value;
+        chrome.storage.local.set({ settings }, () => {
+             // Optional: Handle error
+        });
+        // We also want to update our local state to ensure other saves don't overwrite
+        // But loadSettings reads from storage anyway.
+    };
+
+    const notifyThemeChange = (newTheme) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0] && tabs[0].id) {
+                chrome.tabs.sendMessage(tabs[0].id, { 
+                    action: 'UPDATE_SETTINGS', 
+                    settings: { activeTheme: newTheme } // Partial update might be enough if main.js handles it
+                });
+            }
+        });
     };
 
 
-    const applyThemeToPopup = (themeKey, themes) => {
-        const id = 'ypp-active-theme-css';
-        let link = document.getElementById(id);
 
-        // In Popup context, we can use relative paths or runtime URLs
-        // Relative path from src/popup/popup.html to src/content/themes/
-        const cssPath = `../content/themes/${themeKey}.css`;
-
-        if (!link) {
-            link = document.createElement('link');
-            link.id = id;
-            link.rel = 'stylesheet';
-            document.head.appendChild(link);
+    const applyThemeToPopup = (themeKey) => {
+        // Handle System Theme for Popup Preview
+        if (themeKey === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeKey = isDark ? 'midnight' : 'default';
         }
 
-        if (link.getAttribute('href') !== cssPath) {
-             link.setAttribute('href', cssPath);
-        }
+        document.documentElement.setAttribute('data-ypp-theme', themeKey);
+        document.documentElement.classList.add('yt-premium-plus-theme');
+        
+        // Remove legacy link if exists
+        const link = document.getElementById('ypp-active-theme-css');
+        if (link) link.remove();
     };
 
     // --- EVENT LISTENERS ---

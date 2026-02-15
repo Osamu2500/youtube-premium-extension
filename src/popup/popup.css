@@ -472,3 +472,89 @@ input[type="color"]::-webkit-color-swatch {
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
 }
+
+/* --- Theme Selection Grid --- */
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-btn.active {
+    background: rgba(62, 166, 255, 0.15);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 16px rgba(62, 166, 255, 0.1);
+}
+
+.theme-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-preview.split {
+    background: linear-gradient(135deg, #eee 50%, #222 50%);
+}
+
+.theme-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.theme-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.theme-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.theme-btn.active .theme-name {
+    color: var(--accent-primary);
+}
+
+/* Checkmark logic (optional, via pseudo) */
+.theme-btn.active::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent-primary);
+}

@@ -40,6 +40,10 @@ window.YPP.features.VideoControls = class VideoControls {
         this.Utils.removeStyle('ypp-video-controls-css');
     }
 
+    disable() {
+        this.destroy();
+    }
+
     injectToggle() {
         // Wait for player controls
         this.Utils.waitForElement('.ytp-right-controls').then(controls => {

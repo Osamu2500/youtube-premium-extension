@@ -52,10 +52,18 @@ window.YPP.features.Layout = class GridLayoutManager {
      */
     enable(settings) {
         if (settings?.grid4x4) {
-            this.init();
+             this.init();
         } else {
-            this.disable();
+             this.disable();
         }
+    }
+
+    /**
+     * Standard interface for FeatureManager
+     * @param {Object} settings
+     */
+    run(settings) {
+        this.enable(settings);
     }
 
     /**

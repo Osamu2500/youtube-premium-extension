@@ -59,9 +59,13 @@ window.YPP.features.Player = class Player {
         if (time) time.remove();
 
         // Remove listeners
-        const video = document.querySelector('video');
         if (video && this._boundTimeUpdate) {
             video.removeEventListener('timeupdate', this._boundTimeUpdate);
+        }
+        
+        if (this._boundPiP) {
+            document.removeEventListener('visibilitychange', this._boundPiP);
+            this._boundPiP = null;
         }
     }
 
@@ -116,8 +120,60 @@ window.YPP.features.Player = class Player {
                 if (this.settings.autoQuality) {
                     this.applyAutoQuality();
                 }
+                // Feature 5: Auto Cinema (Forced Theater)
+                if (this.settings.autoCinema) {
+                    this.enforceTheaterMode(controls);
+                }
+                
+                // Feature 6: Auto PiP
+                if (this.settings.autoPiP) {
+                     this.handleAutoPiP(video);
+                }
             }
         }, 1000);
+    }
+
+    enforceTheaterMode(controls) {
+        // Only run if we haven't already enforced it (to avoid fighting user)
+        if (this.hasEnforcedTheater) return;
+
+        const sizeBtn = controls.querySelector('.ytp-size-button');
+        if (!sizeBtn) return;
+
+        // Youtube stores theater state in a cookie 'wide=1', but we can check the button title or DOM
+        // The button usually has title "Theater mode (t)" or "Default view (t)"
+        // Or check if ytd-watch-flexy has attribute 'theater'
+        const ytdWatch = document.querySelector('ytd-watch-flexy');
+        if (ytdWatch && !ytdWatch.hasAttribute('theater')) {
+             // Not in theater mode, click it
+             sizeBtn.click();
+             this.hasEnforcedTheater = true;
+             // Also set cookie for persistence
+             document.cookie = "wide=1;domain=.youtube.com;path=/";
+        } else if (ytdWatch && ytdWatch.hasAttribute('theater')) {
+             this.hasEnforcedTheater = true; // Already there
+        }
+    }
+
+    handleAutoPiP(video) {
+        if (this._boundPiP) return;
+
+        const handleVisibility = async () => {
+             if (document.hidden && !video.paused) {
+                 if (document.pictureInPictureEnabled && !document.pictureInPictureElement) {
+                     try {
+                         await video.requestPictureInPicture();
+                     } catch(e) { /* ignore */ }
+                 }
+             } else if (!document.hidden && document.pictureInPictureElement) {
+                 try {
+                     await document.exitPictureInPicture();
+                 } catch(e) { /* ignore */ }
+             }
+        };
+
+        this._boundPiP = handleVisibility;
+        document.addEventListener('visibilitychange', handleVisibility);
     }
 
     /**

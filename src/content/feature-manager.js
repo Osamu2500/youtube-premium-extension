@@ -61,13 +61,12 @@ window.YPP.FeatureManager = class FeatureManager {
      */
     instantiateFeatures() {
         // Use centralized feature map
-        const featureMap = window.YPP?.CONSTANTS?.FEATURE_MAP || {
-             // Fallback if constants fail to load
-            theme: 'Theme',
-            layout: 'Layout',
-            sidebar: 'SidebarManager',
-            headerNav: 'HeaderNav'
-        };
+        const featureMap = window.YPP?.CONSTANTS?.FEATURE_MAP;
+
+        if (!featureMap) {
+             window.YPP.Utils.log('FEATURE_MAP not found in Constants. Features will not load.', 'MANAGER', 'error');
+             return;
+        }
 
         // Defensive: Ensure window.YPP.features exists
         if (!window.YPP?.features) {
@@ -77,13 +76,15 @@ window.YPP.FeatureManager = class FeatureManager {
 
         for (const [key, className] of Object.entries(featureMap)) {
             try {
+                // Skip if already instantiated
+                if (this.features[key]) continue;
+
                 // Ensure the class exists in the global namespace
                 if (typeof window.YPP.features[className] === 'function') {
                     this.features[key] = new window.YPP.features[className]();
                     this.errorCounts[key] = 0;
-                    // window.YPP.Utils.log(`Feature Loaded: ${key}`, 'MANAGER'); // reduce noise
                 } else {
-                    window.YPP.Utils.log(`Feature class '${className}' not found. Check file inclusion.`, 'MANAGER', 'warn');
+                    // window.YPP.Utils.log(`Feature class '${className}' not found. Check file inclusion.`, 'MANAGER', 'warn');
                 }
             } catch (e) {
                 window.YPP.Utils.log(`Failed to instantiate '${className}': ${e?.message || 'Unknown error'}`, 'MANAGER', 'error');

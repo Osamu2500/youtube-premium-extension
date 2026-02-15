@@ -135,14 +135,15 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
 
     extractMetadata() {
         try {
-             // Try multiple selectors
-            const titleEl = document.querySelector('h1.ytd-watch-metadata') 
-                        || document.querySelector('#title h1')
-                        || document.querySelector('ytd-shorts-player-overlay-renderer #title'); // Shorts title
+             // Access centralized selectors
+             const SELECTORS = window.YPP.CONSTANTS.SELECTORS.METADATA_SELECTORS || { TITLE: [], CHANNEL: [] };
+             
+             // Try multiple selectors from constants
+             const titleEl = SELECTORS.TITLE.map(s => document.querySelector(s)).find(el => el) 
+                             || document.querySelector('h1.ytd-watch-metadata'); // Fallback
 
-            const channelEl = document.querySelector('ytd-video-owner-renderer #channel-name a') 
-                        || document.querySelector('#channel-name a')
-                        || document.querySelector('ytd-reel-player-header-renderer #channel-name a'); // Shorts channel
+             const channelEl = SELECTORS.CHANNEL.map(s => document.querySelector(s)).find(el => el)
+                               || document.querySelector('ytd-video-owner-renderer #channel-name a'); // Fallback
 
             this.videoTitle = titleEl ? titleEl.textContent.trim() : 'Unknown Video';
             this.videoChannel = channelEl ? channelEl.textContent.trim() : 'Unknown Channel';

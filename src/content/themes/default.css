@@ -33,14 +33,4 @@ html.yt-premium-plus-theme body {
     --ytd-searchbox-legacy-button-border-radius: 0 18px 18px 0;
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05);
-    
-    /* CORE YOUTUBE OVERRIDES */
-    /* We must be aggressive with these to ensure the theme takes hold */
-    --yt-spec-base-background: #080808 !important;
-    --yt-spec-raised-background: #191919 !important;
-    --yt-spec-menu-background: #191919 !important;
-    --yt-spec-inverted-background: #ffffff !important;
-    
-    --yt-spec-text-primary: #ffffff !important;
-    --yt-spec-text-secondary: rgba(255, 255, 255, 0.75) !important;
 }

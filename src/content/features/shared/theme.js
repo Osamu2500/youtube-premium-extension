@@ -150,32 +150,85 @@ window.YPP.features.Theme = class ThemeManager {
             let activeThemeKey = this._settings.activeTheme || 'default';
 
             // Legacy support: if trueBlack is on and theme is default, use midnight
-            // This ensures users who had "True Black" enabled before the update get the Midnight theme
             if (this._settings.trueBlack === true && activeThemeKey === 'default') {
                 this._Utils.log('Legacy True Black enabled -> Forcing Midnight theme', 'THEME');
                 activeThemeKey = 'midnight';
             }
-            
-            
-            // Optimization: Only inject if theme changed or not yet injected
-            if (activeThemeKey !== this._currentThemeKey) {
-                this._Utils.log(`Theme changed (${this._currentThemeKey} -> ${activeThemeKey}), injecting...`, 'THEME');
-                this._injectThemeFile(activeThemeKey);
-                this._currentThemeKey = activeThemeKey;
+
+            // Handle System Theme
+            if (activeThemeKey === 'system') {
+                this._handleSystemTheme();
+                return; // _handleSystemTheme will call _injectThemeFile
             } else {
-                 this._Utils.log(`Theme '${activeThemeKey}' already active, skipping injection.`, 'THEME', 'debug');
+                // If not system, stop listening for system changes
+                this._stopSystemListener();
             }
             
-            // Show feedback (only if not initial load to avoid spam)
-            // But for now, let's show it to be sure
-            // if (this._Utils && typeof this._Utils.createToast === 'function') {
-            //     const themeName = Object.values(this._CONSTANTS.THEMES).find(t => t.key === activeThemeKey)?.label || 'Theme';
-            //      this._Utils.createToast(`Applied ${themeName}`);
-            // }
+            this._applyTheme(activeThemeKey);
 
         } else {
+            this._stopSystemListener();
             this._removeThemeFile();
             this._currentThemeKey = null;
+        }
+    }
+
+    /**
+     * Handle System Theme logic
+     * @private
+     */
+    _handleSystemTheme() {
+        if (!this._systemMediaQuery) {
+            this._systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            this._systemListener = (e) => {
+                const newTheme = e.matches ? 'midnight' : 'ocean'; // Default mapping: Dark -> Midnight, Light -> Ocean (or default)
+                // Actually, let's map: Dark -> Midnight (OLED), Light -> Default (Premium)
+                // Or better: Let user decide? For now, hardcode sensible defaults.
+                // YouTube is mostly dark. 'default' is the Premium Dark.
+                // Let's use 'default' for Dark and maybe 'ocean' for light? 
+                // Wait, YouTube doesn't really have a light theme in this extension context properly supported yet?
+                // The extension is "Premium Plus", mostly dark mode oriented.
+                // Let's assume System Dark = Midnight, System Light = Default (Premium/Dark-ish) or disable?
+                // For safety: System defaults to 'default' (Premium)
+                
+                this._Utils.log(`System theme changed: ${e.matches ? 'Dark' : 'Light'}`, 'THEME');
+                this._applyTheme(e.matches ? 'midnight' : 'default'); 
+            };
+            
+            // Add listener
+            this._systemMediaQuery.addEventListener('change', this._systemListener);
+        }
+
+        // Apply initial
+        const isDark = this._systemMediaQuery.matches;
+        this._applyTheme(isDark ? 'midnight' : 'default');
+    }
+
+    /**
+     * Stop listening for system theme changes
+     * @private
+     */
+    _stopSystemListener() {
+        if (this._systemMediaQuery && this._systemListener) {
+            this._systemMediaQuery.removeEventListener('change', this._systemListener);
+            this._systemMediaQuery = null;
+            this._systemListener = null;
+        }
+    }
+
+    /**
+     * Apply a specific theme key
+     * @private
+     * @param {string} themeKey 
+     */
+    _applyTheme(themeKey) {
+        // Optimization: Only inject if theme changed or not yet injected
+        if (themeKey !== this._currentThemeKey || !document.getElementById('ypp-active-theme-css')) {
+            this._Utils.log(`Theme changed (${this._currentThemeKey} -> ${themeKey}), injecting...`, 'THEME');
+            this._injectThemeFile(themeKey);
+            this._currentThemeKey = themeKey;
+        } else {
+             this._Utils.log(`Theme '${themeKey}' already active, skipping injection.`, 'THEME', 'debug');
         }
     }
 
@@ -202,10 +255,6 @@ window.YPP.features.Theme = class ThemeManager {
         let link = document.getElementById(id);
 
         const cssUrl = chrome.runtime.getURL(`src/content/themes/${themeKey}.css`);
-        
-        // Only use timestamp if forced, otherwise let Chrome handle caching (or not)
-        // Actually, for local dev/updates, we probably don't need timestamp unless dev is changing files.
-        // But "Force Apply" implies we want to be sure.
         const fullUrl = force ? `${cssUrl}?t=${Date.now()}` : cssUrl;
 
         if (!link) {
@@ -221,7 +270,6 @@ window.YPP.features.Theme = class ThemeManager {
 
         // VERIFICATION LOG
         this._Utils.log(`Injecting Theme: ${themeKey} (Force: ${force})`, 'THEME');
-        this._Utils.log(`URL: ${fullUrl}`, 'THEME');
     }
 
     /**

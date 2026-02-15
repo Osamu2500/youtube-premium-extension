@@ -1,6 +1,7 @@
 window.YPP.features.SubscriptionUI = class SubscriptionUI {
     constructor(manager) {
-        this.manager = manager;
+        this.manager = manager; 
+        // If instantiated by FeatureManager without args, we need to resolve manager later
         this.logger = new window.YPP.Utils.Logger('SubscriptionUI');
         this.Utils = window.YPP.Utils;
         this.isModalOpen = false;
@@ -8,8 +9,25 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
     }
 
     init() {
+        // Resolve dependency if missing
+        if (!this.manager && window.YPP.Main && window.YPP.Main.featureManager) {
+             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionManager');
+        }
+
+        if (!this.manager) {
+             this.logger.error('Dependency missing: SubscriptionManager');
+             return;
+        }
+
         this.logger.info('Initialized Subscription UI');
         this.observePage();
+    }
+
+    /**
+     * Standard interface for FeatureManager
+     */
+    run(settings) {
+        this.init();
     }
 
     observePage() {
