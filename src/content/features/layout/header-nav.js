@@ -8,12 +8,11 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.HeaderNav = class HeaderNav {
 
     static ICONS = {
-        Subscriptions: '<path d="M20 7H4V6h16v1zm-2 4H6v-1h12v1zm4 11v-8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8h20zM10 17l6-3.5-6-3.5v7z" fill="currentColor"></path>',
-        Shorts: '<path d="M17.77 10.32l-1.2-3.5c-0.18-0.52-0.65-0.9-1.2-0.96c-0.55-0.08-1.1 0.16-1.42 0.6L12 9.5l-2-3 c-0.8-1.2-2.4-1.6-3.7-0.9C4.8 6.4 4 8.1 4.5 9.6l1.2 3.5c0.18 0.52 0.65 0.9 1.2 0.96c0.55 0.08 1.1-0.16 1.42-0.6L10 10.5l2 3 c0.8 1.2 2.4 1.6 3.7 0.9C17.2 13.6 18 11.9 17.5 10.4z M10 14.65V10.7l3.43 1.98L10 14.65z" fill="currentColor"></path>',
+        Subscriptions: '<path d="M4 6h16v2H4zm0 4h16v2H4zm-2 4c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2v-6c0-1.1-.9-2-2-2H2zm8 8v-6l5 3-5 3z" fill="currentColor"></path>',
+        Shorts: '<g transform="translate(0.5, 0)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 14.65v-5.3L15 12l-5 2.65zm7.77-4.33c-.77-.32-1.65-.15-2.29.4l-4.8 3.53-1.43-.86 3.42-2.05c1.45-.87 1.93-2.74 1.06-4.19l-.06-.1c-.87-1.45-2.74-1.93-4.19-1.06L6 8.52c-1.45.87-1.93 2.74-1.06 4.19.23.39.55.72.91.96l4.8 3.53 1.43.86-3.42 2.05c-1.45.87-1.93 2.74-1.06 4.19l.06.1c.87 1.45 2.74 1.93 4.19 1.06l4.8-2.87c1.45-.87 1.93-2.74 1.06-4.19-.23-.39-.55-.72-.91-.96z" fill="currentColor"></path></g>',
         WatchLater: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"></path>',
-        Playlists: '<path d="M19 9H2v2h17V9zm0-4H2v2h17V5zM2 15h13v-2H2v2zm15-2v6l5-3-5-3z" fill="currentColor"></path>',
-        History: '<path d="M13 3a9 9 0 109 9 9 9 0 00-9-9zm0 16a7 7 0 117-7 7 7 0 01-7 7zm1-11h-2v5.41l4.29 2.51.71-1.22-3-1.78z" fill="currentColor"></path>',
-        Trending: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z" fill="currentColor"></path>'
+        Playlists: '<g transform="translate(0, 1)"><path d="M19 9H2v2h17V9zm0-4H2v2h17V5zM2 15h13v-2H2v2zm15-2v6l5-3-5-3z" fill="currentColor"></path></g>',
+        History: '<g transform="translate(0.5, 0.5)"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 9H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 6v7l6 3.6.75-1.23-4.75-2.85V9z" fill="currentColor"></path></g>'
     };
 
     constructor() {
@@ -100,7 +99,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
             .ypp-nav-btn {
                 width: 40px;
                 height: 40px;
-                border-radius: 50%;
+                border-radius: 12px; /* Squircle */
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -141,6 +140,21 @@ window.YPP.features.HeaderNav = class HeaderNav {
             }
             .ypp-nav-btn:hover::after {
                 opacity: 1;
+            }
+            
+            /* --- Topbar Polish --- */
+            /* Center Mic Icon */
+            #voice-search-button {
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                border-radius: 50% !important; /* Ensure circle or match others? User said center in button */
+            }
+            /* Profile Icon Squircle */
+            #avatar-btn,
+            #avatar-btn yt-img-shadow,
+            #avatar-btn img {
+                border-radius: 12px !important;
             }
             /* Hide Sidebar Support */
             body.ypp-hide-sidebar ytd-mini-guide-renderer, 
@@ -235,8 +249,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
                 { setting: 'navShorts', label: 'Shorts', url: '/shorts', icon: HeaderNav.ICONS.Shorts },
                 { setting: 'navWatchLater', label: 'Watch Later', url: '/playlist?list=WL', icon: HeaderNav.ICONS.WatchLater },
                 { setting: 'navPlaylists', label: 'Playlists', url: '/feed/playlists', icon: HeaderNav.ICONS.Playlists },
-                { setting: 'navHistory', label: 'History', url: '/feed/history', icon: HeaderNav.ICONS.History },
-                { setting: 'navTrending', label: 'Trending', url: '/feed/trending', icon: HeaderNav.ICONS.Trending }
+                { setting: 'navHistory', label: 'History', url: '/feed/history', icon: HeaderNav.ICONS.History }
             ];
 
             let addedCount = 0;
@@ -293,29 +306,8 @@ window.YPP.features.HeaderNav = class HeaderNav {
             btn.title = label; // Used by CSS tooltip
             btn.dataset.url = url;
             
-            // Safer SVG injection
-            // Create a temporary container to parse SVG safely
-            try {
-                const range = document.createRange();
-                const frag = range.createContextualFragment(svgContent);
-                const svg = frag.querySelector('svg') || frag.querySelector('path');
-                
-                if (svg) {
-                    const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    iconSvg.setAttribute('viewBox', '0 0 24 24');
-                    iconSvg.classList.add('ypp-nav-icon');
-                    
-                    if (svg.tagName.toLowerCase() === 'path') {
-                        iconSvg.appendChild(svg.cloneNode(true));
-                    } else {
-                        // If it's already an SVG, copy its children
-                        Array.from(svg.children).forEach(child => iconSvg.appendChild(child.cloneNode(true)));
-                    }
-                    btn.appendChild(iconSvg);
-                }
-            } catch (e) {
-                btn.textContent = label[0]; // Fallback
-            }
+            // Simple SVG injection
+            btn.innerHTML = `<svg viewBox="0 0 24 24" class="ypp-nav-icon" style="pointer-events: none; display: block; width: 24px; height: 24px; fill: currentColor;">${svgContent}</svg>`;
 
             // Reliable Navigation with keyboard support
             const handleClick = (e) => {

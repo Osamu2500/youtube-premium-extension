@@ -347,3 +347,37 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 .ypp-icon-btn:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* Sidebar Integration */
+.ypp-sidebar-header {
+    padding: 8px 24px;
+    font-size: 1.4rem; /* YouTube size approx */
+    font-weight: 500;
+    color: var(--yt-spec-text-primary);
+    text-transform: capitalize;
+}
+
+.ypp-sidebar-entry {
+    cursor: pointer;
+}
+
+.ypp-sidebar-entry.active tp-yt-paper-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+}
+
+.ypp-sidebar-entry:hover tp-yt-paper-item {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Toggle Chips */
+.ypp-toggle-chip {
+    border-color: rgba(255, 255, 255, 0.2);
+    border-style: dashed;
+}
+.ypp-toggle-chip.active {
+    background: #ff4e45; /* Red for 'Blocking/Hiding' action? Or generic active color */
+    border-color: #ff4e45;
+    color: #fff;
+    border-style: solid;
+}

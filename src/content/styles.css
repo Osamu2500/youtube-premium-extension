@@ -244,16 +244,23 @@ body.ypp-hide-watched ytd-grid-video-renderer[is-watched] {
 }
 
 /* Hide Create Button */
+/* Hide Create Button (All variants) */
 .yt-premium-plus-theme ytd-topbar-menu-button-renderer[aria-label*="Create"],
 .yt-premium-plus-theme ytd-button-renderer:has(a[href*="/upload"]),
 .yt-premium-plus-theme #buttons ytd-topbar-model-builder-renderer,
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has([aria-label*="Create"]) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has([aria-label*="Create"]),
+.yt-premium-plus-theme #buttons #create-button,
+.yt-premium-plus-theme #buttons ytd-button-renderer:has([aria-label="Create"]),
+.yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer { 
+  /* The big pill button for create is often a generic button renderer in #buttons. 
+     Be careful not to hide Sign In if it's there, but we assume signed in. 
+     Better to target by icon or specific attributes if possible. */
+     display: none !important;
+}
+/* Specific targetting for the "Pill" styled Create button */
+.yt-premium-plus-theme ytd-masthead #end #buttons ytd-button-renderer:has(yt-icon[icon="icons:plus"]),
+.yt-premium-plus-theme ytd-masthead #end #buttons ytd-button-renderer:has(path[d*="M20 12h-8v8h-2v-8H2v-2h8V2h2v8h8v2z"]) {
+    display: none !important;
 }
 
 /* Logo Area */
@@ -353,19 +360,24 @@ ytd-mini-guide-renderer {
 }
 
 /* Search Bar Styling */
+
+/* Search Bar Styling */
 .yt-premium-plus-theme ytd-searchbox {
   margin: 0 16px;
   height: 44px;
-  --ytd-searchbox-background: transparent;
-  --ytd-searchbox-border-radius: 18px;
+  --ytd-searchbox-background: transparent !important;
+  --ytd-searchbox-border-radius: 12px !important;
+  --ytd-searchbox-text-color: var(--ypp-text-primary) !important;
+  overflow: visible !important; /* Allow pop-out shadows */
 }
 
 .yt-premium-plus-theme ytd-searchbox #container {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
 }
 
 .yt-premium-plus-theme ytd-searchbox #search-form {
@@ -374,50 +386,66 @@ ytd-mini-guide-renderer {
   max-width: 850px;
   flex: 1 1 auto;
   margin-left: 0;
+  overflow: visible !important;
 }
 
 .yt-premium-plus-theme ytd-searchbox input#search {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--ypp-glass-border);
-  border-right: none;
-  border-radius: 18px 0 0 18px !important;
-  padding: 0 16px;
-  color: var(--ypp-text-primary);
-  font-size: 16px;
-  height: 100%;
-  margin: 0;
-  box-sizing: border-box;
-  width: 100%;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--ypp-glass-border) !important;
+  border-right: none !important;
+  border-radius: 12px 0 0 12px !important; /* Squircle */
+  padding: 0 16px !important;
+  color: var(--ypp-text-primary) !important;
+  font-size: 16px !important;
+  height: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important; /* Pop-up Look */
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.yt-premium-plus-theme ytd-searchbox input#search:focus {
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .yt-premium-plus-theme ytd-searchbox #search-icon-legacy {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--ypp-glass-border);
-  border-radius: 0 18px 18px 0 !important;
-  width: 60px;
-  height: 100%;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid var(--ypp-glass-border) !important;
+  border-radius: 0 12px 12px 0 !important; /* Squircle */
+  width: 60px !important;
+  height: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important; /* Pop-up Look */
+  transition: all 0.2s ease !important;
 }
 
 .yt-premium-plus-theme ytd-searchbox #search-icon-legacy:hover,
 .yt-premium-plus-theme #voice-search-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+  cursor: pointer !important;
 }
 
 /* Voice Search */
 .yt-premium-plus-theme #voice-search-button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--ypp-glass-border);
-  border-radius: 18px !important;
+  border-radius: 12px !important; /* Squircle */
   margin-left: 12px;
   width: 44px;
   height: 44px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Center Section Alignment */
@@ -430,41 +458,76 @@ ytd-mini-guide-renderer {
   display: flex;
 }
 
-/* TopBar Buttons (Profile, Notifications) */
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer,
-.yt-premium-plus-theme ytd-notification-topbar-button-renderer,
-.yt-premium-plus-theme #avatar-btn {
-  border-radius: 12px;
+/* TopBar Buttons (Notifications specifically) */
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer {
+  border-radius: 12px !important; /* Squircle */
   width: 44px;
   height: 44px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--ypp-glass-border);
   margin-left: 8px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   transition: var(--ypp-transition);
   overflow: hidden;
 }
 
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer:hover,
-.yt-premium-plus-theme ytd-notification-topbar-button-renderer:hover,
-.yt-premium-plus-theme #avatar-btn:hover {
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer yt-icon,
-.yt-premium-plus-theme ytd-notification-topbar-button-renderer yt-icon {
-  width: 24px;
-  height: 24px;
+/* Fix inner button of notification to be transparent/full size */
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer #button {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Profile (Already fixed, keeping for context if needed, but not replacing) */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn) {
+  /* Only style the outer container for profile */
+  border-radius: 12px !important;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ypp-glass-border);
+  margin-left: 8px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 !important; /* Ensure no padding causes gap */
+}
+
+/* Make inner button transparent and full size */
+.yt-premium-plus-theme #avatar-btn {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important; /* Let container handle shape */
+}
+
+/* Ensure Image Fills */
+.yt-premium-plus-theme #avatar-btn yt-img-shadow,
 .yt-premium-plus-theme #avatar-btn img {
-  border-radius: 16px;
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important; /* Let container handle shape */
+  object-fit: cover !important;
+  margin: 0 !important;
 }
 
 /* Header Navigation Buttons */

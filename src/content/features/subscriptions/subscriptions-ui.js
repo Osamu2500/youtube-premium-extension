@@ -34,15 +34,26 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
 
     checkRoute() {
         const path = window.location.pathname;
+        const params = new URLSearchParams(window.location.search);
+        const groupParam = params.get('ypp_group');
+
         if (path === '/feed/subscriptions') {
             this.injectManageButton();
             this.injectFilterBar();
+            // Apply group filter if present in URL
+            if (groupParam) {
+                // Wait for filter bar to render
+                setTimeout(() => this.filterFeed(groupParam), 500);
+            }
         } else if (path === '/feed/channels') {
             this.injectOrganizerButton();
             this.applyGridClass();
         } else if (path === '/' || path === '/index') {
             this.injectFilterBar();
         }
+        
+        // Always try to inject sidebar if guide exists
+        this.injectSidebarGroups();
     }
 
     applyGridClass() {
@@ -117,6 +128,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         container.innerHTML = '';
         const groups = this.manager.getGroups();
         
+        // 1. Groups
         const allBtn = document.createElement('button');
         allBtn.className = 'ypp-filter-chip active';
         allBtn.textContent = 'All';
@@ -130,41 +142,146 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
             btn.onclick = () => this.filterFeed(groupName);
             container.appendChild(btn);
         });
+
+        // Separator
+        const sep = document.createElement('div');
+        sep.style.cssText = 'width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 8px;';
+        container.appendChild(sep);
+
+        // 2. Toggles (Shorts, Watched)
+        const toggleShorts = document.createElement('button');
+        toggleShorts.className = 'ypp-filter-chip ypp-toggle-chip';
+        toggleShorts.textContent = 'Hide Shorts';
+        toggleShorts.dataset.toggle = 'shorts';
+        toggleShorts.onclick = () => {
+            toggleShorts.classList.toggle('active');
+            this.reapplyFilters();
+        };
+        container.appendChild(toggleShorts);
+
+        const toggleWatched = document.createElement('button');
+        toggleWatched.className = 'ypp-filter-chip ypp-toggle-chip';
+        toggleWatched.textContent = 'Hide Watched';
+        toggleWatched.dataset.toggle = 'watched';
+        toggleWatched.onclick = () => {
+            toggleWatched.classList.toggle('active');
+            this.reapplyFilters();
+        };
+        container.appendChild(toggleWatched);
+    }
+
+    reapplyFilters() {
+        // Find active group
+        const activeGroupChip = document.querySelector('#ypp-subs-filter-bar .ypp-filter-chip:not(.ypp-toggle-chip).active');
+        const groupName = activeGroupChip && activeGroupChip.textContent !== 'All' ? activeGroupChip.textContent : null;
+        this.filterFeed(groupName);
     }
 
     filterFeed(groupName) {
-        const chips = document.querySelectorAll('#ypp-subs-filter-bar .ypp-filter-chip');
-        chips.forEach(c => c.classList.remove('active'));
-        
-        const targetChip = Array.from(chips).find(c => c.textContent === (groupName || 'All'));
+        const bar = document.getElementById('ypp-subs-filter-bar');
+        if (!bar) return;
+
+        // Update active group chip
+        const groupChips = bar.querySelectorAll('.ypp-filter-chip:not(.ypp-toggle-chip)');
+        groupChips.forEach(c => c.classList.remove('active'));
+        const targetChip = Array.from(groupChips).find(c => c.textContent === (groupName || 'All'));
         if (targetChip) targetChip.classList.add('active');
 
+        // Check toggles
+        const hideShorts = bar.querySelector('[data-toggle="shorts"]')?.classList.contains('active');
+        const hideWatched = bar.querySelector('[data-toggle="watched"]')?.classList.contains('active');
+
         // Handles both Home and Subs feed items
-        const videos = document.querySelectorAll('ytd-rich-item-renderer');
+        const videos = document.querySelectorAll('ytd-rich-item-renderer, ytd-grid-video-renderer');
         const allowedChannels = groupName ? this.manager.getChannelsInGroup(groupName).map(c => c.name) : null;
 
         videos.forEach(video => {
-            if (!video.dataset.yppChannel) {
-                // Try standard selectors
-                let nameNode = video.querySelector('#text.ytd-channel-name');
-                if (!nameNode) nameNode = video.querySelector('ytd-channel-name #text');
-                if (!nameNode) nameNode = video.querySelector('.ytd-channel-name'); // broader fallback
-                
-                if (nameNode) video.dataset.yppChannel = nameNode.textContent.trim();
+            let shouldShow = true;
+
+            // 1. Group Filter
+            if (allowedChannels) {
+                if (!video.dataset.yppChannel) {
+                    // Try standard selectors
+                    let nameNode = video.querySelector('#text.ytd-channel-name') || video.querySelector('.ytd-channel-name') || video.querySelector('ytd-channel-name');
+                    if (nameNode) video.dataset.yppChannel = nameNode.textContent.trim();
+                }
+                const channelName = video.dataset.yppChannel;
+                if (!channelName || !allowedChannels.includes(channelName)) {
+                    shouldShow = false;
+                }
             }
-            const channelName = video.dataset.yppChannel;
-            
-            if (!allowedChannels) {
-                video.style.display = '';
-            } else if (channelName && allowedChannels.includes(channelName)) {
-                video.style.display = '';
-            } else {
-                video.style.display = 'none';
+
+            // 2. Hide Shorts
+            if (shouldShow && hideShorts) {
+                // Heuristic for Shorts: ytd-rich-item-renderer can contain ytd-reel-item-renderer or look vertical
+                // Or check for /shorts/ link
+                if (video.querySelector('a[href*="/shorts/"]')) shouldShow = false;
+                // Check for "Shorts" dismissal
+                if (video.tagName.toLowerCase().includes('reel')) shouldShow = false;
             }
+
+            // 3. Hide Watched
+            if (shouldShow && hideWatched) {
+                const progress = video.querySelector('#progress');
+                if (progress) {
+                    const width = parseFloat(progress.style.width || '0');
+                    if (width > 80) shouldShow = false; // >80% watched
+                }
+            }
+
+            video.style.display = shouldShow ? '' : 'none';
         });
         
         // Also trigger a reflow on the grid if needed by dispatching resize
         window.dispatchEvent(new Event('resize'));
+        this.injectSidebarGroups(); // Refresh sidebar active state
+    }
+
+    injectSidebarGroups() {
+        const guide = document.querySelector('ytd-guide-renderer #sections');
+        if (!guide) return;
+        
+        let section = document.getElementById('ypp-sidebar-group-section');
+        if (!section) {
+            section = document.createElement('ytd-guide-section-renderer');
+            section.id = 'ypp-sidebar-group-section';
+            section.className = 'style-scope ytd-guide-renderer';
+            // Insert after the first section (usually Home/Shorts/Subs)
+            if (guide.children.length > 0) {
+                guide.insertBefore(section, guide.children[1]); 
+            } else {
+                guide.appendChild(section);
+            }
+        }
+
+        const groups = this.manager.getGroups();
+        const activeGroup = new URLSearchParams(window.location.search).get('ypp_group');
+
+        section.innerHTML = `
+            <div id="items" class="style-scope ytd-guide-section-renderer">
+                <h3 class="ypp-sidebar-header">Groups</h3>
+                ${Object.keys(groups).map(name => `
+                    <ytd-guide-entry-renderer class="style-scope ytd-guide-section-renderer ypp-sidebar-entry ${activeGroup === name ? 'active' : ''}" role="tab">
+                        <a class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" tabindex="-1">
+                            <tp-yt-paper-item class="style-scope ytd-guide-entry-renderer" role="link">
+                                <yt-icon class="guide-icon style-scope ytd-guide-entry-renderer"><svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon" style="pointer-events: none; display: block; width: 100%; height: 100%;"><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2,6v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18H4V6h5.17l2,2H20V18z"></path></svg></yt-icon>
+                                <span class="title style-scope ytd-guide-entry-renderer">${name}</span>
+                            </tp-yt-paper-item>
+                        </a>
+                    </ytd-guide-entry-renderer>
+                `).join('')}
+            </div>
+        `;
+
+        // Add Listeners
+        section.querySelectorAll('.ypp-sidebar-entry').forEach(el => {
+            el.onclick = (e) => {
+                e.preventDefault();
+                const name = el.querySelector('.title').textContent;
+                // Navigate with param
+                window.location.href = `/feed/subscriptions?ypp_group=${encodeURIComponent(name)}`;
+            };
+        });
     }
 
     openOrganizer() {
