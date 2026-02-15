@@ -47,11 +47,19 @@ window.YPP.features.VideoFilters = class VideoFilters {
     }
 
     run(settings) {
-        this.enable(settings);
+        this.settings = settings;
+        if (settings.enableVideoFilters) {
+            this.enable(settings);
+        }
     }
 
     update(settings) {
         this.settings = settings;
+        if (settings.enableVideoFilters) {
+            this.enable(settings);
+        } else {
+            this.disable();
+        }
     }
 
     isWatchPage() {

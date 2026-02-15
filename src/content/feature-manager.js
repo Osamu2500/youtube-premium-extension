@@ -32,9 +32,13 @@ window.YPP.FeatureManager = class FeatureManager {
         // Defensive: Ensure settings exist, fallback to defaults
         this.settings = settings || window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
 
-        // Self-Healing: Reset error counts on re-initialization (e.g., settings change or navigation)
-        // This allows features to recover if they crashed due to transient issues or bad settings
-        this.resetErrors();
+        // Self-Healing: Reset error counts on re-initialization ONLY if enough time has passed
+        // This prevents infinite retry loops if a feature crashes immediately upon load
+        const now = Date.now();
+        if (!this.lastReset || (now - this.lastReset > 5000)) {
+            this.resetErrors();
+            this.lastReset = now;
+        }
 
         if (!this.instantiated) {
             this.instantiateFeatures();
@@ -56,40 +60,13 @@ window.YPP.FeatureManager = class FeatureManager {
      * Maps internal keys to global class names.
      */
     instantiateFeatures() {
-        const featureMap = {
+        // Use centralized feature map
+        const featureMap = window.YPP?.CONSTANTS?.FEATURE_MAP || {
+             // Fallback if constants fail to load
             theme: 'Theme',
             layout: 'Layout',
-            homeOrganizer: 'HomeOrganizer',
-            subsOrganizer: 'SubscriptionsOrganizer',
-            advancedFilter: 'AdvancedFilter',
-            zenMode: 'ZenMode',
-            studyMode: 'StudyMode',
-            focusMode: 'FocusMode',
-            player: 'Player',
-            contentControl: 'ContentControl',
             sidebar: 'SidebarManager',
-            headerNav: 'HeaderNav',
-            searchRedesign: 'SearchRedesign',
-            shortsTools: 'ShortsTools',
-            playerTools: 'PlayerTools',
-            // New Features
-            playlistDuration: 'PlaylistDuration',
-            statsVisualizer: 'StatsVisualizer',
-            watchHistory: 'WatchHistoryTracker',
-            historyTracker: 'HistoryTracker',
-            historyRedesign: 'HistoryRedesign',
-            playlistRedesign: 'PlaylistRedesign',
-            ambientMode: 'AmbientMode',
-            audioMode: 'AudioMode',
-            videoControls: 'VideoControls',
-            videoControls: 'VideoControls',
-            returnYouTubeDislike: 'ReturnDislike',
-            sponsorBlock: 'SponsorBlock',
-            miniPlayer: 'MiniPlayer',
-            videoFilters: 'VideoFilters',
-            reversePlaylist: 'ReversePlaylist',
-            dataAPI: 'DataAPI',
-            contextMenu: 'ContextMenu'
+            headerNav: 'HeaderNav'
         };
 
         // Defensive: Ensure window.YPP.features exists

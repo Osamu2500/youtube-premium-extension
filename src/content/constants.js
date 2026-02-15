@@ -146,10 +146,14 @@ window.YPP.CONSTANTS = {
     // =========================================================================
     // DEFAULT SETTINGS
     // =========================================================================
+    // =========================================================================
+    // DEFAULT SETTINGS
+    // =========================================================================
     DEFAULT_SETTINGS: {
         // Theme
         premiumTheme: true,
-        trueBlack: false,
+        activeTheme: 'default', // default, ocean, sunset, dracula, forest, midnight, cherry
+        trueBlack: false, // Legacy: treated as 'midnight' theme if true during migration
         hideScrollbar: false,
         customProgressBar: false,
         progressBarColor: '#ff0000',
@@ -314,5 +318,56 @@ window.YPP.CONSTANTS = {
         TITLE_LINE_HEIGHT: '2.2rem',
         TITLE_MAX_LINES: 2,
         METADATA_FONT_SIZE: '1.3rem'
+    },
+
+    // =========================================================================
+    // THEME DEFINITIONS
+    // =========================================================================
+    THEMES: {
+        DEFAULT: { key: 'default', label: 'Default (Premium)', class: '' },
+        OCEAN: { key: 'ocean', label: 'Ocean Blue', class: 'ypp-theme-ocean' },
+        SUNSET: { key: 'sunset', label: 'Sunset Glow', class: 'ypp-theme-sunset' },
+        DRACULA: { key: 'dracula', label: 'Dracula', class: 'ypp-theme-dracula' },
+        FOREST: { key: 'forest', label: 'Forest', class: 'ypp-theme-forest' },
+        MIDNIGHT: { key: 'midnight', label: 'Midnight (OLED)', class: 'ypp-theme-midnight' },
+        CHERRY: { key: 'cherry', label: 'Cherry Blossom', class: 'ypp-theme-cherry' }
+    },
+
+    // =========================================================================
+    // FEATURE MAPPING
+    // =========================================================================
+    FEATURE_MAP: {
+        theme: 'Theme',
+        layout: 'Layout',
+        homeOrganizer: 'HomeOrganizer',
+        subsOrganizer: 'SubscriptionsOrganizer',
+        advancedFilter: 'AdvancedFilter',
+        zenMode: 'ZenMode',
+        studyMode: 'StudyMode',
+        focusMode: 'FocusMode',
+        player: 'Player',
+        contentControl: 'ContentControl',
+        sidebar: 'SidebarManager',
+        headerNav: 'HeaderNav',
+        searchRedesign: 'SearchRedesign',
+        shortsTools: 'ShortsTools',
+        playerTools: 'PlayerTools',
+        // New Features
+        playlistDuration: 'PlaylistDuration',
+        statsVisualizer: 'StatsVisualizer',
+        watchHistory: 'WatchHistoryTracker',
+        historyTracker: 'HistoryTracker',
+        historyRedesign: 'HistoryRedesign',
+        playlistRedesign: 'PlaylistRedesign',
+        ambientMode: 'AmbientMode',
+        audioMode: 'AudioMode',
+        videoControls: 'VideoControls',
+        returnYouTubeDislike: 'ReturnDislike',
+        sponsorBlock: 'SponsorBlock',
+        miniPlayer: 'MiniPlayer',
+        videoFilters: 'VideoFilters',
+        reversePlaylist: 'ReversePlaylist',
+        dataAPI: 'DataAPI',
+        contextMenu: 'ContextMenu'
     }
 };

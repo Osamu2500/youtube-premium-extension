@@ -9,7 +9,30 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration {
     }
 
     run(settings) {
-        this.init();
+        this.settings = settings;
+        if (settings.playlistDuration) {
+            this.init();
+        }
+    }
+
+    update(settings) {
+        this.settings = settings;
+        if (settings.playlistDuration) {
+            this.init();
+        } else {
+            this.disable();
+        }
+    }
+
+    disable() {
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
+        if (this.card) {
+            this.card.remove();
+            this.card = null;
+        }
     }
 
     init() {

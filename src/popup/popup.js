@@ -73,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'blueProgress',
 
         // Navigation
-        'navTrending',
         'navShorts',
         'navSubscriptions',
         'navWatchLater',
@@ -98,36 +97,41 @@ document.addEventListener('DOMContentLoaded', () => {
         'cleanSearch',
         
         // Player
-        'autoQuality',
-        'enableRemainingTime',
-        'volumeBoost',
-        'enableCustomSpeed',
-        'enableCinemaFilters',
-        'snapshotBtn',
-        'loopBtn',
-        'enablePiP',
-        
-        // Smart Features
         'sponsorBlock',
         'returnYouTubeDislike',
-        
-        // Modes
+        'autoQuality',
+        'volumeBoost',
+        'enableCustomSpeed',
+        'enablePiP', // Button
+        'miniPlayer', // Scroll PiP
+        'enableVideoFilters', // Slider UI
+        'loopBtn',
+        'snapshotBtn',
+        'enableRemainingTime',
+        'enableStatsForNerds',
+
+        // Visuals
+        'enableCinemaFilters', // Presets
         'zenMode',
-        'studyMode',
         'autoCinema',
-        
-        // Focus / Distractions
+        'studyMode',
+        'ambientMode',
+        'audioModeEnabled',
+        'videoControlsEnabled',
+
+        // Distractions
         'enableFocusMode',
         'hideComments',
         'hideEndScreens',
         'hideCards',
-        // 'hideMerch' removed from HTML
+        'hideMerch',
         
-        // New Feature Keys
-        'enableSubsManager',
-        'ambientMode',
-        'audioModeEnabled',
-        'videoControlsEnabled'
+        // Playlist
+        'reversePlaylist',
+        'playlistDuration',
+
+        // Subscription Manager
+        'enableSubsManager'
     ];
 
     // --- STORAGE HANDLING ---
@@ -157,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 });
+
+                // Initialize Theme Selector
+                initThemeSelector(settings.activeTheme);
 
                 updateDependencyUI();
             });
@@ -197,6 +204,69 @@ document.addEventListener('DOMContentLoaded', () => {
     settingKeys.forEach(key => {
         elements[key] = document.getElementById(key);
     });
+
+    // --- THEME SELECTOR ---
+    const initThemeSelector = (currentTheme) => {
+        const themeSelect = document.getElementById('activeTheme');
+        if (!themeSelect) return;
+
+        // Clear existing options
+        themeSelect.innerHTML = '';
+
+        // Define themes (Should match constants.js, but duplicated here for popup speed/independence)
+        const themes = [
+            { key: 'default', label: 'Default (Premium)' },
+            { key: 'ocean', label: 'Ocean Blue' },
+            { key: 'sunset', label: 'Sunset Glow' },
+            { key: 'dracula', label: 'Dracula' },
+            { key: 'forest', label: 'Forest' },
+            { key: 'midnight', label: 'Midnight (OLED)' },
+            { key: 'cherry', label: 'Cherry Blossom' }
+        ];
+
+        // Populate dropdown
+        themes.forEach(theme => {
+            const option = document.createElement('option');
+            option.value = theme.key;
+            option.textContent = theme.label;
+            if (theme.key === currentTheme) {
+                option.selected = true;
+            }
+            themeSelect.appendChild(option);
+        });
+
+        // Apply initial theme to popup
+        applyThemeToPopup(currentTheme, themes);
+
+        // Handle Change
+        themeSelect.addEventListener('change', (e) => {
+            const newTheme = e.target.value;
+            updateSetting('activeTheme', newTheme);
+            applyThemeToPopup(newTheme, themes);
+            
+            // Legacy sync for trueBlack
+            if (newTheme === 'midnight') {
+                updateSetting('trueBlack', true);
+            } else {
+                updateSetting('trueBlack', false);
+            }
+        });
+    };
+
+    const applyThemeToPopup = (themeKey, themes) => {
+        // Remove all theme classes
+        themes.forEach(t => {
+            const themeClass = `ypp-theme-${t.key}`;
+            if (t.key !== 'default') {
+                 document.body.classList.remove(themeClass);
+            }
+        });
+
+        // Add new theme class
+        if (themeKey !== 'default') {
+            document.body.classList.add(`ypp-theme-${themeKey}`);
+        }
+    };
 
     // --- EVENT LISTENERS ---
     

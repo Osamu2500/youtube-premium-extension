@@ -593,16 +593,28 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @param {Function} onClick - Click handler
      * @returns {HTMLButtonElement}
      */
+    /**
+     * Create a standard player control button
+     * @param {string} className - Extra CSS classes
+     * @param {string} title - Tooltip title
+     * @param {string} svgContent - Inner SVG HTML (WARNING: Trusted content only, uses innerHTML)
+     * @param {Function} onClick - Click handler
+     * @returns {HTMLButtonElement}
+     */
     addPlayerButton: (className, title, svgContent, onClick) => {
         const btn = document.createElement('button');
         btn.className = `ytp-button ${className || ''}`;
         btn.title = title || '';
         
         // Safety: standardized SVG injection
-        // If svgContent is a string starting with <svg, use innerHTML (trusted source assumed)
-        // If it's an element, append it.
-        if (typeof svgContent === 'string' && svgContent.trim().startsWith('<svg')) {
-           btn.innerHTML = svgContent;
+        if (typeof svgContent === 'string') {
+            // Basic sanitation to check for XSS vectors in string
+            if (svgContent.toLowerCase().includes('javascript:') || svgContent.toLowerCase().includes('onclick')) {
+                console.warn('[YPP] Blocked potential XSS in addPlayerButton');
+                btn.textContent = 'ERROR';
+            } else {
+                 btn.innerHTML = svgContent;
+            }
         } else if (svgContent instanceof Element) {
             btn.appendChild(svgContent);
         }

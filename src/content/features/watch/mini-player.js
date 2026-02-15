@@ -38,11 +38,19 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
     }
 
     run(settings) {
-        this.enable(settings);
+        this.settings = settings;
+        if (settings.miniPlayer) {
+            this.enable(settings);
+        }
     }
 
     update(settings) {
         this.settings = settings;
+        if (settings.miniPlayer) {
+            this.enable(settings);
+        } else {
+            this.disable();
+        }
     }
 
     isWatchPage() {

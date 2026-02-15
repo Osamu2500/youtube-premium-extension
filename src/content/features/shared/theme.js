@@ -126,30 +126,60 @@ window.YPP.features.Theme = class ThemeManager {
     }
 
     /**
-     * Toggle premium theme
-     * @private
-     * @param {boolean} enable
+     * Toggle the theme based on settings.
+     * Handles premium theme, true black (legacy), and new multi-themes.
+     * @param {boolean} enable - Whether premium theme is enabled
      */
     _toggleTheme(enable) {
-        document.body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
+        const body = document.body;
+        const THEMES = this._CONSTANTS.THEMES;
+        
+        // Always remove all theme classes first to prevent conflicts
+        Object.values(THEMES).forEach(theme => {
+            if (theme.class) body.classList.remove(theme.class);
+        });
+        
+        // Remove base premium class
+        body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
+
+        if (enable) {
+            // Determine active theme
+            let activeThemeKey = this._settings.activeTheme || 'default';
+
+            // Legacy support: if trueBlack is on and theme is default, use midnight
+            if (this._settings.trueBlack && activeThemeKey === 'default') {
+                activeThemeKey = 'midnight';
+            }
+
+            // Find theme definition
+            const themeDef = Object.values(THEMES).find(t => t.key === activeThemeKey);
+            
+            // Apply theme class if not default (default uses base variables)
+            if (themeDef && themeDef.class) {
+                body.classList.add(themeDef.class);
+            }
+
+            // Inject themes.css if not already present
+            this._injectThemeStyles();
+        }
+    }
+
+    _injectThemeStyles() {
+        if (document.getElementById('ypp-themes-css')) return;
+
+        const link = document.createElement('link');
+        link.id = 'ypp-themes-css';
+        link.rel = 'stylesheet';
+        link.href = chrome.runtime.getURL('src/content/themes.css');
+        document.head.appendChild(link);
     }
 
     /**
-     * Apply true black theme
-     * @private
-     * @param {boolean} enable
+     * Apply True Black overrides (Now handled via Midnight Theme)
+     * Kept for reference or specific edge case overrides if needed in future
      */
-    _applyTrueBlack(enable) {
-        const root = document.documentElement.style;
-        if (enable) {
-            root.setProperty('--yt-spec-base-background', '#000000', 'important');
-            root.setProperty('--yt-spec-raised-background', '#090909', 'important');
-            root.setProperty('--yt-spec-menu-background', '#0f0f0f', 'important');
-        } else {
-            root.removeProperty('--yt-spec-base-background');
-            root.removeProperty('--yt-spec-raised-background');
-            root.removeProperty('--yt-spec-menu-background');
-        }
+    _applyTrueBlack() {
+        // Deprecated: Handled by .ypp-theme-midnight class
     }
 
     /**

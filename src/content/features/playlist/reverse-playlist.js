@@ -31,11 +31,19 @@ window.YPP.features.ReversePlaylist = class ReversePlaylist {
     }
 
     run(settings) {
-        this.enable(settings);
+        this.settings = settings;
+        if (settings.reversePlaylist) {
+            this.enable(settings);
+        }
     }
 
     update(settings) {
         this.settings = settings;
+        if (settings.reversePlaylist) {
+            this.enable(settings);
+        } else {
+            this.disable();
+        }
     }
 
     handleNavigation() {

@@ -6,10 +6,38 @@
     <title>YouTube Premium+</title>
     <link rel="stylesheet" href="popup.css" />
     <link rel="stylesheet" href="history.css" />
+    <link rel="stylesheet" href="../content/themes.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <style>
+      .theme-select-container {
+        width: 100%;
+        margin-top: 8px;
+      }
+      .theme-select {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 16px;
+      }
+      .theme-select option {
+        background: #1a1a1a;
+        color: white;
+      }
+    </style>
   </head>
 
   <body>
@@ -314,9 +342,17 @@
 
             <div class="grid-2" style="margin-top: 10px">
               <div class="setting-item">
-                <div class="info"><span class="name">PiP</span></div>
+                <div class="info"><span class="name">PiP Btn</span></div>
                 <label class="toggle"
                   ><input type="checkbox" id="enablePiP" /><span
+                    class="slider"
+                  ></span
+                ></label>
+              </div>
+               <div class="setting-item">
+                <div class="info"><span class="name">Mini Player</span></div>
+                <label class="toggle"
+                  ><input type="checkbox" id="miniPlayer" /><span
                     class="slider"
                   ></span
                 ></label>
@@ -325,6 +361,14 @@
                 <div class="info"><span class="name">Loop</span></div>
                 <label class="toggle"
                   ><input type="checkbox" id="loopBtn" /><span
+                    class="slider"
+                  ></span
+                ></label>
+              </div>
+              <div class="setting-item">
+                <div class="info"><span class="name">Filters UI</span></div>
+                <label class="toggle"
+                  ><input type="checkbox" id="enableVideoFilters" /><span
                     class="slider"
                   ></span
                 ></label>
@@ -567,8 +611,29 @@
               <h2>Library</h2>
               <p>Your content</p>
             </div>
-             <div class="card-group" style="text-align:center; padding: 20px;">
-                <p style="color:var(--text-tertiary);">Playlist features coming soon.</p>
+            
+             <div class="section-title">TOOLS</div>
+             <div class="card-group">
+                <div class="setting-item">
+                  <div class="info">
+                    <span class="name">Playlist Duration</span>
+                    <span class="desc">Calculate total time</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="playlistDuration" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                 <div class="setting-item">
+                  <div class="info">
+                    <span class="name">Reverse Playlist</span>
+                    <span class="desc">Toggle Button</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="reversePlaylist" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
             </div>
           </section>
           
@@ -726,10 +791,23 @@
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="setting-item">
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+              <div class="info" style="margin-bottom: 4px; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                   <span class="name">Active Theme</span>
+                   <span class="desc">Select color scheme</span>
+                </div>
+              </div>
+              <div class="theme-select-container">
+                  <select id="activeTheme" class="theme-select">
+                      <!-- Populated by JS -->
+                  </select>
+              </div>
+            </div>
+            <!-- Legacy True Black (Hidden/Deprecated in favor of Midnight Theme) -->
+             <div class="setting-item" style="display: none;">
               <div class="info">
                 <span class="name">True Black Mode</span>
-                <span class="desc">OLED Background</span>
               </div>
               <label class="toggle">
                 <input type="checkbox" id="trueBlack" />
@@ -750,14 +828,6 @@
               </label>
             </div>
             <div class="grid-2" style="margin-top: 10px">
-              <div class="setting-item">
-                <div class="info"><span class="name">Trending</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="navTrending" /><span
-                    class="slider"
-                  ></span
-                ></label>
-              </div>
               <div class="setting-item">
                 <div class="info"><span class="name">Shorts</span></div>
                 <label class="toggle"

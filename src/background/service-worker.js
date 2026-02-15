@@ -4,27 +4,85 @@ const ALARM_NAME = 'ypp-focus-timer';
 
 // Default Settings
 const DEFAULT_SETTINGS = {
-  premiumTheme: true,
-  grid4x4: true,
-  hideShorts: false,
-  autoCinema: false,
-  hideComments: false,
-  hideMerch: false,
-  hideEndScreens: false,
-  blueProgress: false,
-  zenMode: false,
-  enableSnapshot: true,
-  enableLoop: true,
-  hookFreeHome: false,
-  studyMode: false,
-  hideMixes: false,
-  hideWatched: false,
-  enablePiP: true,
-  enableTranscript: true,
-  dopamineDetox: false,
-  redirectShorts: false, // Moved logic here for consistency
-  autoQuality: false,
-  enableRemainingTime: false
+    // Theme
+    premiumTheme: true,
+    activeTheme: 'default',
+    trueBlack: false,
+    hideScrollbar: false,
+    customProgressBar: false,
+    progressBarColor: '#ff0000',
+
+    // Layout
+    grid4x4: true,
+
+    // Visibility
+    hideShorts: false,
+    hideSearchShorts: true,
+    hideMixes: false,
+    hideWatched: false,
+    hideMerch: false,
+    hideComments: false,
+    hideEndScreens: false,
+    hookFreeHome: false,
+
+    // Player
+    autoCinema: false,
+    blueProgress: false,
+    enablePiP: true,
+    enableTranscript: true,
+    enableSnapshot: true,
+    enableLoop: true,
+
+    // Search Redesign
+    searchGrid: true,
+    cleanSearch: true,
+
+    // Navigation
+    navTrending: true,
+    navShorts: true,
+    navSubscriptions: true,
+    navWatchLater: true,
+    navPlaylists: true,
+    navHistory: true,
+    forceHideSidebar: false,
+
+    // Shorts Tools
+    shortsAutoScroll: false,
+    redirectShorts: false,
+
+    // Player Tools
+    enableCustomSpeed: true,
+    enableCinemaFilters: true,
+    filterBrightness: 100,
+    filterContrast: 100,
+
+    // Ad Skipper
+    adSkipper: true,
+
+    // Zen Mode
+    zenMode: false,
+
+    // Focus Mode
+    dopamineDetox: false,
+    enableFocusMode: false,
+    cinemaMode: false,
+    minimalMode: false,
+    
+    // New Features
+    ambientMode: false,
+    audioModeEnabled: false,
+    videoControlsEnabled: true,
+    miniPlayer: false,
+    enableVideoFilters: false,
+    reversePlaylist: false,
+    playlistDuration: true,
+
+    // Study Mode
+    studyMode: false,
+
+    // Other
+    autoQuality: false,
+    enableRemainingTime: false
 };
 
 // --- TIMER LOGIC (Robust End-Time Based) ---

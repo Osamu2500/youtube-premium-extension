@@ -1,0 +1,200 @@
+/* 
+=======================================================================================
+   YOUTUBE PREMIUM PLUS - THEMES
+=======================================================================================
+   Collection of color themes that override the default CSS variables.
+   
+   Themes:
+   - Ocean: Deep blues and teals
+   - Sunset: Warm oranges, purples, and pinks
+   - Dracula: Famous dark theme with vibrant accents
+   - Forest: Calming greens and earth tones
+   - Midnight (True Black): OLED optimized (replaces the old toggle)
+=======================================================================================
+*/
+
+/* --- OCEAN THEME --- */
+.ypp-theme-ocean {
+    --ypp-bg-base: #051421;
+    --ypp-bg-surface: rgba(10, 30, 50, 0.6);
+    --ypp-bg-glass: rgba(5, 20, 33, 0.85);
+    --ypp-glass-border: rgba(62, 166, 255, 0.15);
+    --ypp-glass-highlight: rgba(100, 200, 255, 0.1);
+    
+    --ypp-accent-blue: #00bcd4;
+    --ypp-accent-blue-hover: #26c6da;
+    --ypp-accent-glow: rgba(0, 188, 212, 0.4);
+    
+    --ypp-text-primary: #e1f5fe;
+    --ypp-text-secondary: #b3e5fc;
+    
+    --ypp-shadow-glow: 0 0 24px rgba(0, 188, 212, 0.2);
+
+    /* Deep YouTube Overrides */
+    --yt-spec-base-background: #051421 !important;
+    --yt-spec-raised-background: #0a1e32 !important;
+    --yt-spec-menu-background: #0a1e32 !important;
+    --yt-spec-text-primary: #e1f5fe !important;
+    --yt-spec-text-secondary: #b3e5fc !important;
+    --yt-spec-icon-active-other: #00bcd4 !important;
+    --yt-spec-icon-inactive: #b3e5fc !important;
+    --yt-spec-brand-icon-active: #00bcd4 !important;
+    --yt-spec-brand-icon-inactive: #b3e5fc !important;
+    --paper-toggle-button-checked-bar-color: #00bcd4 !important;
+    --paper-toggle-button-checked-button-color: #00bcd4 !important;
+}
+
+/* --- SUNSET THEME --- */
+.ypp-theme-sunset {
+    --ypp-bg-base: #1a0b1a;
+    --ypp-bg-surface: rgba(40, 10, 30, 0.6);
+    --ypp-bg-glass: rgba(26, 11, 26, 0.85);
+    --ypp-glass-border: rgba(255, 100, 100, 0.15);
+    --ypp-glass-highlight: rgba(255, 160, 120, 0.1);
+    
+    --ypp-accent-blue: #ff6b6b; /* Actually "Sunset Red/Pink" */
+    --ypp-accent-blue-hover: #ff8787;
+    --ypp-accent-glow: rgba(255, 107, 107, 0.4);
+    
+    --ypp-text-primary: #fff0f5;
+    --ypp-text-secondary: #f8bbd0;
+    
+    --ypp-shadow-glow: 0 0 24px rgba(255, 107, 107, 0.25);
+
+    /* Deep YouTube Overrides */
+    --yt-spec-base-background: #1a0b1a !important;
+    --yt-spec-raised-background: #280a1e !important;
+    --yt-spec-menu-background: #280a1e !important;
+    --yt-spec-text-primary: #fff0f5 !important;
+    --yt-spec-text-secondary: #f8bbd0 !important;
+    --yt-spec-icon-active-other: #ff6b6b !important;
+    --yt-spec-icon-inactive: #f8bbd0 !important;
+    --yt-spec-brand-icon-active: #ff6b6b !important;
+    --yt-spec-brand-icon-inactive: #f8bbd0 !important;
+    --paper-toggle-button-checked-bar-color: #ff6b6b !important;
+    --paper-toggle-button-checked-button-color: #ff6b6b !important;
+}
+
+/* --- DRACULA THEME --- */
+.ypp-theme-dracula {
+    --ypp-bg-base: #282a36;
+    --ypp-bg-surface: rgba(68, 71, 90, 0.6);
+    --ypp-bg-glass: rgba(40, 42, 54, 0.9);
+    --ypp-glass-border: rgba(189, 147, 249, 0.15); /* Purple border */
+    --ypp-glass-highlight: rgba(255, 121, 198, 0.1); /* Pink highlight */
+    
+    --ypp-accent-blue: #bd93f9; /* Dracula Purple */
+    --ypp-accent-blue-hover: #d6acff;
+    --ypp-accent-glow: rgba(189, 147, 249, 0.4);
+    
+    --ypp-text-primary: #f8f8f2;
+    --ypp-text-secondary: #6272a4;
+    
+    --ypp-shadow-glow: 0 0 24px rgba(189, 147, 249, 0.25);
+
+    /* Deep YouTube Overrides */
+    --yt-spec-base-background: #282a36 !important;
+    --yt-spec-raised-background: #44475a !important;
+    --yt-spec-menu-background: #44475a !important;
+    --yt-spec-text-primary: #f8f8f2 !important;
+    --yt-spec-text-secondary: #6272a4 !important;
+    --yt-spec-icon-active-other: #bd93f9 !important;
+    --yt-spec-icon-inactive: #6272a4 !important;
+    --yt-spec-brand-icon-active: #bd93f9 !important;
+    --yt-spec-brand-icon-inactive: #6272a4 !important;
+    --paper-toggle-button-checked-bar-color: #bd93f9 !important;
+    --paper-toggle-button-checked-button-color: #bd93f9 !important;
+}
+
+/* --- FOREST THEME --- */
+.ypp-theme-forest {
+    --ypp-bg-base: #0a1f0a;
+    --ypp-bg-surface: rgba(20, 50, 20, 0.6);
+    --ypp-bg-glass: rgba(10, 31, 10, 0.85);
+    --ypp-glass-border: rgba(100, 255, 100, 0.1);
+    --ypp-glass-highlight: rgba(150, 255, 150, 0.1);
+    
+    --ypp-accent-blue: #4caf50; /* Green */
+    --ypp-accent-blue-hover: #66bb6a;
+    --ypp-accent-glow: rgba(76, 175, 80, 0.4);
+    
+    --ypp-text-primary: #e8f5e9;
+    --ypp-text-secondary: #a5d6a7;
+    
+    --ypp-shadow-glow: 0 0 24px rgba(76, 175, 80, 0.25);
+
+    /* Deep YouTube Overrides */
+    --yt-spec-base-background: #0a1f0a !important;
+    --yt-spec-raised-background: #143214 !important;
+    --yt-spec-menu-background: #143214 !important;
+    --yt-spec-text-primary: #e8f5e9 !important;
+    --yt-spec-text-secondary: #a5d6a7 !important;
+    --yt-spec-icon-active-other: #4caf50 !important;
+    --yt-spec-icon-inactive: #a5d6a7 !important;
+    --yt-spec-brand-icon-active: #4caf50 !important;
+    --yt-spec-brand-icon-inactive: #a5d6a7 !important;
+    --paper-toggle-button-checked-bar-color: #4caf50 !important;
+    --paper-toggle-button-checked-button-color: #4caf50 !important;
+}
+
+/* --- MIDNIGHT (TRUE BLACK) --- */
+.ypp-theme-midnight {
+    --ypp-bg-base: #000000;
+    --ypp-bg-surface: rgba(20, 20, 20, 0.8);
+    --ypp-bg-glass: rgba(0, 0, 0, 0.95);
+    --ypp-glass-border: rgba(255, 255, 255, 0.1);
+    --ypp-glass-highlight: rgba(255, 255, 255, 0.15);
+    
+    --ypp-accent-blue: #ffffff; /* Monochrome Accent */
+    --ypp-accent-blue-hover: #e0e0e0;
+    --ypp-accent-glow: rgba(255, 255, 255, 0.25);
+    
+    --ypp-text-primary: #ffffff;
+    --ypp-text-secondary: #aaaaaa;
+    
+    --ypp-shadow-glow: 0 0 24px rgba(255, 255, 255, 0.15);
+
+    /* Deep YouTube Overrides */
+    --yt-spec-base-background: #000000 !important;
+    --yt-spec-raised-background: #0f0f0f !important;
+    --yt-spec-menu-background: #0f0f0f !important;
+    --yt-spec-text-primary: #ffffff !important;
+    --yt-spec-text-secondary: #aaaaaa !important;
+    --yt-spec-icon-active-other: #ffffff !important;
+    --yt-spec-icon-inactive: #aaaaaa !important;
+    --yt-spec-brand-icon-active: #ffffff !important;
+    --yt-spec-brand-icon-inactive: #aaaaaa !important;
+    --paper-toggle-button-checked-bar-color: #ffffff !important;
+    --paper-toggle-button-checked-button-color: #ffffff !important;
+}
+
+/* --- CHERRY BLOSSOM --- */
+.ypp-theme-cherry {
+    --ypp-bg-base: #26181b;
+    --ypp-bg-surface: rgba(60, 30, 40, 0.6);
+    --ypp-bg-glass: rgba(38, 24, 27, 0.85);
+    --ypp-glass-border: rgba(255, 182, 193, 0.2);
+    --ypp-glass-highlight: rgba(255, 210, 220, 0.15);
+    
+    --ypp-accent-blue: #ffb7b2; 
+    --ypp-accent-blue-hover: #ffdac1;
+    --ypp-accent-glow: rgba(255, 183, 178, 0.4);
+    
+    --ypp-text-primary: #fff0f5;
+    --ypp-text-secondary: #ffc2cd;
+    
+    --ypp-shadow-glow: 0 0 24px rgba(255, 183, 178, 0.3);
+
+    /* Deep YouTube Overrides */
+    --yt-spec-base-background: #26181b !important;
+    --yt-spec-raised-background: #3c1e28 !important;
+    --yt-spec-menu-background: #3c1e28 !important;
+    --yt-spec-text-primary: #fff0f5 !important;
+    --yt-spec-text-secondary: #ffc2cd !important;
+    --yt-spec-icon-active-other: #ffb7b2 !important;
+    --yt-spec-icon-inactive: #ffc2cd !important;
+    --yt-spec-brand-icon-active: #ffb7b2 !important;
+    --yt-spec-brand-icon-inactive: #ffc2cd !important;
+    --paper-toggle-button-checked-bar-color: #ffb7b2 !important;
+    --paper-toggle-button-checked-button-color: #ffb7b2 !important;
+}
