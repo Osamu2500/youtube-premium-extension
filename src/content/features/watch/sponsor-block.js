@@ -89,6 +89,10 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         this.removeToast();
     }
 
+    removeToast() {
+        // Implementation depends on global toast availability, generic placeholder
+    }
+
     pollForVideo() {
         let attempts = 0;
         const interval = setInterval(() => {
@@ -112,14 +116,32 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         if (this.abortController) this.abortController.abort();
         this.abortController = new AbortController();
 
-        const categoriesParam = JSON.stringify(this.categories);
-        const url = `https://sponsor.ajay.app/api/skipSegments?videoID=${this.videoId}&categories=${categoriesParam}`;
-
         try {
+            // SHA-256 Hash the video ID
+            const buffer = new TextEncoder().encode(this.videoId);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            // Use first 4 chracters (prefix) for privacy
+            const prefix = hashHex.substring(0, 4);
+
+            const categoriesParam = JSON.stringify(this.categories);
+            const url = `https://sponsor.ajay.app/api/skipSegments/${prefix}?categories=${categoriesParam}`;
+
             const response = await fetch(url, { signal: this.abortController.signal });
             if (response.ok) {
-                this.segments = await response.json();
-                // window.YPP.Utils.log(`SponsorBlock: Loaded ${this.segments.length} segments`, 'SPONSOR');
+                const data = await response.json();
+                
+                // Filter for our exact video ID from the privacy-bucket results
+                const videoData = data.find(item => item.videoID === this.videoId);
+                
+                if (videoData && videoData.segments) {
+                    this.segments = videoData.segments;
+                    // window.YPP.Utils.log(`SponsorBlock: Loaded ${this.segments.length} segments`, 'SPONSOR');
+                } else {
+                     this.segments = [];
+                }
             } else if (response.status === 404) {
                 // No segments found
                 this.segments = [];
@@ -140,12 +162,11 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
                 // Precision check: verify we are actually in the segment and not just jumping out
                 // Seek to end
                 this.videoElement.currentTime = segment.segment[1];
-                if (window.YPP.Utils.createToast) {
+                if (window.YPP.Utils && window.YPP.Utils.createToast) {
                     window.YPP.Utils.createToast(`Skipped ${segment.category}`, 'info');
                 } else {
                     console.log(`[SponsorBlock] Skipped ${segment.category}`);
                 }
-                // window.YPP.Utils.log(`Skipped ${segment.category} (${segment.segment[0].toFixed(1)}s - ${segment.segment[1].toFixed(1)}s)`, 'SPONSOR');
                 return; // Only skip one at a time
             }
         }

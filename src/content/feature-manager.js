@@ -82,8 +82,13 @@ window.YPP.FeatureManager = class FeatureManager {
             ambientMode: 'AmbientMode',
             audioMode: 'AudioMode',
             videoControls: 'VideoControls',
-            returnYouTubeDislike: 'ReturnYouTubeDislike',
+            videoControls: 'VideoControls',
+            returnYouTubeDislike: 'ReturnDislike',
             sponsorBlock: 'SponsorBlock',
+            miniPlayer: 'MiniPlayer',
+            videoFilters: 'VideoFilters',
+            reversePlaylist: 'ReversePlaylist',
+            dataAPI: 'DataAPI',
             contextMenu: 'ContextMenu'
         };
 

@@ -68,6 +68,12 @@
                 "src/content/features/stats/stats-visualizer.js",
                 "src/content/features/history/history-redesign.js",
                 "src/content/features/playlist/playlist-redesign.js",
+                "src/content/features/playlist/playlist-redesign.js",
+                "src/content/features/data-api.js",
+                "src/content/features/watch/return-dislike.js",
+                "src/content/features/watch/mini-player.js",
+                "src/content/features/watch/video-filters.js",
+                "src/content/features/playlist/reverse-playlist.js",
                 "src/content/main.js"
             ]
         }
