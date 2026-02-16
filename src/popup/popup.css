@@ -431,23 +431,66 @@ input:checked+.slider:before {
 /* Grid Layout for Small Items */
 .grid-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
 }
 
 .grid-2 .setting-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
     background: rgba(255, 255, 255, 0.03);
+    padding: 12px 14px;
 }
 
 .grid-2 .info {
     margin: 0;
+    align-self: stretch;
 }
 
 .grid-2 .toggle {
     align-self: flex-end;
+}
+
+/* Auto-fit grid - adapts to content */
+.grid-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+}
+
+.grid-auto .setting-item {
+    flex-direction: row;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Compact toggle cards (for 2-column layouts) */
+.toggle-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 14px;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.03);
+    transition: all var(--duration-fast);
+    border: 1px solid transparent;
+    min-height: 80px;
+}
+
+.toggle-card:hover {
+    background: var(--ypp-glass-highlight);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.toggle-card .info {
+    margin: 0;
+    flex: 1;
+}
+
+.toggle-card .toggle {
+    margin-top: auto;
 }
 
 /* Color Picker */

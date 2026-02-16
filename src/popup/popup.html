@@ -23,7 +23,7 @@
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: white;
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         font-size: 14px;
         outline: none;
         cursor: pointer;
@@ -79,77 +79,81 @@
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
           </button>
-          
+
           <!-- SHORTS -->
           <button class="nav-item" data-tab="shorts" title="Shorts">
-            <svg 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              stroke-width="2"
-             >
-                <path d="M10 15v4a3 3 0 0 0 6 0v-4"></path>
-                <path d="M10 9l0-2a2 2 0 0 1 2-2l6 0"></path>
-                <line x1="16" y1="13" x2="16" y2="5"></line>
-                <path d="M10 9l-4 0a3 3 0 0 0-3 3v4"></path>
-            </svg>
-          </button>
-          
-          <!-- SUBSCRIPTIONS -->
-          <button class="nav-item" data-tab="subscriptions" title="Subscriptions">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
             >
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              <path d="M10 15v4a3 3 0 0 0 6 0v-4"></path>
+              <path d="M10 9l0-2a2 2 0 0 1 2-2l6 0"></path>
+              <line x1="16" y1="13" x2="16" y2="5"></line>
+              <path d="M10 9l-4 0a3 3 0 0 0-3 3v4"></path>
             </svg>
           </button>
-          
+
+          <!-- SUBSCRIPTIONS -->
+          <button
+            class="nav-item"
+            data-tab="subscriptions"
+            title="Subscriptions"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </button>
+
           <!-- PLAYLISTS -->
           <button class="nav-item" data-tab="playlists" title="Playlists">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
             >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
             </svg>
           </button>
-          
+
           <!-- WATCH LATER -->
           <button class="nav-item" data-tab="watchlater" title="Watch Later">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
             >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
           </button>
-          
+
           <!-- HISTORY -->
           <button class="nav-item" data-tab="history" title="History">
-             <svg
+            <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
             >
-                <path d="M1 4v6h6"></path>
-                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              <path d="M1 4v6h6"></path>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
             </svg>
           </button>
 
@@ -213,77 +217,96 @@
 
           <div class="section-title">LAYOUT & FEEL</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hook Free Home</span>
-                <span class="desc">Hide Feed Completely</span>
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hook Free Home</span>
+                  <span class="desc">Hide Feed Completely</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hookFreeHome" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hookFreeHome" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">4x4 Grid Layout</span>
-                <span class="desc">Denser video grid</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">4x4 Grid Layout</span>
+                  <span class="desc">Denser video grid</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="grid4x4" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="grid4x4" />
-                <span class="slider"></span>
-              </label>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Scrollbar</span>
+                  <span class="desc">Clean interface</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideScrollbar" />
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
-            <div class="setting-item">
+
+            <div class="setting-item" style="margin-top: 6px">
               <div class="info">
                 <span class="name">Grid Columns</span>
-                <span class="desc">Videos per row: <span id="homeColumnsValue">4</span></span>
+                <span class="desc"
+                  >Videos per row: <span id="homeColumnsValue">4</span></span
+                >
               </div>
               <div class="range-container">
-                  <input type="range" id="homeColumns" min="1" max="8" step="1" value="4" />
+                <input
+                  type="range"
+                  id="homeColumns"
+                  min="1"
+                  max="8"
+                  step="1"
+                  value="4"
+                />
               </div>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Scrollbar</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideScrollbar" />
-                <span class="slider"></span>
-              </label>
             </div>
           </div>
 
           <div class="section-title">CONTENT FILTERING</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Shorts</span>
-                <span class="desc">Remove Shorts shelf</span>
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Shorts</span>
+                  <span class="desc">Remove Shorts shelf</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideShorts" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideShorts" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Watched</span>
-                <span class="desc">Videos >80% watched</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Watched</span>
+                  <span class="desc">Videos >80% watched</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideWatched" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideWatched" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Mixes</span>
-                <span class="desc">Remove YouTube Mixes</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Mixes</span>
+                  <span class="desc">Remove YouTube Mixes</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideMixes" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideMixes" />
-                <span class="slider"></span>
-              </label>
             </div>
           </div>
         </section>
@@ -297,7 +320,8 @@
 
           <div class="section-title">SMART FEATURES</div>
           <div class="card-group">
-            <div class="setting-item">
+            <div class="grid-2">
+              <div class="toggle-card">
                 <div class="info">
                   <span class="name">SponsorBlock</span>
                   <span class="desc">Auto-skip Sponsors</span>
@@ -306,8 +330,9 @@
                   <input type="checkbox" id="sponsorBlock" />
                   <span class="slider"></span>
                 </label>
-            </div>
-            <div class="setting-item">
+              </div>
+
+              <div class="toggle-card">
                 <div class="info">
                   <span class="name">Return YouTube Dislike</span>
                   <span class="desc">Show Dislike Count</span>
@@ -316,448 +341,485 @@
                   <input type="checkbox" id="returnYouTubeDislike" />
                   <span class="slider"></span>
                 </label>
+              </div>
             </div>
           </div>
 
           <div class="section-title">TOOLS</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Auto-Quality (Highest)</span>
+            <div class="grid-2" style="margin-bottom: 6px">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Auto-Quality (Highest)</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="autoQuality" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="autoQuality" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Volume Booster</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="volumeBoost" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Custom Speed Control</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="enableCustomSpeed" />
-                <span class="slider"></span>
-              </label>
-            </div>
 
-            <div class="grid-2" style="margin-top: 10px">
-              <div class="setting-item">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Volume Booster</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="volumeBoost" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Custom Speed Control</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="enableCustomSpeed" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">PiP Btn</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="enablePiP" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="enablePiP" />
+                  <span class="slider"></span>
+                </label>
               </div>
-               <div class="setting-item">
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">Mini Player</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="miniPlayer" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="miniPlayer" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <div class="setting-item">
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">Loop</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="loopBtn" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="loopBtn" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <div class="setting-item">
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">Filters UI</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="enableVideoFilters" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="enableVideoFilters" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <div class="setting-item">
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">Snapshot</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="snapshotBtn" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="snapshotBtn" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <div class="setting-item">
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">Time</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="enableRemainingTime" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="enableRemainingTime" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <div class="setting-item">
+
+              <div class="toggle-card">
                 <div class="info"><span class="name">Stats</span></div>
-                <label class="toggle"
-                  ><input type="checkbox" id="enableStatsForNerds" /><span
-                    class="slider"
-                  ></span
-                ></label>
+                <label class="toggle">
+                  <input type="checkbox" id="enableStatsForNerds" />
+                  <span class="slider"></span>
+                </label>
               </div>
             </div>
           </div>
 
           <div class="section-title">VISUALS & MODES</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Cinema Filters</span>
-                <span class="desc">Sepia, Grayscale, etc.</span>
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Cinema Filters</span>
+                  <span class="desc">Sepia, Grayscale, etc.</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="enableCinemaFilters" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="enableCinemaFilters" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Zen Mode</span>
-                <span class="desc">Ambient lighting effect</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Zen Mode</span>
+                  <span class="desc">Ambient lighting effect</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="zenMode" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="zenMode" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Auto Cinema</span>
-                <span class="desc">Expand player on load</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Auto Cinema</span>
+                  <span class="desc">Expand player on load</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="autoCinema" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="autoCinema" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Auto PiP</span>
-                <span class="desc">PiP on tab switch</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Auto PiP</span>
+                  <span class="desc">PiP on tab switch</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="autoPiP" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="autoPiP" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Study Mode</span>
-                <span class="desc">Focus + 1.25x Speed</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Study Mode</span>
+                  <span class="desc">Focus + 1.25x Speed</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="studyMode" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="studyMode" />
-                <span class="slider"></span>
-              </label>
-            </div>
-             <div class="setting-item">
-              <div class="info">
-                <span class="name">Ambient Mode</span>
-                <span class="desc">Ambilight Effect</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Ambient Mode</span>
+                  <span class="desc">Ambilight Effect</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="ambientMode" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="ambientMode" />
-                <span class="slider"></span>
-              </label>
-            </div>
-             <div class="setting-item">
-              <div class="info">
-                <span class="name">Audio Mode</span>
-                <span class="desc">Hide Video, Keep Audio</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Audio Mode</span>
+                  <span class="desc">Hide Video, Keep Audio</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="audioModeEnabled" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="audioModeEnabled" />
-                <span class="slider"></span>
-              </label>
-            </div>
-             <div class="setting-item">
-              <div class="info">
-                <span class="name">Video Controls</span>
-                <span class="desc">Floating Panel</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Video Controls</span>
+                  <span class="desc">Floating Panel</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="videoControlsEnabled" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="videoControlsEnabled" />
-                <span class="slider"></span>
-              </label>
             </div>
           </div>
 
           <div class="section-title">DISTRACTIONS</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Focus Mode</span>
-                <span class="desc">Master Switch</span>
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Focus Mode</span>
+                  <span class="desc">Master Switch</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="enableFocusMode" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="enableFocusMode" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Comments</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Comments</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideComments" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideComments" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide End Screens</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide End Screens</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideEndScreens" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideEndScreens" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Cards</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Cards</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideCards" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideCards" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Merch</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Merch</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideMerch" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideMerch" />
-                <span class="slider"></span>
-              </label>
             </div>
           </div>
 
           <div class="section-title">PROGRESS BAR</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Custom Style</span>
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Custom Style</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="customProgressBar" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="customProgressBar" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Custom Color</span>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Custom Color</span>
+                </div>
+                <input type="color" id="progressBarColor" value="#3ea6ff" />
               </div>
-              <input type="color" id="progressBarColor" value="#3ea6ff" />
             </div>
           </div>
         </section>
-        
+
         <!-- TAB: SHORTS -->
         <section id="tab-shorts" class="tab-content">
-            <div class="hero-card">
-              <h2>Shorts</h2>
-              <p>Take back control</p>
+          <div class="hero-card">
+            <h2>Shorts</h2>
+            <p>Take back control</p>
+          </div>
+
+          <div class="section-title">BEHAVIOR</div>
+          <div class="card-group">
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">Redirect Shorts</span>
+                <span class="desc">Open as normal video</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="redirectShorts" />
+                <span class="slider"></span>
+              </label>
             </div>
-  
-            <div class="section-title">BEHAVIOR</div>
-            <div class="card-group">
-              <div class="setting-item">
+          </div>
+        </section>
+
+        <!-- TAB: SUBSCRIPTIONS -->
+        <section id="tab-subscriptions" class="tab-content">
+          <div class="hero-card">
+            <h2>Subscriptions</h2>
+            <p>Manage your groups and feeds</p>
+          </div>
+
+          <div class="section-title">MANAGEMENT</div>
+          <div class="card-group">
+            <div class="grid-2">
+              <div class="toggle-card">
                 <div class="info">
-                  <span class="name">Redirect Shorts</span>
-                  <span class="desc">Open as normal video</span>
+                  <span class="name">Subscription Groups</span>
+                  <span class="desc">Enable Custom Groups</span>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" id="redirectShorts" />
+                  <input type="checkbox" id="enableSubsManager" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Quick Add Menu</span>
+                  <span class="desc">"Add to Group" on Cards</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="contextMenu" checked />
                   <span class="slider"></span>
                 </label>
               </div>
             </div>
-          </section>
-          
-          <!-- TAB: SUBSCRIPTIONS -->
-          <section id="tab-subscriptions" class="tab-content">
-             <div class="hero-card">
-              <h2>Subscriptions</h2>
-              <p>Manage your groups and feeds</p>
-            </div>
-            
-            <div class="section-title">MANAGEMENT</div>
-            <div class="card-group">
-                 <div class="setting-item">
-                  <div class="info">
-                    <span class="name">Subscription Groups</span>
-                    <span class="desc">Enable Custom Groups</span>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" id="enableSubsManager" checked />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <div class="setting-item">
-                  <div class="info">
-                    <span class="name">Quick Add Menu</span>
-                    <span class="desc">"Add to Group" on Cards</span>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" id="contextMenu" checked />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <div class="setting-item">
-                  <div class="info">
-                    <span class="name">Channel Columns</span>
-                    <span class="desc">Grid width: <span id="channelColumnsValue">4</span></span>
-                  </div>
-                  <div class="range-container">
-                      <input type="range" id="channelColumns" min="2" max="10" step="1" value="4" />
-                  </div>
-                </div>
-                <button
-                  id="manageSubsBtn"
-                  class="action-btn"
-                  style="margin-top: 10px"
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">Channel Columns</span>
+                <span class="desc"
+                  >Grid width: <span id="channelColumnsValue">4</span></span
                 >
-                  Manage Groups
+              </div>
+              <div class="range-container">
+                <input
+                  type="range"
+                  id="channelColumns"
+                  min="2"
+                  max="10"
+                  step="1"
+                  value="4"
+                />
+              </div>
+            </div>
+            <button
+              id="manageSubsBtn"
+              class="action-btn"
+              style="margin-top: 10px"
+            >
+              Manage Groups
+            </button>
+          </div>
+        </section>
+
+        <!-- TAB: PLAYLISTS -->
+        <section id="tab-playlists" class="tab-content">
+          <div class="hero-card">
+            <h2>Library</h2>
+            <p>Your content</p>
+          </div>
+
+          <div class="section-title">TOOLS</div>
+          <div class="card-group">
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Playlist Duration</span>
+                  <span class="desc">Calculate total time</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="playlistDuration" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Reverse Playlist</span>
+                  <span class="desc">Toggle Button</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="reversePlaylist" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: WATCH LATER -->
+        <section id="tab-watchlater" class="tab-content">
+          <div class="hero-card">
+            <h2>Watch Later</h2>
+            <p>Catch up on your queue</p>
+          </div>
+          <div class="card-group" style="text-align: center; padding: 20px">
+            <p style="color: var(--text-tertiary)">
+              Queue features coming soon.
+            </p>
+          </div>
+        </section>
+
+        <!-- TAB: HISTORY -->
+        <section id="tab-history" class="tab-content">
+          <div class="hero-card">
+            <h2>Watch History</h2>
+            <p>Track your viewing habits</p>
+          </div>
+
+          <div class="section-title">WATCH HISTORY</div>
+          <div class="card-group">
+            <div id="history-widget" class="history-widget">
+              <div class="history-summary">
+                <div class="daily-stat">
+                  <span id="history-today-time">--</span>
+                  <span class="label">Today's Watch Time</span>
+                </div>
+                <button id="history-calendar-btn" class="history-expand-btn">
+                  📅 View Calendar
                 </button>
-            </div>
-          </section>
-          
-          <!-- TAB: PLAYLISTS -->
-          <section id="tab-playlists" class="tab-content">
-             <div class="hero-card">
-              <h2>Library</h2>
-              <p>Your content</p>
-            </div>
-            
-             <div class="section-title">TOOLS</div>
-             <div class="card-group">
-                <div class="setting-item">
-                  <div class="info">
-                    <span class="name">Playlist Duration</span>
-                    <span class="desc">Calculate total time</span>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" id="playlistDuration" />
-                    <span class="slider"></span>
-                  </label>
+              </div>
+
+              <!-- Mini Heatmap (Last 2 months maybe?) -->
+              <div id="history-heatmap" class="history-heatmap"></div>
+
+              <!-- Details Panel -->
+              <div id="history-details-panel" class="history-details-panel">
+                <div
+                  class="calendar-header"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 8px;
+                    color: #fff;
+                    font-weight: 600;
+                  "
+                >
+                  <button
+                    id="cal-prev"
+                    style="
+                      background: none;
+                      border: none;
+                      color: #aaa;
+                      cursor: pointer;
+                    "
+                  >
+                    &lt;
+                  </button>
+                  <span id="cal-month-year">Month</span>
+                  <button
+                    id="cal-next"
+                    style="
+                      background: none;
+                      border: none;
+                      color: #aaa;
+                      cursor: pointer;
+                    "
+                  >
+                    &gt;
+                  </button>
                 </div>
-                 <div class="setting-item">
-                  <div class="info">
-                    <span class="name">Reverse Playlist</span>
-                    <span class="desc">Toggle Button</span>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" id="reversePlaylist" />
-                    <span class="slider"></span>
-                  </label>
+                <div id="calendar-grid" class="calendar-grid">
+                  <!-- JS Generated -->
                 </div>
-            </div>
-          </section>
-          
-          <!-- TAB: WATCH LATER -->
-          <section id="tab-watchlater" class="tab-content">
-             <div class="hero-card">
-              <h2>Watch Later</h2>
-              <p>Catch up on your queue</p>
-            </div>
-             <div class="card-group" style="text-align:center; padding: 20px;">
-                <p style="color:var(--text-tertiary);">Queue features coming soon.</p>
-            </div>
-          </section>
-          
-          <!-- TAB: HISTORY -->
-          <section id="tab-history" class="tab-content">
-             <div class="hero-card">
-              <h2>Watch History</h2>
-              <p>Track your viewing habits</p>
-            </div>
-            
-            <div class="section-title">WATCH HISTORY</div>
-             <div class="card-group">
-                <div id="history-widget" class="history-widget">
-                  <div class="history-summary">
-                    <div class="daily-stat">
-                      <span id="history-today-time">--</span>
-                      <span class="label">Today's Watch Time</span>
-                    </div>
-                    <button id="history-calendar-btn" class="history-expand-btn">
-                      📅 View Calendar
-                    </button>
-                  </div>
-    
-                  <!-- Mini Heatmap (Last 2 months maybe?) -->
-                  <div id="history-heatmap" class="history-heatmap"></div>
-    
-                  <!-- Details Panel -->
-                  <div id="history-details-panel" class="history-details-panel">
-                    <div
-                      class="calendar-header"
-                      style="
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 8px;
-                        color: #fff;
-                        font-weight: 600;
-                      "
-                    >
-                      <button
-                        id="cal-prev"
-                        style="
-                          background: none;
-                          border: none;
-                          color: #aaa;
-                          cursor: pointer;
-                        "
-                      >
-                        &lt;
-                      </button>
-                      <span id="cal-month-year">Month</span>
-                      <button
-                        id="cal-next"
-                        style="
-                          background: none;
-                          border: none;
-                          color: #aaa;
-                          cursor: pointer;
-                        "
-                      >
-                        &gt;
-                      </button>
-                    </div>
-                    <div id="calendar-grid" class="calendar-grid">
-                      <!-- JS Generated -->
-                    </div>
-                    <div class="section-title" style="margin: 8px 0 4px 0">
-                      WATCH LOG
-                    </div>
-                    <div id="video-log-list" class="video-log-list">
-                      <!-- JS Generated -->
-                      <div
-                        style="
-                          text-align: center;
-                          color: #666;
-                          font-size: 11px;
-                          padding: 10px;
-                        "
-                      >
-                        Select a date to view history
-                      </div>
-                    </div>
+                <div class="section-title" style="margin: 8px 0 4px 0">
+                  WATCH LOG
+                </div>
+                <div id="video-log-list" class="video-log-list">
+                  <!-- JS Generated -->
+                  <div
+                    style="
+                      text-align: center;
+                      color: #666;
+                      font-size: 11px;
+                      padding: 10px;
+                    "
+                  >
+                    Select a date to view history
                   </div>
                 </div>
               </div>
-          </section>
+            </div>
+          </div>
+        </section>
 
         <!-- TAB: SEARCH -->
         <section id="tab-search" class="tab-content">
@@ -768,43 +830,55 @@
 
           <div class="section-title">LAYOUT</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Glass Grid View</span>
-                <span class="desc">Premium Card Layout</span>
+            <div class="grid-2">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Glass Grid View</span>
+                  <span class="desc">Premium Card Layout</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="searchGrid" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="searchGrid" />
-                <span class="slider"></span>
-              </label>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Clean Search</span>
+                  <span class="desc">Remove ads & junk</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="cleanSearch" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Hide Shorts in Search</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="hideSearchShorts" />
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
-            <div class="setting-item">
+
+            <div class="setting-item" style="margin-top: 6px">
               <div class="info">
                 <span class="name">Grid Columns</span>
                 <span class="desc">Videos per row: <span id="searchColumnsValue">4</span></span>
               </div>
               <div class="range-container">
-                  <input type="range" id="searchColumns" min="1" max="8" step="1" value="4" />
+                <input
+                  type="range"
+                  id="searchColumns"
+                  min="1"
+                  max="8"
+                  step="1"
+                  value="4"
+                />
               </div>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Clean Search</span>
-                <span class="desc">Remove ads & junk</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="cleanSearch" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Hide Shorts in Search</span>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="hideSearchShorts" />
-                <span class="slider"></span>
-              </label>
             </div>
           </div>
         </section>
@@ -818,29 +892,43 @@
 
           <div class="section-title">THEME & APPEARANCE</div>
           <div class="card-group">
-            <div class="setting-item">
-              <div class="info">
-                <span class="name">Premium Theme</span>
-                <span class="desc">Glassmorphism UI</span>
+            <div class="grid-2" style="margin-bottom: 6px">
+              <div class="toggle-card">
+                <div class="info">
+                  <span class="name">Premium Theme</span>
+                  <span class="desc">Glassmorphism UI</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="premiumTheme" />
+                  <span class="slider"></span>
+                </label>
               </div>
-              <label class="toggle">
-                <input type="checkbox" id="premiumTheme" />
-                <span class="slider"></span>
-              </label>
             </div>
-            <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-              <div class="info" style="margin-bottom: 4px; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <div
+              class="setting-item"
+              style="flex-direction: column; align-items: flex-start"
+            >
+              <div
+                class="info"
+                style="
+                  margin-bottom: 4px;
+                  width: 100%;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
                 <div>
-                   <span class="name">Active Theme</span>
-                   <span class="desc">Select color scheme</span>
+                  <span class="name">Active Theme</span>
+                  <span class="desc">Select color scheme</span>
                 </div>
               </div>
               <div id="themeGrid" class="theme-grid">
-                  <!-- Generated by JS -->
+                <!-- Generated by JS -->
               </div>
             </div>
             <!-- Legacy True Black (Hidden/Deprecated in favor of Midnight Theme) -->
-             <div class="setting-item" style="display: none;">
+            <div class="setting-item" style="display: none">
               <div class="info">
                 <span class="name">True Black Mode</span>
               </div>
@@ -850,20 +938,56 @@
               </label>
             </div>
           </div>
-          
-          <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-              <div class="info" style="width: 100%; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                  <span class="name">Blue Light Filter</span>
-                  <span class="desc" id="blueLightValue">0%</span>
-              </div>
-              <input type="range" id="blueLight" min="0" max="90" step="5" style="width: 100%; accent-color: #3ea6ff;">
+
+          <div
+            class="setting-item"
+            style="flex-direction: column; align-items: flex-start"
+          >
+            <div
+              class="info"
+              style="
+                width: 100%;
+                margin-bottom: 8px;
+                display: flex;
+                justify-content: space-between;
+              "
+            >
+              <span class="name">Blue Light Filter</span>
+              <span class="desc" id="blueLightValue">0%</span>
+            </div>
+            <input
+              type="range"
+              id="blueLight"
+              min="0"
+              max="90"
+              step="5"
+              style="width: 100%; accent-color: #3ea6ff"
+            />
           </div>
-          <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-              <div class="info" style="width: 100%; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                  <span class="name">Dim Screen</span>
-                  <span class="desc" id="dimValue">0%</span>
-              </div>
-              <input type="range" id="dim" min="0" max="90" step="5" style="width: 100%; accent-color: #3ea6ff;">
+          <div
+            class="setting-item"
+            style="flex-direction: column; align-items: flex-start"
+          >
+            <div
+              class="info"
+              style="
+                width: 100%;
+                margin-bottom: 8px;
+                display: flex;
+                justify-content: space-between;
+              "
+            >
+              <span class="name">Dim Screen</span>
+              <span class="desc" id="dimValue">0%</span>
+            </div>
+            <input
+              type="range"
+              id="dim"
+              min="0"
+              max="90"
+              step="5"
+              style="width: 100%; accent-color: #3ea6ff"
+            />
           </div>
 
           <div class="section-title">NAVIGATION SHORTCUTS</div>
