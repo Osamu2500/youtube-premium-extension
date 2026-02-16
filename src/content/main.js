@@ -72,23 +72,26 @@
             this.bootstrapLock = true;
 
             try {
-                // Wait for core dependencies
-                await this.waitForDependencies();
-
                 const startTime = performance.now();
                 this.Utils?.log('Starting App...', 'MAIN');
 
+                // Wait for core dependencies before proceeding
+                await this.waitForDependencies();
+                
+                // Load settings and initialize features
                 await this.loadSettings();
                 this.initFeatureManager();
                 this.updateContext();
                 this.setupEvents();
 
+                // Mark as initialized
                 this.isInitialized = true;
                 this.bootstrapLock = false;
 
                 const loadTime = (performance.now() - startTime).toFixed(2);
                 this.Utils?.log(`Extension Initialized Successfully in ${loadTime}ms`, 'MAIN');
 
+                // Visual feedback
                 this.showReadyToast();
                 document.documentElement.classList.add('ypp-loaded');
 

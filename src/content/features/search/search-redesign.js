@@ -92,6 +92,9 @@ export class SearchRedesign {
         /** @type {string|null} Track last query to distinguish fresh searches */
         this._lastQuery = null;
         
+        /** @type {boolean} CRITICAL FIX: Initialize batching flag to prevent errors */
+        this._batching = false;
+        
         // Bind methods to ensure correct 'this' context
         this._handleNavigation = this._handleNavigation.bind(this);
         this._processMutations = this._processMutations.bind(this);
@@ -419,24 +422,34 @@ export class SearchRedesign {
     }
 
     /**
-     * Poll for a DOM element existence
+     * Poll for a DOM element with exponential backoff
      * @private
      * @param {string} selector - CSS Selector
      * @param {Function} callback - Success callback
-     * @param {number} maxAttempts - Max retries (default 20)
-     * @param {number} interval - Interval in ms (default 200)
+     * @param {number} maxWaitMs - Maximum total wait time in milliseconds (default 4000ms)
+     * @param {number} startInterval - Starting interval in ms (default 100ms)
      */
-    _pollForElement(selector, callback, maxAttempts = 20, interval = 200) {
-        let attempts = 0;
+    _pollForElement(selector, callback, maxWaitMs = 4000, startInterval = 100) {
+        const startTime = Date.now();
+        let currentInterval = startInterval;
+        
         const check = () => {
             const el = document.querySelector(selector);
             if (el) {
                 callback(el);
-            } else if (attempts < maxAttempts) {
-                attempts++;
-                setTimeout(check, interval);
+                return;
+            }
+            
+            const elapsed = Date.now() - startTime;
+            if (elapsed < maxWaitMs) {
+                // Exponential backoff: 100ms, 200ms, 400ms, 800ms...
+                currentInterval = Math.min(currentInterval * 2, 1000);
+                setTimeout(check, currentInterval);
+            } else {
+                this._log(`Element ${selector} not found after ${maxWaitMs}ms`, 'warn');
             }
         };
+        
         check();
     }
 

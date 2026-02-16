@@ -18,15 +18,27 @@ window.YPP.features.HeaderNav = class HeaderNav {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
+        
         /** @type {boolean} Internal state tracking if the manager is active */
         this.isEnabled = false;
+        
         /** @type {Object|null} Current user settings */
         this.settings = null;
+        
+        /** @type {MutationObserver|null} DOM mutation observer */
         this.observer = null;
+        
+        /** @type {number|null} Health check interval ID */
+        this._healthCheckInterval = null;
+        
+        /** @type {string} Current URL for change detection */
         this._currentUrl = window.location.pathname + window.location.search;
 
-        // Bind methods
+        // Bind methods for performance
         this._boundHandleNavigate = this._handleNavigate.bind(this);
+        
+        // Cache debounced inject function (created once, reused)
+        this._debouncedInject = null;
     }
 
     run(settings) {
@@ -67,18 +79,35 @@ window.YPP.features.HeaderNav = class HeaderNav {
     /**
      * Disable header navigation and clean up
      */
+    /**
+     * Disable header navigation and clean up all resources
+     */
     disable() {
         this.isEnabled = false;
+        
+        // Disconnect observer
         if (this.observer) {
             this.observer.disconnect();
             this.observer = null;
         }
 
+        // CRITICAL FIX: Clear health check interval to prevent memory leak
+        if (this._healthCheckInterval) {
+            clearInterval(this._healthCheckInterval);
+            this._healthCheckInterval = null;
+        }
+
+        // Remove injected elements
         const navGroup = document.querySelector('.ypp-nav-group');
         if (navGroup) navGroup.remove();
 
-        this.Utils.removeStyle('ypp-header-nav-style');
+        // Remove styles
+        this.Utils.removeStyle?.('ypp-header-nav-style');
+        
+        // Remove event listeners
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
+        
+        this.Utils.log?.('Header navigation disabled and cleaned up', 'HEADERNAV', 'debug');
     }
 
     handleSidebarState() {
@@ -93,30 +122,62 @@ window.YPP.features.HeaderNav = class HeaderNav {
         // Keeping this method stub for potential future dynamic styles.
     }
 
+    /**
+     * Start observing the header for changes
+     */
     observeHeader() {
         if (this.observer) return;
 
-        // Debounce injection to avoid rapid DOM thrashing
-        const debouncedInject = this.Utils.debounce(() => {
-            if (this.isEnabled) this.scheduleInjection();
-        }, 200);
+        // Cache debounced function (create once, reuse)
+        if (!this._debouncedInject) {
+            this._debouncedInject = this.Utils.debounce?.(() => {
+                if (this.isEnabled) this.scheduleInjection();
+            }, 200) || (() => this.scheduleInjection());
+        }
+
+        // OPTIMIZATION: Target specific masthead container instead of entire body
+        const masthead = document.querySelector('ytd-masthead');
+        if (!masthead) {
+            this.Utils.log?.('Masthead not found, retrying observer setup...', 'HEADERNAV', 'warn');
+            setTimeout(() => this.observeHeader(), 1000);
+            return;
+        }
 
         this.observer = new MutationObserver((mutations) => {
             // Check if relevant header parts changed
             const shouldUpdate = mutations.some(m =>
                 m.target.id === 'center' ||
+                m.target.id === 'container' ||
                 m.target.tagName === 'YTD-MASTHEAD'
             );
-            if (shouldUpdate) debouncedInject();
+            if (shouldUpdate) this._debouncedInject();
         });
 
-        this.observer.observe(document.body, { childList: true, subtree: true });
+        // OPTIMIZATION: Observe masthead only, not entire body
+        this.observer.observe(masthead, { 
+            childList: true, 
+            subtree: true,
+            attributes: false // We only care about DOM structure changes
+        });
 
         // Initial check
         this.scheduleInjection();
 
         // Listen for navigations to update active state
         window.addEventListener('yt-navigate-finish', this._boundHandleNavigate);
+        
+        // CRITICAL FIX: Store interval ID and respect visibility
+        this._healthCheckInterval = setInterval(() => {
+            // Don't poll if tab is backgrounded or feature disabled
+            if (document.hidden || !this.isEnabled) return;
+            
+            if (!document.querySelector('.ypp-nav-group')) {
+                this.Utils.log?.('Nav group missing, reinjecting...', 'HEADERNAV', 'debug');
+                this.scheduleInjection();
+            }
+        }, 3000);
+        
+        this.Utils.log?.('Header observer initialized', 'HEADERNAV', 'debug');
     }
 
     _handleNavigate() {
@@ -130,15 +191,21 @@ window.YPP.features.HeaderNav = class HeaderNav {
     scheduleInjection() {
         // Use requestAnimationFrame for safer DOM access
         requestAnimationFrame(() => {
-            // Try specific selectors first, then broader ones
-            const centerSection = document.querySelector('ytd-masthead #center') || 
-                                document.querySelector('ytd-masthead #container') ||
-                                document.querySelector('ytd-masthead');
+            // Priority list of containers to inject into
+            const targets = [
+                document.querySelector('ytd-masthead #center'),
+                document.querySelector('ytd-masthead #container'),
+                document.querySelector('ytd-masthead')
+            ];
+
+            const centerSection = targets.find(t => t);
             
             if (centerSection) {
                  this.injectButtons(centerSection);
             } else {
-                this.Utils?.log('Header injection target not found (yet)', 'HEADERNAV', 'debug');
+                // If not found, exponential backoff or simple retry
+                this.Utils?.log('Header target not found, retrying...', 'HEADERNAV', 'debug');
+                setTimeout(() => this.scheduleInjection(), 1500);
             }
         });
     }
@@ -163,6 +230,8 @@ window.YPP.features.HeaderNav = class HeaderNav {
 
             const navGroup = document.createElement('div');
             navGroup.className = 'ypp-nav-group ypp-nav-group-right';
+            // Force pointer events auto to ensure clickability
+            navGroup.style.pointerEvents = 'auto';
 
             // Define button config for cleaner iteration
             const buttons = [

@@ -1,21 +1,41 @@
 /**
  * Zen Mode Feature
  * Reduces distractions on the Watch Page and adds an ambient glow effect.
+ * Refactored for performance: Cached DOM elements, optimized canvas operations.
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.ZenMode = class ZenMode {
     constructor() {
-        this.CONSTANTS = window.YPP.CONSTANTS;
-        this.Utils = window.YPP.Utils;
+        this.CONSTANTS = window.YPP.CONSTANTS || {};
+        this.Utils = window.YPP.Utils || {};
+        
+        // State
+        this.isEnabled = false;
         this.zenToastShown = false;
-        this.ambientInterval = null;
+        this.ambientActive = false;
+        this.animationFrame = null;
+        
+        // Cached Elements
         this.canvas = null;
         this.ctx = null;
+        this.videoElement = null;
+        this.playerElement = null;
+
+        // Configuration
+        this.FPS = 15; // Smooth ambilight
+        this.FRAME_INTERVAL = 1000 / this.FPS;
+        this.CANVAS_SIZE = 10; // Low res is sufficient for ambient light
+
+        // Bindings
+        this._loop = this._loop.bind(this);
+        this._handleNavigation = this._handleNavigation.bind(this);
     }
 
     run(settings) {
+        // Listen for navigations to refresh cached elements
+        window.addEventListener('yt-navigate-finish', this._handleNavigation);
         this.update(settings);
     }
 
@@ -27,39 +47,51 @@ window.YPP.features.ZenMode = class ZenMode {
         }
     }
 
-    /**
-     * Enable Zen Mode.
-     * @param {Object} settings 
-     */
     enable(settings) {
-        this.toggleZen(!!settings.zenMode);
+        this.isEnabled = true;
+        this.toggleZen(true);
     }
 
-    /**
-     * Disable Zen Mode.
-     */
     disable() {
+        this.isEnabled = false;
         this.toggleZen(false);
     }
 
-    /**
-     * Toggle the Zen Mode state.
-     * @param {boolean} enable 
-     */
+    _handleNavigation() {
+        if (this.isEnabled) {
+            // Re-acquire elements after navigation
+            this._clearCache();
+            if (location.pathname === '/watch') {
+                this.autoCinema();
+                if (this.ambientActive) {
+                    this._applyAmbientMode(); // Restart/Refresh loop
+                }
+            } else {
+                this._removeAmbientMode();
+            }
+        }
+    }
+
+    _clearCache() {
+        this.videoElement = null;
+        this.playerElement = null;
+    }
+
     toggleZen(enable) {
-        // Toggle global class
-        document.body.classList.toggle(this.CONSTANTS.CSS_CLASSES.ZEN_MODE, enable);
+        // Apply zen mode class for CSS-driven transitions
+        document.body.classList.toggle('ypp-zen-mode', enable);
 
         if (enable) {
-            // Only trigger active effects if on Watch page
+            // Only apply cinema mode and ambient lighting on watch pages
             if (location.pathname === '/watch') {
                 this.autoCinema();
                 this._applyAmbientMode();
-            }
-
-            if (!this.zenToastShown && location.pathname === '/watch') {
-                this.Utils.createToast('Zen Mode Enabled');
-                this.zenToastShown = true;
+                
+                // Show toast notification once per session
+                if (!this.zenToastShown) {
+                    this.Utils.createToast?.('Zen Mode Enabled');
+                    this.zenToastShown = true;
+                }
             }
         } else {
             this.zenToastShown = false;
@@ -67,108 +99,102 @@ window.YPP.features.ZenMode = class ZenMode {
         }
     }
 
-    /**
-     * Automatically switch player to "Cinema" (Theater) mode if not already.
-     */
     async autoCinema() {
         try {
-            // Wait for the button to ensure DOM is ready
-            const btn = await this.Utils.waitForElement('.ytp-size-button, [aria-label="Cinema mode"]', 5000);
+            const btn = await this.Utils.waitForElement?.('.ytp-size-button, [aria-label="Cinema mode"]', 5000);
             if (!btn) return;
 
-            const checkAndClick = () => {
+            const checkAndEnableTheater = () => {
+                // Only click if not already in theater mode
                 const isTheater = document.querySelector('ytd-watch-flexy[theater]');
                 if (!isTheater) {
                     btn.click();
                 }
             };
 
-            checkAndClick();
-            
-            // Double check for SPA/race conditions
-            setTimeout(checkAndClick, 1000);
+            // Attempt immediately and verify after brief delay
+            checkAndEnableTheater();
+            setTimeout(checkAndEnableTheater, 1000);
         } catch (e) {
-            console.error('[YPP] AutoCinema error', e);
+            // Silent fail if button not found or page not ready
         }
     }
 
-    /**
-     * Start the ambient light effect (Ambilight).
-     * Samples the video frame and casts a glow around the player.
-     */
-    /**
-     * Start the ambient light effect (Ambilight).
-     * Uses throttled requestAnimationFrame for performance.
-     */
     _applyAmbientMode() {
         if (this.ambientActive) return;
         this.ambientActive = true;
 
-        const video = document.querySelector('video');
-        if (!video) return;
+        this._initCanvas();
+        this.lastUpdate = 0;
+        this.animationFrame = requestAnimationFrame(this._loop);
+    }
 
-        // Reuse canvas if exists
+    _initCanvas() {
         if (!this.canvas) {
             this.canvas = document.createElement('canvas');
-            // Optimization: Small size is enough for ambient average
-            this.canvas.width = 10;
-            this.canvas.height = 10;
+            this.canvas.width = this.CANVAS_SIZE;
+            this.canvas.height = this.CANVAS_SIZE;
             this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         }
-
-        let lastUpdate = 0;
-        const FPS = 10; // 10fps is enough for ambient glow
-        const interval = 1000 / FPS;
-
-        const loop = (timestamp) => {
-            if (!this.ambientActive) return;
-
-            // Performance: Don't compute if tab is hidden
-            if (document.hidden) {
-                this.animationFrame = requestAnimationFrame(loop);
-                return;
-            }
-
-            if (timestamp - lastUpdate > interval) {
-                lastUpdate = timestamp;
-
-                if (video && !video.paused && !video.ended && video.readyState >= 2) {
-                    try {
-                        this.ctx.drawImage(video, 0, 0, 10, 10);
-                        const frame = this.ctx.getImageData(0, 0, 10, 10);
-                        const [r, g, b] = this._getAverageColor(frame.data);
-
-                        this._updateGlow(`rgba(${r}, ${g}, ${b}, 0.5)`);
-                    } catch (e) {
-                        // Fallback seldom needed, but good to have
-                    }
-                }
-            }
-
-            this.animationFrame = requestAnimationFrame(loop);
-        };
-
-        this.animationFrame = requestAnimationFrame(loop);
     }
 
-    /**
-     * Helper to update the player glow.
-     * @param {string} color 
-     */
-    _updateGlow(color) {
-        const player = document.querySelector('#ytd-player') ||
-            document.querySelector('#player-container-outer') ||
-            document.querySelector('.html5-video-player');
+    _loop(timestamp) {
+        if (!this.ambientActive) return;
 
-        if (player) {
-            player.classList.add('ypp-zen-shadow');
-            player.style.boxShadow = `0 0 150px 30px ${color}`;
+        // Pause if tab hidden
+        if (document.hidden) {
+            this.animationFrame = requestAnimationFrame(this._loop);
+            return;
+        }
+
+        // Throttle to FPS
+        if (timestamp - this.lastUpdate > this.FRAME_INTERVAL) {
+            this.lastUpdate = timestamp;
+            this._processFrame();
+        }
+
+        this.animationFrame = requestAnimationFrame(this._loop);
+    }
+
+    _processFrame() {
+        // Cache Video Element
+        if (!this.videoElement || !this.videoElement.isConnected) {
+            this.videoElement = document.querySelector('video');
+        }
+
+        const video = this.videoElement;
+        
+        if (video && !video.paused && !video.ended && video.readyState >= 2) {
+            try {
+                this.ctx.drawImage(video, 0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
+                // Get center pixel or average
+                const frame = this.ctx.getImageData(0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
+                const [r, g, b] = this._getAverageColor(frame.data);
+                this._updateGlow(`rgba(${r}, ${g}, ${b}, 0.5)`);
+            } catch (e) {
+                // Cross-origin issues or other canvas errors
+            }
         }
     }
 
-    /**
-     * Stop the ambient mode.
-     */
+    _updateGlow(color) {
+        // Lazy-cache player element on first update
+        if (!this.playerElement || !this.playerElement.isConnected) {
+            this.playerElement = document.querySelector('#ytd-player') || 
+                                 document.querySelector('#player-container-outer') || 
+                                 document.querySelector('.html5-video-player');
+        }
+
+        if (this.playerElement) {
+            // Add marker class once (avoids repeated checks)
+            if (!this.playerElement.classList.contains('ypp-zen-shadow')) {
+                this.playerElement.classList.add('ypp-zen-shadow');
+            }
+            // Hardware-accelerated box-shadow update (GPU composited)
+            this.playerElement.style.boxShadow = `0 0 150px 30px ${color}`;
+        }
+    }
+
     _removeAmbientMode() {
         this.ambientActive = false;
         if (this.animationFrame) {
@@ -176,35 +202,31 @@ window.YPP.features.ZenMode = class ZenMode {
             this.animationFrame = null;
         }
 
-        // Clear styles
-        const player = document.querySelector('#ytd-player') ||
-            document.querySelector('#player-container-outer') ||
-            document.querySelector('.html5-video-player');
+        // Clean up styles
+        const player = this.playerElement || document.querySelector('#ytd-player');
         if (player) {
             player.classList.remove('ypp-zen-shadow');
             player.style.boxShadow = '';
         }
+        
+        // Clear references
+        this.videoElement = null;
+        this.playerElement = null;
     }
 
-    /**
-     * Calculate average dominant color from pixel data.
-     * @param {Uint8ClampedArray} data 
-     * @returns {number[]} [r, g, b]
-     */
     _getAverageColor(data) {
-        let r = 0, g = 0, b = 0;
-        // Sample every 10th pixel for performance
-        const step = 4 * 10;
-        let count = 0;
+        let r = 0, g = 0, b = 0, count = 0;
+        const length = data.length;
+        const step = 4 * 4; // Sample every 4th pixel 
 
-        for (let i = 0; i < data.length; i += step) {
+        for (let i = 0; i < length; i += step) {
             r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
+            g += data[i+1];
+            b += data[i+2];
             count++;
         }
 
         if (count === 0) return [0, 0, 0];
-        return [Math.floor(r / count), Math.floor(g / count), Math.floor(b / count)];
+        return [Math.floor(r/count), Math.floor(g/count), Math.floor(b/count)];
     }
 };

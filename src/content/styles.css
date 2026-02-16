@@ -264,9 +264,10 @@ body.ypp-hide-watched ytd-grid-video-renderer[is-watched] {
 .yt-premium-plus-theme ytd-topbar-menu-button-renderer[aria-label*="Create"],
 .yt-premium-plus-theme ytd-button-renderer:has(a[href*="/upload"]),
 .yt-premium-plus-theme #buttons ytd-topbar-model-builder-renderer,
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has([aria-label*="Create"]),
+.yt-premium-plus-theme #buttons ytd-topbar-model-builder-renderer,
+/*.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has([aria-label*="Create"]),*/
 .yt-premium-plus-theme #buttons #create-button,
-.yt-premium-plus-theme #buttons ytd-button-renderer:has([aria-label="Create"]),
+/*.yt-premium-plus-theme #buttons ytd-button-renderer:has([aria-label="Create"]),*/
 .yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer { 
   /* The big pill button for create is often a generic button renderer in #buttons. 
      Be careful not to hide Sign In if it's there, but we assume signed in. 
@@ -330,6 +331,9 @@ ytd-mini-guide-renderer {
   background: transparent;
   box-shadow: none;
   width: 100%;
+  height: var(--ypp-header-height);
+  min-height: var(--ypp-header-height);
+  overflow: visible; /* Allow pill to be visible */
 }
 
 /* Push Page Content Down */
@@ -338,40 +342,45 @@ ytd-mini-guide-renderer {
 }
 
 /* Inner Masthead - The Floating Pill */
+/* Inner Masthead - The Floating Pill */
 .yt-premium-plus-theme ytd-masthead {
-  position: absolute;
-  top: 4px;
-  left: var(--ypp-header-margin);
-  right: var(--ypp-header-margin);
+  /* FIX: Use relative positioning so it flows naturally within the fixed container */
+  position: relative !important;
+  display: flex !important;
+  justify-content: center !important;
+  margin: 0 auto;
   height: var(--ypp-header-height);
-  width: auto;
+  width: 100% !important;
+  max-width: 100% !important;
   background: transparent;
   padding: 0;
-  pointer-events: none;
-}
-
-/* Ensure Masthead stays on top */
-.yt-premium-plus-theme ytd-masthead {
+  pointer-events: none; /* Let clicks pass through outside of #container */
   z-index: var(--ypp-z-header) !important;
-  position: fixed !important;
-  width: 100% !important;
-  transform: none !important; /* Prevent transformation context issues */
+  transform: none !important;
 }
 
 /* The Visual Glass Container */
+/* The Visual Glass Container (The Pill) */
 .yt-premium-plus-theme ytd-masthead #container {
-  pointer-events: auto;
+  pointer-events: auto; /* Re-enable clicks */
   background: var(--ypp-bg-glass);
   backdrop-filter: var(--ypp-blur-med);
   border: 1px solid var(--ypp-glass-border);
   background-image: var(--ypp-glass-shine);
   border-radius: var(--ypp-radius-pill);
   box-shadow: var(--ypp-shadow-float);
+  
+  /* Layout & Sizing */
+  margin: 4px var(--ypp-header-margin) 0 var(--ypp-header-margin); /* Add margin here instead of on parent */
   padding: 0 24px;
   display: flex;
   align-items: center;
-  height: 100%;
-  transition: box-shadow 0.3s ease;
+  height: calc(100% - 4px); /* Account for top margin */
+  width: auto;
+  flex: 1;
+  max-width: 1800px; /* Prevent it from being too wide on huge screens */
+  
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .yt-premium-plus-theme ytd-masthead #container:hover {
@@ -473,13 +482,25 @@ ytd-mini-guide-renderer {
 }
 
 /* Center Section Alignment */
-.yt-premium-plus-theme #center.ytd-masthead {
+.yt-premium-plus-theme ytd-masthead #center {
   margin-left: 0;
   margin-right: 0;
   justify-content: flex-start;
   flex: 1;
   max-width: none;
   display: flex;
+}
+
+/* Ensure Start and End sections are visible/layout correctly */
+.yt-premium-plus-theme ytd-masthead #start {
+    display: flex !important;
+    align-items: center;
+}
+
+.yt-premium-plus-theme ytd-masthead #end {
+    display: flex !important;
+    align-items: center;
+    min-width: 0; 
 }
 
 /* TopBar Buttons (Notifications specifically) */
@@ -581,6 +602,7 @@ ytd-mini-guide-renderer {
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  z-index: 2205; /* Ensure above other elements */
 }
 
 .ypp-nav-btn:hover {
@@ -622,6 +644,7 @@ ytd-mini-guide-renderer {
    =================================================================================== */
 
 /* Main Grid Container */
+/* Main Grid Container */
 .yt-premium-plus-theme ytd-rich-grid-renderer {
   margin-top: 24px;
   padding-right: 24px;
@@ -630,14 +653,11 @@ ytd-mini-guide-renderer {
 }
 
 /* Grid Contents - Use CSS Grid instead of Flex */
-/* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
-/* Grid Contents - Use CSS Grid instead of Flex */
-/* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
 .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
   display: grid !important;
-  /* Default fallbacks */
+  /* Default fallbacks - 4 columns, variable gap */
   grid-template-columns: repeat(4, 1fr) !important;
-  gap: 24px 16px !important;
+  gap: var(--ypp-grid-gap, 24px) !important;
   width: 100% !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -734,24 +754,22 @@ body.ypp-channel-page .yt-premium-plus-theme ytd-rich-grid-renderer > #contents 
 }
 
 /* Responsive Breakpoints */
+/* Responsive Breakpoints - Grid Columns */
 @media (max-width: 1600px) {
   .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
     grid-template-columns: repeat(var(--ypp-home-columns, 4), 1fr) !important;
-    gap: 20px 14px !important;
   }
 }
 
 @media (max-width: 1400px) {
   .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 16px 12px !important;
   }
 }
 
 @media (max-width: 1100px) {
   .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px 10px !important;
   }
 }
 

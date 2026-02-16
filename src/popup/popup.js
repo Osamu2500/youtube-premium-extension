@@ -23,29 +23,26 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function switchTab(tabId) {
-        // Update Nav
-        navItems.forEach(item => {
-            if (item.dataset.tab === tabId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
+        // Batch DOM updates for better performance
+        requestAnimationFrame(() => {
+            // Update Nav
+            navItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === tabId);
+            });
 
-        // Update Content
-        tabs.forEach(tab => {
-            if (tab.id === `tab-${tabId}`) {
-                tab.classList.add('active');
-            } else {
-                tab.classList.remove('active');
-            }
-        });
+            // Update Content
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.id === `tab-${tabId}`);
+            });
 
-        // Update Title
-        if (pageTitle) pageTitle.textContent = titles[tabId] || 'Settings';
-        
-        // Save last active tab (optional polish)
-        localStorage.setItem('ypp-last-tab', tabId);
+            // Update Title
+            if (pageTitle) {
+                pageTitle.textContent = titles[tabId] || 'Settings';
+            }
+            
+            // Save last active tab for persistence
+            localStorage.setItem('ypp-last-tab', tabId);
+        });
     }
 
     navItems.forEach(item => {
@@ -228,10 +225,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 500);
 
-    // Combined Action
+    // Combined Action with Visual Feedback
     const saveSettings = () => {
         sendPreviewUpdate();
         persistSettings();
+        showSaveIndicator();
+    };
+
+    // Visual feedback for save action
+    const showSaveIndicator = () => {
+        const badge = document.querySelector('.status-badge');
+        if (badge) {
+            const originalText = badge.textContent;
+            badge.textContent = 'Saved ✓';
+            badge.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            
+            setTimeout(() => {
+                badge.textContent = originalText;
+                badge.style.background = '';
+            }, 1200);
+        }
     };
 
     // --- ELEMENT CACHE ---
@@ -654,5 +667,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize
     loadSettings();
-    renderWatchHistory(); // Call once on load
+    initHistoryWidget(); // Initialize history widget on load
 });
