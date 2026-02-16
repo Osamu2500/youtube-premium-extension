@@ -548,13 +548,22 @@ ytd-mini-guide-renderer {
 
 /* Header Navigation Buttons */
 .ypp-nav-group {
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 8px;
   margin-left: 16px;
-  pointer-events: auto;
-  z-index: 2202;
+  pointer-events: auto !important; /* Ensure clickability - override masthead */
+  z-index: 2210 !important; /* Above all header elements and zen mode */
   position: relative;
+  visibility: visible !important; /* Force visibility */
+  opacity: 1 !important; /* Force opacity */
+}
+
+/* Extra specificity for individual buttons */
+.ypp-nav-group .ypp-nav-btn {
+  pointer-events: auto !important;
+  visibility: visible !important;
+  display: flex !important;
 }
 
 .ypp-nav-btn {
@@ -564,8 +573,8 @@ ytd-mini-guide-renderer {
   width: 44px;
   height: 44px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.10); /* Increased from 0.03 for visibility */
+  border: 1px solid rgba(255, 255, 255, 0.20); /* Increased from 0.08 for visibility */
   backdrop-filter: blur(4px);
   color: var(--ypp-text-secondary);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -573,6 +582,7 @@ ytd-mini-guide-renderer {
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  z-index: 2205; /* Ensure above other elements */
 }
 
 .ypp-nav-btn:hover {
@@ -599,7 +609,7 @@ ytd-mini-guide-renderer {
   width: 24px;
   height: 24px;
   fill: currentColor;
-  opacity: 0.9;
+  opacity: 1.0; /* Increased from 0.9 for better visibility */
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
   transition: transform 0.3s ease;
 }
@@ -607,6 +617,15 @@ ytd-mini-guide-renderer {
 .ypp-nav-btn:hover svg {
   transform: scale(1.1);
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+/* Nav Icon Styling */
+.ypp-nav-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  pointer-events: none;
+  display: block;
 }
 
 /* ===================================================================================

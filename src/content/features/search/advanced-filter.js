@@ -45,6 +45,8 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter {
     // --- Lifecycle Methods ---
 
     run() {
+        // DISABLED: User requested removal of homepage filter buttons
+        return;
         // Only run on Home
         if (window.location.pathname === '/' || window.location.pathname === '') {
             this.init();

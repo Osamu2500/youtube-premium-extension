@@ -115,12 +115,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
         document.body.classList.toggle('ypp-hide-sidebar', !!this.settings.forceHideSidebar);
     }
 
-    _injectStyles() {
-        // Most styles are now in src/content/styles.css for better management and performance.
-        // We only inject essential functional styles here if absolutely necessary, 
-        // but for now, the external stylesheet handles it all.
-        // Keeping this method stub for potential future dynamic styles.
-    }
+    // Removed: All styles now in styles.css for better performance and maintainability
 
     /**
      * Start observing the header for changes
@@ -175,7 +170,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
                 this.Utils.log?.('Nav group missing, reinjecting...', 'HEADERNAV', 'debug');
                 this.scheduleInjection();
             }
-        }, 3000);
+        }, 5000); // Reduced frequency: consistent with docs
         
         this.Utils.log?.('Header observer initialized', 'HEADERNAV', 'debug');
     }
@@ -219,17 +214,17 @@ window.YPP.features.HeaderNav = class HeaderNav {
 
         try {
             // Check if our group already exists in valid state
-            if (document.querySelector('.ypp-nav-group-right')) {
+            if (document.querySelector('.ypp-nav-group')) {
                 this._updateActiveStates();
                 return;
             }
 
             // Remove any stale groups
-            const oldGroups = document.querySelectorAll('.ypp-nav-group');
+            const oldGroups = document.querySelectorAll('.ypp-nav-group, .ypp-nav-group-right');
             oldGroups.forEach(g => g.remove());
 
             const navGroup = document.createElement('div');
-            navGroup.className = 'ypp-nav-group ypp-nav-group-right';
+            navGroup.className = 'ypp-nav-group';
             // Force pointer events auto to ensure clickability
             navGroup.style.pointerEvents = 'auto';
 

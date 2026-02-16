@@ -8,11 +8,18 @@ window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.SponsorBlock = class SponsorBlock {
     constructor() {
+        this.CONSTANTS = window.YPP.CONSTANTS || {};
+        this.Utils = window.YPP.Utils || {};
+        
         this.isActive = false;
         this.videoId = null;
         this.segments = [];
         this.videoElement = null;
         this.abortController = null;
+        
+        // Cache for segments (avoid re-fetching same video)
+        this.segmentCache = new Map();
+        this.CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
         
         // Categories to skip
         this.categories = ['sponsor', 'selfpromo', 'interaction', 'intro', 'outro'];
@@ -116,20 +123,32 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         if (this.abortController) this.abortController.abort();
         this.abortController = new AbortController();
 
+        // Check cache first
+        const cached = this.segmentCache.get(this.videoId);
+        if (cached && (Date.now() - cached.timestamp) < this.CACHE_DURATION) {
+            this.segments = cached.segments;
+            this.Utils.log?.(`SponsorBlock: Loaded ${this.segments.length} segments from cache`, 'SPONSOR');
+            return;
+        }
+
         try {
-            // SHA-256 Hash the video ID
+            // SHA-256 Hash the video ID for privacy
             const buffer = new TextEncoder().encode(this.videoId);
             const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             
-            // Use first 4 chracters (prefix) for privacy
+            // Use first 4 characters (prefix) for privacy
             const prefix = hashHex.substring(0, 4);
 
-            const categoriesParam = JSON.stringify(this.categories);
+            const categoriesParam = encodeURIComponent(JSON.stringify(this.categories));
             const url = `https://sponsor.ajay.app/api/skipSegments/${prefix}?categories=${categoriesParam}`;
 
-            const response = await fetch(url, { signal: this.abortController.signal });
+            const response = await fetch(url, { 
+                signal: this.abortController.signal,
+                headers: { 'Accept': 'application/json' }
+            });
+            
             if (response.ok) {
                 const data = await response.json();
                 
@@ -138,16 +157,36 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
                 
                 if (videoData && videoData.segments) {
                     this.segments = videoData.segments;
-                    // window.YPP.Utils.log(`SponsorBlock: Loaded ${this.segments.length} segments`, 'SPONSOR');
+                    // Cache the segments
+                    this.segmentCache.set(this.videoId, {
+                        segments: this.segments,
+                        timestamp: Date.now()
+                    });
+                    this.Utils.log?.(`SponsorBlock: Loaded ${this.segments.length} segments`, 'SPONSOR');
                 } else {
-                     this.segments = [];
+                    this.segments = [];
+                    this.Utils.log?.('SponsorBlock: No segments found for this video', 'SPONSOR');
                 }
             } else if (response.status === 404) {
-                // No segments found
+                // No segments found - cache empty result
                 this.segments = [];
+                this.segmentCache.set(this.videoId, {
+                    segments: [],
+                    timestamp: Date.now()
+                });
+            } else {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         } catch (e) {
-            if (e.name !== 'AbortError') console.error('SponsorBlock fetch error:', e);
+            if (e.name === 'AbortError') return;
+            
+            this.Utils.log?.(`SponsorBlock API error: ${e.message}`, 'SPONSOR', 'error');
+            
+            // Retry once after 2s on non-abort errors
+            if (!this.retryAttempted) {
+                this.retryAttempted = true;
+                setTimeout(() => this.fetchSegments(), 2000);
+            }
         }
     }
 

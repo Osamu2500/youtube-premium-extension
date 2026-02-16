@@ -61,12 +61,18 @@ window.YPP.features.ZenMode = class ZenMode {
         if (this.isEnabled) {
             // Re-acquire elements after navigation
             this._clearCache();
-            if (location.pathname === '/watch') {
-                this.autoCinema();
+            const isWatchPage = location.pathname === '/watch';
+            
+            if (isWatchPage) {
+                // On watch page: apply zen mode class
+                document.body.classList.add('ypp-zen-mode');
+                // Auto-cinema disabled per user request
                 if (this.ambientActive) {
                     this._applyAmbientMode(); // Restart/Refresh loop
                 }
             } else {
+                // CRITICAL: Remove zen class when leaving watch page
+                document.body.classList.remove('ypp-zen-mode');
                 this._removeAmbientMode();
             }
         }
@@ -78,22 +84,23 @@ window.YPP.features.ZenMode = class ZenMode {
     }
 
     toggleZen(enable) {
-        // Apply zen mode class for CSS-driven transitions
-        document.body.classList.toggle('ypp-zen-mode', enable);
-
-        if (enable) {
-            // Only apply cinema mode and ambient lighting on watch pages
-            if (location.pathname === '/watch') {
-                this.autoCinema();
-                this._applyAmbientMode();
-                
-                // Show toast notification once per session
-                if (!this.zenToastShown) {
-                    this.Utils.createToast?.('Zen Mode Enabled');
-                    this.zenToastShown = true;
-                }
+        const isWatchPage = location.pathname === '/watch';
+        
+        // CRITICAL FIX: Only apply zen mode class on watch pages
+        // Remove class from all other pages to prevent hiding topbar everywhere
+        if (enable && isWatchPage) {
+            document.body.classList.add('ypp-zen-mode');
+            // Auto-cinema disabled per user request - keep default view
+            this._applyAmbientMode();
+            
+            // Show toast notification once per session
+            if (!this.zenToastShown) {
+                this.Utils.createToast?.('Zen Mode Enabled');
+                this.zenToastShown = true;
             }
         } else {
+            // Remove zen class when not on watch page or when disabling
+            document.body.classList.remove('ypp-zen-mode');
             this.zenToastShown = false;
             this._removeAmbientMode();
         }
