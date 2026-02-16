@@ -247,53 +247,7 @@ window.YPP.CONSTANTS = {
         studyMode: false
     },
 
-    // =========================================================================
-    // FEATURE MAPPING (Internal Key -> Class Name)
-    // =========================================================================
-    FEATURE_MAP: {
-        // Core
-        theme: 'Theme',
-        layout: 'Layout',
-        sidebar: 'SidebarManager',
-        headerNav: 'HeaderNav',
 
-        // Content Control
-        contentControl: 'ContentControl',
-        searchRedesign: 'SearchRedesign',
-        shortsTools: 'ShortsTools',
-        nightMode: 'NightModeManager',
-
-        // Watch Features
-        player: 'Player',
-        playerTools: 'PlayerTools',
-        zenMode: 'ZenMode',
-        focusMode: 'FocusMode',
-        studyMode: 'StudyMode',
-        ambientMode: 'AmbientMode',
-        audioMode: 'AudioMode',
-        videoControls: 'VideoControls',
-        returnDislike: 'ReturnDislike',
-        miniPlayer: 'MiniPlayer',
-        videoFilters: 'VideoFilters',
-
-        // Subscriptions
-        subscriptionManager: 'SubscriptionManager',
-        subscriptionUI: 'SubscriptionUI',
-
-        // History & Stats
-        watchHistoryTracker: 'WatchHistoryTracker',
-        historyTracker: 'HistoryTracker',
-        statsVisualizer: 'StatsVisualizer',
-        historyRedesign: 'HistoryRedesign',
-
-        // Playlists
-        playlistRedesign: 'PlaylistRedesign',
-        reversePlaylist: 'ReversePlaylist',
-        durationCalculator: 'DurationCalculator',
-
-        // Utilities
-        dataAPI: 'DataAPI'
-    },
 
     // =========================================================================
     // GRID CONFIGURATION

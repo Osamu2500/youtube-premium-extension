@@ -155,9 +155,16 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @returns {Promise<Element|null>}
      */
     waitForElement: (selector, timeout = CONSTANTS.TIMINGS?.ELEMENT_WAIT_DEFAULT || 10000) => {
+        // Input validation
         if (!selector || typeof selector !== 'string') {
             Utils?.log('Invalid selector provided to waitForElement', 'UTILS', 'warn');
             return Promise.resolve(null);
+        }
+        
+        // Validate timeout
+        if (typeof timeout !== 'number' || timeout <= 0 || !isFinite(timeout)) {
+            Utils?.log(`Invalid timeout (${timeout}), using default 10000ms`, 'UTILS', 'warn');
+            timeout = 10000;
         }
 
         // Try distinct lookup first
@@ -165,6 +172,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             const existing = document.querySelector(selector);
             if (existing) return Promise.resolve(existing);
         } catch (e) {
+            Utils?.log(`Invalid CSS selector: ${selector}`, 'UTILS', 'error');
             return Promise.resolve(null);
         }
 
@@ -341,6 +349,18 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @returns {Function}
      */
     debounce: (func, wait = CONSTANTS.TIMINGS?.DEBOUNCE_DEFAULT || 50) => {
+        // Validate function
+        if (typeof func !== 'function') {
+            Utils?.log('debounce requires a function as first argument', 'UTILS', 'error');
+            return () => {}; // Return noop
+        }
+        
+        // Validate wait time
+        if (typeof wait !== 'number' || wait < 0 || !isFinite(wait)) {
+            Utils?.log(`Invalid wait time for debounce (${wait}), using default`, 'UTILS', 'warn');
+            wait = CONSTANTS.TIMINGS?.DEBOUNCE_DEFAULT || 50;
+        }
+        
         let timeoutId = null;
         return function (...args) {
             if (timeoutId) {
@@ -359,6 +379,18 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @returns {Function}
      */
     throttle: (func, limit = 100) => {
+        // Validate function
+        if (typeof func !== 'function') {
+            Utils?.log('throttle requires a function as first argument', 'UTILS', 'error');
+            return () => {}; // Return noop
+        }
+        
+        // Validate limit
+        if (typeof limit !== 'number' || limit < 0 || !isFinite(limit)) {
+            Utils?.log(`Invalid limit for throttle (${limit}), using default 100ms`, 'UTILS', 'warn');
+            limit = 100;
+        }
+        
         let inThrottle = false;
         return function (...args) {
             if (!inThrottle) {
@@ -589,15 +621,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * Create a standard player control button
      * @param {string} className - Extra CSS classes
      * @param {string} title - Tooltip title
-     * @param {string} svgContent - Inner SVG HTML (WARNING: Trusted content only, uses innerHTML)
-     * @param {Function} onClick - Click handler
-     * @returns {HTMLButtonElement}
-     */
-    /**
-     * Create a standard player control button
-     * @param {string} className - Extra CSS classes
-     * @param {string} title - Tooltip title
-     * @param {string} svgContent - Inner SVG HTML (WARNING: Trusted content only, uses innerHTML)
+     * @param {string|Element} svgContent - SVG element or SVG markup string
      * @param {Function} onClick - Click handler
      * @returns {HTMLButtonElement}
      */
@@ -606,20 +630,34 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         btn.className = `ytp-button ${className || ''}`;
         btn.title = title || '';
         
-        // Safety: standardized SVG injection
+        // Safely handle SVG content
         if (typeof svgContent === 'string') {
-            // Basic sanitation to check for XSS vectors in string
-            if (svgContent.toLowerCase().includes('javascript:') || svgContent.toLowerCase().includes('onclick')) {
-                console.warn('[YPP] Blocked potential XSS in addPlayerButton');
-                btn.textContent = 'ERROR';
-            } else {
-                 btn.innerHTML = svgContent;
+            // Use DOMParser for safe SVG parsing (browsers automatically sanitize)
+            try {
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+                
+                // Check for parse errors
+                const parseError = svgDoc.querySelector('parsererror');
+                if (parseError) {
+                    console.warn('[YPP] Invalid SVG in addPlayerButton');
+                    btn.textContent = '?';
+                } else {
+                    const svgElement = svgDoc.documentElement;
+                    btn.appendChild(svgElement);
+                }
+            } catch (error) {
+                console.error('[YPP] Error parsing SVG:', error);
+                btn.textContent = '?';
             }
         } else if (svgContent instanceof Element) {
             btn.appendChild(svgContent);
         }
         
-        btn.onclick = onClick;
+        if (typeof onClick === 'function') {
+            btn.onclick = onClick;
+        }
+        
         return btn;
     },
 
@@ -690,9 +728,27 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @param {number} value - Value to clamp
      * @param {number} min - Minimum value
      * @param {number} max - Maximum value
-     * @returns {number}
+     * @returns {number} Clamped value or min if inputs are invalid
      */
     clamp: (value, min, max) => {
+        // Validate inputs are numbers
+        if (typeof value !== 'number' || typeof min !== 'number' || typeof max !== 'number') {
+            Utils?.log('Invalid inputs to clamp function', 'UTILS', 'warn');
+            return typeof min === 'number' ? min : 0;
+        }
+        
+        // Handle NaN and Infinity
+        if (isNaN(value) || !isFinite(value)) {
+           return min;
+        }
+        if (isNaN(min) || !isFinite(min)) min = 0;
+        if (isNaN(max) || !isFinite(max)) max = 100;
+        
+        // Ensure min <= max
+        if (min > max) {
+            [min, max] = [max, min]; // Swap if needed
+        }
+        
         return Math.min(Math.max(value, min), max);
     }
 });

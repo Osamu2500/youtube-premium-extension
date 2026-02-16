@@ -42,6 +42,8 @@
         isInitialized: false,
         /** @type {boolean} Bootstrap lock */
         bootstrapLock: false,
+        /** @type {Array} Event listeners for cleanup */
+        eventListeners: [],
         /** @type {number} Maximum retry attempts */
         MAX_RETRY_ATTEMPTS: 3,
         /** @type {number} Retry delay in ms */
@@ -196,16 +198,8 @@
                      throw new Error('Extension context invalidated');
                 }
 
-                // Check for Chrome storage API
-                if (!chrome?.storage?.local) {
-                    this.Utils?.log('Chrome storage API not available, using defaults', 'MAIN', 'warn');
-                    this.settings = window.YPP.getDefaultSettings();
-                    return;
-                }
-
-                const data = await chrome.storage.local.get('settings');
-                this.settings = data.settings || window.YPP.getDefaultSettings();
-
+                // Use centralized settings loader from Utils
+                this.settings = await this.Utils.loadSettings();
                 this.Utils?.log(`Settings Loaded (attempt ${attempt})`, 'MAIN', 'debug');
 
             } catch (error) {
@@ -252,6 +246,9 @@
          * @private
          */
         setupEvents() {
+            // Clean up existing listeners first
+            this.removeEventListeners();
+
             // Handle YouTube SPA navigation
             const handleNavigation = () => {
                 this.Utils?.log('Navigation detected', 'MAIN', 'debug');
@@ -261,15 +258,17 @@
                 }
             };
 
-            // Listen for page navigation
+            // Listen for page navigation and track listener
             window.addEventListener('yt-navigate-finish', handleNavigation);
+            this.eventListeners.push({ target: window, event: 'yt-navigate-finish', handler: handleNavigation });
 
             // Also listen for yt-page-data-updated for some YouTube versions
             window.addEventListener('yt-page-data-updated', handleNavigation);
+            this.eventListeners.push({ target: window, event: 'yt-page-data-updated', handler: handleNavigation });
 
             // Listen for settings changes from popup
             if (chrome?.storage?.onChanged) {
-                chrome.storage.onChanged.addListener((changes, area) => {
+                const storageHandler = (changes, area) => {
                     try {
                         if (area === 'local' && changes.settings) {
                             const newSettings = changes.settings.newValue;
@@ -285,13 +284,15 @@
                     } catch (error) {
                         this.Utils?.log(`Error handling settings change: ${error.message}`, 'MAIN', 'error');
                     }
-                });
+                };
+                chrome.storage.onChanged.addListener(storageHandler);
+                this.eventListeners.push({ target: chrome.storage.onChanged, event: 'storage', handler: storageHandler });
             } else {
                 this.Utils?.log('chrome.storage.onChanged API not available', 'MAIN', 'warn');
             }
 
             // Listen for direct messages for instant updates
-            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            const messageHandler = (request, sender, sendResponse) => {
                 if (request.action === 'UPDATE_SETTINGS' && request.settings) {
                     this.settings = request.settings;
                     this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
@@ -309,7 +310,28 @@
                     }
                     sendResponse({ success: true });
                 }
+            };
+            chrome.runtime.onMessage.addListener(messageHandler);
+            this.eventListeners.push({ target: chrome.runtime.onMessage, event: 'message', handler: messageHandler });
+        },
+
+        /**
+         * Remove all event listeners (cleanup)
+         * @private
+         */
+        removeEventListeners() {
+            this.eventListeners.forEach(({ target, event, handler }) => {
+                try {
+                    if (target.removeEventListener) {
+                        target.removeEventListener(event, handler);
+                    } else if (target.removeListener) {
+                        target.removeListener(handler);
+                    }
+                } catch (error) {
+                    // Ignore cleanup errors
+                }
             });
+            this.eventListeners = [];
         },
 
         // =========================================================================
@@ -477,6 +499,9 @@
          */
         cleanup() {
             this.Utils?.log('Cleaning up...', 'MAIN');
+
+            // Remove event listeners
+            this.removeEventListeners();
 
             if (this.featureManager) {
                 this.featureManager.disableAll?.();

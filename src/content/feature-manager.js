@@ -74,22 +74,39 @@ window.YPP.FeatureManager = class FeatureManager {
             return;
         }
 
+        let successCount = 0;
+        let failCount = 0;
+        const totalFeatures = Object.keys(featureMap).length;
+
         for (const [key, className] of Object.entries(featureMap)) {
             try {
                 // Skip if already instantiated
-                if (this.features[key]) continue;
+                if (this.features[key]) {
+                    successCount++;
+                    continue;
+                }
 
                 // Ensure the class exists in the global namespace
                 if (typeof window.YPP.features[className] === 'function') {
                     this.features[key] = new window.YPP.features[className]();
                     this.errorCounts[key] = 0;
+                    successCount++;
                 } else {
-                    // window.YPP.Utils.log(`Feature class '${className}' not found. Check file inclusion.`, 'MANAGER', 'warn');
+                    failCount++;
+                    // Silently track missing features (they might not be loaded yet)
                 }
             } catch (e) {
+                failCount++;
                 window.YPP.Utils.log(`Failed to instantiate '${className}': ${e?.message || 'Unknown error'}`, 'MANAGER', 'error');
             }
         }
+
+        window.YPP.Utils.log(
+            `Feature instantiation complete: ${successCount}/${totalFeatures} loaded` +
+            (failCount > 0 ? `, ${failCount} failed/unavailable` : ''),
+            'MANAGER',
+            'info'
+        );
     }
 
     /**
