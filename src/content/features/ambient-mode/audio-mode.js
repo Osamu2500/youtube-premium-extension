@@ -79,11 +79,14 @@ window.YPP.features.AudioMode = class AudioMode {
     }
 
     async showThumbnailOverlay() {
-        const player = document.querySelector('.html5-video-player');
-        if (!player) {
-            console.error('YPP Audio Mode: Player not found');
-            return;
-        }
+        if (!this.Utils.pollFor) return;
+
+        try {
+            const player = await this.Utils.pollFor(() => document.querySelector('.html5-video-player'), 10000, 500);
+            if (!player) {
+                console.error('YPP Audio Mode: Player not found');
+                return;
+            }
 
         // Get video ID
         const videoId = new URLSearchParams(window.location.search).get('v');
@@ -177,6 +180,9 @@ window.YPP.features.AudioMode = class AudioMode {
 
         player.prepend(overlay);
         this.overlay = overlay;
+        } catch (error) {
+            console.error('YPP Audio Mode: Failed to overlay', error);
+        }
     }
 
     /**

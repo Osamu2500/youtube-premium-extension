@@ -156,15 +156,6 @@ window.YPP.features.HeaderNav = class HeaderNav {
             #avatar-btn img {
                 border-radius: 12px !important;
             }
-            /* Hide Sidebar Support */
-            body.ypp-hide-sidebar ytd-mini-guide-renderer, 
-            body.ypp-hide-sidebar app-drawer, 
-            body.ypp-hide-sidebar #guide {
-                display: none !important;
-            }
-            body.ypp-hide-sidebar ytd-app {
-                --ytd-mini-guide-width: 0px !important;
-            }
             body.ypp-hide-sidebar #content {
                 margin-left: 0 !important;
             }
@@ -231,12 +222,12 @@ window.YPP.features.HeaderNav = class HeaderNav {
 
         try {
             // Check if our group already exists in valid state
-            if (document.querySelector('.ypp-nav-group-right')) {
+            if (centerSection.querySelector('.ypp-nav-group')) {
                 this._updateActiveStates();
                 return;
             }
 
-            // Remove any stale groups
+            // Remove any stale groups that might exist outside the current center context
             const oldGroups = document.querySelectorAll('.ypp-nav-group');
             oldGroups.forEach(g => g.remove());
 

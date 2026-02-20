@@ -3,6 +3,7 @@
  * Starting fresh to place sidebar on homepage first.
  */
 window.YPP = window.YPP || {};
+window.YPP.features = window.YPP.features || {};
 /**
  * Sidebar Manager
  * Controls sidebar visibility and ensures proper state management.

@@ -127,13 +127,36 @@ window.YPP.features.ZenMode = class ZenMode {
         }
     }
 
-    _applyAmbientMode() {
+    async _applyAmbientMode() {
         if (this.ambientActive) return;
         this.ambientActive = true;
 
         this._initCanvas();
         this.lastUpdate = 0;
-        this.animationFrame = requestAnimationFrame(this._loop);
+        
+        // Ensure player elements exist before starting loop
+        const Utils = window.YPP.Utils;
+        if (Utils) {
+            try {
+                const elements = await Utils.pollFor(() => {
+                    const player = document.querySelector('#ytd-player') || 
+                                 document.querySelector('#player-container-outer') || 
+                                 document.querySelector('.html5-video-player');
+                    const video = document.querySelector('video');
+                    
+                    if (player && video) return { player, video };
+                    return null;
+                }, 10000, 500);
+                
+                if (elements && this.ambientActive) {
+                    this.playerElement = elements.player;
+                    this.videoElement = elements.video;
+                    this.animationFrame = requestAnimationFrame(this._loop);
+                }
+            } catch (e) {
+                Utils.log?.('ZenMode failed to find player elements', 'ZEN', 'warn');
+            }
+        }
     }
 
     _initCanvas() {
@@ -149,22 +172,21 @@ window.YPP.features.ZenMode = class ZenMode {
         if (!this.ambientActive) return;
 
         // Pause if tab hidden
-        if (document.hidden) {
-            this.animationFrame = requestAnimationFrame(this._loop);
-            return;
-        }
-
-        // Throttle to FPS
-        if (timestamp - this.lastUpdate > this.FRAME_INTERVAL) {
-            this.lastUpdate = timestamp;
-            this._processFrame();
+        if (!document.hidden) {
+            // Throttle to FPS
+            if (timestamp - this.lastUpdate > this.FRAME_INTERVAL) {
+                this.lastUpdate = timestamp;
+                this._processFrame();
+            }
         }
 
         this.animationFrame = requestAnimationFrame(this._loop);
     }
 
     _processFrame() {
-        // Cache Video Element
+        if (!this.ctx) return;
+        
+        // Cache Video Element (fallback if poller missed it or it changed)
         if (!this.videoElement || !this.videoElement.isConnected) {
             this.videoElement = document.querySelector('video');
         }
@@ -185,7 +207,7 @@ window.YPP.features.ZenMode = class ZenMode {
     }
 
     _updateGlow(color) {
-        // Lazy-cache player element on first update
+        // Fallback if player element not cached
         if (!this.playerElement || !this.playerElement.isConnected) {
             this.playerElement = document.querySelector('#ytd-player') || 
                                  document.querySelector('#player-container-outer') || 

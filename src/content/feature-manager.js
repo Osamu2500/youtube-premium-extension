@@ -120,34 +120,40 @@ window.YPP.FeatureManager = class FeatureManager {
 
     /**
      * Apply or update all features based on current settings.
-     * Calls update() or run() on each feature instance.
-     * @returns {void}
+     * Calls update() or run() on each feature instance asynchronously.
+     * @returns {Promise<void>}
      */
-    applyFeatures() {
-        Object.entries(this.features).forEach(([name, instance]) => {
+    async applyFeatures() {
+        // Collect all feature execution promises
+        const featurePromises = Object.entries(this.features).map(([name, instance]) => {
             // Skip if feature is broken
-            if (this.errorCounts[name] >= this.MAX_ERRORS) return;
+            if (this.errorCounts[name] >= this.MAX_ERRORS) {
+                return Promise.resolve();
+            }
 
-            this.safeRun(name, () => {
+            return this.safeRun(name, async () => {
                 // Standard: check for enable/disable methods and update logic
                 if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
                     // Method 1: Feature has strict 'update' method (Preferred)
                     if (typeof instance.update === 'function') {
-                        instance.update(this.settings);
+                        await instance.update(this.settings);
                     }
                     // Method 2: Fallback to 'run' method for simple features
                     else if (typeof instance.run === 'function') {
-                        instance.run(this.settings);
+                        await instance.run(this.settings);
                     }
                 }
                 // Legacy support for older features
                 else if (typeof instance.run === 'function') {
-                    instance.run(this.settings);
+                    await instance.run(this.settings);
                 }
             });
         });
 
-        // Notify system that features have been applied/updated
+        // Await all features to initialize/update concurrently
+        await Promise.allSettled(featurePromises);
+
+        // Notify system that all features have been applied/updated
         if (window.YPP.events) {
             window.YPP.events.emit('features:updated', this.settings);
         }
@@ -167,7 +173,9 @@ window.YPP.FeatureManager = class FeatureManager {
         } catch (e) {
             this.errorCounts[name] = (this.errorCounts[name] || 0) + 1;
             window.YPP.Utils.log(`Error in feature '${name}' (${this.errorCounts[name]}/${this.MAX_ERRORS}): ${e.message}`, 'MANAGER', 'error');
-            console.error(e);
+            
+            // Preserve stack trace in console for debugging
+            console.error(`[YPP:${name}]`, e);
 
             if (this.errorCounts[name] >= this.MAX_ERRORS) {
                 window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors.`, 'MANAGER', 'warn');

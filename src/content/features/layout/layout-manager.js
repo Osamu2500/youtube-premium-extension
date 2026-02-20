@@ -79,9 +79,11 @@ window.YPP.features.Layout = class GridLayoutManager {
         /** @type {WeakSet<Element>} Track processed containers to avoid reprocessing */
         this._processedContainers = new WeakSet();
 
+        // Initialize centralized DOM observer
+        this.domObserver = new window.YPP.Utils.DOMObserver();
+
         // Bind methods for performance
         this._boundApplyLayout = this.applyGridLayout.bind(this);
-        this._boundHandleMutation = this._handleMutation.bind(this);
     }
 
     /**
@@ -155,65 +157,22 @@ window.YPP.features.Layout = class GridLayoutManager {
     }
 
     /**
-     * Start mutation observer to watch for DOM changes
+     * Start central DOMObserver to watch for grid changes
      */
     startObserver() {
-        if (this.observer) return;
-
-        // Target specific container instead of entire body
-        const targetNode = document.querySelector(GridLayoutManager.SELECTORS.APP_CONTAINER);
-        if (!targetNode) {
-            this.Utils.log?.('App container not found, retrying...', 'LAYOUT', 'warn');
-            setTimeout(() => this.startObserver(), 1000);
-            return;
-        }
-
-        this.observer = new MutationObserver(this._boundHandleMutation);
-
-        // Watch only relevant parts of the DOM tree
-        this.observer.observe(targetNode, { 
-            childList: true, 
-            subtree: true,
-            // Don't watch attributes - we only care about new nodes
-            attributes: false
-        });
-
-        this.Utils.log?.('Observer started', 'LAYOUT', 'debug');
-    }
-
-    /**
-     * Handle mutation events with optimized filtering
-     * @private
-     * @param {MutationRecord[]} mutations - Array of mutation records
-     */
-    _handleMutation(mutations) {
         if (!this.isActive) return;
 
-        // Early exit: Check if any relevant nodes were added
-        let shouldUpdate = false;
+        this.domObserver.start();
         
-        for (const mutation of mutations) {
-            if (mutation.type !== 'childList' || mutation.addedNodes.length === 0) {
-                continue;
-            }
+        // Register observer for main app container changes
+        this.domObserver.register(
+            'layout-manager',
+            GridLayoutManager.SELECTORS.APP_CONTAINER,
+            () => this._debouncedApply(),
+            false // Process handled by init()'s applyWithRetry
+        );
 
-            // Check if any added node is relevant
-            for (const node of mutation.addedNodes) {
-                if (node.nodeType !== Node.ELEMENT_NODE) continue;
-                
-                const tag = node.tagName;
-                if (GridLayoutManager.WATCHED_TAGS.has(tag) || node.id === 'contents') {
-                    shouldUpdate = true;
-                    break;
-                }
-            }
-
-            if (shouldUpdate) break;
-        }
-
-        if (shouldUpdate) {
-            this._debouncedApply();
-        }
+        this.Utils.log?.('Observer started via DOMObserver', 'LAYOUT', 'debug');
     }
 
     /**
@@ -349,9 +308,9 @@ window.YPP.features.Layout = class GridLayoutManager {
      */
     _cleanup() {
         // Disconnect observer
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+        if (this.domObserver) {
+            this.domObserver.unregister('layout-manager');
+            this.domObserver.stop();
         }
 
         // Remove resize listener

@@ -69,17 +69,26 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         }
     }
 
-    init() {
+    async init() {
         this.videoId = this.getVideoId();
         if (!this.videoId) return;
 
-        this.videoElement = document.querySelector('video');
-        if (this.videoElement) {
-            this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
-            this.fetchSegments();
-        } else {
-            // Poll for video if not ready (rare on nav finish, but possible)
-            this.pollForVideo();
+        try {
+            // Use centralized pollFor to wait for the video element
+            const video = await this.Utils.pollFor(() => {
+                const v = document.querySelector('video');
+                // Ensure video is somewhat ready
+                if (v && v.readyState >= 1) return v;
+                return null;
+            }, 10000, 500);
+
+            if (video) {
+                this.videoElement = video;
+                this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
+                this.fetchSegments();
+            }
+        } catch (error) {
+            this.Utils.log?.('SponsorBlock initialization timed out waiting for video', 'SPONSOR', 'warn');
         }
     }
 
@@ -100,20 +109,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         // Implementation depends on global toast availability, generic placeholder
     }
 
-    pollForVideo() {
-        let attempts = 0;
-        const interval = setInterval(() => {
-            if (!this.isActive) { clearInterval(interval); return; }
-            const video = document.querySelector('video');
-            if (video) {
-                clearInterval(interval);
-                this.videoElement = video;
-                this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
-                this.fetchSegments();
-            }
-            if (++attempts > 10) clearInterval(interval);
-        }, 500);
-    }
+    // Removed pollForVideo in favor of init's Utils.pollFor
 
     getVideoId() {
         return new URLSearchParams(window.location.search).get('v');

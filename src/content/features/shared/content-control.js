@@ -13,12 +13,13 @@ window.YPP.features.ContentControl = class ContentControl {
      * Initialize Content Control
      */
     constructor() {
-        this.observer = null;
-        this.shortsObserver = null;  // Dedicated observer for Shorts
         this.settings = null;
         this._redirectListenerAdded = false;
         this._isMonitoring = false;
         this.Utils = window.YPP.Utils;
+        
+        // Initialize centralized DOM observer
+        this.domObserver = new window.YPP.Utils.DOMObserver();
         
         // Bind methods for safe event listener removal
         this.checkRedirect = this.checkRedirect.bind(this);
@@ -298,52 +299,25 @@ window.YPP.features.ContentControl = class ContentControl {
 
     /**
      * Start continuous monitoring for dynamically loaded Shorts
-     * This catches Shorts that load as user scrolls or navigates
+     * Uses centralized DOMObserver.
      */
     startShortsMonitoring() {
         if (this._isMonitoring || !this.settings?.hideShorts) return;
 
-        this.Utils?.log('Starting continuous Shorts monitoring', 'CONTENT');
+        this.Utils?.log('Starting continuous Shorts monitoring via DOMObserver', 'CONTENT');
 
-        // Debounced handler to avoid excessive processing
-        const debouncedProcess = this.Utils?.debounce?.(
-            this.handleShortsAdded.bind(this), 
-            200
-        ) || this.handleShortsAdded.bind(this);
+        // Start the observer
+        this.domObserver.start();
 
-        this.shortsObserver = new MutationObserver((mutations) => {
-            // Check if any Shorts-related content was added
-            const hasShortsContent = mutations.some(mutation => {
-                if (mutation.addedNodes.length === 0) return false;
-                
-                return Array.from(mutation.addedNodes).some(node => {
-                    if (node.nodeType !== 1) return false; // Element nodes only
-                    
-                    const tagName = node.tagName?.toLowerCase();
-                    
-                    // Quick checks for Shorts-related elements
-                    return tagName?.includes('reel') ||
-                           tagName?.includes('shorts') ||
-                           node.hasAttribute?.('is-shorts') ||
-                           node.querySelector?.('a[href*="/shorts/"]') ||
-                           tagName === 'ytd-rich-item-renderer' ||
-                           tagName === 'ytd-video-renderer' ||
-                           tagName === 'ytd-grid-video-renderer' ||
-                           tagName === 'ytd-compact-video-renderer' ||
-                           tagName === 'ytd-shelf-renderer';
-                });
-            });
-
-            if (hasShortsContent) {
-                debouncedProcess();
-            }
-        });
-
-        // Observe entire document for changes
-        this.shortsObserver.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        // Register a catch-all callback for dynamically added content containers
+        // Since Shorts can appear in various forms, we watch the main content area
+        // and run our comprehensive detection logic when it updates.
+        this.domObserver.register(
+            'shorts-monitor',
+            '#contents, ytd-rich-grid-row, ytd-item-section-renderer', 
+            this.handleShortsAdded,
+            false // Don't run immediately, removeShortsFromDOM already did the initial pass
+        );
 
         this._isMonitoring = true;
     }
@@ -352,9 +326,9 @@ window.YPP.features.ContentControl = class ContentControl {
      * Stop continuous Shorts monitoring
      */
     stopShortsMonitoring() {
-        if (this.shortsObserver) {
-            this.shortsObserver.disconnect();
-            this.shortsObserver = null;
+        if (this._isMonitoring) {
+            this.domObserver.unregister('shorts-monitor');
+            this.domObserver.stop();
             this._isMonitoring = false;
             this.Utils?.log('Stopped Shorts monitoring', 'CONTENT');
         }

@@ -158,65 +158,54 @@ chrome.alarms.onAlarm.addListener((alarm) => {
  * Handle messages from content scripts and popup
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'GET_SETTINGS') {
-        chrome.storage.local.get('settings', (data) => {
-            try {
+    const action = request.action || request.type;
+
+    switch (action) {
+        case 'GET_SETTINGS':
+            chrome.storage.local.get('settings').then((data) => {
                 sendResponse(data.settings || DEFAULT_SETTINGS);
-            } catch (error) {
+            }).catch((error) => {
                 console.error('[YPP] Error getting settings:', error);
                 sendResponse(DEFAULT_SETTINGS);
-              }
-        });
-        return true;
-    }
+            });
+            return true; // Indicate async response
 
-    if (request.action === 'getTimer') {
-        chrome.storage.local.get('timerState', (data) => {
-            try {
+        case 'getTimer':
+            chrome.storage.local.get('timerState').then((data) => {
                 const state = data.timerState || { isRunning: false, endTime: null };
                 let timeLeft = 0;
+                
                 if (state.isRunning && state.endTime) {
                     timeLeft = Math.max(0, Math.floor((state.endTime - Date.now()) / 1000));
                     // If time is up but alarm hasn't fired/cleared yet (rare race condition), consider it done
                     if (timeLeft === 0) {
-                        stopTimer();
+                        stopTimer(); // Fire-and-forget
                         state.isRunning = false;
                     }
                 }
                 sendResponse({ isRunning: state.isRunning, timeLeft });
-            } catch (error) {
+            }).catch((error) => {
                 console.error('[YPP] Error getting timer state:', error);
                 sendResponse({ isRunning: false, timeLeft: 0 });
-            }
-        });
-        return true;
-    }
-
-    if (request.action === 'startTimer') {
-        startTimer().then(() => sendResponse({ success: true }))
-            .catch((error) => {
-                console.error('[YPP] Error in startTimer message handler:', error);
-                sendResponse({ success: false });
             });
-        return true;
-    }
+            return true; // Indicate async response
 
-    if (request.action === 'stopTimer') {
-        stopTimer().then(() => sendResponse({ success: true }))
-            .catch((error) => {
-                console.error('[YPP] Error in stopTimer message handler:', error);
-                sendResponse({ success: false });
-            });
-        return true;
-    }
+        case 'startTimer':
+        case 'stopTimer':
+        case 'resetTimer':
+            const timerAction = action === 'startTimer' ? startTimer() : stopTimer();
+            
+            timerAction
+                .then(() => sendResponse({ success: true }))
+                .catch((error) => {
+                    console.error(`[YPP] Error in ${action} message handler:`, error);
+                    sendResponse({ success: false });
+                });
+            return true; // Indicate async response
 
-    if (request.action === 'resetTimer') {
-        stopTimer().then(() => sendResponse({ success: true }))
-            .catch((error) => {
-                console.error('[YPP] Error in resetTimer message handler:', error);
-                sendResponse({ success: false });
-            });
-        return true;
+        default:
+            // Unhandled actions can be ignored or logged
+            return false;
     }
 });
 

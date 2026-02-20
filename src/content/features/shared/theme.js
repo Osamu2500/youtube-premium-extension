@@ -64,7 +64,6 @@ window.YPP.features.Theme = class ThemeManager {
             this._applyTrueBlack(false);
             this._applyHideScrollbar(false);
             this._applyProgressBarColor(null);
-            this._manageShortsObserver(false);
             this._manageWatchedObserver(false);
             this._cleanupClasses();
 
@@ -112,10 +111,6 @@ window.YPP.features.Theme = class ThemeManager {
             } else {
                 this._applyProgressBarColor(null);
             }
-
-            // Shorts management
-            const hideShorts = this._settings.hideShorts || this._settings.hideSearchShorts;
-            this._manageShortsObserver(hideShorts);
 
             // Watched videos
             this._manageWatchedObserver(this._settings.hideWatched);
@@ -359,7 +354,6 @@ window.YPP.features.Theme = class ThemeManager {
     _cleanupClasses() {
         const classes = [
             this._CSS_CLASSES.THEME_ENABLED,
-            this._CSS_CLASSES.HIDE_SHORTS,
             this._CSS_CLASSES.HIDE_MIXES,
             this._CSS_CLASSES.HIDE_WATCHED,
             this._CSS_CLASSES.HIDE_MERCH,
@@ -376,115 +370,7 @@ window.YPP.features.Theme = class ThemeManager {
         document.documentElement.classList.remove(...classes);
     }
 
-    // =========================================================================
-    // SHORTS MANAGEMENT
-    // =========================================================================
 
-    /**
-     * Manage shorts observer
-     * @private
-     * @param {boolean} enable
-     */
-    _manageShortsObserver(enable) {
-        this._hideShortsElements(enable);
-
-        if (enable) {
-            if (!this._shortsObserver) {
-                const processMutations = () => this._hideShortsElements(true);
-                const debouncedProcess = this._Utils.debounce?.(processMutations, this._SHORTS_DEBOUNCE) || debounce(processMutations, this._SHORTS_DEBOUNCE);
-
-                this._shortsObserver = new MutationObserver((mutations) => {
-                    const hasRelevantMutation = mutations.some(m =>
-                        m.addedNodes.length > 0 &&
-                        (m.target.tagName?.includes('YTD') || m.target.id === 'contents')
-                    );
-
-                    if (hasRelevantMutation) {
-                        debouncedProcess();
-                    }
-                });
-
-                this._shortsObserver.observe(document.body, { childList: true, subtree: true });
-            }
-        } else {
-            if (this._shortsObserver) {
-                this._shortsObserver.disconnect();
-                this._shortsObserver = null;
-            }
-            this._hideShortsElements(false);
-        }
-    }
-
-    /**
-     * Hide or show shorts elements
-     * @private
-     * @param {boolean} enable
-     */
-    _hideShortsElements(enable) {
-        const selectors = [
-            this._SELECTORS.SHORTS_SECTION || 'ytd-rich-section-renderer[is-shorts]',
-            this._SELECTORS.SHORTS_SHELF,
-            'ytd-rich-shelf-renderer[is-shorts]',
-            'ytd-secondary-search-container-renderer',
-            'a[href^="/shorts"]'
-        ];
-
-        selectors.forEach(sel => {
-            try {
-                const elements = document.querySelectorAll(sel);
-                elements.forEach(el => {
-                    if (el.tagName === 'A' && !el.closest('ytd-rich-item-renderer')) return;
-                    el.style.display = enable ? 'none' : '';
-                });
-            } catch (error) {
-                // Skip invalid selectors
-            }
-        });
-
-        // Content heuristics for containers
-        if (enable) {
-            const potentialContainers = document.querySelectorAll(
-                'ytd-shelf-renderer, ytd-rich-shelf-renderer, ytd-item-section-renderer'
-            );
-            potentialContainers.forEach(container => {
-                if (this._isShortsContainer(container)) {
-                    container.style.display = 'none';
-                }
-            });
-        }
-    }
-
-    /**
-     * Detect if container is shorts
-     * @private
-     * @param {HTMLElement} container
-     * @returns {boolean}
-     */
-    _isShortsContainer(container) {
-        if (!container) return false;
-
-        try {
-            // Check tag
-            if (container.tagName === 'YTD-REEL-SHELF-RENDERER') return true;
-            if (container.hasAttribute('is-shorts')) return true;
-
-            // Check title
-            const titleEl = container.querySelector('#title');
-            if (titleEl?.textContent) {
-                const title = titleEl.textContent.trim().toLowerCase();
-                if (title === 'shorts' || title.includes('shorts')) return true;
-            }
-
-            // Check aria-label
-            const ariaLabel = container.getAttribute('aria-label');
-            if (ariaLabel?.toLowerCase().includes('shorts')) return true;
-
-            return false;
-        } catch (error) {
-            this._Utils.log?.(`Error checking shorts container: ${error.message}`, 'THEME', 'warn');
-            return false;
-        }
-    }
 
     // =========================================================================
     // WATCHED VIDEOS

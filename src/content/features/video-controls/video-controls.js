@@ -44,9 +44,13 @@ window.YPP.features.VideoControls = class VideoControls {
         this.destroy();
     }
 
-    injectToggle() {
-        // Wait for player controls
-        this.Utils.waitForElement('.ytp-right-controls').then(controls => {
+    async injectToggle() {
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
+
+        try {
+            // Wait for player controls
+            const controls = await Utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
             if (!this.isActive || !controls) return;
             if (controls.querySelector('#ypp-vcp-toggle')) return;
 
@@ -61,7 +65,9 @@ window.YPP.features.VideoControls = class VideoControls {
             // Insert before settings button
             const settingsBtn = controls.querySelector('.ytp-settings-button');
             controls.insertBefore(btn, settingsBtn);
-        });
+        } catch (error) {
+            this.logger.warn('Timeout waiting for .ytp-right-controls');
+        }
     }
 
     togglePanel() {
@@ -245,10 +251,6 @@ window.YPP.features.VideoControls = class VideoControls {
             }
         });
         this.listeners = [];
-        
-        // Also clean up draggable listeners on document
-        document.onmousemove = null;
-        document.onmouseup = null;
     }
 
     makeDraggable() {

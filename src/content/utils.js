@@ -127,7 +127,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         try {
             return parent.querySelector(selector);
         } catch (e) {
-            Utils?.log(`Invalid selector: ${selector}`, 'UTILS', 'warn');
+            window.YPP.Utils?.log(`Invalid selector: ${selector}`, 'UTILS', 'warn');
             return null;
         }
     },
@@ -143,7 +143,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         try {
             return parent.querySelectorAll(selector);
         } catch (e) {
-            Utils?.log(`Invalid selector: ${selector}`, 'UTILS', 'warn');
+            window.YPP.Utils?.log(`Invalid selector: ${selector}`, 'UTILS', 'warn');
             return [];
         }
     },
@@ -157,13 +157,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     waitForElement: (selector, timeout = CONSTANTS.TIMINGS?.ELEMENT_WAIT_DEFAULT || 10000) => {
         // Input validation
         if (!selector || typeof selector !== 'string') {
-            Utils?.log('Invalid selector provided to waitForElement', 'UTILS', 'warn');
+            window.YPP.Utils?.log('Invalid selector provided to waitForElement', 'UTILS', 'warn');
             return Promise.resolve(null);
         }
         
         // Validate timeout
         if (typeof timeout !== 'number' || timeout <= 0 || !isFinite(timeout)) {
-            Utils?.log(`Invalid timeout (${timeout}), using default 10000ms`, 'UTILS', 'warn');
+            window.YPP.Utils?.log(`Invalid timeout (${timeout}), using default 10000ms`, 'UTILS', 'warn');
             timeout = 10000;
         }
 
@@ -172,7 +172,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             const existing = document.querySelector(selector);
             if (existing) return Promise.resolve(existing);
         } catch (e) {
-            Utils?.log(`Invalid CSS selector: ${selector}`, 'UTILS', 'error');
+            window.YPP.Utils?.log(`Invalid CSS selector: ${selector}`, 'UTILS', 'error');
             return Promise.resolve(null);
         }
 
@@ -266,6 +266,42 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
+     * Poll for a condition to be met (used when MutationObserver is not ideal)
+     * @param {Function} conditionFn - Function that returns a truthy value when condition is met
+     * @param {number} timeout - Maximum wait time in ms
+     * @param {number} interval - Polling interval in ms
+     * @returns {Promise<any>} Resolves with the truthy value returned by conditionFn
+     */
+    pollFor: (conditionFn, timeout = 10000, interval = 250) => {
+        return new Promise((resolve, reject) => {
+            // First check
+            const result = conditionFn();
+            if (result) {
+                return resolve(result);
+            }
+
+            const startTime = Date.now();
+            
+            const timer = setInterval(() => {
+                try {
+                    const result = conditionFn();
+                    if (result) {
+                        clearInterval(timer);
+                        resolve(result);
+                    } else if (Date.now() - startTime >= timeout) {
+                        clearInterval(timer);
+                        resolve(null); // Resolve with null instead of reject for safer handling
+                    }
+                } catch (error) {
+                    clearInterval(timer);
+                    window.YPP.Utils?.log('Error in pollFor condition', 'UTILS', 'warn');
+                    resolve(null);
+                }
+            }, interval);
+        });
+    },
+
+    /**
      * Create a DOM element with attributes and children
      * @param {string} tag - HTML tag name
      * @param {Object} [attrs] - Element attributes
@@ -351,13 +387,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     debounce: (func, wait = CONSTANTS.TIMINGS?.DEBOUNCE_DEFAULT || 50) => {
         // Validate function
         if (typeof func !== 'function') {
-            Utils?.log('debounce requires a function as first argument', 'UTILS', 'error');
+            window.YPP.Utils?.log('debounce requires a function as first argument', 'UTILS', 'error');
             return () => {}; // Return noop
         }
         
         // Validate wait time
         if (typeof wait !== 'number' || wait < 0 || !isFinite(wait)) {
-            Utils?.log(`Invalid wait time for debounce (${wait}), using default`, 'UTILS', 'warn');
+            window.YPP.Utils?.log(`Invalid wait time for debounce (${wait}), using default`, 'UTILS', 'warn');
             wait = CONSTANTS.TIMINGS?.DEBOUNCE_DEFAULT || 50;
         }
         
@@ -381,13 +417,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     throttle: (func, limit = 100) => {
         // Validate function
         if (typeof func !== 'function') {
-            Utils?.log('throttle requires a function as first argument', 'UTILS', 'error');
+            window.YPP.Utils?.log('throttle requires a function as first argument', 'UTILS', 'error');
             return () => {}; // Return noop
         }
         
         // Validate limit
         if (typeof limit !== 'number' || limit < 0 || !isFinite(limit)) {
-            Utils?.log(`Invalid limit for throttle (${limit}), using default 100ms`, 'UTILS', 'warn');
+            window.YPP.Utils?.log(`Invalid limit for throttle (${limit}), using default 100ms`, 'UTILS', 'warn');
             limit = 100;
         }
         
@@ -483,7 +519,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         try {
             return JSON.parse(jsonString);
         } catch (error) {
-            Utils?.log('JSON parse error: ' + error.message, 'UTILS', 'warn');
+            window.YPP.Utils?.log('JSON parse error: ' + error.message, 'UTILS', 'warn');
             return fallback;
         }
     },
@@ -498,7 +534,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         try {
             return JSON.stringify(obj);
         } catch (error) {
-            Utils?.log('JSON stringify error: ' + error.message, 'UTILS', 'warn');
+            window.YPP.Utils?.log('JSON stringify error: ' + error.message, 'UTILS', 'warn');
             return fallback;
         }
     },
@@ -510,14 +546,14 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     loadSettings: async () => {
         try {
             if (!chrome?.storage?.local) {
-                Utils?.log('Chrome storage not available', 'UTILS', 'warn');
+                window.YPP.Utils?.log('Chrome storage not available', 'UTILS', 'warn');
                 return CONSTANTS.DEFAULT_SETTINGS || {};
             }
 
             const data = await chrome.storage.local.get('settings');
             return data.settings || CONSTANTS.DEFAULT_SETTINGS || {};
         } catch (error) {
-            Utils?.log('Error loading settings: ' + error.message, 'UTILS', 'error');
+            window.YPP.Utils?.log('Error loading settings: ' + error.message, 'UTILS', 'error');
             return CONSTANTS.DEFAULT_SETTINGS || {};
         }
     },
@@ -530,13 +566,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     saveSettings: async (settings) => {
         try {
             if (!chrome?.storage?.local) {
-                Utils?.log('Chrome storage not available', 'UTILS', 'warn');
+                window.YPP.Utils?.log('Chrome storage not available', 'UTILS', 'warn');
                 return;
             }
             await chrome.storage.local.set({ settings });
-            Utils?.log('Settings saved', 'UTILS', 'debug');
+            window.YPP.Utils?.log('Settings saved', 'UTILS', 'debug');
         } catch (error) {
-            Utils?.log('Error saving settings: ' + error.message, 'UTILS', 'error');
+            window.YPP.Utils?.log('Error saving settings: ' + error.message, 'UTILS', 'error');
         }
     },
 
@@ -965,13 +1001,14 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
      * @private
      */
     _processMutations() {
-        this.callbacks.forEach(({ selector, callback }) => {
+        this.callbacks.forEach(({ selector, callback }, id) => {
             const el = document.querySelector(selector);
-            if (el) {
+            // Ensure element is in the live DOM before calling the callback
+            if (el && el.isConnected) {
                 try {
                     callback(el);
                 } catch (error) {
-                    console.error(`[DOMObserver] Error in callback:`, error);
+                    console.error(`[DOMObserver] Error in callback for '${id}':`, error);
                 }
             }
         });

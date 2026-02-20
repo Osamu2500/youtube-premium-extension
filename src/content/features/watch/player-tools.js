@@ -40,7 +40,6 @@ window.YPP.features.PlayerTools = class PlayerTools {
         this._controlsInjected = false;
         this._speedInput = null;
         this._Utils = window.YPP.Utils || {};
-        this._elementCache = new ElementCache(); // Performance: cache DOM queries
 
         // Rate change listener binding
         this._boundHandleRateChange = this._onRateChange.bind(this);
@@ -96,12 +95,9 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @private
      */
     _disable() {
-        if (!this._isActive) return;
-
         this._isActive = false;
         this._removeControls();
         this._cleanupListeners();
-        this._elementCache.clear(); // Clear cached elements
         this._Utils.removeStyle('ypp-player-tools-style');
     }
 
@@ -113,16 +109,20 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * Start monitoring for player initialization
      * @private
      */
-    _startMonitoring() {
-        // Wait for player controls to exist
-        this._Utils.waitForElement(this._SELECTORS.VIDEO_CONTROLS, 10000).then(controls => {
+    async _startMonitoring() {
+        if (!this._Utils.pollFor) return;
+
+        try {
+            const controls = await this._Utils.pollFor(() => document.querySelector(this._SELECTORS.VIDEO_CONTROLS), 10000, 500);
             if (!this._isActive || !controls) return;
             
             this._injectControls(controls);
             
             // Re-check on navigation
             window.addEventListener('yt-navigate-finish', () => this._checkForPlayer());
-        });
+        } catch (error) {
+            this._Utils.log?.('PlayerTools timeout waiting for controls', 'PLAYER_TOOLS', 'warn');
+        }
     }
 
     /**
@@ -132,9 +132,9 @@ window.YPP.features.PlayerTools = class PlayerTools {
     _checkForPlayer() {
         if (!this._isActive) return;
 
-        // Re-inject if missing (use cache)
-        const rightControls = this._elementCache.get('controls', this._SELECTORS.VIDEO_CONTROLS);
-        const existingTools = this._elementCache.get('tools', `#${this._CSS_CLASSES.PLAYER_TOOLS}`);
+        // Re-inject if missing
+        const rightControls = document.querySelector(this._SELECTORS.VIDEO_CONTROLS);
+        const existingTools = document.querySelector(`#${this._CSS_CLASSES.PLAYER_TOOLS}`);
         
         if (rightControls && !existingTools) {
             this._controlsInjected = false;
@@ -248,8 +248,8 @@ window.YPP.features.PlayerTools = class PlayerTools {
         // Prevent key propagation (so typing 2 doesn't skip video)
         input.addEventListener('keydown', (e) => e.stopPropagation());
 
-        // Listen for rate changes from other sources (use cache)
-        const video = this._elementCache.get('video', this._SELECTORS.VIDEO);
+        // Listen for rate changes from other sources
+        const video = document.querySelector(this._SELECTORS.VIDEO || 'video');
         if (video) {
             video.addEventListener('ratechange', this._boundHandleRateChange);
         }
@@ -268,7 +268,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @param {number} speed - Playback speed
      */
     _setSpeed(speed) {
-        const video = this._elementCache.get('video', this._SELECTORS.VIDEO);
+        const video = document.querySelector(this._SELECTORS.VIDEO || 'video');
         if (video) {
             const clamped = Math.max(this._PLAYER.SPEED_MIN || 0.1, Math.min(16, speed));
             video.playbackRate = clamped;
@@ -280,7 +280,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @private
      */
     _onRateChange() {
-        const video = this._elementCache.get('video', this._SELECTORS.VIDEO);
+        const video = document.querySelector(this._SELECTORS.VIDEO || 'video');
         if (video && this._speedInput && document.activeElement !== this._speedInput) {
             this._speedInput.value = video.playbackRate.toFixed(1);
         }
@@ -307,7 +307,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @private
      */
     _cleanupListeners() {
-        const video = this._elementCache.get('video', this._SELECTORS.VIDEO);
+        const video = document.querySelector(this._SELECTORS.VIDEO || 'video');
         if (video) {
             video.removeEventListener('ratechange', this._boundHandleRateChange);
         }
@@ -330,7 +330,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @returns {number}
      */
     getSpeed() {
-        const video = this._elementCache.get('video', this._SELECTORS.VIDEO);
+        const video = document.querySelector(this._SELECTORS.VIDEO || 'video');
         return video?.playbackRate || 1;
     }
 

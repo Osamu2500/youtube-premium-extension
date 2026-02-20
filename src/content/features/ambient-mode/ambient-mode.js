@@ -34,48 +34,42 @@ window.YPP.features.AmbientMode = class AmbientMode {
 
     async injectToggleButton() {
         try {
-            // Wait for controls to be ready
-            const maxAttempts = 20;
-            let attempt = 0;
-            
-            while (attempt < maxAttempts) {
-                const theaterBtn = document.querySelector('.ytp-size-button');
-                if (theaterBtn && !document.getElementById('ypp-ambient-toggle')) {
-                    const btn = document.createElement('button');
-                    btn.id = 'ypp-ambient-toggle';
-                    btn.className = 'ytp-button' + (this.isActive ? ' ypp-ambient-active' : '');
-                    btn.title = 'Ambient Mode';
-                    btn.setAttribute('aria-label', 'Ambient Mode');
-                    btn.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>`;
-                    
-                    btn.onclick = async () => {
-                        if (this.isActive) {
-                            this.disable();
-                            btn.classList.remove('ypp-ambient-active');
-                        } else {
-                            this.enable();
-                            btn.classList.add('ypp-ambient-active');
-                        }
-                        
-                        // Save state to storage
-                        try {
-                            const settings = await chrome.storage.local.get('settings');
-                            const newSettings = { ...(settings.settings || {}), ambientMode: this.isActive };
-                            await chrome.storage.local.set({ settings: newSettings });
-                        } catch (error) {
-                            console.error('Failed to save ambient mode state:', error);
-                        }
-                    };
+            if (!this.Utils.pollFor) return;
 
-                    if (theaterBtn.parentNode) {
-                        theaterBtn.parentNode.insertBefore(btn, theaterBtn);
-                        this.toggleBtn = btn;
-                    }
-                    return;
-                }
+            // Wait for controls to be ready
+            const theaterBtn = await this.Utils.pollFor(() => document.querySelector('.ytp-size-button'), 10000, 250);
+            
+            if (theaterBtn && !document.getElementById('ypp-ambient-toggle')) {
+                const btn = document.createElement('button');
+                btn.id = 'ypp-ambient-toggle';
+                btn.className = 'ytp-button' + (this.isActive ? ' ypp-ambient-active' : '');
+                btn.title = 'Ambient Mode';
+                btn.setAttribute('aria-label', 'Ambient Mode');
+                btn.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>`;
                 
-                attempt++;
-                await new Promise(resolve => setTimeout(resolve, 250));
+                btn.onclick = async () => {
+                    if (this.isActive) {
+                        this.disable();
+                        btn.classList.remove('ypp-ambient-active');
+                    } else {
+                        this.enable();
+                        btn.classList.add('ypp-ambient-active');
+                    }
+                    
+                    // Save state to storage
+                    try {
+                        const settings = await chrome.storage.local.get('settings');
+                        const newSettings = { ...(settings.settings || {}), ambientMode: this.isActive };
+                        await chrome.storage.local.set({ settings: newSettings });
+                    } catch (error) {
+                        console.error('Failed to save ambient mode state:', error);
+                    }
+                };
+
+                if (theaterBtn.parentNode) {
+                    theaterBtn.parentNode.insertBefore(btn, theaterBtn);
+                    this.toggleBtn = btn;
+                }
             }
         } catch (error) {
             this.logger.error?.('Failed to inject toggle button:', error) || console.error('Ambient Mode: Failed to inject toggle button:', error);

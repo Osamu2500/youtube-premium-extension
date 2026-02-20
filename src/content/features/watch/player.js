@@ -21,9 +21,10 @@ window.YPP.features.Player = class Player {
             { name: 'Invert', value: 'invert(100%)' },
             { name: 'Saturate', value: 'saturate(200%)' }
         ];
-        this.waitForPlayerInterval = null;
         this.injectedButtons = false;
         this._boundTimeUpdate = null;
+        this._boundPiP = null;
+        this._videoElement = null;
     }
 
     /**
@@ -59,14 +60,17 @@ window.YPP.features.Player = class Player {
         if (time) time.remove();
 
         // Remove listeners
-        if (video && this._boundTimeUpdate) {
-            video.removeEventListener('timeupdate', this._boundTimeUpdate);
+        if (this._videoElement && this._boundTimeUpdate) {
+            this._videoElement.removeEventListener('timeupdate', this._boundTimeUpdate);
+            this._boundTimeUpdate = null;
         }
         
         if (this._boundPiP) {
             document.removeEventListener('visibilitychange', this._boundPiP);
             this._boundPiP = null;
         }
+        
+        this._videoElement = null;
     }
 
     /**
@@ -90,25 +94,33 @@ window.YPP.features.Player = class Player {
     }
 
     /**
-     * Start the feature loop to detect player.
+     * Start the feature logic, using pollFor to wait for the player.
      */
-    run() {
-        if (this.waitForPlayerInterval) clearInterval(this.waitForPlayerInterval);
+    async run() {
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
 
-        this.waitForPlayerInterval = setInterval(() => {
-            const video = document.querySelector('video');
-            const controls = document.querySelector('.ytp-right-controls');
+        try {
+            // Wait for both video and controls to be present
+            const elements = await Utils.pollFor(() => {
+                const video = document.querySelector('video');
+                const controls = document.querySelector('.ytp-right-controls');
+                if (video && controls && video.readyState >= 1) { // Ensure video has minimally loaded metadata
+                    return { video, controls };
+                }
+                return null;
+            }, 10000, 500); // Wait up to 10 seconds, check every 500ms
 
-            if (video && controls) {
+            if (elements) {
+                const { video, controls } = elements;
+                this._videoElement = video;
+
                 // Feature 1: Control Buttons
                 if (!document.querySelector('.ypp-player-controls')) {
                     this.injectControls(video, controls);
                 }
 
-                // Feature 2: Volume Boost (Lazy Init)
-                if (this.settings.volumeBoost && !this.ctx) {
-                    // Logic handled in initAudioContext triggered by play
-                }
+                // Feature 2: Volume Boost (Lazy Init) handled via injectControls > initAudioContext
 
                 // Feature 3: Remaining Time
                 if (this.settings.enableRemainingTime) {
@@ -120,6 +132,7 @@ window.YPP.features.Player = class Player {
                 if (this.settings.autoQuality) {
                     this.applyAutoQuality();
                 }
+                
                 // Feature 5: Auto Cinema (Forced Theater)
                 if (this.settings.autoCinema) {
                     this.enforceTheaterMode(controls);
@@ -127,10 +140,12 @@ window.YPP.features.Player = class Player {
                 
                 // Feature 6: Auto PiP
                 if (this.settings.autoPiP) {
-                     this.handleAutoPiP(video);
+                    this.handleAutoPiP(video);
                 }
             }
-        }, 1000);
+        } catch (error) {
+            Utils.log('Player initialization timed out or failed', 'PLAYER', 'debug');
+        }
     }
 
     enforceTheaterMode(controls) {
@@ -414,11 +429,16 @@ window.YPP.features.Player = class Player {
         }
 
         const update = () => {
-            if (!video.duration || !isFinite(video.duration)) {
+            if (!video || !video.duration || !isFinite(video.duration) || isNaN(video.currentTime)) {
                 remainingEl.textContent = '';
                 return;
             }
             const left = video.duration - video.currentTime;
+            
+            if (left <= 0) {
+                 remainingEl.textContent = '';
+                 return;
+            }
 
             const format = (s) => {
                 const m = Math.floor(s / 60);

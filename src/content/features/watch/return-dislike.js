@@ -85,8 +85,15 @@ window.YPP.features.ReturnDislike = class ReturnDislike {
     async updateUI(data) {
         if (!data || !this.isActive) return;
 
-        // Wait for the like/dislike buttons to appear
-        const buttons = await window.YPP.Utils.waitForElement('#top-level-buttons-computed', 10000);
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
+
+        // Wait for the like/dislike buttons to appear using pollFor
+        const buttons = await Utils.pollFor(() => {
+            const el = document.querySelector('#top-level-buttons-computed');
+            return el ? el : null;
+        }, 10000, 500);
+        
         if (!buttons) return;
 
         // Find the dislike button

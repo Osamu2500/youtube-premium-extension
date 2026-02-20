@@ -99,11 +99,13 @@ window.YPP.features.StudyMode = class StudyMode {
      * @private
      */
     async injectSpeedControl() {
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
+
         try {
             // Wait for player controls
-            await new Promise(resolve => setTimeout(resolve, 500));
+            const rightControls = await Utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
             
-            const rightControls = document.querySelector('.ytp-right-controls');
             if (!rightControls || document.getElementById('ypp-study-btn')) return;
 
             // Create button

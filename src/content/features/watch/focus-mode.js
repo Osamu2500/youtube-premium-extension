@@ -40,9 +40,10 @@ window.YPP.features.FocusMode = class FocusMode {
      */
     _initState() {
         this._settingsRef = null;
-        this._observer = null;
         this._isActive = false;
-        this._debounceTimer = null;
+
+        // Initialize centralized DOM observer
+        this.domObserver = new window.YPP.Utils.DOMObserver();
 
         // Bound methods
         this._boundRun = this._run.bind(this);
@@ -81,9 +82,6 @@ window.YPP.features.FocusMode = class FocusMode {
     _cleanup() {
         // Disconnect observer
         this._cleanupObserver();
-
-        // Clear debounce timer
-        this._clearDebounce();
 
         // Disable all features
         this._toggleDetox(false);
@@ -134,25 +132,26 @@ window.YPP.features.FocusMode = class FocusMode {
     // =========================================================================
 
     /**
-     * Setup observer for dynamic content changes
+     * Setup central DOMObserver for dynamic content changes
      * @private
      */
     _setupObserver() {
-        if (this._observer) return;
+        if (!this._isActive || !this._settingsRef) return;
 
-        this._observer = new MutationObserver(() => {
-            this._clearDebounce();
-            this._debounceTimer = setTimeout(() => {
+        this.domObserver.start();
+        
+        // Debounce logic is already handled by DOMObserver's internal batching,
+        // but we add a small delay here for applying focus state to ensure DOM is ready
+        this.domObserver.register(
+            'focus-mode',
+            '#contents, ytd-watch-flexy', 
+            () => {
                 if (this._isActive && this._settingsRef) {
                     this._applyFocusState();
                 }
-            }, 300);
-        });
-
-        this._observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+            },
+            false // Initial apply is done in _run()
+        );
     }
 
     /**
@@ -160,20 +159,9 @@ window.YPP.features.FocusMode = class FocusMode {
      * @private
      */
     _cleanupObserver() {
-        if (this._observer) {
-            this._observer.disconnect();
-            this._observer = null;
-        }
-    }
-
-    /**
-     * Clear debounce timer
-     * @private
-     */
-    _clearDebounce() {
-        if (this._debounceTimer) {
-            clearTimeout(this._debounceTimer);
-            this._debounceTimer = null;
+        if (this.domObserver) {
+            this.domObserver.unregister('focus-mode');
+            this.domObserver.stop();
         }
     }
 

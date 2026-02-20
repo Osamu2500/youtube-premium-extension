@@ -81,22 +81,26 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         this.activeVideoId = videoId;
         this.sessionSeconds = 0;
         
-        // Try to attach. If video not found, poll for it.
-        this.attemptAttach(0);
+        // Try to attach using pollFor
+        this.attemptAttach();
     }
 
-    attemptAttach(attempts) {
-        if (attempts > 10) {
-            console.log('[YPP Tracker] Gave up finding video element.');
-            return;
-        }
+    async attemptAttach() {
+        try {
+            const Utils = window.YPP.Utils;
+            if (!Utils) return;
 
-        const video = document.querySelector('video');
-        if (video) {
-            this.attachListeners(video);
-        } else {
-            // console.log(`[YPP Tracker] Waiting for video... (${attempts})`);
-            setTimeout(() => this.attemptAttach(attempts + 1), 1000);
+            const video = await Utils.pollFor(() => {
+                const v = document.querySelector('video');
+                if (v && v.readyState >= 1) return v;
+                return null;
+            }, 10000, 500);
+
+            if (video) {
+                this.attachListeners(video);
+            }
+        } catch (error) {
+            console.log('[YPP Tracker] Gave up finding video element.');
         }
     }
 

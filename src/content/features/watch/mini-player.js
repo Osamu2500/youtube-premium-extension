@@ -85,26 +85,29 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
     }
 
     async init() {
-        // Find the player container to observe (the "hole" where video sits)
-        // #player-container or #movie_player
-        this.playerContainer = document.getElementById('player-container');
-        if (!this.playerContainer) {
-            this.playerContainer = document.getElementById('movie_player');
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
+
+        try {
+            // Find the player container to observe (the "hole" where video sits)
+            const elements = await Utils.pollFor(() => {
+                const container = document.getElementById('player-container') || document.getElementById('movie_player');
+                const video = document.querySelector('video');
+                
+                if (container && video) {
+                    return { container, video };
+                }
+                return null;
+            }, 5000, 500); // Wait up to 5 seconds
+
+            if (elements) {
+                this.playerContainer = elements.container;
+                this.videoElement = elements.video;
+                this.startObserving();
+            }
+        } catch (error) {
+            Utils.log('MiniPlayer initialization timed out waiting for player elements', 'MINIPLAYER', 'warn');
         }
-
-        this.videoElement = document.querySelector('video');
-
-        if (!this.playerContainer || !this.videoElement) {
-            // Retry once
-            setTimeout(() => {
-                this.playerContainer = document.getElementById('player-container') || document.getElementById('movie_player');
-                this.videoElement = document.querySelector('video');
-                if (this.playerContainer && this.videoElement) this.startObserving();
-            }, 1000);
-            return;
-        }
-
-        this.startObserving();
     }
 
     startObserving() {

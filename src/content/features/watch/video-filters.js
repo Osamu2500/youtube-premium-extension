@@ -74,20 +74,31 @@ window.YPP.features.VideoFilters = class VideoFilters {
         }
     }
 
-    init() {
-        this.videoElement = document.querySelector('video');
-        if (!this.videoElement) return;
+    async init() {
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
 
-        // Add button to player controls if not exists
-        this.injectButton();
+        try {
+            const elements = await Utils.pollFor(() => {
+                const video = document.querySelector('video');
+                const controls = document.querySelector('.ytp-right-controls');
+                if (video && controls && video.readyState >= 1) {
+                    return { video, controls };
+                }
+                return null;
+            }, 10000, 500);
+
+            if (elements) {
+                this.videoElement = elements.video;
+                this.injectButton(elements.controls);
+            }
+        } catch (error) {
+            Utils.log('VideoFilters initialization timed out waiting for player', 'FILTERS', 'warn');
+        }
     }
 
-    injectButton() {
-        if (document.getElementById('ypp-filter-btn')) return;
-
-        // Try to find the settings button or similar in right controls
-        const controls = document.querySelector('.ytp-right-controls');
-        if (!controls) return;
+    injectButton(controls) {
+        if (document.getElementById('ypp-filter-btn') || !controls) return;
 
         const btn = document.createElement('button');
         btn.id = 'ypp-filter-btn';
@@ -223,14 +234,9 @@ window.YPP.features.VideoFilters = class VideoFilters {
         };
         this.applyFilters();
         if (this.panel) {
-            // refresh sliders
-            const inputs = this.panel.querySelectorAll('input[type="range"]');
-            inputs.forEach(input => {
-                // Logic to map back implies identifying input. 
-                // Simple redraw is easier
-                this.removePanel();
-                this.createPanel();
-            });
+            // Re-render panel to update slider positions
+            this.removePanel();
+            this.createPanel();
         }
     }
 

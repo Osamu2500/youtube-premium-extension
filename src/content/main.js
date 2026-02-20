@@ -164,14 +164,8 @@
         initFeatureManager() {
             // Check for FeatureManager
             if (!window.YPP?.FeatureManager) {
-                this.Utils?.log('FeatureManager not found, checking for inline definition...', 'MAIN', 'warn');
-
-                // FeatureManager might be defined inline in main.js
-                if (typeof YPPMainApp.defineFeatureManager === 'function') {
-                    this.defineFeatureManager();
-                } else {
-                    throw new Error('FeatureManager class not found');
-                }
+                this.Utils?.log('FeatureManager class not found on window.YPP', 'MAIN', 'error');
+                throw new Error('FeatureManager class not found');
             }
 
             this.featureManager = new window.YPP.FeatureManager();
@@ -430,10 +424,10 @@
 
             // Show error toast
             try {
-                this.Utils?.createToast('YouTube Premium+ failed to load!', 'error');
+                this.Utils?.createToast?.('YouTube Premium+ failed to load!', 'error');
             } catch (e) {
                 // Last resort fallback
-                console.error('[YPP] Fatal error:', error);
+                console.error('[YPP] Fatal error showing toast:', e);
             }
 
             // Log suggestions
@@ -527,9 +521,10 @@
     } catch (error) {
         console.error('[YPP] Fatal Bootstrap Error:', error);
         try {
-            Utils?.createToast?.('YouTube Premium+ encountered a fatal error!', 'error');
+            window.YPP?.Utils?.createToast?.('YouTube Premium+ encountered a fatal error!', 'error');
         } catch (e) {
             // Last resort
+            console.error('[YPP] Could not show fatal error toast:', e);
         }
     }
 

@@ -396,7 +396,20 @@ window.YPP.CONSTANTS = {
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
         dataAPI: 'DataAPI',
-        contextMenu: 'ContextMenu',
         nightMode: 'NightModeManager'
     }
 };
+
+// Deep freeze CONSTANTS.DEFAULT_SETTINGS to prevent accidental state mutation
+const deepFreeze = obj => {
+    Object.keys(obj).forEach(prop => {
+        if (typeof obj[prop] === 'object' && obj[prop] !== null && !Object.isFrozen(obj[prop])) {
+            deepFreeze(obj[prop]);
+        }
+    });
+    return Object.freeze(obj);
+};
+
+if (window.YPP.CONSTANTS && window.YPP.CONSTANTS.DEFAULT_SETTINGS) {
+    deepFreeze(window.YPP.CONSTANTS.DEFAULT_SETTINGS);
+}
