@@ -1808,7 +1808,7 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  gap: 20px; /* Increased from 16px for Pro Max spaciousness */
   width: 100%;
   max-width: 1800px;
   padding: 0 24px;
@@ -1835,10 +1835,10 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
-  background: var(--ypp-bg-surface);
-  backdrop-filter: var(--ypp-blur-med);
-  border: 1px solid var(--ypp-glass-border);
-  border-radius: var(--ypp-radius-md); /* Updated for Pro Max */
+  background: rgba(30, 30, 30, 0.4); /* Deeper base for Pro Max */
+  backdrop-filter: var(--ypp-blur-high); /* Increased blur */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* More subtle border */
+  border-radius: var(--ypp-radius-lg); /* Larger radius */
   box-shadow: var(--ypp-shadow-card);
   overflow: hidden;
   box-sizing: border-box;
@@ -1902,12 +1902,13 @@ body.ypp-search-grid-mode ytd-video-renderer #meta {
 body.ypp-search-grid-mode ytd-video-renderer #video-title,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
 body.ypp-search-grid-mode ytd-radio-renderer #video-title {
-  font-family: "Roboto", sans-serif;
+  font-family: "Inter", "Roboto", sans-serif; /* Priority on Inter */
   font-size: 1.6rem !important;
   line-height: 2.2rem !important;
-  font-weight: 500 !important;
-  margin: 0 0 4px 0 !important;
-  color: var(--ypp-text-primary);
+  font-weight: 600 !important; /* Bolder titles */
+  letter-spacing: -0.2px;
+  margin: 0 0 6px 0 !important;
+  color: #ffffff; /* Brighter titles */
   text-shadow: none;
   max-height: 4.4rem;
   display: -webkit-box;
@@ -1946,9 +1947,9 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-name {
 body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
 body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
 body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
-  font-size: 1.2rem !important;
+  font-size: 1.25rem !important;
   font-weight: 400 !important;
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.4) !important; /* Dimmer for contrast */
   margin-top: 4px !important;
   line-height: 1.4 !important;
 }
@@ -1966,19 +1967,20 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
 /* Glass Badges (Duration, Quality) on Thumbnail */
 body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
 body.ypp-search-grid-mode ytd-thumbnail-overlay-resume-playback-renderer {
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(4px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
-  padding: 2px 4px !important;
-  margin: 4px !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important; /* Fully rounded pills */
+  padding: 4px 8px !important;
+  margin: 6px !important;
 }
 
 body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
-  font-family: "Roboto", sans-serif !important;
-  font-size: 1.1rem !important;
-  font-weight: 500 !important;
+  font-family: "Inter", "Roboto", sans-serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
   letter-spacing: 0.5px !important;
+  color: #fff !important;
 }
 
 /* Hover-Only Menu Button */
@@ -2056,29 +2058,30 @@ body.ypp-search-grid-mode yt-chip-cloud-renderer {
 
 /* Base Chip Style */
 body.ypp-search-grid-mode yt-chip-cloud-chip-renderer {
-  height: 36px;
-  border-radius: 18px;
+  height: 38px;
+  border-radius: 19px; /* Perfect pill */
   margin-right: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--ypp-glass-border);
-  backdrop-filter: blur(4px);
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--ypp-blur-high);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   overflow: hidden;
+  transform: translateZ(0);
 }
 
 body.ypp-search-grid-mode yt-chip-cloud-chip-renderer:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 12px rgba(255, 255, 255, 0.1);
 }
 
 /* Active Chip */
 body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected],
 body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
 /* Chip Text */
