@@ -1557,22 +1557,31 @@ body.ypp-search-grid-mode ytd-continuation-item-renderer {
 .ypp-card-hover-effect,
 body.yt-premium-plus-theme ytd-rich-item-renderer,
 body.yt-premium-plus-theme ytd-video-renderer,
-body.ypp-search-grid-mode ytd-video-renderer {
+body.ypp-search-grid-mode ytd-video-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer,
+body.ypp-search-grid-mode ytd-channel-renderer {
   transition:
     transform var(--ypp-transition),
     box-shadow var(--ypp-transition),
-    border-color var(--ypp-transition);
+    border-color var(--ypp-transition),
+    background-color var(--ypp-transition);
   transform: translateZ(0); /* Hardware Acceleration */
-  will-change: transform, box-shadow, border-color;
+  will-change: transform, box-shadow, border-color, background-color;
 }
 
 .ypp-card-hover-effect:hover,
 body.yt-premium-plus-theme ytd-rich-item-renderer:hover,
 body.yt-premium-plus-theme ytd-video-renderer:hover,
-body.ypp-search-grid-mode ytd-video-renderer:hover {
+body.ypp-search-grid-mode ytd-video-renderer:hover,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover,
+body.ypp-search-grid-mode ytd-radio-renderer:hover,
+body.ypp-search-grid-mode ytd-channel-renderer:hover {
   transform: translateY(-4px) scale(1.01);
   box-shadow: var(--ypp-shadow-float), var(--ypp-shadow-accent-glow);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--ypp-bg-surface);
+  z-index: var(--ypp-z-card-hover);
 }
 
 /* Button Hover Pattern */
@@ -1793,17 +1802,26 @@ body.ypp-search-grid-mode ytd-search {
   padding: 0 !important;
 }
 
-/* Enforce the 4-Column Grid */
+/* Enforce the Responsive Grid Layout (Ported from Main) */
 body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
 body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents,
 body.ypp-search-grid-mode ytd-search ytd-two-column-search-results-renderer #primary {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
-  gap: 24px 16px !important;
+  /* Optimized for density and screen usage */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 16px !important;
   width: 100% !important;
-  max-width: none !important;
-  padding: 0 !important;
+  max-width: 1800px !important; /* Prevent getting TOO wide on ultrawide monitors */
+  padding: 0 24px !important; /* Balanced padding */
+  margin: 0 auto !important; /* Center the container itself */
   box-sizing: border-box !important;
+  justify-content: center !important; /* Ensure grid items are centered if they don't fill row */
+}
+
+/* Ensure the main wrapper is also centered */
+body.ypp-search-grid-mode ytd-search ytd-two-column-search-results-renderer #primary {
+  display: flex !important;
+  justify-content: center !important;
 }
 
 /* Convert horizontally-laid out List Items into Vertical Cards */
@@ -1881,18 +1899,36 @@ body.ypp-search-grid-mode ytd-channel-renderer #info-section {
     align-items: center;
 }
 
-/* Responsive Overrides */
+/* Responsive Overrides (Search Grid) */
 @media (max-width: 1600px) {
   body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
   body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 20px !important;
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
   body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
+  body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
+  body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 }
 
