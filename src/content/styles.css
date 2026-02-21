@@ -1807,7 +1807,7 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 /* Search Grid Layout */
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* 240px fits 5 cards comfortably */
+  grid-template-columns: repeat(5, 1fr) !important; /* Strictly lock to 5 cards on desktop */
   gap: 20px; /* Increased from 16px for Pro Max spaciousness */
   width: 100%;
   max-width: 1800px;
@@ -1938,7 +1938,7 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
 body.ypp-search-grid-mode ytd-video-renderer #channel-name,
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
   font-family: "Roboto", sans-serif !important;
-  font-size: 1.3rem !important;
+  font-size: 1.15rem !important; /* Reduced from 1.3rem to fit better */
   font-weight: 500 !important;
   color: var(--ypp-text-secondary) !important;
   margin: 0 !important;
@@ -2111,11 +2111,11 @@ body.ypp-search-grid-mode #right-arrow-button {
   backdrop-filter: blur(8px);
 }
 
-/* Responsive Search Grid */
+/* Responsive Search Grid - Forcing specific column counts for perfect cards */
 @media (max-width: 1600px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
   body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    grid-template-columns: repeat(4, 1fr) !important;
     gap: 20px !important;
   }
 }
@@ -2123,7 +2123,7 @@ body.ypp-search-grid-mode #right-arrow-button {
 @media (max-width: 1200px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
   body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 16px !important;
   }
 }
@@ -2131,7 +2131,7 @@ body.ypp-search-grid-mode #right-arrow-button {
 @media (max-width: 900px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
   body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
 }
