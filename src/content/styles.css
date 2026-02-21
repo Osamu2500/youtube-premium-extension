@@ -1868,7 +1868,10 @@ body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
 /* Force inner wrappers in Playlists & Mixes to stack vertically */
 body.ypp-search-grid-mode ytd-playlist-renderer > a,
 body.ypp-search-grid-mode ytd-radio-renderer > div,
-body.ypp-search-grid-mode ytd-radio-renderer > ytd-thumbnail {
+body.ypp-search-grid-mode ytd-radio-renderer > ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer > ytd-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer #dismissible > *,
+body.ypp-search-grid-mode ytd-playlist-renderer #content > * {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
@@ -2069,18 +2072,32 @@ body.ypp-search-grid-mode ytd-rich-section-renderer {
 
 /* Shelf Internal Grid (e.g. "From related searches") */
 body.ypp-search-grid-mode ytd-shelf-renderer #contents,
-body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #contents {
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #contents,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #items {
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
   gap: 20px !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
+  width: 100% !important;
 }
 
+/* Annihilate Horizontal Scroll Containers */
 body.ypp-search-grid-mode ytd-shelf-renderer #scroll-container,
 body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #scroll-container {
-  overflow: visible !important;
-  display: block !important;
+  display: contents !important; /* Flatten the scroll track so children join the grid */
+}
+
+/* Gap Annihilation: Nuke Hidden Shorts and Spacers */
+body.ypp-search-grid-mode ytd-reel-shelf-renderer,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer[has-shorts],
+body.ypp-search-grid-mode ytd-item-section-renderer.ytd-section-list-renderer[is-empty],
+body.ypp-search-grid-mode ytd-continuation-item-renderer {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
 }
 
 /* Channel Result Card (Vertical Grid Item) */
