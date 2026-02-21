@@ -2834,3 +2834,83 @@ body.yt-premium-plus-theme ytd-playlist-panel-video-renderer[selected] {
   background-color: rgba(62, 166, 255, 0.1);
   border-left: 3px solid var(--ypp-accent-blue);
 }
+
+/* ===================================================================================
+   12. YOUTUBE REFINED ENHANCEMENTS (PHASE 10)
+   =================================================================================== */
+
+/* 1. Continue Watching UI */
+ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer.previously-watched-video {
+  margin-bottom: 10px !important;
+  padding: 10px 10px 0 !important;
+  background-color: var(--ypp-bg-elevated) !important;
+  border-radius: var(--ypp-radius-md) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--ypp-border-color) !important;
+  position: relative !important;
+}
+
+ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer.previously-watched-video ytd-thumbnail {
+  margin-bottom: 28px !important;
+}
+
+ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer.previously-watched-video ytd-thumbnail:before {
+  content: "CONTINUE WATCHING" !important;
+  position: absolute !important;
+  bottom: -22px !important;
+  left: 0 !important;
+  width: 100% !important;
+  text-align: center !important;
+  color: var(--ypp-text-secondary) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* 2. Slide-out Hover Animation for Related Videos */
+ytd-compact-video-renderer {
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+ytd-compact-video-renderer:hover {
+  transform: translateX(8px) !important;
+}
+
+/* 3. Pro Max Rounding for Core Elements */
+#player.ytd-watch-flexy {
+  border-radius: var(--ypp-radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+#container.ytd-searchbox {
+  border-radius: var(--ypp-radius-md) 0 0 var(--ypp-radius-md) !important;
+}
+#search-icon-legacy.ytd-searchbox {
+  border-radius: 0 var(--ypp-radius-md) var(--ypp-radius-md) 0 !important;
+}
+
+/* 4. Segmented Comments Cards */
+body.yt-premium-plus-theme ytd-comment-thread-renderer {
+  padding: 16px !important;
+  border-radius: var(--ypp-radius-md) !important;
+  border: 1px solid var(--ypp-glass-border) !important;
+  background: var(--ypp-bg-surface) !important;
+  margin-bottom: 16px !important;
+  box-shadow: var(--ypp-shadow-card) !important;
+}
+
+body.yt-premium-plus-theme ytd-comment-thread-renderer #replies ytd-comment-renderer {
+  margin-top: 12px !important;
+  padding: 12px 0 0 0 !important;
+  border-top: 1px solid var(--ypp-glass-border) !important;
+}
+
+/* 5. Live Badge Red Voids */
+body.yt-premium-plus-theme .badge-style-type-live-now.ytd-badge-supported-renderer, 
+body.yt-premium-plus-theme .badge-style-type-starting-soon.ytd-badge-supported-renderer {
+  padding: 4px 6px !important;
+  background-color: #cc0000 !important;
+  color: white !important;
+  border-radius: var(--ypp-radius-sm) !important;
+  font-weight: bold !important;
+}

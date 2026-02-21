@@ -396,7 +396,8 @@ window.YPP.CONSTANTS = {
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
         dataAPI: 'DataAPI',
-        nightMode: 'NightModeManager'
+        nightMode: 'NightModeManager',
+        continueWatching: 'ContinueWatching'
     }
 };
 
