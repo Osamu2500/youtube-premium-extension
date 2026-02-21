@@ -1846,7 +1846,7 @@ body.ypp-search-grid-mode ytd-radio-renderer {
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #dismissible,
-body.ypp-search-grid-mode ytd-playlist-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #content,
 body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
   display: flex !important;
   flex-direction: column !important;
@@ -1887,14 +1887,18 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
 
 /* Text Content */
 body.ypp-search-grid-mode ytd-video-renderer .text-wrapper,
-body.ypp-search-grid-mode ytd-video-renderer #dismissible .text-wrapper {
+body.ypp-search-grid-mode ytd-video-renderer #dismissible .text-wrapper,
+body.ypp-search-grid-mode ytd-playlist-renderer #content .text-wrapper,
+body.ypp-search-grid-mode ytd-radio-renderer #dismissible .text-wrapper {
   width: 100% !important;
   max-width: 100% !important;
   flex: 1 !important;
   min-width: 0 !important;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer #meta {
+body.ypp-search-grid-mode ytd-video-renderer #meta,
+body.ypp-search-grid-mode ytd-playlist-renderer #meta,
+body.ypp-search-grid-mode ytd-radio-renderer #meta {
   padding: 0 !important;
 }
 
@@ -1973,7 +1977,7 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
   display: none !important;
 }
 
-/* Glass Badges (Duration, Quality) on Thumbnail */
+/* Glass Badges (Duration, Quality, Playlist Overlays) on Thumbnail */
 /* CRITICAL: Do NOT style ytd-thumbnail-overlay-resume-playback-renderer here, it breaks the red progress bar */
 body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
 body.ypp-search-grid-mode ytd-thumbnail-overlay-bottom-right-renderer {
@@ -1983,6 +1987,18 @@ body.ypp-search-grid-mode ytd-thumbnail-overlay-bottom-right-renderer {
   border-radius: 12px !important; /* Fully rounded pills */
   padding: 4px 8px !important;
   margin: 6px !important;
+}
+
+/* Playlist Specific Badge Overlays */
+body.ypp-search-grid-mode ytd-playlist-thumbnail {
+  border-radius: var(--ypp-radius-md) !important;
+  overflow: hidden !important;
+  margin-bottom: 12px !important;
+}
+
+body.ypp-search-grid-mode ytd-thumbnail-overlay-side-panel-renderer {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
 }
 
 body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
