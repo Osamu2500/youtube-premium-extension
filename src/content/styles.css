@@ -1903,14 +1903,14 @@ body.ypp-search-grid-mode ytd-video-renderer #video-title,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
 body.ypp-search-grid-mode ytd-radio-renderer #video-title {
   font-family: "Inter", "Roboto", sans-serif; /* Priority on Inter */
-  font-size: 1.6rem !important;
-  line-height: 2.2rem !important;
+  font-size: 16px !important; /* Strict pixel size */
+  line-height: 22px !important;
   font-weight: 600 !important; /* Bolder titles */
   letter-spacing: -0.2px;
   margin: 0 0 6px 0 !important;
   color: #ffffff; /* Brighter titles */
   text-shadow: none;
-  max-height: 4.4rem;
+  max-height: 44px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1936,21 +1936,27 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #channel-name,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name yt-formatted-string,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a {
   font-family: "Roboto", sans-serif !important;
-  font-size: 1.1rem !important; /* Reduced further to prevent clipping */
+  font-size: 13px !important; /* Strict pixel size */
   font-weight: 500 !important;
   color: var(--ypp-text-secondary) !important;
   margin: 0 !important;
   padding: 0 !important;
-  line-height: 1.5 !important; /* Increased line-height so descenders don't get cut off */
+  line-height: 1.2 !important;
   letter-spacing: normal !important;
+  white-space: nowrap !important; /* Keep it on one line */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
 body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
 body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
-  font-size: 1.25rem !important;
+  font-size: 12px !important; /* Strict pixel size */
   font-weight: 400 !important;
   color: rgba(255, 255, 255, 0.4) !important; /* Dimmer for contrast */
   margin-top: 4px !important;
@@ -1981,10 +1987,11 @@ body.ypp-search-grid-mode ytd-thumbnail-overlay-bottom-right-renderer {
 
 body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
   font-family: "Inter", "Roboto", sans-serif !important;
-  font-size: 1.15rem !important;
+  font-size: 12px !important; /* Strict pixel size */
   font-weight: 600 !important;
   letter-spacing: 0.5px !important;
   color: #fff !important;
+  line-height: 1 !important;
 }
 
 /* Hover-Only Menu Button */
