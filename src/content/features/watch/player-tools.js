@@ -155,16 +155,32 @@ window.YPP.features.PlayerTools = class PlayerTools {
                 vertical-align: top;
             }
             .ypp-speed-input {
-                width: 40px;
-                background: rgba(0,0,0,0.5);
-                border: 1px solid rgba(255,255,255,0.3);
-                color: white;
-                border-radius: 4px;
-                padding: 2px 4px;
+                width: 44px;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.9);
+                border-radius: 12px;
+                padding: 4px 6px;
                 margin-right: 8px;
-                font-size: 12px;
+                font-size: 13px;
+                font-weight: 500;
                 text-align: center;
+                font-family: inherit;
                 pointer-events: auto;
+                backdrop-filter: blur(4px);
+                transition: all 0.2s;
+            }
+            .ypp-speed-input:focus {
+                outline: none;
+                border-color: #3ea6ff;
+                background: rgba(0, 0, 0, 0.6);
+                box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
+            }
+            /* Hide arrows on number input */
+            .ypp-speed-input::-webkit-outer-spin-button,
+            .ypp-speed-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
             }
             .ypp-toast-mini {
                 position: absolute;

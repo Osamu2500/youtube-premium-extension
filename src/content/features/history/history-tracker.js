@@ -250,24 +250,25 @@ window.YPP.features.HistoryTracker = class HistoryTracker {
         style.id = 'ypp-tracker-styles';
         style.textContent = `
             #ypp-history-tracker-widget {
-                background: rgba(30,30,30,0.9);
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(255,255,255,0.1);
-                border-radius: 16px;
+                background: var(--ypp-bg-surface);
+                backdrop-filter: var(--ypp-blur-lg);
+                border: 1px solid var(--ypp-glass-border);
+                border-radius: var(--ypp-radius-lg);
                 margin-bottom: 32px;
                 overflow: hidden;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-                max-width: 1200px;
+                box-shadow: var(--ypp-shadow-card);
+                max-width: var(--ypp-layout-max-width, 1200px);
                 margin-left: auto;
                 margin-right: auto;
+                transition: var(--ypp-transition);
             }
             .ypp-tracker-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 20px 32px;
-                background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent);
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                padding: 16px 24px;
+                background: var(--ypp-glass-shine);
+                border-bottom: 1px solid var(--ypp-glass-border);
             }
             .ypp-tracker-title {
                 display: flex;
@@ -275,17 +276,18 @@ window.YPP.features.HistoryTracker = class HistoryTracker {
             }
             .ypp-tracker-title h2 {
                 margin: 0;
-                font-size: 20px;
+                font-size: 18px;
+                font-family: 'Inter', sans-serif;
                 font-weight: 700;
-                color: #fff;
+                color: var(--ypp-text-primary);
                 margin-right: 12px;
                 letter-spacing: -0.5px;
             }
             .ypp-badge {
-                background: rgba(62,166,255,0.2);
-                color: #3ea6ff;
-                padding: 4px 8px;
-                border-radius: 6px;
+                background: rgba(62,166,255,0.15);
+                color: var(--ypp-accent-blue);
+                padding: 4px 10px;
+                border-radius: 8px;
                 font-size: 11px;
                 font-weight: 700;
                 text-transform: uppercase;
@@ -295,16 +297,18 @@ window.YPP.features.HistoryTracker = class HistoryTracker {
             .ypp-streak-badge {
                 display: flex;
                 align-items: center;
-                background: rgba(255,107,107,0.15);
+                background: rgba(255,107,107,0.1);
                 border: 1px solid rgba(255,107,107,0.3);
-                padding: 6px 12px;
+                padding: 6px 14px;
                 border-radius: 20px;
-                margin-left: auto; /* Push to right */
+                margin-left: auto;
                 margin-right: 16px;
+                backdrop-filter: var(--ypp-blur-sm);
             }
             .ypp-streak-badge .fire-icon {
                 margin-right: 6px;
                 font-size: 16px;
+                filter: drop-shadow(0 2px 4px rgba(255,107,107,0.4));
             }
             .ypp-streak-badge span:last-child {
                 color: #FF6B6B;
@@ -315,74 +319,77 @@ window.YPP.features.HistoryTracker = class HistoryTracker {
             .ypp-tracker-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 24px;
-                padding: 32px;
+                gap: 16px;
+                padding: 24px;
             }
             .ypp-tracker-grid.expanded {
-                grid-template-columns: 1fr 1fr 1fr 1fr;
+                grid-template-columns: repeat(4, 1fr);
             }
             .ypp-stat-card.full-width {
-                grid-column: span 2; 
+                grid-column: 1 / -1; 
             }
             .ypp-stat-card {
-                background: rgba(255,255,255,0.03);
-                padding: 24px 16px;
-                border-radius: 16px;
+                background: rgba(255,255,255,0.02);
+                padding: 20px 16px;
+                border-radius: var(--ypp-radius-md);
                 text-align: center;
-                border: 1px solid rgba(255,255,255,0.05);
-                transition: transform 0.2s;
+                border: 1px solid var(--ypp-glass-border);
+                transition: var(--ypp-transition);
             }
             .ypp-stat-card:hover {
                 background: rgba(255,255,255,0.05);
                 transform: translateY(-2px);
+                box-shadow: var(--ypp-shadow-float);
+                border-color: rgba(255,255,255,0.1);
             }
             .ypp-stat-card .label {
                 display: block;
-                font-size: 13px;
+                font-size: 12px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: rgba(255,255,255,0.5);
-                margin-bottom: 12px;
+                color: var(--ypp-text-secondary);
+                margin-bottom: 8px;
                 font-weight: 600;
             }
             .ypp-stat-card .value {
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 800;
-                color: #fff;
+                color: var(--ypp-text-primary);
                 font-family: 'Inter', sans-serif;
                 letter-spacing: -1px;
             }
-             .ypp-stat-card .value.text-value {
-                font-size: 20px;
+            .ypp-stat-card .value.text-value {
+                font-size: 18px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 display: block;
+                color: var(--ypp-text-secondary);
             }
             .ypp-tracker-footer {
-                padding: 12px 32px;
-                background: rgba(0,0,0,0.2);
-                color: rgba(255,255,255,0.3);
+                padding: 12px 24px;
+                background: rgba(0,0,0,0.1);
+                color: var(--ypp-text-muted);
                 font-size: 12px;
                 text-align: center;
-                border-top: 1px solid rgba(255,255,255,0.05);
+                border-top: 1px solid var(--ypp-glass-border);
             }
             .hidden { display: none; }
             
             #ypp-tracker-toggle {
-                background: none;
-                border: none;
-                color: rgba(255,255,255,0.5);
+                background: rgba(255,255,255,0.05);
+                border: 1px solid var(--ypp-glass-border);
+                color: var(--ypp-text-secondary);
                 cursor: pointer;
-                font-size: 12px;
-                transition: all 0.3s;
+                font-size: 10px;
+                transition: var(--ypp-transition);
                 width: 32px; height: 32px;
                 display: flex; align-items: center; justify-content: center;
                 border-radius: 50%;
             }
             #ypp-tracker-toggle:hover {
                 background: rgba(255,255,255,0.1);
-                color: #fff;
+                color: var(--ypp-text-primary);
             }
             #ypp-tracker-toggle.rotated {
                 transform: rotate(180deg);

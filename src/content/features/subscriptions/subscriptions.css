@@ -12,19 +12,23 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout > ytd-channel-rend
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-radius: 12px !important;
+    background: var(--ypp-bg-surface) !important;
+    backdrop-filter: var(--ypp-blur-lg) !important;
+    border: 1px solid var(--ypp-glass-border) !important;
+    border-radius: var(--ypp-radius-lg) !important;
     padding: 24px 16px !important;
     width: auto !important;
     margin: 0 !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition: var(--ypp-transition) !important;
+    transform: translateZ(0) !important;
+    will-change: transform, box-shadow;
 }
 
 ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout > ytd-channel-renderer:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
     transform: translateY(-4px) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: var(--ypp-shadow-card) !important;
+    border-color: rgba(62, 166, 255, 0.3) !important;
 }
 
 /* Fix internal layout of channel card */
@@ -52,11 +56,11 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
   gap: 12px;
   padding: 16px 24px;
   margin-bottom: 24px;
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-lg);
+  -webkit-backdrop-filter: var(--ypp-blur-lg);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
   align-items: center;
   overflow-x: auto;
 }
@@ -132,10 +136,11 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 .ypp-modal-content.ypp-organizer-modal {
   width: 900px;
   height: 600px;
-  background: #121212;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  background: var(--ypp-bg-glass);
+  backdrop-filter: var(--ypp-blur-lg);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-xl);
+  box-shadow: var(--ypp-shadow-float);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -182,48 +187,52 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 24px;
   overflow: hidden;
 }
 
 .ypp-pane-left {
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid var(--ypp-glass-border);
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .ypp-pane-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  color: #aaa;
-  font-size: 12px;
+  margin-bottom: 20px;
+  color: var(--ypp-text-secondary);
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .ypp-count {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 10px;
   border-radius: 12px;
-  color: #fff;
+  color: var(--ypp-text-primary);
+  font-size: 12px;
 }
 
 .ypp-search-input {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #fff;
-  margin-bottom: 16px;
-  font-family: inherit;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ypp-glass-border);
+  padding: 12px 16px;
+  border-radius: var(--ypp-radius-md);
+  color: var(--ypp-text-primary);
+  margin-bottom: 20px;
+  font-family: 'Inter', inherit;
+  font-size: 14px;
+  transition: var(--ypp-transition);
 }
 
 .ypp-search-input:focus {
   outline: none;
-  border-color: #3ea6ff;
+  border-color: var(--ypp-accent-blue);
   background: rgba(62, 166, 255, 0.05);
+  box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.15);
 }
 
 .ypp-scroll-list {
@@ -248,82 +257,95 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 .ypp-channel-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px;
-  border-radius: 8px;
+  gap: 14px;
+  padding: 12px;
+  border-radius: var(--ypp-radius-md);
   background: transparent;
   cursor: grab;
-  transition: background 0.2s;
+  transition: var(--ypp-transition);
+  border: 1px solid transparent;
 }
 
 .ypp-channel-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--ypp-glass-border);
 }
 
 .ypp-channel-item.dragging {
-  opacity: 0.5;
-  background: rgba(62, 166, 255, 0.1);
+  opacity: 0.6;
+  background: rgba(62, 166, 255, 0.08);
+  border-color: var(--ypp-accent-blue);
+  box-shadow: var(--ypp-shadow-float);
 }
 
 .ypp-channel-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #333;
+  background: rgba(255,255,255,0.1);
 }
 
 .ypp-channel-name {
-  color: #e0e0e0;
+  color: var(--ypp-text-primary);
   font-size: 14px;
+  font-weight: 500;
 }
 
 /* Category Item */
 .ypp-category-item {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 12px;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  padding: 16px;
+  margin-bottom: 8px;
+  transition: var(--ypp-transition);
 }
 
 .ypp-category-item.drag-over {
-  background: rgba(62, 166, 255, 0.08);
-  border-color: #3ea6ff;
+  background: rgba(62, 166, 255, 0.05);
+  border-color: var(--ypp-accent-blue);
   transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(62, 166, 255, 0.15);
 }
 
 .ypp-cat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .ypp-cat-name {
-  color: #fff;
-  font-weight: 500;
+  color: var(--ypp-text-primary);
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 15px;
 }
 
 .ypp-cat-count {
   font-size: 12px;
-  color: #aaa;
+  color: var(--ypp-text-secondary);
+  background: rgba(255,255,255,0.05);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .ypp-cat-channels {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
 }
 
 .ypp-mini-channel {
   font-size: 11px;
-  color: #aaa;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2px 6px;
-  border-radius: 4px;
+  color: var(--ypp-text-secondary);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: var(--ypp-transition);
 }
 
 .ypp-icon-btn, .ypp-del-cat-btn {

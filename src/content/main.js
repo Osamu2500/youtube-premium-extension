@@ -245,11 +245,14 @@
 
             // Handle YouTube SPA navigation
             const handleNavigation = () => {
-                this.Utils?.log('Navigation detected', 'MAIN', 'debug');
-                this.updateContext();
-                if (this.featureManager) {
-                    this.featureManager.init(this.settings);
-                }
+                if (this._navTimeout) cancelAnimationFrame(this._navTimeout);
+                this._navTimeout = requestAnimationFrame(() => {
+                    this.Utils?.log('Navigation detected', 'MAIN', 'debug');
+                    this.updateContext();
+                    if (this.featureManager) {
+                        this.featureManager.init(this.settings);
+                    }
+                });
             };
 
             // Listen for page navigation and track listener

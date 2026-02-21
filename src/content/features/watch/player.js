@@ -288,31 +288,66 @@ window.YPP.features.Player = class Player {
 
     _createFilterButton(video) {
         const icon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M17.66 7.93L12 2.27 6.34 7.93c-3.12 3.12-3.12 8.19 0 11.31C7.9 20.8 9.95 21.58 12 21.58c2.05 0 4.1-.78 5.66-2.34 3.12-3.12 3.12-8.19 0-11.31zM12 19.59c-1.6 0-3.11-.62-4.24-1.76C6.62 16.69 6 15.19 6 13.59s.62-3.11 1.76-4.24L12 5.1v14.49z"/></svg>`;
-        const btn = this.createButton(icon, 'Cinema Filters: Normal', () => this.cycleFilters(video, btn));
+        const btn = this.createButton(icon, 'Cinema Filters', () => this.showFilterMenu(video, btn));
         return btn;
     }
 
-    cycleFilters(video, btn) {
-        this.currentFilterIndex = (this.currentFilterIndex + 1) % this.filters.length;
-        const filter = this.filters[this.currentFilterIndex];
-        
-        // Apply filter to video stream
-        video.style.filter = filter.value;
-        btn.title = `Cinema Filters: ${filter.name}`;
-        
-        // Visual feedback
-        if (filter.value !== 'none') {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+    showFilterMenu(video, btn) {
+        // Remove existing popover if any
+        let existing = document.querySelector('.ypp-filter-popover');
+        if (existing) {
+            existing.remove();
+            return;
         }
-        
-        // Show temp toast
-        const toast = document.createElement('div');
-        toast.className = 'ypp-toast-mini';
-        toast.textContent = `Filter: ${filter.name}`;
-        video.parentElement.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
+
+        const popover = document.createElement('div');
+        popover.className = 'ypp-filter-popover ypp-tag-popover'; // Reuse Tag Popover styles
+
+        this.filters.forEach((filter, index) => {
+            const item = document.createElement('div');
+            item.className = 'ypp-tag-option';
+            if (this.currentFilterIndex === index) {
+                item.style.color = 'var(--ypp-accent-blue)';
+                item.style.fontWeight = 'bold';
+            }
+            item.textContent = filter.name;
+            item.onclick = (e) => {
+                e.stopPropagation();
+                this.currentFilterIndex = index;
+                video.style.filter = filter.value;
+                btn.title = `Cinema Filters: ${filter.name}`;
+                
+                if (filter.value !== 'none') {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+                
+                const toast = document.createElement('div');
+                toast.className = 'ypp-toast-mini';
+                toast.textContent = `Filter: ${filter.name}`;
+                video.parentElement.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+
+                popover.remove();
+            };
+            popover.appendChild(item);
+        });
+
+        const rect = btn.getBoundingClientRect();
+        popover.style.bottom = `${window.innerHeight - rect.top + 8}px`; // Display above the button
+        popover.style.left = `${rect.left + window.scrollX - 50}px`; // Center ish
+
+        document.body.appendChild(popover);
+
+        // Click outside to close
+        const closePopover = (e) => {
+            if (!popover.contains(e.target) && !btn.contains(e.target)) {
+                popover.remove();
+                document.removeEventListener('click', closePopover);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closePopover), 0);
     }
 
     createButton(svgContent, title, onClick) {

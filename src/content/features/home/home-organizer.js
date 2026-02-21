@@ -137,72 +137,66 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
             topSeparator.onclick = () => this.toggleSection(topSeparator);
         }
 
-        // Feature 2: Visual Priority
-        this.applyVisualPriority(contents);
-
-        // Feature 3: Topic Tags
-        this.injectTagButtons(contents);
-
-        // Feature 4: Hide Watched Videos
-        if (this.settings?.hideWatched) {
-            this._hideWatchedVideos(contents);
-        }
+        // Process Items in a single pass (Priority, Tags, Watched Status)
+        this._processGridItems(contents);
     }
 
     /**
-     * Apply visual styles based on priority/type
+     * Process grid items in a single pass for performance.
      * @param {HTMLElement} contents 
      */
-    applyVisualPriority(contents) {
+    _processGridItems(contents) {
+        // Handle standalone shelves priority
         const lowPrioritySelectors = ['ytd-rich-shelf-renderer[is-shorts]', 'ytd-reel-shelf-renderer'];
         lowPrioritySelectors.forEach(sel => {
             contents.querySelectorAll(sel).forEach(el => el.classList.add('ypp-priority-low'));
         });
 
-        // Apply Tags Visuals
-        contents.querySelectorAll('ytd-rich-item-renderer').forEach(item => {
-            // Shorts Check
-            if (item.querySelector('a[href^="/shorts/"]')) item.classList.add('ypp-priority-low');
-        });
-    }
-
-    /**
-     * Inject tagging buttons onto video cards
-     * @param {HTMLElement} contents 
-     */
-    injectTagButtons(contents) {
+        // Single pass on video items
         const videoItems = contents.querySelectorAll('ytd-rich-item-renderer');
         videoItems.forEach(item => {
-            if (item.querySelector('.ypp-tag-btn')) return;
+            // 1. Shorts Check Priority
+            if (item.querySelector('a[href^="/shorts/"]')) {
+                item.classList.add('ypp-priority-low');
+            }
 
-            const thumbnail = item.querySelector('ytd-thumbnail');
-            if (!thumbnail) return;
-
-            // Positioning handled by CSS (absolute)
-            // Ensure parent has position relative (ytd-thumbnail does)
-
-            const btn = document.createElement('button');
-            btn.className = 'ypp-tag-btn';
-            btn.innerHTML = '#';
-            btn.title = 'Tag Channel';
-
-            // Check if already tagged
-            const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim();
-            if (channelName && this.channelTags[channelName]) {
-                const tag = this.channelTags[channelName];
-                if (tag && tag.length > 0) {
-                    btn.classList.add('tagged');
-                    btn.innerHTML = tag[0]; // First letter
+            // 2. Hide Watched Check (if enabled)
+            if (this.settings?.hideWatched && item.style.display !== 'none') {
+                const progressBar = item.querySelector('ytd-thumbnail-overlay-resume-playback-renderer #progress');
+                if (progressBar) {
+                    const percentage = parseFloat(progressBar.style.width);
+                    if (!isNaN(percentage) && percentage > 80) {
+                        item.style.display = 'none';
+                    }
                 }
             }
 
-            btn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.handleTagClick(e, channelName, btn);
-            };
-
-            thumbnail.appendChild(btn);
+            // 3. Inject Tag Buttons (skip if hidden or already injected)
+            if (item.style.display !== 'none' && !item.querySelector('.ypp-tag-btn')) {
+                const thumbnail = item.querySelector('ytd-thumbnail');
+                if (thumbnail) {
+                    const btn = document.createElement('button');
+                    btn.className = 'ypp-tag-btn';
+                    btn.innerHTML = '#';
+                    btn.title = 'Tag Channel';
+            
+                    const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim();
+                    if (channelName && this.channelTags[channelName]) {
+                        const tag = this.channelTags[channelName];
+                        if (tag && tag.length > 0) {
+                            btn.classList.add('tagged');
+                            btn.innerHTML = tag[0]; 
+                        }
+                    }
+            
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.handleTagClick(e, channelName, btn);
+                    };
+                    thumbnail.appendChild(btn);
+                }
+            }
         });
     }
 
@@ -273,23 +267,5 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         return div;
     }
 
-    /**
-     * Hide videos that have been watched (>80% progress)
-     * @param {HTMLElement} contents 
-     */
-    _hideWatchedVideos(contents) {
-        const items = contents.querySelectorAll('ytd-rich-item-renderer');
-        items.forEach(item => {
-            const progressBar = item.querySelector('ytd-thumbnail-overlay-resume-playback-renderer #progress');
-            if (progressBar) {
-                // width is percentage e.g. "100%"
-                const widthStyle = progressBar.style.width; 
-                const percentage = parseFloat(widthStyle);
-                if (!isNaN(percentage) && percentage > 80) {
-                    item.style.display = 'none';
-                    // Optional: Log or count hidden items
-                }
-            }
-        });
-    }
+
 };

@@ -997,20 +997,26 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
     }
 
     /**
-     * Process mutations
+     * Process mutations (Optimized with requestAnimationFrame)
      * @private
      */
     _processMutations() {
-        this.callbacks.forEach(({ selector, callback }, id) => {
-            const el = document.querySelector(selector);
-            // Ensure element is in the live DOM before calling the callback
-            if (el && el.isConnected) {
-                try {
-                    callback(el);
-                } catch (error) {
-                    console.error(`[DOMObserver] Error in callback for '${id}':`, error);
+        if (this._isProcessingNodeMutations) return;
+        this._isProcessingNodeMutations = true;
+        
+        requestAnimationFrame(() => {
+            this.callbacks.forEach(({ selector, callback }, id) => {
+                const el = document.querySelector(selector);
+                // Ensure element is in the live DOM before calling the callback
+                if (el && el.isConnected) {
+                    try {
+                        callback(el);
+                    } catch (error) {
+                        console.error(`[DOMObserver] Error in '${id}':`, error);
+                    }
                 }
-            }
+            });
+            this._isProcessingNodeMutations = false;
         });
     }
 
