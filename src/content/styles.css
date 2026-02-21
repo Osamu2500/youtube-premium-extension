@@ -2019,8 +2019,7 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer yt-icon-button {
   border-radius: 50% !important;
 }
 
-/* Non-Video Elements Span Full Width */
-body.ypp-search-grid-mode ytd-channel-renderer,
+/* Non-Video Elements Span Full Width (Except Channels) */
 body.ypp-search-grid-mode ytd-shelf-renderer,
 body.ypp-search-grid-mode ytd-rich-shelf-renderer,
 body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
@@ -2030,32 +2029,90 @@ body.ypp-search-grid-mode ytd-rich-section-renderer {
   max-width: 100%;
 }
 
-/* Channel Result Card */
+/* Shelf Internal Grid (e.g. "From related searches") */
+body.ypp-search-grid-mode ytd-shelf-renderer #contents,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #contents {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 20px !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+}
+
+body.ypp-search-grid-mode ytd-shelf-renderer #scroll-container,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #scroll-container {
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* Channel Result Card (Vertical Grid Item) */
 body.ypp-search-grid-mode ytd-channel-renderer {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
-  border: 1px solid var(--ypp-glass-border);
-  border-radius: var(--ypp-radius-md);
-  padding: 24px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 32px 16px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  background: rgba(30, 30, 30, 0.4);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--ypp-radius-lg);
+  box-shadow: var(--ypp-shadow-card);
+  box-sizing: border-box;
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer #content-section {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
-  margin-right: 32px;
+  margin-right: 0;
+  margin-bottom: 16px;
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer img#img {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #info-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer ytd-channel-name {
+  font-family: "Inter", "Roboto", sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  margin-bottom: 4px;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #subscribers {
+  font-size: 13px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  margin-bottom: 16px;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #subscribe-button {
+  margin-top: 8px;
+  width: 100%;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer yt-button-shape {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* ===================================================================================
@@ -2121,7 +2178,9 @@ body.ypp-search-grid-mode #right-arrow-button {
 /* Responsive Search Grid - Forcing specific column counts for perfect cards */
 @media (max-width: 1600px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents,
+  body.ypp-search-grid-mode ytd-shelf-renderer > #contents,
+  body.ypp-search-grid-mode ytd-horizontal-card-list-renderer > #contents {
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 20px !important;
   }
@@ -2129,7 +2188,9 @@ body.ypp-search-grid-mode #right-arrow-button {
 
 @media (max-width: 1200px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents,
+  body.ypp-search-grid-mode ytd-shelf-renderer > #contents,
+  body.ypp-search-grid-mode ytd-horizontal-card-list-renderer > #contents {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 16px !important;
   }
@@ -2137,7 +2198,9 @@ body.ypp-search-grid-mode #right-arrow-button {
 
 @media (max-width: 900px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents,
+  body.ypp-search-grid-mode ytd-shelf-renderer > #contents,
+  body.ypp-search-grid-mode ytd-horizontal-card-list-renderer > #contents {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
@@ -2145,7 +2208,9 @@ body.ypp-search-grid-mode #right-arrow-button {
 
 @media (max-width: 600px) {
   body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents,
+  body.ypp-search-grid-mode ytd-shelf-renderer > #contents,
+  body.ypp-search-grid-mode ytd-horizontal-card-list-renderer > #contents {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
