@@ -1791,142 +1791,347 @@ body.yt-premium-plus-theme ytd-rich-item-renderer:hover .ypp-tag-btn {
 }
 
 /* ===================================================================================
-   SEARCH GRID MODE (from search-redesign.js)
+   6. SEARCH REDESIGN (Imported from Main & Optimized for Pro Max)
    =================================================================================== */
 
-/* Container Setup */
-body.ypp-search-grid-mode ytd-search {
+/* Search Grid Mode - Container Overrides */
+body.ypp-search-grid-mode ytd-search,
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer,
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   width: 100% !important;
-  max-width: none !important;
+  max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-/* Enforce the Responsive Grid Layout (Ported from Main) */
-body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
-body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents,
-body.ypp-search-grid-mode ytd-search ytd-two-column-search-results-renderer #primary {
-  display: grid !important;
-  /* Optimized for density and screen usage */
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
-  gap: 16px !important;
-  width: 100% !important;
-  max-width: 1800px !important; /* Prevent getting TOO wide on ultrawide monitors */
-  padding: 0 24px !important; /* Balanced padding */
-  margin: 0 auto !important; /* Center the container itself */
-  box-sizing: border-box !important;
-  justify-content: center !important; /* Ensure grid items are centered if they don't fill row */
+/* Search Grid Layout */
+body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 1800px;
+  padding: 0 24px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  justify-content: center;
 }
 
 /* Ensure the main wrapper is also centered */
-body.ypp-search-grid-mode ytd-search ytd-two-column-search-results-renderer #primary {
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   display: flex !important;
   justify-content: center !important;
 }
 
-/* Convert horizontally-laid out List Items into Vertical Cards */
+/* Video Cards in Grid */
 body.ypp-search-grid-mode ytd-video-renderer,
 body.ypp-search-grid-mode ytd-playlist-renderer,
-body.ypp-search-grid-mode ytd-radio-renderer,
-body.ypp-search-grid-mode ytd-channel-renderer {
+body.ypp-search-grid-mode ytd-radio-renderer {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
   display: flex !important;
   flex-direction: column !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important; /* Allow shrinking in grid */
-  background: var(--ypp-bg-surface) !important;
-  backdrop-filter: var(--ypp-blur-md) !important;
-  border: 1px solid var(--ypp-glass-border) !important;
-  border-radius: var(--ypp-radius-md) !important;
-  padding: var(--ypp-card-padding, 12px) !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  /* Reset YouTube flex properties */
-  flex: none !important;
+  align-items: stretch !important;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-med);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-md); /* Updated for Pro Max */
+  box-shadow: var(--ypp-shadow-card);
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 }
 
-/* Thumbnail wrapper - force aspect ratio */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #dismissible,
+body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Remove 'Search Specific' skew effect */
+body.ypp-search-grid-mode ytd-video-renderer::after {
+  display: none;
+}
+
+/* Thumbnail */
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
-body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
-body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail,
-body.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   width: 100% !important;
   max-width: 100% !important;
-  margin: 0 0 12px 0 !important;
+  min-width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16/9 !important;
   flex: none !important;
-  aspect-ratio: 16 / 9; /* Channels will override this */
+  border-radius: var(--ypp-radius-md);
+  margin-right: 0 !important;
+  margin-bottom: 12px !important;
+  box-shadow: none;
 }
 
-/* Video Wrapper size reset */
-body.ypp-search-grid-mode ytd-video-renderer > div#dismissible {
-  display: flex !important;
-  flex-direction: column !important;
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Text Content */
+body.ypp-search-grid-mode ytd-video-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-video-renderer #dismissible .text-wrapper {
   width: 100% !important;
-  height: 100% !important;
+  max-width: 100% !important;
+  flex: 1 !important;
+  min-width: 0 !important;
 }
 
-/* Metadata Text wrapper */
-body.ypp-search-grid-mode ytd-video-renderer div.text-wrapper,
-body.ypp-search-grid-mode ytd-playlist-renderer div.text-wrapper,
-body.ypp-search-grid-mode ytd-radio-renderer div.text-wrapper,
-body.ypp-search-grid-mode ytd-channel-renderer div.text-wrapper {
-  max-width: 100% !important;
-  min-width: 0 !important;
+body.ypp-search-grid-mode ytd-video-renderer #meta {
   padding: 0 !important;
+}
+
+/* Title - Match Homepage Typography */
+body.ypp-search-grid-mode ytd-video-renderer #video-title,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title {
+  font-family: "Roboto", sans-serif;
+  font-size: 1.6rem !important;
+  line-height: 2.2rem !important;
+  font-weight: 500 !important;
+  margin: 0 0 4px 0 !important;
+  color: var(--ypp-text-primary);
+  text-shadow: none;
+  max-height: 4.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Metadata - Clean Flex Row */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 0 4px 0 !important;
   margin: 0 !important;
 }
 
-/* Hide description snippets in Grid Mode */
-body.ypp-search-grid-mode ytd-video-renderer yt-formatted-string.metadata-snippet-text {
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #channel-name {
+  font-size: 1.3rem !important;
+  font-weight: 500 !important;
+  color: var(--ypp-text-secondary) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
+  font-size: 1.2rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  margin-top: 4px !important;
+  line-height: 1.4 !important;
+}
+
+/* Hide Description Snippet (Clutter) */
+body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container {
   display: none !important;
 }
 
-/* Channel Avatar in Grid View */
+/* Hide Badges in Text Area */
+body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
+  display: none !important;
+}
+
+/* Glass Badges (Duration, Quality) on Thumbnail */
+body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
+body.ypp-search-grid-mode ytd-thumbnail-overlay-resume-playback-renderer {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 2px 4px !important;
+  margin: 4px !important;
+}
+
+body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
+  font-family: "Roboto", sans-serif !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Hover-Only Menu Button */
+body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-menu-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-menu-renderer {
+  opacity: 1;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer yt-icon-button,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer yt-icon-button,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer yt-icon-button {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 50% !important;
+}
+
+/* Non-Video Elements Span Full Width */
+body.ypp-search-grid-mode ytd-channel-renderer,
+body.ypp-search-grid-mode ytd-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+body.ypp-search-grid-mode ytd-rich-section-renderer {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Channel Result Card */
+body.ypp-search-grid-mode ytd-channel-renderer {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #content-section {
+  display: flex;
+  align-items: center;
+}
+
 body.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    margin-bottom: 16px !important;
+  margin-right: 32px;
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer #avatar {
-    width: 100px !important;
-    height: 100px !important;
-    margin: 0 auto;
+body.ypp-search-grid-mode ytd-channel-renderer img#img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer #info-section {
-    text-align: center;
-    align-items: center;
+/* ===================================================================================
+   SEARCH FILTERS (CHIPS)
+   =================================================================================== */
+
+/* Chip Container */
+body.ypp-search-grid-mode yt-chip-cloud-renderer {
+  margin-bottom: 24px;
 }
 
-/* Responsive Overrides (Search Grid) */
+/* Base Chip Style */
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer {
+  height: 36px;
+  border-radius: 18px;
+  margin-right: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ypp-glass-border);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Active Chip */
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected],
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+}
+
+/* Chip Text */
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer yt-formatted-string,
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer span {
+  color: var(--ypp-text-secondary);
+  font-family: "Roboto", sans-serif;
+  font-weight: 500;
+  font-size: 1.4rem;
+  padding: 0 16px;
+}
+
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected] yt-formatted-string,
+body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected yt-formatted-string {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+/* Next/Prev Buttons */
+body.ypp-search-grid-mode #left-arrow-button,
+body.ypp-search-grid-mode #right-arrow-button {
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+/* Responsive Search Grid */
 @media (max-width: 1600px) {
-  body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
     gap: 20px !important;
   }
 }
 
 @media (max-width: 1200px) {
-  body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
     gap: 16px !important;
   }
 }
 
 @media (max-width: 900px) {
-  body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
     gap: 12px !important;
   }
 }
 
 @media (max-width: 600px) {
-  body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
-  body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+  body.ypp-search-grid-mode ytd-item-section-renderer > #contents,
+  body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
