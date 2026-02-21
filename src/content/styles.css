@@ -1938,12 +1938,12 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
 body.ypp-search-grid-mode ytd-video-renderer #channel-name,
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
   font-family: "Roboto", sans-serif !important;
-  font-size: 1.15rem !important; /* Reduced from 1.3rem to fit better */
+  font-size: 1.1rem !important; /* Reduced further to prevent clipping */
   font-weight: 500 !important;
   color: var(--ypp-text-secondary) !important;
   margin: 0 !important;
   padding: 0 !important;
-  line-height: 1.2 !important;
+  line-height: 1.5 !important; /* Increased line-height so descenders don't get cut off */
   letter-spacing: normal !important;
 }
 
