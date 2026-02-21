@@ -1804,8 +1804,8 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   padding: 0 !important;
 }
 
-/* Search Grid Layout */
-body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+/* Search Grid Layout (Master Container) */
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
   display: grid;
   grid-template-columns: repeat(5, 1fr) !important; /* Strictly lock to 5 cards on desktop */
   gap: 20px; /* Increased from 16px for Pro Max spaciousness */
@@ -1815,6 +1815,15 @@ body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   margin: 0 auto;
   box-sizing: border-box;
   justify-content: center;
+}
+
+/* Flatten the isolated wrappers so they join the master grid */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+  display: contents !important;
+}
+
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
+  display: contents !important;
 }
 
 /* Ensure the main wrapper is also centered */
@@ -1854,6 +1863,19 @@ body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
+}
+
+/* Force inner wrappers in Playlists & Mixes to stack vertically */
+body.ypp-search-grid-mode ytd-playlist-renderer > a,
+body.ypp-search-grid-mode ytd-radio-renderer > div,
+body.ypp-search-grid-mode ytd-radio-renderer > ytd-thumbnail {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  align-items: stretch !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Remove 'Search Specific' skew effect */
@@ -2067,18 +2089,19 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   max-width: 100%;
   min-width: 0;
   margin: 0;
-  padding: 32px 16px;
+  padding: 32px 24px;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  background: rgba(30, 30, 30, 0.4);
+  background: linear-gradient(180deg, rgba(40, 40, 40, 0.4) 0%, rgba(20, 20, 20, 0.6) 100%);
   backdrop-filter: var(--ypp-blur-high);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--ypp-radius-lg);
-  box-shadow: var(--ypp-shadow-card);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
+  aspect-ratio: 3/4; /* Make it a nice vertical portrait card */
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer #content-section {
