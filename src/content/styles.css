@@ -1787,20 +1787,23 @@ body.yt-premium-plus-theme ytd-rich-item-renderer:hover .ypp-tag-btn {
 
 /* Container Setup */
 body.ypp-search-grid-mode ytd-search {
-  max-width: var(--ypp-layout-max-width) !important;
-  margin: 0 auto !important;
-  padding: 0 var(--ypp-layout-padding-x) !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Enforce the 4-Column Grid */
 body.ypp-search-grid-mode ytd-search ytd-item-section-renderer > #contents,
-body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents {
+body.ypp-search-grid-mode ytd-search ytd-section-list-renderer > #contents,
+body.ypp-search-grid-mode ytd-search ytd-two-column-search-results-renderer #primary {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
-  gap: var(--ypp-grid-gap, 24px) !important;
+  gap: 24px 16px !important;
   width: 100% !important;
   max-width: none !important;
   padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
 /* Convert horizontally-laid out List Items into Vertical Cards */
@@ -2172,4 +2175,286 @@ body.ypp-search-grid-mode
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===================================================================================
+   12. CHANNEL PAGE PRO MAX OVERHAUL
+   =================================================================================== */
+
+/* Channel Layout Base */
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-two-column-browse-results-renderer {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 24px !important;
+  box-sizing: border-box;
+}
+
+/* Channel Header & Banner Overhaul */
+body.yt-premium-plus-theme ytd-c4-tabbed-header-renderer {
+  margin-top: 16px;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ypp-shadow-float);
+  transform: translateZ(0);
+}
+
+/* Banner Image - Ensure rounded corners inside the glass container */
+body.yt-premium-plus-theme #channel-header-banner,
+body.yt-premium-plus-theme yt-page-header-renderer #banner {
+  border-radius: var(--ypp-radius-md) var(--ypp-radius-md) 0 0;
+  overflow: hidden;
+}
+
+body.yt-premium-plus-theme .ytd-c4-tabbed-header-renderer #banner {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* Channel Header Info Section */
+body.yt-premium-plus-theme ytd-channel-header-links-renderer,
+body.yt-premium-plus-theme #channel-header {
+  padding: 24px !important;
+}
+
+/* Channel Header Text */
+body.yt-premium-plus-theme ytd-channel-name#channel-name .yt-formatted-string {
+  font-family: inherit;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ypp-text-primary);
+}
+
+/* Sub button inside header */
+body.yt-premium-plus-theme #subscribe-button ytd-subscribe-button-renderer {
+  background: var(--ypp-bg-glass);
+  border-radius: var(--ypp-radius-pill);
+  border: 1px solid var(--ypp-glass-border);
+  backdrop-filter: var(--ypp-blur-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.yt-premium-plus-theme #subscribe-button ytd-subscribe-button-renderer:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Channel Tabs Navigation */
+body.yt-premium-plus-theme #tabs-inner-container {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0 16px;
+}
+
+body.yt-premium-plus-theme tp-yt-paper-tab {
+  padding: 0 24px !important;
+  font-size: 1.4rem !important;
+  font-weight: 500 !important;
+  color: var(--ypp-text-secondary) !important;
+  transition: color 0.2s;
+}
+
+body.yt-premium-plus-theme tp-yt-paper-tab.iron-selected {
+  color: var(--ypp-text-primary) !important;
+  font-weight: 700 !important;
+}
+
+body.yt-premium-plus-theme tp-yt-paper-tabs {
+  --paper-tabs-selection-bar-color: var(--ypp-accent) !important;
+}
+
+/* Hide nested tabs/pills that are redundant */
+body.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Channel Videos Grid (Home/Videos Tab)
+   Normalize it to match the main home feed 4x4 layout */
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-grid-renderer > #contents {
+  margin-top: 24px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 24px 16px !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Hide rows and sections to allow raw grid flow */
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-grid-row,
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-section-renderer > #content {
+   display: contents !important;
+}
+
+/* Individual Channel Video Cards */
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-item-renderer {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+/* Lists on Channel Home Tab (Multiple playlists horizontal scrolls) */
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-item-section-renderer #header {
+  margin-bottom: 16px;
+}
+
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-item-section-renderer #title-text {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  color: var(--ypp-text-primary) !important;
+}
+
+/* Horizontal Shelves (e.g. Popular Videos) */
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-horizontal-card-list-renderer {
+  background: transparent;
+  padding: 0;
+  margin-bottom: 32px;
+}
+
+body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-horizontal-card-list-renderer ytd-button-renderer {
+  display: none !important; /* Hide weird side arrows */
+}
+
+/* Responsive Overrides for Channels */
+@media (max-width: 1600px) {
+  body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+@media (max-width: 1100px) {
+  body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-grid-renderer > #contents {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 700px) {
+  body.yt-premium-plus-theme ytd-browse[page-subtype="channels"] ytd-rich-grid-renderer > #contents {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* ===================================================================================
+   13. PLAYLIST PAGE PRO MAX OVERHAUL
+   =================================================================================== */
+
+/* Full Layout Container */
+body.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer {
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Left Sidebar (Playlist Header) */
+body.yt-premium-plus-theme ytd-playlist-header-renderer {
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  padding: 24px;
+  box-shadow: var(--ypp-shadow-float);
+  position: sticky;
+  top: 100px; /* Account for fixed header */
+  transform: translateZ(0);
+}
+
+/* Left Sidebar - Thumbnail */
+body.yt-premium-plus-theme ytd-playlist-header-renderer ytd-playlist-thumbnail {
+  border-radius: var(--ypp-radius-md);
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  margin-bottom: 24px;
+}
+
+/* Left Sidebar - Fast Action Buttons */
+body.yt-premium-plus-theme ytd-playlist-header-renderer #primary-button ytd-button-renderer,
+body.yt-premium-plus-theme ytd-playlist-header-renderer #secondary-button ytd-button-renderer {
+  background: var(--ypp-bg-glass);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-pill);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.yt-premium-plus-theme ytd-playlist-header-renderer #primary-button ytd-button-renderer:hover,
+body.yt-premium-plus-theme ytd-playlist-header-renderer #secondary-button ytd-button-renderer:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Right Side - Playlist Video List Container */
+body.yt-premium-plus-theme ytd-playlist-video-list-renderer {
+  background: var(--ypp-bg-base);
+  border-radius: var(--ypp-radius-lg);
+}
+
+/* Individual Playlist Videos (Watch Later, Liked Videos, Playlists) */
+body.yt-premium-plus-theme ytd-playlist-video-renderer {
+  background: var(--ypp-bg-surface) !important;
+  backdrop-filter: var(--ypp-blur-md) !important;
+  border: 1px solid var(--ypp-glass-border) !important;
+  border-radius: var(--ypp-radius-md) !important;
+  padding: 12px 16px !important;
+  margin-bottom: 12px !important;
+  box-shadow: var(--ypp-shadow-card) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s !important;
+  align-items: center !important; /* Keep row neat */
+  width: 100% !important; /* Extremely important flex fix for shrink bugs */
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.yt-premium-plus-theme ytd-playlist-video-renderer:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--ypp-shadow-float) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Video Index Number */
+body.yt-premium-plus-theme ytd-playlist-video-renderer #index {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--ypp-text-secondary);
+  width: 32px;
+  text-align: center;
+}
+
+/* Video Title in Playlist */
+body.yt-premium-plus-theme ytd-playlist-video-renderer #video-title {
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+
+/* Playlist Panel on Watch Page (Queue) */
+body.yt-premium-plus-theme ytd-playlist-panel-renderer {
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  box-shadow: var(--ypp-shadow-float);
+  margin-bottom: 24px;
+}
+
+body.yt-premium-plus-theme ytd-playlist-panel-renderer #header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 24px;
+}
+
+body.yt-premium-plus-theme ytd-playlist-panel-video-renderer {
+  margin: 8px;
+  border-radius: var(--ypp-radius-sm);
+  padding: 8px;
+  transition: background-color 0.15s;
+}
+
+body.yt-premium-plus-theme ytd-playlist-panel-video-renderer:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.yt-premium-plus-theme ytd-playlist-panel-video-renderer[selected] {
+  background-color: rgba(62, 166, 255, 0.1);
+  border-left: 3px solid var(--ypp-accent-blue);
 }
