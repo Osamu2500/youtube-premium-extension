@@ -1807,7 +1807,7 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 /* Search Grid Layout */
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* 240px fits 5 cards comfortably */
   gap: 20px; /* Increased from 16px for Pro Max spaciousness */
   width: 100%;
   max-width: 1800px;
@@ -1935,13 +1935,16 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
   overflow: hidden;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer #channel-name {
+body.ypp-search-grid-mode ytd-video-renderer #channel-name,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
+  font-family: "Roboto", sans-serif !important;
   font-size: 1.3rem !important;
   font-weight: 500 !important;
   color: var(--ypp-text-secondary) !important;
   margin: 0 !important;
   padding: 0 !important;
-  line-height: 1 !important;
+  line-height: 1.2 !important;
+  letter-spacing: normal !important;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
@@ -1965,8 +1968,9 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
 }
 
 /* Glass Badges (Duration, Quality) on Thumbnail */
+/* CRITICAL: Do NOT style ytd-thumbnail-overlay-resume-playback-renderer here, it breaks the red progress bar */
 body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
-body.ypp-search-grid-mode ytd-thumbnail-overlay-resume-playback-renderer {
+body.ypp-search-grid-mode ytd-thumbnail-overlay-bottom-right-renderer {
   background: rgba(0, 0, 0, 0.7) !important;
   backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
