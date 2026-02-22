@@ -242,6 +242,7 @@ window.YPP.CONSTANTS = {
         ambientMode: false,
         audioModeEnabled: false,
         videoControlsEnabled: true,
+        subscriptionFolders: true,
 
         // Study Mode
         studyMode: false
@@ -397,7 +398,8 @@ window.YPP.CONSTANTS = {
         reversePlaylist: 'ReversePlaylist',
         dataAPI: 'DataAPI',
         nightMode: 'NightModeManager',
-        continueWatching: 'ContinueWatching'
+        continueWatching: 'ContinueWatching',
+        subscriptionFolders: 'SubscriptionFolders'
     }
 };
 

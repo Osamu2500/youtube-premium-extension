@@ -2972,3 +2972,245 @@ body.yt-premium-plus-theme .badge-style-type-starting-soon.ytd-badge-supported-r
   border-radius: var(--ypp-radius-sm) !important;
   font-weight: bold !important;
 }
+
+/* ===================================================================================
+   15. SUBSCRIPTION FOLDERS (PocketTube Replacement)
+   =================================================================================== */
+
+/* Sidebar Folder List Header */
+.ypp-sub-folders {
+  margin: 12px 16px 8px 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ypp-glass-border);
+}
+
+.ypp-folder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.ypp-folder-header h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ypp-text-primary);
+  margin: 0;
+}
+
+.ypp-icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.ypp-icon-btn:hover {
+  background: var(--ypp-accent);
+  transform: scale(1.1);
+}
+
+/* Sidebar Folder Item */
+.ypp-folder-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--ypp-radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  margin-bottom: 4px;
+}
+
+.ypp-folder-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+.ypp-folder-item.active {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-left: 3px solid var(--ypp-accent);
+}
+
+.ypp-folder-icon {
+  margin-right: 12px;
+  font-size: 1.4rem;
+}
+
+.ypp-folder-name {
+  flex: 1;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--ypp-text-secondary);
+}
+
+.ypp-folder-item.active .ypp-folder-name {
+  color: var(--ypp-text-primary);
+  font-weight: 600;
+}
+
+.ypp-folder-count {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Feed Filter Chips */
+.ypp-folder-chips-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 12px;
+  padding: 16px 0 24px 0;
+  scrollbar-width: none;
+}
+.ypp-folder-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.ypp-filter-chip {
+  background: var(--ypp-bg-surface);
+  border: 1px solid var(--ypp-glass-border);
+  color: var(--ypp-text-secondary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  backdrop-filter: var(--ypp-blur-md);
+}
+
+.ypp-filter-chip:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.ypp-filter-chip.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.15);
+}
+
+/* Channel Page Popover button */
+.ypp-tactile-btn {
+  background: var(--ypp-bg-glass);
+  border: 1px solid var(--ypp-glass-border);
+  color: var(--ypp-text-primary);
+  border-radius: var(--ypp-radius-pill);
+  padding: 0 16px;
+  height: 36px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  backdrop-filter: var(--ypp-blur-md);
+  margin-right: 8px;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
+}
+
+.ypp-tactile-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Popover Menu */
+.ypp-glass-popover {
+  position: absolute;
+  background: var(--ypp-bg-elevated);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: var(--ypp-shadow-float);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.ypp-glass-popover.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.ypp-popover-header {
+  font-size: 1.4rem;
+  color: var(--ypp-text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ypp-glass-border);
+}
+
+.ypp-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ypp-folder-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.ypp-folder-checkbox:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ypp-folder-checkbox input[type="checkbox"] {
+  margin-right: 12px;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: 4px;
+  background: rgba(0,0,0,0.4);
+  position: relative;
+  cursor: pointer;
+}
+
+.ypp-folder-checkbox input[type="checkbox"]:checked {
+  background: var(--ypp-accent);
+  border-color: var(--ypp-accent);
+}
+
+.ypp-folder-checkbox input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ypp-folder-checkbox span {
+  font-size: 1.4rem;
+  color: var(--ypp-text-secondary);
+}
+
+.ypp-folder-checkbox:hover span,
+.ypp-folder-checkbox input[type="checkbox"]:checked + span {
+  color: white;
+}

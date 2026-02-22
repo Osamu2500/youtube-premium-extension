@@ -45,6 +45,7 @@
                 "src/content/features/layout/layout-manager.js",
                 "src/content/features/home/home-organizer.js",
                 "src/content/features/layout/header-nav.js",
+                "src/content/features/subscriptions/subscription-folders.js",
                 "src/content/features/subscriptions/subscription-manager.js",
                 "src/content/features/subscriptions/subscriptions-ui.js",
                 "src/content/features/subscriptions/index.js",
