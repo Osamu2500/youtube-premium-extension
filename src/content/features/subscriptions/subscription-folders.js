@@ -252,11 +252,25 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             
             el.innerHTML = `
                 <div class="ypp-folder-icon">📁</div>
-                <div class="ypp-folder-name">${folderName}</div>
+                <div class="ypp-folder-name" style="flex: 1;">${folderName}</div>
                 <div class="ypp-folder-count">${this.folders[folderName].length}</div>
+                <button class="ypp-play-all-btn" title="Play All" style="margin-left: 8px; width: 24px; height: 24px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border: none; cursor: pointer; background: rgba(255,255,255,0.1); color: white;">
+                    <svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </button>
             `;
             
-            el.addEventListener('click', () => {
+            const playBtn = el.querySelector('.ypp-play-all-btn');
+            el.addEventListener('mouseenter', () => playBtn.style.opacity = '1');
+            el.addEventListener('mouseleave', () => playBtn.style.opacity = '0');
+            
+            playBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.playAll(folderName);
+            });
+            
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.ypp-play-all-btn')) return;
                 // Navigate to subscriptions feed with this folder active
                 if (!window.location.href.includes('/feed/subscriptions')) {
                     // Set a session storage flag so the target page knows which folder to activate
@@ -291,13 +305,71 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     }
 
     // ==========================================
-    // FEED FILTERING INTEGRATION
+    // FEED FILTERING & PLAYLIST INTEGRATION
     // ==========================================
 
+    async playAll(folderName) {
+        if (!this.isFeedPage || this.activeFolder !== folderName) {
+            sessionStorage.setItem('ypp_pending_play_all', folderName);
+            const tempLink = document.createElement('a');
+            tempLink.href = '/feed/subscriptions';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            tempLink.remove();
+            return;
+        }
+
+        window.YPP.Utils.log(`Generating playlist for: ${folderName}`, 'SubFolders');
+        if (window.YPP.Utils.createToast) window.YPP.Utils.createToast(`Generating Playlist for ${folderName}...`);
+        
+        const maxScrolls = 3;
+        let scrolls = 0;
+        
+        const extractAndPlay = () => {
+            const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer.ypp-filtered-in');
+            const videoIds = [];
+            
+            for (let card of videoCards) {
+                const link = card.querySelector('a#video-title-link, a#video-title, #thumbnail.ytd-thumbnail');
+                if (link && link.href) {
+                    const urlObj = new URL(link.href, window.location.origin);
+                    const vid = urlObj.searchParams.get('v');
+                    if (vid && !videoIds.includes(vid) && videoIds.length < 50) {
+                        videoIds.push(vid);
+                    }
+                }
+            }
+            
+            if (videoIds.length > 0) {
+                const playlistUrl = `/watch_videos?video_ids=${videoIds.join(',')}`;
+                window.location.href = playlistUrl;
+            } else if (scrolls < maxScrolls) {
+                scrolls++;
+                window.scrollBy(0, window.innerHeight * 2);
+                setTimeout(extractAndPlay, 800);
+            } else {
+                if (window.YPP.Utils.createToast) window.YPP.Utils.createToast('No videos found in this folder.', 'error');
+            }
+        };
+        
+        // Ensure DOM filtering has fully applied
+        setTimeout(extractAndPlay, 500);
+    }
+
     setupFeedFilters() {
-        // Check if there's a pending folder requested from the sidebar
+        const pendingPlayAll = sessionStorage.getItem('ypp_pending_play_all');
         const pendingFolder = sessionStorage.getItem('ypp_pending_folder');
-        if (pendingFolder) {
+        
+        if (pendingPlayAll) {
+            this.activeFolder = pendingPlayAll;
+            sessionStorage.removeItem('ypp_pending_play_all');
+            
+            // Wait for grid to render, then trigger playAll
+            setTimeout(() => {
+                this.playAll(pendingPlayAll);
+            }, 1000);
+        }
+        else if (pendingFolder) {
             this.activeFolder = pendingFolder;
             sessionStorage.removeItem('ypp_pending_folder');
         }
@@ -444,7 +516,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
                 chip.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     if (confirm(`Delete folder "${folderName}"?`)) {
-                        this.removeFolder(folderName);
+                        this.deleteFolder(folderName);
                         // reset active if it was the deleted one
                         if (this.activeFolder === folderName) this.setActiveFolder(null);
                         this.renderFilterChips();
@@ -453,6 +525,18 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
                 
                 chipsBar.appendChild(chip);
             });
+            
+            // Add Play All Button if a folder is active
+            if (this.activeFolder) {
+                const playChip = document.createElement('button');
+                playChip.className = 'ypp-filter-chip ypp-play-action-chip';
+                playChip.innerHTML = `<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
+                playChip.style.backgroundColor = 'var(--ypp-accent, #ff0000)';
+                playChip.style.color = '#fff';
+                playChip.style.border = 'none';
+                playChip.addEventListener('click', () => this.playAll(this.activeFolder));
+                chipsBar.appendChild(playChip);
+            }
             
             // Add Folder Button
             const addBtn = document.createElement('button');
