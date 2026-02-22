@@ -12,8 +12,10 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         this.Utils = window.YPP.Utils;
         // Use the shared DOMObserver mechanism
         this.domObserver = new window.YPP.Utils.DOMObserver(); 
-        /** @type {Object<string, string>} Channel name to tag mapping */
+        /** @type {Object<string, string[]>} Channel name to folder tags mapping */
         this.channelTags = {};
+        /** @type {Object<string, string[]>} Folders loaded from SubscriptionFolders */
+        this.folders = {};
         /** @type {boolean} Feature active state */
         this.isActive = false;
     }
@@ -84,41 +86,81 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
     }
 
     /**
-     * Load tags from storage
+     * Load tags by parsing the Subscription Folders
      */
     async loadTags() {
         try {
-            const data = await this.Utils.loadSettings(); // Actually we need 'channelTags', not 'settings'
-            // Utils.loadSettings gets 'settings' key.
-            // We need a generic storage getter for 'channelTags'. 
-            // Utils.getSetting gets from 'settings' object usually? 
-            // Let's check Utils.js. loadSettings gets "settings". 
-            // We need raw storage for channelTags which is likely a separate key.
-            // Let's use direct chrome.storage for this separate key or add a utility.
-            // For now, consistent with others: use direct chrome.storage or add helper. 
-            // Utils has `loadSettings` which returns `settings`. 
+            const result = await chrome.storage.local.get('ypp_subscription_folders');
+            this.folders = result.ypp_subscription_folders || {};
             
-            const result = await chrome.storage.local.get('channelTags');
-            this.channelTags = result.channelTags || {};
+            this.channelTags = {};
+            for (const [folderName, channels] of Object.entries(this.folders)) {
+                for (const channel of channels) {
+                    if (!this.channelTags[channel]) {
+                        this.channelTags[channel] = [];
+                    }
+                    if (!this.channelTags[channel].includes(folderName)) {
+                        this.channelTags[channel].push(folderName);
+                    }
+                }
+            }
         } catch (e) {
-            this.Utils.log(`Failed to load tags: ${e.message}`, 'HOME', 'error');
+            this.Utils.log(`Failed to load tags from Subscription Folders: ${e.message}`, 'HOME', 'error');
         }
     }
 
     /**
-     * Save a tag for a channel
+     * Toggle a channel's presence in a subscription folder
      * @param {string} channelName 
-     * @param {string} tag 
+     * @param {string} folderName 
      */
-    async saveTag(channelName, tag) {
-        this.channelTags[channelName] = tag;
-        try {
-            await chrome.storage.local.set({ channelTags: this.channelTags });
-            this.Utils.createToast(`Tagged as ${tag}`);
-        } catch (e) {
-            this.Utils.log(`Failed to save tag: ${e.message}`, 'HOME', 'error');
-            this.Utils.createToast('Failed to save tag', 'error');
+    async toggleFolderForChannel(channelName, folderName) {
+        if (!this.folders[folderName]) {
+            this.folders[folderName] = [];
         }
+        
+        const channelIndex = this.folders[folderName].indexOf(channelName);
+        let added = false;
+        
+        if (channelIndex > -1) {
+            // Remove
+            this.folders[folderName].splice(channelIndex, 1);
+        } else {
+            // Add
+            this.folders[folderName].push(channelName);
+            added = true;
+        }
+
+        try {
+            await chrome.storage.local.set({ 'ypp_subscription_folders': this.folders });
+            this.Utils.createToast(added ? `Added to ${folderName}` : `Removed from ${folderName}`);
+            await this.loadTags(); // Re-compute mappings
+            this.refreshAllTagButtons();
+        } catch (e) {
+            this.Utils.log(`Failed to update folder assignment: ${e.message}`, 'HOME', 'error');
+            this.Utils.createToast('Failed to update folder', 'error');
+        }
+    }
+
+    /**
+     * Refresh the visual state of all loaded tag buttons instantly
+     */
+    refreshAllTagButtons() {
+        const videoItems = document.querySelectorAll('ytd-rich-item-renderer');
+        videoItems.forEach(item => {
+            const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim();
+            const btn = item.querySelector('.ypp-tag-btn');
+            if (btn && channelName) {
+                const tags = this.channelTags[channelName];
+                if (tags && tags.length > 0) {
+                    btn.classList.add('tagged');
+                    btn.innerHTML = tags[0][0]; // Print the first letter of the first folder name
+                } else {
+                    btn.classList.remove('tagged');
+                    btn.innerHTML = '#';
+                }
+            }
+        });
     }
 
     /**
@@ -182,10 +224,10 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
             
                     const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim();
                     if (channelName && this.channelTags[channelName]) {
-                        const tag = this.channelTags[channelName];
-                        if (tag && tag.length > 0) {
+                        const tags = this.channelTags[channelName];
+                        if (tags && tags.length > 0) {
                             btn.classList.add('tagged');
-                            btn.innerHTML = tag[0]; 
+                            btn.innerHTML = tags[0][0]; 
                         }
                     }
             
@@ -213,27 +255,31 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         const popover = document.createElement('div');
         popover.className = 'ypp-tag-popover';
 
-        const tags = ['Focus', 'Entertainment', 'News', 'Music', 'Clear'];
-
-        tags.forEach(tag => {
-            const item = document.createElement('div');
-            item.className = 'ypp-tag-option';
-            item.textContent = tag;
-            item.onclick = async () => {
-                if (tag === 'Clear') {
-                    delete this.channelTags[channelName];
-                    btn.classList.remove('tagged');
-                    btn.innerHTML = '#';
-                    await this.saveTag(channelName, null); // Handle delete in saveTag if needed or just save map
-                } else {
-                    await this.saveTag(channelName, tag);
-                    btn.classList.add('tagged');
-                    btn.innerHTML = tag[0];
-                }
-                this.removePopover();
-            };
-            popover.appendChild(item);
-        });
+        const folderNames = Object.keys(this.folders);
+        
+        if (folderNames.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'ypp-tag-option';
+            emptyMsg.textContent = 'No Subfolders created yet';
+            emptyMsg.style.fontStyle = 'italic';
+            emptyMsg.style.cursor = 'default';
+            popover.appendChild(emptyMsg);
+        } else {
+            folderNames.forEach(folderName => {
+                const item = document.createElement('div');
+                item.className = 'ypp-tag-option';
+                
+                // Show a checkmark if this channel is already in this folder
+                const isInFolder = this.channelTags[channelName] && this.channelTags[channelName].includes(folderName);
+                item.innerHTML = isInFolder ? `<strong style="color:var(--ypp-accent)">✓</strong> ${folderName}` : folderName;
+                
+                item.onclick = async () => {
+                    await this.toggleFolderForChannel(channelName, folderName);
+                    this.removePopover();
+                };
+                popover.appendChild(item);
+            });
+        }
 
         // Position popover
         const rect = btn.getBoundingClientRect();
