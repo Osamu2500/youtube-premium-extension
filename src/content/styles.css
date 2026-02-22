@@ -1063,43 +1063,47 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
 }
 
 /* Glass Badges (Duration, Quality) on Thumbnail */
-body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
-body.ypp-search-grid-mode ytd-thumbnail-overlay-resume-playback-renderer {
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(4px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
-  padding: 2px 4px !important;
-  margin: 4px !important;
+body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer,
+body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-right-renderer {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important; /* Fully rounded pills */
+  padding: 4px 8px !important;
+  margin: 6px !important;
 }
 
-body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
-  font-family: "Roboto", sans-serif !important;
-  font-size: 1.1rem !important;
-  font-weight: 500 !important;
+body.yt-premium-plus-theme span.ytd-thumbnail-overlay-time-status-renderer {
+  font-family: "Inter", "Roboto", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
   letter-spacing: 0.5px !important;
+  color: #fff !important;
+  line-height: 1 !important;
 }
 
 /* Hover-Only Menu Button */
-body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer {
+body.yt-premium-plus-theme ytd-video-renderer ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-playlist-renderer ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-radio-renderer ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-rich-item-renderer ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-compact-video-renderer ytd-menu-renderer {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer:hover ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-menu-renderer {
+body.yt-premium-plus-theme ytd-video-renderer:hover ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-playlist-renderer:hover ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-radio-renderer:hover ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-rich-item-renderer:hover ytd-menu-renderer,
+body.yt-premium-plus-theme ytd-compact-video-renderer:hover ytd-menu-renderer {
   opacity: 1;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer yt-icon-button,
-body.ypp-search-grid-mode
-  ytd-playlist-renderer
-  ytd-menu-renderer
-  yt-icon-button,
-body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer yt-icon-button {
+body.yt-premium-plus-theme ytd-video-renderer ytd-menu-renderer yt-icon-button,
+body.yt-premium-plus-theme ytd-playlist-renderer ytd-menu-renderer yt-icon-button,
+body.yt-premium-plus-theme ytd-radio-renderer ytd-menu-renderer yt-icon-button,
+body.yt-premium-plus-theme ytd-rich-item-renderer ytd-menu-renderer yt-icon-button {
   width: 32px !important;
   height: 32px !important;
   padding: 4px !important;
@@ -1989,9 +1993,11 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a {
   display: block;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
-body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
-body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
+body.yt-premium-plus-theme ytd-video-renderer #metadata-line,
+body.yt-premium-plus-theme ytd-playlist-renderer #metadata-line,
+body.yt-premium-plus-theme ytd-radio-renderer #metadata-line,
+body.yt-premium-plus-theme ytd-rich-item-renderer #metadata-line,
+body.yt-premium-plus-theme ytd-compact-video-renderer #metadata-line {
   font-size: 12px !important; /* Strict pixel size */
   font-weight: 400 !important;
   color: rgba(255, 255, 255, 0.4) !important; /* Dimmer for contrast */
@@ -2009,52 +2015,20 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
   display: none !important;
 }
 
-/* Glass Badges (Duration, Quality, Playlist Overlays) on Thumbnail */
-/* CRITICAL: Do NOT style ytd-thumbnail-overlay-resume-playback-renderer here, it breaks the red progress bar */
-body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer,
-body.ypp-search-grid-mode ytd-thumbnail-overlay-bottom-right-renderer {
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 12px !important; /* Fully rounded pills */
-  padding: 4px 8px !important;
-  margin: 6px !important;
-}
-
 /* Playlist Specific Badge Overlays */
-body.ypp-search-grid-mode ytd-playlist-thumbnail {
+body.yt-premium-plus-theme ytd-playlist-thumbnail {
   border-radius: var(--ypp-radius-md) !important;
   overflow: hidden !important;
   margin-bottom: 12px !important;
 }
 
-body.ypp-search-grid-mode ytd-thumbnail-overlay-side-panel-renderer {
+body.yt-premium-plus-theme ytd-thumbnail-overlay-side-panel-renderer {
   background: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(8px) !important;
 }
 
-body.ypp-search-grid-mode span.ytd-thumbnail-overlay-time-status-renderer {
-  font-family: "Inter", "Roboto", sans-serif !important;
-  font-size: 12px !important; /* Strict pixel size */
-  font-weight: 600 !important;
-  letter-spacing: 0.5px !important;
-  color: #fff !important;
-  line-height: 1 !important;
-}
-
 /* Hover-Only Menu Button */
-body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-radio-renderer ytd-menu-renderer {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-body.ypp-search-grid-mode ytd-video-renderer:hover ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-menu-renderer,
-body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-menu-renderer {
-  opacity: 1;
-}
+/* Removed duplicated hover definitions */
 
 body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer yt-icon-button,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer yt-icon-button,
