@@ -1,6 +1,6 @@
 window.YPP.features.VideoControls = class VideoControls {
     constructor() {
-        this.logger = new window.YPP.Utils.Logger('VideoControls');
+        this.logger = window.YPP.Utils || console;
         this.Utils = window.YPP.Utils;
         this.panel = null;
         this.isActive = false;

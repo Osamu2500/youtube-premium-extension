@@ -377,68 +377,88 @@ window.YPP.features.Theme = class ThemeManager {
     // =========================================================================
 
     /**
-     * Manage watched observer
+    /**
+     * Manage watched observer using IntersectionObserver for better performance
      * @private
      * @param {boolean} enable
      */
     _manageWatchedObserver(enable) {
-        this._processWatchedVideos();
-
-        if (enable) {
-            if (!this._watchedObserver) {
-                const process = () => this._processWatchedVideos();
-                const debouncedProcess = this._Utils.debounce?.(process, this._WATCHED_DEBOUNCE) || debounce(process, this._WATCHED_DEBOUNCE);
-
-                this._watchedObserver = new MutationObserver((mutations) => {
-                    const relevant = mutations.some(m => m.addedNodes.length > 0 || m.type === 'attributes');
-                    if (relevant) debouncedProcess();
-                });
-
-                this._watchedObserver.observe(document.body, { childList: true, subtree: true });
-            }
-        } else {
+        if (!enable) {
             if (this._watchedObserver) {
                 this._watchedObserver.disconnect();
                 this._watchedObserver = null;
             }
+            if (this._domObserver) {
+                this._domObserver.disconnect();
+                this._domObserver = null;
+            }
+            return;
+        }
+
+        // Initialize IntersectionObserver if it doesn't exist
+        if (!this._watchedObserver) {
+            this._watchedObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this._processWatchedVideo(entry.target);
+                    }
+                });
+            }, { rootMargin: '200px' }); // Load slightly before visible
+        }
+
+        // Initialize a low-priority MutationObserver just to find new video elements
+        if (!this._domObserver) {
+            const scan = () => {
+                const containers = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer');
+                containers.forEach(container => {
+                    if (!container.dataset.yppWatchedObserved) {
+                        this._watchedObserver.observe(container);
+                        container.dataset.yppWatchedObserved = 'true';
+                    }
+                });
+            };
+            
+            const debouncedScan = this._Utils.debounce?.(scan, 1000) || scan;
+            this._domObserver = new MutationObserver((mutations) => {
+                if (mutations.some(m => m.addedNodes.length > 0)) debouncedScan();
+            });
+            this._domObserver.observe(document.body, { childList: true, subtree: true });
+            
+            // Initial scan
+            scan();
         }
     }
 
     /**
-     * Process and mark watched videos
+     * Process and mark a single watched video
      * @private
+     * @param {Element} container - The video container element
      */
-    _processWatchedVideos() {
+    _processWatchedVideo(container) {
         try {
             const selector = this._SELECTORS.WATCHED_OVERLAY || 'ytd-thumbnail-overlay-resume-playback-renderer #progress';
-            const progressBars = document.querySelectorAll(selector);
+            const bar = container.querySelector(selector);
+            
+            if (!bar) return;
 
-            if (!progressBars?.length) return;
+            const width = bar?.style?.width;
+            if (!width) return;
 
-            progressBars.forEach(bar => {
-                try {
-                    const width = bar?.style?.width;
-                    if (!width) return;
+            const percent = parseFloat(width);
+            if (isNaN(percent)) return;
 
-                    const percent = parseFloat(width);
-                    if (isNaN(percent)) return;
+            const isWatched = percent > this._WATCHED_THRESHOLD;
 
-                    const isWatched = percent > this._WATCHED_THRESHOLD;
-
-                    const container = bar.closest('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer');
-                    if (container) {
-                        if (isWatched) {
-                            container.setAttribute('is-watched', '');
-                        } else {
-                            container.removeAttribute('is-watched');
-                        }
-                    }
-                } catch (err) {
-                    // Skip individual element errors
+            if (isWatched) {
+                container.setAttribute('is-watched', '');
+            } else {
+                // Don't remove if it was manually marked as watched
+                if (!container.querySelector('.ypp-manually-watched')) {
+                    container.removeAttribute('is-watched');
                 }
-            });
+            }
         } catch (error) {
-            this._Utils.log?.(`Error processing watched videos: ${error.message}`, 'THEME', 'error');
+            // Ignore minor errors for individual elements
         }
     }
 

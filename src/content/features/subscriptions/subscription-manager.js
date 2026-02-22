@@ -1,6 +1,6 @@
 window.YPP.features.SubscriptionManager = class SubscriptionManager {
     constructor() {
-        this.logger = new window.YPP.Utils.Logger('SubscriptionManager');
+        this.logger = window.YPP.Utils || console;
         this.groups = {}; // { groupName: [channelId1, channelId2, ...] }
         this.channels = []; // [{ id, name, icon, url }, ...]
         this.isInitialized = false;

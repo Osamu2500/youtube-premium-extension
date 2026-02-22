@@ -241,6 +241,10 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
             console.log(`[YPP Tracker] Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`);
 
         } catch (e) {
+            if (e.message && e.message.includes('Extension context invalidated')) {
+                // Ignore silent context invalidation on extension reload
+                return;
+            }
             console.error('[YPP Tracker] Save failed:', e);
         }
     }

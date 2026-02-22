@@ -266,8 +266,65 @@ body.ypp-hide-shorts
 }
 
 /* Hide Watched Videos */
-body.ypp-hide-watched ytd-grid-video-renderer[is-watched] {
-  display: none;
+body.ypp-hide-watched ytd-grid-video-renderer[is-watched],
+body.ypp-hide-watched ytd-rich-item-renderer[is-watched],
+body.ypp-hide-watched ytd-video-renderer[is-watched],
+body.ypp-hide-watched ytd-compact-video-renderer[is-watched] {
+  display: none !important;
+}
+
+/* ===================================================================================
+   MARK AS WATCHED (MANUAL)
+   =================================================================================== */
+.ypp-watched-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 50;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+ytd-thumbnail:hover .ypp-watched-icon {
+  opacity: 0.8;
+}
+
+.ypp-watched-icon:hover {
+  opacity: 1 !important;
+  transform: scale(1.1);
+  background: var(--ypp-accent, #3ea6ff);
+}
+
+.ypp-watched-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Visually indicate manually watched videos */
+.ypp-manually-watched::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background-color: var(--ypp-accent, #f00);
+  z-index: 40;
+}
+
+.ypp-manually-watched img {
+  opacity: 0.4;
+  filter: grayscale(0.5);
 }
 
 /* Advanced Filter Hidden Items */
@@ -337,6 +394,79 @@ body.ypp-hide-watched ytd-grid-video-renderer[is-watched] {
   #buttons
   ytd-button-renderer:has(path[d*="M20 12h-8v8h-2v-8H2v-2h8V2h2v8h8v2z"]) {
   display: none !important;
+}
+
+/* Topbar Polish (Dynamic Injection from HeaderNav) */
+/* Center Mic Icon */
+.yt-premium-plus-theme #voice-search-button {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border-radius: 50% !important; 
+}
+/* Profile Icon Squircle */
+.yt-premium-plus-theme #avatar-btn,
+.yt-premium-plus-theme #avatar-btn yt-img-shadow,
+.yt-premium-plus-theme #avatar-btn img {
+  border-radius: 12px !important;
+}
+body.ypp-hide-sidebar #content {
+  margin-left: 0 !important;
+}
+
+/* Header Navigation Group (Header Nav Feature) */
+.ypp-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 16px;
+    margin-right: 16px;
+    height: 40px;
+}
+.ypp-nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px; /* Squircle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--yt-spec-text-primary);
+    transition: background-color 0.2s;
+    position: relative;
+}
+.ypp-nav-btn:hover {
+    background-color: var(--yt-spec-badge-chip-background);
+}
+.ypp-nav-btn.active {
+    background-color: var(--yt-spec-text-primary);
+    color: var(--yt-spec-text-primary-inverse);
+}
+.ypp-nav-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+/* Tooltip integration (simple title for now) */
+.ypp-nav-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 2000;
+}
+.ypp-nav-btn:hover::after {
+    opacity: 1;
 }
 
 /* Logo Area */
@@ -410,29 +540,31 @@ ytd-mini-guide-renderer {
   pointer-events: none;
 }
 
-/* The Visual Glass Container */
+/* The Visual Glass Container - Premium Frosted */
 .yt-premium-plus-theme ytd-masthead #container {
   pointer-events: auto;
-  background: var(--ypp-bg-glass);
-  backdrop-filter: var(--ypp-blur-med);
-  border: 1px solid var(--ypp-glass-border);
-  background-image: var(--ypp-glass-shine);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  backdrop-filter: blur(32px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; /* Lighter top, darker bottom */
   border-radius: var(--ypp-radius-pill);
-  box-shadow: var(--ypp-shadow-float);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
   padding: 0 24px;
   display: flex;
   align-items: center;
   height: 100%;
-  transition:
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
+  transition: box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              border-color 0.4s ease, 
+              background 0.4s ease;
   transform: translateZ(0); /* Hardware Acceleration */
-  will-change: box-shadow;
+  will-change: box-shadow, border-color, background;
 }
 
 .yt-premium-plus-theme ytd-masthead #container:hover {
-  box-shadow: var(--ypp-shadow-glow), var(--ypp-shadow-float);
-  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)) !important;
 }
 
 .yt-premium-plus-theme ytd-masthead #background {
@@ -710,12 +842,14 @@ ytd-mini-guide-renderer {
 /* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
 .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
+  /* Premium layout optimization: fluid auto-filling columns */
+  grid-template-columns: repeat(auto-fill, minmax(var(--ypp-grid-column-min, 300px), 1fr)) !important;
   gap: 24px 16px !important;
   width: 100% !important;
+  max-width: 100% !important;
   padding: 0 !important;
   margin: 0 !important;
-  flex-wrap: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 /* Grid Rows */
@@ -724,23 +858,27 @@ ytd-mini-guide-renderer {
   display: contents !important;
 }
 
-/* Individual Video Items - Restore Card Styling Here */
+/* Individual Video Items - Premium Glassmorphic Card */
 .yt-premium-plus-theme ytd-rich-item-renderer {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
-  padding: 0 !important;
   flex: none !important;
-  background: var(--ypp-bg-surface);
-  backdrop-filter: var(--ypp-blur-med);
-  border: 1px solid var(--ypp-glass-border);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top-color: rgba(255, 255, 255, 0.15) !important; /* Luminous top edge */
   border-radius: var(--ypp-radius-lg);
-  box-shadow: var(--ypp-shadow-card);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   padding: 16px !important;
   box-sizing: border-box !important;
-  transition: var(--ypp-transition);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              border-color 0.4s ease, 
+              background 0.4s ease !important;
   transform: translateZ(0); /* Hardware Acceleration */
-  will-change: transform, box-shadow, border-color, background-color;
+  will-change: transform, box-shadow, border-color, background;
 }
 
 /* Video Cards - Reset Child Styling (Since parent now has card style) */
@@ -792,55 +930,21 @@ ytd-mini-guide-renderer {
   line-height: 1.5 !important;
 }
 
-/* Hover Effect */
+/* Consolidate Duplicate Hover Effects into One Premium Animation */
 .yt-premium-plus-theme ytd-rich-item-renderer:hover {
-  transform: translateY(-4px);
-  border-color: rgba(62, 166, 255, 0.4);
+  transform: translateY(-6px) scale(1.015) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  border-color: rgba(62, 166, 255, 0.4) !important;
+  border-top-color: rgba(62, 166, 255, 0.6) !important;
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(62, 166, 255, 0.3);
-}
-
-/* Responsive Breakpoints */
-@media (max-width: 1600px) {
-  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 20px 14px !important;
-  }
-}
-
-@media (max-width: 1400px) {
-  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 16px 12px !important;
-  }
-}
-
-@media (max-width: 1100px) {
-  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px 10px !important;
-  }
-}
-
-@media (max-width: 700px) {
-  .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-.yt-premium-plus-theme ytd-rich-item-renderer:hover {
-  transform: translateY(-6px) scale(1.02);
-  background: rgba(30, 30, 30, 0.85);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow:
-    var(--ypp-shadow-float),
-    0 0 20px rgba(0, 0, 0, 0.2);
-  z-index: var(--ypp-z-card-hover);
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    0 0 24px rgba(62, 166, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  z-index: 10;
 }
 
 .yt-premium-plus-theme ytd-rich-item-renderer:hover ytd-thumbnail {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .yt-premium-plus-theme ytd-thumbnail {
@@ -849,18 +953,8 @@ ytd-mini-guide-renderer {
   width: 100%;
 }
 
-/* Responsive Grid */
-@media (max-width: 1400px) {
-  .yt-premium-plus-theme ytd-rich-item-renderer {
-    width: calc(33.33% - 24px);
-  }
-}
-
-@media (max-width: 1000px) {
-  .yt-premium-plus-theme ytd-rich-item-renderer {
-    width: calc(50% - 24px);
-  }
-}
+/* Fluid CSS Grid handles responsiveness natively using auto-fill minmax. 
+   Removing legacy percentage-width hacks for cleaner layout. */
 
 /* No Sidebar Mode Grid Centering */
 body.ypp-hide-sidebar ytd-rich-grid-renderer {
@@ -917,17 +1011,22 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important; /* Ensure children fill width */
-  background: var(--ypp-bg-surface);
-  backdrop-filter: var(--ypp-blur-med);
-  border: 1px solid var(--ypp-glass-border);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top-color: rgba(255, 255, 255, 0.15) !important; /* Luminous top edge */
   border-radius: var(--ypp-radius-lg);
-  box-shadow: var(--ypp-shadow-card);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   overflow: hidden;
-  transition: var(--ypp-transition);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              border-color 0.4s ease, 
+              background 0.4s ease !important;
   box-sizing: border-box;
   position: relative;
   transform: translateZ(0); /* Hardware Acceleration */
-  will-change: transform, box-shadow, border-color, background-color;
+  will-change: transform, box-shadow, border-color, background;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #dismissible,
@@ -945,13 +1044,15 @@ body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
 body.ypp-search-grid-mode ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-playlist-renderer:hover,
 body.ypp-search-grid-mode ytd-radio-renderer:hover {
-  transform: translateY(-4px);
-  border-color: rgba(62, 166, 255, 0.4);
+  transform: translateY(-6px) scale(1.015) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  border-color: rgba(62, 166, 255, 0.4) !important;
+  border-top-color: rgba(62, 166, 255, 0.6) !important;
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(62, 166, 255, 0.3);
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    0 0 24px rgba(62, 166, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
   z-index: 10;
-  background: var(--ypp-bg-surface);
 }
 
 /* Remove the "Search Specific" skew effect */
@@ -1262,6 +1363,20 @@ body.ypp-search-grid-mode #right-arrow-button {
 /* ===================================================================================
    7. PLAYER ENHANCEMENTS
    =================================================================================== */
+
+/* Premium Glassmorphic Player Container */
+.yt-premium-plus-theme ytd-watch-flexy #ytd-player {
+  border-radius: var(--ypp-radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  transition: box-shadow 0.4s ease, transform 0.4s ease;
+  transform: translateZ(0); /* Hardware Acceleration */
+}
+
+/* Edge Glow effect on player hover */
+.yt-premium-plus-theme ytd-watch-flexy #ytd-player:hover {
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 0 24px rgba(62, 166, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
 
 /* Video Title & Metadata */
 ytd-watch-metadata #title h1,
@@ -2323,12 +2438,13 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   max-width: 100% !important;
 }
 
-/* --- 3. Header Cleanup --- */
-/* Hide headers that might belong to hidden Shorts shelves */
-body.ypp-search-grid-mode
-  ytd-item-section-renderer:has(ytd-reel-shelf-renderer)
-  #header {
+/* --- 3. Gap Cleanup --- */
+/* Hide entire section wrappers that contain hidden Shorts shelves to prevent empty grid gaps */
+body.ypp-search-grid-mode ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
+body.ypp-search-grid-mode ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]) {
   display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 /* ===================================================================================
    10. JS-INJECTED UTILITIES (Performance Optimization)
@@ -2337,7 +2453,7 @@ body.ypp-search-grid-mode
 /* Grid Layout (Replaces inline styles in layout-manager.js) */
 .ypp-grid-container {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-columns: repeat(auto-fill, minmax(var(--ypp-grid-column-min, 320px), 1fr)) !important;
   gap: 24px 16px !important;
   width: 100% !important;
   padding: 0 !important;

@@ -1,7 +1,7 @@
 // Main entry point for Subscriptions Feature
 window.YPP.features.SubscriptionsOrganizer = class SubscriptionsOrganizer {
     constructor() {
-        this.logger = new window.YPP.Utils.Logger('SubscriptionsOrganizer');
+        this.logger = window.YPP.Utils || console;
         this.manager = new window.YPP.features.SubscriptionManager();
         this.ui = new window.YPP.features.SubscriptionUI(this.manager);
     }

@@ -197,29 +197,12 @@ window.YPP.features.Layout = class GridLayoutManager {
     addResizeListener() {
         if (this.resizeListener) return;
         
-        // Use shared Utils.debounce if available
+        // Use shared Utils.debounce
         const applyFn = () => this._applyWithRetry();
         
-        this.resizeListener = this.Utils.debounce ? 
-            this.Utils.debounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY) : 
-            this._createSimpleDebounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY);
+        this.resizeListener = this.Utils.debounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY);
             
         window.addEventListener('resize', this.resizeListener);
-    }
-
-    /**
-     * Simple debounce implementation as fallback
-     * @private
-     * @param {Function} func - Function to debounce
-     * @param {number} delay - Delay in milliseconds
-     * @returns {Function} Debounced function
-     */
-    _createSimpleDebounce(func, delay) {
-        let timeoutId;
-        return function(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func.apply(this, args), delay);
-        };
     }
 
     /**

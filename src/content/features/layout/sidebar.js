@@ -1,14 +1,12 @@
 /**
- * Sidebar Manager (Redesign)
- * Starting fresh to place sidebar on homepage first.
+ * Sidebar Manager
+ * Controls sidebar visibility and ensures proper state management.
+ * Relies on the 'ypp-hide-sidebar' body class to hide the guide/sidebar.
+ * @class SidebarManager
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
-/**
- * Sidebar Manager
- * Controls sidebar visibility and ensures proper state management.
- * @class SidebarManager
- */
+
 window.YPP.features.SidebarManager = class SidebarManager {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;

@@ -10,16 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tab Title Mapping
     const titles = {
-        'home': 'Home Feed',
-        'player': 'Player & Watch',
-        'shorts': 'Shorts',
+        'home': 'Home & Feed',
+        'player': 'Player & Tools',
         'subscriptions': 'Subscriptions',
-        'playlists': 'Library & Playlists',
-        'watchlater': 'Watch Later',
-        'history': 'Watch History',
-        'search': 'Search Options',
-        'global': 'Global Settings',
-        'settings': 'Admin Center'
+        'history': 'History & Library',
+        'global': 'Global Settings'
     };
 
     function switchTab(tabId) {

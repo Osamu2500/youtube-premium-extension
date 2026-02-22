@@ -22,7 +22,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
         this.isEnabled = false;
         /** @type {Object|null} Current user settings */
         this.settings = null;
-        this.observer = null;
+        this.domObserver = new this.Utils.DOMObserver();
         this._currentUrl = window.location.pathname + window.location.search;
 
         // Bind methods
@@ -49,8 +49,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
             return;
         }
 
-        // Inject styles consistently
-        this._injectStyles();
+        // Styles are now universally handled by styles.css
 
         if (this.isEnabled) {
             this.handleSidebarState();
@@ -68,16 +67,16 @@ window.YPP.features.HeaderNav = class HeaderNav {
      * Disable header navigation and clean up
      */
     disable() {
+        if (!this.isEnabled) return;
         this.isEnabled = false;
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+        
+        if (this.domObserver) {
+            this.domObserver.stop();
         }
 
         const navGroup = document.querySelector('.ypp-nav-group');
         if (navGroup) navGroup.remove();
 
-        this.Utils.removeStyle('ypp-header-nav-style');
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
     }
 
@@ -86,101 +85,18 @@ window.YPP.features.HeaderNav = class HeaderNav {
         document.body.classList.toggle('ypp-hide-sidebar', !!this.settings.forceHideSidebar);
     }
 
-    _injectStyles() {
-        const css = `
-            .ypp-nav-group {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-left: 16px;
-                margin-right: 16px;
-                height: 40px;
-            }
-            .ypp-nav-btn {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px; /* Squircle */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                color: var(--yt-spec-text-primary);
-                transition: background-color 0.2s;
-                position: relative;
-            }
-            .ypp-nav-btn:hover {
-                background-color: var(--yt-spec-badge-chip-background);
-            }
-            .ypp-nav-btn.active {
-                background-color: var(--yt-spec-text-primary);
-                color: var(--yt-spec-text-primary-inverse);
-            }
-            .ypp-nav-btn svg {
-                width: 24px;
-                height: 24px;
-                fill: currentColor;
-            }
-            /* Tooltip integration (simple title for now) */
-            .ypp-nav-btn::after {
-                content: attr(title);
-                position: absolute;
-                bottom: -30px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                white-space: nowrap;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.2s;
-                z-index: 2000;
-            }
-            .ypp-nav-btn:hover::after {
-                opacity: 1;
-            }
-            
-            /* --- Topbar Polish --- */
-            /* Center Mic Icon */
-            #voice-search-button {
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                border-radius: 50% !important; /* Ensure circle or match others? User said center in button */
-            }
-            /* Profile Icon Squircle */
-            #avatar-btn,
-            #avatar-btn yt-img-shadow,
-            #avatar-btn img {
-                border-radius: 12px !important;
-            }
-            body.ypp-hide-sidebar #content {
-                margin-left: 0 !important;
-            }
-        `;
-        this.Utils.addStyle(css, 'ypp-header-nav-style');
-    }
+    // Styles moved to styles.css
 
     observeHeader() {
-        if (this.observer) return;
-
-        // Debounce injection to avoid rapid DOM thrashing
-        const debouncedInject = this.Utils.debounce(() => {
-            if (this.isEnabled) this.scheduleInjection();
-        }, 200);
-
-        this.observer = new MutationObserver((mutations) => {
-            // Check if relevant header parts changed
-            const shouldUpdate = mutations.some(m =>
-                m.target.id === 'center' ||
-                m.target.tagName === 'YTD-MASTHEAD'
-            );
-            if (shouldUpdate) debouncedInject();
-        });
-
-        this.observer.observe(document.body, { childList: true, subtree: true });
+        this.domObserver.start();
+        
+        // Register observer for masthead/center changes safely
+        this.domObserver.register(
+            'header-nav-center',
+            'ytd-masthead #center',
+            () => this.scheduleInjection(),
+            true
+        );
 
         // Initial check
         this.scheduleInjection();

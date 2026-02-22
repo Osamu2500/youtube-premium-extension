@@ -101,7 +101,10 @@ window.YPP.CONSTANTS = {
                 '#channel-name a',
                 'ytd-reel-player-header-renderer #channel-name a'
             ]
-        }
+        },
+        
+        // Mark as Watched
+        THUMBNAIL_CONTAINER: 'ytd-thumbnail'
     },
 
     // =========================================================================
@@ -120,6 +123,10 @@ window.YPP.CONSTANTS = {
         HOOK_FREE: 'ypp-hook-free-home',
         BLUE_PROGRESS: 'ypp-blue-progress',
         SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed',
+
+        // Mark as Watched
+        MANUALLY_WATCHED: 'ypp-manually-watched',
+        WATCHED_ICON: 'ypp-watched-icon',
 
         // Search Redesign
         SEARCH_GRID_MODE: 'ypp-search-grid-mode',
@@ -183,6 +190,7 @@ window.YPP.CONSTANTS = {
         hideSearchShorts: true,
         hideMixes: false,
         hideWatched: false,
+        enableMarkWatched: true,
         hideMerch: false,
         hideComments: false,
         hideEndScreens: false,
@@ -399,7 +407,8 @@ window.YPP.CONSTANTS = {
         dataAPI: 'DataAPI',
         nightMode: 'NightModeManager',
         continueWatching: 'ContinueWatching',
-        subscriptionFolders: 'SubscriptionFolders'
+        subscriptionFolders: 'SubscriptionFolders',
+        markWatched: 'MarkWatched'
     }
 };
 

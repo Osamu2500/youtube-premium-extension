@@ -2,7 +2,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
     constructor(manager) {
         this.manager = manager; 
         // If instantiated by FeatureManager without args, we need to resolve manager later
-        this.logger = new window.YPP.Utils.Logger('SubscriptionUI');
+        this.logger = window.YPP.Utils || console;
         this.Utils = window.YPP.Utils;
         this.isModalOpen = false;
         this.draggedChannel = null;
