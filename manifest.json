@@ -41,40 +41,51 @@
             "js": [
                 "src/content/constants.js",
                 "src/content/utils.js",
-                "src/content/features/shared/theme.js",
+                
+                "src/content/features/global/theme.js",
+                "src/content/features/global/content-control.js",
+                "src/content/features/global/night-mode.js",
+                "src/content/features/global/data-api.js",
+                "src/content/features/global/stats/stats-visualizer.js",
+
                 "src/content/features/layout/layout-manager.js",
-                "src/content/features/home/home-organizer.js",
                 "src/content/features/layout/header-nav.js",
+                "src/content/features/layout/sidebar.js",
+                
+                "src/content/features/home/home-organizer.js",
+                "src/content/features/home/shorts-tools.js",
+
                 "src/content/features/subscriptions/subscription-folders.js",
                 "src/content/features/subscriptions/subscription-manager.js",
                 "src/content/features/subscriptions/subscriptions-ui.js",
                 "src/content/features/subscriptions/index.js",
-                "src/content/features/shared/content-control.js",
+
+                "src/content/features/search/search-redesign.js",
                 "src/content/features/search/advanced-filter.js",
+
+                "src/content/features/watch/player.js",
+                "src/content/features/watch/player-tools.js",
+                "src/content/features/watch/watch-history.js",
+                "src/content/features/watch/continue-watching.js",
                 "src/content/features/watch/zen-mode.js",
                 "src/content/features/watch/focus-mode.js",
                 "src/content/features/watch/study-mode.js",
-                "src/content/features/watch/player.js",
-                "src/content/features/home/shorts-tools.js",
-                "src/content/features/watch/player-tools.js",
-                "src/content/features/layout/sidebar.js",
-                "src/content/features/shared/night-mode.js",
-                "src/content/features/search/search-redesign.js",
-                "src/content/feature-manager.js",
-                "src/content/features/watch-history.js",
-                "src/content/features/ambient-mode/ambient-mode.js",
-                "src/content/features/ambient-mode/audio-mode.js",
-                "src/content/features/video-controls/video-controls.js",
-                "src/content/features/history/history-tracker.js",
-                "src/content/features/playlist/duration-calculator.js",
-                "src/content/features/stats/stats-visualizer.js",
-                "src/content/features/history/history-redesign.js",
-                "src/content/features/playlist/playlist-redesign.js",
-                "src/content/features/data-api.js",
                 "src/content/features/watch/return-dislike.js",
                 "src/content/features/watch/mini-player.js",
                 "src/content/features/watch/video-filters.js",
-                "src/content/features/playlist/reverse-playlist.js",
+                "src/content/features/watch/sponsor-block.js",
+
+                "src/content/features/library/history/history-tracker.js",
+                "src/content/features/library/history/history-redesign.js",
+                "src/content/features/library/playlist/playlist-redesign.js",
+                "src/content/features/library/playlist/duration-calculator.js",
+                "src/content/features/library/playlist/reverse-playlist.js",
+
+                "src/content/features/ambient-mode/ambient-mode.js",
+                "src/content/features/ambient-mode/audio-mode.js",
+                "src/content/features/video-controls/video-controls.js",
+
+                "src/content/feature-manager.js",
                 "src/content/main.js"
             ]
         }
