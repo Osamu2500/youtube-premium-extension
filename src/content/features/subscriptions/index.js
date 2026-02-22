@@ -9,6 +9,12 @@ window.YPP.features.SubscriptionsOrganizer = class SubscriptionsOrganizer {
     async run(settings) {
         if (!settings.enableSubsManager) return; // Optional check if needed
         
+        // Prevent collision with the newer Native Subscription Folders feature
+        if (settings.subscriptionFolders) {
+             this.logger.info('Native Subscription Folders is active. Legacy SubscriptionsOrganizer is disabled to prevent conflicts.');
+             return;
+        }
+        
         this.logger.info('Running Subscriptions Organizer');
         
         // Inject styles

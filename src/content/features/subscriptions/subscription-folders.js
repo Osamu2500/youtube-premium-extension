@@ -142,12 +142,26 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     // ==========================================
 
     setupNavigationListener() {
+        // Run immediately on init for the first page load
+        this.handleNavigation();
+        
         // Use extension events or standard yt-navigate-finish
         document.addEventListener('yt-navigate-finish', () => this.handleNavigation());
         
         // Some SPAs don't fire navigate-finish perfectly, listen to popstate as fallback
         window.addEventListener('popstate', () => {
             setTimeout(() => this.handleNavigation(), 100);
+        });
+        
+        // Fallback mutation observer for when the guide or feed loads late
+        this.observer.register('fallback-navigation', 'ytd-app', () => {
+             // Non-intrusive re-check to catch delayed DOM renders
+             if (!document.getElementById('ypp-sub-folders-container')) {
+                 this.injectGuideFolders();
+             }
+             if (this.isFeedPage && !document.getElementById('ypp-folder-chips')) {
+                 this.setupFeedFilters();
+             }
         });
     }
 
@@ -388,8 +402,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     }
 
     renderFilterChips() {
-        // Find the native feed filter bar or create our own above the grid
-        this.observer.register('inject-filter-chips', 'ytd-rich-grid-renderer #header', (elements) => {
+        // Target the main browse header or grid to ensure we inject the chips on the feed page
+        this.observer.register('inject-filter-chips', 'ytd-browse[page-subtype="subscriptions"] #header, ytd-browse[page-subtype="channels"] #header', (elements) => {
             const header = elements[0];
             let chipsBar = document.getElementById('ypp-folder-chips');
             
