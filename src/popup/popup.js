@@ -666,7 +666,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- BACKUP & RESTORE TOOLS ---
+    function initBackupTools() {
+        const exportBtn = document.getElementById('exportFoldersBtn');
+        const importBtn = document.getElementById('importFoldersBtn');
+        const fileInput = document.getElementById('importFoldersFile');
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                chrome.storage.local.get(['ypp_subscription_folders', 'ypp_folder_config'], (result) => {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(result, null, 2));
+                    const downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href", dataStr);
+                    downloadAnchorNode.setAttribute("download", "ypp_folders_backup_" + new Date().toISOString().split('T')[0] + ".json");
+                    document.body.appendChild(downloadAnchorNode);
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                });
+            });
+        }
+
+        if (importBtn && fileInput) {
+            importBtn.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', (event) => {
+                const fileReader = new FileReader();
+                fileReader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (importedData.ypp_subscription_folders) {
+                            chrome.storage.local.set({
+                                'ypp_subscription_folders': importedData.ypp_subscription_folders,
+                                'ypp_folder_config': importedData.ypp_folder_config || {}
+                            }, () => {
+                                alert("Folders imported successfully! Please refresh YouTube.");
+                            });
+                        } else {
+                            alert("Invalid backup file format.");
+                        }
+                    } catch (err) {
+                        alert("Error reading file.");
+                    }
+                };
+                if (event.target.files[0]) {
+                    fileReader.readAsText(event.target.files[0]);
+                }
+            });
+        }
+    }
+
     // Initialize
     loadSettings();
     initHistoryWidget(); // Initialize history widget on load
+    initBackupTools();
 });
