@@ -15,6 +15,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             "Tech": [],
             "Gaming": []
         };
+        this.folderConfig = {};
         this.activeFolder = null;
         this.isFeedPage = false;
         this.isGuidePage = false;
@@ -62,13 +63,14 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     
     async loadFolders() {
         try {
-            const result = await chrome.storage.local.get([this.STORAGE_KEY]);
+            const result = await chrome.storage.local.get([this.STORAGE_KEY, 'ypp_folder_config']);
             if (result[this.STORAGE_KEY]) {
                 this.folders = result[this.STORAGE_KEY];
             } else {
                 // Save defaults on first run
                 await this.saveFolders();
             }
+            this.folderConfig = result['ypp_folder_config'] || {};
         } catch (e) {
             window.YPP.Utils.log('Failed to load subscription folders', 'SubFolders', 'error');
         }
@@ -76,7 +78,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
 
     async saveFolders() {
         try {
-            await chrome.storage.local.set({ [this.STORAGE_KEY]: this.folders });
+            await chrome.storage.local.set({ 
+                [this.STORAGE_KEY]: this.folders,
+                'ypp_folder_config': this.folderConfig
+            });
         } catch (e) {
             window.YPP.Utils.log('Failed to save subscription folders', 'SubFolders', 'error');
         }
@@ -93,6 +98,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     deleteFolder(folderName) {
         if (this.folders[folderName]) {
             delete this.folders[folderName];
+            if (this.folderConfig[folderName]) delete this.folderConfig[folderName];
             if (this.activeFolder === folderName) {
                 this.activeFolder = null;
                 this.updateFilterState();
@@ -246,12 +252,14 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
         
         // Render each folder
         Object.keys(this.folders).forEach(folderName => {
+            const config = this.folderConfig[folderName] || {};
             const el = document.createElement('div');
             el.className = 'ypp-folder-item';
             if (this.activeFolder === folderName) el.classList.add('active');
             
+            const icon = config.icon || '📁';
             el.innerHTML = `
-                <div class="ypp-folder-icon">📁</div>
+                <div class="ypp-folder-icon">${icon}</div>
                 <div class="ypp-folder-name" style="flex: 1;">${folderName}</div>
                 <div class="ypp-folder-count">${this.folders[folderName].length}</div>
                 <button class="ypp-play-all-btn" title="Play All" style="margin-left: 8px; width: 24px; height: 24px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border: none; cursor: pointer; background: rgba(255,255,255,0.1); color: white;">
@@ -506,20 +514,51 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             
             // Render folder chips
             Object.keys(this.folders).forEach(folderName => {
+                const config = this.folderConfig[folderName] || {};
                 const chip = document.createElement('button');
                 chip.className = `ypp-filter-chip ${this.activeFolder === folderName ? 'active' : ''}`;
-                chip.textContent = folderName;
+                
+                const icon = config.icon || '';
+                chip.textContent = icon ? `${icon} ${folderName}` : folderName;
                 chip.dataset.folder = folderName;
+                
+                if (this.activeFolder === folderName && config.color) {
+                    chip.style.backgroundColor = config.color;
+                    chip.style.color = '#fff';
+                    chip.style.border = 'none';
+                }
+                
                 chip.addEventListener('click', () => this.setActiveFolder(folderName));
                 
-                // Add right-click to delete folder
+                // Add right-click to edit/delete folder
                 chip.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    if (confirm(`Delete folder "${folderName}"?`)) {
-                        this.deleteFolder(folderName);
-                        // reset active if it was the deleted one
-                        if (this.activeFolder === folderName) this.setActiveFolder(null);
-                        this.renderFilterChips();
+                    const action = prompt(`Edit Folder "${folderName}"\nType 'icon' to change emoji, 'color' to change color, or 'delete' to remove:`, 'icon');
+                    if (action === 'delete') {
+                        if (confirm(`Are you sure you want to delete "${folderName}"?`)) {
+                            this.deleteFolder(folderName);
+                            if (this.activeFolder === folderName) this.setActiveFolder(null);
+                            this.renderFilterChips();
+                        }
+                    } else if (action === 'icon') {
+                        const newIcon = prompt('Enter a new Emoji for this folder:', config.icon || '📁');
+                        if (newIcon !== null) {
+                            if (!this.folderConfig[folderName]) this.folderConfig[folderName] = {};
+                            this.folderConfig[folderName].icon = newIcon.trim();
+                            this.saveFolders();
+                            this.renderFilterChips();
+                            this.renderGuideFolders();
+                        }
+                    } else if (action === 'color') {
+                        const newColor = prompt('Enter a hex color code (e.g. #ff0000) or leave empty for default:', config.color || '');
+                        if (newColor !== null) {
+                            if (!this.folderConfig[folderName]) this.folderConfig[folderName] = {};
+                            this.folderConfig[folderName].color = newColor.trim();
+                            this.saveFolders();
+                            this.renderFilterChips();
+                            this.renderGuideFolders();
+                            if (this.activeFolder === folderName) this.updateFilterState();
+                        }
                     }
                 });
                 
