@@ -172,7 +172,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
         
         // Always try to inject into the sidebar (it persists across pages)
         this.injectGuideFolders();
-
+        this.injectCardBadges(); // Inject onto video cards everywhere
+        
         // 1. Subscriptions Feed
         if (url.includes('/feed/subscriptions')) {
             this.isFeedPage = true;
@@ -402,16 +403,22 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     }
 
     renderFilterChips() {
-        // Target the main browse header or grid to ensure we inject the chips on the feed page
-        this.observer.register('inject-filter-chips', 'ytd-browse[page-subtype="subscriptions"] #header, ytd-browse[page-subtype="channels"] #header', (elements) => {
-            const header = elements[0];
+        // Target the main grid to ensure we inject the chips on the feed page even if header is missing
+        this.observer.register('inject-filter-chips', 'ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer, ytd-browse[page-subtype="channels"] ytd-rich-grid-renderer', (elements) => {
+            const grid = elements[0];
             let chipsBar = document.getElementById('ypp-folder-chips');
             
             if (!chipsBar) {
                 chipsBar = document.createElement('div');
                 chipsBar.id = 'ypp-folder-chips';
                 chipsBar.className = 'ypp-folder-chips-bar';
-                header.appendChild(chipsBar);
+                // Insert before the contents container so it sits at the top of the grid
+                const contents = grid.querySelector('#contents');
+                if (contents) {
+                    grid.insertBefore(chipsBar, contents);
+                } else {
+                    grid.prepend(chipsBar);
+                }
             }
             
             // Re-render contents
@@ -432,8 +439,35 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
                 chip.textContent = folderName;
                 chip.dataset.folder = folderName;
                 chip.addEventListener('click', () => this.setActiveFolder(folderName));
+                
+                // Add right-click to delete folder
+                chip.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (confirm(`Delete folder "${folderName}"?`)) {
+                        this.removeFolder(folderName);
+                        // reset active if it was the deleted one
+                        if (this.activeFolder === folderName) this.setActiveFolder(null);
+                        this.renderFilterChips();
+                    }
+                });
+                
                 chipsBar.appendChild(chip);
             });
+            
+            // Add Folder Button
+            const addBtn = document.createElement('button');
+            addBtn.className = 'ypp-filter-chip ypp-add-folder-btn';
+            addBtn.textContent = '+ New Folder';
+            addBtn.style.opacity = '0.7';
+            addBtn.style.borderStyle = 'dashed';
+            addBtn.addEventListener('click', () => {
+                const name = prompt('Enter new folder name:');
+                if (name && name.trim()) {
+                    this.addFolder(name.trim());
+                    this.renderFilterChips(); // refresh
+                }
+            });
+            chipsBar.appendChild(addBtn);
         }, { runOnce: true });
     }
 
@@ -443,8 +477,42 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     }
 
     // ==========================================
-    // CHANNEL PAGE BADGE
+    // CHANNEL & CARD INTEGRATION
     // ==========================================
+
+    injectCardBadges() {
+        this.observer.register('feed-card-badges', 'ytd-rich-item-renderer #channel-name, ytd-video-renderer #channel-name, ytd-grid-video-renderer #channel-name', (elements) => {
+            elements.forEach(container => {
+                if (container.querySelector('.ypp-card-folder-btn')) return;
+                
+                // YouTube has multiple deeply nested elements with the id "channel-name". 
+                // We want the one containing the complex-string link.
+                const link = container.querySelector('a');
+                if (!link || !link.textContent.trim()) return;
+                
+                const btn = document.createElement('button');
+                btn.className = 'ypp-card-folder-btn';
+                btn.innerHTML = '📁';
+                btn.title = "Save to Folder";
+                btn.style.cssText = 'background:none; border:none; cursor:pointer; font-size:12px; margin-left:6px; opacity:0.6; padding:0; vertical-align:middle; transition:opacity 0.2s';
+                
+                btn.addEventListener('mouseenter', () => btn.style.opacity = '1');
+                btn.addEventListener('mouseleave', () => btn.style.opacity = '0.6');
+                
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const channelName = link.textContent.trim();
+                    this.renderChannelPopover(btn, channelName);
+                });
+                
+                // Append directly after the channel name formatting
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.appendChild(btn);
+            });
+        }, { runOnce: false });
+    }
 
     injectChannelBadge() {
         this.observer.register('channel-badge', 'ytd-subscribe-button-renderer', (elements) => {

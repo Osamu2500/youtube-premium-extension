@@ -134,7 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Subscription Manager
         'enableSubsManager',
-        'channelColumns'
+        'channelColumns',
+        'subscriptionFolders'
     ];
 
     // --- STORAGE HANDLING ---
