@@ -1537,9 +1537,16 @@ body.ypp-zen-mode #columns {
 
 /* [Unused Filter Drawer Styles Removed] */
 
-/* Ad Hiding */
-body.ypp-search-grid-mode ytd-ad-slot-renderer {
-  display: none;
+/* Ad Hiding & Grid Protection */
+body.ypp-search-grid-mode ytd-ad-slot-renderer,
+body.yt-premium-plus-theme ytd-ad-slot-renderer,
+body.yt-premium-plus-theme ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+body.yt-premium-plus-theme ytd-rich-section-renderer:empty {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
 }
 
 /* Continuation Items */
@@ -2091,8 +2098,7 @@ body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #scroll-container {
 /* Gap Annihilation: Nuke Hidden Shorts and Spacers */
 body.ypp-search-grid-mode ytd-reel-shelf-renderer,
 body.ypp-search-grid-mode ytd-horizontal-card-list-renderer[has-shorts],
-body.ypp-search-grid-mode ytd-item-section-renderer.ytd-section-list-renderer[is-empty],
-body.ypp-search-grid-mode ytd-continuation-item-renderer {
+body.ypp-search-grid-mode ytd-item-section-renderer.ytd-section-list-renderer[is-empty] {
   display: none !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -2850,6 +2856,55 @@ ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer.prev
   position: relative !important;
 }
 
+/* ===================================================================================
+   14. PRO MAX UI ENHANCEMENTS (Left Guide, Buttons, Inputs)
+   =================================================================================== */
+
+/* Left Sidebar (Guide) Glassmorphism */
+body.yt-premium-plus-theme #guide-inner-content {
+  background: var(--ypp-bg-surface) !important;
+  backdrop-filter: var(--ypp-blur-high) !important;
+  border-right: 1px solid var(--ypp-glass-border) !important;
+}
+
+body.yt-premium-plus-theme ytd-guide-entry-renderer {
+  border-radius: var(--ypp-radius-md) !important;
+  margin: 2px 12px !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme ytd-guide-entry-renderer:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  transform: translateX(4px) !important;
+}
+
+body.yt-premium-plus-theme ytd-guide-entry-renderer[active] {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-left: 3px solid var(--ypp-accent) !important;
+}
+
+/* Global Buttons & Searchbox Tactile Enhancements */
+body.yt-premium-plus-theme yt-button-shape {
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme yt-button-shape:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.yt-premium-plus-theme #container.ytd-searchbox {
+  background: rgba(20, 20, 20, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme #container.ytd-searchbox[has-focus] {
+  border-color: var(--ypp-accent) !important;
+  box-shadow: 0 0 12px var(--ypp-accent-glow), inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
 ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer.previously-watched-video ytd-thumbnail {
   margin-bottom: 28px !important;
 }
@@ -2868,11 +2923,14 @@ ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer.prev
 }
 
 /* 2. Slide-out Hover Animation for Related Videos */
-ytd-compact-video-renderer {
-  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+body.yt-premium-plus-theme ytd-compact-video-renderer {
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.2s ease, border-radius 0.2s ease !important;
+  padding: 4px !important;
+  border-radius: var(--ypp-radius-md) !important;
 }
-ytd-compact-video-renderer:hover {
+body.yt-premium-plus-theme ytd-compact-video-renderer:hover {
   transform: translateX(8px) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* 3. Pro Max Rounding for Core Elements */
