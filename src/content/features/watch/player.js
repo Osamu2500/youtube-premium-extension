@@ -395,10 +395,20 @@ window.YPP.features.Player = class Player {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 this.ctx = new AudioContext();
                 this.source = this.ctx.createMediaElementSource(video);
+                
+                // Add DynamicsCompressor to prevent clipping at high volumes
+                this.compressorNode = this.ctx.createDynamicsCompressor();
+                this.compressorNode.threshold.value = -1; // -1 dB threshold
+                this.compressorNode.knee.value = 10;
+                this.compressorNode.ratio.value = 20; // High ratio for hard limiting
+                this.compressorNode.attack.value = 0.005; // Fast attack
+                this.compressorNode.release.value = 0.05; // Fast release
+
                 this.gainNode = this.ctx.createGain();
 
                 this.source.connect(this.gainNode);
-                this.gainNode.connect(this.ctx.destination);
+                this.gainNode.connect(this.compressorNode);
+                this.compressorNode.connect(this.ctx.destination);
 
                 this.setVolume(this.settings.volumeLevel || 1);
             } catch (e) {

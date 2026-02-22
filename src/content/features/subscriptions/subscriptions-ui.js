@@ -20,7 +20,19 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         }
 
         this.logger.info('Initialized Subscription UI');
+        this.observer = new window.YPP.Utils.DOMObserver();
         this.observePage();
+    }
+
+    disable() {
+        if (this.observer) {
+            this.observer.stop();
+        }
+        const els = document.querySelectorAll('#ypp-manage-subs-btn, #ypp-organize-btn, #ypp-subs-filter-bar, #ypp-sidebar-group-section');
+        els.forEach(el => el.remove());
+        
+        const container = document.querySelector('ytd-browse[page-subtype="channels"] #contents');
+        if (container) container.classList.remove('ypp-grid-layout');
     }
 
     /**
@@ -31,21 +43,25 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
     }
 
     observePage() {
-        const observer = new MutationObserver((mutations) => {
-            const path = window.location.pathname;
-            if (path === '/feed/subscriptions') {
-                this.injectManageButton(); // "Manage Groups" on feed
-                this.injectFilterBar();
-            } else if (path === '/feed/channels') {
-                this.injectOrganizerButton(); // "Organize" on channels list
-                this.applyGridClass();
-            } else if (path === '/' || path === '/index') {
-                 // Home Feed Support
-                 this.injectFilterBar();
-            }
+        this.observer.start();
+
+        // Target Subscriptions Feed
+        this.observer.register('subs-ui-feed', 'ytd-browse[page-subtype="subscriptions"] #contents, ytd-browse[page-subtype="subscriptions"] #title-container', () => {
+             this.injectManageButton(); 
+             this.injectFilterBar();
         });
-        observer.observe(document.body, { childList: true, subtree: true });
-        
+
+        // Target Channels Grid
+        this.observer.register('subs-ui-channels', 'ytd-browse[page-subtype="channels"] #contents, ytd-browse[page-subtype="channels"] #title-container', () => {
+             this.injectOrganizerButton(); 
+             this.applyGridClass();
+        });
+
+        // Target Home Feed (for filter bar)
+        this.observer.register('subs-ui-home', 'ytd-browse[page-subtype="home"] #contents', () => {
+             this.injectFilterBar();
+        });
+
         // Initial check
         this.checkRoute();
     }

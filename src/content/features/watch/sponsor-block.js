@@ -6,14 +6,13 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.SponsorBlock = class SponsorBlock {
+window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.features.BaseFeature {
     constructor() {
-        this.CONSTANTS = window.YPP.CONSTANTS || {};
-        this.Utils = window.YPP.Utils || {};
+        super('SponsorBlock');
         
-        this.isActive = false;
         this.videoId = null;
         this.segments = [];
+        this.segmentElements = [];
         this.videoElement = null;
         this.abortController = null;
         
@@ -24,47 +23,55 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         // Categories to skip
         this.categories = ['sponsor', 'selfpromo', 'interaction', 'intro', 'outro'];
         
+        this.COLORS = {
+            'sponsor': '#00d400',
+            'selfpromo': '#ffff00',
+            'interaction': '#cc00ff',
+            'intro': '#00ffff',
+            'outro': '#0202ed',
+            'preview': '#008fd6',
+            'music_offtopic': '#ff9900',
+            'filler': '#7300FF'
+        };
+        
         // Binds
         this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
         this.handleNavigation = this.handleNavigation.bind(this);
+        this.handleVideoLoaded = this.handleVideoLoaded.bind(this);
     }
 
-    enable(settings) {
-        if (this.isActive) return;
-        this.isActive = true;
+    getConfigKey() {
+        // Assume settings has a enableSponsorBlock or sponsorBlock key
+        return 'sponsorBlock';
+    }
 
-        if (this.isWatchPage()) {
+    async enable() {
+        if (!this.utils.isWatchPage()) return;
+        await super.enable();
+
+        this.init();
+        this.addListener(window, 'yt-navigate-finish', this.handleNavigation);
+    }
+
+    async disable() {
+        await super.disable();
+        this.stop();
+        this.clearSegments();
+    }
+
+    async onUpdate() {
+        // Handle setting changes (e.g. toggling categories if we add that later)
+        // For now, if settings change, we could theoretically clear and refetch.
+        // We'll leave this empty for basic re-runs.
+        if (this.utils.isWatchPage() && !this.videoElement) {
             this.init();
         }
-
-        // Listen for internal navigation if Manager doesn't re-init
-        window.addEventListener('yt-navigate-finish', this.handleNavigation);
-    }
-
-    disable() {
-        if (!this.isActive) return;
-        this.isActive = false;
-        
-        this.stop();
-        window.removeEventListener('yt-navigate-finish', this.handleNavigation);
-    }
-
-    update(settings) {
-        // Could update categories from settings here
-    }
-
-    run(settings) {
-        this.enable(settings);
-    }
-
-    isWatchPage() {
-        return location.pathname.startsWith('/watch');
     }
 
     handleNavigation() {
-        if (!this.isActive) return;
+        if (!this.isEnabled) return;
         this.stop(); // Clean up previous video
-        if (this.isWatchPage()) {
+        if (this.utils.isWatchPage()) {
             this.init();
         }
     }
@@ -74,42 +81,58 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         if (!this.videoId) return;
 
         try {
-            // Use centralized pollFor to wait for the video element
-            const video = await this.Utils.pollFor(() => {
+            // Wait for video element
+            const video = await this.utils.pollFor(() => {
                 const v = document.querySelector('video');
-                // Ensure video is somewhat ready
                 if (v && v.readyState >= 1) return v;
                 return null;
             }, 10000, 500);
 
             if (video) {
                 this.videoElement = video;
-                this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
+                this.addListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
+                this.addListener(this.videoElement, 'loadedmetadata', this.handleVideoLoaded);
+                
+                // If it already has duration, render directly
+                if (this.videoElement.duration) {
+                     this.handleVideoLoaded();
+                }
+
                 this.fetchSegments();
             }
         } catch (error) {
-            this.Utils.log?.('SponsorBlock initialization timed out waiting for video', 'SPONSOR', 'warn');
+            this.utils.log?.('SponsorBlock initialization timed out waiting for video', 'SPONSOR', 'warn');
         }
+        
+        // Observe for player controls recreating, which wipes our segments
+        this.observer.register('sponsor-progress', '.ytp-progress-list', (progressList) => {
+            if (this.segmentElements.length === 0 && this.segments.length > 0 && this.videoElement?.duration) {
+                this.renderSegments();
+            } else if (this.segmentElements.length > 0) {
+                // Check if our segments are still attached to the DOM
+                const stillAttached = this.segmentElements.some(el => progressList.contains(el));
+                if (!stillAttached) {
+                     this.renderSegments();
+                }
+            }
+        }, false);
     }
 
     stop() {
-        if (this.videoElement) {
-            this.videoElement.removeEventListener('timeupdate', this.handleTimeUpdate);
-            this.videoElement = null;
-        }
         if (this.abortController) {
             this.abortController.abort();
             this.abortController = null;
         }
         this.segments = [];
-        this.removeToast();
+        this.clearSegments();
+        this.videoElement = null;
     }
 
-    removeToast() {
-        // Implementation depends on global toast availability, generic placeholder
+    handleVideoLoaded() {
+        if (this.segments.length > 0 && this.videoElement && this.videoElement.duration) {
+            this.renderSegments();
+        }
     }
-
-    // Removed pollForVideo in favor of init's Utils.pollFor
 
     getVideoId() {
         return new URLSearchParams(window.location.search).get('v');
@@ -123,7 +146,8 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         const cached = this.segmentCache.get(this.videoId);
         if (cached && (Date.now() - cached.timestamp) < this.CACHE_DURATION) {
             this.segments = cached.segments;
-            this.Utils.log?.(`SponsorBlock: Loaded ${this.segments.length} segments from cache`, 'SPONSOR');
+            this.utils.log?.(`SponsorBlock: Loaded ${this.segments.length} segments from cache`, 'SPONSOR');
+            this.renderSegments();
             return;
         }
 
@@ -148,37 +172,36 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
             if (response.ok) {
                 const data = await response.json();
                 
-                // Filter for our exact video ID from the privacy-bucket results
+                // Filter for our exact video ID
                 const videoData = data.find(item => item.videoID === this.videoId);
                 
                 if (videoData && videoData.segments) {
                     this.segments = videoData.segments;
-                    // Cache the segments
                     this.segmentCache.set(this.videoId, {
                         segments: this.segments,
                         timestamp: Date.now()
                     });
-                    this.Utils.log?.(`SponsorBlock: Loaded ${this.segments.length} segments`, 'SPONSOR');
+                    this.utils.log?.(`SponsorBlock: Loaded ${this.segments.length} segments`, 'SPONSOR');
+                    this.renderSegments();
                 } else {
                     this.segments = [];
-                    this.Utils.log?.('SponsorBlock: No segments found for this video', 'SPONSOR');
+                    this.utils.log?.('SponsorBlock: No segments found for this video', 'SPONSOR');
+                    this.clearSegments();
                 }
             } else if (response.status === 404) {
-                // No segments found - cache empty result
                 this.segments = [];
                 this.segmentCache.set(this.videoId, {
                     segments: [],
                     timestamp: Date.now()
                 });
+                this.clearSegments();
             } else {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         } catch (e) {
             if (e.name === 'AbortError') return;
+            this.utils.log?.(`SponsorBlock API error: ${e.message}`, 'SPONSOR', 'error');
             
-            this.Utils.log?.(`SponsorBlock API error: ${e.message}`, 'SPONSOR', 'error');
-            
-            // Retry once after 2s on non-abort errors
             if (!this.retryAttempted) {
                 this.retryAttempted = true;
                 setTimeout(() => this.fetchSegments(), 2000);
@@ -186,19 +209,54 @@ window.YPP.features.SponsorBlock = class SponsorBlock {
         }
     }
 
+    renderSegments() {
+        this.clearSegments();
+        
+        if (!this.videoElement || !this.videoElement.duration || this.segments.length === 0) return;
+        
+        const progressList = document.querySelector('.ytp-progress-list');
+        if (!progressList) return;
+        
+        const duration = this.videoElement.duration;
+        
+        this.segments.forEach(seg => {
+            const startPercent = (seg.segment[0] / duration) * 100;
+            const endPercent = (seg.segment[1] / duration) * 100;
+            const widthPercent = endPercent - startPercent;
+            
+            const el = document.createElement('div');
+            el.className = 'ypp-sponsor-segment ytp-play-progress';
+            el.style.position = 'absolute';
+            el.style.left = `${startPercent}%`;
+            el.style.width = `${widthPercent}%`;
+            el.style.height = '100%';
+            el.style.backgroundColor = this.COLORS[seg.category] || this.COLORS['sponsor'];
+            el.style.opacity = '0.7';
+            el.style.zIndex = '35'; // Draw above regular progress (typically 34 or below)
+            el.style.pointerEvents = 'none'; // Click passes through
+            
+            progressList.appendChild(el);
+            this.segmentElements.push(el);
+        });
+    }
+
+    clearSegments() {
+        this.segmentElements.forEach(el => el.remove());
+        this.segmentElements = [];
+    }
+
     handleTimeUpdate() {
-        if (!this.isActive || !this.videoElement || this.segments.length === 0) return;
+        if (!this.isEnabled || !this.videoElement || this.segments.length === 0) return;
         if (this.videoElement.seeking) return; // Don't skip while user is seeking
 
         const currentTime = this.videoElement.currentTime;
 
         for (const segment of this.segments) {
             if (currentTime >= segment.segment[0] && currentTime < segment.segment[1]) {
-                // Precision check: verify we are actually in the segment and not just jumping out
                 // Seek to end
                 this.videoElement.currentTime = segment.segment[1];
-                if (window.YPP.Utils && window.YPP.Utils.createToast) {
-                    window.YPP.Utils.createToast(`Skipped ${segment.category}`, 'info');
+                if (this.utils.createToast) {
+                    this.utils.createToast(`Skipped ${segment.category}`, 'info');
                 } else {
                     console.log(`[SponsorBlock] Skipped ${segment.category}`);
                 }

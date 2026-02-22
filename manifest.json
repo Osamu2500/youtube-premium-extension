@@ -41,6 +41,7 @@
             "js": [
                 "src/content/constants.js",
                 "src/content/utils.js",
+                "src/content/features/base-feature.js",
                 
                 "src/content/features/global/theme.js",
                 "src/content/features/global/content-control.js",

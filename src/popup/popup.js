@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideShorts', // Global/Home
         'hideSearchShorts',
         'redirectShorts',
+        'shortsAutoScroll',
 
         // Search
         'searchGrid',

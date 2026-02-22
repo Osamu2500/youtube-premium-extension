@@ -5,10 +5,11 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.MiniPlayer = class MiniPlayer {
+window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.BaseFeature {
     constructor() {
-        this.isActive = false;
-        this.observer = null;
+        super('MiniPlayer');
+        
+        this.observer = null; // IntersectionObserver
         this.videoElement = null;
         this.playerContainer = null;
         this.isPipActive = false;
@@ -16,52 +17,35 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
 
         this.handleIntersection = this.handleIntersection.bind(this);
         this.handlePipLeave = this.handlePipLeave.bind(this);
-        this.handleNavigation = this.handleNavigation.bind(this);
     }
 
-    enable(settings) {
-        if (this.isActive) return;
-        this.isActive = true;
-        this.settings = settings;
+    getConfigKey() {
+        return 'miniPlayer';
+    }
 
-        if (this.isWatchPage()) {
+    async enable() {
+        if (!this.utils.isWatchPage()) return;
+        await super.enable();
+
+        this.init();
+        
+        // Handle SPA Navigation
+        this.addListener(window, 'yt-navigate-finish', () => {
+             this.cleanup();
+             if (this.utils.isWatchPage() && this.isEnabled) {
+                 setTimeout(() => this.init(), 1000);
+             }
+        });
+    }
+
+    async disable() {
+        await super.disable();
+        this.cleanup();
+    }
+
+    async onUpdate() {
+        if (this.utils.isWatchPage() && !this.observer) {
             this.init();
-        }
-        window.addEventListener('yt-navigate-finish', this.handleNavigation);
-    }
-
-    disable() {
-        if (!this.isActive) return;
-        this.isActive = false;
-        this.cleanup();
-        window.removeEventListener('yt-navigate-finish', this.handleNavigation);
-    }
-
-    run(settings) {
-        this.settings = settings;
-        if (settings.miniPlayer) {
-            this.enable(settings);
-        }
-    }
-
-    update(settings) {
-        this.settings = settings;
-        if (settings.miniPlayer) {
-            this.enable(settings);
-        } else {
-            this.disable();
-        }
-    }
-
-    isWatchPage() {
-        return location.pathname.startsWith('/watch');
-    }
-
-    handleNavigation() {
-        this.cleanup();
-        if (this.isActive && this.isWatchPage()) {
-            // Slight delay to ensure DOM is ready after navigation
-            setTimeout(() => this.init(), 1000);
         }
     }
 
@@ -71,9 +55,10 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
             this.observer = null;
         }
         if (this.videoElement) {
-            this.videoElement.removeEventListener('leavepictureinpicture', this.handlePipLeave);
-            // If we are still in PiP and we caused it, maybe exit? 
-            // Usually navigating away handles this, but good to be safe.
+            try {
+                this.videoElement.removeEventListener('leavepictureinpicture', this.handlePipLeave);
+            } catch(e) {}
+            
             if (document.pictureInPictureElement === this.videoElement) {
                 document.exitPictureInPicture().catch(() => {});
             }
@@ -85,20 +70,17 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
     }
 
     async init() {
-        const Utils = window.YPP.Utils;
-        if (!Utils) return;
-
         try {
-            // Find the player container to observe (the "hole" where video sits)
-            const elements = await Utils.pollFor(() => {
+            const elements = await this.utils.pollFor(() => {
+                // Find primary video container that scrolls out of view
                 const container = document.getElementById('player-container') || document.getElementById('movie_player');
                 const video = document.querySelector('video');
                 
-                if (container && video) {
+                if (container && video && video.readyState >= 1) {
                     return { container, video };
                 }
                 return null;
-            }, 5000, 500); // Wait up to 5 seconds
+            }, 5000, 500);
 
             if (elements) {
                 this.playerContainer = elements.container;
@@ -106,19 +88,19 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
                 this.startObserving();
             }
         } catch (error) {
-            Utils.log('MiniPlayer initialization timed out waiting for player elements', 'MINIPLAYER', 'warn');
+            this.utils.log?.('MiniPlayer initialization timed out waiting for player elements', 'MINIPLAYER', 'warn');
         }
     }
 
     startObserving() {
-        if (!window.IntersectionObserver) return;
+        if (!window.IntersectionObserver || !this.playerContainer || !this.videoElement) return;
 
-        // Listen for user manually exiting PiP to avoid annoyance
+        // Use custom listener for manual PiP exit detection
         this.videoElement.addEventListener('leavepictureinpicture', this.handlePipLeave);
 
         const options = {
             root: null, // viewport
-            threshold: 0.5 // 50% visibility
+            threshold: 0.1 // 10% visibility (triggers when almost completely scrolled past)
         };
 
         this.observer = new IntersectionObserver(this.handleIntersection, options);
@@ -126,21 +108,19 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
     }
 
     handleIntersection(entries) {
-        if (!this.isActive || !this.videoElement) return;
+        if (!this.isEnabled || !this.videoElement) return;
 
         entries.forEach(entry => {
-            // If video is scrolling OUT of view (isIntersecting false)
+            // Check if scrolling down past video
             if (!entry.isIntersecting && !this.isPipActive && !this.userManuallyExited) {
-                // Check if video is playing
+                // Only activate if playing
                 if (!this.videoElement.paused && !this.videoElement.ended) {
                     this.requestPip();
                 }
             }
-            // If video is scrolling BACK into view
+            // Scrolling back up to video
             else if (entry.isIntersecting) {
-                // Reset manual exit flag so it can work again
-                this.userManuallyExited = false;
-
+                this.userManuallyExited = false; // Reset manual exit flag
                 if (this.isPipActive) {
                     this.exitPip();
                 }
@@ -152,13 +132,13 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
         try {
             if (document.pictureInPictureElement) return; // Already in Pip
             
-            // Check if API is enabled
             if (document.pictureInPictureEnabled) {
                 await this.videoElement.requestPictureInPicture();
                 this.isPipActive = true;
+                if (this.utils.createToast) this.utils.createToast('Mini Player Active', 'info');
             }
         } catch (e) {
-            console.error('[YPP MiniPlayer] Failed to enter PiP:', e);
+            this.utils.log?.('Failed to enter PiP: ' + e.message, 'MINIPLAYER', 'debug');
         }
     }
 
@@ -173,12 +153,11 @@ window.YPP.features.MiniPlayer = class MiniPlayer {
         }
     }
 
-    handlePipLeave() {
+    handlePipLeave(event) {
         this.isPipActive = false;
-        // If we are still looking at the page (not navigating away), 
-        // and the player is likely out of view, assume user closed it manually
-        // and doesn't want it popping back up immediately until they scroll up once.
-        if (this.isActive) {
+        // If the player is still out of view intersection-wise, 
+        // the user likely closed the PiP window manually
+        if (this.isEnabled && this.observer) {
             this.userManuallyExited = true;
         }
     }

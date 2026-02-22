@@ -50,7 +50,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
 
     disable() {
         this.enabled = false;
-        this.observer.disconnectAll();
+        this.observer.stop();
         // Remove active filters
         document.body.classList.remove('ypp-sub-folders-active');
         this.removeFilterChips();

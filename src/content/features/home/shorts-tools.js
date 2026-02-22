@@ -3,20 +3,29 @@
  * Adds auto-scroll functionality to YouTube Shorts with proper event handling
  */
 window.YPP = window.YPP || {};
+window.YPP.features = window.YPP.features || {};
 
 /**
  * Shorts Tools
  * Adds auto-scroll functionality to YouTube Shorts
  * @class ShortsTools
  */
-window.YPP.features.ShortsTools = class ShortsTools {
+window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.BaseFeature {
     /**
      * Initialize Shorts Tools
      * @constructor
      */
     constructor() {
+        super('ShortsTools');
         this._initConstants();
-        this._initState();
+
+        this._videoRef = null;
+        this._isScrolling = false;
+
+        // Bound event handlers for proper cleanup
+        this._boundHandleEnded = this._onVideoEnded.bind(this);
+        // Throttle time update to run at most every 200ms
+        this._boundHandleTimeUpdate = this.utils.throttle(this._onTimeUpdate.bind(this), 200);
     }
 
     /**
@@ -26,75 +35,34 @@ window.YPP.features.ShortsTools = class ShortsTools {
     _initConstants() {
         this._CONSTANTS = window.YPP.CONSTANTS || {};
         this._SELECTORS = this._CONSTANTS.SELECTORS || {};
-        this._TIMINGS = this._CONSTANTS.TIMINGS || {};
-        this._checkInterval = this._TIMINGS.SHORTS_CHECK_INTERVAL || 500;
     }
 
-    /**
-     * Initialize internal state
-     * @private
-     */
-    _initState() {
-        this._isEnabled = false;
-        this._settings = null;
-        this._observer = null;
-        this._videoRef = null;
-        this._isScrolling = false;
-        this._isMonitoring = false;
-        this._Utils = window.YPP.Utils || {};
-
-        // Bound event handlers for proper cleanup
-        this._boundHandleEnded = this._onVideoEnded.bind(this);
-        // Throttle time update to run at most every 200ms
-        this._boundHandleTimeUpdate = this._Utils.throttle(this._onTimeUpdate.bind(this), 200);
-        this._boundCheckForVideo = this._checkForVideo.bind(this);
+    getConfigKey() {
+        return 'shortsAutoScroll'; // This feature specifically handles auto-scrolling
     }
 
-    /**
-     * Run the feature with settings
-     * @param {Object} settings - User settings
-     */
-    run(settings) {
-        this._update(settings);
-    }
+    async enable() {
+        if (!this._isOnShortsPage()) return;
+        await super.enable();
+        
+        this.utils.log?.('Enabled Shorts Auto-Scroll', 'SHORTS');
+        
+        // Listen for internal navigation to start/stop observing
+        this.addListener(window, 'yt-navigate-finish', () => {
+             if (this._isOnShortsPage() && this.isEnabled) {
+                 this._startMonitoring();
+             } else {
+                 this._stopMonitoring();
+             }
+        });
 
-    /**
-     * Update settings
-     * @private
-     * @param {Object} settings - Updated settings
-     */
-    _update(settings) {
-        this._settings = settings || {};
-
-        if (this._settings?.shortsAutoScroll) {
-            this._enable();
-        } else {
-            this._disable();
-        }
-    }
-
-    /**
-     * Enable Shorts auto-scroll
-     * @private
-     */
-    _enable() {
-        if (this._isEnabled) return;
-
-        this._isEnabled = true;
-        this._Utils.log?.('Enabled Shorts Tools', 'SHORTS');
         this._startMonitoring();
     }
 
-    /**
-     * Disable Shorts auto-scroll and cleanup
-     * @private
-     */
-    _disable() {
-        if (!this._isEnabled) return;
-
-        this._isEnabled = false;
+    async disable() {
+        await super.disable();
         this._stopMonitoring();
-        this._Utils.log?.('Disabled Shorts Tools', 'SHORTS');
+        this.utils.log?.('Disabled Shorts Auto-Scroll', 'SHORTS');
     }
 
     // =========================================================================
@@ -102,39 +70,32 @@ window.YPP.features.ShortsTools = class ShortsTools {
     // =========================================================================
 
     /**
-     * Start monitoring for Shorts videos
+     * Start monitoring for Shorts videos using BaseFeature's DOMObserver
      * @private
      */
     _startMonitoring() {
-        if (this._isMonitoring) return;
-        this._isMonitoring = true;
+        this.observer.start();
+        
+        // Watch for the active reel video renderer becoming available
+        const activeContainerSelector = this._SELECTORS.REEL_SHELF_RENDERER?.replace('ytd-', 'ytd-reel-video-renderer[is-active]') || 'ytd-reel-video-renderer[is-active]';
+        
+        this.observer.register('active-short', activeContainerSelector, (activeRenderer) => {
+             if (!this.isEnabled) return;
+             const newVideo = activeRenderer.querySelector('video');
+             
+             if (!newVideo) {
+                 // Fallback if video tag not immediately within active container
+                 const playing = this._findPlayingVideo();
+                 if (playing && playing !== this._videoRef) {
+                     this._attachToVideo(playing);
+                 }
+                 return;
+             }
 
-        // Determine best container to observe
-        const container = this._getShortsContainer();
-        const observeSubtree = container === document.body;
-
-        this._Utils.log?.(`Monitoring Shorts container: ${container.tagName}`, 'SHORTS', 'debug');
-
-        // Set up mutation observer
-        this._observer = new MutationObserver(this._boundCheckForVideo);
-        this._observer.observe(container, {
-            childList: true,
-            subtree: observeSubtree
-        });
-
-        // Initial check
-        this._boundCheckForVideo();
-    }
-
-    /**
-     * Get the best Shorts container to observe
-     * @private
-     * @returns {Element}
-     */
-    _getShortsContainer() {
-        return document.querySelector(this._SELECTORS.SHORTS_CONTAINER) ||
-               document.querySelector(this._SELECTORS.SHORTS_CONTAINER_ALT) ||
-               document.body;
+             if (newVideo !== this._videoRef) {
+                 this._attachToVideo(newVideo);
+             }
+        }, true);
     }
 
     /**
@@ -142,52 +103,14 @@ window.YPP.features.ShortsTools = class ShortsTools {
      * @private
      */
     _stopMonitoring() {
-        if (this._observer) {
-            this._observer.disconnect();
-            this._observer = null;
-        }
+        this.observer.stop();
+        this.observer.unregister('active-short');
         this._removeVideoListeners();
-        this._isMonitoring = false;
     }
 
     // =========================================================================
     // VIDEO DETECTION
     // =========================================================================
-
-    /**
-     * Check for and attach to playing video
-     * @private
-     */
-    _checkForVideo() {
-        if (!this._isEnabled) return;
-
-        // Only process on Shorts pages
-        if (!this._isOnShortsPage()) {
-            this._removeVideoListeners();
-            return;
-        }
-
-        try {
-            const activeRenderer = document.querySelector(this._SELECTORS.REEL_SHELF_RENDERER?.replace('ytd-', 'ytd-reel-video-renderer[is-active]') || 'ytd-reel-video-renderer[is-active]');
-            let activeVideo = null;
-
-            if (activeRenderer) {
-                activeVideo = activeRenderer.querySelector('video');
-            }
-
-            // Fallback: Find playing video
-            if (!activeVideo) {
-                activeVideo = this._findPlayingVideo();
-            }
-
-            // Attach to new video
-            if (activeVideo && activeVideo !== this._videoRef) {
-                this._attachToVideo(activeVideo);
-            }
-        } catch (error) {
-            this._Utils.log?.(`Error checking for video: ${error.message}`, 'SHORTS', 'error');
-        }
-    }
 
     /**
      * Check if on Shorts page
@@ -224,10 +147,16 @@ window.YPP.features.ShortsTools = class ShortsTools {
         this._videoRef = video;
 
         try {
+            // We use standard addEventListener here instead of BaseFeature's addListener
+            // because we constantly attach/detach from different video elements as the user scrolls,
+            // and we need precise low-level control of this specific cleanup without wiping
+            // the feature-level listeners (like the yt-navigate-finish).
             video.addEventListener('ended', this._boundHandleEnded);
             video.addEventListener('timeupdate', this._boundHandleTimeUpdate);
+            // Shorts usually loop natively, so we ensure the ended event might fire if loop is false,
+            // but rely primarily on timeupdate for looped shorts.
         } catch (error) {
-            this._Utils.log?.(`Error attaching to video: ${error.message}`, 'SHORTS', 'error');
+            this.utils.log?.(`Error attaching to video: ${error.message}`, 'SHORTS', 'error');
         }
     }
 
@@ -256,7 +185,7 @@ window.YPP.features.ShortsTools = class ShortsTools {
      * @private
      */
     _onVideoEnded() {
-        if (!this._isEnabled || !this._settings?.shortsAutoScroll) return;
+        if (!this.isEnabled) return;
         this._scrollToNext();
     }
 
@@ -265,24 +194,18 @@ window.YPP.features.ShortsTools = class ShortsTools {
      * @private
      */
     _onTimeUpdate() {
-        if (!this._isEnabled || !this._settings?.shortsAutoScroll || !this._videoRef) return;
+        if (!this.isEnabled || !this._videoRef) return;
 
         const currentTime = this._videoRef.currentTime;
         const duration = this._videoRef.duration;
 
-        // Auto-skip long shorts (placeholder structure)
-        if (this._settings?.shortsAutoSkipDuration && duration > this._settings.shortsAutoSkipDuration) {
-             // Logic to skip if user wants to skip long shorts
-             // Not active by default, but structure is here
-        }
+        if (!duration) return;
 
-        // Handle looped videos
-        if (this._videoRef.loop) {
-            const timeRemaining = duration - currentTime;
-            // Looped videos don't fire 'ended', so we check proximity to end
-            if (timeRemaining < 0.25 && !this._isScrolling) {
-                this._scrollToNext();
-            }
+        // Handle looped videos: Shorts naturally loop.
+        // If we are within the last ~100ms of the video, trigger scroll.
+        const timeRemaining = duration - currentTime;
+        if (timeRemaining <= 0.15 && !this._isScrolling) {
+            this._scrollToNext();
         }
     }
 
@@ -298,7 +221,11 @@ window.YPP.features.ShortsTools = class ShortsTools {
         if (this._isScrolling) return;
 
         this._isScrolling = true;
-        this._Utils.log?.('Auto-scrolling to next Short...', 'SHORTS');
+        this.utils.log?.('Auto-scrolling to next Short...', 'SHORTS');
+        
+        if (this.utils.createToast) {
+             this.utils.createToast('Auto-scrolling...', 'info');
+        }
 
         try {
             // Strategy 1: Click next button (Most reliable for SPA state)
@@ -309,15 +236,7 @@ window.YPP.features.ShortsTools = class ShortsTools {
                 return;
             }
 
-            // Strategy 2: Simulate Wheel Event (often used by YouTube's own listeners)
-            const container = this._getShortsContainer();
-            container.dispatchEvent(new WheelEvent('wheel', {
-                bubbles: true,
-                deltaY: 100,
-                view: window
-            }));
-
-            // Strategy 3: Simulate down arrow key (Fallback)
+            // Strategy 2: Simulate down arrow key (Fallback)
             const event = new KeyboardEvent('keydown', {
                 key: 'ArrowDown',
                 code: 'ArrowDown',
@@ -329,38 +248,20 @@ window.YPP.features.ShortsTools = class ShortsTools {
             document.body.dispatchEvent(event);
             
         } catch (error) {
-            this._Utils.log?.(`Scroll error: ${error.message}`, 'SHORTS', 'error');
+            this.utils.log?.(`Scroll error: ${error.message}`, 'SHORTS', 'error');
         }
 
         this._finishScroll();
     }
 
     /**
-     * Finish scrolling after delay
+     * Finish scrolling after delay to prevent rapid-fire skipping
      * @private
      */
     _finishScroll() {
+        // Prevents triggering multiple scrolls for the same end-of-video event
         setTimeout(() => {
             this._isScrolling = false;
         }, 1500);
-    }
-
-    // =========================================================================
-    // PUBLIC API
-    // =========================================================================
-
-    /**
-     * Check if feature is enabled
-     * @returns {boolean}
-     */
-    isEnabled() {
-        return this._isEnabled;
-    }
-
-    /**
-     * Manually trigger scroll to next
-     */
-    scrollNext() {
-        this._scrollToNext();
     }
 };

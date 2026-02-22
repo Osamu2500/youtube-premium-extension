@@ -309,12 +309,10 @@ window.YPP.features.ContentControl = class ContentControl {
         // Start the observer
         this.domObserver.start();
 
-        // Register a catch-all callback for dynamically added content containers
-        // Since Shorts can appear in various forms, we watch the main content area
-        // and run our comprehensive detection logic when it updates.
+        // Register a callback for dynamically added content containers that might contain shorts
         this.domObserver.register(
             'shorts-monitor',
-            '#contents, ytd-rich-grid-row, ytd-item-section-renderer', 
+            'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-guide-entry-renderer, yt-chip-cloud-chip-renderer', 
             this.handleShortsAdded,
             false // Don't run immediately, removeShortsFromDOM already did the initial pass
         );
@@ -337,75 +335,49 @@ window.YPP.features.ContentControl = class ContentControl {
     /**
      * Handle newly added Shorts elements
      * Called by MutationObserver when potential Shorts are detected
+     * @param {HTMLElement[]} elements - Array of newly added or modified elements
      */
-    handleShortsAdded() {
+    handleShortsAdded(elements) {
         if (!this.settings?.hideShorts) return;
 
-        // Use same removal logic as initial load
-        const SHORTS_PATTERNS = [
-            // Primary Shorts shelves
-            'ytd-reel-shelf-renderer',
-            'ytd-rich-shelf-renderer[is-shorts]',
-            'ytd-rich-section-renderer[is-shorts]',
-            'ytd-shelf-renderer[is-shorts]',
-            'ytm-reel-shelf-renderer',
-            
-            // Grid shelf model and reel items
-            'grid-shelf-view-model',
-            'ytd-reel-item-renderer',
-            
-            // Individual Shorts videos - ALL renderer types
-            'ytd-rich-item-renderer:has(a[href*="/shorts/"])',
-            'ytd-video-renderer:has(a[href*="/shorts/"])',
-            'ytd-grid-video-renderer:has(a[href*="/shorts/"])',
-            'ytd-compact-video-renderer:has(a[href*="/shorts/"])',
-            'ytd-playlist-video-renderer:has(a[href*="/shorts/"])',
-            
-            // Search results specific
-            '#contents.ytd-item-section-renderer ytd-video-renderer:has(a[href*="/shorts/"])',
-            'ytd-search ytd-video-renderer:has(a[href*="/shorts/"])',
-            
-            // Subscription feed specific
-            'ytd-grid-video-renderer:has(span[aria-label="Shorts"])',
-            'ytd-browse[page-subtype="subscriptions"] ytd-grid-video-renderer:has(a[href*="/shorts/"])',
-            
-            // Watch page sidebar
-            '#related ytd-compact-video-renderer:has(a[href*="/shorts/"])',
-            'ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer:has(a[href*="/shorts/"])',
-            
-            // Navigation entries
-            'ytd-guide-entry-renderer:has(a[title="Shorts"])',
-            'ytd-mini-guide-entry-renderer:has(a[title="Shorts"])'
-        ];
+        // If no specifically mutated elements provided, fallback to standard scan
+        if (!elements || elements.length === 0) {
+            this.removeShortsFromDOM();
+            return;
+        }
 
         let removed = 0;
 
-        SHORTS_PATTERNS.forEach(selector => {
-            try {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(el => {
-                    if (this._isShortsElement(el)) {
-                        if (el.parentNode) {
-                            el.parentNode.removeChild(el);
-                        } else {
-                            el.remove();
-                        }
-                        removed++;
-                    }
-                });
-            } catch (err) {
-                // Skip invalid selectors
+        elements.forEach(el => {
+            // First check if the element itself is a short/shorts chip
+            if (this._isShortsElement(el)) {
+                if (el.parentNode) el.parentNode.removeChild(el); else el.remove();
+                removed++;
+                return;
             }
+            
+            // Check for Shorts chips
+            if (el.tagName && el.tagName.toLowerCase() === 'yt-chip-cloud-chip-renderer') {
+                const textElement = el.querySelector("#text");
+                if (textElement && textElement.innerText.trim() === "Shorts") {
+                    if (el.parentNode) el.parentNode.removeChild(el); else el.remove();
+                    removed++;
+                }
+                return;
+            }
+
+            // Otherwise, see if it CONTAINS known short elements (rare for these specific selectors but safe to check)
+            try {
+                const nestedShorts = el.querySelectorAll('ytd-reel-shelf-renderer, a[href*="/shorts/"]');
+                if (nestedShorts.length > 0 && this._isShortsElement(el)) {
+                     if (el.parentNode) el.parentNode.removeChild(el); else el.remove();
+                     removed++;
+                }
+            } catch(e) {}
         });
 
-        // Remove Shorts chips
-        this._removeShortsChips();
-
-        // Also run heuristic check
-        this._removeShortsByHeuristics();
-
         if (removed > 0) {
-            this.Utils?.log(`Dynamic removal: ${removed} Shorts elements`, 'CONTENT');
+            this.Utils?.log(`Dynamic removal (Optimized): ${removed} Shorts elements`, 'CONTENT');
         }
     }
 };

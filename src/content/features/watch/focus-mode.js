@@ -14,14 +14,14 @@ const waitForElement = (selector, timeout = 5000) => {
  * Focus Mode
  * @class FocusMode
  */
-window.YPP.features.FocusMode = class FocusMode {
+window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.BaseFeature {
     /**
      * Initialize Focus Mode
      * @constructor
      */
     constructor() {
+        super('FocusMode');
         this._initConstants();
-        this._initState();
     }
 
     /**
@@ -31,44 +31,39 @@ window.YPP.features.FocusMode = class FocusMode {
     _initConstants() {
         this._CONSTANTS = window.YPP.CONSTANTS || {};
         this._CSS_CLASSES = this._CONSTANTS.CSS_CLASSES || {};
-        this._Utils = window.YPP.Utils || {};
     }
 
-    /**
-     * Initialize internal state
-     * @private
-     */
-    _initState() {
-        this._settingsRef = null;
-        this._isActive = false;
-
-        // Initialize centralized DOM observer
-        this.domObserver = new window.YPP.Utils.DOMObserver();
-
-        // Bound methods
-        this._boundRun = this._run.bind(this);
+    getConfigKey() {
+        return null; // Focus mode bundles multiple settings, so it's always "enabled" but internal toggles dictate effects
     }
 
-    /**
-     * Enable focus mode features
-     * @param {Object} settings - User settings
-     */
-    enable(settings) {
-        this._settingsRef = settings;
-        this._run(settings);
-        this._setupObserver();
+    async enable() {
+        this.observer.register(
+            'focus-mode',
+            '#contents, ytd-watch-flexy', 
+            () => {
+                if (this.isEnabled && this.settings) {
+                    this._applyFocusState();
+                }
+            },
+            false // Initial apply is done in onUpdate()
+        );
+        await super.enable();
+        this._run();
     }
 
-    /**
-     * Disable focus mode features
-     */
-    disable() {
-        try {
-            this._cleanup();
-            this._Utils.log?.('Focus mode disabled', 'FOCUS');
-        } catch (error) {
-            this._Utils.log?.(`Error disabling focus mode: ${error.message}`, 'FOCUS', 'error');
-        }
+    async disable() {
+        this.observer.unregister('focus-mode');
+        // Disable all features
+        this._toggleDetox(false);
+        this._toggleFocus(false);
+        this._toggleCinemaMode(false);
+        this._toggleMinimalMode(false);
+        await super.disable();
+    }
+
+    async onUpdate() {
+        this._run();
     }
 
     // =========================================================================
@@ -76,41 +71,20 @@ window.YPP.features.FocusMode = class FocusMode {
     // =========================================================================
 
     /**
-     * Complete cleanup
-     * @private
-     */
-    _cleanup() {
-        // Disconnect observer
-        this._cleanupObserver();
-
-        // Disable all features
-        this._toggleDetox(false);
-        this._toggleFocus(false);
-        this._toggleCinemaMode(false);
-        this._toggleMinimalMode(false);
-
-        this._isActive = false;
-        this._settingsRef = null;
-    }
-
-    /**
      * Run focus mode with settings
      * @private
-     * @param {Object} settings
      */
-    _run(settings) {
-        if (!settings) return;
-
-        this._isActive = true;
+    _run() {
+        if (!this.settings) return;
 
         try {
-            this._toggleDetox(settings.dopamineDetox);
-            this._toggleFocus(settings.enableFocusMode);
-            this._toggleCinemaMode(settings.cinemaMode);
-            this._toggleMinimalMode(settings.minimalMode);
+            this._toggleDetox(this.settings.dopamineDetox);
+            this._toggleFocus(this.settings.enableFocusMode);
+            this._toggleCinemaMode(this.settings.cinemaMode);
+            this._toggleMinimalMode(this.settings.minimalMode);
             this._applyFocusState();
         } catch (error) {
-            this._Utils.log?.(`Error running focus mode: ${error.message}`, 'FOCUS', 'error');
+            this.utils.log?.(`Error running focus mode: ${error.message}`, 'FOCUS', 'error');
         }
     }
 
@@ -119,49 +93,11 @@ window.YPP.features.FocusMode = class FocusMode {
      * @private
      */
     _applyFocusState() {
-        const settings = this._settingsRef;
+        const settings = this.settings;
         if (!settings) return;
 
         if (settings.enableFocusMode) {
             this._hideDistractions(true);
-        }
-    }
-
-    // =========================================================================
-    // OBSERVER
-    // =========================================================================
-
-    /**
-     * Setup central DOMObserver for dynamic content changes
-     * @private
-     */
-    _setupObserver() {
-        if (!this._isActive || !this._settingsRef) return;
-
-        this.domObserver.start();
-        
-        // Debounce logic is already handled by DOMObserver's internal batching,
-        // but we add a small delay here for applying focus state to ensure DOM is ready
-        this.domObserver.register(
-            'focus-mode',
-            '#contents, ytd-watch-flexy', 
-            () => {
-                if (this._isActive && this._settingsRef) {
-                    this._applyFocusState();
-                }
-            },
-            false // Initial apply is done in _run()
-        );
-    }
-
-    /**
-     * Cleanup observer
-     * @private
-     */
-    _cleanupObserver() {
-        if (this.domObserver) {
-            this.domObserver.unregister('focus-mode');
-            this.domObserver.stop();
         }
     }
 
@@ -183,7 +119,7 @@ window.YPP.features.FocusMode = class FocusMode {
             this._removeDetoxStyle();
         }
 
-        this._Utils.log?.(`Dopamine detox ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
+        this.utils.log?.(`Dopamine detox ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
     }
 
     /**
@@ -237,7 +173,7 @@ window.YPP.features.FocusMode = class FocusMode {
      */
     _toggleFocus(enable) {
         document.body.classList.toggle(this._CSS_CLASSES.FOCUS_MODE, enable);
-        this._Utils.log?.(`Focus mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
+        this.utils.log?.(`Focus mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
     }
 
     /**
@@ -278,7 +214,7 @@ window.YPP.features.FocusMode = class FocusMode {
             this._removeCinemaStyle();
         }
 
-        this._Utils.log?.(`Cinema mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
+        this.utils.log?.(`Cinema mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
 
         // Logic to trigger YouTube's native theater mode if requested
         // This coordinates with the CSS class to ensure the player expands
@@ -366,7 +302,7 @@ window.YPP.features.FocusMode = class FocusMode {
             this._removeMinimalStyle();
         }
 
-        this._Utils.log?.(`Minimal mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
+        this.utils.log?.(`Minimal mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
     }
 
     /**

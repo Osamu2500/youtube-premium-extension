@@ -8,8 +8,7 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.ContextMenu = class ContextMenu {
     constructor() {
         this.isActive = false;
-        this.observer = null;
-        this._boundProcess = this.processNodes.bind(this);
+        this.observer = new window.YPP.Utils.DOMObserver();
     }
 
     enable(settings) {
@@ -21,10 +20,9 @@ window.YPP.features.ContextMenu = class ContextMenu {
     disable() {
         if (!this.isActive) return;
         this.isActive = false;
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
-        }
+        this.observer.unregister('context-menu-cards');
+        this.observer.unregister('context-menu-header');
+        this.observer.stop();
         document.querySelectorAll('.ypp-add-to-group-btn').forEach(btn => btn.remove());
     }
 
@@ -32,28 +30,28 @@ window.YPP.features.ContextMenu = class ContextMenu {
     run(settings) { this.enable(settings); }
 
     init() {
-        const debouncedProcess = window.YPP.Utils.debounce(this._boundProcess, 100);
-        this.observer = new MutationObserver((mutations) => {
-            // Check for new video cards
-            const hasNodes = mutations.some(m => m.addedNodes.length > 0);
-            if (hasNodes) debouncedProcess();
-        });
-        
-        this.observer.observe(document.body, { childList: true, subtree: true });
-        this.processNodes();
-    }
+        this.observer.start();
 
-    processNodes() {
-        if (!this.isActive) return;
+        // Register observer for video cards
+        this.observer.register(
+            'context-menu-cards',
+            'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer',
+            (elements) => {
+                if (!this.isActive) return;
+                elements.forEach(card => this.injectButton(card));
+            }
+        );
 
-        // 1. Video Cards (Home/Subs/Search)
-        const cards = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer');
-        cards.forEach(card => this.injectButton(card));
-
-        // 2. Channel Page Header
-        if (window.YPP.Utils.isChannelPage()) {
-             this.injectChannelHeaderButton();
-        }
+        // Register observer for channel page header (if applicable)
+        this.observer.register(
+            'context-menu-header',
+            '#inner-header-container #buttons',
+            () => {
+                if (this.isActive && window.YPP.Utils.isChannelPage()) {
+                    this.injectChannelHeaderButton();
+                }
+            }
+        );
     }
 
     injectButton(card) {
