@@ -10,7 +10,7 @@
         "alarms"
     ],
     "host_permissions": [
-        "*://*.youtube.com/*"
+        "*://www.youtube.com/*"
     ],
     "icons": {
         "16": "src/assets/icon.svg",
@@ -40,6 +40,7 @@
             "run_at": "document_idle",
             "js": [
                 "src/content/constants.js",
+                "src/content/settings-schema.js",
                 "src/content/utils.js",
                 "src/content/features/base-feature.js",
                 

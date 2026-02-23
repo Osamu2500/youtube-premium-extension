@@ -29,8 +29,8 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         const style = styles[level] || styles.info;
         const consoleMethod = console[level] || console.log;
         
-        // Filter debug logs in production if needed
-        if (level === 'debug' && !window.YPP_DEBUG) return;
+        // Filter debug logs unless debug mode is active
+        if (level === 'debug' && !window.YPP?.debug?.enabled) return;
 
         consoleMethod(prefix, style, msg);
     },
@@ -551,7 +551,15 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             }
 
             const data = await chrome.storage.local.get('settings');
-            return data.settings || CONSTANTS.DEFAULT_SETTINGS || {};
+            const raw = data.settings || {};
+
+            // Run through schema validator if available (settings-schema.js loads before utils)
+            if (window.YPP?.SettingsSchema) {
+                return window.YPP.SettingsSchema.validateAndMerge(raw);
+            }
+
+            // Fallback: merge raw over defaults
+            return Object.assign({}, CONSTANTS.DEFAULT_SETTINGS || {}, raw);
         } catch (error) {
             window.YPP.Utils?.log('Error loading settings: ' + error.message, 'UTILS', 'error');
             return CONSTANTS.DEFAULT_SETTINGS || {};
@@ -791,6 +799,74 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
 
 // Alias for convenience
 const Utils = window.YPP.Utils;
+
+// =====================================================================
+// DEBUG MODE TOGGLE
+// =====================================================================
+
+/**
+ * Debug mode controller.
+ * Toggle from the browser console: YPP.debug.toggle()
+ * State persists across page loads via localStorage.
+ */
+window.YPP.debug = {
+    /** @type {boolean} Whether debug logging is currently enabled */
+    enabled: localStorage.getItem('ypp-debug') === 'true',
+
+    /**
+     * Toggle debug mode on/off and persist the state.
+     * @returns {boolean} New enabled state
+     */
+    toggle() {
+        this.enabled = !this.enabled;
+        localStorage.setItem('ypp-debug', String(this.enabled));
+        const state = this.enabled ? 'ON 🟢' : 'OFF 🔴';
+        console.log(`%c[YPP:DEBUG] Debug mode ${state} — reload to see full logs`, 'color:#3ea6ff;font-weight:bold;');
+        return this.enabled;
+    },
+
+    /**
+     * Print a summary of all loaded features and their error counts.
+     * Useful for diagnosing which features are active.
+     */
+    status() {
+        const fm = window.YPP?.featureManager;
+        if (!fm) { console.warn('[YPP:DEBUG] FeatureManager not initialized yet.'); return; }
+        console.group('%c[YPP:DEBUG] Feature Status', 'color:#3ea6ff;font-weight:bold;');
+        for (const [name, instance] of Object.entries(fm.features)) {
+            const errors = fm.errorCounts[name] ?? 0;
+            const active = instance.isActive ?? '?';
+            console.log(`%c${name}%c  active=${active}  errors=${errors}`, 'font-weight:bold', 'color:#aaa');
+        }
+        console.groupEnd();
+    }
+};
+
+// =====================================================================
+// SAFE EXECUTE — top-level one-shot async error wrapper
+// =====================================================================
+
+/**
+ * Safely execute an async function outside the FeatureManager context.
+ * Catches all errors, logs them with context, and returns null on failure.
+ * Use this for one-off async operations (e.g. in event handlers).
+ *
+ * @param {Function} fn - Async function to execute
+ * @param {string} [context='UNKNOWN'] - Label for log messages
+ * @returns {Promise<any>} Result, or null if an error was thrown
+ *
+ * @example
+ * const result = await YPP.safeExecute(() => fetchData(), 'DataAPI');
+ */
+window.YPP.safeExecute = async (fn, context = 'UNKNOWN') => {
+    try {
+        return await fn();
+    } catch (error) {
+        window.YPP.Utils?.log(`safeExecute error in [${context}]: ${error.message}`, 'UTILS', 'error');
+        console.error(`[YPP:${context}]`, error);
+        return null;
+    }
+};
 
 // =====================================================================
 // EVENT BUS
