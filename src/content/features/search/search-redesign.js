@@ -130,7 +130,15 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     run(settings) {
         this._settings = settings || {};
 
-        // Load persisted view preference (synchronous best-effort from localStorage)
+        // Load persisted view preference — check chrome.storage first, fall back to localStorage
+        chrome.storage.local.get(['searchViewMode'], (result) => {
+            const mode = result.searchViewMode || localStorage.getItem('ypp_searchViewMode') || 'grid';
+            if (mode !== this._viewMode) {
+                this._viewMode = mode;
+                this._applyViewMode();
+            }
+        });
+
         const saved = localStorage.getItem('ypp_searchViewMode');
         if (saved) this._viewMode = saved;
 
@@ -155,6 +163,18 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
 
         window.addEventListener('yt-navigate-finish', this._handleNavigation);
 
+        // Listen for live view mode changes from the popup
+        this._boundMessageListener = (msg) => {
+            if (msg.type === 'YPP_SET_SEARCH_VIEW_MODE' && msg.mode) {
+                this._viewMode = msg.mode;
+                this._applyViewMode();
+                try {
+                    localStorage.setItem('ypp_searchViewMode', msg.mode);
+                } catch (_) {}
+            }
+        };
+        chrome.runtime.onMessage.addListener(this._boundMessageListener);
+
         // Process current page immediately
         this._handleNavigation();
         this._log('SearchRedesign enabled', 'info');
@@ -172,6 +192,11 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         this._removeViewToggle();
         document.body.classList.remove('ypp-filter-pending'); // Cleanup
         window.removeEventListener('yt-navigate-finish', this._handleNavigation);
+
+        if (this._boundMessageListener) {
+            chrome.runtime.onMessage.removeListener(this._boundMessageListener);
+            this._boundMessageListener = null;
+        }
     }
 
 
@@ -192,7 +217,6 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             // Apply grid if enabled
             if (this._settings.searchGrid) {
                 this._applyViewMode();
-                this._injectViewToggle();
                 this._startObserver();
             }
 
@@ -342,10 +366,11 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
 
         this._viewMode = mode;
         this._applyViewMode();
-        this._updateToggleButtonState();
         
         try {
             localStorage.setItem('ypp_searchViewMode', mode);
+            // Also sync to chrome.storage so popup reflects current state
+            chrome.storage.local.set({ searchViewMode: mode });
         } catch (error) {
             this._log('Failed to save view mode preference', 'warn');
         }
@@ -429,22 +454,11 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     }
 
     /**
-     * Update the active state of toggle buttons
+     * No-op: toggle UI is now in the popup, not injected into the page.
+     * Kept for backward-compat with disable() which calls _removeViewToggle().
      * @private
      */
-    _updateToggleButtonState() {
-        const container = document.getElementById('ypp-view-toggle');
-        if (!container) return;
-
-        const btns = container.querySelectorAll(`.${SearchRedesign.CLASSES.TOGGLE_BTN}`);
-        btns.forEach(btn => {
-            if (btn.dataset.mode === this._viewMode) {
-                btn.classList.add(SearchRedesign.CLASSES.ACTIVE);
-            } else {
-                btn.classList.remove(SearchRedesign.CLASSES.ACTIVE);
-            }
-        });
-    }
+    _updateToggleButtonState() { /* no-op — UI is in popup */ }
 
     /**
      * Remove the toggle button from DOM

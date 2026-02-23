@@ -353,6 +353,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- SEARCH VIEW MODE PILL TOGGLE ---
+    const initSearchViewMode = () => {
+        const container = document.getElementById('searchViewModeToggle');
+        if (!container) return;
+
+        const btns = container.querySelectorAll('.view-mode-btn');
+
+        const applyActiveState = (mode) => {
+            btns.forEach(b => {
+                const isActive = b.dataset.mode === mode;
+                b.classList.toggle('active', isActive);
+                b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+                b.style.color = isActive ? '#3ea6ff' : 'rgba(255,255,255,0.5)';
+            });
+        };
+
+        // Load saved mode
+        chrome.storage.local.get(['searchViewMode'], (result) => {
+            const savedMode = result.searchViewMode || localStorage.getItem('ypp_searchViewMode') || 'grid';
+            applyActiveState(savedMode);
+        });
+
+        // Handle clicks
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                applyActiveState(mode);
+
+                // Persist
+                chrome.storage.local.set({ searchViewMode: mode });
+                localStorage.setItem('ypp_searchViewMode', mode);
+
+                // Live-push to active YouTube search tab
+                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    const tab = tabs[0];
+                    if (tab && tab.url && tab.url.includes('youtube.com/results')) {
+                        chrome.tabs.sendMessage(tab.id, {
+                            type: 'YPP_SET_SEARCH_VIEW_MODE',
+                            mode: mode
+                        }).catch(() => {}); // Ignore if content script not ready
+                    }
+                });
+            });
+        });
+    };
+
+    initSearchViewMode();
+
     const updateSetting = (key, value) => {
         chrome.storage.local.get(['settings'], (result) => {
             const currentSettings = result.settings || {};

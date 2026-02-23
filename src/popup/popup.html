@@ -872,6 +872,51 @@
                 <input type="range" id="searchColumns" min="1" max="8" step="1" value="4" />
               </div>
             </div>
+
+            <div class="setting-item" style="margin-top: 8px">
+              <div class="info">
+                <span class="name">View Mode</span>
+                <span class="desc">Layout when Grid is on</span>
+              </div>
+              <div id="searchViewModeToggle" style="
+                display: flex;
+                gap: 0;
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                overflow: hidden;
+                flex-shrink: 0;
+              ">
+                <button data-mode="grid" class="view-mode-btn active" style="
+                  display: flex; align-items: center; gap: 6px;
+                  padding: 6px 14px; border: none; cursor: pointer;
+                  font-size: 12px; font-weight: 500;
+                  background: transparent; color: rgba(255,255,255,0.5);
+                  transition: all 0.2s ease;
+                ">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                  </svg>
+                  Grid
+                </button>
+                <button data-mode="list" class="view-mode-btn" style="
+                  display: flex; align-items: center; gap: 6px;
+                  padding: 6px 14px; border: none; cursor: pointer;
+                  font-size: 12px; font-weight: 500;
+                  background: transparent; color: rgba(255,255,255,0.5);
+                  border-left: 1px solid rgba(255,255,255,0.1);
+                  transition: all 0.2s ease;
+                ">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                  </svg>
+                  List
+                </button>
+              </div>
+            </div>
+
           </div>
         </section>
 
