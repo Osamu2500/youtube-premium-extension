@@ -188,7 +188,12 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         this._isEnabled = false;
         
         this._disconnectObserver();
-        this._removeClasses();
+        // Remove all body state classes on disable
+        document.body.classList.remove(
+            SearchRedesign.CLASSES.GRID_MODE,
+            SearchRedesign.CLASSES.LIST_MODE,
+            'ypp-search-clean-grid'
+        );
         this._removeViewToggle();
         document.body.classList.remove('ypp-filter-pending'); // Cleanup
         window.removeEventListener('yt-navigate-finish', this._handleNavigation);
@@ -220,13 +225,25 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                 this._startObserver();
             }
 
+            // Apply clean-grid class (hides shelf noise sections)
+            if (this._settings.hideSearchShelves) {
+                document.body.classList.add('ypp-search-clean-grid');
+            } else {
+                document.body.classList.remove('ypp-search-clean-grid');
+            }
+
             // Apply filter logic
             if (this._settings.autoVideoFilter) {
                 this._checkAndApplyFilter();
             }
         } else {
             this._disconnectObserver();
-            this._removeClasses();
+            // Clean up all body classes when leaving search page
+            document.body.classList.remove(
+                SearchRedesign.CLASSES.GRID_MODE,
+                SearchRedesign.CLASSES.LIST_MODE,
+                'ypp-search-clean-grid'
+            );
             this._lastQuery = null; // Reset query on nav away
         }
     }

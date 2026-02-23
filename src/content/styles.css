@@ -997,10 +997,15 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   padding: 0 !important;
 }
 
-/* Search Grid Layout */
-body.ypp-search-grid-mode .ypp-search-grid-container {
-  display: grid;
-  /* 240px min keeps 4+ columns on 1440p, gracefully collapses on smaller screens */
+/* ===========================================================================
+   UNIFIED GRID: ytd-section-list-renderer > #contents is the ONE true grid.
+   ytd-item-section-renderer elements are flattened (display:contents) so
+   all video cards flow into a single grid with no inter-section gaps.
+   =========================================================================== */
+
+/* The unified grid parent */
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 20px;
   width: 100%;
@@ -1008,11 +1013,26 @@ body.ypp-search-grid-mode .ypp-search-grid-container {
   padding: 16px 24px 24px;
   margin: 0 auto;
   box-sizing: border-box;
-  align-items: start; /* Prevent stretching cards with different content heights */
+  align-items: start;
 }
 
-/* Also target contents directly (for items not yet processed by JS) */
-body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+/* Flatten section wrappers into the grid flow */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+  display: contents !important; /* No box — children flow directly into parent grid */
+}
+
+/* Flatten the inner #contents div too */
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
+  display: contents !important;
+}
+
+/* Remove any separators that would create gaps between sections */
+body.ypp-search-grid-mode ytd-item-section-renderer #separator {
+  display: none !important;
+}
+
+/* Legacy/fallback grid for .ypp-search-grid-container class */
+body.ypp-search-grid-mode .ypp-search-grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 20px;
@@ -1028,6 +1048,51 @@ body.ypp-search-grid-mode ytd-item-section-renderer #contents {
 body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   display: flex !important;
   justify-content: center !important;
+}
+
+/* ===========================================================================
+   CLEAN SEARCH GRID: Hide shelf noise sections that break the grid layout.
+   Activated by body.ypp-search-clean-grid (from hideSearchShelves setting).
+   =========================================================================== */
+
+/* Shelf renderers — "From related searches", "Videos you've watched", etc. */
+body.ypp-search-grid-mode ytd-shelf-renderer,
+body.ypp-search-clean-grid ytd-shelf-renderer {
+  display: none !important;
+}
+
+/* Horizontal card list — "People also search for" */
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+body.ypp-search-clean-grid ytd-horizontal-card-list-renderer {
+  display: none !important;
+}
+
+/* Universal watch card — large featured cards that break grid flow */
+body.ypp-search-grid-mode ytd-universal-watch-card-renderer,
+body.ypp-search-clean-grid ytd-universal-watch-card-renderer {
+  display: none !important;
+}
+
+/* Background shelf / promoted content */
+body.ypp-search-grid-mode ytd-background-promo-renderer,
+body.ypp-search-clean-grid ytd-background-promo-renderer {
+  display: none !important;
+}
+
+/* Search refinement chips shelves (Related queries) */
+body.ypp-search-clean-grid ytd-search-refinement-card-renderer {
+  display: none !important;
+}
+
+/* Continuation spinner — hide loading spinners between sections to prevent gap flicker */
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents > ytd-continuation-item-renderer,
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents > ytd-continuation-item-renderer {
+  display: none !important;
+}
+
+/* Active search filter (promoted) labels that appear as block-level between rows */
+body.ypp-search-grid-mode #filter-container {
+  display: none !important;
 }
 
 /* Video Cards in Grid - Ported from Homepage (ytd-rich-item-renderer) */
