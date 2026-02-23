@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'searchGrid',
         'searchColumns', // New
         'cleanSearch',
+        'hideSearchShelves',
         
         // Player
         'sponsorBlock',
