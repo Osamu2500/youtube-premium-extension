@@ -202,6 +202,13 @@ body.ypp-hide-shorts ytd-shelf-renderer[is-shorts],
 body.ypp-hide-shorts [is-shorts],
 body.ypp-hide-shorts ytm-reel-shelf-renderer,
 
+/* New renderer types (2024+) */
+body.ypp-hide-shorts reels-video-with-pill-title-renderer,
+body.ypp-hide-shorts ytd-reel-video-renderer,
+body.ypp-hide-shorts grid-shelf-view-model,
+body.ypp-hide-shorts ytd-reel-item-renderer,
+body.ypp-hide-shorts ytd-shorts,
+
 /* Individual Shorts Videos - All Renderers */
 body.ypp-hide-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-video-renderer:has(a[href*="/shorts/"]),
@@ -213,6 +220,8 @@ body.ypp-hide-shorts ytd-playlist-video-renderer:has(a[href*="/shorts/"]),
 /* Shorts Badge/Label Detection */
 body.ypp-hide-shorts ytd-compact-video-renderer:has(span[aria-label="Shorts"]),
 body.ypp-hide-shorts ytd-video-renderer:has(span[aria-label="Shorts"]),
+body.ypp-hide-shorts ytd-video-renderer:has(ytd-badge-supported-renderer[aria-label="Shorts"]),
+body.ypp-hide-shorts ytd-rich-item-renderer:has(ytd-badge-supported-renderer[aria-label="Shorts"]),
 
 /* Navigation - Sidebar & Mini Guide */
 body.ypp-hide-shorts ytd-guide-entry-renderer:has(a[title="Shorts"]),
@@ -226,7 +235,7 @@ body.ypp-hide-shorts yt-tab-shape[tab-title="Shorts"],
 /* Search & Filter Chips */
 body.ypp-hide-shorts yt-chip-cloud-chip-renderer:has(a[href*="/shorts"]),
 
-/* Shelf Title Detection (Text-based) */
+/* Shelf Title Detection (Text & Attribute-based) */
 body.ypp-hide-shorts ytd-shelf-renderer:has(span#title[aria-label*="Shorts"]),
 body.ypp-hide-shorts ytd-shelf-renderer:has(div#title-container h2 span[aria-label*="Shorts"]),
 body.ypp-hide-shorts ytd-shelf-renderer:has(a[href*="/shorts/"]),
@@ -237,17 +246,12 @@ body.ypp-hide-shorts #related ytd-reel-shelf-renderer,
 body.ypp-hide-shorts #related ytd-compact-video-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer,
 
-/* Subscription Feed Specific */
-body.ypp-hide-shorts ytd-grid-video-renderer:has(ytd-badge-supported-renderer:has-text("Shorts")),
-
-/* NEW: Grid Shelf Model (Important for search/feed) */
-body.ypp-hide-shorts grid-shelf-view-model,
-
-/* NEW: Individual Reel Items */
-body.ypp-hide-shorts ytd-reel-item-renderer,
+/* Subscription Feed - grid container Shorts */
+body.ypp-hide-shorts ytd-rich-section-renderer:has([is-shorts]),
+body.ypp-hide-shorts #grid-container ytd-rich-item-renderer:has(a[href*="/shorts/"]),
 
 /* Mixes (Mix Playlists) */
-body.ypp-hide-shorts ytd-rich-item-renderer:has(a[href*='start_radio']) {
+body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='start_radio']) {
   display: none !important;
 }
 
@@ -994,17 +998,30 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 }
 
 /* Search Grid Layout */
+body.ypp-search-grid-mode .ypp-search-grid-container {
+  display: grid;
+  /* 240px min keeps 4+ columns on 1440p, gracefully collapses on smaller screens */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1920px;
+  padding: 16px 24px 24px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  align-items: start; /* Prevent stretching cards with different content heights */
+}
+
+/* Also target contents directly (for items not yet processed by JS) */
 body.ypp-search-grid-mode ytd-item-section-renderer #contents {
   display: grid;
-  /* Optimized for density and screen usage */
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
   width: 100%;
-  max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
-  padding: 0 24px; /* Balanced padding */
-  margin: 0 auto; /* Center the container itself */
+  max-width: 1920px;
+  padding: 16px 24px 24px;
+  margin: 0 auto;
   box-sizing: border-box;
-  justify-content: center; /* Ensure grid items are centered if they don't fill row */
+  align-items: start;
 }
 
 /* Ensure the main wrapper is also centered */
@@ -1179,6 +1196,145 @@ body.ypp-search-grid-mode ytd-video-renderer .metadata-snippet-container {
 /* Hide Badges in Text Area */
 body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
   display: none !important;
+}
+
+/* ==========================================================================
+   CHANNEL RENDERER — Full-width spanning card
+   ========================================================================== */
+body.ypp-search-grid-mode ytd-channel-renderer,
+body.ypp-search-grid-mode .ypp-full-width-item {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 4px 0;
+  padding: 14px 20px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 16px;
+  background: linear-gradient(135deg, rgba(62, 166, 255, 0.06), rgba(255, 255, 255, 0.02)) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(62, 166, 255, 0.15) !important;
+  border-top-color: rgba(62, 166, 255, 0.28) !important;
+  border-radius: var(--ypp-radius-md) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer:hover,
+body.ypp-search-grid-mode .ypp-full-width-item:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 16px rgba(62, 166, 255, 0.18) !important;
+  border-color: rgba(62, 166, 255, 0.32) !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #avatar {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   VIEW MODE TOGGLE BUTTON STYLES
+   ========================================================================== */
+.ypp-view-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ypp-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ypp-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ypp-toggle-btn.active {
+  background: rgba(62, 166, 255, 0.2);
+  color: #3ea6ff;
+  border: 1px solid rgba(62, 166, 255, 0.3);
+}
+
+/* ==========================================================================
+   LIST MODE — Restore YouTube's native horizontal card layout
+   ========================================================================== */
+body.ypp-search-list-mode ytd-item-section-renderer #contents {
+  display: block !important;
+}
+
+body.ypp-search-list-mode ytd-video-renderer {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  background: none !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+  border-radius: 0 !important;
+  padding: 12px 4px !important;
+}
+
+body.ypp-search-list-mode ytd-video-renderer:last-child {
+  border-bottom: none !important;
+}
+
+body.ypp-search-list-mode ytd-video-renderer:hover {
+  transform: none !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+body.ypp-search-list-mode ytd-video-renderer #dismissible {
+  flex-direction: row !important;
+}
+
+body.ypp-search-list-mode ytd-video-renderer ytd-thumbnail {
+  width: 246px !important;
+  min-width: 246px !important;
+  aspect-ratio: 16/9 !important;
+  margin-right: 16px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Show description snippet in list mode */
+body.ypp-search-list-mode ytd-video-renderer .metadata-snippet-container {
+  display: block !important;
+}
+
+body.ypp-search-list-mode ytd-channel-renderer,
+body.ypp-search-list-mode .ypp-full-width-item {
+  background: none !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 12px 4px !important;
 }
 
 /* Glass Badges (Duration, Quality) on Thumbnail */

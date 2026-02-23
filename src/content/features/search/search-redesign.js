@@ -123,7 +123,42 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         }
     }
 
-    // ... (run, enable remain same)
+    /**
+     * FeatureManager entry point — called with latest settings on every settings update.
+     * @param {Object} settings
+     */
+    run(settings) {
+        this._settings = settings || {};
+
+        // Load persisted view preference (synchronous best-effort from localStorage)
+        const saved = localStorage.getItem('ypp_searchViewMode');
+        if (saved) this._viewMode = saved;
+
+        const shouldEnable = this._settings.searchGrid || this._settings.cleanSearch;
+        if (shouldEnable) {
+            this.enable();
+        } else {
+            this.disable();
+        }
+    }
+
+    /**
+     * Enable the feature, wire navigation listener, and process current page.
+     */
+    enable() {
+        if (this._isEnabled) {
+            // Already enabled — re-process in case settings changed
+            this._handleNavigation();
+            return;
+        }
+        this._isEnabled = true;
+
+        window.addEventListener('yt-navigate-finish', this._handleNavigation);
+
+        // Process current page immediately
+        this._handleNavigation();
+        this._log('SearchRedesign enabled', 'info');
+    }
 
     /**
      * Disable the feature and perform cleanup
@@ -138,6 +173,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         document.body.classList.remove('ypp-filter-pending'); // Cleanup
         window.removeEventListener('yt-navigate-finish', this._handleNavigation);
     }
+
 
     // =========================================================================
     // LOGIC: NAVIGATION & PAGE CHECK
@@ -309,9 +345,9 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         this._updateToggleButtonState();
         
         try {
-            await window.YPP.Utils?.saveSetting('searchViewMode', mode);
+            localStorage.setItem('ypp_searchViewMode', mode);
         } catch (error) {
-            this._log('Failed to save view mode preference', 'error');
+            this._log('Failed to save view mode preference', 'warn');
         }
     }
 
