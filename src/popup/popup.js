@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const titles = {
         'home': 'Home & Feed',
         'player': 'Player & Tools',
+        'search': 'Search Results',
         'subscriptions': 'Subscriptions',
         'history': 'History & Library',
+        'themes': 'Themes & Appearance',
         'global': 'Global Settings'
     };
 
