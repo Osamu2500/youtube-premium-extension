@@ -3322,3 +3322,108 @@ body.yt-premium-plus-theme .badge-style-type-starting-soon.ytd-badge-supported-r
 .ypp-folder-checkbox input[type="checkbox"]:checked + span {
   color: white;
 }
+
+/* ==========================================================================
+   KEYBOARD SHORTCUT TOAST
+   Small action label that fades in at the bottom of the screen on keypress.
+   ========================================================================== */
+.ypp-shortcut-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(20, 20, 30, 0.88);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  color: #fff;
+  font-family: 'Roboto', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 99999;
+  white-space: nowrap;
+}
+.ypp-shortcut-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   WATCH TIME ALERT OVERLAY
+   Dismissible reminder banner that slides in from the top-right.
+   ========================================================================== */
+.ypp-watch-alert {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(18, 18, 26, 0.92);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 170, 0, 0.35);
+  border-top-color: rgba(255, 200, 0, 0.5);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow:
+    0 8px 36px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 170, 0, 0.12);
+  max-width: 360px;
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 99999;
+}
+.ypp-watch-alert.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+.ypp-watch-alert-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.ypp-watch-alert-body {
+  flex: 1;
+}
+.ypp-watch-alert-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 200, 0, 0.9);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ypp-watch-alert-msg {
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+.ypp-watch-alert-msg strong {
+  color: #fff;
+  font-weight: 600;
+}
+.ypp-watch-alert-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.ypp-watch-alert-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}

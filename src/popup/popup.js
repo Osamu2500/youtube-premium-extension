@@ -131,7 +131,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Subscription Manager
         'enableSubsManager',
         'channelColumns',
-        'subscriptionFolders'
+        'subscriptionFolders',
+
+        // Watch Time Alert
+        'watchTimeAlert',
+        'watchTimeAlertHours',
+
+        // Keyboard Shortcuts
+        'keyboardShortcuts',
+        'shortcut_zenMode',
+        'shortcut_focusMode',
+        'shortcut_cinemaMode',
+        'shortcut_snapshot',
+        'shortcut_loop',
+        'shortcut_pip',
+        'shortcut_speedDown',
+        'shortcut_speedUp',
+        'shortcut_speedReset',
+        'shortcut_ambientMode'
     ];
 
     // --- STORAGE HANDLING ---
@@ -315,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns'].forEach(key => {
+    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'watchTimeAlertHours'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {

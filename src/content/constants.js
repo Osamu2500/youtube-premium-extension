@@ -253,7 +253,25 @@ window.YPP.CONSTANTS = {
         subscriptionFolders: true,
 
         // Study Mode
-        studyMode: false
+        studyMode: false,
+
+        // Watch Time Alert
+        watchTimeAlert: false,
+        watchTimeAlertHours: 2,
+
+        // Keyboard Shortcuts (master toggle)
+        keyboardShortcuts: true,
+        // Individual shortcut bindings (action → "Modifier+Key" string)
+        shortcut_zenMode:     'Shift+Z',
+        shortcut_focusMode:   'Shift+F',
+        shortcut_cinemaMode:  'Shift+C',
+        shortcut_snapshot:    'Shift+S',
+        shortcut_loop:        'Shift+L',
+        shortcut_pip:         'Shift+P',
+        shortcut_speedDown:   'Shift+,',
+        shortcut_speedUp:     'Shift+.',
+        shortcut_speedReset:  'Shift+R',
+        shortcut_ambientMode: 'Shift+M'
     },
 
 
@@ -408,7 +426,8 @@ window.YPP.CONSTANTS = {
         nightMode: 'NightModeManager',
         continueWatching: 'ContinueWatching',
         subscriptionFolders: 'SubscriptionFolders',
-        markWatched: 'MarkWatched'
+        markWatched: 'MarkWatched',
+        keyboardShortcuts: 'KeyboardShortcuts'
     }
 };
 
