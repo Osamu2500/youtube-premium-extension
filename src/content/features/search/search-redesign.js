@@ -591,27 +591,61 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     }
 
     /**
-     * Process all search results on the page
+     * Process all search results on the page.
+     * Two-pass: first hide noise sections, then wire up grids for video sections.
      * @private
      */
     _processAll() {
         if (!this._isEnabled) return;
 
         try {
-            // 1. Identify Grid Containers (Section Contents)
             const itemSections = document.querySelectorAll(SearchRedesign.SELECTORS.ITEM_SECTION);
+
             itemSections.forEach(section => {
                 const contents = section.querySelector(SearchRedesign.SELECTORS.CONTENTS);
-                
-                // Validate: Only treat as grid if it contains video renderers
-                // This prevents styling non-result sections incorrectly
-                if (contents && contents.querySelector('ytd-video-renderer')) {
+                if (!contents) return;
+
+                // ── PASS 1: NOISE DETECTION ─────────────────────────────────────────
+                // If a section's #contents has NO video/playlist/radio renderers,
+                // hide the entire ytd-item-section-renderer so it takes zero space.
+                const NOISE_TAGS = new Set([
+                    'ytd-shelf-renderer',
+                    'ytd-horizontal-card-list-renderer',
+                    'ytd-universal-watch-card-renderer',
+                    'ytd-background-promo-renderer',
+                    'ytd-search-refinement-card-renderer',
+                    'ytd-reel-shelf-renderer',
+                    'ytd-rich-shelf-renderer',
+                    'ytd-continuation-item-renderer',
+                ]);
+                const VIDEO_TAGS = new Set([
+                    'ytd-video-renderer',
+                    'ytd-playlist-renderer',
+                    'ytd-radio-renderer',
+                    'ytd-channel-renderer',
+                ]);
+
+                const children = Array.from(contents.children).filter(
+                    c => c.tagName.toLowerCase() !== 'ytd-continuation-item-renderer'
+                );
+
+                const hasVideos = children.some(c => VIDEO_TAGS.has(c.tagName.toLowerCase()));
+                const allNoise = children.length > 0 && children.every(c => NOISE_TAGS.has(c.tagName.toLowerCase()));
+
+                if (allNoise || (!hasVideos && children.length > 0)) {
+                    // Hide the whole section to eliminate the blank row gap
+                    section.classList.add('ypp-noise-section');
+                    section.style.setProperty('display', 'none', 'important');
+                    return; // Don't process this section further
+                }
+
+                // ── PASS 2: GRID SETUP ───────────────────────────────────────────────
+                if (hasVideos) {
                     if (!contents.classList.contains(SearchRedesign.CLASSES.GRID_CONTAINER)) {
                         contents.classList.add(SearchRedesign.CLASSES.GRID_CONTAINER);
                     }
-                    
-                    // 2. Process Children within the verified container
-                    Array.from(contents.children).forEach(child => this._processNode(child));
+                    // Process each child
+                    children.forEach(child => this._processNode(child, contents));
                 }
             });
         } catch (error) {
@@ -622,9 +656,10 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     /**
      * Process a single result node
      * @private
-     * @param {Node} node 
+     * @param {Node} node
+     * @param {Element} [gridContainer] - The grid container (passed from _processAll)
      */
-    _processNode(node) {
+    _processNode(node, gridContainer) {
         // Only process Element nodes
         if (node.nodeType !== Node.ELEMENT_NODE) return;
         
@@ -634,40 +669,45 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
 
         const tag = node.tagName.toLowerCase();
 
-        const _hideNode = (el) => {
-            el.classList.add('ypp-hidden-short');
-            el.style.display = 'none';
-            // Also hide parent section if this is the only content
-            const parentSection = el.closest('ytd-item-section-renderer');
-            if (parentSection) {
-                parentSection.style.display = 'none';
-            }
-        };
+        const NOISE_TAGS = new Set([
+            'ytd-shelf-renderer',
+            'ytd-horizontal-card-list-renderer',
+            'ytd-universal-watch-card-renderer',
+            'ytd-background-promo-renderer',
+            'ytd-search-refinement-card-renderer',
+            'ytd-reel-shelf-renderer',
+            'ytd-rich-shelf-renderer',
+            'ytd-continuation-item-renderer',
+        ]);
 
-        // A. SHORTS DETECTION (Hide them)
-        if (this._isShorts(node)) {
-            _hideNode(node);
+        // A. NOISE NODE — hide it and its parent section
+        if (NOISE_TAGS.has(tag)) {
+            node.style.setProperty('display', 'none', 'important');
+            const parentSection = node.closest('ytd-item-section-renderer');
+            if (parentSection) {
+                parentSection.classList.add('ypp-noise-section');
+                parentSection.style.setProperty('display', 'none', 'important');
+            }
             return;
         }
 
-        // Special handling for Shelf Renderers (Container of Shorts)
-        if (tag === 'ytd-shelf-renderer' && this._isShortsShelf(node)) {
-             _hideNode(node);
-             return;
+        // B. SHORTS DETECTION
+        if (this._isShorts(node)) {
+            node.style.setProperty('display', 'none', 'important');
+            return;
         }
 
-        // B. LAYOUT NORMALIZATION (For Grid Mode)
-        // Only apply if inside a grid container
-        if (node.parentElement?.classList.contains(SearchRedesign.CLASSES.GRID_CONTAINER)) {
-            // Grid Items: Videos, Radios, Playlists
+        // C. GRID LAYOUT (only in grid mode, only for video/playlist/radio)
+        const container = gridContainer || node.parentElement;
+        if (container?.classList.contains(SearchRedesign.CLASSES.GRID_CONTAINER)) {
             if (tag === 'ytd-video-renderer' || tag === 'ytd-radio-renderer' || tag === 'ytd-playlist-renderer') {
                 node.classList.add(SearchRedesign.CLASSES.GRID_ITEM);
                 this._cleanInlineStyles(node);
-            } 
-            // Full Width Items: Channels, Shelves, etc.
-            else {
+            } else if (tag === 'ytd-channel-renderer') {
+                // Channels span full row
                 node.classList.add(SearchRedesign.CLASSES.FULL_WIDTH);
             }
+            // Other unknown renderers: leave them — CSS :has() will hide parent section if they're alone
         }
     }
 

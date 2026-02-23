@@ -997,101 +997,90 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   padding: 0 !important;
 }
 
-/* ===========================================================================
-   UNIFIED GRID: ytd-section-list-renderer > #contents is the ONE true grid.
-   ytd-item-section-renderer elements are flattened (display:contents) so
-   all video cards flow into a single grid with no inter-section gaps.
-   =========================================================================== */
+/* Ensure the main wrapper fills width */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
+  display: block !important;
+}
 
-/* The unified grid parent */
-body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+/* =============================================================================
+   PER-SECTION GRID: Each ytd-item-section-renderer > #contents is one grid.
+   Sections that contain only noise (shelves) are hidden by JS.
+   This avoids the display:contents leaking #header/#footer into the grid.
+   ============================================================================= */
+
+/* Each section that the JS marks as a grid container */
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents.ypp-search-grid-container {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: 1920px;
-  padding: 16px 24px 24px;
-  margin: 0 auto;
+  padding: 16px 24px 8px;
   box-sizing: border-box;
   align-items: start;
 }
 
-/* Flatten section wrappers into the grid flow */
+/* Remove the margin/border from sections so they butt up against each other */
 body.ypp-search-grid-mode ytd-item-section-renderer {
-  display: contents !important; /* No box — children flow directly into parent grid */
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  border: none !important;
 }
 
-/* Flatten the inner #contents div too */
-body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
-  display: contents !important;
-}
-
-/* Remove any separators that would create gaps between sections */
+/* Hide the section separator line */
 body.ypp-search-grid-mode ytd-item-section-renderer #separator {
   display: none !important;
 }
 
-/* Legacy/fallback grid for .ypp-search-grid-container class */
-body.ypp-search-grid-mode .ypp-search-grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1920px;
-  padding: 16px 24px 24px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  align-items: start;
-}
-
-/* Ensure the main wrapper is also centered */
-body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
-  display: flex !important;
-  justify-content: center !important;
-}
-
-/* ===========================================================================
-   CLEAN SEARCH GRID: Hide shelf noise sections that break the grid layout.
-   Activated by body.ypp-search-clean-grid (from hideSearchShelves setting).
-   =========================================================================== */
+/* =============================================================================
+   NOISE SECTION HIDING - JS adds .ypp-noise-section class then hides.
+   CSS below is a secondary safety net for anything JS misses.
+   ============================================================================= */
 
 /* Shelf renderers — "From related searches", "Videos you've watched", etc. */
-body.ypp-search-grid-mode ytd-shelf-renderer,
-body.ypp-search-clean-grid ytd-shelf-renderer {
+body.ypp-search-grid-mode ytd-shelf-renderer {
   display: none !important;
 }
 
 /* Horizontal card list — "People also search for" */
-body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
-body.ypp-search-clean-grid ytd-horizontal-card-list-renderer {
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer {
   display: none !important;
 }
 
 /* Universal watch card — large featured cards that break grid flow */
-body.ypp-search-grid-mode ytd-universal-watch-card-renderer,
-body.ypp-search-clean-grid ytd-universal-watch-card-renderer {
+body.ypp-search-grid-mode ytd-universal-watch-card-renderer {
   display: none !important;
 }
 
-/* Background shelf / promoted content */
-body.ypp-search-grid-mode ytd-background-promo-renderer,
-body.ypp-search-clean-grid ytd-background-promo-renderer {
+/* Background promo / promoted content */
+body.ypp-search-grid-mode ytd-background-promo-renderer {
   display: none !important;
 }
 
-/* Search refinement chips shelves (Related queries) */
-body.ypp-search-clean-grid ytd-search-refinement-card-renderer {
+/* Search refinement card renderer */
+body.ypp-search-grid-mode ytd-search-refinement-card-renderer {
   display: none !important;
 }
 
-/* Continuation spinner — hide loading spinners between sections to prevent gap flicker */
-body.ypp-search-grid-mode ytd-item-section-renderer > #contents > ytd-continuation-item-renderer,
-body.ypp-search-grid-mode ytd-section-list-renderer > #contents > ytd-continuation-item-renderer {
+/* Hide parent section when JS marks it as noise */
+body.ypp-search-grid-mode ytd-item-section-renderer.ypp-noise-section {
   display: none !important;
 }
 
-/* Active search filter (promoted) labels that appear as block-level between rows */
-body.ypp-search-grid-mode #filter-container {
+/* Hide continuation spinners that appear between sections */
+body.ypp-search-grid-mode ytd-continuation-item-renderer {
+  display: none !important;
+}
+
+/* Extra: if all we can see is a shelf inside a section, hide the section  */
+body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-shelf-renderer:only-child),
+body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-horizontal-card-list-renderer:only-child),
+body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-universal-watch-card-renderer:only-child),
+body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-background-promo-renderer:only-child) {
+  display: none !important;
+}
+
+/* Clean grid opt-in: also hide search refinement sections */
+body.ypp-search-clean-grid ytd-item-section-renderer:has(> #contents > ytd-search-refinement-card-renderer:only-child) {
   display: none !important;
 }
 
@@ -1263,9 +1252,20 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
   display: none !important;
 }
 
-/* ==========================================================================
-   CHANNEL RENDERER — Full-width spanning card
-   ========================================================================== */
+/* Hide chapter preview bars — these cause uneven card heights in grid mode */
+body.ypp-search-grid-mode ytd-video-renderer ytd-macro-markers-list-item-renderer,
+body.ypp-search-grid-mode ytd-video-renderer ytd-chapter-renderer,
+body.ypp-search-grid-mode ytd-video-renderer #chapters,
+body.ypp-search-grid-mode ytd-video-renderer #chapter-list,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-macro-markers-list-item-renderer {
+  display: none !important;
+}
+
+/* Seamless section joining — remove top-padding on 2nd+ grid sections */
+body.ypp-search-grid-mode ytd-item-section-renderer + ytd-item-section-renderer > #contents.ypp-search-grid-container {
+  padding-top: 0 !important;
+}
+
 body.ypp-search-grid-mode ytd-channel-renderer,
 body.ypp-search-grid-mode .ypp-full-width-item {
   grid-column: 1 / -1;
