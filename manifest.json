@@ -49,6 +49,7 @@
                 "src/content/features/global/night-mode.js",
                 "src/content/features/global/data-api.js",
                 "src/content/features/global/mark-watched.js",
+                "src/content/features/global/keyboard-shortcuts.js",
                 "src/content/features/global/stats/stats-visualizer.js",
 
                 "src/content/features/layout/layout-manager.js",

@@ -22,14 +22,19 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         this.flushTimer = null;
         this.videoElement = null;
 
+        // Watch Time Alert state
+        this.lastAlertTime = 0; // Timestamp of last alert shown (prevents spam)
+
         // Binds
         this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
         this.handlePlay = this.handlePlay.bind(this);
         this.handlePause = this.handlePause.bind(this);
         this.saveData = this.saveData.bind(this);
+        this._checkWatchTimeAlert = this._checkWatchTimeAlert.bind(this);
     }
 
     run(settings) {
+        this.settings = settings;
         // Always run, but only active on /watch or /shorts
         // Init once, handling navigation internally
         if (!this.initialized) {
@@ -240,6 +245,9 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
             
             console.log(`[YPP Tracker] Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`);
 
+            // Check watch time alert
+            this._checkWatchTimeAlert(dayRecord.totalSeconds);
+
         } catch (e) {
             if (e.message && e.message.includes('Extension context invalidated')) {
                 // Ignore silent context invalidation on extension reload
@@ -247,5 +255,68 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
             }
             console.error('[YPP Tracker] Save failed:', e);
         }
+    }
+
+    /**
+     * Check if today's total watch time has exceeded the user's alert threshold.
+     * Fires at most once per hour to avoid repeated interruptions.
+     * @param {number} totalSecondsToday - Today's total seconds watched
+     */
+    _checkWatchTimeAlert(totalSecondsToday) {
+        const settings = this.settings;
+        if (!settings?.watchTimeAlert) return;
+
+        const limitHours = settings.watchTimeAlertHours ?? 2;
+        const limitSeconds = limitHours * 3600;
+
+        if (totalSecondsToday < limitSeconds) return;
+
+        // Throttle: only alert once per hour
+        const now = Date.now();
+        if (now - this.lastAlertTime < 60 * 60 * 1000) return;
+
+        this.lastAlertTime = now;
+        this._showWatchTimeAlert(totalSecondsToday, limitHours);
+    }
+
+    /**
+     * Show a dismissible watch time warning overlay.
+     * @param {number} totalSeconds - Today's total seconds
+     * @param {number} limitHours - The configured limit
+     */
+    _showWatchTimeAlert(totalSeconds, limitHours) {
+        // Remove any existing alert
+        document.querySelector('.ypp-watch-alert')?.remove();
+
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'ypp-watch-alert';
+        overlay.innerHTML = `
+            <div class="ypp-watch-alert-icon">⏱️</div>
+            <div class="ypp-watch-alert-body">
+                <div class="ypp-watch-alert-title">Watch Time Reminder</div>
+                <div class="ypp-watch-alert-msg">You've watched <strong>${timeStr}</strong> today (limit: ${limitHours}h). Time for a break?</div>
+            </div>
+            <button class="ypp-watch-alert-close" aria-label="Dismiss">✕</button>
+        `;
+
+        overlay.querySelector('.ypp-watch-alert-close').addEventListener('click', () => {
+            overlay.classList.remove('show');
+            setTimeout(() => overlay.remove(), 300);
+        });
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('show'));
+
+        // Auto-dismiss after 20 seconds
+        setTimeout(() => {
+            if (overlay.isConnected) {
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.remove(), 300);
+            }
+        }, 20000);
     }
 };

@@ -98,7 +98,24 @@ window.YPP.SettingsSchema = {
         ambientMode:         { type: 'boolean', default: false },
         audioModeEnabled:    { type: 'boolean', default: false },
         videoControlsEnabled:{ type: 'boolean', default: true },
-        subscriptionFolders: { type: 'boolean', default: true }
+        subscriptionFolders: { type: 'boolean', default: true },
+
+        // --- Watch Time Alert ---
+        watchTimeAlert:      { type: 'boolean', default: false },
+        watchTimeAlertHours: { type: 'number',  default: 2, min: 1, max: 8 },
+
+        // --- Keyboard Shortcuts ---
+        keyboardShortcuts:      { type: 'boolean', default: true },
+        shortcut_zenMode:       { type: 'string', default: 'Shift+Z' },
+        shortcut_focusMode:     { type: 'string', default: 'Shift+F' },
+        shortcut_cinemaMode:    { type: 'string', default: 'Shift+C' },
+        shortcut_snapshot:      { type: 'string', default: 'Shift+S' },
+        shortcut_loop:          { type: 'string', default: 'Shift+L' },
+        shortcut_pip:           { type: 'string', default: 'Shift+P' },
+        shortcut_speedDown:     { type: 'string', default: 'Shift+,' },
+        shortcut_speedUp:       { type: 'string', default: 'Shift+.' },
+        shortcut_speedReset:    { type: 'string', default: 'Shift+R' },
+        shortcut_ambientMode:   { type: 'string', default: 'Shift+M' }
     }),
 
     // =========================================================================

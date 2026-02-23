@@ -37,6 +37,32 @@
         background: #1a1a1a;
         color: white;
       }
+      .shortcut-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 0;
+        font-size: 12px;
+        color: rgba(255,255,255,0.7);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+      }
+      .shortcut-input {
+        width: 90px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 6px;
+        color: #fff;
+        font-size: 11px;
+        font-family: 'Inter', monospace;
+        text-align: center;
+        padding: 3px 6px;
+        outline: none;
+        cursor: text;
+      }
+      .shortcut-input:focus {
+        border-color: #3ea6ff;
+        background: rgba(62,166,255,0.1);
+      }
     </style>
   </head>
 
@@ -558,6 +584,27 @@
               </div>
             </div>
           </div>
+          <!-- Watch Time Alert -->
+          <div class="card-group">
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">⏱ Watch Time Alert</span>
+                <span class="desc">Notify after daily limit</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="watchTimeAlert" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item" style="flex-direction:column; align-items:flex-start; margin-top:4px">
+              <div class="info" style="width:100%; display:flex; justify-content:space-between">
+                <span class="name">Daily Limit</span>
+                <span class="desc"><span id="watchTimeAlertHoursValue">2</span>h</span>
+              </div>
+              <input type="range" id="watchTimeAlertHours" min="1" max="8" step="1" value="2"
+                style="width:100%; accent-color:#3ea6ff; margin-top:4px" />
+            </div>
+          </div>
         </section>
 
         <!-- TAB: SUBSCRIPTIONS -->
@@ -970,6 +1017,32 @@
             </div>
           </div>
 
+          <!-- Keyboard Shortcuts -->
+          <div class="card-group">
+            <div class="setting-item">
+              <div class="info">
+                <span class="name">&#x2328; Keyboard Shortcuts</span>
+                <span class="desc">Active on watch pages only</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="keyboardShortcuts" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px; margin-top:6px">
+              <div class="shortcut-row"><span>Zen Mode</span><input type="text" id="shortcut_zenMode" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Focus Mode</span><input type="text" id="shortcut_focusMode" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Cinema/Theater</span><input type="text" id="shortcut_cinemaMode" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Snapshot</span><input type="text" id="shortcut_snapshot" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Loop</span><input type="text" id="shortcut_loop" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>PiP</span><input type="text" id="shortcut_pip" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Speed -0.25x</span><input type="text" id="shortcut_speedDown" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Speed +0.25x</span><input type="text" id="shortcut_speedUp" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Reset Speed</span><input type="text" id="shortcut_speedReset" class="shortcut-input" maxlength="20" /></div>
+              <div class="shortcut-row"><span>Ambient Mode</span><input type="text" id="shortcut_ambientMode" class="shortcut-input" maxlength="20" /></div>
+            </div>
+          </div>
+
           <div class="card-group">
             <button id="resetBtn" class="action-btn danger">
               <svg
@@ -987,10 +1060,12 @@
             </button>
             <div class="version-info">v2.5.0 • Premium Edition</div>
           </div>
+
         </section>
       </main>
     </div>
     <script src="../content/constants.js"></script>
+    <script src="../content/settings-schema.js"></script>
     <script src="../content/utils.js"></script>
     <script src="popup.js"></script>
   </body>
