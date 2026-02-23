@@ -833,27 +833,32 @@ ytd-mini-guide-renderer {
 /* Main Grid Container */
 .yt-premium-plus-theme ytd-rich-grid-renderer {
   margin-top: 24px;
-  /* Add padding left/right to center the grid symmetrically away from both window edges */
-  padding-left: 16px !important;
-  padding-right: 16px !important;
+  /* Centered with max-width cap to prevent ultra-wide sprawl */
+  max-width: 1900px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
   width: 100% !important;
-  max-width: 100% !important;
   box-sizing: border-box !important;
+  /* Allow hover card shadows to paint outside the renderer boundary */
+  overflow: visible !important;
 }
 
 /* Grid Contents - Use CSS Grid instead of Flex */
-/* Fix: Target the #contents inside ytd-rich-grid-renderer correctly */
 .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
   display: grid !important;
-  /* Premium layout optimization: fluid auto-filling columns */
+  /* auto-fill: let the browser decide how many columns fit naturally */
   grid-template-columns: repeat(auto-fill, minmax(var(--ypp-grid-column-min, 300px), 1fr)) !important;
-  gap: 24px 16px !important;
+  gap: var(--ypp-grid-gap, 24px) !important;
   width: 100% !important;
   max-width: 100% !important;
-  padding: 12px !important; /* Adding internal padding so items don't hit the strict edge causing visual clip */
-  margin: 0 auto !important;
+  /* No padding here — renderer padding handles the breathing room */
+  padding: 0 !important;
+  margin: 0 !important;
   box-sizing: border-box !important;
-  justify-content: center !important; /* Ensure the grid centers the items */
+  /* Do NOT use justify-content:center — it breaks auto-fill column width calculation */
+  justify-items: start !important;
 }
 
 /* Grid Rows */
@@ -883,8 +888,11 @@ ytd-mini-guide-renderer {
               background 0.4s ease !important;
   transform: translateZ(0); /* Hardware Acceleration */
   will-change: transform, box-shadow, border-color, background;
-  /* Additional fix to prevent black line artifact bleeding through */
-  background-clip: padding-box !important; 
+  /* FIX: isolation creates new stacking context → prevents backdrop-filter from leaking
+     outside the card boundary and causing the black line artifact on hover */
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background-clip: border-box !important;
 }
 
 /* Video Cards - Reset Child Styling (Since parent now has card style) */
@@ -941,14 +949,15 @@ ytd-mini-guide-renderer {
 
 /* Consolidate Duplicate Hover Effects into One Premium Animation */
 .yt-premium-plus-theme ytd-rich-item-renderer:hover {
-  transform: translateY(-6px) scale(1.015) !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  /* Use only translateY — scale() can cause sub-pixel rendering gaps on edges causing artifact */
+  transform: translateY(-8px) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)) !important;
   border-color: rgba(62, 166, 255, 0.4) !important;
   border-top-color: rgba(62, 166, 255, 0.6) !important;
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    0 0 24px rgba(62, 166, 255, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 0 28px rgba(62, 166, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   z-index: 10;
 }
 
@@ -965,12 +974,9 @@ ytd-mini-guide-renderer {
 /* Fluid CSS Grid handles responsiveness natively using auto-fill minmax. 
    Removing legacy percentage-width hacks for cleaner layout. */
 
-/* No Sidebar Mode Grid Centering */
+/* No Sidebar Mode Grid Centering — margin auto handles centering; keep symmetric padding */
 body.ypp-hide-sidebar ytd-rich-grid-renderer {
-  margin-left: 0;
   width: 100%;
-  justify-content: center;
-  padding-left: 0;
 }
 
 /* ===================================================================================
