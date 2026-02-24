@@ -113,13 +113,13 @@
 
             // Wait for Utils
             if (!window.YPP?.Utils) {
-                this.Utils?.log('Waiting for Utils...', 'MAIN', 'debug');
+                safeLog('Waiting for Utils...', 'debug');
                 await this.waitFor(() => window.YPP?.Utils !== undefined, timeout);
             }
 
             // Wait for CONSTANTS
             if (!window.YPP?.CONSTANTS) {
-                this.Utils?.log('Waiting for CONSTANTS...', 'MAIN', 'debug');
+                safeLog('Waiting for CONSTANTS...', 'debug');
                 await this.waitFor(() => window.YPP?.CONSTANTS !== undefined, timeout);
             }
 
@@ -382,13 +382,19 @@
 
             } catch (error) {
                 this.Utils?.log(`Error updating context: ${error.message}`, 'MAIN', 'error');
-                // Reset context on error
+                // Reset context on error with full shape
                 this.context = {
                     isHome: false,
                     isWatch: false,
                     isSearch: false,
                     isChannel: false,
-                    isShorts: false
+                    isShorts: false,
+                    isShortsPage: false,
+                    isPlaylist: false,
+                    isTrending: false,
+                    isSubscriptions: false,
+                    isLibrary: false,
+                    isHistory: false
                 };
             } finally {
                 this.Utils?.endPerf('updateContext');
