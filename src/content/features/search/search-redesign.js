@@ -61,6 +61,34 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     };
 
     /**
+     * Element tags that are considered noise (shelves, promos) and may be hidden.
+     * Defined once as a static Set to avoid re-allocation on every mutation.
+     * NOTE: ytd-continuation-item-renderer is intentionally excluded — it is
+     * YouTube's IntersectionObserver sentinel for infinite scroll.
+     * @readonly
+     */
+    static NOISE_TAGS = new Set([
+        'ytd-shelf-renderer',
+        'ytd-horizontal-card-list-renderer',
+        'ytd-universal-watch-card-renderer',
+        'ytd-background-promo-renderer',
+        'ytd-search-refinement-card-renderer',
+        'ytd-reel-shelf-renderer',
+        'ytd-rich-shelf-renderer',
+    ]);
+
+    /**
+     * Element tags that represent actual content (videos, playlists, channels).
+     * @readonly
+     */
+    static VIDEO_TAGS = new Set([
+        'ytd-video-renderer',
+        'ytd-playlist-renderer',
+        'ytd-radio-renderer',
+        'ytd-channel-renderer',
+    ]);
+
+    /**
      * SVG Icons for the view toggle buttons
      * @readonly
      */
@@ -130,6 +158,11 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     run(settings) {
         this._settings = settings || {};
 
+        // Reset the processed-node cache on each navigation so new pages
+        // start with a clean slate. Mutations during scroll do NOT reset it —
+        // see _processAll — so stable cards are not re-processed mid-session.
+        this._processedNodes = new WeakSet();
+
         // Load persisted view preference — check chrome.storage first, fall back to localStorage
         chrome.storage.local.get(['searchViewMode'], (result) => {
             const mode = result.searchViewMode || localStorage.getItem('ypp_searchViewMode') || 'grid';
@@ -138,9 +171,6 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                 this._applyViewMode();
             }
         });
-
-        const saved = localStorage.getItem('ypp_searchViewMode');
-        if (saved) this._viewMode = saved;
 
         const shouldEnable = this._settings.searchGrid || this._settings.cleanSearch;
         if (shouldEnable) {
@@ -597,10 +627,6 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     _processAll() {
         if (!this._isEnabled) return;
 
-        // Reset processed nodes cache each pass so newly scroll-loaded video
-        // cards (brand-new DOM elements) get grid item class correctly.
-        this._processedNodes = new WeakSet();
-
         try {
             const itemSections = document.querySelectorAll(SearchRedesign.SELECTORS.ITEM_SECTION);
 
@@ -612,27 +638,13 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                 // Only hide a section if ALL its meaningful (non-transient) children are
                 // confirmed noise types. NEVER hide based on "no videos yet" — that
                 // fires while YouTube is still loading (continuation items shown first).
-                const NOISE_TAGS = new Set([
-                    'ytd-shelf-renderer',
-                    'ytd-horizontal-card-list-renderer',
-                    'ytd-universal-watch-card-renderer',
-                    'ytd-background-promo-renderer',
-                    'ytd-search-refinement-card-renderer',
-                    'ytd-reel-shelf-renderer',
-                    'ytd-rich-shelf-renderer',
-                ]);
-                const VIDEO_TAGS = new Set([
-                    'ytd-video-renderer',
-                    'ytd-playlist-renderer',
-                    'ytd-radio-renderer',
-                    'ytd-channel-renderer',
-                ]);
 
                 // Exclude continuation items — they are transient load indicators
                 const children = Array.from(contents.children).filter(
                     c => c.tagName.toLowerCase() !== 'ytd-continuation-item-renderer'
                 );
 
+                const { NOISE_TAGS, VIDEO_TAGS } = SearchRedesign;
                 const hasVideos = children.some(c => VIDEO_TAGS.has(c.tagName.toLowerCase()));
                 // Only all-noise when every NON-transient child is a confirmed noise tag
                 const allNoise = children.length > 0 &&
@@ -685,17 +697,8 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
 
         const tag = node.tagName.toLowerCase();
 
-        const NOISE_TAGS = new Set([
-            'ytd-shelf-renderer',
-            'ytd-horizontal-card-list-renderer',
-            'ytd-universal-watch-card-renderer',
-            'ytd-background-promo-renderer',
-            'ytd-search-refinement-card-renderer',
-            'ytd-reel-shelf-renderer',
-            'ytd-rich-shelf-renderer',
-            // NOTE: ytd-continuation-item-renderer is intentionally NOT here.
-            // It is YouTube's scroll sentinel — hiding it breaks infinite scroll.
-        ]);
+        // Use static class constant — avoids re-allocating a new Set on every node
+        const { NOISE_TAGS } = SearchRedesign;
 
         // A. NOISE NODE — hide only the individual noise element, NOT the parent section.
         // Sections can contain a mix of noise and video renderers (e.g. a shelf + videos),

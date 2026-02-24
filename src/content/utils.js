@@ -777,7 +777,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     clamp: (value, min, max) => {
         // Validate inputs are numbers
         if (typeof value !== 'number' || typeof min !== 'number' || typeof max !== 'number') {
-            Utils?.log('Invalid inputs to clamp function', 'UTILS', 'warn');
+            window.YPP.Utils?.log('Invalid inputs to clamp function', 'UTILS', 'warn');
             return typeof min === 'number' ? min : 0;
         }
         
@@ -1147,7 +1147,7 @@ window.YPP.Utils.retry = async (fn, retries = 3, delay = 1000) => {
     } catch (error) {
         if (retries <= 0) throw error;
         await Utils.timeout(delay);
-        return Utils.retry(fn, retries - 1, delay * 2); // Exponential backoff
+        return window.YPP.Utils.retry(fn, retries - 1, delay * 2); // Exponential backoff
     }
 };
 
