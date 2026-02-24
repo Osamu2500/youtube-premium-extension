@@ -241,9 +241,14 @@ window.YPP.features.ContentControl = class ContentControl {
 
     /**
      * Remove Shorts using heuristic detection
-     * Catches elements that might not match CSS selectors
+     * Catches elements that might not match CSS selectors.
+     * IMPORTANT: Skipped on search result pages — ytd-video-renderer there are real results,
+     * not Shorts, and badge scanning causes false positives that delete visible video cards.
      */
     _removeShortsByHeuristics() {
+        // Never run heuristics on search results — it removes real video cards
+        if (window.location.pathname === '/results') return;
+
         // Check all shelf renderers
         const shelves = document.querySelectorAll('ytd-shelf-renderer, ytd-rich-shelf-renderer');
         shelves.forEach(shelf => {
@@ -252,14 +257,15 @@ window.YPP.features.ContentControl = class ContentControl {
             }
         });
 
-        // Check all video renderers with Shorts badge
+        // Check video renderers with Shorts badge — only on non-search pages
         const videos = document.querySelectorAll(
             'ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer'
         );
         videos.forEach(video => {
             const badge = video.querySelector('span[aria-label="Shorts"], ytd-badge-supported-renderer');
-            if (badge?.textContent?.toLowerCase().includes('shorts') ||
-                badge?.getAttribute('aria-label')?.toLowerCase().includes('shorts')) {
+            // Be strict: only remove if aria-label is explicitly "Shorts" (not just contains "shorts")
+            if (badge?.getAttribute('aria-label') === 'Shorts' ||
+                badge?.textContent?.trim() === 'Shorts') {
                 video.remove();
             }
         });
@@ -309,10 +315,17 @@ window.YPP.features.ContentControl = class ContentControl {
         // Start the observer
         this.domObserver.start();
 
+        // On search pages, do NOT watch ytd-video-renderer — those are real search results.
+        // The :has(a[href*="/shorts/"]) CSS + selector-based removal handles search Shorts correctly.
+        const isSearchPage = window.location.pathname === '/results';
+        const monitorSelector = isSearchPage
+            ? 'ytd-rich-item-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-guide-entry-renderer, yt-chip-cloud-chip-renderer'
+            : 'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-guide-entry-renderer, yt-chip-cloud-chip-renderer';
+
         // Register a callback for dynamically added content containers that might contain shorts
         this.domObserver.register(
             'shorts-monitor',
-            'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-guide-entry-renderer, yt-chip-cloud-chip-renderer', 
+            monitorSelector,
             this.handleShortsAdded,
             false // Don't run immediately, removeShortsFromDOM already did the initial pass
         );
@@ -339,6 +352,10 @@ window.YPP.features.ContentControl = class ContentControl {
      */
     handleShortsAdded(elements) {
         if (!this.settings?.hideShorts) return;
+
+        // On search results, ytd-video-renderer cards are real results — never delete them here.
+        // The CSS :has(a[href*="/shorts/"]) + removeShortsFromDOM() handle search Shorts precisely.
+        if (window.location.pathname === '/results') return;
 
         // If no specifically mutated elements provided, fallback to standard scan
         if (!elements || elements.length === 0) {

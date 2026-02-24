@@ -555,8 +555,6 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
      * @param {MutationRecord[]} mutations 
      */
     _processMutations(mutations) {
-        if (this._batching) return;
-        
         let shouldProcess = false;
         for (const m of mutations) {
             if (m.addedNodes.length > 0) {
@@ -565,14 +563,15 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             }
         }
 
-        if (shouldProcess) {
-            this._batching = true;
-            // Use requestAnimationFrame for smoother UI updates
-            requestAnimationFrame(() => {
-                this._processAll();
-                this._batching = false;
-            });
-        }
+        if (!shouldProcess) return;
+
+        // Debounce: if already waiting, let the existing timer handle it.
+        // This ensures late-arriving scroll mutations aren't swallowed.
+        if (this._debounceTimer) clearTimeout(this._debounceTimer);
+        this._debounceTimer = setTimeout(() => {
+            this._processAll();
+            this._debounceTimer = null;
+        }, 150);
     }
 
     /**
@@ -598,6 +597,10 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     _processAll() {
         if (!this._isEnabled) return;
 
+        // Reset processed nodes cache each pass so newly scroll-loaded video
+        // cards (brand-new DOM elements) get grid item class correctly.
+        this._processedNodes = new WeakSet();
+
         try {
             const itemSections = document.querySelectorAll(SearchRedesign.SELECTORS.ITEM_SECTION);
 
@@ -605,9 +608,10 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                 const contents = section.querySelector(SearchRedesign.SELECTORS.CONTENTS);
                 if (!contents) return;
 
-                // ── PASS 1: NOISE DETECTION ─────────────────────────────────────────
-                // If a section's #contents has NO video/playlist/radio renderers,
-                // hide the entire ytd-item-section-renderer so it takes zero space.
+                // ── PASS 1: NOISE DETECTION ──────────────────────────────────────────
+                // Only hide a section if ALL its meaningful (non-transient) children are
+                // confirmed noise types. NEVER hide based on "no videos yet" — that
+                // fires while YouTube is still loading (continuation items shown first).
                 const NOISE_TAGS = new Set([
                     'ytd-shelf-renderer',
                     'ytd-horizontal-card-list-renderer',
@@ -616,7 +620,6 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                     'ytd-search-refinement-card-renderer',
                     'ytd-reel-shelf-renderer',
                     'ytd-rich-shelf-renderer',
-                    'ytd-continuation-item-renderer',
                 ]);
                 const VIDEO_TAGS = new Set([
                     'ytd-video-renderer',
@@ -625,19 +628,31 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                     'ytd-channel-renderer',
                 ]);
 
+                // Exclude continuation items — they are transient load indicators
                 const children = Array.from(contents.children).filter(
                     c => c.tagName.toLowerCase() !== 'ytd-continuation-item-renderer'
                 );
 
                 const hasVideos = children.some(c => VIDEO_TAGS.has(c.tagName.toLowerCase()));
-                const allNoise = children.length > 0 && children.every(c => NOISE_TAGS.has(c.tagName.toLowerCase()));
+                // Only all-noise when every NON-transient child is a confirmed noise tag
+                const allNoise = children.length > 0 &&
+                    children.every(c => NOISE_TAGS.has(c.tagName.toLowerCase()));
 
-                if (allNoise || (!hasVideos && children.length > 0)) {
-                    // Hide the whole section to eliminate the blank row gap
+                if (this._settings.hideSearchShelves && allNoise) {
+                    // We are confident this section only has shelf/promo noise — safe to hide
                     section.classList.add('ypp-noise-section');
                     section.style.setProperty('display', 'none', 'important');
-                    return; // Don't process this section further
+                    return;
                 }
+
+                // If we previously hid this section but it now has videos, restore it
+                if (section.classList.contains('ypp-noise-section') && hasVideos) {
+                    section.classList.remove('ypp-noise-section');
+                    section.style.removeProperty('display');
+                }
+
+                // Skip sections that are still loading (no children yet)
+                if (children.length === 0) return;
 
                 // ── PASS 2: GRID SETUP ───────────────────────────────────────────────
                 if (hasVideos) {
@@ -652,6 +667,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             this._log('Error in _processAll: ' + error.message, 'error');
         }
     }
+
 
     /**
      * Process a single result node
@@ -677,16 +693,16 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             'ytd-search-refinement-card-renderer',
             'ytd-reel-shelf-renderer',
             'ytd-rich-shelf-renderer',
-            'ytd-continuation-item-renderer',
+            // NOTE: ytd-continuation-item-renderer is intentionally NOT here.
+            // It is YouTube's scroll sentinel — hiding it breaks infinite scroll.
         ]);
 
-        // A. NOISE NODE — hide it and its parent section
+        // A. NOISE NODE — hide only the individual noise element, NOT the parent section.
+        // Sections can contain a mix of noise and video renderers (e.g. a shelf + videos),
+        // so nuking the whole section would hide real video cards.
         if (NOISE_TAGS.has(tag)) {
-            node.style.setProperty('display', 'none', 'important');
-            const parentSection = node.closest('ytd-item-section-renderer');
-            if (parentSection) {
-                parentSection.classList.add('ypp-noise-section');
-                parentSection.style.setProperty('display', 'none', 'important');
+            if (this._settings.hideSearchShelves) {
+                node.style.setProperty('display', 'none', 'important');
             }
             return;
         }

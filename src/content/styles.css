@@ -861,22 +861,48 @@ ytd-mini-guide-renderer {
   padding: 0 !important;
   margin: 0 !important;
   box-sizing: border-box !important;
-  /* Do NOT use justify-content:center — it breaks auto-fill column width calculation */
-  justify-items: start !important;
+  /* stretch: cards must fill their grid cell (fixes cards only using left portion of grid) */
+  justify-items: stretch !important;
+  align-items: start !important;
 }
 
-/* Grid Rows */
+/* Grid Rows - display:contents flattens ALL row wrappers so items participate directly in parent grid.
+   IMPORTANT: Must cover both the element AND its #contents — YouTube re-stamps these on scroll. */
 .yt-premium-plus-theme ytd-rich-grid-row,
-.yt-premium-plus-theme ytd-rich-grid-row > #contents {
+.yt-premium-plus-theme ytd-rich-grid-row #contents {
   display: contents !important;
 }
 
-/* Individual Video Items - Premium Glassmorphic Card */
+/* Override YouTube's own --ytd-rich-grid-items-per-row at EVERY level.
+   YouTube's polymer JS sets this variable on the renderer AND on individual rows/items.
+   Setting it to 'auto' makes calc(100%/auto) resolve as invalid, which browsers discard. */
+.yt-premium-plus-theme ytd-rich-grid-renderer,
+.yt-premium-plus-theme ytd-rich-grid-row,
 .yt-premium-plus-theme ytd-rich-item-renderer {
+  --ytd-rich-grid-items-per-row: auto !important;
+  --ytd-rich-grid-posts-per-row: auto !important;
+}
+
+/* ytd-rich-section-renderer: wide promo/shelf cards injected mid-scroll by YouTube.
+   Force them to occupy a full grid row so they don't break the column flow. */
+.yt-premium-plus-theme ytd-rich-section-renderer {
+  grid-column: 1 / -1 !important;
   width: 100% !important;
-  max-width: none !important;
+}
+
+/* Individual Video Items - Premium Glassmorphic Card.
+   NOTE: YouTube's polymer sets an inline 'width' style on this element via JS on scroll.
+   We compensate by also declaring width:100% here AND by neutering the --ytd variable above
+   so YouTube's own calc(100% / var(--ytd-rich-grid-items-per-row)) resolves as invalid. */
+.yt-premium-plus-theme ytd-rich-item-renderer {
+  /* Size: must fill the grid cell. min-width:0 prevents overflow blowing out the column. */
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   margin: 0 !important;
   flex: none !important;
+  align-self: stretch !important;
+  /* Glassmorphic Card Style */
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
   backdrop-filter: blur(24px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
@@ -892,8 +918,7 @@ ytd-mini-guide-renderer {
               background 0.4s ease !important;
   transform: translateZ(0); /* Hardware Acceleration */
   will-change: transform, box-shadow, border-color, background;
-  /* FIX: isolation creates new stacking context → prevents backdrop-filter from leaking
-     outside the card boundary and causing the black line artifact on hover */
+  /* isolation: new stacking context → prevents backdrop-filter leaking outside card */
   isolation: isolate !important;
   overflow: hidden !important;
   background-clip: border-box !important;
@@ -997,95 +1022,27 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   padding: 0 !important;
 }
 
-/* Ensure the main wrapper fills width */
-body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
-  display: block !important;
-}
-
-/* =============================================================================
-   PER-SECTION GRID: Each ytd-item-section-renderer > #contents is one grid.
-   Sections that contain only noise (shelves) are hidden by JS.
-   This avoids the display:contents leaking #header/#footer into the grid.
-   ============================================================================= */
-
-/* Each section that the JS marks as a grid container */
-body.ypp-search-grid-mode ytd-item-section-renderer > #contents.ypp-search-grid-container {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
+/* Search Grid Layout */
+body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+  display: grid;
+  /* Optimized for density and screen usage */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
   width: 100%;
-  padding: 16px 24px 8px;
+  max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
+  padding: 0 24px; /* Balanced padding */
+  margin: 0 auto; /* Center the container itself */
   box-sizing: border-box;
-  align-items: start;
+  justify-content: center; /* Ensure grid items are centered if they don't fill row */
 }
 
-/* Remove the margin/border from sections so they butt up against each other */
-body.ypp-search-grid-mode ytd-item-section-renderer {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-  border: none !important;
+/* Ensure the main wrapper is also centered */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
+  display: flex !important;
+  justify-content: center !important;
 }
 
-/* Hide the section separator line */
-body.ypp-search-grid-mode ytd-item-section-renderer #separator {
-  display: none !important;
-}
-
-/* =============================================================================
-   NOISE SECTION HIDING - JS adds .ypp-noise-section class then hides.
-   CSS below is a secondary safety net for anything JS misses.
-   ============================================================================= */
-
-/* Shelf renderers — "From related searches", "Videos you've watched", etc. */
-body.ypp-search-grid-mode ytd-shelf-renderer {
-  display: none !important;
-}
-
-/* Horizontal card list — "People also search for" */
-body.ypp-search-grid-mode ytd-horizontal-card-list-renderer {
-  display: none !important;
-}
-
-/* Universal watch card — large featured cards that break grid flow */
-body.ypp-search-grid-mode ytd-universal-watch-card-renderer {
-  display: none !important;
-}
-
-/* Background promo / promoted content */
-body.ypp-search-grid-mode ytd-background-promo-renderer {
-  display: none !important;
-}
-
-/* Search refinement card renderer */
-body.ypp-search-grid-mode ytd-search-refinement-card-renderer {
-  display: none !important;
-}
-
-/* Hide parent section when JS marks it as noise */
-body.ypp-search-grid-mode ytd-item-section-renderer.ypp-noise-section {
-  display: none !important;
-}
-
-/* Hide continuation spinners that appear between sections */
-body.ypp-search-grid-mode ytd-continuation-item-renderer {
-  display: none !important;
-}
-
-/* Extra: if all we can see is a shelf inside a section, hide the section  */
-body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-shelf-renderer:only-child),
-body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-horizontal-card-list-renderer:only-child),
-body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-universal-watch-card-renderer:only-child),
-body.ypp-search-grid-mode ytd-item-section-renderer:has(> #contents > ytd-background-promo-renderer:only-child) {
-  display: none !important;
-}
-
-/* Clean grid opt-in: also hide search refinement sections */
-body.ypp-search-clean-grid ytd-item-section-renderer:has(> #contents > ytd-search-refinement-card-renderer:only-child) {
-  display: none !important;
-}
-
-/* Video Cards in Grid - Ported from Homepage (ytd-rich-item-renderer) */
-
+/* Video Cards in Grid */
 body.ypp-search-grid-mode ytd-video-renderer,
 body.ypp-search-grid-mode ytd-playlist-renderer,
 body.ypp-search-grid-mode ytd-radio-renderer {
@@ -1124,6 +1081,7 @@ body.ypp-search-grid-mode ytd-radio-renderer #dismissible {
   align-items: stretch !important;
   width: 100% !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   height: auto !important; /* Allow height to fit content */
 }
 
@@ -1200,9 +1158,8 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title {
   max-height: 4.4rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   line-clamp: 2;
-  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
@@ -1252,7 +1209,7 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-badge-supported-renderer {
   display: none !important;
 }
 
-/* Hide chapter preview bars — these cause uneven card heights in grid mode */
+/* Hide chapter preview bars */
 body.ypp-search-grid-mode ytd-video-renderer ytd-macro-markers-list-item-renderer,
 body.ypp-search-grid-mode ytd-video-renderer ytd-chapter-renderer,
 body.ypp-search-grid-mode ytd-video-renderer #chapters,
@@ -1261,47 +1218,120 @@ body.ypp-search-grid-mode ytd-playlist-renderer ytd-macro-markers-list-item-rend
   display: none !important;
 }
 
-/* Seamless section joining — remove top-padding on 2nd+ grid sections */
-body.ypp-search-grid-mode ytd-item-section-renderer + ytd-item-section-renderer > #contents.ypp-search-grid-container {
-  padding-top: 0 !important;
-}
-
+/* Non-Video Elements Span Full Width */
 body.ypp-search-grid-mode ytd-channel-renderer,
-body.ypp-search-grid-mode .ypp-full-width-item {
+body.ypp-search-grid-mode ytd-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer,
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+body.ypp-search-grid-mode ytd-rich-section-renderer {
   grid-column: 1 / -1;
   width: 100%;
-  margin: 4px 0;
-  padding: 14px 20px;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 16px;
-  background: linear-gradient(135deg, rgba(62, 166, 255, 0.06), rgba(255, 255, 255, 0.02)) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  border: 1px solid rgba(62, 166, 255, 0.15) !important;
-  border-top-color: rgba(62, 166, 255, 0.28) !important;
-  border-radius: var(--ypp-radius-md) !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18) !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-  overflow: hidden;
-  box-sizing: border-box;
+  max-width: 100%;
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer:hover,
-body.ypp-search-grid-mode .ypp-full-width-item:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 16px rgba(62, 166, 255, 0.18) !important;
-  border-color: rgba(62, 166, 255, 0.32) !important;
+/* Channel Result Card */
+body.ypp-search-grid-mode ytd-channel-renderer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 100%
+  );
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer #avatar {
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 50% !important;
-  flex-shrink: 0;
-  overflow: hidden;
+body.ypp-search-grid-mode ytd-channel-renderer #content-section {
+  display: flex;
+  align-items: center;
 }
+
+body.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
+  margin-right: 32px;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer img#img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Noise Section Hiding */
+body.ypp-search-grid-mode ytd-background-promo-renderer,
+body.ypp-search-grid-mode ytd-search-refinement-card-renderer {
+  display: none !important;
+}
+
+/* Continuation item MUST remain visible — it is YouTube's scroll sentinel.
+   When it enters the viewport, YouTube's IntersectionObserver loads the next
+   page of results. Hiding it with display:none breaks infinite scroll entirely.
+   We just make it span the full row and keep it at the bottom of the grid. */
+body.ypp-search-grid-mode ytd-continuation-item-renderer {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide parent section when JS marks it as noise */
+body.ypp-search-grid-mode ytd-item-section-renderer.ypp-noise-section {
+  display: none !important;
+}
+
+/* Section separator */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+body.ypp-search-grid-mode ytd-item-section-renderer #separator {
+  display: none !important;
+}
+
+/* Strict Shorts Suppression on Search */
+body.ypp-search-grid-mode ytd-reel-shelf-renderer,
+body.ypp-search-grid-mode ytd-rich-shelf-renderer[is-shorts],
+body.ypp-search-grid-mode ytd-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*="/shorts/"]) {
+  display: none !important;
+}
+
+/* Responsive Search Grid */
+@media (max-width: 1600px) {
+  body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1200px) {
+  body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 
 /* ==========================================================================
    VIEW MODE TOGGLE BUTTON STYLES
