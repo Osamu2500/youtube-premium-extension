@@ -10,7 +10,7 @@
         "alarms"
     ],
     "host_permissions": [
-        "*://*.youtube.com/*"
+        "*://www.youtube.com/*"
     ],
     "icons": {
         "16": "src/assets/icon.svg",
@@ -40,6 +40,7 @@
             "run_at": "document_idle",
             "js": [
                 "src/content/constants.js",
+                "src/content/settings-schema.js",
                 "src/content/utils.js",
                 "src/content/features/base-feature.js",
                 
@@ -48,6 +49,7 @@
                 "src/content/features/global/night-mode.js",
                 "src/content/features/global/data-api.js",
                 "src/content/features/global/mark-watched.js",
+                "src/content/features/global/keyboard-shortcuts.js",
                 "src/content/features/global/stats/stats-visualizer.js",
 
                 "src/content/features/layout/layout-manager.js",

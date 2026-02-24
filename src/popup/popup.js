@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const titles = {
         'home': 'Home & Feed',
         'player': 'Player & Tools',
+        'search': 'Search Results',
         'subscriptions': 'Subscriptions',
         'history': 'History & Library',
+        'themes': 'Themes & Appearance',
         'global': 'Global Settings'
     };
 
@@ -90,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'searchGrid',
         'searchColumns', // New
         'cleanSearch',
+        'hideSearchShelves',
         
         // Player
         'sponsorBlock',
@@ -131,7 +134,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Subscription Manager
         'enableSubsManager',
         'channelColumns',
-        'subscriptionFolders'
+        'subscriptionFolders',
+
+        // Watch Time Alert
+        'watchTimeAlert',
+        'watchTimeAlertHours',
+
+        // Keyboard Shortcuts
+        'keyboardShortcuts',
+        'shortcut_zenMode',
+        'shortcut_focusMode',
+        'shortcut_cinemaMode',
+        'shortcut_snapshot',
+        'shortcut_loop',
+        'shortcut_pip',
+        'shortcut_speedDown',
+        'shortcut_speedUp',
+        'shortcut_speedReset',
+        'shortcut_ambientMode'
     ];
 
     // --- STORAGE HANDLING ---
@@ -315,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns'].forEach(key => {
+    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'watchTimeAlertHours'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {
@@ -333,6 +353,54 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // --- SEARCH VIEW MODE PILL TOGGLE ---
+    const initSearchViewMode = () => {
+        const container = document.getElementById('searchViewModeToggle');
+        if (!container) return;
+
+        const btns = container.querySelectorAll('.view-mode-btn');
+
+        const applyActiveState = (mode) => {
+            btns.forEach(b => {
+                const isActive = b.dataset.mode === mode;
+                b.classList.toggle('active', isActive);
+                b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+                b.style.color = isActive ? '#3ea6ff' : 'rgba(255,255,255,0.5)';
+            });
+        };
+
+        // Load saved mode
+        chrome.storage.local.get(['searchViewMode'], (result) => {
+            const savedMode = result.searchViewMode || localStorage.getItem('ypp_searchViewMode') || 'grid';
+            applyActiveState(savedMode);
+        });
+
+        // Handle clicks
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                applyActiveState(mode);
+
+                // Persist
+                chrome.storage.local.set({ searchViewMode: mode });
+                localStorage.setItem('ypp_searchViewMode', mode);
+
+                // Live-push to active YouTube search tab
+                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    const tab = tabs[0];
+                    if (tab && tab.url && tab.url.includes('youtube.com/results')) {
+                        chrome.tabs.sendMessage(tab.id, {
+                            type: 'YPP_SET_SEARCH_VIEW_MODE',
+                            mode: mode
+                        }).catch(() => {}); // Ignore if content script not ready
+                    }
+                });
+            });
+        });
+    };
+
+    initSearchViewMode();
 
     const updateSetting = (key, value) => {
         chrome.storage.local.get(['settings'], (result) => {
