@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'searchColumns', // New
         'cleanSearch',
         'hideSearchShelves',
+        'hideChannelCards',
         
         // Player
         'sponsorBlock',

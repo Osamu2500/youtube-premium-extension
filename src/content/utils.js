@@ -584,6 +584,25 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         }
     },
 
+    /**
+     * Retrieve a single value from chrome.storage.local by key.
+     * Useful for persisting non-settings preferences (e.g. searchViewMode).
+     * @param {string} key - Storage key to retrieve
+     * @param {*} [fallback=null] - Value to return if key is not found or storage unavailable
+     * @returns {Promise<*>} The stored value, or fallback
+     */
+    getSetting: async (key, fallback = null) => {
+        if (!key || typeof key !== 'string') return fallback;
+        try {
+            if (!chrome?.storage?.local) return fallback;
+            const result = await chrome.storage.local.get([key]);
+            return result[key] !== undefined ? result[key] : fallback;
+        } catch (error) {
+            window.YPP.Utils?.log(`Error reading storage key "${key}": ${error.message}`, 'UTILS', 'warn');
+            return fallback;
+        }
+    },
+
     // =====================================================================
     // STYLE UTILITIES
     // =====================================================================
@@ -1011,7 +1030,9 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
      * Start observing
      */
     start() {
-        if (this.isRunning || this.observer) return;
+        // isRunning is the authoritative guard. this.observer is null until _init()
+        // is called below, so checking it here is always false and misleading.
+        if (this.isRunning) return;
         this.isRunning = true;
 
         this._init();
