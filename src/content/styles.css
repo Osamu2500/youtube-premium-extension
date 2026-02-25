@@ -1028,6 +1028,7 @@ body.ypp-search-grid-mode .ypp-flattened-grid {
   display: grid;
   /* Optimized for density and screen usage */
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-flow: dense !important; /* Auto-pack items to fill empty holes and gaps */
   gap: 16px;
   width: 100% !important;
   max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
@@ -1059,6 +1060,28 @@ body.ypp-search-grid-mode .ypp-flattened-container #scroll-container {
 body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   display: flex !important;
   justify-content: center !important;
+}
+
+/* Ensure intermediate containers don't choke the grid */
+body.ypp-search-grid-mode .ypp-flattened-container ytd-vertical-list-renderer,
+body.ypp-search-grid-mode .ypp-flattened-container ytd-horizontal-card-list-renderer,
+body.ypp-search-grid-mode .ypp-flattened-container #contents {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Ensure non-grid items (like ad slots, tracking pixels, or continuation tokens) 
+   span the full width of the grid so they don't consume single cells causing gaps. 
+   Items with 0 height will naturally take 0 vertical space. */
+body.ypp-search-grid-mode .ypp-full-width-item,
+body.ypp-search-grid-mode ytd-continuation-item-renderer,
+body.ypp-search-grid-mode ytd-search-sub-menu-renderer,
+body.ypp-search-grid-mode .ypp-flattened-container {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 /* Video Cards in Grid */
