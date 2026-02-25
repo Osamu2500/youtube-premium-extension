@@ -205,6 +205,7 @@ window.YPP.CONSTANTS = {
         searchGrid: true,
         cleanSearch: true,
         autoVideoFilter: true,
+        hideChannelCards: false,
 
         // Navigation
         navTrending: true,

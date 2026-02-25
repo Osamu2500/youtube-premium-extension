@@ -1165,14 +1165,14 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   max-width: 100% !important;
   min-width: 100% !important;
   height: auto !important;
-  aspect-ratio: 1/1 !important; /* Make Playlists and Radios explicitly square */
+  aspect-ratio: 16/9 !important; /* Reverted back to 16/9 to fix grid alignment */
   flex: none !important; /* Prevent flex shrinking */
-  border-radius: var(--ypp-radius-lg) !important; /* Slightly more rounded to distinguish from 16:9 videos */
+  border-radius: var(--ypp-radius-md) !important; /* Match video radius */
   margin-right: 0 !important;
   margin-bottom: 12px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
   background-color: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: box-shadow 0.4s ease, border-color 0.4s ease, transform 0.4s ease !important;
   z-index: 2;
   position: relative;

@@ -746,6 +746,12 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             return;
         }
 
+        // A1. HIDE CHANNEL CARDS
+        if (tag === 'ytd-channel-renderer' && this._settings.hideChannelCards) {
+            node.style.setProperty('display', 'none', 'important');
+            return;
+        }
+
         // B. SHORTS DETECTION
         if (this._isShorts(node)) {
             node.style.setProperty('display', 'none', 'important');
