@@ -1023,17 +1023,36 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 }
 
 /* Search Grid Layout */
-body.ypp-search-grid-mode ytd-item-section-renderer #contents {
+body.ypp-search-grid-mode ytd-item-section-renderer #contents,
+body.ypp-search-grid-mode .ypp-flattened-grid {
   display: grid;
   /* Optimized for density and screen usage */
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
-  width: 100%;
+  width: 100% !important;
   max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
   padding: 0 24px; /* Balanced padding */
   margin: 0 auto; /* Center the container itself */
   box-sizing: border-box;
   justify-content: center; /* Ensure grid items are centered if they don't fill row */
+}
+
+/* Flattened Grid Specific Overrides */
+body.ypp-search-grid-mode .ypp-flattened-grid {
+  padding: 0 !important; /* Internal padding is handled by the parent section */
+  max-width: none !important; /* Allow the grid to fill the full width of the parent */
+  overflow: visible !important; /* Disable any leftover horizontal scrolling */
+  white-space: normal !important; /* Fix inline-block/nowrap behaviors */
+  /* Override original YouTube flex/carousel properties */
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  height: auto !important;
+  align-items: stretch !important;
+}
+
+/* Target internal carousel scroll wrappers and strip their constraints */
+body.ypp-search-grid-mode .ypp-flattened-container #scroll-container {
+    overflow: visible !important;
 }
 
 /* Ensure the main wrapper is also centered */
@@ -1157,6 +1176,16 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
   transition: box-shadow 0.4s ease, border-color 0.4s ease !important;
   z-index: 2;
   position: relative;
+  /* Fix for oversized prominent thumbnails */
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+/* Fix oversized prominent thumbnails on "Related searches" cards */
+body.ypp-search-grid-mode ytd-video-renderer[use-prominent-thumbs] ytd-thumbnail {
+    aspect-ratio: 16/9 !important;
+    width: 100% !important;
+    min-width: 0 !important;
 }
 
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
