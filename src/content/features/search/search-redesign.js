@@ -568,6 +568,9 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
 
             // Process existing content immediately
             this._processAll();
+            
+            // Start persistent fallback monitor
+            this._startMonitor();
 
             // Setup observer with specific config for performance
             this._observer = new MutationObserver(this._processMutations);
@@ -577,6 +580,35 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                 attributes: false // We only care about new nodes
             });
         });
+    }
+
+    /**
+     * Fallback interval to aggressively catch un-styled elements
+     * that slip past the MutationObserver due to SPA lifecycle depth
+     * @private
+     */
+    _startMonitor() {
+        if (this._monitorInterval) {
+            clearInterval(this._monitorInterval);
+        }
+        
+        // Check every 1500ms if we're in search and have unstyled items
+        this._monitorInterval = setInterval(() => {
+            if (!this._state.isActive) return;
+            
+            const container = document.querySelector(SearchRedesign.SELECTORS.SEARCH_CONTAINER);
+            if (!container) return;
+
+            // Look for unprocessed video, playlist, or radio renderers
+            const unprocessedItems = container.querySelectorAll(
+                'ytd-video-renderer:not(.ypp-grid-item), ytd-playlist-renderer:not(.ypp-grid-item), ytd-radio-renderer:not(.ypp-grid-item), ytd-channel-renderer:not(.ypp-grid-item)'
+            );
+
+            if (unprocessedItems.length > 0) {
+                this._log(`Monitor caught ${unprocessedItems.length} unprocessed items`, 'info');
+                this._processAll();
+            }
+        }, 1500);
     }
 
     /**
@@ -612,6 +644,10 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         if (this._observer) {
             this._observer.disconnect();
             this._observer = null;
+        }
+        if (this._monitorInterval) {
+            clearInterval(this._monitorInterval);
+            this._monitorInterval = null;
         }
         if (this._debounceTimer) {
             clearTimeout(this._debounceTimer);
