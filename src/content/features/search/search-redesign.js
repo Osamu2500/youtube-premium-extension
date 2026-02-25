@@ -737,9 +737,13 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         const { NOISE_TAGS } = SearchRedesign;
 
         // A. NOISE NODE — hide only the individual noise element, NOT the parent section.
-        // Sections can contain a mix of noise and video renderers (e.g. a shelf + videos),
-        // so nuking the whole section would hide real video cards.
+        // We exclude shelves that we intend to flatten into the grid.
         if (NOISE_TAGS.has(tag)) {
+            // Check if this is a flattenable shelf before treating it as noise
+            if (this._isFlattenableShelf(node)) {
+                this._flattenShelf(node);
+                return;
+            }
             if (this._settings.hideSearchShelves) {
                 node.style.setProperty('display', 'none', 'important');
             }
@@ -825,6 +829,61 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
          if (node.querySelector('a[href*="/shorts/"]')) return true;
 
          return false;
+    }
+
+    /**
+     * Determine if a node is a shelf that should be flattened instead of hidden.
+     * @private
+     * @param {Element} node 
+     * @returns {boolean}
+     */
+    _isFlattenableShelf(node) {
+        const tag = node.tagName.toLowerCase();
+        
+        // We want to flatten these specific types if they contain video/playlist renderers
+        if (tag === 'ytd-horizontal-card-list-renderer' || 
+            tag === 'ytd-shelf-renderer' || 
+            tag === 'ytd-rich-shelf-renderer') {
+            
+            // It's not a shorts shelf and has valid renderers inside
+            if (!this._isShortsShelf(node)) {
+                return !!node.querySelector('ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer');
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Converts a horizontal scrolling shelf into a standard CSS grid
+     * to match the rest of the search results.
+     * @private
+     * @param {Element} node The shelf element
+     */
+    _flattenShelf(node) {
+        // Prevent infinite loops
+        if (node.dataset.yppFlattened === 'true') return;
+        node.dataset.yppFlattened = 'true';
+
+        // Add container class to target scroll-wrappers in CSS
+        node.classList.add('ypp-flattened-container');
+
+        // Find the inner container that holds the actual items
+        const itemsContainer = node.querySelector('#items') || node.querySelector('#scroll-container');
+        
+        if (itemsContainer) {
+            itemsContainer.classList.add('ypp-flattened-grid');
+            
+            // Re-process the individual child video cards inside the shelf
+            // so they receive the GRID_ITEM styling.
+            const cards = itemsContainer.querySelectorAll('ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer');
+            cards.forEach(card => {
+                // Ensure the card gets standard styling
+                card.classList.add(SearchRedesign.CLASSES.GRID_ITEM);
+                this._cleanInlineStyles(card);
+            });
+        }
+        
+        this._log(`Flattened shelf node: ${node.tagName.toLowerCase()}`, 'info');
     }
 
     /**
