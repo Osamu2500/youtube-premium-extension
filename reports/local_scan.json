@@ -1,0 +1,113 @@
+{
+  "lint": {
+    "issues": [
+      "No ESLint configuration found",
+      "Multiple raw innerHTML assignments observed in DOM manipulation (e.g., subscriptions-ui.js, video-controls.js)"
+    ],
+    "severity": "Medium",
+    "example_paths": [
+      "src/content/features/subscriptions/subscriptions-ui.js",
+      "src/content/features/video-controls/video-controls.js"
+    ],
+    "suggested_fixes": [
+      "Add robust ESLint configuration (.eslintrc.json) enforcing security rules (e.g., eslint-plugin-security).",
+      "Replace innerHTML with DOMParser or safe wrappers."
+    ]
+  },
+  "tsc": {
+    "issues": [
+      "Missing tsconfig.json",
+      "Implicit any types across the JavaScript codebase"
+    ],
+    "severity": "Low",
+    "example_paths": [
+      "src/content/main.js"
+    ],
+    "suggested_fixes": [
+      "Add tsconfig.json with allowJs and checkJs to provide baseline type checking via JSDoc."
+    ]
+  },
+  "deps": {
+    "issues": [
+      "Missing package.json",
+      "Dependencies managed manually or not used"
+    ],
+    "severity": "Low",
+    "example_paths": [
+      "."
+    ],
+    "suggested_fixes": [
+      "Initialize npm and manage development tools (ESLint, TypeScript) locally rather than globally."
+    ]
+  },
+  "bundle": {
+    "issues": [
+      "No module bundler is in use.",
+      "42 separate JavaScript files are injected directly into YouTube pages via manifest.json content scripts. This significantly slows down page load and increases parse time."
+    ],
+    "severity": "High",
+    "example_paths": [
+      "manifest.json (content_scripts.js array)"
+    ],
+    "suggested_fixes": [
+      "Introduce a bundler (Webpack/Rollup/Vite) to compile content scripts into a single or chunked payload.",
+      "Load non-critical features lazily on-demand rather than injecting everything upfront."
+    ]
+  },
+  "runtime": {
+    "issues": [
+      "Excessive synchronous DOM polling/MutationObserver bindings across 40+ module initializations on page load.",
+      "Extension relies on extensive DOM modifications directly on the YouTube SPA, leading to frequent style recalculations."
+    ],
+    "severity": "High",
+    "example_paths": [
+      "src/content/feature-manager.js",
+      "src/content/main.js"
+    ],
+    "suggested_fixes": [
+      "Implement a centralized MutationObserver (Event Bus pattern).",
+      "Debounce DOM insertions and batch updates (e.g., requestAnimationFrame)."
+    ]
+  },
+  "manifest": {
+    "issues": [
+      "Current manifest is Manifest V3, which is good. However, all content scripts are unconditionally loaded on `*://*.youtube.com/*`."
+    ],
+    "severity": "Medium",
+    "example_paths": [
+      "manifest.json"
+    ],
+    "suggested_fixes": [
+      "Use dynamic scripting (chrome.scripting) for features that are toggleable by the user, reducing baseline payload."
+    ]
+  },
+  "security": {
+    "issues": [
+      "Use of innerHTML string templating without apparent sanitization allows XSS risks if any external data is parsed.",
+      "Permissions (`storage`, `scripting`, `tabs`, `alarms`) are acceptable and scoped correctly (no `<all_urls>`)."
+    ],
+    "severity": "High",
+    "example_paths": [
+      "src/content/features/subscriptions/subscriptions-ui.js",
+      "src/popup/popup.js"
+    ],
+    "suggested_fixes": [
+      "Adopt DOMPurify or sanitize all strings before assigning them to innerHTML."
+    ]
+  },
+  "a11y": {
+    "issues": [
+      "Multiple control buttons in the popup lack `aria-label` or accessible text (they only contain SVG or use `title`).",
+      "Toggle labels are not properly associated with their inputs using screenreader-only text.",
+      "Potentially low contrast on some nested dark mode UI elements."
+    ],
+    "severity": "Medium",
+    "example_paths": [
+      "src/popup/popup.html"
+    ],
+    "suggested_fixes": [
+      "Add `aria-label` to icon-only buttons (`.nav-item`).",
+      "Ensure proper focus styles (`:focus-visible`) across all custom toggles and cards."
+    ]
+  }
+}
