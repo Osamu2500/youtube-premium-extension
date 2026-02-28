@@ -70,6 +70,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
     static NOISE_TAGS = new Set([
         'ytd-shelf-renderer',
         'ytd-horizontal-card-list-renderer',
+        'ytd-vertical-list-renderer', // Add vertical lists to intercept for flattening
         'ytd-universal-watch-card-renderer',
         'ytd-background-promo-renderer',
         'ytd-search-refinement-card-renderer',
@@ -88,14 +89,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         'ytd-channel-renderer',
     ]);
 
-    /**
-     * SVG Icons for the view toggle buttons
-     * @readonly
-     */
-    static ICONS = {
-        GRID: '<svg viewBox="0 0 24 24" height="20" width="20"><path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z" fill="currentColor"/></svg>',
-        LIST: '<svg viewBox="0 0 24 24" height="20" width="20"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z" fill="currentColor"/></svg>'
-    };
+
 
     // =========================================================================
     // INITIALIZATION
@@ -218,13 +212,11 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         this._isEnabled = false;
         
         this._disconnectObserver();
-        // Remove all body state classes on disable
         document.body.classList.remove(
             SearchRedesign.CLASSES.GRID_MODE,
             SearchRedesign.CLASSES.LIST_MODE,
             'ypp-search-clean-grid'
         );
-        this._removeViewToggle();
         document.body.classList.remove('ypp-filter-pending'); // Cleanup
         window.removeEventListener('yt-navigate-finish', this._handleNavigation);
 
@@ -423,100 +415,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         }
     }
 
-    /**
-     * Inject the Grid/List toggle buttons into the YouTube UI
-     * @private
-     */
-    _injectViewToggle() {
-        // Poll for the filter menu container
-        this._pollForElement(SearchRedesign.SELECTORS.FILTER_HEADER, (container) => {
-            // Avoid duplicate injection
-            if (document.getElementById('ypp-view-toggle')) return;
 
-            // Create Container
-            const toggleContainer = document.createElement('div');
-            toggleContainer.id = 'ypp-view-toggle';
-            toggleContainer.className = SearchRedesign.CLASSES.TOGGLE_CONTAINER;
-
-            // Create Grid Button
-            const gridBtn = this._createToggleButton(
-                SearchRedesign.MODES.GRID, 
-                'Grid View', 
-                SearchRedesign.ICONS.GRID
-            );
-            
-            // Create List Button
-            const listBtn = this._createToggleButton(
-                SearchRedesign.MODES.LIST, 
-                'List View', 
-                SearchRedesign.ICONS.LIST
-            );
-
-            toggleContainer.appendChild(gridBtn);
-            toggleContainer.appendChild(listBtn);
-
-            // Insert into DOM
-            container.appendChild(toggleContainer);
-            this._updateToggleButtonState();
-        });
-    }
-
-    /**
-     * Helper to create a toggle button element
-     * @private
-     * @param {string} mode - Mode associated with the button
-     * @param {string} title - Tooltip title
-     * @param {string} iconSvg - SVG content
-     * @returns {HTMLElement}
-     */
-    _createToggleButton(mode, title, iconSvg) {
-        const btn = document.createElement('button');
-        btn.className = SearchRedesign.CLASSES.TOGGLE_BTN;
-        btn.title = title;
-        btn.dataset.mode = mode;
-        
-        // Safety: Use DOMParser to avoid direct innerHTML assignment
-        try {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
-            if (doc.documentElement && doc.documentElement.tagName === 'svg') {
-                btn.appendChild(doc.documentElement);
-            } else {
-                throw new Error('Invalid SVG');
-            }
-        } catch (e) {
-            // Fallback for safety (though constants should be valid)
-            btn.textContent = title;
-            this._log('Error parsing SVG icon: ' + e.message, 'warn');
-        }
-        
-        btn.addEventListener('click', (e) => {
-            // Prevent default YouTube navigation if any
-            e.preventDefault();
-            e.stopPropagation();
-            this._setViewMode(mode);
-        });
-
-        return btn;
-    }
-
-    /**
-     * No-op: toggle UI is now in the popup, not injected into the page.
-     * Kept for backward-compat with disable() which calls _removeViewToggle().
-     * @private
-     */
-    _updateToggleButtonState() { /* no-op — UI is in popup */ }
-
-    /**
-     * Remove the toggle button from DOM
-     * @private
-     */
-    _removeViewToggle() {
-        const toggle = document.getElementById('ypp-view-toggle');
-        if (toggle) {
-            toggle.remove();
-        }
-    }
 
     /**
      * Poll for a DOM element with exponential backoff
@@ -592,15 +491,22 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             clearInterval(this._monitorInterval);
         }
         
+        let containerCache = null;
+
         // Check every 1500ms if we're in search and have unstyled items
         this._monitorInterval = setInterval(() => {
-            if (!this._state.isActive) return;
+            // Do not run explosive DOM queries if the tab is in the background
+            if (document.hidden) return;
+            if (!this._isEnabled) return;
             
-            const container = document.querySelector(SearchRedesign.SELECTORS.SEARCH_CONTAINER);
-            if (!container) return;
+            // Re-use container cache if connected, otherwise query once
+            if (!containerCache || !containerCache.isConnected) {
+                containerCache = document.querySelector(SearchRedesign.SELECTORS.SEARCH_CONTAINER);
+            }
+            if (!containerCache) return;
 
             // Look for unprocessed video, playlist, or radio renderers
-            const unprocessedItems = container.querySelectorAll(
+            const unprocessedItems = containerCache.querySelectorAll(
                 'ytd-video-renderer:not(.ypp-grid-item), ytd-playlist-renderer:not(.ypp-grid-item), ytd-radio-renderer:not(.ypp-grid-item), ytd-channel-renderer:not(.ypp-grid-item)'
             );
 
@@ -618,8 +524,10 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
      */
     _processMutations(mutations) {
         let shouldProcess = false;
-        for (const m of mutations) {
-            if (m.addedNodes.length > 0) {
+        
+        // Quick check without allocating arrays
+        for (let i = 0; i < mutations.length; i++) {
+            if (mutations[i].addedNodes.length > 0) {
                 shouldProcess = true;
                 break;
             }
@@ -630,8 +538,14 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         // Debounce: if already waiting, let the existing timer handle it.
         // This ensures late-arriving scroll mutations aren't swallowed.
         if (this._debounceTimer) clearTimeout(this._debounceTimer);
+        
+        // Use a combination of timeout and requestAnimationFrame to ensure
+        // DOM modifications happen exactly at the start of the next paint cycle,
+        // eliminating visual tearing / layout thrashing during fast scrolls.
         this._debounceTimer = setTimeout(() => {
-            this._processAll();
+            requestAnimationFrame(() => {
+                this._processAll();
+            });
             this._debounceTimer = null;
         }, 150);
     }
@@ -665,32 +579,53 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
 
         try {
             const itemSections = document.querySelectorAll(SearchRedesign.SELECTORS.ITEM_SECTION);
+            
+            // Reusable references to prevent static lookup overhead in tight loop
+            const { NOISE_TAGS, VIDEO_TAGS, CLASSES } = SearchRedesign;
 
-            itemSections.forEach(section => {
+            for (const section of itemSections) {
                 const contents = section.querySelector(SearchRedesign.SELECTORS.CONTENTS);
-                if (!contents) return;
+                if (!contents) continue;
 
                 // ── PASS 1: NOISE DETECTION ──────────────────────────────────────────
                 // Only hide a section if ALL its meaningful (non-transient) children are
                 // confirmed noise types. NEVER hide based on "no videos yet" — that
                 // fires while YouTube is still loading (continuation items shown first).
 
-                // Exclude continuation items — they are transient load indicators
-                const children = Array.from(contents.children).filter(
-                    c => c.tagName.toLowerCase() !== 'ytd-continuation-item-renderer'
-                );
+                const children = contents.children;
+                if (children.length === 0) continue; // Skip loading sections
 
-                const { NOISE_TAGS, VIDEO_TAGS } = SearchRedesign;
-                const hasVideos = children.some(c => VIDEO_TAGS.has(c.tagName.toLowerCase()));
-                // Only all-noise when every NON-transient child is a confirmed noise tag
-                const allNoise = children.length > 0 &&
-                    children.every(c => NOISE_TAGS.has(c.tagName.toLowerCase()));
+                let hasVideos = false;
+                let allNoise = true;
+                let hasTransients = false;
 
-                if (this._settings.hideSearchShelves && allNoise) {
-                    // We are confident this section only has shelf/promo noise — safe to hide
-                    section.classList.add('ypp-noise-section');
-                    section.style.setProperty('display', 'none', 'important');
-                    return;
+                // Examine children without allocating arrays
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    const tag = child.tagName.toLowerCase();
+
+                    // Skip continuation items (transient load indicators) when judging noise
+                    if (tag === 'ytd-continuation-item-renderer') {
+                        hasTransients = true;
+                        continue; 
+                    }
+
+                    if (VIDEO_TAGS.has(tag)) {
+                        hasVideos = true;
+                        allNoise = false; // Definitively not pure noise
+                    } else if (!NOISE_TAGS.has(tag)) {
+                        allNoise = false; // An unknown element, keep section visible to be safe
+                    }
+                }
+
+                // If the only children are transients, we don't know if it's noise yet
+                if (allNoise && !hasTransients && children.length > 0) {
+                     // We are confident this section only has shelf/promo noise — safe to hide
+                     if (this._settings.hideSearchShelves) {
+                         section.classList.add('ypp-noise-section');
+                         section.style.setProperty('display', 'none', 'important');
+                     }
+                     continue;
                 }
 
                 // If we previously hid this section but it now has videos, restore it
@@ -699,18 +634,17 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
                     section.style.removeProperty('display');
                 }
 
-                // Skip sections that are still loading (no children yet)
-                if (children.length === 0) return;
-
                 // ── PASS 2: GRID SETUP ───────────────────────────────────────────────
                 if (hasVideos) {
-                    if (!contents.classList.contains(SearchRedesign.CLASSES.GRID_CONTAINER)) {
-                        contents.classList.add(SearchRedesign.CLASSES.GRID_CONTAINER);
+                    if (!contents.classList.contains(CLASSES.GRID_CONTAINER)) {
+                        contents.classList.add(CLASSES.GRID_CONTAINER);
                     }
                     // Process each child
-                    children.forEach(child => this._processNode(child, contents));
+                    for (let i = 0; i < children.length; i++) {
+                        this._processNode(children[i], contents);
+                    }
                 }
-            });
+            }
         } catch (error) {
             this._log('Error in _processAll: ' + error.message, 'error');
         }
@@ -737,9 +671,13 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         const { NOISE_TAGS } = SearchRedesign;
 
         // A. NOISE NODE — hide only the individual noise element, NOT the parent section.
-        // Sections can contain a mix of noise and video renderers (e.g. a shelf + videos),
-        // so nuking the whole section would hide real video cards.
+        // We exclude shelves that we intend to flatten into the grid.
         if (NOISE_TAGS.has(tag)) {
+            // Check if this is a flattenable shelf before treating it as noise
+            if (this._isFlattenableShelf(node)) {
+                this._flattenShelf(node);
+                return;
+            }
             if (this._settings.hideSearchShelves) {
                 node.style.setProperty('display', 'none', 'important');
             }
@@ -767,8 +705,15 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
             } else if (tag === 'ytd-channel-renderer') {
                 // Channels span full row
                 node.classList.add(SearchRedesign.CLASSES.FULL_WIDTH);
+            } else if (tag === 'ytd-ad-slot-renderer' || tag === 'ytd-promoted-sparkles-web-renderer') {
+                // Known ad containers - explicitly hide them safely via JS instead of laggy CSS :not() rules
+                node.style.setProperty('display', 'none', 'important');
+            } else if (!node.classList.contains('ypp-flattened-container')) {
+                // Any other unknown structural node (pixels, spacers, continuation items) 
+                // gets full width so it doesn't take up a normal 1-col video grid cell.
+                // Since its height is 0, it simply flows down without causing a visual gap.
+                node.classList.add(SearchRedesign.CLASSES.FULL_WIDTH);
             }
-            // Other unknown renderers: leave them — CSS :has() will hide parent section if they're alone
         }
     }
 
@@ -800,8 +745,8 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         // 4. Metadata Badge detection (New)
         // Look for specific metadata badges often found on Shorts in search
         const metadata = node.querySelectorAll('ytd-badge-supported-renderer');
-        for (const badge of metadata) {
-            if (badge.textContent.trim() === 'Shorts') return true;
+        for (let i = 0; i < metadata.length; i++) {
+            if (metadata[i].textContent.trim() === 'Shorts') return true;
         }
 
         return false;
@@ -825,6 +770,73 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
          if (node.querySelector('a[href*="/shorts/"]')) return true;
 
          return false;
+    }
+
+    /**
+     * Determine if a node is a shelf that should be flattened instead of hidden.
+     * @private
+     * @param {Element} node 
+     * @returns {boolean}
+     */
+    _isFlattenableShelf(node) {
+        const tag = node.tagName.toLowerCase();
+        
+        // We want to flatten these specific types if they contain video/playlist renderers
+        if (tag === 'ytd-horizontal-card-list-renderer' || 
+            tag === 'ytd-vertical-list-renderer' ||
+            tag === 'ytd-shelf-renderer' || 
+            tag === 'ytd-rich-shelf-renderer') {
+            
+            // It's not a shorts shelf and has valid renderers inside
+            if (!this._isShortsShelf(node)) {
+                return !!node.querySelector('ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer');
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Converts a horizontal scrolling or vertical list shelf into a standard CSS grid
+     * to match the rest of the search results.
+     * @private
+     * @param {Element} node The shelf element
+     */
+    _flattenShelf(node) {
+        // Prevent infinite loops
+        if (node.dataset.yppFlattened === 'true') return;
+        node.dataset.yppFlattened = 'true';
+
+        // Add container class to target scroll-wrappers in CSS
+        node.classList.add('ypp-flattened-container');
+
+        // Find the inner container that holds the actual items
+        // Specifically look for the vertical list items or horizontal scroll container first
+        const verticalList = node.querySelector('ytd-vertical-list-renderer #items');
+        const horizontalList = node.querySelector('ytd-horizontal-card-list-renderer #scroll-container') || node.querySelector('ytd-horizontal-card-list-renderer #items');
+        const genericItems = node.querySelector('#items') || node.querySelector('#scroll-container') || node.querySelector('#contents');
+        
+        const itemsContainer = verticalList || horizontalList || genericItems;
+        
+        if (itemsContainer) {
+            itemsContainer.classList.add('ypp-flattened-grid');
+            
+            // Re-process the individual child video cards inside the shelf
+            // so they receive the GRID_ITEM styling.
+            const cards = itemsContainer.querySelectorAll('ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer, ytd-channel-renderer');
+            
+            // Iterate using standard loop to prevent array allocation overhead
+            for (let i = 0; i < cards.length; i++) {
+                const card = cards[i];
+                // Ensure the card gets standard styling
+                card.classList.add(SearchRedesign.CLASSES.GRID_ITEM);
+                if(card.tagName.toLowerCase() === 'ytd-channel-renderer') {
+                    card.classList.add(SearchRedesign.CLASSES.FULL_WIDTH);
+                }
+                this._cleanInlineStyles(card);
+            }
+        }
+        
+        this._log(`Flattened shelf node: ${node.tagName.toLowerCase()}`, 'info');
     }
 
     /**

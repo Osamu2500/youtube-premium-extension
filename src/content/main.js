@@ -250,7 +250,11 @@
                     this.Utils?.log('Navigation detected', 'MAIN', 'debug');
                     this.updateContext();
                     if (this.featureManager) {
-                        this.featureManager.init(this.settings);
+                        try {
+                            this.featureManager.init(this.settings);
+                        } catch (error) {
+                            this.Utils?.log(`Error initializing features on navigation: ${error.message}`, 'MAIN', 'error');
+                        }
                     }
                 });
             };
@@ -274,7 +278,11 @@
                                 this.Utils?.log('Settings updated from popup', 'MAIN', 'debug');
 
                                 if (this.featureManager) {
-                                    this.featureManager.init(this.settings);
+                                    try {
+                                        this.featureManager.init(this.settings);
+                                    } catch (error) {
+                                        this.Utils?.log(`Error re-initializing features on settings change: ${error.message}`, 'MAIN', 'error');
+                                    }
                                 }
                             }
                         }
@@ -294,7 +302,11 @@
                     this.settings = request.settings;
                     this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
                     if (this.featureManager) {
-                        this.featureManager.init(this.settings);
+                        try {
+                            this.featureManager.init(this.settings);
+                        } catch (error) {
+                            this.Utils?.log(`Error re-initializing features on instant update: ${error.message}`, 'MAIN', 'error');
+                        }
                     }
                     sendResponse({ success: true });
                 }

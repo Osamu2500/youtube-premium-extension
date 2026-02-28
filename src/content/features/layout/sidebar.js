@@ -26,29 +26,25 @@ window.YPP.features.SidebarManager = class SidebarManager {
      */
     update(settings) {
         this.settings = settings;
-        // Logic: if forceHideSidebar is enabled, hide the sidebar
-        if (settings.forceHideSidebar) {
-            this.enable(); // Enable manager to hide sidebar
+        // Logic: if forceHideSidebar or hoverSidebar is enabled, enable manager
+        if (settings.forceHideSidebar || settings.hoverSidebar) {
+            this.enable(); 
         } else {
-            this.disable(); // Disable to show sidebar normally
+            this.disable(); 
         }
     }
 
     /**
-     * Enable sidebar management to hide sidebar
+     * Enable sidebar management
      */
     enable() {
-        if (this.isEnabled) {
-            this.ensureSidebarHidden();
-            return;
+        if (!this.isEnabled) {
+            this.isEnabled = true;
+            this.Utils.log('Sidebar Manager Enabled', 'SIDEBAR');
+            window.addEventListener('yt-page-data-updated', this.handleNavigation);
+            window.addEventListener('yt-navigate-finish', this.handleNavigation);
         }
-        this.isEnabled = true;
-        this.Utils.log('Sidebar Manager Enabled (Hiding Sidebar)', 'SIDEBAR');
-
-        this.ensureSidebarHidden();
-
-        window.addEventListener('yt-page-data-updated', this.handleNavigation);
-        window.addEventListener('yt-navigate-finish', this.handleNavigation);
+        this.ensureSidebarState();
     }
 
     /**
@@ -58,7 +54,7 @@ window.YPP.features.SidebarManager = class SidebarManager {
         if (!this.isEnabled) return;
 
         this.isEnabled = false;
-        document.body.classList.remove('ypp-hide-sidebar');
+        document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar');
 
         window.removeEventListener('yt-page-data-updated', this.handleNavigation);
         window.removeEventListener('yt-navigate-finish', this.handleNavigation);
@@ -69,19 +65,29 @@ window.YPP.features.SidebarManager = class SidebarManager {
      * Handle navigation events to re-apply sidebar state
      */
     handleNavigation() {
-        if (this.isEnabled) this.ensureSidebarHidden();
+        if (this.isEnabled) this.ensureSidebarState();
     }
 
     /**
-     * Ensure the hide-sidebar CSS class is applied
+     * Ensures the correct CSS class is applied to the body based on settings.
+     * Note: `forceHideSidebar` (Zen Mode) takes strict precedence over `hoverSidebar` (Top Drawer).
+     * Uses `requestAnimationFrame` to ensure the DOM is ready and avoid layout thrashing.
      */
-    ensureSidebarHidden() {
-        if (!this.isEnabled) return;
+    ensureSidebarState() {
+        if (!this.isEnabled || !this.settings) return;
 
         // Use requestAnimationFrame to ensure DOM is ready and avoid layout thrashing
         requestAnimationFrame(() => {
-            if (document.body && !document.body.classList.contains('ypp-hide-sidebar')) {
+            if (!document.body) return;
+
+            if (this.settings.forceHideSidebar) {
                 document.body.classList.add('ypp-hide-sidebar');
+                document.body.classList.remove('ypp-hover-sidebar');
+            } else if (this.settings.hoverSidebar) {
+                document.body.classList.add('ypp-hover-sidebar');
+                document.body.classList.remove('ypp-hide-sidebar');
+            } else {
+                document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar');
             }
         });
     }

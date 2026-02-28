@@ -6,10 +6,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.StudyMode = class StudyMode {
+window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.BaseFeature {
     constructor() {
-        this.CONSTANTS = window.YPP.CONSTANTS;
-        this.Utils = window.YPP.Utils;
+        super('StudyMode');
         this.studyInterval = null;
         this.speedPanel = null;
         this.controlBtn = null;
@@ -55,7 +54,7 @@ window.YPP.features.StudyMode = class StudyMode {
         if (this.studyInterval) return;
 
         try {
-            this.Utils?.createToast(`Study Mode: ${this.config.speed}x Speed ${this.config.enableCaptions ? '+ Captions' : ''}`);
+            this.utils?.createToast(`Study Mode: ${this.config.speed}x Speed ${this.config.enableCaptions ? '+ Captions' : ''}`);
 
             // Initial enforcement
             this._enforceState();
@@ -66,7 +65,7 @@ window.YPP.features.StudyMode = class StudyMode {
             // Periodic enforcement to handle ads and manual changes
             this.studyInterval = setInterval(() => this._enforceState(), this.config.enforceInterval);
         } catch (error) {
-            this.Utils?.log(`Error enabling study mode: ${error.message}`, 'STUDY', 'error');
+            this.utils?.log(`Error enabling study mode: ${error.message}`, 'STUDY', 'error');
         }
     }
 
@@ -87,10 +86,10 @@ window.YPP.features.StudyMode = class StudyMode {
             const video = document.querySelector('video');
             if (video?.playbackRate === this.config.speed) {
                 video.playbackRate = 1.0;
-                this.Utils?.createToast('Study Mode Disabled');
+                this.utils?.createToast('Study Mode Disabled');
             }
         } catch (error) {
-            this.Utils?.log(`Error disabling study mode: ${error.message}`, 'STUDY', ' error');
+            this.utils?.log(`Error disabling study mode: ${error.message}`, 'STUDY', ' error');
         }
     }
 
@@ -99,12 +98,11 @@ window.YPP.features.StudyMode = class StudyMode {
      * @private
      */
     async injectSpeedControl() {
-        const Utils = window.YPP.Utils;
-        if (!Utils) return;
+        if (!this.utils) return;
 
         try {
             // Wait for player controls
-            const rightControls = await Utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
+            const rightControls = await this.utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
             
             if (!rightControls || document.getElementById('ypp-study-btn')) return;
 
@@ -122,7 +120,7 @@ window.YPP.features.StudyMode = class StudyMode {
             rightControls.insertBefore(btn, rightControls.firstChild);
             this.controlBtn = btn;
         } catch (error) {
-            console.error('Study Mode: Failed to inject controls:', error);
+            this.utils?.log('Failed to inject controls: ' + error.message, 'STUDY', 'error');
         }
     }
 
@@ -368,7 +366,7 @@ window.YPP.features.StudyMode = class StudyMode {
                 this.config = { ...this.config, ...result.ypp_study_mode };
             }
         } catch (error) {
-            console.error('Study Mode: Failed to load config:', error);
+            this.utils?.log('Failed to load config: ' + error.message, 'STUDY', 'error');
         }
     }
 
@@ -380,7 +378,7 @@ window.YPP.features.StudyMode = class StudyMode {
         try {
             await chrome.storage.local.set({ ypp_study_mode: this.config });
         } catch (error) {
-            console.error('Study Mode: Failed to save config:', error);
+            this.utils?.log('Failed to save config: ' + error.message, 'STUDY', 'error');
         }
     }
 };
