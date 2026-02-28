@@ -66,6 +66,7 @@ window.YPP.SettingsSchema = {
         navPlaylists:        { type: 'boolean', default: true },
         navHistory:          { type: 'boolean', default: true },
         forceHideSidebar:    { type: 'boolean', default: false },
+        hoverSidebar:        { type: 'boolean', default: true },
 
         // --- Shorts Tools ---
         shortsAutoScroll:    { type: 'boolean', default: false },
@@ -158,12 +159,15 @@ window.YPP.SettingsSchema = {
                 continue;
             }
 
-            // String enum validation
-            if (rule.type === 'string' && rule.values && !rule.values.includes(value)) {
-                window.YPP.Utils?.log(`Settings: "${key}" value "${value}" not in allowed list. Resetting.`, 'SCHEMA', 'warn');
-                out[key] = rule.default;
-                warnings++;
-                continue;
+            // String enum validation (defensive against Array mutation/injection)
+            if (rule.type === 'string' && Array.isArray(rule.values) && rule.values.length > 0) {
+                // Ensure value is a primitive string before using .includes()
+                if (typeof value !== 'string' || !rule.values.includes(value)) {
+                    window.YPP.Utils?.log(`Settings: "${key}" value "${value}" not in allowed list. Resetting.`, 'SCHEMA', 'warn');
+                    out[key] = rule.default;
+                    warnings++;
+                    continue;
+                }
             }
 
             // Number range clamp

@@ -8,10 +8,6 @@ window.YPP = window.YPP || {};
 const CONSTANTS = window.YPP.CONSTANTS || {};
 
 window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
-    // =====================================================================
-    // LOGGING
-    // =====================================================================
-
     /**
      * Standardized Logger
      * @param {string} msg - Message to log
@@ -180,6 +176,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             let resolved = false;
             let timeoutId = null;
             let observer = null;
+            const startUrl = location.href; // Capture URL for early abort
 
             const cleanup = () => {
                 if (observer) {
@@ -193,6 +190,14 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             };
 
             const check = () => {
+                // Abort if the user navigates away before element is found
+                if (location.href !== startUrl && !selector.includes('yt-navigate-finish')) {
+                    resolved = true;
+                    cleanup();
+                    resolve(null);
+                    return true;
+                }
+
                 try {
                     const el = document.querySelector(selector);
                     if (el) {
@@ -237,7 +242,16 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         }
 
         return new Promise((resolve) => {
+            const startUrl = location.href; // Capture URL for early abort
+            let observer = null;
+
             const checkElements = () => {
+                // Abort if the user navigates away before elements are found
+                if (location.href !== startUrl) {
+                    if (observer) observer.disconnect();
+                    resolve(results); // Return what we found so far
+                    return;
+                }
                 selectors.forEach(sel => {
                     if (!results.has(sel)) {
                         const el = document.querySelector(sel);
@@ -253,13 +267,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 }
             };
 
-            const observer = new MutationObserver(checkElements);
+            observer = new MutationObserver(checkElements);
             observer.observe(document.documentElement, { childList: true, subtree: true });
 
             checkElements();
 
             setTimeout(() => {
-                observer.disconnect();
+                if (observer) observer.disconnect();
                 resolve(results);
             }, timeout);
         });
@@ -272,32 +286,54 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @param {number} interval - Polling interval in ms
      * @returns {Promise<any>} Resolves with the truthy value returned by conditionFn
      */
-    pollFor: (conditionFn, timeout = 10000, interval = 250) => {
-        return new Promise((resolve, reject) => {
-            // First check
-            const result = conditionFn();
-            if (result) {
-                return resolve(result);
+    pollFor: (conditionFn, timeout = 10000, intervalMs = 250) => {
+        return new Promise((resolve) => {
+            // Initial check
+            try {
+                const initialResult = conditionFn();
+                if (initialResult) return resolve(initialResult);
+            } catch (error) {
+                window.YPP.Utils?.log('Error in initial pollFor condition', 'UTILS', 'warn');
+                return resolve(null);
             }
 
             const startTime = Date.now();
-            
-            const timer = setInterval(() => {
-                try {
-                    const result = conditionFn();
-                    if (result) {
-                        clearInterval(timer);
-                        resolve(result);
-                    } else if (Date.now() - startTime >= timeout) {
-                        clearInterval(timer);
-                        resolve(null); // Resolve with null instead of reject for safer handling
+            const startUrl = location.href; // Capture URL for early abort
+            let lastCheckTime = startTime;
+            let rafId = null;
+
+            const check = () => {
+                const now = Date.now();
+
+                // Throttle the checks to match the requested interval
+                if (now - lastCheckTime >= intervalMs) {
+                    lastCheckTime = now;
+                    try {
+                        // Abort if the user navigates away early
+                        if (location.href !== startUrl) {
+                            return resolve(null);
+                        }
+
+                        const result = conditionFn();
+                        if (result) {
+                            return resolve(result); // Success
+                        } 
+                        
+                        // Check for timeout
+                        if (now - startTime >= timeout) {
+                            return resolve(null); // Timeout reached cleanly
+                        }
+                    } catch (error) {
+                        window.YPP.Utils?.log('Error in pollFor condition execution', 'UTILS', 'warn');
+                        return resolve(null);
                     }
-                } catch (error) {
-                    clearInterval(timer);
-                    window.YPP.Utils?.log('Error in pollFor condition', 'UTILS', 'warn');
-                    resolve(null);
                 }
-            }, interval);
+                
+                // Continue polling aligned with browser frame rate
+                rafId = requestAnimationFrame(check);
+            };
+
+            rafId = requestAnimationFrame(check);
         });
     },
 

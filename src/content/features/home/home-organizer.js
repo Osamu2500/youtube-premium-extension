@@ -6,12 +6,13 @@ window.YPP.features = window.YPP.features || {};
  * Home Feed Organizer
  * Manages channel tagging, visual priorities, and feed organization
  */
-window.YPP.features.HomeOrganizer = class HomeOrganizer {
+window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.features.BaseFeature {
     constructor() {
+        super('HomeOrganizer');
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
-        // Use the shared DOMObserver mechanism
-        this.domObserver = new window.YPP.Utils.DOMObserver(); 
+        // Use the shared DOMObserver mechanism from BaseFeature, fallback if missing
+        this.domObserver = this.observer || new window.YPP.Utils.DOMObserver(); 
         /** @type {Object<string, string[]>} Channel name to folder tags mapping */
         this.channelTags = {};
         /** @type {Object<string, string[]>} Folders loaded from SubscriptionFolders */
@@ -61,7 +62,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
                 this.removePopover();
             }
         };
-        document.addEventListener('click', this._boundClickListener);
+        // Use tracked listener to prevent SPA memory leaks
+        this.addListener(document, 'click', this._boundClickListener);
     }
 
     /**
@@ -79,7 +81,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer {
         this.removePopover();
 
         if (this._boundClickListener) {
-            document.removeEventListener('click', this._boundClickListener);
+            // Clean up tracked events automatically
+            this.cleanupEvents();
         }
         
         this.Utils.log('Home Organizer Disabled', 'HOME');

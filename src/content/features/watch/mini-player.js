@@ -88,7 +88,7 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
                 this.startObserving();
             }
         } catch (error) {
-            this.utils.log?.('MiniPlayer initialization timed out waiting for player elements', 'MINIPLAYER', 'warn');
+            this.utils.log('MiniPlayer initialization timed out waiting for player elements', 'MINIPLAYER', 'warn');
         }
     }
 

@@ -15,7 +15,10 @@ window.YPP.features.VideoFilters = class VideoFilters {
             saturate: 100,
             grayscale: 0,
             sepia: 0,
-            invert: 0
+            invert: 0,
+            hueRotate: 0,
+            blur: 0,
+            opacity: 100
         };
         this.panel = null;
         this.btn = null;
@@ -182,7 +185,10 @@ window.YPP.features.VideoFilters = class VideoFilters {
             { id: 'saturate', name: 'Saturation', min: 0, max: 200, unit: '%' },
             { id: 'grayscale', name: 'Grayscale', min: 0, max: 100, unit: '%' },
             { id: 'sepia', name: 'Sepia', min: 0, max: 100, unit: '%' },
-            { id: 'invert', name: 'Invert', min: 0, max: 100, unit: '%' }
+            { id: 'invert', name: 'Invert', min: 0, max: 100, unit: '%' },
+            { id: 'hueRotate', name: 'Hue Rotate', min: 0, max: 360, unit: 'deg' },
+            { id: 'blur', name: 'Blur', min: 0, max: 10, unit: 'px' },
+            { id: 'opacity', name: 'Opacity', min: 0, max: 100, unit: '%' }
         ];
 
         configs.forEach(cfg => {
@@ -230,7 +236,10 @@ window.YPP.features.VideoFilters = class VideoFilters {
             saturate: 100,
             grayscale: 0,
             sepia: 0,
-            invert: 0
+            invert: 0,
+            hueRotate: 0,
+            blur: 0,
+            opacity: 100
         };
         this.applyFilters();
         if (this.panel) {
@@ -245,7 +254,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         if (!this.videoElement) return;
 
         const f = this.filters;
-        const filterString = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%) grayscale(${f.grayscale}%) sepia(${f.sepia}%) invert(${f.invert}%)`;
+        const filterString = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%) grayscale(${f.grayscale}%) sepia(${f.sepia}%) invert(${f.invert}%) hue-rotate(${f.hueRotate}deg) blur(${f.blur}px) opacity(${f.opacity}%)`;
         
         this.videoElement.style.filter = filterString;
     }
