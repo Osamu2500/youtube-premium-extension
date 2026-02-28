@@ -175,12 +175,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         const contents = document.querySelector(this.CONSTANTS.SELECTORS.GRID_CONTENTS);
         if (!contents) return;
 
-        // Feature 1: Separators
-        if (!document.querySelector('.ypp-separator-top')) {
-            const topSeparator = this.createSeparator('Top Recommendations', 'ypp-separator-top');
-            contents.prepend(topSeparator);
-            topSeparator.onclick = () => this.toggleSection(topSeparator);
-        }
+        // Feature 1: Separators removed per user request
 
         // Process Items in a single pass (Priority, Tags, Watched Status)
         this._processGridItems(contents);
