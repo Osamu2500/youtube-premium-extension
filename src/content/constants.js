@@ -215,6 +215,7 @@ window.YPP.CONSTANTS = {
         navPlaylists: true,
         navHistory: true,
         forceHideSidebar: false,
+        hoverSidebar: true,
 
         // Shorts Tools
         shortsAutoScroll: false,

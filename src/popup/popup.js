@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'zenMode',
         'autoCinema',
         'autoPiP',
+        'hoverSidebar',
         'studyMode',
         'ambientMode',
         'audioModeEnabled',

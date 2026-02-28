@@ -165,6 +165,107 @@ html.yt-premium-plus-theme body {
   display: none;
 }
 
+/* Hover Sidebar (Top-Collapse Drawer) */
+body.ypp-hover-sidebar #secondary,
+body.ypp-hover-sidebar ytd-watch-flexy #secondary,
+body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer {
+  position: absolute !important;
+  top: 12px !important;
+  right: 24px !important;
+  width: 402px !important;
+  min-width: 0 !important;
+  max-width: 90vw !important;
+  height: auto !important;
+  max-height: 48px !important;
+  flex: none !important;
+  background: rgba(15, 15, 15, 0.95) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+  z-index: 9999 !important;
+  transition: max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
+  padding: 0 16px 16px 16px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.ypp-hover-sidebar #secondary:hover,
+body.ypp-hover-sidebar ytd-watch-flexy #secondary:hover,
+body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer:hover {
+  max-height: calc(100vh - var(--ytd-masthead-height, 56px) - 24px) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8) !important;
+  border-color: rgba(62, 166, 255, 0.5) !important;
+  overflow-y: auto !important;
+  border-bottom: 1px solid rgba(62, 166, 255, 0.5) !important;
+}
+
+/* Invisible extended hover trigger zone for the collapsed bar */
+body.ypp-hover-sidebar #secondary::before,
+body.ypp-hover-sidebar ytd-watch-flexy #secondary::before,
+body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: transparent;
+  z-index: 9999;
+}
+
+/* Hover Handle indicator (Horizontal Drawer Pill) */
+body.ypp-hover-sidebar #secondary::after,
+body.ypp-hover-sidebar ytd-watch-flexy #secondary::after,
+body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  right: 50%;
+  transform: translateX(50%);
+  width: 60px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 4px;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+body.ypp-hover-sidebar #secondary:hover::after,
+body.ypp-hover-sidebar ytd-watch-flexy #secondary:hover::after,
+body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer:hover::after {
+  opacity: 0.2;
+}
+
+/* Expand Primary Column to fill the freed space */
+body.ypp-hover-sidebar #primary.ytd-watch-flexy,
+body.ypp-hover-sidebar ytd-watch-flexy[flexy] #primary.ytd-watch-flexy {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding-right: 24px !important;
+}
+
+/* Hide scrollbar of the sidebar */
+body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar {
+  width: 8px;
+}
+body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar-track {
+  background: transparent;
+}
+body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
 /* Hide End Screens */
 .ypp-hide-endscreens .ytp-ce-element,
 .ypp-hide-endscreens .ytp-endscreen-content {
@@ -191,9 +292,11 @@ body.ypp-hide-scrollbar {
   scrollbar-width: none;
 }
 
-/* Hide Shorts & Mixes (Global) - Comprehensive Coverage */
+/* ===================================================================================
+   SHORTS & MIXES HIDING (Global Coverage)
+   =================================================================================== */
 
-/* Primary Shorts Shelves & Renderers */
+/* --- Primary Shorts Shelves & Global Renderers --- */
 body.ypp-hide-shorts ytd-reel-shelf-renderer,
 body.ypp-hide-shorts ytd-rich-shelf-renderer[is-shorts],
 body.ypp-hide-shorts ytd-rich-section-renderer[is-shorts],
@@ -202,51 +305,52 @@ body.ypp-hide-shorts ytd-shelf-renderer[is-shorts],
 body.ypp-hide-shorts [is-shorts],
 body.ypp-hide-shorts ytm-reel-shelf-renderer,
 
-/* New renderer types (2024+) */
+/* --- New Renderer Types (2024+) --- */
 body.ypp-hide-shorts reels-video-with-pill-title-renderer,
 body.ypp-hide-shorts ytd-reel-video-renderer,
 body.ypp-hide-shorts grid-shelf-view-model,
 body.ypp-hide-shorts ytd-reel-item-renderer,
 body.ypp-hide-shorts ytd-shorts,
 
-/* Individual Shorts Videos - All Renderers */
+/* --- Individual Shorts Videos (URL Match) --- */
+/* Note: Using :has() is expensive but necessary for URL matching on parent containers */
 body.ypp-hide-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-video-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-grid-video-renderer:has(a[href*="/shorts/"]),
-body.ypp-hide-shorts ytd-grid-video-renderer:has(span#text[aria-label="Shorts"]),
 body.ypp-hide-shorts ytd-compact-video-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-playlist-video-renderer:has(a[href*="/shorts/"]),
 
-/* Shorts Badge/Label Detection */
+/* --- Shorts Badge/Label Detection --- */
+body.ypp-hide-shorts ytd-grid-video-renderer:has(span#text[aria-label="Shorts"]),
 body.ypp-hide-shorts ytd-compact-video-renderer:has(span[aria-label="Shorts"]),
 body.ypp-hide-shorts ytd-video-renderer:has(span[aria-label="Shorts"]),
 body.ypp-hide-shorts ytd-video-renderer:has(ytd-badge-supported-renderer[aria-label="Shorts"]),
 body.ypp-hide-shorts ytd-rich-item-renderer:has(ytd-badge-supported-renderer[aria-label="Shorts"]),
 
-/* Navigation - Sidebar & Mini Guide */
+/* --- Navigation (Sidebar & Guide) --- */
 body.ypp-hide-shorts ytd-guide-entry-renderer:has(a[title="Shorts"]),
 body.ypp-hide-shorts ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
 
-/* Channel Page - Shorts Tab */
+/* --- Channel Page Tabs --- */
 body.ypp-hide-shorts tp-yt-paper-tab[aria-label="Shorts"],
 body.ypp-hide-shorts tp-yt-paper-tab[tab-title="Shorts"],
 body.ypp-hide-shorts yt-tab-shape[tab-title="Shorts"],
 
-/* Search & Filter Chips */
+/* --- Search & Chip Filters --- */
 body.ypp-hide-shorts yt-chip-cloud-chip-renderer:has(a[href*="/shorts"]),
 
-/* Shelf Title Detection (Text & Attribute-based) */
+/* --- Shelf Title Detection --- */
 body.ypp-hide-shorts ytd-shelf-renderer:has(span#title[aria-label*="Shorts"]),
 body.ypp-hide-shorts ytd-shelf-renderer:has(div#title-container h2 span[aria-label*="Shorts"]),
 body.ypp-hide-shorts ytd-shelf-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-shelf-renderer:has(ytd-icon-button-renderer[aria-label="Shorts"]),
 
-/* Watch Page Sidebar - Related Shorts */
+/* --- Watch Page (Secondary Results) --- */
 body.ypp-hide-shorts #related ytd-reel-shelf-renderer,
 body.ypp-hide-shorts #related ytd-compact-video-renderer:has(a[href*="/shorts/"]),
 body.ypp-hide-shorts ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer,
 
-/* Subscription Feed - grid container Shorts */
+/* --- Subscription Feed --- */
 body.ypp-hide-shorts ytd-rich-section-renderer:has([is-shorts]),
 body.ypp-hide-shorts #grid-container ytd-rich-item-renderer:has(a[href*="/shorts/"]),
 
@@ -2426,31 +2530,7 @@ body.yt-premium-plus-theme ytd-rich-item-renderer:hover .ypp-tag-btn {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Category Separators */
-.ypp-feed-separator {
-  grid-column: 1 / -1;
-  display: flex !important;
-  align-items: center;
-  margin: 32px 0 16px 0;
-  padding: 0 8px;
-  width: 100%;
-}
 
-.ypp-feed-separator span {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--ypp-text-primary);
-  margin-right: 16px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -0.5px;
-}
-
-.ypp-feed-separator::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--ypp-glass-border), transparent);
-}
 
 /* ===================================================================================
    6. SEARCH REDESIGN (Imported from Main & Optimized for Pro Max)

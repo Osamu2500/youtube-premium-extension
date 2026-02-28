@@ -95,23 +95,16 @@ class ElementCache {
     }
 
     /**
-     * Get cache statistics
+     * Get cache statistics without forcing synchronous DOM reflows.
+     * The cache lazily self-invalidates on 'get' anyway, so returning 
+     * the raw size is much faster and usually accurate enough for stats.
      * @returns {Object}
      */
     getStats() {
-        let valid = 0;
-        let invalid = 0;
-
-        this._cache.forEach((element, key) => {
-            if (element && document.contains(element)) {
-                valid++;
-            } else {
-                invalid++;
-                this._cache.delete(key);
-            }
-        });
-
-        return { valid, invalid, total: valid };
+        return { 
+            totalCachedItems: this._cache.size,
+            activeObservers: this._observers.size
+        };
     }
 
     /**

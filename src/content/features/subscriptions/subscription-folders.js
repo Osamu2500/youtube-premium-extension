@@ -672,9 +672,12 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             popover.className = 'ypp-glass-popover';
             document.body.appendChild(popover);
             
-            // Click outside to close
+            // Click outside to close (use dynamic closest checks instead of stale closures)
             document.addEventListener('click', (e) => {
-                if (!popover.contains(e.target) && e.target !== buttonEl) {
+                const clickedInside = popover.contains(e.target);
+                const clickedFolderBtn = e.target.closest('.ypp-card-folder-btn') || e.target.closest('#ypp-channel-folder-btn');
+                
+                if (!clickedInside && !clickedFolderBtn) {
                     popover.classList.remove('visible');
                 }
             });

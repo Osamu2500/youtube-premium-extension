@@ -89,14 +89,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         'ytd-channel-renderer',
     ]);
 
-    /**
-     * SVG Icons for the view toggle buttons
-     * @readonly
-     */
-    static ICONS = {
-        GRID: '<svg viewBox="0 0 24 24" height="20" width="20"><path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z" fill="currentColor"/></svg>',
-        LIST: '<svg viewBox="0 0 24 24" height="20" width="20"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z" fill="currentColor"/></svg>'
-    };
+
 
     // =========================================================================
     // INITIALIZATION
@@ -219,13 +212,11 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         this._isEnabled = false;
         
         this._disconnectObserver();
-        // Remove all body state classes on disable
         document.body.classList.remove(
             SearchRedesign.CLASSES.GRID_MODE,
             SearchRedesign.CLASSES.LIST_MODE,
             'ypp-search-clean-grid'
         );
-        this._removeViewToggle();
         document.body.classList.remove('ypp-filter-pending'); // Cleanup
         window.removeEventListener('yt-navigate-finish', this._handleNavigation);
 
@@ -424,100 +415,7 @@ window.YPP.features.SearchRedesign = class SearchRedesign {
         }
     }
 
-    /**
-     * Inject the Grid/List toggle buttons into the YouTube UI
-     * @private
-     */
-    _injectViewToggle() {
-        // Poll for the filter menu container
-        this._pollForElement(SearchRedesign.SELECTORS.FILTER_HEADER, (container) => {
-            // Avoid duplicate injection
-            if (document.getElementById('ypp-view-toggle')) return;
 
-            // Create Container
-            const toggleContainer = document.createElement('div');
-            toggleContainer.id = 'ypp-view-toggle';
-            toggleContainer.className = SearchRedesign.CLASSES.TOGGLE_CONTAINER;
-
-            // Create Grid Button
-            const gridBtn = this._createToggleButton(
-                SearchRedesign.MODES.GRID, 
-                'Grid View', 
-                SearchRedesign.ICONS.GRID
-            );
-            
-            // Create List Button
-            const listBtn = this._createToggleButton(
-                SearchRedesign.MODES.LIST, 
-                'List View', 
-                SearchRedesign.ICONS.LIST
-            );
-
-            toggleContainer.appendChild(gridBtn);
-            toggleContainer.appendChild(listBtn);
-
-            // Insert into DOM
-            container.appendChild(toggleContainer);
-            this._updateToggleButtonState();
-        });
-    }
-
-    /**
-     * Helper to create a toggle button element
-     * @private
-     * @param {string} mode - Mode associated with the button
-     * @param {string} title - Tooltip title
-     * @param {string} iconSvg - SVG content
-     * @returns {HTMLElement}
-     */
-    _createToggleButton(mode, title, iconSvg) {
-        const btn = document.createElement('button');
-        btn.className = SearchRedesign.CLASSES.TOGGLE_BTN;
-        btn.title = title;
-        btn.dataset.mode = mode;
-        
-        // Safety: Use DOMParser to avoid direct innerHTML assignment
-        try {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
-            if (doc.documentElement && doc.documentElement.tagName === 'svg') {
-                btn.appendChild(doc.documentElement);
-            } else {
-                throw new Error('Invalid SVG');
-            }
-        } catch (e) {
-            // Fallback for safety (though constants should be valid)
-            btn.textContent = title;
-            this._log('Error parsing SVG icon: ' + e.message, 'warn');
-        }
-        
-        btn.addEventListener('click', (e) => {
-            // Prevent default YouTube navigation if any
-            e.preventDefault();
-            e.stopPropagation();
-            this._setViewMode(mode);
-        });
-
-        return btn;
-    }
-
-    /**
-     * No-op: toggle UI is now in the popup, not injected into the page.
-     * Kept for backward-compat with disable() which calls _removeViewToggle().
-     * @private
-     */
-    _updateToggleButtonState() { /* no-op — UI is in popup */ }
-
-    /**
-     * Remove the toggle button from DOM
-     * @private
-     */
-    _removeViewToggle() {
-        const toggle = document.getElementById('ypp-view-toggle');
-        if (toggle) {
-            toggle.remove();
-        }
-    }
 
     /**
      * Poll for a DOM element with exponential backoff

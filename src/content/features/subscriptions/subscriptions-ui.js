@@ -11,7 +11,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
     init() {
         // Resolve dependency if missing
         if (!this.manager && window.YPP.Main && window.YPP.Main.featureManager) {
-             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionManager');
+             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionFolders');
         }
 
         if (!this.manager) {

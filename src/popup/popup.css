@@ -586,6 +586,41 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 50%;
 }
 
+/* Highlighted specific cards */
+.toggle-card.highlight-card {
+  border-color: rgba(62, 166, 255, 0.4);
+  background: linear-gradient(180deg, rgba(62, 166, 255, 0.1), rgba(62, 166, 255, 0.02));
+  box-shadow: 0 4px 16px rgba(62, 166, 255, 0.15);
+}
+
+.toggle-card.highlight-card:hover {
+  background: linear-gradient(180deg, rgba(62, 166, 255, 0.15), rgba(62, 166, 255, 0.05));
+  box-shadow: 0 8px 24px rgba(62, 166, 255, 0.3);
+  border-color: rgba(62, 166, 255, 0.6);
+}
+
+/* NEW Badge */
+@keyframes pulseNewBadge {
+  0% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0.6); }
+  70% { box-shadow: 0 0 0 4px rgba(255, 78, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0); }
+}
+
+.badge-new {
+  font-size: 9px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff4e45, #ff007b);
+  padding: 2px 6px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulseNewBadge 2s infinite;
+  display: inline-block;
+}
+
 /* --- Theme Selection Grid --- */
 .theme-grid {
   display: grid;
@@ -675,6 +710,7 @@ input[type="color"]::-webkit-color-swatch {
 /* --- Range Sliders (Premium Styling) --- */
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   background: transparent;
   margin: 8px 0;
@@ -701,6 +737,7 @@ input[type="range"]::-webkit-slider-thumb {
   background: #ffffff;
   cursor: pointer;
   -webkit-appearance: none;
+  appearance: none;
   margin-top: -7px;
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
