@@ -881,7 +881,7 @@ ytd-mini-guide-renderer {
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(4px);
   color: var(--ypp-text-secondary);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
   text-decoration: none;
   position: relative;
@@ -900,7 +900,7 @@ ytd-mini-guide-renderer {
 }
 
 .ypp-nav-btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.95);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -1016,10 +1016,10 @@ ytd-mini-guide-renderer {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   padding: 16px !important;
   box-sizing: border-box !important;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              border-color 0.4s ease, 
-              background 0.4s ease !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              border-color 0.3s ease, 
+              background 0.3s ease !important;
   transform: translateZ(0); /* Hardware Acceleration */
   will-change: transform, box-shadow, border-color, background;
   /* isolation: new stacking context → prevents backdrop-filter leaking outside card */
@@ -1083,12 +1083,12 @@ ytd-mini-guide-renderer {
 /* Consolidate Duplicate Hover Effects into One Premium Animation */
 .yt-premium-plus-theme ytd-rich-item-renderer:hover {
   /* Use only translateY — scale() can cause sub-pixel rendering gaps on edges causing artifact */
-  transform: translateY(-8px) !important;
+  transform: translateY(-4px) !important;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)) !important;
   border-color: rgba(62, 166, 255, 0.4) !important;
   border-top-color: rgba(62, 166, 255, 0.6) !important;
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 16px 40px rgba(0, 0, 0, 0.65),
     0 0 28px rgba(62, 166, 255, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   z-index: 10;
@@ -1208,10 +1208,10 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   border-radius: var(--ypp-radius-lg);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
   overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              border-color 0.4s ease, 
-              background 0.4s ease !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              border-color 0.3s ease, 
+              background 0.3s ease !important;
   box-sizing: border-box;
   position: relative;
   transform: translateZ(0);
@@ -1270,12 +1270,12 @@ body.ypp-search-grid-mode ytd-radio-renderer a.ytd-radio-renderer {
 body.ypp-search-grid-mode ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-playlist-renderer:hover,
 body.ypp-search-grid-mode ytd-radio-renderer:hover {
-  transform: translateY(-8px) scale(1.02) !important;
+  transform: translateY(-4px) scale(1.01) !important;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)) !important;
   border-color: rgba(62, 166, 255, 0.5) !important;
   border-top-color: rgba(62, 166, 255, 0.8) !important;
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 16px 40px rgba(0, 0, 0, 0.65),
     0 0 32px rgba(62, 166, 255, 0.3),
     inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
   z-index: 10;
@@ -1469,10 +1469,10 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   align-items: center !important;
   justify-content: space-between !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              border-color 0.4s ease, 
-              background 0.4s ease !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              border-color 0.3s ease, 
+              background 0.3s ease !important;
   position: relative;
   overflow: hidden;
   max-width: 1400px; /* Instead of stretching purely full 100%, limit max width so it resembles a controlled banner */
@@ -1481,13 +1481,13 @@ body.ypp-search-grid-mode ytd-channel-renderer {
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer:hover {
-  transform: translateY(-4px) scale(1.01) !important;
+  transform: translateY(-3px) scale(1.005) !important;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)) !important;
   border-color: rgba(62, 166, 255, 0.5) !important;
   border-top-color: rgba(62, 166, 255, 0.8) !important;
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.55),
-    0 0 32px rgba(62, 166, 255, 0.3),
+    0 14px 32px rgba(0, 0, 0, 0.6),
+    0 0 24px rgba(62, 166, 255, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
   z-index: 10;
 }
