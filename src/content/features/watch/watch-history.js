@@ -44,7 +44,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
 
     init() {
         this.initialized = true;
-        console.log('[YPP Tracker] Initialized');
+        window.YPP.Utils?.log('Initialized', 'TRACKER');
         
         // Handle Navigation (SPA)
         window.addEventListener('yt-navigate-finish', () => this.handleNavigation());
@@ -71,7 +71,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         
         if (!isWatch && !isShorts) return;
 
-        console.log('[YPP Tracker] Navigation: detected watch/shorts page.');
+        window.YPP.Utils?.log('Navigation: detected watch/shorts page.', 'TRACKER');
 
         // Extract ID immediately
         const urlParams = new URLSearchParams(window.location.search);
@@ -79,7 +79,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         if (isShorts) videoId = location.pathname.split('/shorts/')[1];
 
         if (!videoId) {
-            console.log('[YPP Tracker] No Video ID found yet.');
+            window.YPP.Utils?.log('No Video ID found yet.', 'TRACKER', 'debug');
             return;
         }
 
@@ -105,7 +105,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
                 this.attachListeners(video);
             }
         } catch (error) {
-            console.log('[YPP Tracker] Gave up finding video element.');
+            window.YPP.Utils?.log('Gave up finding video element.', 'TRACKER', 'warn');
         }
     }
 
@@ -123,7 +123,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         video.addEventListener('play', this.handlePlay);
         video.addEventListener('pause', this.handlePause);
         
-        console.log(`[YPP Tracker] Tracking started for ${this.activeVideoId}`);
+        window.YPP.Utils?.log(`Tracking started for ${this.activeVideoId}`, 'TRACKER');
     }
 
     stopTracking() {
@@ -243,7 +243,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
 
             await chrome.storage.local.set({ [storageKey]: dayRecord });
             
-            console.log(`[YPP Tracker] Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`);
+            window.YPP.Utils?.log(`Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`, 'TRACKER', 'debug');
 
             // Check watch time alert
             this._checkWatchTimeAlert(dayRecord.totalSeconds);
@@ -253,7 +253,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
                 // Ignore silent context invalidation on extension reload
                 return;
             }
-            console.error('[YPP Tracker] Save failed:', e);
+            window.YPP.Utils?.log('Save failed: ' + e.message, 'TRACKER', 'error');
         }
     }
 

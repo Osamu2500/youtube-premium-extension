@@ -9,12 +9,13 @@ window.YPP.features = window.YPP.features || {};
  * Player Tools
  * @class PlayerTools
  */
-window.YPP.features.PlayerTools = class PlayerTools {
+window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.BaseFeature {
     /**
      * Initialize Player Tools
      * @constructor
      */
     constructor() {
+        super('PlayerTools');
         this._initConstants();
         this._initState();
     }
@@ -81,7 +82,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
         if (this._isActive) return;
 
         this._isActive = true;
-        this._Utils.log('Enabled Player Tools', 'PLAYER_TOOLS');
+        this.utils.log('Enabled Player Tools', 'PLAYER_TOOLS');
         
         // Inject styles
         this._injectStyles();
@@ -98,7 +99,8 @@ window.YPP.features.PlayerTools = class PlayerTools {
         this._isActive = false;
         this._removeControls();
         this._cleanupListeners();
-        this._Utils.removeStyle('ypp-player-tools-style');
+        // BaseFeature automatically unbinds added listeners on disable
+        this.utils.removeStyle('ypp-player-tools-style');
     }
 
     // =========================================================================
@@ -110,18 +112,18 @@ window.YPP.features.PlayerTools = class PlayerTools {
      * @private
      */
     async _startMonitoring() {
-        if (!this._Utils.pollFor) return;
+        if (!this.utils.pollFor) return;
 
         try {
-            const controls = await this._Utils.pollFor(() => document.querySelector(this._SELECTORS.VIDEO_CONTROLS), 10000, 500);
+            const controls = await this.utils.pollFor(() => document.querySelector(this._SELECTORS.VIDEO_CONTROLS), 10000, 500);
             if (!this._isActive || !controls) return;
             
             this._injectControls(controls);
             
-            // Re-check on navigation
-            window.addEventListener('yt-navigate-finish', () => this._checkForPlayer());
+            // Re-check on navigation (Memory-managed)
+            this.addListener(window, 'yt-navigate-finish', () => this._checkForPlayer());
         } catch (error) {
-            this._Utils.log?.('PlayerTools timeout waiting for controls', 'PLAYER_TOOLS', 'warn');
+            this.utils.log?.('PlayerTools timeout waiting for controls', 'PLAYER_TOOLS', 'warn');
         }
     }
 
@@ -203,7 +205,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
                 100% { opacity: 0; }
             }
         `;
-        this._Utils.addStyle(css, 'ypp-player-tools-style');
+        this.utils.addStyle(css, 'ypp-player-tools-style');
     }
 
     /**
@@ -243,7 +245,7 @@ window.YPP.features.PlayerTools = class PlayerTools {
         input.step = this._PLAYER.SPEED_STEP || 0.1;
         input.min = this._PLAYER.SPEED_MIN || 0.1;
         input.max = this._PLAYER.SPEED_MAX || 5.0;
-        input.value = this._Utils.getVideo()?.playbackRate?.toFixed(1) || '1.0';
+        input.value = this.utils.getVideo()?.playbackRate?.toFixed(1) || '1.0';
         input.title = 'Custom Speed (e.g. 2.5)';
 
         input.addEventListener('change', (e) => {
