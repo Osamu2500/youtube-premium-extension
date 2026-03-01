@@ -18,7 +18,7 @@ window.YPP.features.SubscriptionsOrganizer = class SubscriptionsOrganizer {
         this.logger.info('Running Subscriptions Organizer');
         
         // Inject styles
-        window.YPP.Utils.injectCSS('src/content/features/subscriptions/subscriptions.css', 'ypp-subs-css');
+        window.YPP.Utils.injectCSS('src/content/features/pages/subscriptions/subscriptions.css', 'ypp-subs-css');
 
         await this.manager.init();
         this.ui.init();

@@ -15,7 +15,7 @@ window.YPP.features.VideoControls = class VideoControls {
         this.isActive = true;
         
         // Inject styles
-        this.Utils.injectCSS('src/content/features/video-controls/video-controls.css', 'ypp-video-controls-css');
+        this.Utils.injectCSS('src/content/features/player/video-controls/video-controls.css', 'ypp-video-controls-css');
 
         this.injectToggle();
     }
