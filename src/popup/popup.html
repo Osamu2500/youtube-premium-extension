@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="theme-vars.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
     />
     <style>
       .theme-select-container {
@@ -60,8 +59,8 @@
         cursor: text;
       }
       .shortcut-input:focus {
-        border-color: #3ea6ff;
-        background: rgba(62,166,255,0.1);
+        border-color: #ff4e45;
+        background: rgba(255,78,69,0.1);
       }
     </style>
   </head>
@@ -176,7 +175,7 @@
         <!-- TAB: HOME -->
         <section id="tab-home" class="tab-content active">
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Hook Free Home</span>
@@ -232,7 +231,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Hide Shorts</span>
@@ -283,7 +282,7 @@
         <!-- TAB: PLAYER -->
         <section id="tab-player" class="tab-content">
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">SponsorBlock</span>
@@ -309,7 +308,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3" style="margin-bottom: 6px">
+            <div class="grid-4" style="margin-bottom: 6px">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Auto-Quality (Highest)</span>
@@ -399,7 +398,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Cinema Filters</span>
@@ -502,7 +501,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Focus Mode</span>
@@ -557,7 +556,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Custom Style</span>
@@ -572,13 +571,13 @@
                 <div class="info">
                   <span class="name">Custom Color</span>
                 </div>
-                <input type="color" id="progressBarColor" value="#3ea6ff" />
+                <input type="color" id="progressBarColor" value="#ff4e45" />
               </div>
             </div>
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Redirect Shorts</span>
@@ -620,7 +619,7 @@
                 <span class="desc"><span id="watchTimeAlertHoursValue">2</span>h</span>
               </div>
               <input type="range" id="watchTimeAlertHours" min="1" max="8" step="1" value="2"
-                style="width:100%; accent-color:#3ea6ff; margin-top:4px" />
+                style="width:100%; accent-color:#ff4e45; margin-top:4px" />
             </div>
           </div>
         </section>
@@ -628,7 +627,7 @@
         <!-- TAB: SUBSCRIPTIONS -->
         <section id="tab-subscriptions" class="tab-content">
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Subscription Folders</span>
@@ -690,7 +689,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <button
                 id="exportFoldersBtn"
                 class="action-btn"
@@ -792,7 +791,7 @@
           </div>
 
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Playlist Duration</span>
@@ -828,7 +827,7 @@
         <!-- TAB: SEARCH RESULTS -->
         <section id="tab-search" class="tab-content">
           <div class="card-group">
-            <div class="grid-3">
+            <div class="grid-4">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Glass Grid View</span>
@@ -956,7 +955,7 @@
         <!-- TAB: THEMES & APPEARANCE -->
         <section id="tab-themes" class="tab-content">
           <div class="card-group">
-            <div class="grid-3" style="margin-bottom: 6px">
+            <div class="grid-4" style="margin-bottom: 6px">
               <div class="toggle-card">
                 <div class="info">
                   <span class="name">Premium Theme</span>
@@ -996,7 +995,7 @@
               <span class="name">Blue Light Filter</span>
               <span class="desc" id="blueLightValue">0%</span>
             </div>
-            <input type="range" id="blueLight" min="0" max="90" step="5" style="width: 100%; accent-color: #3ea6ff" />
+            <input type="range" id="blueLight" min="0" max="90" step="5" style="width: 100%; accent-color: #ff4e45" />
           </div>
 
           <div class="setting-item" style="flex-direction: column; align-items: flex-start">
@@ -1004,7 +1003,7 @@
               <span class="name">Dim Screen</span>
               <span class="desc" id="dimValue">0%</span>
             </div>
-            <input type="range" id="dim" min="0" max="90" step="5" style="width: 100%; accent-color: #3ea6ff" />
+            <input type="range" id="dim" min="0" max="90" step="5" style="width: 100%; accent-color: #ff4e45" />
           </div>
         </section>
 
@@ -1021,7 +1020,7 @@
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="grid-3" style="margin-top: 10px">
+            <div class="grid-4" style="margin-top: 10px">
               <div class="setting-item">
                 <div class="info"><span class="name">Shorts</span></div>
                 <label class="toggle"><input type="checkbox" id="navShorts" /><span class="slider"></span></label>
@@ -1086,49 +1085,7 @@
       </main>
     </div>
 
-              <div class="toggle-card">
-                <div class="info">
-                  <span class="name">Clean Search</span>
-                  <span class="desc">Remove ads & junk</span>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" id="cleanSearch" />
-                  <span class="slider"></span>
-                </label>
-              </div>
 
-              <div class="toggle-card">
-                <div class="info">
-                  <span class="name">Hide Shorts in Search</span>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" id="hideSearchShorts" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="setting-item" style="margin-top: 6px">
-              <div class="info">
-                <span class="name">Grid Columns</span>
-                <span class="desc"
-                  >Videos per row: <span id="searchColumnsValue">4</span></span
-                >
-              </div>
-              <div class="range-container">
-                <input
-                  type="range"
-                  id="searchColumns"
-                  min="1"
-                  max="8"
-                  step="1"
-                  value="4"
-                />
-              </div>
-          </div>
-        </section>
-      </main>
-    </div>
     <script src="../content/constants.js"></script>
     <script src="../content/settings-schema.js"></script>
     <script src="../content/utils.js"></script>

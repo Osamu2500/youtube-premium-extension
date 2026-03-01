@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const display = document.getElementById(key + 'Value');
                             if (display) display.textContent = el.value + '%';
                         } else if (el.type === 'color' || el.type === 'text') {
-                            el.value = settings[key] || (key === 'progressBarColor' ? '#3ea6ff' : '');
+                            el.value = settings[key] || (key === 'progressBarColor' ? '#ff4e45' : '');
                         }
                     }
                 });
@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isActive = b.dataset.mode === mode;
                 b.classList.toggle('active', isActive);
                 b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
-                b.style.color = isActive ? '#3ea6ff' : 'rgba(255,255,255,0.5)';
+                b.style.color = isActive ? '#ff4e45' : 'rgba(255,255,255,0.5)';
             });
         };
 

@@ -8,84 +8,68 @@ window.YPP = window.YPP || {};
  * Manages visibility of distraction elements and handles Shorts redirects.
  * @class ContentControl
  */
-window.YPP.features.ContentControl = class ContentControl {
+window.YPP.features.ContentControl = class ContentControl extends window.YPP.features.BaseFeature {
     /**
      * Initialize Content Control
      */
     constructor() {
-        this.settings = null;
-        this._redirectListenerAdded = false;
-        this._isMonitoring = false;
-        this.Utils = window.YPP.Utils;
-        
-        // Initialize centralized DOM observer
-        this.domObserver = new window.YPP.Utils.DOMObserver();
+        super('ContentControl');
         
         // Bind methods for safe event listener removal
         this.checkRedirect = this.checkRedirect.bind(this);
         this.handleShortsAdded = this.handleShortsAdded.bind(this);
+        this._isMonitoringShorts = false;
     }
 
     /**
-     * Enable content control with settings
-     * @param {Object} settings - User settings
+     * Always active, manages its own sub-settings
+     * @returns {null}
      */
+    getConfigKey() {
+        return null;
+    }
 
-    enable(settings) {
-        this.run(settings);
+    /**
+     * Enable content control
+     */
+    async enable() {
+        await super.enable();
+        // Register navigation listener once, checkRedirect handles settings check
+        this.addListener(window, 'yt-navigate-start', this.checkRedirect);
+        this.applySettings();
     }
 
     /**
      * Disable content control and cleanup
      */
-    disable() {
-        // Revert all CSS classes
-        document.body.classList.remove(
-            'ypp-hide-comments',
-            'ypp-hide-sidebar',
-            'ypp-hide-endscreens',
-            'ypp-hide-cards',
-            'ypp-hide-merch'
-        );
-
-        // Remove Shorts CSS
-        this.showShortsGlobally();
-        
-        // Stop monitoring Shorts
-        this.stopShortsMonitoring();
-
-        // Remove listeners
-        if (this._redirectListenerAdded) {
-            window.removeEventListener('yt-navigate-start', this.checkRedirect);
-            this._redirectListenerAdded = false;
-        }
+    async disable() {
+        await super.disable();
+        this._cleanupDOM();
+        this._isMonitoringShorts = false;
     }
 
     /**
-     * Update settings and re-apply rules.
-     * @param {Object} settings 
+     * Update settings
      */
-    update(settings) {
-        this.run(settings);
+    async onUpdate() {
+        this.applySettings();
     }
 
     /**
      * Apply content control rules based on settings.
-     * @param {Object} settings 
      */
-    run(settings) {
-        this.settings = settings;
+    applySettings() {
+        const settings = this.settings;
 
         // 1. Shorts Handling
         if (settings.hideShorts) {
             this.hideShortsGlobally();
             this.removeShortsFromDOM();  // Initial removal
             this.startShortsMonitoring(); // Continuous monitoring
-            this.redirectShorts();
+            this.checkRedirect(); // Immediate check
         } else {
             this.showShortsGlobally();
             this.stopShortsMonitoring();
-            window.removeEventListener('yt-navigate-start', this.checkRedirect);
         }
 
         // 2. Class Toggles for other elements
@@ -96,6 +80,22 @@ window.YPP.features.ContentControl = class ContentControl {
         toggle('ypp-hide-endscreens', settings.hideEndScreens);
         toggle('ypp-hide-cards', settings.hideCards);
         toggle('ypp-hide-merch', settings.hideMerch);
+    }
+
+    /**
+     * Clean up manual DOM modifications
+     * @private
+     */
+    _cleanupDOM() {
+        // Revert all CSS classes
+        document.body.classList.remove(
+            'ypp-hide-comments',
+            'ypp-hide-sidebar',
+            'ypp-hide-endscreens',
+            'ypp-hide-cards',
+            'ypp-hide-merch',
+            'ypp-hide-shorts'
+        );
     }
 
     /**
@@ -185,7 +185,7 @@ window.YPP.features.ContentControl = class ContentControl {
 
         const duration = (performance.now() - startTime).toFixed(2);
         if (removed > 0) {
-            this.Utils?.log(`Removed ${removed} Shorts elements from DOM (${duration}ms)`, 'CONTENT');
+            this.utils?.log(`Removed ${removed} Shorts elements from DOM (${duration}ms)`, 'CONTENT');
         }
     }
 
@@ -272,33 +272,21 @@ window.YPP.features.ContentControl = class ContentControl {
     }
 
     /**
-     * Setup redirect logic for Shorts URLs.
-     */
-    redirectShorts() {
-        // Immediate check
-        this.checkRedirect();
-
-        // Add listener only once to avoid duplicates
-        if (!this._redirectListenerAdded) {
-            window.addEventListener('yt-navigate-start', this.checkRedirect);
-            this._redirectListenerAdded = true;
-        }
-    }
-
-    /**
      * Check if current URL is a Short and redirect to standard Watch.
      */
     checkRedirect() {
+        if (!this.settings?.hideShorts) return;
+
         if (location.pathname.startsWith('/shorts/')) {
             // Extract video ID and validate format
             const videoId = location.pathname.split('/shorts/')[1]?.split('/')[0];
 
             // YouTube video IDs are exactly 11 characters: alphanumeric, underscore, hyphen
             if (videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-                this.Utils?.log('Redirecting Short to Watch:', videoId, 'CONTENT');
+                this.utils?.log('Redirecting Short to Watch:', videoId, 'CONTENT');
                 location.replace('/watch?v=' + videoId);
             } else if (videoId) {
-                this.Utils?.log('Invalid video ID format:', videoId, 'CONTENT', 'warn');
+                this.utils?.log('Invalid video ID format:', videoId, 'CONTENT', 'warn');
             }
         }
     }
@@ -308,40 +296,34 @@ window.YPP.features.ContentControl = class ContentControl {
      * Uses centralized DOMObserver.
      */
     startShortsMonitoring() {
-        if (this._isMonitoring || !this.settings?.hideShorts) return;
+        if (this._isMonitoringShorts || !this.settings?.hideShorts) return;
 
-        this.Utils?.log('Starting continuous Shorts monitoring via DOMObserver', 'CONTENT');
+        this.utils?.log('Starting continuous Shorts monitoring via DOMObserver', 'CONTENT');
 
-        // Start the observer
-        this.domObserver.start();
-
-        // On search pages, do NOT watch ytd-video-renderer — those are real search results.
-        // The :has(a[href*="/shorts/"]) CSS + selector-based removal handles search Shorts correctly.
         const isSearchPage = window.location.pathname === '/results';
         const monitorSelector = isSearchPage
             ? 'ytd-rich-item-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-guide-entry-renderer, yt-chip-cloud-chip-renderer'
             : 'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-guide-entry-renderer, yt-chip-cloud-chip-renderer';
 
         // Register a callback for dynamically added content containers that might contain shorts
-        this.domObserver.register(
+        this.observer.register(
             'shorts-monitor',
             monitorSelector,
             this.handleShortsAdded,
             false // Don't run immediately, removeShortsFromDOM already did the initial pass
         );
 
-        this._isMonitoring = true;
+        this._isMonitoringShorts = true;
     }
 
     /**
      * Stop continuous Shorts monitoring
      */
     stopShortsMonitoring() {
-        if (this._isMonitoring) {
-            this.domObserver.unregister('shorts-monitor');
-            this.domObserver.stop();
-            this._isMonitoring = false;
-            this.Utils?.log('Stopped Shorts monitoring', 'CONTENT');
+        if (this._isMonitoringShorts) {
+            this.observer.unregister('shorts-monitor');
+            this._isMonitoringShorts = false;
+            this.utils?.log('Stopped Shorts monitoring', 'CONTENT');
         }
     }
 
@@ -394,7 +376,7 @@ window.YPP.features.ContentControl = class ContentControl {
         });
 
         if (removed > 0) {
-            this.Utils?.log(`Dynamic removal (Optimized): ${removed} Shorts elements`, 'CONTENT');
+            this.utils?.log(`Dynamic removal (Optimized): ${removed} Shorts elements`, 'CONTENT');
         }
     }
 };
