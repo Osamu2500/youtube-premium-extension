@@ -4025,3 +4025,237 @@ body.yt-premium-plus-theme .badge-style-type-starting-soon.ytd-badge-supported-r
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
+
+/* ===================================================================================
+   16. REDESIGNED UI ELEMENTS (PREMIUM GLASSMORPHIC AESTHETIC)
+   =================================================================================== */
+
+/* 1. Video Player Redesign */
+/* Detach control bar and add glassmorphism */
+body.yt-premium-plus-theme .ytp-chrome-bottom {
+  margin: 0 auto 12px auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: calc(100% - 24px) !important;
+  border-radius: 20px !important;
+  background: rgba(20, 20, 20, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  transition: opacity 0.25s cubic-bezier(0.0,0.0,0.2,1) !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+/* Reposition progress bar so it sits cleanly on top of the rounded glass container */
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container {
+  bottom: 56px !important; /* Move it completely above the player buttons row */
+  width: calc(100% - 48px) !important;
+  left: 24px !important;
+}
+
+/* Also apply to popups inside the player (e.g. settings menu) */
+body.yt-premium-plus-theme .ytp-popup {
+  border-radius: 16px !important;
+  background: rgba(20, 20, 20, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 2. Action Buttons Redesign (Beneath Video Title) */
+/* Container for the entire top row (Channel info + Actions) */
+body.yt-premium-plus-theme #top-row.ytd-watch-metadata {
+  margin-top: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+
+/* Channel Owner Section Pill */
+body.yt-premium-plus-theme #owner.ytd-watch-metadata {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 100px !important;
+  padding: 4px 16px 4px 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme #owner.ytd-watch-metadata:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Subscribe Button */
+body.yt-premium-plus-theme #subscribe-button > ytd-subscribe-button-renderer > yt-smartimation > div > yt-button-shape > button,
+body.yt-premium-plus-theme #subscribe-button ytd-button-renderer yt-button-shape > button {
+  background-color: var(--yt-spec-text-primary, #fff) !important;
+  color: var(--yt-spec-text-primary-inverse, #0f0f0f) !important;
+  border-radius: 100px !important;
+  margin-left: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+  border: none !important;
+}
+
+body.yt-premium-plus-theme #subscribe-button > ytd-subscribe-button-renderer > yt-smartimation > div > yt-button-shape > button:hover,
+body.yt-premium-plus-theme #subscribe-button ytd-button-renderer yt-button-shape > button:hover {
+  background-color: #e5e5e5 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button .yt-spec-button-shape-next__button-text-content {
+  color: inherit !important;
+}
+
+/* Actions Menu Container */
+body.yt-premium-plus-theme #actions.ytd-watch-metadata {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* Base button container fixes (remove native YouTube backgrounds that cause double layering) */
+body.yt-premium-plus-theme #actions-inner ytd-button-renderer yt-button-shape button,
+body.yt-premium-plus-theme #actions-inner ytd-download-button-renderer yt-button-shape button,
+body.yt-premium-plus-theme #actions-inner ytd-menu-renderer yt-button-shape button,
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button {
+  border: none !important;
+}
+
+/* Hide native ripple and dark mode overlay pseudo-elements responsible for the "double view" */
+body.yt-premium-plus-theme #actions-inner yt-button-shape button::before,
+body.yt-premium-plus-theme #actions-inner yt-button-shape button::after,
+body.yt-premium-plus-theme #actions-inner yt-touch-feedback-shape,
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button::before,
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button::after,
+body.yt-premium-plus-theme #subscribe-button yt-touch-feedback-shape {
+  display: none !important;
+}
+
+body.yt-premium-plus-theme #actions-inner ytd-button-renderer yt-button-shape button .yt-spec-button-shape-next__button-text-content,
+body.yt-premium-plus-theme #actions-inner ytd-download-button-renderer yt-button-shape button .yt-spec-button-shape-next__button-text-content,
+body.yt-premium-plus-theme #actions-inner ytd-menu-renderer yt-button-shape button .yt-spec-button-shape-next__button-text-content {
+  margin: 0 !important;
+}
+
+/* Individual Action Pills (Share, Download, Save, etc.) applying glassmorphism to the outer button structure */
+body.yt-premium-plus-theme #actions-inner ytd-button-renderer yt-button-shape > button,
+body.yt-premium-plus-theme #actions-inner ytd-download-button-renderer yt-button-shape > button,
+body.yt-premium-plus-theme #actions-inner ytd-menu-renderer yt-button-shape > button {
+  border-radius: 100px !important; 
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-weight: 500 !important;
+  color: var(--ypp-text-primary, #fff) !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme #actions-inner ytd-button-renderer yt-button-shape > button:hover,
+body.yt-premium-plus-theme #actions-inner ytd-download-button-renderer yt-button-shape > button:hover,
+body.yt-premium-plus-theme #actions-inner ytd-menu-renderer yt-button-shape button:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Segmented Like/Dislike Button Fixes */
+/* Reset background on the container so we can style the inner buttons */
+body.yt-premium-plus-theme #segmented-like-button yt-button-shape button,
+body.yt-premium-plus-theme #segmented-dislike-button yt-button-shape button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.yt-premium-plus-theme ytd-segmented-like-dislike-button-renderer {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 100px !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 36px !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme ytd-segmented-like-dislike-button-renderer:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Like button side */
+body.yt-premium-plus-theme ytd-segmented-like-dislike-button-renderer yt-button-shape:first-child button {
+  border-radius: 100px 0 0 100px !important;
+  padding: 0 16px !important;
+  height: 100% !important;
+}
+
+/* Dislike button side */
+body.yt-premium-plus-theme ytd-segmented-like-dislike-button-renderer yt-button-shape:last-child button {
+  border-radius: 0 100px 100px 0 !important;
+  padding: 0 16px !important;
+  height: 100% !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Adjust icons inside buttons */
+body.yt-premium-plus-theme #actions-inner yt-icon {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 3. Pop-up Menus Redesign (3-dot menus) */
+body.yt-premium-plus-theme tp-yt-paper-listbox {
+  border-radius: 16px !important;
+  background: rgba(25, 25, 25, 0.8) !important;
+  backdrop-filter: blur(24px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Added micro-animations on hovering menu items */
+body.yt-premium-plus-theme ytd-menu-service-item-renderer,
+body.yt-premium-plus-theme ytd-menu-navigation-item-renderer {
+  border-radius: 8px !important;
+  margin: 4px 8px !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme ytd-menu-service-item-renderer:hover,
+body.yt-premium-plus-theme ytd-menu-navigation-item-renderer:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  transform: translateX(4px) !important;
+}
+
+/* 4. Search Results Chapters Redesign */
+/* The cleanest approach for a grid layout is to remove this element. */
+body.ypp-search-grid-mode ytd-expandable-metadata-renderer {
+  display: none !important;
+}
+
+/* Also hide any accompanying chapter expanding teasers inside search video cards */
+body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
+  display: none !important;
+}

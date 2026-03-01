@@ -23,11 +23,10 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts {
+window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts extends window.YPP.features.BaseFeature {
     constructor() {
-        this.settings = null;
-        this.isActive = false;
-        this._boundHandler = null;
+        super('KeyboardShortcuts');
+        this._boundHandler = this._handleKey.bind(this);
 
         // Action definitions: label shown in UI → what happens when triggered
         this.actions = {
@@ -59,46 +58,23 @@ window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts {
         };
     }
 
-    run(settings) {
-        this.settings = settings;
-        if (settings.keyboardShortcuts !== false) {
-            this.enable();
-        } else {
-            this.disable();
-        }
+    /**
+     * Settings key this feature responds to
+     */
+    getConfigKey() {
+        return 'keyboardShortcuts';
     }
 
-    update(settings) {
-        this.settings = settings;
-        // Re-attach with new bindings
-        if (this.isActive) {
-            this.disable();
-            if (settings.keyboardShortcuts !== false) this.enable();
-        } else if (settings.keyboardShortcuts !== false) {
-            this.enable();
-        }
+    async enable() {
+        await super.enable();
+        this.addListener(document, 'keydown', this._boundHandler, { capture: false });
+        this.utils?.log('Keyboard Shortcuts enabled', 'SHORTCUTS', 'debug');
     }
 
-    enable() {
-        if (this.isActive) return;
-        this.isActive = true;
-
-        this._boundHandler = (e) => this._handleKey(e);
-        document.addEventListener('keydown', this._boundHandler, { capture: false });
-
-        window.YPP.Utils?.log('Keyboard Shortcuts enabled', 'SHORTCUTS', 'debug');
-    }
-
-    disable() {
-        if (!this.isActive) return;
-        this.isActive = false;
-
-        if (this._boundHandler) {
-            document.removeEventListener('keydown', this._boundHandler, { capture: false });
-            this._boundHandler = null;
-        }
-
-        window.YPP.Utils?.log('Keyboard Shortcuts disabled', 'SHORTCUTS', 'debug');
+    async disable() {
+        await super.disable();
+        // Listener removed automatically by BaseFeature.cleanupEvents()
+        this.utils?.log('Keyboard Shortcuts disabled', 'SHORTCUTS', 'debug');
     }
 
     // =========================================================================
@@ -126,7 +102,7 @@ window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts {
                     definition.fn();
                     this._showToast(definition.label);
                 } catch (err) {
-                    window.YPP.Utils?.log(`Shortcut error for ${action}: ${err.message}`, 'SHORTCUTS', 'error');
+                    this.utils?.log(`Shortcut error for ${action}: ${err.message}`, 'SHORTCUTS', 'error');
                 }
                 return;
             }
@@ -177,7 +153,6 @@ window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts {
      * Toggle a boolean setting and broadcast the change
      */
     async _toggleSetting(key) {
-        const Utils = window.YPP.Utils;
         const data = await chrome.storage.local.get('settings');
         const settings = data.settings || {};
         settings[key] = !settings[key];
