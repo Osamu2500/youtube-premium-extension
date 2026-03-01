@@ -24,6 +24,7 @@
 ### From Source (Developer Mode)
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Osamu2500/youtube-premium-extension.git
    cd youtube-premium-extension
@@ -69,27 +70,32 @@ For the best experience, enable these features:
 ## 🚀 Feature Categories
 
 ### 🎨 Theme & UI
+
 - **Premium Theme** - Glassmorphism with modern aesthetics
-- **True Black Mode** - OLED-friendly pure black backgrounds  
+- **True Black Mode** - OLED-friendly pure black backgrounds
 - **Hide Scrollbar** - Clean, minimal interface
 
 ### 🏠 Home Feed Control
+
 - **Hook-Free Home** - Completely hide the recommended feed
 - **Hide Watched** - Auto-hide videos you've already watched (>80% progress)
 - **Hide Mixes** - Remove algorithmic mix playlists
 - **Grid Layout** - Force 4x4 video grid display
 
 ### 🧭 Navigation
+
 - **Custom Header Buttons** - Quick access to Trending, Shorts, Subscriptions, Watch Later, Playlists, and History
 - **Force Hide Sidebar** - Replace YouTube's sidebar with clean header navigation
 
 ### 🔍 Search Tools
+
 - **Grid View** - Display search results in a modern grid layout
 - **Clean Search** - Hide "For You" and "People also watched" suggestions
 - **Hide Shorts in Search** - Remove all Shorts from search results
 - **Shorts Auto-Scroll** - Auto-play next Short
 
 ### ▶️ Player Enhancements
+
 - **Auto-Quality** - Force 1080p+ quality on all videos
 - **Remaining Time** - Show time left instead of elapsed time
 - **Volume Booster** - Boost audio up to 600%
@@ -100,12 +106,14 @@ For the best experience, enable these features:
 - **Picture-in-Picture** - Easy PiP mode toggle
 
 ### 🎯 Focus Modes
+
 - **Zen Mode** - Distraction-free cinema view (hides comments & suggestions)
 - **Study Mode** - Auto-enables 1.25x speed + captions for learning
 - **Focus Mode** - Globally hide comments and suggested videos
 - **Auto Cinema** - Automatically expand player to theater mode
 
 ### 🚫 Distraction Control
+
 - **Hide Comments** - Remove the entire comments section
 - **Hide End Screens** - No video suggestions or cards overlay
 - **Hide Shorts Globally** - Remove all Shorts across YouTube
@@ -137,6 +145,7 @@ src/
 ```
 
 ### Design Principles
+
 - **Feature Isolation** - Each feature is self-contained and independently toggleable
 - **ES6 Modules** - Modern JavaScript with proper imports/exports
 - **Chrome Storage** - Persistent settings across sessions
@@ -147,16 +156,19 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for technical details.
 ## 🛠️ Development
 
 ### Prerequisites
+
 - Google Chrome (or Chromium-based browser)
 - Basic understanding of Chrome Extension Manifest V3
 
 ### Making Changes
+
 1. Edit files in the `src/` directory
 2. Reload the extension in `chrome://extensions/`
 3. Test on YouTube
 
 ### Adding New Features
-1. Create a new module in `src/content/features/`
+
+1. Create a new module in `src/content/features/core|pages|player/`
 2. Register the feature in `feature-manager.js`
 3. Add settings keys to `constants.js`
 4. Add UI controls in `popup/popup.html`
@@ -172,6 +184,7 @@ Contributions are welcome! Here's how you can help:
 5. **Open a Pull Request**
 
 ### Guidelines
+
 - Follow the existing code style
 - Test thoroughly on YouTube
 - Update documentation for new features
