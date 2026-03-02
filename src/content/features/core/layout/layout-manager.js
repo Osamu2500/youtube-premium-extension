@@ -203,16 +203,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
     applyGridLayout() {
         if (!this._isValidPage(window.location.pathname)) return false;
 
-        const gridRenderer = document.querySelector(GridLayoutManager.SELECTORS.GRID_RENDERER);
+        const isSearchPage = window.location.pathname.startsWith('/results');
+        const rendererSelector = isSearchPage ? 'ytd-section-list-renderer' : GridLayoutManager.SELECTORS.GRID_RENDERER;
+        
+        const gridRenderer = document.querySelector(rendererSelector);
         if (!gridRenderer) return false;
 
         const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
         if (!contents) return false;
-
-        // Performance: Skip if already processed and unchanged
-        if (this._processedContainers.has(contents)) {
-            return true;
-        }
 
         // Apply grid container class
         contents.classList.add('ypp-grid-container');
@@ -222,15 +220,24 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         const path = window.location.pathname;
         if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
             cols = this.settings?.channelColumns || 4;
-        } else if (path.startsWith('/results')) {
+        } else if (isSearchPage) {
             cols = this.settings?.searchColumns || 4;
         } else if (path === '/feed/subscriptions') {
             cols = this.settings?.subscriptionsColumns || 4;
         }
-        contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+        
+        // Browsers invalidate grid-template-columns: repeat(var(--css-var), 1fr) so we MUST set it as an inline string here.
+        if (isSearchPage) {
+            // Check if we are using the flattened unified grid mode (Section 2 from styles.css)
+            // It applies to ytd-section-list-renderer > #contents
+            contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+            contents.style.setProperty('display', 'grid', 'important');
+        } else {
+            contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+        }
 
         // Style grid items
-        const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
+        const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS + (isSearchPage ? ', ytd-item-section-renderer ytd-video-renderer' : ''));
         items.forEach(item => {
             if (!item.classList.contains('ypp-grid-item')) {
                 item.classList.add('ypp-grid-item');
@@ -238,7 +245,8 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         });
 
         // Fix YouTube's row wrappers (use display: contents to flatten)
-        const rows = gridRenderer.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ROWS);
+        // Includes ytd-item-section-renderer and their #contents for search results
+        const rows = gridRenderer.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ROWS + (isSearchPage ? ', ytd-item-section-renderer, ytd-item-section-renderer > #contents' : ''));
         rows.forEach(row => {
             if (row.style.display !== 'contents') {
                 row.style.display = 'contents';
@@ -263,7 +271,8 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                path.startsWith('/channel') || 
                path.startsWith('/c/') || 
                path.startsWith('/@') ||
-               path === '/feed/subscriptions';
+               path === '/feed/subscriptions' ||
+               path.startsWith('/results');
     }
 
     /**

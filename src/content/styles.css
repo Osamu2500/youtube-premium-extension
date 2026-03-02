@@ -1228,6 +1228,7 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 }
 
 /* Search Grid Layout */
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents,
 body.ypp-search-grid-mode ytd-item-section-renderer #contents,
 body.ypp-search-grid-mode .ypp-flattened-grid {
   display: grid;
@@ -1268,6 +1269,11 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 }
 
 /* Ensure intermediate containers don't choke the grid */
+body.ypp-search-grid-mode ytd-item-section-renderer,
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
+  display: contents !important;
+}
+
 body.ypp-search-grid-mode .ypp-flattened-container ytd-vertical-list-renderer,
 body.ypp-search-grid-mode
   .ypp-flattened-container
