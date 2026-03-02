@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Subscription Manager
         'enableSubsManager',
         'channelColumns',
+        'subscriptionsColumns',
         'subscriptionFolders',
 
         // Watch Time Alert
@@ -341,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'watchTimeAlertHours'].forEach(key => {
+    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {

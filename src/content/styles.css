@@ -2757,9 +2757,9 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
   display: grid;
   grid-template-columns: repeat(
-    5,
+    var(--ypp-search-columns, 5),
     1fr
-  ) !important; /* Strictly lock to 5 cards on desktop */
+  ) !important; /* Dynamically draw from user settings, default to 5 */
   gap: 20px; /* Increased from 16px for Pro Max spaciousness */
   width: 100%;
   max-width: 1800px;
@@ -4004,73 +4004,90 @@ body.yt-premium-plus-theme
 
 /* Sidebar Folder List Header */
 .ypp-sub-folders {
-  margin: 12px 16px 8px 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--ypp-glass-border);
+  margin: 12px 0 12px 12px;
+  padding: 16px;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-lg);
+  -webkit-backdrop-filter: var(--ypp-blur-lg);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .ypp-folder-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  padding: 0 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .ypp-folder-header h3 {
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--ypp-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin: 0;
 }
 
 .ypp-icon-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ypp-text-primary);
   cursor: pointer;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition:
-    background-color 0.2s,
-    transform 0.2s;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .ypp-icon-btn:hover {
-  background: var(--ypp-accent);
-  transform: scale(1.1);
+  background: var(--ypp-accent-blue);
+  color: #fff;
+  border-color: rgba(62, 166, 255, 0.5);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 0 12px rgba(62, 166, 255, 0.4);
 }
 
 /* Sidebar Folder Item */
 .ypp-folder-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-radius: var(--ypp-radius-md);
   cursor: pointer;
-  transition:
-    background-color 0.2s,
-    transform 0.2s;
-  margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: 6px;
 }
 
 .ypp-folder-item:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
   transform: translateX(4px);
 }
 
 .ypp-folder-item.active {
-  background-color: rgba(255, 255, 255, 0.12);
-  border-left: 3px solid var(--ypp-accent);
+  background: linear-gradient(90deg, rgba(62, 166, 255, 0.15) 0%, rgba(62, 166, 255, 0.05) 100%);
+  border: 1px solid rgba(62, 166, 255, 0.2);
+  border-left: 3px solid var(--ypp-accent-blue);
+  box-shadow: inset 0 0 12px rgba(62, 166, 255, 0.05);
 }
 
 .ypp-folder-icon {
   margin-right: 12px;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
+  color: var(--ypp-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.ypp-folder-item.active .ypp-folder-icon {
+  color: var(--ypp-accent-blue);
 }
 
 .ypp-folder-name {
@@ -4078,6 +4095,11 @@ body.yt-premium-plus-theme
   font-size: 1.4rem;
   font-weight: 500;
   color: var(--ypp-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.ypp-folder-item:hover .ypp-folder-name {
+  color: #fff;
 }
 
 .ypp-folder-item.active .ypp-folder-name {
@@ -4087,10 +4109,20 @@ body.yt-premium-plus-theme
 
 .ypp-folder-count {
   font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2px 8px;
-  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 12px;
+  min-width: 24px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.ypp-folder-item.active .ypp-folder-count {
+  background: rgba(62, 166, 255, 0.2);
+  color: #fff;
+  border-color: rgba(62, 166, 255, 0.4);
 }
 
 /* Feed Filter Chips */
@@ -4099,7 +4131,14 @@ body.yt-premium-plus-theme
   flex-wrap: nowrap;
   overflow-x: auto;
   gap: 12px;
-  padding: 16px 0 24px 0;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-lg);
+  -webkit-backdrop-filter: var(--ypp-blur-lg);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  align-items: center;
   scrollbar-width: none;
 }
 .ypp-folder-chips-bar::-webkit-scrollbar {
@@ -4107,9 +4146,9 @@ body.yt-premium-plus-theme
 }
 
 .ypp-filter-chip {
-  background: var(--ypp-bg-surface);
-  border: 1px solid var(--ypp-glass-border);
-  color: var(--ypp-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #aaa;
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 1.4rem;
@@ -4117,20 +4156,40 @@ body.yt-premium-plus-theme
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
-  backdrop-filter: var(--ypp-blur-md);
 }
 
 .ypp-filter-chip:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .ypp-filter-chip.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  color: white;
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.15);
+  background: var(--ypp-accent-blue);
+  border-color: var(--ypp-accent-blue);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(62,166,255,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Feature Parity Toggle Chips */
+.ypp-toggle-chip {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: transparent;
+}
+
+.ypp-toggle-chip:hover {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255,255,255,0.05);
+}
+
+.ypp-toggle-chip.active {
+  background: #ff4e45;
+  border: 1px solid #ff4e45;
+  color: #fff;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(255, 78, 69, 0.3);
 }
 
 /* Channel Page Popover button */
@@ -4157,6 +4216,30 @@ body.yt-premium-plus-theme
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Channel Badges on Thumbnails */
+.ypp-folder-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(18, 18, 26, 0.85);
+  backdrop-filter: var(--ypp-blur-md);
+  -webkit-backdrop-filter: var(--ypp-blur-md);
+  color: var(--ypp-text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--ypp-radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 10;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Popover Menu */
@@ -4322,6 +4405,14 @@ body.yt-premium-plus-theme
 }
 .ypp-watch-alert-body {
   flex: 1;
+}
+
+/* ===================================================================================
+   16. SUBSCRIPTIONS FEED TWEAKS
+   =================================================================================== */
+/* Completely hide horizontal shelves (Shorts, Continuations, Community Posts) on Subscriptions */
+ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
+  display: none !important;
 }
 .ypp-watch-alert-title {
   font-family: "Roboto", sans-serif;
