@@ -1071,7 +1071,7 @@ ytd-mini-guide-renderer {
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-  padding: 16px !important;
+  padding: 0 !important; /* Removed 16px padding for edge-to-edge thumbnails */
   box-sizing: border-box !important;
   transition:
     transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -1087,23 +1087,31 @@ ytd-mini-guide-renderer {
 }
 
 /* Video Cards - Reset Child Styling (Since parent now has card style) */
+.yt-premium-plus-theme ytd-rich-item-renderer > #content,
 .yt-premium-plus-theme ytd-rich-item-renderer ytd-video-renderer,
-.yt-premium-plus-theme ytd-rich-item-renderer ytd-rich-grid-media {
+.yt-premium-plus-theme ytd-rich-item-renderer ytd-rich-grid-media,
+.yt-premium-plus-theme ytd-rich-item-renderer ytd-rich-grid-media > #dismissible {
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
 }
 
 /* Thumbnail */
 .yt-premium-plus-theme ytd-rich-item-renderer ytd-thumbnail {
   width: 100% !important;
   aspect-ratio: 16/9 !important;
-  border-radius: 12px !important;
+  border-radius: var(--ypp-radius-lg) var(--ypp-radius-lg) 0 0 !important; /* Top roundness only */
   overflow: hidden !important;
   position: relative !important;
+  margin: 0 !important;
   /* Fix thumbnail background bleeding */
   background-color: transparent !important;
 }
@@ -1115,7 +1123,13 @@ ytd-mini-guide-renderer {
   background-color: transparent !important;
 }
 
-/* Video Title */
+/* Video Title & Details Wrapper */
+.yt-premium-plus-theme ytd-rich-item-renderer #details {
+  padding: 12px 16px 16px 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
 .yt-premium-plus-theme ytd-rich-item-renderer #video-title {
   font-size: 1.6rem !important;
   line-height: 2.2rem !important;
@@ -1136,6 +1150,31 @@ ytd-mini-guide-renderer {
   font-size: 1.3rem !important;
   color: var(--ypp-text-secondary) !important;
   line-height: 1.5 !important;
+}
+
+/* Channel Avatar Polish */
+.yt-premium-plus-theme ytd-rich-item-renderer #avatar-link {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+.yt-premium-plus-theme ytd-rich-item-renderer #avatar-link img {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.yt-premium-plus-theme ytd-rich-item-renderer #avatar-link:hover {
+  transform: scale(1.08) !important;
+}
+
+/* 3-Dot Menu Button */
+.yt-premium-plus-theme ytd-rich-item-renderer yt-icon-button#menu-button {
+  opacity: 0.5;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+.yt-premium-plus-theme ytd-rich-item-renderer:hover yt-icon-button#menu-button {
+  opacity: 1;
+}
+.yt-premium-plus-theme ytd-rich-item-renderer yt-icon-button#menu-button:hover {
+  transform: scale(1.1) !important;
+  color: var(--ypp-text-primary) !important;
 }
 
 /* Consolidate Duplicate Hover Effects into One Premium Animation */
@@ -2792,7 +2831,7 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   max-width: 100%;
   min-width: 0;
   margin: 0;
-  padding: 16px;
+  padding: 0; /* Removed 16px padding for edge-to-edge thumbnail */
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -2848,9 +2887,9 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   height: auto !important;
   aspect-ratio: 16/9 !important;
   flex: none !important;
-  border-radius: var(--ypp-radius-md);
+  border-radius: var(--ypp-radius-lg) var(--ypp-radius-lg) 0 0 !important; /* Top roundness only */
   margin-right: 0 !important;
-  margin-bottom: 12px !important;
+  margin-bottom: 0 !important; /* Removed 12px margin */
   box-shadow: none;
 }
 
@@ -2871,6 +2910,21 @@ body.ypp-search-grid-mode ytd-radio-renderer #dismissible .text-wrapper {
   max-width: 100% !important;
   flex: 1 !important;
   min-width: 0 !important;
+  padding: 12px 16px 16px 16px !important; /* Added padding to text wrapper */
+  box-sizing: border-box;
+}
+
+/* Search Video 3-Dot Menu Hover Polish */
+body.ypp-search-grid-mode ytd-video-renderer yt-icon-button#menu-button {
+  opacity: 0.5;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+body.ypp-search-grid-mode ytd-video-renderer:hover yt-icon-button#menu-button {
+  opacity: 1;
+}
+body.ypp-search-grid-mode ytd-video-renderer yt-icon-button#menu-button:hover {
+  transform: scale(1.1) !important;
+  color: var(--ypp-text-primary) !important;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #meta,
@@ -4800,4 +4854,118 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
   margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
+}
+
+/* ===================================================================================
+   18. GLOBAL VIDEO CARD REDESIGN (The Final Polish)
+   =================================================================================== */
+
+/* 1. Base Container Transitions & Hover Physics */
+body.yt-premium-plus-theme ytd-rich-item-renderer,
+body.yt-premium-plus-theme ytd-video-renderer,
+body.yt-premium-plus-theme ytd-compact-video-renderer,
+body.yt-premium-plus-theme ytd-grid-video-renderer {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.3s ease !important;
+  border-radius: 12px !important;
+  /* Protect against overflow clipping shadows */
+  overflow: visible !important; 
+}
+
+/* Hover Physics - Elevate the card */
+body.yt-premium-plus-theme ytd-rich-item-renderer:hover,
+body.yt-premium-plus-theme ytd-video-renderer:not(.ypp-search-grid-mode *):hover,
+body.yt-premium-plus-theme ytd-compact-video-renderer:hover,
+body.yt-premium-plus-theme ytd-grid-video-renderer:hover {
+  transform: translateY(-4px) !important;
+  /* Apply a soft underglow drop-shadow to the whole renderer */
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4)) !important;
+  z-index: 2;
+}
+
+/* Keep search grid cards clean since they already have container styling */
+body.ypp-search-grid-mode ytd-video-renderer:hover,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 2. Global Thumbnail Standardization (Curves & Borders) */
+body.yt-premium-plus-theme ytd-thumbnail,
+body.yt-premium-plus-theme .ytd-thumbnail {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  /* Soft inset border to frame artwork instantly */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  background-color: var(--ypp-bg-glass) !important;
+}
+
+/* Ensure inner anchor and image respect the rounded corners */
+body.yt-premium-plus-theme ytd-thumbnail a#thumbnail,
+body.yt-premium-plus-theme ytd-thumbnail yt-image {
+  border-radius: 12px !important;
+}
+
+/* 3. Glassmorphic Overlays (Time Status / Play Indicators) */
+body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer,
+body.yt-premium-plus-theme ytd-thumbnail-overlay-resume-playback-renderer {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 3px 6px !important;
+  margin: 6px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Adjust text inside the time status */
+body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer span {
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  color: #fff !important;
+}
+
+/* 4. Playback Progress Bar Refinements */
+body.yt-premium-plus-theme ytd-thumbnail-overlay-resume-playback-renderer {
+  height: 4px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 0 12px 12px !important;
+  border: none !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+body.yt-premium-plus-theme ytd-thumbnail-overlay-resume-playback-renderer #progress {
+  height: 100% !important;
+  background: var(--ypp-accent) !important;
+  border-radius: 0 0 0 12px !important;
+}
+
+/* 5. Typography and Meta Polish */
+body.yt-premium-plus-theme #video-title {
+  font-weight: 600 !important;
+  color: var(--ypp-text-primary) !important;
+  line-height: 1.4 !important;
+  transition: color 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme #video-title:hover {
+  color: var(--ypp-accent-blue) !important;
+}
+
+body.yt-premium-plus-theme ytd-video-meta-block,
+body.yt-premium-plus-theme .ytd-channel-name {
+  color: var(--ypp-text-secondary) !important;
+  font-weight: 500 !important;
+  font-size: 0.95em !important;
+}
+
+/* Make verified badges a bit more prominent and match the active aesthetic */
+body.yt-premium-plus-theme ytd-badge-supported-renderer.ytd-channel-name {
+  color: var(--ypp-accent-blue) !important;
 }
