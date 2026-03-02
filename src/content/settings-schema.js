@@ -33,6 +33,7 @@ window.YPP.SettingsSchema = {
         homeColumns:         { type: 'number',  default: 4, min: 1, max: 8 },
         searchColumns:       { type: 'number',  default: 4, min: 1, max: 8 },
         channelColumns:      { type: 'number',  default: 4, min: 1, max: 8 },
+        displayFullTitle:    { type: 'boolean', default: false },
 
         // --- Visibility ---
         hideShorts:          { type: 'boolean', default: false },
@@ -42,6 +43,8 @@ window.YPP.SettingsSchema = {
         enableMarkWatched:   { type: 'boolean', default: true },
         hideMerch:           { type: 'boolean', default: false },
         hideComments:        { type: 'boolean', default: false },
+        hideLiveChat:        { type: 'boolean', default: false },
+        hideFundraiser:      { type: 'boolean', default: false },
         hideEndScreens:      { type: 'boolean', default: false },
         hookFreeHome:        { type: 'boolean', default: false },
 
@@ -67,6 +70,7 @@ window.YPP.SettingsSchema = {
         navHistory:          { type: 'boolean', default: true },
         forceHideSidebar:    { type: 'boolean', default: false },
         hoverSidebar:        { type: 'boolean', default: true },
+        logoRedirectSub:     { type: 'boolean', default: false },
 
         // --- Shorts Tools ---
         shortsAutoScroll:    { type: 'boolean', default: false },

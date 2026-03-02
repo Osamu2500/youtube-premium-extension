@@ -42,7 +42,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
         const shouldRun = settings.navTrending || settings.navShorts ||
             settings.navSubscriptions || settings.navWatchLater ||
             settings.navPlaylists || settings.navHistory ||
-            settings.forceHideSidebar;
+            settings.forceHideSidebar || settings.logoRedirectSub;
 
         if (!shouldRun) {
             this.disable();
@@ -116,6 +116,8 @@ window.YPP.features.HeaderNav = class HeaderNav {
     scheduleInjection() {
         // Use requestAnimationFrame for safer DOM access
         requestAnimationFrame(() => {
+            this.handleLogoRedirect();
+
             // Try specific selectors first, then broader ones
             const centerSection = document.querySelector('ytd-masthead #center') || 
                                 document.querySelector('ytd-masthead #container') ||
@@ -127,6 +129,47 @@ window.YPP.features.HeaderNav = class HeaderNav {
                 this.Utils?.log('Header injection target not found (yet)', 'HEADERNAV', 'debug');
             }
         });
+    }
+
+    /**
+     * Override main YouTube logo to redirect to Subscriptions feed
+     */
+    handleLogoRedirect() {
+        const logo = document.querySelector('ytd-topbar-logo-renderer a#logo');
+        if (!logo) return;
+
+        if (this.settings?.logoRedirectSub) {
+            // Apply redirection
+            if (!logo.dataset.yppRedirectBound) {
+                logo.dataset.yppRedirectBound = 'true';
+                logo.dataset.originalHref = logo.getAttribute('href') || '/';
+                logo.href = '/feed/subscriptions';
+                
+                // Add click listener
+                if (!this._logoClickListener) {
+                    this._logoClickListener = (e) => {
+                        if (this.settings.logoRedirectSub && !this.isCurrentPage('/feed/subscriptions')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.navigateTo('/feed/subscriptions');
+                        }
+                    };
+                    logo.addEventListener('click', this._logoClickListener, true);
+                }
+            }
+        } else {
+            // Revert redirection
+            if (logo.dataset.yppRedirectBound) {
+                delete logo.dataset.yppRedirectBound;
+                if (logo.dataset.originalHref) {
+                    logo.setAttribute('href', logo.dataset.originalHref);
+                }
+                if (this._logoClickListener) {
+                    logo.removeEventListener('click', this._logoClickListener, true);
+                    this._logoClickListener = null;
+                }
+            }
+        }
     }
 
     /**

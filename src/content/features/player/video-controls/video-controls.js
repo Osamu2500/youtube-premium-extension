@@ -1,27 +1,26 @@
-window.YPP.features.VideoControls = class VideoControls {
+window.YPP.features.VideoControls = class VideoControls extends window.YPP.features.BaseFeature {
     constructor() {
-        this.logger = window.YPP.Utils || console;
-        this.Utils = window.YPP.Utils;
+        super('VideoControls');
         this.panel = null;
-        this.isActive = false;
         this.isPanelVisible = false;
-        this.listeners = []; // Track listeners for cleanup
     }
 
-    run(settings) {
-        if (!settings.videoControlsEnabled) return;
+    getConfigKey() {
+        return 'videoControlsEnabled';
+    }
 
-        this.logger.info('Running Video Controls');
-        this.isActive = true;
+    async enable() {
+        await super.enable();
+        this.utils?.log('Running Video Controls', 'VideoControls');
         
         // Inject styles
-        this.Utils.injectCSS('src/content/features/player/video-controls/video-controls.css', 'ypp-video-controls-css');
+        this.utils?.injectCSS('src/content/features/player/video-controls/video-controls.css', 'ypp-video-controls-css');
 
         this.injectToggle();
     }
 
-    destroy() {
-        this.isActive = false;
+    async disable() {
+        await super.disable();
         
         // Remove Toggle
         const toggle = document.getElementById('ypp-vcp-toggle');
@@ -33,25 +32,17 @@ window.YPP.features.VideoControls = class VideoControls {
             this.panel = null;
         }
 
-        // Cleanup Listeners
-        this.removeListeners();
-
-        // Remove CSS (optional, usually fine to leave)
-        this.Utils.removeStyle('ypp-video-controls-css');
-    }
-
-    disable() {
-        this.destroy();
+        // Remove CSS
+        this.utils?.removeStyle('ypp-video-controls-css');
     }
 
     async injectToggle() {
-        const Utils = window.YPP.Utils;
-        if (!Utils) return;
+        if (!this.utils) return;
 
         try {
             // Wait for player controls
-            const controls = await Utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
-            if (!this.isActive || !controls) return;
+            const controls = await this.utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
+            if (!this.isEnabled || !controls) return;
             if (controls.querySelector('#ypp-vcp-toggle')) return;
 
             const btn = document.createElement('button');
@@ -66,7 +57,7 @@ window.YPP.features.VideoControls = class VideoControls {
             const settingsBtn = controls.querySelector('.ytp-settings-button');
             controls.insertBefore(btn, settingsBtn);
         } catch (error) {
-            this.logger.warn('Timeout waiting for .ytp-right-controls');
+            this.utils?.log('Timeout waiting for .ytp-right-controls', 'VideoControls', 'warn');
         }
     }
 
@@ -144,19 +135,11 @@ window.YPP.features.VideoControls = class VideoControls {
         const video = document.querySelector('video');
         if (!video) return;
 
-        // Helper to track listeners
-        const addListener = (element, event, handler) => {
-            if (element) {
-                element.addEventListener(event, handler);
-                this.listeners.push({ element, event, handler });
-            }
-        };
-
         // Speed
         const speedSlider = this.panel.querySelector('#ypp-speed-slider');
         const speedVal = this.panel.querySelector('#ypp-speed-val');
         
-        addListener(speedSlider, 'input', (e) => {
+        this.addListener(speedSlider, 'input', (e) => {
             const val = parseFloat(e.target.value);
             video.playbackRate = val;
             speedVal.textContent = val + 'x';
@@ -182,36 +165,36 @@ window.YPP.features.VideoControls = class VideoControls {
         const brightSlider = this.panel.querySelector('#ypp-bright-slider');
         const contrastSlider = this.panel.querySelector('#ypp-contrast-slider');
 
-        addListener(brightSlider, 'input', updateFilters);
-        addListener(contrastSlider, 'input', updateFilters);
+        this.addListener(brightSlider, 'input', updateFilters);
+        this.addListener(contrastSlider, 'input', updateFilters);
 
         // Double-click to reset
-        addListener(speedSlider, 'dblclick', () => {
+        this.addListener(speedSlider, 'dblclick', () => {
             speedSlider.value = 1;
             video.playbackRate = 1;
             speedVal.textContent = '1.0x';
         });
 
-        addListener(brightSlider, 'dblclick', () => {
+        this.addListener(brightSlider, 'dblclick', () => {
             brightSlider.value = 100;
             updateFilters();
         });
 
-        addListener(contrastSlider, 'dblclick', () => {
+        this.addListener(contrastSlider, 'dblclick', () => {
             contrastSlider.value = 100;
             updateFilters();
         });
 
         // Flip
         const flipBtn = this.panel.querySelector('#ypp-flip-btn');
-        addListener(flipBtn, 'click', (e) => {
+        this.addListener(flipBtn, 'click', (e) => {
             e.currentTarget.classList.toggle('active');
             updateFilters();
         });
 
         // Loop
         const loopBtn = this.panel.querySelector('#ypp-loop-btn');
-        addListener(loopBtn, 'click', (e) => {
+        this.addListener(loopBtn, 'click', (e) => {
             const btn = e.currentTarget;
             btn.classList.toggle('active');
             video.loop = btn.classList.contains('active');
@@ -219,7 +202,7 @@ window.YPP.features.VideoControls = class VideoControls {
 
         // Reset
         const resetBtn = this.panel.querySelector('#ypp-reset-btn');
-        addListener(resetBtn, 'click', () => {
+        this.addListener(resetBtn, 'click', () => {
              video.playbackRate = 1;
              video.style.filter = '';
              video.style.transform = '';
@@ -241,16 +224,7 @@ window.YPP.features.VideoControls = class VideoControls {
 
         // Close
         const closeBtn = this.panel.querySelector('.ypp-vcp-close');
-        addListener(closeBtn, 'click', () => this.togglePanel());
-    }
-
-    removeListeners() {
-        this.listeners.forEach(({ element, event, handler }) => {
-            if (element) {
-                element.removeEventListener(event, handler);
-            }
-        });
-        this.listeners = [];
+        this.addListener(closeBtn, 'click', () => this.togglePanel());
     }
 
     makeDraggable() {
@@ -302,14 +276,9 @@ window.YPP.features.VideoControls = class VideoControls {
             }
         };
 
-        header.addEventListener('mousedown', onMouseDown);
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-
-        // Add to listeners for cleanup
-        this.listeners.push({ element: header, event: 'mousedown', handler: onMouseDown });
-        this.listeners.push({ element: document, event: 'mousemove', handler: onMouseMove });
-        this.listeners.push({ element: document, event: 'mouseup', handler: onMouseUp });
+        this.addListener(header, 'mousedown', onMouseDown);
+        this.addListener(document, 'mousemove', onMouseMove);
+        this.addListener(document, 'mouseup', onMouseUp);
     }
     
     restorePosition() {

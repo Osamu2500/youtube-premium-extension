@@ -6,8 +6,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.HistoryTracker = class HistoryTracker {
+window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.features.BaseFeature {
     constructor() {
+        super('HistoryTracker');
         this.STORAGE_PREFIX = 'ypp_analytics_';
         this.stats = {
             today: { count: 0, seconds: 0 },
@@ -18,36 +19,56 @@ window.YPP.features.HistoryTracker = class HistoryTracker {
         };
         this.isExpanded = false;
         this.updateInterval = null;
+        
+        this._boundLoadStats = this.loadStats.bind(this);
+        this._boundMountUI = this.mountUI.bind(this);
+    }
+    
+    getConfigKey() {
+        return null; // Always active when on history page
     }
 
-    run(settings) {
-        if (location.pathname === '/feed/history') {
-            this.init();
-        }
-    }
-
-    init() {
-        if (this.initialized) return;
-        this.initialized = true;
+    async enable() {
+        if (location.pathname !== '/feed/history') return;
+        await super.enable();
 
         // Initial Load
         this.mountUI();
         this.loadStats();
 
         // Update periodically (in case user watches video in another tab or background)
-        this.updateInterval = setInterval(() => this.loadStats(), 5000);
+        this.updateInterval = setInterval(this._boundLoadStats, 5000);
 
         // Re-check on Focus
-        window.addEventListener('focus', () => this.loadStats());
+        this.addListener(window, 'focus', this._boundLoadStats);
         
-        // Handle Navigation
-        this.observer = new MutationObserver(() => {
-            if (location.pathname === '/feed/history') {
-                this.mountUI();
-            }
-        });
-        const app = document.querySelector('ytd-app');
-        if (app) this.observer.observe(app, { childList: true, subtree: true });
+        // Handle Navigation via BaseFeature's DOMObserver instead of raw MutationObserver
+        this.observer.start();
+        // Just re-mount if the app node updates while we're on the history page
+        this.observer.register('history-tracker-mount', 'ytd-app', () => {
+             if (location.pathname === '/feed/history') {
+                 this.mountUI();
+             }
+        }, false);
+    }
+    
+    async disable() {
+        await super.disable();
+        
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+        
+        if (this.observer) {
+            this.observer.unregister('history-tracker-mount');
+            this.observer.stop();
+        }
+        
+        const widget = document.getElementById('ypp-history-tracker-widget');
+        if (widget) widget.remove();
+        
+        this.isExpanded = false;
     }
 
     mountUI() {

@@ -2,50 +2,48 @@
  * Feature: History Page Redesign
  * Transforms the history list into a responsive 5-column grid and adds stats/calendar.
  */
-class HistoryRedesign {
+window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.features.BaseFeature {
     constructor() {
-        this.observer = null;
-        this.isInitialized = false;
+        super('HistoryRedesign');
         this.styleElement = null;
         this.currentCalDate = new Date();
         this.selectedCalDateString = null;
+        this._boundHandleMutations = this.handleMutations.bind(this);
+    }
+    
+    getConfigKey() {
+        return null;
     }
 
-    run(settings) {
-        // Only run on history page
-        if (location.pathname === '/feed/history') {
-            this.init();
-        }
-    }
+    async enable() {
+        if (location.pathname !== '/feed/history') return;
+        await super.enable();
 
-    init() {
-        if (!this.isInitialized) {
-            // One-time setup
-            this.injectStyles();
-            this.injectCalendarModal();
-
-            // Observer to maintain grid and injections
-            this.observer = new MutationObserver(() => {
-                this.handleMutations();
-            });
-
-            const content = document.querySelector('ytd-app');
-            if (content) {
-                this.observer.observe(content, { childList: true, subtree: true });
-            }
-
-            this.isInitialized = true;
-        }
-        
-        // Run logic that needs to happen on navigation/init
         this.apply();
-        // this.updateStats(); // Removed
+
+        this.observer.start();
+        this.observer.register('history-redesign', 'ytd-app', this._boundHandleMutations, false);
+    }
+    
+    async disable() {
+        await super.disable();
+        if (this.observer) {
+            this.observer.unregister('history-redesign');
+            this.observer.stop();
+        }
+        if (this.styleElement) {
+            this.styleElement.remove();
+            this.styleElement = null;
+        }
     }
 
     apply() {
         // Re-inject header if missing (e.g. after nav)
         // this.injectHeaderWidget(); // Removed - logic moved to HistoryTracker
         this.injectStyles(); // Ensure styles are re-injected if needed
+        if (typeof this.injectCalendarModal === 'function') {
+             this.injectCalendarModal();
+        }
     }
 
     injectStyles() {
@@ -280,7 +278,4 @@ class HistoryRedesign {
     }
 }
 
-// Attach
-window.YPP = window.YPP || {};
-window.YPP.features = window.YPP.features || {};
-window.YPP.features.HistoryRedesign = HistoryRedesign;
+// Class is already attached at declaration.

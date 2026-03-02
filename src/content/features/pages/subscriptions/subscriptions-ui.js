@@ -8,10 +8,11 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         this.draggedChannel = null;
     }
 
-    init() {
+    enable() {
         // Resolve dependency if missing
         if (!this.manager && window.YPP.Main && window.YPP.Main.featureManager) {
-             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionFolders');
+             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionsOrganizer')?.manager 
+                          || window.YPP.Main.featureManager.getFeature('subscriptionFolders');
         }
 
         if (!this.manager) {
@@ -19,27 +20,24 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
              return;
         }
 
-        this.logger.info('Initialized Subscription UI');
-        this.observer = new window.YPP.Utils.DOMObserver();
+        this.logger.info('Started Subscription UI');
+        this.observer = this.observer || new window.YPP.Utils.DOMObserver();
         this.observePage();
     }
 
     disable() {
         if (this.observer) {
-            this.observer.stop();
+            this.observer.unregister('subs-ui-feed');
+            this.observer.unregister('subs-ui-channels');
+            this.observer.unregister('subs-ui-home');
         }
-        const els = document.querySelectorAll('#ypp-manage-subs-btn, #ypp-organize-btn, #ypp-subs-filter-bar, #ypp-sidebar-group-section');
+        const els = document.querySelectorAll('#ypp-manage-subs-btn, #ypp-organize-btn, #ypp-subs-filter-bar, #ypp-sidebar-group-section, .ypp-modal-overlay');
         els.forEach(el => el.remove());
         
         const container = document.querySelector('ytd-browse[page-subtype="channels"] #contents');
         if (container) container.classList.remove('ypp-grid-layout');
-    }
-
-    /**
-     * Standard interface for FeatureManager
-     */
-    run(settings) {
-        this.init();
+        
+        this.isModalOpen = false;
     }
 
     observePage() {

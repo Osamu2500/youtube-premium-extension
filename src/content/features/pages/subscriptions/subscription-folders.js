@@ -605,6 +605,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
 
     injectCardBadges() {
         this.observer.register('feed-card-badges', 'ytd-rich-item-renderer #channel-name, ytd-video-renderer #channel-name, ytd-grid-video-renderer #channel-name', (elements) => {
+            if (!elements || !Array.isArray(elements) || elements.length === 0) return;
             elements.forEach(container => {
                 if (container.querySelector('.ypp-card-folder-btn')) return;
                 
@@ -639,6 +640,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
 
     injectChannelBadge() {
         this.observer.register('channel-badge', 'ytd-subscribe-button-renderer', (elements) => {
+            if (!elements || elements.length === 0) return;
             // Double check we are actually on a channel page banner
             const container = elements[0].parentNode;
             if (document.getElementById('ypp-channel-folder-btn')) return;

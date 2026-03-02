@@ -338,6 +338,9 @@ window.YPP.features.Theme = class ThemeManager {
         toggle(this._CSS_CLASSES.HIDE_MERCH, this._settings.hideMerch);
         toggle(this._CSS_CLASSES.HIDE_COMMENTS, this._settings.hideComments);
         toggle(this._CSS_CLASSES.HIDE_ENDSCREENS, this._settings.hideEndScreens);
+        toggle(this._CSS_CLASSES.HIDE_LIVE_CHAT, this._settings.hideLiveChat);
+        toggle(this._CSS_CLASSES.HIDE_FUNDRAISER, this._settings.hideFundraiser);
+        toggle(this._CSS_CLASSES.DISPLAY_FULL_TITLE, this._settings.displayFullTitle);
         toggle(this._CSS_CLASSES.BLUE_PROGRESS, this._settings.blueProgress);
         toggle(this._CSS_CLASSES.HOOK_FREE, this._settings.hookFreeHome);
 
@@ -359,6 +362,9 @@ window.YPP.features.Theme = class ThemeManager {
             this._CSS_CLASSES.HIDE_MERCH,
             this._CSS_CLASSES.HIDE_COMMENTS,
             this._CSS_CLASSES.HIDE_ENDSCREENS,
+            this._CSS_CLASSES.HIDE_LIVE_CHAT,
+            this._CSS_CLASSES.HIDE_FUNDRAISER,
+            this._CSS_CLASSES.DISPLAY_FULL_TITLE,
             this._CSS_CLASSES.BLUE_PROGRESS,
             this._CSS_CLASSES.HOOK_FREE,
             'ypp-clean-search',

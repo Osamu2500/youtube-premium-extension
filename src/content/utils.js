@@ -651,7 +651,15 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      */
     addStyle: (css, id = 'ypp-custom-style') => {
         if (!css || typeof css !== 'string') return;
+        
+        // 1. Check by ID first (fastest)
         if (document.getElementById(id)) return;
+        
+        // 2. Check by exact content to prevent duplicate nameless/id-less injections
+        const existingStyles = document.querySelectorAll('style');
+        for (const style of existingStyles) {
+             if (style.textContent === css) return;
+        }
 
         try {
             const style = document.createElement('style');
@@ -1110,12 +1118,15 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
         this.callbacks.set(id, { selector, callback });
 
         if (immediate) {
-            const el = document.querySelector(selector);
-            if (el) {
+            const elements = document.querySelectorAll(selector);
+            if (elements.length > 0) {
                 try {
-                    callback(el);
+                    const liveElements = Array.from(elements).filter(el => el.isConnected);
+                    if (liveElements.length > 0) {
+                        callback(liveElements);
+                    }
                 } catch (error) {
-                    console.error(`[DOMObserver] Error in callback for '${id}':`, error);
+                    console.error(`[DOMObserver] Error in immediate callback for '${id}':`, error);
                 }
             }
         }
@@ -1139,11 +1150,14 @@ window.YPP.Utils.DOMObserver = class DOMObserver {
         
         requestAnimationFrame(() => {
             this.callbacks.forEach(({ selector, callback }, id) => {
-                const el = document.querySelector(selector);
-                // Ensure element is in the live DOM before calling the callback
-                if (el && el.isConnected) {
+                const elements = document.querySelectorAll(selector);
+                if (elements.length > 0) {
                     try {
-                        callback(el);
+                        // Features expect an Array/NodeList, so we pass one containing live nodes
+                        const liveElements = Array.from(elements).filter(el => el.isConnected);
+                        if (liveElements.length > 0) {
+                            callback(liveElements);
+                        }
                     } catch (error) {
                         console.error(`[DOMObserver] Error in '${id}':`, error);
                     }
