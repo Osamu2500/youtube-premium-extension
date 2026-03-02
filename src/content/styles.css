@@ -4778,3 +4778,26 @@ body.ypp-search-grid-mode ytd-expandable-metadata-renderer {
 body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
   display: none !important;
 }
+
+/* ===================================================================================
+   17. DYNAMIC GRID LAYOUT (Home, Subscriptions, Channels)
+   =================================================================================== */
+.ypp-grid-container {
+  display: grid !important;
+  gap: 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  align-items: start !important;
+}
+
+/* Ensure individual items fill the grid cell and override YouTube's flex-basis constraints */
+.ypp-grid-item {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
