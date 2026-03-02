@@ -157,25 +157,24 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         let removed = 0;
         const startTime = performance.now();
 
-        SHORTS_PATTERNS.forEach(selector => {
-            try {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(el => {
-                    // Double-check it's actually a Shorts element before removing
-                    if (this._isShortsElement(el)) {
-                        // Use parentNode.removeChild for better compatibility
-                        if (el.parentNode) {
-                            el.parentNode.removeChild(el);
-                        } else {
-                            el.remove();
-                        }
-                        removed++;
+        try {
+            const combinedSelector = SHORTS_PATTERNS.join(', ');
+            const elements = document.querySelectorAll(combinedSelector);
+            elements.forEach(el => {
+                // Double-check it's actually a Shorts element before removing
+                if (this._isShortsElement(el)) {
+                    // Use parentNode.removeChild for better compatibility
+                    if (el.parentNode) {
+                        el.parentNode.removeChild(el);
+                    } else {
+                        el.remove();
                     }
-                });
-            } catch (err) {
-                // Skip invalid selectors (e.g., :has() not supported in some browsers)
-            }
-        });
+                    removed++;
+                }
+            });
+        } catch (err) {
+            this.utils?.log(`Error removing shorts: ${err.message}`, 'CONTENT', 'error');
+        }
 
         // Remove Shorts filter chips (critical for search page)
         this._removeShortsChips();
@@ -339,8 +338,8 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         // The CSS :has(a[href*="/shorts/"]) + removeShortsFromDOM() handle search Shorts precisely.
         if (window.location.pathname === '/results') return;
 
-        // If no specifically mutated elements provided, fallback to standard scan
-        if (!elements || elements.length === 0) {
+        // If no specifically mutated elements provided, or not an array, fallback to standard scan
+        if (!elements || !Array.isArray(elements) || elements.length === 0) {
             this.removeShortsFromDOM();
             return;
         }
@@ -348,6 +347,8 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         let removed = 0;
 
         elements.forEach(el => {
+            if (!el) return;
+            
             // First check if the element itself is a short/shorts chip
             if (this._isShortsElement(el)) {
                 if (el.parentNode) el.parentNode.removeChild(el); else el.remove();

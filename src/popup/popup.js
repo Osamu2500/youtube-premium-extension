@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'navPlaylists',
         'navHistory',
         'forceHideSidebar',
+        'logoRedirectSub',
 
         // Feed & Home
         'hookFreeHome',
@@ -80,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideWatched', // Also in Search
         'grid4x4',
         'homeColumns', // New
+        'displayFullTitle', // New
         'contextMenu', // Subscription Groups Context Menu
         
         // Shorts
@@ -125,6 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Distractions
         'enableFocusMode',
         'hideComments',
+        'hideLiveChat',
+        'hideFundraiser',
         'hideEndScreens',
         'hideCards',
         'hideMerch',

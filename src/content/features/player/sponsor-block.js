@@ -105,7 +105,10 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         }
         
         // Observe for player controls recreating, which wipes our segments
-        this.observer.register('sponsor-progress', '.ytp-progress-list', (progressList) => {
+        this.observer.register('sponsor-progress', '.ytp-progress-list', (elements) => {
+            if (!elements || elements.length === 0) return;
+            const progressList = elements[0];
+            
             if (this.segmentElements.length === 0 && this.segments.length > 0 && this.videoElement?.duration) {
                 this.renderSegments();
             } else if (this.segmentElements.length > 0) {

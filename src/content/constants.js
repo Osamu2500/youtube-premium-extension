@@ -118,6 +118,9 @@ window.YPP.CONSTANTS = {
         HIDE_MERCH: 'ypp-hide-merch',
         HIDE_COMMENTS: 'ypp-hide-comments',
         HIDE_ENDSCREENS: 'ypp-hide-endscreens',
+        HIDE_LIVE_CHAT: 'ypp-hide-livechat',
+        HIDE_FUNDRAISER: 'ypp-hide-fundraiser',
+        DISPLAY_FULL_TITLE: 'ypp-display-full-title',
         DOPAMINE_DETOX: 'ypp-dopamine-detox',
         ZEN_MODE: 'ypp-zen-mode',
         HOOK_FREE: 'ypp-hook-free-home',
@@ -181,6 +184,7 @@ window.YPP.CONSTANTS = {
         homeColumns: 4,
         searchColumns: 4,
         channelColumns: 4,
+        displayFullTitle: false,
 
         // Visibility
         hideShorts: false,
@@ -190,6 +194,8 @@ window.YPP.CONSTANTS = {
         enableMarkWatched: true,
         hideMerch: false,
         hideComments: false,
+        hideLiveChat: false,
+        hideFundraiser: false,
         hideEndScreens: false,
         hookFreeHome: false,
 
@@ -216,6 +222,7 @@ window.YPP.CONSTANTS = {
         navHistory: true,
         forceHideSidebar: false,
         hoverSidebar: true,
+        logoRedirectSub: false,
 
         // Shorts Tools
         shortsAutoScroll: false,

@@ -105,6 +105,8 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
     async onUpdate() {
         if (this.settings) {
             this.updateSettings(this.settings);
+            // Force re-apply of grid structural styles when settings change
+            this._processedContainers = new WeakSet();
             this._debouncedApply();
         }
     }
@@ -211,6 +213,16 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
 
         // Apply grid container class
         contents.classList.add('ypp-grid-container');
+
+        // Determine active columns
+        let cols = this.settings?.homeColumns || 4;
+        const path = window.location.pathname;
+        if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
+            cols = this.settings?.channelColumns || 4;
+        } else if (path.startsWith('/results')) {
+            cols = this.settings?.searchColumns || 4;
+        }
+        contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
 
         // Style grid items
         const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);

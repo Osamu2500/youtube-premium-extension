@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
 
     // Layout
     grid4x4: true,
+    displayFullTitle: false,
 
     // Visibility
     hideShorts: false,
@@ -29,6 +30,8 @@ const DEFAULT_SETTINGS = {
     hideWatched: false,
     hideMerch: false,
     hideComments: false,
+    hideLiveChat: false,
+    hideFundraiser: false,
     hideEndScreens: false,
     hookFreeHome: false,
 
@@ -52,6 +55,7 @@ const DEFAULT_SETTINGS = {
     navPlaylists: true,
     navHistory: true,
     forceHideSidebar: false,
+    logoRedirectSub: false,
 
     // Shorts Tools
     shortsAutoScroll: false,
