@@ -1,52 +1,43 @@
 // Attach to features namespace
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.PlaylistDuration = class PlaylistDuration {
+window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP.features.BaseFeature {
     constructor() {
-        this.observer = null;
+        super('PlaylistDuration');
         this.debounceTimer = null;
         this.card = null;
+        this._boundCalculate = this.calculateDuration.bind(this);
+    }
+    
+    getConfigKey() {
+        return 'playlistDuration';
     }
 
-    run(settings) {
-        this.settings = settings;
-        if (settings.playlistDuration) {
-            this.init();
-        }
+    async enable() {
+        if (!location.pathname.includes('/playlist')) return;
+        await super.enable();
+
+        this.calculateDuration();
+
+        this.observer.start();
+        this.observer.register('playlist-duration', 'ytd-app', () => {
+             if (location.pathname.includes('/playlist')) {
+                 clearTimeout(this.debounceTimer);
+                 this.debounceTimer = setTimeout(this._boundCalculate, 1000);
+             }
+        }, false);
     }
 
-    update(settings) {
-        this.settings = settings;
-        if (settings.playlistDuration) {
-            this.init();
-        } else {
-            this.disable();
-        }
-    }
-
-    disable() {
+    async disable() {
+        await super.disable();
         if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+            this.observer.unregister('playlist-duration');
+            this.observer.stop();
         }
+        clearTimeout(this.debounceTimer);
         if (this.card) {
             this.card.remove();
             this.card = null;
-        }
-    }
-
-    init() {
-        if (!location.pathname.includes('/playlist')) return;
-        this.calculateDuration();
-
-        this.observer = new MutationObserver(() => {
-            clearTimeout(this.debounceTimer);
-            this.debounceTimer = setTimeout(() => this.calculateDuration(), 1000);
-        });
-
-        const app = document.querySelector('ytd-app');
-        if (app) {
-            this.observer.observe(app, { childList: true, subtree: true });
         }
     }
 

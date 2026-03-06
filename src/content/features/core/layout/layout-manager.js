@@ -6,7 +6,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.Layout = class GridLayoutManager {
+window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features.BaseFeature {
     /**
      * Configuration constants
      * @readonly
@@ -42,18 +42,9 @@ window.YPP.features.Layout = class GridLayoutManager {
     ]);
 
     constructor() {
-        this._initConstants();
-        this._initState();
-    }
-
-    /**
-     * Initialize constant references
-     * @private
-     */
-    _initConstants() {
+        super('GridLayoutManager');
         this.CONSTANTS = window.YPP.CONSTANTS || {};
-        this.SELECTORS = this.CONSTANTS.SELECTORS || {};
-        this.Utils = window.YPP.Utils || {};
+        this._initState();
     }
 
     /**
@@ -61,15 +52,6 @@ window.YPP.features.Layout = class GridLayoutManager {
      * @private
      */
     _initState() {
-        /** @type {boolean} Feature active state */
-        this.isActive = false;
-        
-        /** @type {MutationObserver|null} DOM mutation observer */
-        this.observer = null;
-        
-        /** @type {Function|null} Window resize event listener */
-        this.resizeListener = null;
-        
         /** @type {number|null} RequestAnimationFrame ID */
         this._rafId = null;
         
@@ -79,34 +61,53 @@ window.YPP.features.Layout = class GridLayoutManager {
         /** @type {WeakSet<Element>} Track processed containers to avoid reprocessing */
         this._processedContainers = new WeakSet();
 
-        // Initialize centralized DOM observer
-        this.domObserver = new window.YPP.Utils.DOMObserver();
-
         // Bind methods for performance
         this._boundApplyLayout = this.applyGridLayout.bind(this);
     }
 
     /**
-     * Run the feature with given settings
-     * @param {Object} settings - User settings
+     * Feature configuration key
      */
-    run(settings) {
-        this.enable(settings);
+    getConfigKey() {
+        return 'grid4x4';
     }
 
     /**
-     * Enable grid layout with settings
-     * @param {Object} settings - User settings object
+     * Run the feature with given settings
      */
-    enable(settings) {
-        if (!settings) return;
+    async enable() {
+        await super.enable();
         
-        this.updateSettings(settings);
+        if (this.settings) {
+            this.updateSettings(this.settings);
+        }
         
-        if (settings.grid4x4) {
-            this.init();
-        } else {
-            this.disable();
+        this._retryCount = 0;
+        this.utils.log?.('Initializing 4x4 grid...', 'LAYOUT');
+
+        this._applyWithRetry();
+        this.startObserver();
+        this.addResizeListener();
+    }
+
+    /**
+     * Disable grid layout and cleanup resources
+     */
+    async disable() {
+        await super.disable();
+        this._cleanup();
+        this.utils.log?.('Grid Layout Disabled', 'LAYOUT');
+    }
+
+    /**
+     * Handle settings updates
+     */
+    async onUpdate() {
+        if (this.settings) {
+            this.updateSettings(this.settings);
+            // Force re-apply of grid structural styles when settings change
+            this._processedContainers = new WeakSet();
+            this._debouncedApply();
         }
     }
 
@@ -128,51 +129,24 @@ window.YPP.features.Layout = class GridLayoutManager {
         if (settings.channelColumns) {
             root.style.setProperty('--ypp-channel-columns', settings.channelColumns);
         }
-    }
-
-    /**
-     * Disable grid layout and cleanup resources
-     */
-    disable() {
-        if (!this.isActive) return;
-        
-        this.isActive = false;
-        this._cleanup();
-        this.Utils.log?.('Grid Layout Disabled', 'LAYOUT');
-    }
-
-    /**
-     * Initialize grid layout system
-     */
-    init() {
-        if (this.isActive) return;
-        
-        this.isActive = true;
-        this._retryCount = 0;
-        this.Utils.log?.('Initializing 4x4 grid...', 'LAYOUT');
-
-        this._applyWithRetry();
-        this.startObserver();
-        this.addResizeListener();
+        if (settings.subscriptionsColumns) {
+            root.style.setProperty('--ypp-subscriptions-columns', settings.subscriptionsColumns);
+        }
     }
 
     /**
      * Start central DOMObserver to watch for grid changes
      */
     startObserver() {
-        if (!this.isActive) return;
-
-        this.domObserver.start();
-        
         // Register observer for main app container changes
-        this.domObserver.register(
+        this.observer.register(
             'layout-manager',
             GridLayoutManager.SELECTORS.APP_CONTAINER,
             () => this._debouncedApply(),
             false // Process handled by init()'s applyWithRetry
         );
 
-        this.Utils.log?.('Observer started via DOMObserver', 'LAYOUT', 'debug');
+        this.utils.log?.('Observer started via DOMObserver', 'LAYOUT', 'debug');
     }
 
     /**
@@ -195,14 +169,12 @@ window.YPP.features.Layout = class GridLayoutManager {
      * Add window resize listener with debouncing
      */
     addResizeListener() {
-        if (this.resizeListener) return;
-        
-        // Use shared Utils.debounce
+        // Use shared utils.debounce
         const applyFn = () => this._applyWithRetry();
         
-        this.resizeListener = this.Utils.debounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY);
+        const resizeListener = this.utils.debounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY);
             
-        window.addEventListener('resize', this.resizeListener);
+        this.addListener(window, 'resize', resizeListener);
     }
 
     /**
@@ -210,8 +182,6 @@ window.YPP.features.Layout = class GridLayoutManager {
      * @private
      */
     _applyWithRetry() {
-        if (!this.isActive) return;
-        
         const success = this.applyGridLayout();
         
         if (!success && this._retryCount < GridLayoutManager.CONFIG.MAX_RETRIES) {
@@ -219,10 +189,10 @@ window.YPP.features.Layout = class GridLayoutManager {
             const delay = GridLayoutManager.CONFIG.BASE_RETRY_DELAY * 
                          Math.pow(GridLayoutManager.CONFIG.RETRY_BACKOFF_FACTOR, this._retryCount - 1);
             
-            this.Utils.log?.(`Retry ${this._retryCount}/${GridLayoutManager.CONFIG.MAX_RETRIES} in ${delay}ms`, 'LAYOUT', 'debug');
+            this.utils.log?.(`Retry ${this._retryCount}/${GridLayoutManager.CONFIG.MAX_RETRIES} in ${delay}ms`, 'LAYOUT', 'debug');
             setTimeout(() => this._applyWithRetry(), delay);
         } else if (!success) {
-            this.Utils.log?.('Max retries reached, grid application failed', 'LAYOUT', 'warn');
+            this.utils.log?.('Max retries reached, grid application failed', 'LAYOUT', 'warn');
         }
     }
 
@@ -231,7 +201,6 @@ window.YPP.features.Layout = class GridLayoutManager {
      * @returns {boolean} True if layout was successfully applied
      */
     applyGridLayout() {
-        if (!this.isActive) return false;
         if (!this._isValidPage(window.location.pathname)) return false;
 
         const gridRenderer = document.querySelector(GridLayoutManager.SELECTORS.GRID_RENDERER);
@@ -247,6 +216,18 @@ window.YPP.features.Layout = class GridLayoutManager {
 
         // Apply grid container class
         contents.classList.add('ypp-grid-container');
+
+        // Determine active columns
+        let cols = this.settings?.homeColumns || 4;
+        const path = window.location.pathname;
+        if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
+            cols = this.settings?.channelColumns || 4;
+        } else if (path.startsWith('/results')) {
+            cols = this.settings?.searchColumns || 4;
+        } else if (path === '/feed/subscriptions') {
+            cols = this.settings?.subscriptionsColumns || 4;
+        }
+        contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
 
         // Style grid items
         const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
@@ -291,15 +272,8 @@ window.YPP.features.Layout = class GridLayoutManager {
      */
     _cleanup() {
         // Disconnect observer
-        if (this.domObserver) {
-            this.domObserver.unregister('layout-manager');
-            this.domObserver.stop();
-        }
-
-        // Remove resize listener
-        if (this.resizeListener) {
-            window.removeEventListener('resize', this.resizeListener);
-            this.resizeListener = null;
+        if (this.observer) {
+            this.observer.unregister('layout-manager');
         }
 
         // Cancel pending animation frame
@@ -324,6 +298,6 @@ window.YPP.features.Layout = class GridLayoutManager {
             row.style.display = '';
         });
 
-        this.Utils.log?.('Cleanup complete', 'LAYOUT', 'debug');
+        this.utils.log?.('Cleanup complete', 'LAYOUT', 'debug');
     }
 };

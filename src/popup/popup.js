@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'navPlaylists',
         'navHistory',
         'forceHideSidebar',
+        'logoRedirectSub',
 
         // Feed & Home
         'hookFreeHome',
@@ -80,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideWatched', // Also in Search
         'grid4x4',
         'homeColumns', // New
+        'displayFullTitle', // New
         'contextMenu', // Subscription Groups Context Menu
         
         // Shorts
@@ -125,6 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Distractions
         'enableFocusMode',
         'hideComments',
+        'hideLiveChat',
+        'hideFundraiser',
         'hideEndScreens',
         'hideCards',
         'hideMerch',
@@ -136,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Subscription Manager
         'enableSubsManager',
         'channelColumns',
+        'subscriptionsColumns',
         'subscriptionFolders',
 
         // Watch Time Alert
@@ -184,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const display = document.getElementById(key + 'Value');
                             if (display) display.textContent = el.value + '%';
                         } else if (el.type === 'color' || el.type === 'text') {
-                            el.value = settings[key] || (key === 'progressBarColor' ? '#3ea6ff' : '');
+                            el.value = settings[key] || (key === 'progressBarColor' ? '#ff4e45' : '');
                         }
                     }
                 });
@@ -337,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'watchTimeAlertHours'].forEach(key => {
+    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {
@@ -368,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isActive = b.dataset.mode === mode;
                 b.classList.toggle('active', isActive);
                 b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
-                b.style.color = isActive ? '#3ea6ff' : 'rgba(255,255,255,0.5)';
+                b.style.color = isActive ? '#ff4e45' : 'rgba(255,255,255,0.5)';
             });
         };
 

@@ -26,6 +26,7 @@
     /* Gradient text */
     background: linear-gradient(135deg, #fff 0%, #aaa 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -107,7 +108,7 @@
 }
 .calendar-day:hover { background: rgba(255,255,255,0.1); }
 .calendar-day.has-data { border-bottom: 2px solid #26a641; }
-.calendar-day.selected { background: #3ea6ff; color: #fff; }
+.calendar-day.selected { background: #ff4e45; color: #fff; }
 
 /* Video List */
 .video-log-list {
@@ -130,7 +131,7 @@
 .log-time {
     font-size: 11px;
     font-weight: 600;
-    color: #3ea6ff;
+    color: #ff4e45;
     min-width: 40px;
 }
 .log-info {
