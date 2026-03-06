@@ -33,6 +33,7 @@ window.YPP.SettingsSchema = {
         homeColumns:         { type: 'number',  default: 4, min: 1, max: 8 },
         searchColumns:       { type: 'number',  default: 4, min: 1, max: 8 },
         channelColumns:      { type: 'number',  default: 4, min: 1, max: 8 },
+        subscriptionsColumns:{ type: 'number',  default: 4, min: 1, max: 8 },
         displayFullTitle:    { type: 'boolean', default: false },
 
         // --- Visibility ---

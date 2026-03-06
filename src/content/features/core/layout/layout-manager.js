@@ -129,6 +129,9 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         if (settings.channelColumns) {
             root.style.setProperty('--ypp-channel-columns', settings.channelColumns);
         }
+        if (settings.subscriptionsColumns) {
+            root.style.setProperty('--ypp-subscriptions-columns', settings.subscriptionsColumns);
+        }
     }
 
     /**
@@ -221,6 +224,8 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             cols = this.settings?.channelColumns || 4;
         } else if (path.startsWith('/results')) {
             cols = this.settings?.searchColumns || 4;
+        } else if (path === '/feed/subscriptions') {
+            cols = this.settings?.subscriptionsColumns || 4;
         }
         contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
 

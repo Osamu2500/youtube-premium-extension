@@ -444,7 +444,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     }
 
     applyFeedFilters() {
-        if (!this.activeFolder || !this.isFeedPage) return;
+        if (!this.isFeedPage) return;
         
         // Extremely fast DOM iteration natively overriding CSS display
         const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
@@ -454,9 +454,41 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             const channelLink = card.querySelector('#channel-name a');
             if (!channelLink) return;
             
-            const channelName = channelLink.textContent.trim();
+            let isVisible = true;
             
-            if (this.activeChannelSet.has(channelName)) {
+            // 1. Folder Filtering
+            if (this.activeFolder) {
+                const channelName = channelLink.textContent.trim();
+                if (!this.activeChannelSet.has(channelName)) {
+                    isVisible = false;
+                }
+            }
+
+            // 2. Hide Shorts Filtering
+            if (isVisible && this.hideShortsActive) {
+                const isShortsRenderer = card.querySelector('ytd-reel-item-renderer') !== null;
+                const hasShortsAttr = card.hasAttribute('is-shorts');
+                const hasShortsLink = card.querySelector('a[href^="/shorts/"]') !== null;
+                
+                if (isShortsRenderer || hasShortsAttr || hasShortsLink) {
+                    isVisible = false;
+                }
+            }
+
+            // 3. Hide Watched Filtering
+            if (isVisible && this.hideWatchedActive) {
+                const progressEl = card.querySelector('#progress');
+                if (progressEl) {
+                    const widthStyle = progressEl.style.width;
+                    const progressValue = parseInt(widthStyle.replace('%', ''), 10);
+                    if (!isNaN(progressValue) && progressValue >= 80) {
+                        isVisible = false;
+                    }
+                }
+            }
+            
+            // Apply Visibility
+            if (isVisible) {
                 card.style.display = '';
                 card.classList.add('ypp-filtered-in');
             } else {
@@ -475,6 +507,12 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     }
 
     resetFeedVisibility() {
+        // If external toggles are active, we must re-evaluate instead of blindly resetting
+        if (this.hideShortsActive || this.hideWatchedActive) {
+            this.applyFeedFilters();
+            return;
+        }
+
         const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
         videoCards.forEach(card => {
             card.style.display = '';
@@ -577,6 +615,28 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
                 chipsBar.appendChild(playChip);
             }
             
+            // Feature Parity: Hide Shorts Toggle
+            const hideShortsChip = document.createElement('button');
+            hideShortsChip.className = `ypp-filter-chip ypp-toggle-chip ${this.hideShortsActive ? 'active' : ''}`;
+            hideShortsChip.textContent = 'Hide Shorts';
+            hideShortsChip.addEventListener('click', () => {
+                this.hideShortsActive = !this.hideShortsActive;
+                hideShortsChip.classList.toggle('active', this.hideShortsActive);
+                this.updateFilterState(); // Re-evaluate feed visibility
+            });
+            chipsBar.appendChild(hideShortsChip);
+
+            // Feature Parity: Hide Watched Toggle
+            const hideWatchedChip = document.createElement('button');
+            hideWatchedChip.className = `ypp-filter-chip ypp-toggle-chip ${this.hideWatchedActive ? 'active' : ''}`;
+            hideWatchedChip.textContent = 'Hide Watched';
+            hideWatchedChip.addEventListener('click', () => {
+                this.hideWatchedActive = !this.hideWatchedActive;
+                hideWatchedChip.classList.toggle('active', this.hideWatchedActive);
+                this.updateFilterState(); // Re-evaluate feed visibility
+            });
+            chipsBar.appendChild(hideWatchedChip);
+
             // Add Folder Button
             const addBtn = document.createElement('button');
             addBtn.className = 'ypp-filter-chip ypp-add-folder-btn';
@@ -615,13 +675,9 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
                 if (!link || !link.textContent.trim()) return;
                 
                 const btn = document.createElement('button');
-                btn.className = 'ypp-card-folder-btn';
-                btn.innerHTML = '📁';
+                btn.className = 'ypp-card-folder-btn ypp-folder-badge';
+                btn.innerHTML = `<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> Save`;
                 btn.title = "Save to Folder";
-                btn.style.cssText = 'background:none; border:none; cursor:pointer; font-size:12px; margin-left:6px; opacity:0.6; padding:0; vertical-align:middle; transition:opacity 0.2s';
-                
-                btn.addEventListener('mouseenter', () => btn.style.opacity = '1');
-                btn.addEventListener('mouseleave', () => btn.style.opacity = '0.6');
                 
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
