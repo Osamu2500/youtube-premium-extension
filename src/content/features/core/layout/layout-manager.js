@@ -209,15 +209,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
         if (!contents) return false;
 
-        // Performance: Skip if already processed and unchanged
-        if (this._processedContainers.has(contents)) {
-            return true;
-        }
-
-        // Apply grid container class
-        contents.classList.add('ypp-grid-container');
-
-        // Determine active columns
+        // Determine column count from user settings per page type
         let cols = this.settings?.homeColumns || 4;
         const path = window.location.pathname;
         if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
@@ -227,7 +219,35 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         } else if (path === '/feed/subscriptions') {
             cols = this.settings?.subscriptionsColumns || 4;
         }
+
+        // Performance: Skip if already processed and unchanged
+        if (this._processedContainers.has(contents)) {
+            // Restore inline style if it was wiped by YouTube
+            if (!contents.style.gridTemplateColumns) {
+                contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+                contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+            }
+            return true;
+        }
+
+        // Apply grid container class
+        contents.classList.add('ypp-grid-container');
+
+
+
+        // Use repeat(N, 1fr) — reliable exact column count.
+        // minmax(0, 1fr) ensures columns never overflow when cards have wide content.
         contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+
+        // Also set dense auto-flow so hidden items (Shorts, watched, filtered) don't leave blank cells
+        contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+
+        // Ensure CSS knows the active column count
+        document.documentElement.style.setProperty('--ypp-active-columns', cols);
+
+        // Update the CSS min-column variable so responsive breakpoints in styles.css stay consistent
+        document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
+
 
         // Style grid items
         const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);

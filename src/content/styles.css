@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 =======================================================================================
    YOUTUBE PREMIUM PLUS - Glassmorphism Redesign
 =======================================================================================
@@ -724,12 +724,17 @@ ytd-app[is-watch-page] .yt-premium-plus-theme ytd-guide-renderer {
   display: none;
 }
 
-/* Sidebar No-Mini Mode */
+/* Sidebar No-Mini Mode - Full Width without margin gaps */
 ytd-mini-guide-renderer {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  width: 0;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+}
+ytd-app[mini-guide-visible] ytd-page-manager,
+ytd-app[mini-guide-visible] #content {
+  margin-left: 0 !important;
+  --ytd-mini-guide-width: 0px !important;
 }
 
 /* Hook-Free Home */
@@ -1077,37 +1082,47 @@ ytd-mini-guide-renderer {
    5. VIDEO GRID & CARDS
    =================================================================================== */
 
-/* Main Grid Container */
+/* Main Grid Container - Full Width, Edge-to-Edge */
 .yt-premium-plus-theme ytd-rich-grid-renderer {
-  margin-top: 24px;
-  /* Centered with max-width cap to prevent ultra-wide sprawl */
-  max-width: 1900px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-left: 32px !important;
-  padding-right: 32px !important;
+  margin-top: 16px !important;
+  /* Edge-to-edge: no max-width cap, no side margins, no side padding */
+  max-width: 100% !important;
   width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
   box-sizing: border-box !important;
   /* Allow hover card shadows to paint outside the renderer boundary */
   overflow: visible !important;
 }
 
-/* Grid Contents - Use CSS Grid instead of Flex */
+/* Strip YouTube's own outer container margins that create side gaps */
+.yt-premium-plus-theme ytd-browse[page-subtype="home"] #primary,
+.yt-premium-plus-theme ytd-browse[page-subtype="home"] ytd-two-column-browse-results-renderer > #primary-items,
+.yt-premium-plus-theme ytd-browse[page-subtype="home"] #contents.ytd-page-manager {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Grid Contents - CSS Grid with exact columns from user settings */
 .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
   display: grid !important;
-  /* auto-fill: let the browser decide how many columns fit naturally */
+  /* Use active columns as defined by JS Layout Manager, fallback to 4 */
   grid-template-columns: repeat(
-    auto-fill,
-    minmax(var(--ypp-grid-column-min, 300px), 1fr)
+    var(--ypp-active-columns, 4),
+    minmax(0, 1fr)
   ) !important;
-  gap: var(--ypp-grid-gap, 24px) !important;
+  /* dense: packs items into any gaps left by hidden/removed elements */
+  grid-auto-flow: dense !important;
+  gap: var(--ypp-grid-gap, 16px) !important;
   width: 100% !important;
   max-width: 100% !important;
-  /* No padding here — renderer padding handles the breathing room */
   padding: 0 !important;
   margin: 0 !important;
   box-sizing: border-box !important;
-  /* stretch: cards must fill their grid cell (fixes cards only using left portion of grid) */
   justify-items: stretch !important;
   align-items: start !important;
 }
@@ -1130,10 +1145,15 @@ ytd-mini-guide-renderer {
 }
 
 /* ytd-rich-section-renderer: wide promo/shelf cards injected mid-scroll by YouTube.
-   Force them to occupy a full grid row so they don't break the column flow. */
+   Force them to span the full grid row so they never break column flow.
+   If empty (e.g. Shorts shelf hidden inside), hide them entirely to prevent blank rows. */
 .yt-premium-plus-theme ytd-rich-section-renderer {
   grid-column: 1 / -1 !important;
   width: 100% !important;
+}
+/* Hide section renderers that are completely empty (all children hidden) */
+.yt-premium-plus-theme ytd-rich-section-renderer:not(:has(*:not([style*="display: none"]))):not(:has(*:not(.ypp-filter-hidden))) {
+  display: none !important;
 }
 
 /* Individual Video Items - Premium Glassmorphic Card.
@@ -1265,9 +1285,11 @@ ytd-mini-guide-renderer {
 /* Fluid CSS Grid handles responsiveness natively using auto-fill minmax. 
    Removing legacy percentage-width hacks for cleaner layout. */
 
-/* No Sidebar Mode Grid Centering — margin auto handles centering; keep symmetric padding */
+/* No Sidebar Mode: Already edge-to-edge, no extra treatment needed */
 body.ypp-hide-sidebar ytd-rich-grid-renderer {
-  width: 100%;
+  width: 100% !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
 }
 
 /* ===================================================================================
@@ -1287,9 +1309,9 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
 /* Search Grid Layout */
 body.ypp-search-grid-mode ytd-item-section-renderer #contents,
 body.ypp-search-grid-mode .ypp-flattened-grid {
-  display: grid;
-  /* Optimized for density and screen usage */
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: grid !important;
+  /* Enforce chosen column count rather than auto-packing to eliminate layout collapse */
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
   grid-auto-flow: dense !important; /* Auto-pack items to fill empty holes and gaps */
   gap: 16px;
   width: 100% !important;
@@ -1386,6 +1408,83 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   background-clip: padding-box !important;
 }
 
+/* Thumbnails - match homepage aesthetics */
+body.ypp-search-grid-mode ytd-thumbnail {
+  width: 100% !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  background-color: transparent !important;
+  margin-bottom: 8px !important;
+}
+
+body.ypp-search-grid-mode ytd-thumbnail img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  background-color: transparent !important;
+}
+
+/* Video Title - match homepage aesthetics */
+body.ypp-search-grid-mode #video-title {
+  font-size: 1.6rem !important;
+  line-height: 2.2rem !important;
+  font-weight: 500 !important;
+  margin: 12px 0 4px 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-height: 4.4rem !important;
+  color: var(--ypp-text-primary) !important;
+}
+
+/* Force the wrapper inside the video renderer to be a column instead of a row */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #content,
+body.ypp-search-grid-mode ytd-radio-renderer #content {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Fix inner wrapper widths */
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
+  flex: none !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  margin-right: 0 !important;
+}
+
+/* Text wrapper spacing below thumbnail */
+body.ypp-search-grid-mode ytd-video-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
+  margin-top: 12px !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove channel avatar if it appears on search randomly */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+  padding: 0 !important;
+  margin-top: 4px !important;
+}
+
+/* Metadata formatting */
+body.ypp-search-grid-mode #metadata-line,
+body.ypp-search-grid-mode .ytd-channel-name {
+  font-size: 1.3rem !important;
+  color: var(--ypp-text-secondary) !important;
+  line-height: 1.5 !important;
+}
+
 /* Subtle inner shine */
 body.ypp-search-grid-mode ytd-video-renderer::before,
 body.ypp-search-grid-mode ytd-playlist-renderer::before,
@@ -1443,7 +1542,7 @@ body.ypp-search-grid-mode ytd-radio-renderer a.ytd-radio-renderer {
 body.ypp-search-grid-mode ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-playlist-renderer:hover,
 body.ypp-search-grid-mode ytd-radio-renderer:hover {
-  transform: translateY(-4px) scale(1.01) !important;
+  transform: translateY(-4px) !important;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.1),

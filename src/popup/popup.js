@@ -876,6 +876,189 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- CUSTOMIZATION CONTROLS ---
+
+    /** Generic pill selector init */
+    function initPillSelector(containerId, storageKey, onChange) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const options = container.querySelectorAll('.pill-option');
+
+        // Load saved value
+        chrome.storage.local.get([storageKey], (result) => {
+            const saved = result[storageKey];
+            if (saved) {
+                options.forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.value === saved);
+                });
+            }
+        });
+
+        options.forEach(opt => {
+            opt.addEventListener('click', () => {
+                options.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                const value = opt.dataset.value;
+                chrome.storage.local.set({ [storageKey]: value });
+                if (onChange) onChange(value);
+                showSaveIndicator();
+            });
+        });
+    }
+
+    /** Apply font family to popup */
+    function applyFontFamily(family) {
+        const fontMap = {
+            inter: '"Inter", system-ui, sans-serif',
+            system: 'system-ui, -apple-system, sans-serif',
+            mono: '"Courier New", monospace'
+        };
+        document.body.style.fontFamily = fontMap[family] || fontMap.inter;
+    }
+
+    /** Apply density to popup (injects CSS variable) */
+    function applyDensity(density) {
+        const densityMap = {
+            compact: { pad: '5px', gap: '4px' },
+            comfortable: { pad: '8px', gap: '6px' },
+            spacious: { pad: '14px', gap: '12px' }
+        };
+        const d = densityMap[density] || densityMap.comfortable;
+        document.documentElement.style.setProperty('--density-pad', d.pad);
+        document.documentElement.style.setProperty('--density-gap', d.gap);
+    }
+
+    /** Apply accent color to popup */
+    function applyAccentColor(hex) {
+        if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+        // Derive lighter version for glow
+        document.documentElement.style.setProperty('--accent-primary', hex);
+        document.documentElement.style.setProperty('--accent-glow', hex + '66');
+        // Update accent gradient
+        const darker = hex; // simplified: use same
+        document.documentElement.style.setProperty('--accent-gradient',
+            `linear-gradient(135deg, ${hex} 0%, ${darker}cc 100%)`
+        );
+    }
+
+    // Init pill selectors
+    initPillSelector('fontFamilySelector', 'ypp_fontFamily', applyFontFamily);
+    initPillSelector('densitySelector', 'ypp_density', applyDensity);
+    initPillSelector('cardStyleSelector', 'ypp_cardStyle', (style) => {
+        document.documentElement.setAttribute('data-card-style', style);
+    });
+
+    // Load & apply saved customization values on startup
+    chrome.storage.local.get(['ypp_fontFamily', 'ypp_density', 'ypp_cardStyle', 'ypp_accentColor',
+        'ypp_fontScale', 'ypp_thumbRadius', 'ypp_sidebarOpacity'], (result) => {
+        if (result.ypp_fontFamily) applyFontFamily(result.ypp_fontFamily);
+        if (result.ypp_density) applyDensity(result.ypp_density);
+        if (result.ypp_accentColor) {
+            applyAccentColor(result.ypp_accentColor);
+            // Update swatch active state
+            document.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
+                sw.classList.toggle('active', sw.dataset.color === result.ypp_accentColor);
+            });
+        }
+        // Apply slider values
+        const fontScaleSlider = document.getElementById('fontScale');
+        if (fontScaleSlider && result.ypp_fontScale) {
+            fontScaleSlider.value = result.ypp_fontScale;
+            const disp = document.getElementById('fontScaleValue');
+            if (disp) disp.textContent = result.ypp_fontScale + '%';
+        }
+        const thumbSlider = document.getElementById('thumbRadius');
+        if (thumbSlider && result.ypp_thumbRadius !== undefined) {
+            thumbSlider.value = result.ypp_thumbRadius;
+            const disp = document.getElementById('thumbRadiusValue');
+            if (disp) disp.textContent = result.ypp_thumbRadius + 'px';
+        }
+        const sidebarSlider = document.getElementById('sidebarOpacity');
+        if (sidebarSlider && result.ypp_sidebarOpacity !== undefined) {
+            sidebarSlider.value = result.ypp_sidebarOpacity;
+            const disp = document.getElementById('sidebarOpacityValue');
+            if (disp) disp.textContent = result.ypp_sidebarOpacity + '%';
+        }
+    });
+
+    // Accent color swatches
+    const accentSwatches = document.getElementById('accentSwatches');
+    if (accentSwatches) {
+        accentSwatches.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
+            sw.addEventListener('click', () => {
+                accentSwatches.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                const color = sw.dataset.color;
+                chrome.storage.local.set({ ypp_accentColor: color });
+                applyAccentColor(color);
+                showSaveIndicator();
+            });
+        });
+
+        // Custom color picker
+        const customPicker = document.getElementById('accentColorCustom');
+        if (customPicker) {
+            customPicker.addEventListener('input', () => {
+                accentSwatches.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                const wrap = customPicker.closest('.color-swatch-wrap');
+                if (wrap) wrap.querySelector('.color-swatch').classList.add('active');
+                applyAccentColor(customPicker.value);
+            });
+            customPicker.addEventListener('change', () => {
+                chrome.storage.local.set({ ypp_accentColor: customPicker.value });
+                showSaveIndicator();
+            });
+        }
+    }
+
+    // Customization sliders
+    const custSliders = [
+        { id: 'fontScale', key: 'ypp_fontScale', dispId: 'fontScaleValue', suffix: '%' },
+        { id: 'thumbRadius', key: 'ypp_thumbRadius', dispId: 'thumbRadiusValue', suffix: 'px' },
+        { id: 'sidebarOpacity', key: 'ypp_sidebarOpacity', dispId: 'sidebarOpacityValue', suffix: '%' }
+    ];
+    custSliders.forEach(({ id, key, dispId, suffix }) => {
+        const el = document.getElementById(id);
+        const disp = document.getElementById(dispId);
+        if (el) {
+            el.addEventListener('input', () => {
+                if (disp) disp.textContent = el.value + suffix;
+                // Live apply for font scale
+                if (id === 'fontScale') {
+                    document.documentElement.style.setProperty('--ui-font-scale', (el.value / 100).toFixed(2));
+                }
+            });
+            el.addEventListener('change', () => {
+                chrome.storage.local.set({ [key]: Number(el.value) });
+                showSaveIndicator();
+            });
+        }
+    });
+
+    // Animations toggles
+    const enableAnimationsEl = document.getElementById('enableAnimations');
+    if (enableAnimationsEl) {
+        chrome.storage.local.get(['ypp_enableAnimations'], (r) => {
+            enableAnimationsEl.checked = r.ypp_enableAnimations !== false; // default true
+        });
+        enableAnimationsEl.addEventListener('change', () => {
+            chrome.storage.local.set({ ypp_enableAnimations: enableAnimationsEl.checked });
+            document.documentElement.classList.toggle('ypp-no-animations', !enableAnimationsEl.checked);
+            showSaveIndicator();
+        });
+    }
+    const reducedMotionEl = document.getElementById('reducedMotion');
+    if (reducedMotionEl) {
+        chrome.storage.local.get(['ypp_reducedMotion'], (r) => {
+            reducedMotionEl.checked = r.ypp_reducedMotion || false;
+        });
+        reducedMotionEl.addEventListener('change', () => {
+            chrome.storage.local.set({ ypp_reducedMotion: reducedMotionEl.checked });
+            document.documentElement.classList.toggle('ypp-reduced-motion', reducedMotionEl.checked);
+            showSaveIndicator();
+        });
+    }
+
     // Initialize
     loadSettings();
     initHistoryWidget(); // Initialize history widget on load

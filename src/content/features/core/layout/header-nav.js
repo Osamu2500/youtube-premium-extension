@@ -126,41 +126,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
      * Override main YouTube logo to redirect to Subscriptions feed
      */
     handleLogoRedirect() {
-        const logo = document.querySelector('ytd-topbar-logo-renderer a#logo');
-        if (!logo) return;
-
-        if (this.settings?.logoRedirectSub) {
-            // Apply redirection
-            if (!logo.dataset.yppRedirectBound) {
-                logo.dataset.yppRedirectBound = 'true';
-                logo.dataset.originalHref = logo.getAttribute('href') || '/';
-                logo.href = '/feed/subscriptions';
-                
-                // Add click listener
-                if (!this._logoClickListener) {
-                    this._logoClickListener = (e) => {
-                        if (this.settings.logoRedirectSub && !this.isCurrentPage('/feed/subscriptions')) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            this.navigateTo('/feed/subscriptions');
-                        }
-                    };
-                    logo.addEventListener('click', this._logoClickListener, true);
-                }
-            }
-        } else {
-            // Revert redirection
-            if (logo.dataset.yppRedirectBound) {
-                delete logo.dataset.yppRedirectBound;
-                if (logo.dataset.originalHref) {
-                    logo.setAttribute('href', logo.dataset.originalHref);
-                }
-                if (this._logoClickListener) {
-                    logo.removeEventListener('click', this._logoClickListener, true);
-                    this._logoClickListener = null;
-                }
-            }
-        }
+        return; // Disabled per user request - always go to home
     }
 
     /**
@@ -197,8 +163,8 @@ window.YPP.features.HeaderNav = class HeaderNav {
             });
 
             // Submit to UIManager
-            if (window.YPP.ui) {
-                 window.YPP.ui.mount('headerRight', {
+            if (window.YPP.ui && window.YPP.ui.manager) {
+                 window.YPP.ui.manager.mount('headerRight', {
                      id: 'header-nav-group',
                      el: navGroup
                  }, 'prepend'); // prepend inserts it before the profile/notifications

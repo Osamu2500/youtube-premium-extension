@@ -822,3 +822,179 @@ input[type="range"]::-webkit-slider-thumb:hover {
 input[type="range"]:focus::-webkit-slider-runnable-track {
   background: rgba(255, 255, 255, 0.15);
 }
+
+/* --- Settings Section Spacing --- */
+.settings-section {
+  margin-bottom: 2px;
+}
+
+/* --- Section Subtitle --- */
+.section-subtitle {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-top: 1px;
+  opacity: 0.8;
+}
+
+/* --- Section Header with Accent Dot --- */
+.section-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.section-header .section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.section-header .section-title::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background: var(--accent-gradient);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* --- Pill Selector (segmented control) --- */
+.pill-selector {
+  display: flex;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.pill-option {
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.pill-option:hover {
+  color: var(--text-secondary);
+}
+
+.pill-option.active {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 78, 69, 0.35);
+}
+
+/* --- Color Swatches --- */
+.color-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+  align-items: center;
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--duration-fast);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch.active {
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 2px var(--accent-primary), 0 2px 8px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+.color-swatch.custom-swatch {
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+  position: relative;
+}
+
+/* --- Cust Color Picker inline --- */
+.color-swatch-picker {
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.color-swatch-wrap {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+/* --- Slider with label row --- */
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 2px;
+  padding: 2px 0;
+}
+
+.slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-label-row .name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.slider-label-row .desc {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+}
+
+/* --- Section-level setting row (full-width, no card-group box) --- */
+.inline-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast);
+}
+
+.inline-setting-row:hover {
+  background: var(--ypp-glass-highlight);
+}
+
+/* --- Customization section-divider override (subtler) --- */
+.section-divider {
+  display: none; /* Replaced by accent-dot pattern */
+}
