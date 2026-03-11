@@ -21,7 +21,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         }
 
         this.logger.info('Started Subscription UI');
-        this.observer = this.observer || new window.YPP.Utils.DOMObserver();
+        this.observer = this.observer || window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
         this.observePage();
     }
 

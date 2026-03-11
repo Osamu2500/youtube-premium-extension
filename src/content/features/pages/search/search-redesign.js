@@ -8,7 +8,7 @@
  * - Features a persistent View Toggle (Grid/List).
  */
 
-window.YPP.features.SearchRedesign = class SearchRedesign {
+class SearchRedesign {
     // =========================================================================
     // CONSTANTS & CONFIG
     // =========================================================================

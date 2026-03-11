@@ -10,10 +10,10 @@ window.YPP.CONSTANTS = {
     // =========================================================================
     SELECTORS: {
         // Grid & Layout
-        GRID_RENDERER: 'ytd-rich-grid-renderer',
+        GRID_RENDERER: 'ytd-rich-grid-renderer, ytd-grid-renderer',
         GRID_CONTENTS: '#contents',
         GRID_ROW: 'ytd-rich-grid-row',
-        VIDEO_ITEM: 'ytd-rich-item-renderer',
+        VIDEO_ITEM: 'ytd-rich-item-renderer, ytd-grid-video-renderer, ytd-video-renderer',
 
         // Search Grid
         SEARCH_GRID_CONTENTS: '#contents.ytd-two-column-search-results-renderer',
@@ -35,8 +35,8 @@ window.YPP.CONSTANTS = {
 
         // Player
         THEATER_BUTTON: '.ytp-size-button',
-        WATCH_FLEXY: 'ytd-watch-flexy',
-        PLAYER: '.html5-video-player',
+        WATCH_FLEXY: 'ytd-watch-flexy, #page-manager > ytd-watch',
+        PLAYER: '.html5-video-player, #movie_player',
         PLAYER_CONTAINER: '#player-container-outer',
         PLAYER_OUTER: '#ytd-player',
         VIDEO: 'video',
@@ -171,6 +171,7 @@ window.YPP.CONSTANTS = {
     // DEFAULT SETTINGS
     // =========================================================================
     DEFAULT_SETTINGS: {
+        schemaVersion: 1,
         // Theme
         premiumTheme: true,
         activeTheme: 'default', // default, ocean, sunset, dracula, forest, midnight, cherry

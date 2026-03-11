@@ -22,7 +22,7 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter {
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
-        this.observer = new window.YPP.Utils.DOMObserver();
+        this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
 
         this.state = {
             isActive: false,

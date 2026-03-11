@@ -1,0 +1,11 @@
+{
+  "name": "youtube-premium-plus",
+  "version": "1.0.0",
+  "description": "YouTube Premium Plus Extension",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

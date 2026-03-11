@@ -168,6 +168,10 @@
                 throw new Error('FeatureManager class not found');
             }
 
+            // Initialize and start the global shared DOMObserver
+            window.YPP.sharedObserver = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
+            window.YPP.sharedObserver.start();
+
             this.featureManager = new window.YPP.FeatureManager();
 
             if (!this.featureManager || typeof this.featureManager.init !== 'function') {
@@ -249,6 +253,21 @@
                 this._navTimeout = requestAnimationFrame(() => {
                     this.Utils?.log('Navigation detected', 'MAIN', 'debug');
                     this.updateContext();
+                    
+                    // Fire next-gen EventBus lifecycle hooks
+                    if (window.YPP.events) {
+                        const url = window.location.href;
+                        window.YPP.events.emit('app:pageChange', url);
+                        
+                        if (window.location.pathname === '/watch') {
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const videoId = urlParams.get('v');
+                            if (videoId) {
+                                window.YPP.events.emit('app:videoChange', videoId);
+                            }
+                        }
+                    }
+
                     if (this.featureManager) {
                         try {
                             this.featureManager.init(this.settings);

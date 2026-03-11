@@ -8,7 +8,7 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.ContextMenu = class ContextMenu {
     constructor() {
         this.isActive = false;
-        this.observer = new window.YPP.Utils.DOMObserver();
+        this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
     }
 
     enable(settings) {

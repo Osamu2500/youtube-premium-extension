@@ -20,6 +20,7 @@ window.YPP.SettingsSchema = {
     //   values  - array of allowed values for strings (enum-like)
     // =========================================================================
     schema: Object.freeze({
+        schemaVersion:       { type: 'number',  default: 1 },
         // --- Theme ---
         premiumTheme:        { type: 'boolean', default: true },
         activeTheme:         { type: 'string',  default: 'default', values: ['default','ocean','sunset','dracula','forest','midnight','cherry','system'] },
@@ -144,6 +145,9 @@ window.YPP.SettingsSchema = {
             return this._defaults();
         }
 
+        // Intercept and mutate old settings layout
+        raw = this.migrate(raw);
+
         const out = {};
         let warnings = 0;
 
@@ -203,6 +207,30 @@ window.YPP.SettingsSchema = {
         }
 
         return out;
+    },
+
+    /**
+     * Migrate old settings schema to the current schema.
+     * @param {Object} raw - Raw settings object
+     * @returns {Object} Migrated settings object
+     */
+    migrate(raw) {
+        let currentVersion = raw.schemaVersion || 0;
+        
+        // Example: If migrating from version 0 to 1
+        if (currentVersion < 1) {
+            // Note: v0 had no schemaVersion. 
+            // If trueBlack was set, we migrate it to activeTheme = 'midnight'
+            if (raw.trueBlack === true && raw.activeTheme === 'default') {
+                raw.activeTheme = 'midnight';
+                window.YPP.Utils?.log('Migrated trueBlack -> activeTheme = midnight', 'SCHEMA', 'info');
+            }
+            raw.schemaVersion = 1;
+        }
+
+        // Future migrations go here: if (currentVersion < 2) { ... }
+
+        return raw;
     },
 
     /**

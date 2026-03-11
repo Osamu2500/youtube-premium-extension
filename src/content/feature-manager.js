@@ -43,9 +43,33 @@ window.YPP.FeatureManager = class FeatureManager {
         if (!this.instantiated) {
             this.instantiateFeatures();
             this.instantiated = true;
+            this.setupLifecycleBindings();
         }
 
         this.applyFeatures();
+    }
+
+    /**
+     * Bind to the central EventBus to relay lifecycle events to all features
+     */
+    setupLifecycleBindings() {
+        if (!window.YPP.events) return;
+
+        window.YPP.events.on('app:pageChange', (url) => {
+            Object.values(this.features).forEach(feature => {
+                if (feature.isEnabled && typeof feature.onPageChange === 'function') {
+                    this.safeRun(feature.name, () => feature.onPageChange(url));
+                }
+            });
+        });
+
+        window.YPP.events.on('app:videoChange', (videoId) => {
+            Object.values(this.features).forEach(feature => {
+                if (feature.isEnabled && typeof feature.onVideoChange === 'function') {
+                    this.safeRun(feature.name, () => feature.onVideoChange(videoId));
+                }
+            });
+        });
     }
 
     /**

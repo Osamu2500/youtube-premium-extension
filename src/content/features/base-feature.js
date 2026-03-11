@@ -12,14 +12,13 @@ window.YPP.features.BaseFeature = class BaseFeature {
         this.settings = {};
         this.utils = window.YPP.Utils;
         
-        // Each feature gets its own optimized observer
-        if (this.utils && this.utils.DOMObserver) {
-            this.observer = new this.utils.DOMObserver();
-        } else {
-            console.warn(`[YPP:${this.name}] Utils or DOMObserver not found`);
-        }
+        // Next-Gen Architecture
+        this.events = window.YPP.events;
+        this.domApi = window.YPP.DomAPI;
+        this.observer = window.YPP.sharedObserver;
         
         this.eventListeners = [];
+        this.busListeners = [];
     }
 
     /**
@@ -31,8 +30,11 @@ window.YPP.features.BaseFeature = class BaseFeature {
         const configKey = this.getConfigKey();
         
         // Determine if feature should be enabled based on settings
-        // If there's no specific config key, assume it's an always-on feature
-        const shouldBeEnabled = configKey ? !!settings[configKey] : true;
+        // If there's no specific config key, or the key isn't in settings, assume it's always-on
+        let shouldBeEnabled = true;
+        if (configKey && settings.hasOwnProperty(configKey)) {
+            shouldBeEnabled = !!settings[configKey];
+        }
 
         if (shouldBeEnabled && !this.isEnabled) {
             this.utils?.log(`Enabling feature: ${this.name}`, 'MAIN', 'debug');
@@ -49,27 +51,27 @@ window.YPP.features.BaseFeature = class BaseFeature {
     }
 
     /**
-     * Override this to return the settings key for this feature
-     * e.g., return 'enableFocusMode'
-     * Return null if the feature is always on.
+     * Override this to return the settings key for this feature.
+     * By default, it camelCases the class name (e.g., HideShorts -> hideShorts).
+     * Return null explicitly if the feature is always on.
      * @returns {string|null}
      */
     getConfigKey() {
-        return null;
+        if (!this.name) return null;
+        return this.name.charAt(0).toLowerCase() + this.name.slice(1);
     }
 
     /**
      * Enable the feature. Override this method in child classes.
      */
     async enable() {
-        if (this.observer) this.observer.start();
+        // Base implementation does nothing
     }
 
     /**
      * Disable the feature. Override this method in child classes.
      */
     async disable() {
-        if (this.observer) this.observer.stop();
         this.cleanupEvents();
     }
 
@@ -86,6 +88,7 @@ window.YPP.features.BaseFeature = class BaseFeature {
      * Remove all tracked event listeners
      */
     cleanupEvents() {
+        // Standard DOM event listeners
         this.eventListeners.forEach(({ target, event, handler, options }) => {
             try {
                 if (target.removeEventListener) {
@@ -96,6 +99,35 @@ window.YPP.features.BaseFeature = class BaseFeature {
             }
         });
         this.eventListeners = [];
+        
+        // EventBus listeners
+        this.busListeners.forEach(unsub => {
+            try { unsub(); } catch (e) {}
+        });
+        this.busListeners = [];
+    }
+
+    /**
+     * Safely subscribe to the EventBus and track it for cleanup
+     */
+    onBusEvent(event, handler) {
+        if (!this.events) return;
+        const unsub = this.events.on(event, handler.bind(this));
+        this.busListeners.push(unsub);
+    }
+
+    /**
+     * Lifecycle Hook: Called when standard YouTube SPA navigation completes
+     */
+    onPageChange(url) {
+        // Override in child class
+    }
+
+    /**
+     * Lifecycle Hook: Called when the YouTube player loads a new video
+     */
+    onVideoChange(videoId) {
+        // Override in child class
     }
 
     /**

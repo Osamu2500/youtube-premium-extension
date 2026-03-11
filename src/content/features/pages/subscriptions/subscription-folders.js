@@ -23,7 +23,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
         // Use a fast Set for constant-time lookups during grid rendering
         this.activeChannelSet = new Set();
         
-        this.observer = new window.YPP.Utils.DOMObserver();
+        this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
         this.STORAGE_KEY = 'ypp_subscription_folders';
     }
 

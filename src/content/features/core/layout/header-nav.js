@@ -22,7 +22,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
         this.isEnabled = false;
         /** @type {Object|null} Current user settings */
         this.settings = null;
-        this.domObserver = new this.Utils.DOMObserver();
+        this.domObserver = window.YPP.sharedObserver || new this.Utils.DOMObserver();
         this._currentUrl = window.location.pathname + window.location.search;
 
         // Bind methods

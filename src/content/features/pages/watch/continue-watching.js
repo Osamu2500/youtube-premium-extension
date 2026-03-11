@@ -32,7 +32,7 @@ window.YPP.Features.ContinueWatching = class ContinueWatching {
         if (this.observer) return;
 
         // Use our robust DOMObserver
-        this.observer = new this.Utils.DOMObserver();
+        this.observer = window.YPP.sharedObserver || new this.Utils.DOMObserver();
         
         // Register the selector to watch for new related videos
         this.observer.register('related_videos_continue', 

@@ -13,16 +13,16 @@
         "*://www.youtube.com/*"
     ],
     "icons": {
-        "16": "src/assets/icon.svg",
-        "48": "src/assets/icon.svg",
-        "128": "src/assets/icon.svg"
+        "16": "src/assets/icon.png",
+        "48": "src/assets/icon.png",
+        "128": "src/assets/icon.png"
     },
     "action": {
         "default_popup": "src/popup/popup.html",
         "default_icon": {
-            "16": "src/assets/icon.svg",
-            "48": "src/assets/icon.svg",
-            "128": "src/assets/icon.svg"
+            "16": "src/assets/icon.png",
+            "48": "src/assets/icon.png",
+            "128": "src/assets/icon.png"
         }
     },
     "background": {
@@ -39,58 +39,7 @@
             ],
             "run_at": "document_idle",
             "js": [
-                "src/content/constants.js",
-                "src/content/settings-schema.js",
-                "src/content/utils.js",
-                "src/content/features/base-feature.js",
-                "src/content/features/core/global/theme.js",
-                "src/content/features/core/global/content-control.js",
-                "src/content/features/core/global/night-mode.js",
-                "src/content/features/core/global/data-api.js",
-                "src/content/features/core/global/mark-watched.js",
-                "src/content/features/core/global/keyboard-shortcuts.js",
-                "src/content/features/core/global/stats/stats-visualizer.js",
-
-                "src/content/features/core/layout/layout-manager.js",
-                "src/content/features/core/layout/header-nav.js",
-                "src/content/features/core/layout/sidebar.js",
-                
-                "src/content/features/pages/home/home-organizer.js",
-                "src/content/features/pages/home/shorts-tools.js",
-
-                "src/content/features/pages/subscriptions/subscription-folders.js",
-                "src/content/features/pages/subscriptions/subscription-manager.js",
-                "src/content/features/pages/subscriptions/subscriptions-ui.js",
-                "src/content/features/pages/subscriptions/index.js",
-
-                "src/content/features/pages/search/search-redesign.js",
-                "src/content/features/pages/search/advanced-filter.js",
-
-                "src/content/features/pages/library/history/history-tracker.js",
-                "src/content/features/pages/library/history/history-redesign.js",
-                "src/content/features/pages/library/playlist/playlist-redesign.js",
-                "src/content/features/pages/library/playlist/duration-calculator.js",
-                "src/content/features/pages/library/playlist/reverse-playlist.js",
-
-                "src/content/features/pages/watch/watch-history.js",
-                "src/content/features/pages/watch/continue-watching.js",
-                "src/content/features/pages/watch/zen-mode.js",
-                "src/content/features/pages/watch/focus-mode.js",
-                "src/content/features/pages/watch/study-mode.js",
-
-                "src/content/features/player/player.js",
-                "src/content/features/player/player-tools.js",
-                "src/content/features/player/return-dislike.js",
-                "src/content/features/player/mini-player.js",
-                "src/content/features/player/video-filters.js",
-                "src/content/features/player/sponsor-block.js",
-
-                "src/content/features/player/ambient-mode/ambient-mode.js",
-                "src/content/features/player/ambient-mode/audio-mode.js",
-                "src/content/features/player/video-controls/video-controls.js",
-
-                "src/content/feature-manager.js",
-                "src/content/main.js"
+                "dist/content.js"
             ]
         }
     ],

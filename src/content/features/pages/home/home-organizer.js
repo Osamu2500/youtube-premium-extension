@@ -12,7 +12,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
         // Use the shared DOMObserver mechanism from BaseFeature, fallback if missing
-        this.domObserver = this.observer || new window.YPP.Utils.DOMObserver(); 
+        this.domObserver = this.observer || window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver(); 
         /** @type {Object<string, string[]>} Channel name to folder tags mapping */
         this.channelTags = {};
         /** @type {Object<string, string[]>} Folders loaded from SubscriptionFolders */
