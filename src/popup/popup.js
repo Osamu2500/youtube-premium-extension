@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'subscriptions': 'Subscriptions',
         'history': 'History & Library',
         'themes': 'Themes & Appearance',
+        'customization': 'Customization',
         'global': 'Global Settings'
     };
 
