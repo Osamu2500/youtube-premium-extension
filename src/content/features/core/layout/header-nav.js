@@ -74,8 +74,9 @@ window.YPP.features.HeaderNav = class HeaderNav {
             this.domObserver.stop();
         }
 
-        const navGroup = document.querySelector('.ypp-nav-group');
-        if (navGroup) navGroup.remove();
+        if (window.YPP.ui) {
+            window.YPP.ui.remove('header-nav-group');
+        }
 
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
     }
@@ -117,17 +118,7 @@ window.YPP.features.HeaderNav = class HeaderNav {
         // Use requestAnimationFrame for safer DOM access
         requestAnimationFrame(() => {
             this.handleLogoRedirect();
-
-            // Try specific selectors first, then broader ones
-            const centerSection = document.querySelector('ytd-masthead #center') || 
-                                document.querySelector('ytd-masthead #container') ||
-                                document.querySelector('ytd-masthead');
-            
-            if (centerSection) {
-                 this.injectButtons(centerSection);
-            } else {
-                this.Utils?.log('Header injection target not found (yet)', 'HEADERNAV', 'debug');
-            }
+            this.injectButtons();
         });
     }
 
@@ -176,23 +167,10 @@ window.YPP.features.HeaderNav = class HeaderNav {
      * Inject navigation buttons into the header
      * @private
      */
-    injectButtons(centerSection) {
-        if (!centerSection || !this.isEnabled) return;
+    injectButtons() {
+        if (!this.isEnabled) return;
 
         try {
-            // Check if our group already exists in valid state
-            if (centerSection.querySelector('.ypp-nav-group')) {
-                this._updateActiveStates();
-                return;
-            }
-
-            // Remove any stale groups that might exist outside the current center context
-            const oldGroups = document.querySelectorAll('.ypp-nav-group');
-            oldGroups.forEach(g => g.remove());
-
-            const navGroup = document.createElement('div');
-            navGroup.className = 'ypp-nav-group ypp-nav-group-right';
-
             // Define button config for cleaner iteration
             const buttons = [
                 { setting: 'navSubscriptions', label: 'Subscriptions', url: '/feed/subscriptions', icon: HeaderNav.ICONS.Subscriptions },
@@ -202,39 +180,30 @@ window.YPP.features.HeaderNav = class HeaderNav {
                 { setting: 'navHistory', label: 'History', url: '/feed/history', icon: HeaderNav.ICONS.History }
             ];
 
-            let addedCount = 0;
-            buttons.forEach(btnConfig => {
-                if (this.settings[btnConfig.setting]) {
-                    this.createButton(navGroup, btnConfig.label, btnConfig.url, btnConfig.icon);
-                    addedCount++;
-                }
-            });
+            // Filter active buttons based on settings
+            const activeButtons = buttons.filter(btn => this.settings[btn.setting]);
 
-            if (addedCount === 0) {
+            if (activeButtons.length === 0) {
                 this.Utils?.log('No nav buttons enabled in settings', 'HEADERNAV', 'warn');
                 return;
             }
 
-            // Intelligent Placement
-            const searchBox = centerSection.querySelector('ytd-searchbox');
-            const micBtn = centerSection.querySelector('#voice-search-button');
-            
-            this.Utils?.log(`Injecting nav buttons: SearchBox=${!!searchBox}, MicBtn=${!!micBtn}`, 'HEADERNAV', 'debug');
+            // Create a wrapper component for the buttons group so UI manager handles it as one unit
+            const navGroup = document.createElement('div');
+            navGroup.className = 'ypp-nav-group ypp-nav-group-right';
 
-            // Robust insertion logic
-            if (micBtn && micBtn.nextSibling) {
-                centerSection.insertBefore(navGroup, micBtn.nextSibling);
-            } else if (micBtn) {
-                centerSection.appendChild(navGroup);
-            } else if (searchBox && searchBox.nextSibling) {
-                centerSection.insertBefore(navGroup, searchBox.nextSibling);
-            } else if (searchBox) {
-               centerSection.appendChild(navGroup);
-            } else {
-                // Fallback: just append to center section
-                centerSection.appendChild(navGroup);
+            activeButtons.forEach(btnConfig => {
+                this.createButton(navGroup, btnConfig.label, btnConfig.url, btnConfig.icon, btnConfig.setting);
+            });
+
+            // Submit to UIManager
+            if (window.YPP.ui) {
+                 window.YPP.ui.mount('headerRight', {
+                     id: 'header-nav-group',
+                     el: navGroup
+                 }, 'prepend'); // prepend inserts it before the profile/notifications
             }
-
+            
             this._updateActiveStates();
         } catch (error) {
             this.Utils?.log(`Error injecting buttons: ${error.message}`, 'HEADERNAV', 'error');
@@ -247,46 +216,50 @@ window.YPP.features.HeaderNav = class HeaderNav {
      * @param {string} label - Button label/title
      * @param {string} url - Navigation URL
      * @param {string} svgContent - SVG icon content
+     * @param {string} idSuffix - Unique ID string
      * @private
      */
-    createButton(container, label, url, svgContent) {
+    createButton(container, label, url, svgContent, idSuffix) {
         try {
-            const btn = document.createElement('div');
-            btn.className = 'ypp-nav-btn';
-            btn.title = label; // Used by CSS tooltip
-            btn.dataset.url = url;
-            
-            // Simple SVG injection
-            btn.innerHTML = `<svg viewBox="0 0 24 24" class="ypp-nav-icon" style="pointer-events: none; display: block; width: 24px; height: 24px; fill: currentColor;">${svgContent}</svg>`;
-
-            // Reliable Navigation with keyboard support
             const handleClick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Check if already on the page
                 if (this.isCurrentPage(url)) {
                     this.Utils?.log(`Already on ${label} page`, 'HEADERNAV');
                     return;
                 }
-
-                // Navigate using YouTube's navigation if possible
                 this.navigateTo(url);
             };
 
-            btn.addEventListener('click', handleClick);
-            btn.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleClick(e);
-                }
-            });
+            // Use the UI Manager component factory if it exists
+            if (window.YPP.ui?.components?.createButton) {
+                const component = window.YPP.ui.components.createButton({
+                    id: `nav-${idSuffix}`,
+                    icon: `<svg viewBox="0 0 24 24" class="ypp-nav-icon" style="pointer-events: none; display: block; width: 24px; height: 24px; fill: currentColor;">${svgContent}</svg>`,
+                    tooltip: label,
+                    onClick: handleClick,
+                    className: 'ypp-nav-btn'
+                });
+                
+                // Add attributes required by CSS state logic
+                component.el.dataset.url = url;
+                component.el.setAttribute('tabindex', '0');
+                component.el.setAttribute('role', 'button');
+                
+                // Listen for keyboard
+                component.el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleClick(e);
+                    }
+                });
 
-            // Make button focusable
-            btn.setAttribute('tabindex', '0');
-            btn.setAttribute('role', 'button');
-
-            container.appendChild(btn);
+                container.appendChild(component.el);
+            } else {
+                 // Fallback if UI Manager fails to load
+                 this.Utils?.log('UIManager factory not found for HeaderNav button', 'HEADERNAV', 'warn');
+            }
         } catch (error) {
             this.Utils?.log(`Error creating button ${label}: ${error.message}`, 'HEADERNAV', 'error');
         }

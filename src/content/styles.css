@@ -105,6 +105,29 @@
   --ytd-searchbox-text-color: var(--ypp-text-primary) !important;
   --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05) !important;
 }
+/**
+ * YouTube Premium Plus - Global Styles
+ * Core variables and overrides injected into the YouTube page
+ */
+
+:root {
+  /* UI Architecture Core Variables */
+  --ypp-bg-surface: rgba(20, 20, 20, 0.85);
+  --ypp-bg-hover: rgba(255, 255, 255, 0.1);
+  --ypp-bg-active: rgba(255, 255, 255, 0.2);
+  --ypp-glass-blur: blur(16px);
+  --ypp-glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --ypp-radius-sm: 6px;
+  --ypp-radius-md: 10px;
+  --ypp-radius-lg: 14px;
+  --ypp-radius-xl: 18px;
+  --ypp-accent: #3ea6ff;
+  --ypp-accent-hover: #65b8ff;
+
+  /* Variables for original theme features */
+  --ypp-player-radius: 12px;
+  --ypp-thumbnail-radius: 12px;
+}
 
 /* Responsive Grid Variables */
 :root {
@@ -262,6 +285,79 @@ body.ypp-hover-sidebar ytd-watch-flexy[flexy] #primary.ytd-watch-flexy {
 /* Hide scrollbar of the sidebar */
 body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar {
   width: 8px;
+}
+
+/* ==========================================================================
+   YPP UI Component Frame (Phase 6 UI Consistency)
+   ========================================================================== */
+
+/* Button Components */
+.ypp-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--ypp-radius-full, 50%);
+  color: var(--yt-spec-text-primary, #fff);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ypp-btn:hover {
+  background-color: var(--ypp-bg-hover);
+}
+
+.ypp-btn:active {
+  background-color: var(--ypp-bg-active);
+}
+
+.ypp-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.ypp-btn-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+/* Specific component tweaks */
+.ypp-speed-input {
+  width: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: var(--ypp-radius-sm);
+  padding: 4px 6px;
+  margin-right: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  font-family: inherit;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ypp-speed-input:focus {
+  outline: none;
+  border-color: var(--ypp-accent);
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
+}
+
+/* Hide arrows on number input */
+.ypp-speed-input::-webkit-outer-spin-button,
+.ypp-speed-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar-track {
   background: transparent;
@@ -4073,7 +4169,11 @@ body.yt-premium-plus-theme
 }
 
 .ypp-folder-item.active {
-  background: linear-gradient(90deg, rgba(62, 166, 255, 0.15) 0%, rgba(62, 166, 255, 0.05) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(62, 166, 255, 0.15) 0%,
+    rgba(62, 166, 255, 0.05) 100%
+  );
   border: 1px solid rgba(62, 166, 255, 0.2);
   border-left: 3px solid var(--ypp-accent-blue);
   box-shadow: inset 0 0 12px rgba(62, 166, 255, 0.05);
@@ -4169,8 +4269,10 @@ body.yt-premium-plus-theme
   border-color: var(--ypp-accent-blue);
   color: #fff;
   font-weight: 600;
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(62,166,255,0.3);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(62, 166, 255, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Feature Parity Toggle Chips */
@@ -4182,14 +4284,16 @@ body.yt-premium-plus-theme
 .ypp-toggle-chip:hover {
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .ypp-toggle-chip.active {
   background: #ff4e45;
   border: 1px solid #ff4e45;
   color: #fff;
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(255, 78, 69, 0.3);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(255, 78, 69, 0.3);
 }
 
 /* Channel Page Popover button */

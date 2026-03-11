@@ -20,9 +20,9 @@ window.YPP.CONSTANTS = {
         SEARCH_VIDEO_RENDERER: 'ytd-video-renderer',
 
         // Header & Navigation
-        MASTHEAD: 'ytd-masthead',
-        CHIPS_BAR: 'ytd-feed-filter-chip-bar-renderer',
-        CHIPS_WRAPPER: '#chips-wrapper',
+        MASTHEAD: ['ytd-masthead', '#masthead', '#masthead-container'],
+        CHIPS_BAR: ['ytd-feed-filter-chip-bar-renderer', 'yt-chip-cloud-renderer'],
+        CHIPS_WRAPPER: ['#chips-wrapper', '.yt-chip-cloud-renderer-container'],
 
         // Shorts
         SHORTS_SECTION: 'ytd-rich-section-renderer[is-shorts]',
@@ -38,16 +38,17 @@ window.YPP.CONSTANTS = {
         WATCH_FLEXY: 'ytd-watch-flexy, #page-manager > ytd-watch',
         PLAYER: '.html5-video-player, #movie_player',
         PLAYER_CONTAINER: '#player-container-outer',
-        PLAYER_OUTER: '#ytd-player',
-        VIDEO: 'video',
-        VIDEO_CONTROLS: '.ytp-right-controls',
-        SUBTITLES_BTN: '.ytp-subtitles-button',
+        PLAYER_OUTER: ['#ytd-player', 'ytd-player[id="ytd-player"]'],
+        VIDEO: ['video.html5-main-video', 'video'],
+        VIDEO_CONTROLS: ['.ytp-right-controls', '.html5-video-controls .ytp-right-controls'],
+        SUBTITLES_BTN: ['.ytp-subtitles-button', '.ytp-captions-button'],
 
         // Content
-        COMMENTS_SECTION: 'ytd-comments',
-        MERCH_SHELF: 'ytd-merch-shelf-renderer',
-        RELATED_ITEMS: '#related',
-        END_SCREENS: '.ytp-ce-element',
+        COMMENTS_SECTION: ['ytd-comments', '#comments'],
+        MERCH_SHELF: ['ytd-merch-shelf-renderer', '#ticket-shelf'],
+        RELATED_ITEMS: ['#related', 'ytd-watch-next-secondary-results-renderer'],
+        SIDEBAR: ['#secondary', '#secondary-inner', 'ytd-watch-next-secondary-results-renderer'],
+        END_SCREENS: ['.ytp-ce-element', '.html5-endscreen'],
 
         // Sidebar
         GUIDE_BUTTON: '#guide-button',

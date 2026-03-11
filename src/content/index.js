@@ -8,6 +8,11 @@ import './core/event-bus.js';
 import './core/dom-api.js';
 import './core/dom-observer.js';
 
+// UI Architecture (Phase 4)
+import './ui/ui-manager.js';
+import './ui/components/button.js';
+import './ui/components/panel.js';
+
 // Base feature class
 import './features/base-feature.js';
 

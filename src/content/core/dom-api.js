@@ -10,6 +10,13 @@ window.YPP.core = window.YPP.core || {};
 const getSelector = (key) => window.YPP?.CONSTANTS?.SELECTORS[key] || '';
 const query = (selector, parent = document) => {
     try {
+        if (Array.isArray(selector)) {
+            for (const sel of selector) {
+                const el = parent.querySelector(sel);
+                if (el) return el;
+            }
+            return null;
+        }
         return parent.querySelector(selector);
     } catch {
         return null; // Handle malformed selectors gracefully
@@ -17,6 +24,13 @@ const query = (selector, parent = document) => {
 };
 const queryAll = (selector, parent = document) => {
     try {
+        if (Array.isArray(selector)) {
+            for (const sel of selector) {
+                const els = Array.from(parent.querySelectorAll(sel));
+                if (els.length > 0) return els;
+            }
+            return [];
+        }
         return Array.from(parent.querySelectorAll(selector));
     } catch {
         return [];
@@ -44,7 +58,8 @@ window.YPP.core.DomAPI = {
     getMainGuide() { return query(getSelector('MAIN_GUIDE') || 'ytd-guide-renderer'); },
     getMiniGuide() { return query(getSelector('MINI_GUIDE') || 'ytd-mini-guide-renderer'); },
     getGuideButton() { return query(getSelector('GUIDE_BUTTON') || '#guide-button'); },
-    getRelatedItems() { return query(getSelector('RELATED_ITEMS') || '#related'); },
+    getRelatedItems() { return query(getSelector('RELATED_ITEMS') || ['#related', 'ytd-watch-next-secondary-results-renderer']); },
+    getSecondary() { return query(getSelector('SIDEBAR') || ['#secondary', 'ytd-watch-next-secondary-results-renderer']); },
 
     // Sections
     getComments() { return query(getSelector('COMMENTS_SECTION') || 'ytd-comments'); },

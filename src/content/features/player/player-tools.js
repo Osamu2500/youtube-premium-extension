@@ -84,9 +84,6 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
         this._isActive = true;
         this.utils.log('Enabled Player Tools', 'PLAYER_TOOLS');
         
-        // Inject styles
-        this._injectStyles();
-        
         // Start monitoring
         this._startMonitoring();
     }
@@ -100,7 +97,6 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
         this._removeControls();
         this._cleanupListeners();
         // BaseFeature automatically unbinds added listeners on disable
-        this.utils.removeStyle('ypp-player-tools-style');
     }
 
     // =========================================================================
@@ -134,13 +130,10 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
     _checkForPlayer() {
         if (!this._isActive) return;
 
-        // Re-inject if missing
-        const rightControls = document.querySelector(this._SELECTORS.VIDEO_CONTROLS);
-        const existingTools = document.querySelector(`#${this._CSS_CLASSES.PLAYER_TOOLS}`);
-        
-        if (rightControls && !existingTools) {
-            this._controlsInjected = false;
-            this._injectControls(rightControls);
+        // Re-inject if missing. UIManager handles duplicate prevention internally.
+        const rightControls = window.YPP.DomAPI?.getVideoControls();
+        if (rightControls) {
+            this._injectControls();
         }
     }
 
@@ -148,133 +141,61 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
     // CONTROLS INJECTION
     // =========================================================================
     
-    _injectStyles() {
-        const css = `
-            #${this._CSS_CLASSES.PLAYER_TOOLS} {
-                display: flex;
-                align-items: center;
-                margin-right: 10px;
-                vertical-align: top;
-            }
-            .ypp-speed-input {
-                width: 44px;
-                background: rgba(0, 0, 0, 0.4);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                color: rgba(255, 255, 255, 0.9);
-                border-radius: 12px;
-                padding: 4px 6px;
-                margin-right: 8px;
-                font-size: 13px;
-                font-weight: 500;
-                text-align: center;
-                font-family: inherit;
-                pointer-events: auto;
-                backdrop-filter: blur(4px);
-                transition: all 0.2s;
-            }
-            .ypp-speed-input:focus {
-                outline: none;
-                border-color: #3ea6ff;
-                background: rgba(0, 0, 0, 0.6);
-                box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
-            }
-            /* Hide arrows on number input */
-            .ypp-speed-input::-webkit-outer-spin-button,
-            .ypp-speed-input::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
-            }
-            .ypp-toast-mini {
-                position: absolute;
-                top: 10%;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                pointer-events: none;
-                z-index: 1000;
-                animation: fadeInOut 2s forwards;
-            }
-            @keyframes fadeInOut {
-                0% { opacity: 0; }
-                10% { opacity: 1; }
-                90% { opacity: 1; }
-                100% { opacity: 0; }
-            }
-        `;
-        this.utils.addStyle(css, 'ypp-player-tools-style');
-    }
+
 
     /**
-     * Inject custom controls into the player
+     * Inject custom controls into the player via UIManager
      * @private
-     * @param {Element} container - Container element to inject into
      */
-    _injectControls(container) {
-        if (this._controlsInjected) return;
-
-        const toolsDiv = document.createElement('div');
-        toolsDiv.id = this._CSS_CLASSES.PLAYER_TOOLS;
-
-        // Custom Speed Input
+    _injectControls() {
+        // We only need the speed input for now
         if (this._settings?.enableCustomSpeed) {
-            this._createSpeedInput(toolsDiv);
-        }
+            const input = document.createElement('input');
+            input.className = 'ypp-speed-input';
+            input.type = 'number';
+            input.step = this._PLAYER.SPEED_STEP || 0.1;
+            input.min = this._PLAYER.SPEED_MIN || 0.1;
+            input.max = this._PLAYER.SPEED_MAX || 5.0;
+            input.value = this.utils.getVideo()?.playbackRate?.toFixed(1) || '1.0';
+            input.title = 'Custom Speed (e.g. 2.5)';
 
-        // Insert before settings gear
-        if (container.firstChild) {
-            container.insertBefore(toolsDiv, container.firstChild);
-        } else {
-            container.appendChild(toolsDiv);
-        }
-        this._controlsInjected = true;
-    }
+            input.addEventListener('change', (e) => {
+                let speed = parseFloat(e.target.value);
+                const { SPEED_MIN = 0.1, SPEED_MAX = 5.0 } = this._PLAYER;
 
-    /**
-     * Create speed input control
-     * @private
-     * @param {Element} parent - Parent element
-     */
-    _createSpeedInput(parent) {
-        const input = document.createElement('input');
-        input.className = 'ypp-speed-input';
-        input.type = 'number';
-        input.step = this._PLAYER.SPEED_STEP || 0.1;
-        input.min = this._PLAYER.SPEED_MIN || 0.1;
-        input.max = this._PLAYER.SPEED_MAX || 5.0;
-        input.value = this.utils.getVideo()?.playbackRate?.toFixed(1) || '1.0';
-        input.title = 'Custom Speed (e.g. 2.5)';
+                // Validate and clamp
+                if (isNaN(speed) || speed < SPEED_MIN) {
+                    speed = SPEED_MIN;
+                } else if (speed > SPEED_MAX) {
+                    speed = SPEED_MAX;
+                }
 
-        input.addEventListener('change', (e) => {
-            let speed = parseFloat(e.target.value);
-            const { SPEED_MIN = 0.1, SPEED_MAX = 5.0 } = this._PLAYER;
+                e.target.value = speed.toFixed(1);
+                this._setSpeed(speed);
+            });
+            
+            // Prevent key propagation (so typing 2 doesn't skip video)
+            input.addEventListener('keydown', (e) => e.stopPropagation());
 
-            // Validate and clamp
-            if (isNaN(speed) || speed < SPEED_MIN) {
-                speed = SPEED_MIN;
-            } else if (speed > SPEED_MAX) {
-                speed = SPEED_MAX;
+            // Listen for rate changes from other sources
+            const video = window.YPP.DomAPI?.getVideoElement();
+            if (video) {
+                video.addEventListener('ratechange', this._boundHandleRateChange);
             }
 
-            e.target.value = speed.toFixed(1);
-            this._setSpeed(speed);
-        });
-        
-        // Prevent key propagation (so typing 2 doesn't skip video)
-        input.addEventListener('keydown', (e) => e.stopPropagation());
-
-        // Listen for rate changes from other sources
-        const video = document.querySelector(this._SELECTORS.VIDEO || 'video');
-        if (video) {
-            video.addEventListener('ratechange', this._boundHandleRateChange);
+            this._speedInput = input;
+            
+            // Use UIManager to mount the component
+            const component = {
+                 id: 'custom-speed-input',
+                 el: input
+            };
+            
+            window.YPP.ui.mount('playerControls', component, 'prepend');
         }
-
-        this._speedInput = input;
-        parent.appendChild(input);
     }
+
+
 
     // =========================================================================
     // PLAYBACK CONTROL
@@ -309,14 +230,14 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
     // =========================================================================
 
     /**
-     * Remove injected controls
+     * Remove injected controls via UIManager
      * @private
      */
     _removeControls() {
-        const tools = document.querySelector(`#${this._CSS_CLASSES.PLAYER_TOOLS}`);
-        if (tools) tools.remove();
-
-        this._controlsInjected = false;
+        if (window.YPP.ui) {
+            window.YPP.ui.remove('btn-custom-speed-input');
+            window.YPP.ui.remove('custom-speed-input');
+        }
         this._speedInput = null;
     }
 
