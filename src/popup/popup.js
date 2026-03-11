@@ -462,6 +462,95 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link) link.remove();
     };
 
+    // --- DASHBOARD PRESETS ---
+    const applyPreset = (presetName) => {
+        const presets = {
+            focus: {
+                enableFocusMode: true,
+                hideComments: true,
+                forceHideSidebar: true,
+                hideLiveChat: true,
+                hideEndScreens: true
+            },
+            research: {
+                enableFocusMode: false,
+                hideComments: false,
+                searchGrid: true,
+                searchColumns: 4
+            },
+            minimal: {
+                hookFreeHome: true,
+                forceHideSidebar: true,
+                hideShorts: true
+            }
+        };
+
+        const presetValues = presets[presetName];
+        if (!presetValues) return;
+
+        Object.keys(presetValues).forEach(key => {
+            const el = elements[key];
+            if (el) {
+                if (el.type === 'checkbox') {
+                    el.checked = presetValues[key];
+                } else if (el.type === 'range') {
+                    el.value = presetValues[key];
+                    const display = document.getElementById(key + 'Value');
+                    if (display) display.textContent = el.value + (key.includes('Columns') ? '' : '%');
+                }
+            }
+        });
+
+        // Ensure we switch to a tab where changes are obvious or just show saved
+        updateDependencyUI();
+        saveSettings();
+        showSaveIndicator();
+    };
+
+    const presetFocusBtn = document.getElementById('presetFocus');
+    const presetResearchBtn = document.getElementById('presetResearch');
+    const presetMinimalBtn = document.getElementById('presetMinimal');
+
+    if (presetFocusBtn) presetFocusBtn.addEventListener('click', () => applyPreset('focus'));
+    if (presetResearchBtn) presetResearchBtn.addEventListener('click', () => applyPreset('research'));
+    if (presetMinimalBtn) presetMinimalBtn.addEventListener('click', () => applyPreset('minimal'));
+
+    // --- FEATURE SEARCH ---
+    const featureSearchInput = document.getElementById('featureSearch');
+    if (featureSearchInput) {
+        featureSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const allCards = document.querySelectorAll('.toggle-card, .setting-item');
+            const allSections = document.querySelectorAll('.settings-section');
+            
+            if (!query) {
+                allCards.forEach(card => card.style.display = '');
+                allSections.forEach(sec => sec.style.display = '');
+                
+                // If query is cleared, ensure we are only showing the active tab's content
+                // because all tabs might have their cards restored.
+                // Wait, display='' just inherited styles. We don't change .tab-content
+                return;
+            }
+
+            // Force show all tabs temporarily so we can see search results from everywhere?
+            // Optional: The user might want global search.
+            // For now, let's keep search restricted to the active tab otherwise layout breaks.
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab) {
+                const activeCards = activeTab.querySelectorAll('.toggle-card, .setting-item');
+                activeCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    if (text.includes(query)) {
+                        card.style.display = ''; 
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        });
+    }
+
     // --- EVENT LISTENERS ---
     
     settingKeys.forEach(key => {

@@ -152,6 +152,7 @@ body {
   background: var(--ypp-glass-highlight);
   color: var(--text-primary);
   transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
 }
 
 .nav-item.active {
@@ -202,33 +203,86 @@ body {
   height: 80px;
   padding: 0 24px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 8px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 #page-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  margin: 0 0 6px 0;
+  margin: 0;
   letter-spacing: -0.02em;
-  background: var(--accent-gradient);
+  background: var(--text-primary);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .status-badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--accent-primary);
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: rgba(62, 166, 255, 0.08);
+  background: var(--accent-gradient);
   padding: 4px 8px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(62, 166, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 78, 69, 0.4);
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px;
+  width: 220px;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.search-container:focus-within {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+  width: 260px;
+}
+
+.search-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-tertiary);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.feature-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+}
+
+.feature-search-input::placeholder {
+  color: var(--text-tertiary);
 }
 
 /* Scroll Area */
@@ -399,9 +453,11 @@ body {
 /* --- Toggles (iOS Style) --- */
 .toggle {
   position: relative;
-  width: 32px;
-  height: 18px;
+  display: inline-block; /* Changed from 'relative' */
+  width: 36px; /* Changed from 32px */
+  height: 20px; /* Changed from 18px */
   flex-shrink: 0;
+  margin-top: 2px; /* Added */
   cursor: pointer;
 }
 

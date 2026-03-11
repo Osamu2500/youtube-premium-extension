@@ -80,8 +80,18 @@
         </div>
 
         <div class="nav-items">
+          <!-- DASHBOARD -->
+          <button class="nav-item active" data-tab="dashboard" title="Dashboard & Presets">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9"></rect>
+              <rect x="14" y="3" width="7" height="5"></rect>
+              <rect x="14" y="12" width="7" height="9"></rect>
+              <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+          </button>
+
           <!-- HOME / FEED -->
-          <button class="nav-item active" data-tab="home" title="Home & Feed">
+          <button class="nav-item" data-tab="home" title="Home & Feed">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -196,12 +206,63 @@
       <!-- Main Content -->
       <main class="content">
         <header class="top-bar">
-          <h1 id="page-title">Home Page</h1>
-          <div class="status-badge">Premium</div>
+          <div class="top-bar-left">
+            <h1 id="page-title">Dashboard</h1>
+            <div class="status-badge">Premium</div>
+          </div>
+          <div class="top-bar-right">
+            <div class="search-container">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="featureSearch" placeholder="Search features..." class="feature-search-input" />
+            </div>
+          </div>
         </header>
 
+        <!-- TAB: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content active">
+          <div class="settings-section">
+            <div class="section-header">
+               <div class="section-title">
+                 <span>Quick Presets</span>
+               </div>
+               <hr class="section-divider" />
+            </div>
+            
+            <div class="card-group">
+              <div class="grid-4">
+                <div class="toggle-card">
+                  <div class="info">
+                    <span class="name">Focus Mode</span>
+                    <span class="desc">Minimal player & comments</span>
+                  </div>
+                  <button id="presetFocus" class="action-btn" style="margin-top: 8px;">Apply</button>
+                </div>
+
+                <div class="toggle-card">
+                  <div class="info">
+                    <span class="name">Research Mode</span>
+                    <span class="desc">Grid search & comments</span>
+                  </div>
+                  <button id="presetResearch" class="action-btn" style="margin-top: 8px;">Apply</button>
+                </div>
+
+                <div class="toggle-card">
+                  <div class="info">
+                    <span class="name">Minimal Mode</span>
+                    <span class="desc">Hide headers & sidebars</span>
+                  </div>
+                  <button id="presetMinimal" class="action-btn" style="margin-top: 8px;">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- TAB: HOME -->
-        <section id="tab-home" class="tab-content active">
+        <section id="tab-home" class="tab-content">
           
           <!-- Feed Layout Section -->
           <div class="settings-section">
@@ -344,12 +405,12 @@
         <!-- TAB: PLAYER -->
         <section id="tab-player" class="tab-content">
           
-          <!-- Premium Section -->
+          <!-- Core Integrations Section -->
           <div class="settings-section">
             <div class="section-header">
                <div class="section-title">
-                 <span>Premium Features</span>
-                 <span class="section-label-premium">Premium</span>
+                 <span>Core Integrations</span>
+                 <span class="badge" style="background:var(--accent-gradient); font-size:9px; padding:2px 6px; border-radius:100px; margin-left:8px;">PRO</span>
                </div>
                <hr class="section-divider" />
             </div>
@@ -381,11 +442,11 @@
             </div>
           </div>
 
-          <!-- Player Controls Section -->
+          <!-- Playback Controls Section -->
           <div class="settings-section">
             <div class="section-header">
                <div class="section-title">
-                 <span>Playback & Interfaces</span>
+                 <span>Playback Controls</span>
                </div>
                <hr class="section-divider" />
             </div>
@@ -394,10 +455,20 @@
               <div class="grid-4" style="margin-bottom: 6px">
                 <div class="toggle-card">
                   <div class="info">
-                    <span class="name">Auto-Quality (Highest)</span>
+                    <span class="name">Auto-Quality</span>
                   </div>
                   <label class="toggle">
                     <input type="checkbox" id="autoQuality" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-card">
+                  <div class="info">
+                    <span class="name">Custom Speed</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="enableCustomSpeed" />
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -413,17 +484,15 @@
                 </div>
 
                 <div class="toggle-card">
-                  <div class="info">
-                    <span class="name">Custom Speed Control</span>
-                  </div>
+                  <div class="info"><span class="name">Loop</span></div>
                   <label class="toggle">
-                    <input type="checkbox" id="enableCustomSpeed" />
+                    <input type="checkbox" id="loopBtn" />
                     <span class="slider"></span>
                   </label>
                 </div>
 
                 <div class="toggle-card">
-                  <div class="info"><span class="name">PiP Btn</span></div>
+                  <div class="info"><span class="name">PiP Mode</span></div>
                   <label class="toggle">
                     <input type="checkbox" id="enablePiP" />
                     <span class="slider"></span>
@@ -437,11 +506,41 @@
                     <span class="slider"></span>
                   </label>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Player Utilities Section -->
+          <div class="settings-section">
+            <div class="section-header">
+               <div class="section-title">
+                 <span>Player Utilities</span>
+               </div>
+               <hr class="section-divider" />
+            </div>
+            
+            <div class="card-group">
+              <div class="grid-4">
+                <div class="toggle-card">
+                  <div class="info"><span class="name">Snapshot Btn</span></div>
+                  <label class="toggle">
+                    <input type="checkbox" id="snapshotBtn" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
 
                 <div class="toggle-card">
-                  <div class="info"><span class="name">Loop</span></div>
+                  <div class="info"><span class="name">Stats Info</span></div>
                   <label class="toggle">
-                    <input type="checkbox" id="loopBtn" />
+                    <input type="checkbox" id="enableStatsForNerds" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-card">
+                  <div class="info"><span class="name">Time Remaining</span></div>
+                  <label class="toggle">
+                    <input type="checkbox" id="enableRemainingTime" />
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -453,39 +552,15 @@
                     <span class="slider"></span>
                   </label>
                 </div>
-
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Snapshot</span></div>
-                  <label class="toggle">
-                    <input type="checkbox" id="snapshotBtn" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Time</span></div>
-                  <label class="toggle">
-                    <input type="checkbox" id="enableRemainingTime" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Stats</span></div>
-                  <label class="toggle">
-                    <input type="checkbox" id="enableStatsForNerds" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
               </div>
             </div>
           </div>
 
-          <!-- Cinema Section -->
+          <!-- Viewing Modes Section -->
           <div class="settings-section">
             <div class="section-header">
                <div class="section-title">
-                 <span>Cinema & Viewing</span>
+                 <span>Viewing Modes</span>
                </div>
                <hr class="section-divider" />
             </div>
