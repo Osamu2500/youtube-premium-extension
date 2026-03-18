@@ -40,11 +40,8 @@ window.YPP.features.Theme = class ThemeManager {
         this._isActive = false;
         this._settings = null;
         this._shortsObserver = null;
-        this._watchedObserver = null;
         this._progressBarStyle = null;
-        this._WATCHED_THRESHOLD = 85;
         this._SHORTS_DEBOUNCE = this._TIMINGS.DEBOUNCE_DEFAULT || 100;
-        this._WATCHED_DEBOUNCE = this._TIMINGS.DEBOUNCE_SEARCH || 500;
     }
 
     /**
@@ -64,7 +61,6 @@ window.YPP.features.Theme = class ThemeManager {
             this._applyTrueBlack(false);
             this._applyHideScrollbar(false);
             this._applyProgressBarColor(null);
-            this._manageWatchedObserver(false);
             this._cleanupClasses();
 
             this._isActive = false;
@@ -111,9 +107,6 @@ window.YPP.features.Theme = class ThemeManager {
             } else {
                 this._applyProgressBarColor(null);
             }
-
-            // Watched videos
-            this._manageWatchedObserver(this._settings.hideWatched);
 
         } catch (error) {
             this._Utils.log?.(`Error running theme: ${error.message}`, 'THEME', 'error');
@@ -381,92 +374,10 @@ window.YPP.features.Theme = class ThemeManager {
     // =========================================================================
     // WATCHED VIDEOS
     // =========================================================================
-
-    /**
-    /**
-     * Manage watched observer using IntersectionObserver for better performance
-     * @private
-     * @param {boolean} enable
-     */
-    _manageWatchedObserver(enable) {
-        if (!enable) {
-            if (this._watchedObserver) {
-                this._watchedObserver.disconnect();
-                this._watchedObserver = null;
-            }
-            if (this._domObserver) {
-                this._domObserver.disconnect();
-                this._domObserver = null;
-            }
-            return;
-        }
-
-        // Initialize IntersectionObserver if it doesn't exist
-        if (!this._watchedObserver) {
-            this._watchedObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        this._processWatchedVideo(entry.target);
-                    }
-                });
-            }, { rootMargin: '200px' }); // Load slightly before visible
-        }
-
-        // Initialize a low-priority MutationObserver just to find new video elements
-        if (!this._domObserver) {
-            const scan = () => {
-                const containers = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer');
-                containers.forEach(container => {
-                    if (!container.dataset.yppWatchedObserved) {
-                        this._watchedObserver.observe(container);
-                        container.dataset.yppWatchedObserved = 'true';
-                    }
-                });
-            };
-            
-            const debouncedScan = this._Utils.debounce?.(scan, 1000) || scan;
-            this._domObserver = new MutationObserver((mutations) => {
-                if (mutations.some(m => m.addedNodes.length > 0)) debouncedScan();
-            });
-            this._domObserver.observe(document.body, { childList: true, subtree: true });
-            
-            // Initial scan
-            scan();
-        }
-    }
-
-    /**
-     * Process and mark a single watched video
-     * @private
-     * @param {Element} container - The video container element
-     */
-    _processWatchedVideo(container) {
-        try {
-            const selector = this._SELECTORS.WATCHED_OVERLAY || 'ytd-thumbnail-overlay-resume-playback-renderer #progress';
-            const bar = container.querySelector(selector);
-            
-            if (!bar) return;
-
-            const width = bar?.style?.width;
-            if (!width) return;
-
-            const percent = parseFloat(width);
-            if (isNaN(percent)) return;
-
-            const isWatched = percent > this._WATCHED_THRESHOLD;
-
-            if (isWatched) {
-                container.setAttribute('is-watched', '');
-            } else {
-                // Don't remove if it was manually marked as watched
-                if (!container.querySelector('.ypp-manually-watched')) {
-                    container.removeAttribute('is-watched');
-                }
-            }
-        } catch (error) {
-            // Ignore minor errors for individual elements
-        }
-    }
+    // NOTE: Watched video detection and hiding is fully owned by HideWatched
+    // (features/core/global/hide-watched.js). Theme.js only toggles the body
+    // class 'ypp-hide-watched' so the CSS selector activates — the actual
+    // card-level [data-ypp-watched] attribute is set by HideWatched.
 
     // =========================================================================
     // PUBLIC API

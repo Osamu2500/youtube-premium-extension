@@ -22,6 +22,7 @@ import './features/core/global/content-control.js';
 import './features/core/global/night-mode.js';
 import './features/core/global/data-api.js';
 import './features/core/global/mark-watched.js';
+import './features/core/global/hide-watched.js';
 import './features/core/global/keyboard-shortcuts.js';
 import './features/core/global/stats/stats-visualizer.js';
 

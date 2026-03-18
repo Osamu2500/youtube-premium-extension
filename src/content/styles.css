@@ -494,12 +494,16 @@ body.ypp-hide-shorts
   display: none !important;
 }
 
-/* Hide Watched Videos */
-body.ypp-hide-watched ytd-grid-video-renderer[is-watched],
-body.ypp-hide-watched ytd-rich-item-renderer[is-watched],
-body.ypp-hide-watched ytd-video-renderer[is-watched],
-body.ypp-hide-watched ytd-compact-video-renderer[is-watched] {
+/* Hide Watched Videos — attribute set by HideWatched feature (hide-watched.js) */
+body.ypp-hide-watched [data-ypp-watched="true"] {
   display: none !important;
+}
+
+/* Dim mode — soft-hide watched videos (opacity only, still clickable) */
+body.ypp-dim-watched [data-ypp-watched="true"] {
+  opacity: 0.25 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease;
 }
 
 /* ===================================================================================

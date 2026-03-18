@@ -170,11 +170,19 @@ window.YPP.features.MarkWatched = class MarkWatched {
         if (isWatched) {
             this.watchedVideoIds.delete(videoId);
             thumbnail.classList.remove(this.CONSTANTS.CSS_CLASSES.MANUALLY_WATCHED);
-            if (container) container.removeAttribute('is-watched');
+            if (container) {
+                container.removeAttribute('is-watched');
+                container.removeAttribute('data-ypp-watched');
+                container.removeAttribute('data-ypp-hw');
+            }
         } else {
             this.watchedVideoIds.add(videoId);
             thumbnail.classList.add(this.CONSTANTS.CSS_CLASSES.MANUALLY_WATCHED);
-            if (container) container.setAttribute('is-watched', '');
+            if (container) {
+                container.setAttribute('is-watched', '');
+                container.setAttribute('data-ypp-watched', 'true');
+                container.setAttribute('data-ypp-hw', 'watched');
+            }
         }
 
         await this.saveWatchedData();

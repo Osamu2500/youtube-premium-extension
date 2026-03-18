@@ -200,18 +200,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
                 item.classList.add('ypp-priority-low');
             }
 
-            // 2. Hide Watched Check (if enabled)
-            if (this.settings?.hideWatched && item.style.display !== 'none') {
-                const progressBar = item.querySelector('ytd-thumbnail-overlay-resume-playback-renderer #progress');
-                if (progressBar) {
-                    const percentage = parseFloat(progressBar.style.width);
-                    if (!isNaN(percentage) && percentage > 80) {
-                        item.style.display = 'none';
-                    }
-                }
-            }
-
-            // 3. Inject Tag Buttons (skip if hidden or already injected)
+            // 2. Inject Tag Buttons (skip if hidden or already injected)
             if (item.style.display !== 'none' && !item.querySelector('.ypp-tag-btn')) {
                 const thumbnail = item.querySelector('ytd-thumbnail');
                 if (thumbnail) {

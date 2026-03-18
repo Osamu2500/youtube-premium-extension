@@ -75,6 +75,7 @@ window.YPP.CONSTANTS = {
 
         // Watched
         WATCHED_OVERLAY: 'ytd-thumbnail-overlay-resume-playback-renderer #progress',
+        WATCHED_CONTAINER: 'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer',
 
         // Ad Skipper
         AD_PLAYER: '.html5-video-player',
@@ -131,6 +132,7 @@ window.YPP.CONSTANTS = {
         // Mark as Watched
         MANUALLY_WATCHED: 'ypp-manually-watched',
         WATCHED_ICON: 'ypp-watched-icon',
+        WATCHED_MARKER: 'data-ypp-watched', // Attribute set by HideWatched on detected containers
 
         // Search Redesign
         SEARCH_GRID_MODE: 'ypp-search-grid-mode',
@@ -435,6 +437,7 @@ window.YPP.CONSTANTS = {
         continueWatching: 'ContinueWatching',
         subscriptionFolders: 'SubscriptionFolders',
         markWatched: 'MarkWatched',
+        hideWatched: 'HideWatched',
         keyboardShortcuts: 'KeyboardShortcuts'
     }
 };
