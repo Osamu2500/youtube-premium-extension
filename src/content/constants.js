@@ -234,8 +234,14 @@ window.YPP.CONSTANTS = {
         // Player Tools
         enableCustomSpeed: true,
         enableCinemaFilters: true,
-        filterBrightness: 100,
-        filterContrast: 100,
+        // Cinema Filters — persisted state
+        cinemaFilterIndex: 0,
+        cinemaFilterBrightness: 100,
+        cinemaFilterContrast: 100,
+        cinemaFilterSaturate: 100,
+        cinemaFilterHue: 0,
+        cinemaFilterBlur: 0,
+        cinemaFilterOpacity: 100,
 
         // Ad Skipper
         adSkipper: true,

@@ -106,14 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
         'enableCustomSpeed',
         'enablePiP', // Button
         'miniPlayer', // Scroll PiP
-        'enableVideoFilters', // Slider UI
         'loopBtn',
         'snapshotBtn',
         'enableRemainingTime',
         'enableStatsForNerds',
 
         // Visuals
-        'enableCinemaFilters', // Presets
+        'enableCinemaFilters', // Unified: presets + sliders
+
         'blueLight',
         'dim',
         'zenMode',

@@ -78,10 +78,16 @@ window.YPP.SettingsSchema = {
         shortsAutoScroll:    { type: 'boolean', default: false },
 
         // --- Player Tools ---
-        enableCustomSpeed:   { type: 'boolean', default: true },
-        enableCinemaFilters: { type: 'boolean', default: true },
-        filterBrightness:    { type: 'number',  default: 100, min: 50, max: 200 },
-        filterContrast:      { type: 'number',  default: 100, min: 50, max: 200 },
+        enableCustomSpeed:       { type: 'boolean', default: true },
+        enableCinemaFilters:     { type: 'boolean', default: true },
+        // Cinema Filters — persisted state (preset index + slider adjustments)
+        cinemaFilterIndex:       { type: 'number',  default: 0,   min: 0, max: 20 },
+        cinemaFilterBrightness:  { type: 'number',  default: 100, min: 0, max: 200 },
+        cinemaFilterContrast:    { type: 'number',  default: 100, min: 0, max: 200 },
+        cinemaFilterSaturate:    { type: 'number',  default: 100, min: 0, max: 200 },
+        cinemaFilterHue:         { type: 'number',  default: 0,   min: 0, max: 360 },
+        cinemaFilterBlur:        { type: 'number',  default: 0,   min: 0, max: 10  },
+        cinemaFilterOpacity:     { type: 'number',  default: 100, min: 10, max: 100 },
 
         // --- Ad Skipper ---
         adSkipper:           { type: 'boolean', default: true },
