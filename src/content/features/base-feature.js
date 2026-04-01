@@ -29,8 +29,6 @@ window.YPP.features.BaseFeature = class BaseFeature {
         this.settings = settings;
         const configKey = this.getConfigKey();
         
-        // Determine if feature should be enabled based on settings
-        // If there's no specific config key, or the key isn't in settings, assume it's always-on
         let shouldBeEnabled = true;
         if (configKey && settings.hasOwnProperty(configKey)) {
             shouldBeEnabled = !!settings[configKey];
@@ -38,21 +36,25 @@ window.YPP.features.BaseFeature = class BaseFeature {
 
         if (shouldBeEnabled && !this.isEnabled) {
             this.utils?.log(`Enabling feature: ${this.name}`, 'MAIN', 'debug');
+            this.abortController = new AbortController();
             await this.enable();
             this.isEnabled = true;
         } else if (!shouldBeEnabled && this.isEnabled) {
             this.utils?.log(`Disabling feature: ${this.name}`, 'MAIN', 'debug');
+            if (this.abortController) {
+                this.abortController.abort();
+                this.abortController = null;
+            }
             await this.disable();
             this.isEnabled = false;
         } else if (this.isEnabled && typeof this.onUpdate === 'function') {
-            // Feature is already enabled, but settings changed
             await this.onUpdate();
         }
     }
 
     /**
      * Override this to return the settings key for this feature.
-     * By default, it camelCases the class name (e.g., HideShorts -> hideShorts).
+     * By default, it camelCases the class name.
      * Return null explicitly if the feature is always on.
      * @returns {string|null}
      */
@@ -73,6 +75,20 @@ window.YPP.features.BaseFeature = class BaseFeature {
      */
     async disable() {
         this.cleanupEvents();
+    }
+
+    /**
+     * Wait for element, bound to feature's lifecycle (aborts if feature disabled)
+     */
+    waitForElement(selector, timeout) {
+        return this.utils.waitForElement(selector, timeout, this.abortController?.signal);
+    }
+
+    /**
+     * Poll for condition, bound to feature's lifecycle (aborts if feature disabled)
+     */
+    pollFor(conditionFn, timeout, intervalMs) {
+        return this.utils.pollFor(conditionFn, timeout, intervalMs, this.abortController?.signal);
     }
 
     /**

@@ -148,9 +148,10 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * Wait for an element to appear in the DOM
      * @param {string} selector - CSS selector
      * @param {number} [timeout] - Timeout in ms (default: from CONSTANTS)
+     * @param {AbortSignal} [signal] - Optional abort signal to cancel waiting early
      * @returns {Promise<Element|null>}
      */
-    waitForElement: (selector, timeout = CONSTANTS.TIMINGS?.ELEMENT_WAIT_DEFAULT || 10000) => {
+    waitForElement: (selector, timeout = CONSTANTS.TIMINGS?.ELEMENT_WAIT_DEFAULT || 10000, signal = null) => {
         // Input validation
         if (!selector || typeof selector !== 'string') {
             window.YPP.Utils?.log('Invalid selector provided to waitForElement', 'UTILS', 'warn');
@@ -162,6 +163,8 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             window.YPP.Utils?.log(`Invalid timeout (${timeout}), using default 10000ms`, 'UTILS', 'warn');
             timeout = 10000;
         }
+
+        if (signal?.aborted) return Promise.resolve(null);
 
         // Try distinct lookup first
         try {
@@ -187,7 +190,22 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                     clearTimeout(timeoutId);
                     timeoutId = null;
                 }
+                if (signal) {
+                    signal.removeEventListener('abort', handleAbort);
+                }
             };
+
+            const handleAbort = () => {
+                if (!resolved) {
+                    resolved = true;
+                    cleanup();
+                    resolve(null);
+                }
+            };
+
+            if (signal) {
+                signal.addEventListener('abort', handleAbort);
+            }
 
             const check = () => {
                 // Abort if the user navigates away before element is found
@@ -284,10 +302,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @param {Function} conditionFn - Function that returns a truthy value when condition is met
      * @param {number} timeout - Maximum wait time in ms
      * @param {number} interval - Polling interval in ms
+     * @param {AbortSignal} [signal] - Optional abort signal to cancel polling early
      * @returns {Promise<any>} Resolves with the truthy value returned by conditionFn
      */
-    pollFor: (conditionFn, timeout = 10000, intervalMs = 250) => {
+    pollFor: (conditionFn, timeout = 10000, intervalMs = 250, signal = null) => {
         return new Promise((resolve) => {
+            if (signal?.aborted) return resolve(null);
+
             // Initial check
             try {
                 const initialResult = conditionFn();
@@ -301,8 +322,33 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             const startUrl = location.href; // Capture URL for early abort
             let lastCheckTime = startTime;
             let rafId = null;
+            let resolved = false;
+
+            const cleanup = () => {
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+                if (signal) {
+                    signal.removeEventListener('abort', handleAbort);
+                }
+            };
+
+            const handleAbort = () => {
+                if (!resolved) {
+                    resolved = true;
+                    cleanup();
+                    resolve(null);
+                }
+            };
+
+            if (signal) {
+                signal.addEventListener('abort', handleAbort);
+            }
 
             const check = () => {
+                if (resolved) return;
+                
                 const now = Date.now();
 
                 // Throttle the checks to match the requested interval
@@ -311,20 +357,28 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                     try {
                         // Abort if the user navigates away early
                         if (location.href !== startUrl) {
+                            resolved = true;
+                            cleanup();
                             return resolve(null);
                         }
 
                         const result = conditionFn();
                         if (result) {
+                            resolved = true;
+                            cleanup();
                             return resolve(result); // Success
                         } 
                         
                         // Check for timeout
                         if (now - startTime >= timeout) {
+                            resolved = true;
+                            cleanup();
                             return resolve(null); // Timeout reached cleanly
                         }
                     } catch (error) {
                         window.YPP.Utils?.log('Error in pollFor condition execution', 'UTILS', 'warn');
+                        resolved = true;
+                        cleanup();
                         return resolve(null);
                     }
                 }
@@ -644,26 +698,31 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     // =====================================================================
 
     /**
-     * Inject CSS styles into the document head
+     * Inject CSS styles into the document head efficiently
      * @param {string} css - CSS string to inject
      * @param {string} [id] - Unique ID for the style element
      * @returns {void}
      */
-    addStyle: (css, id = 'ypp-custom-style') => {
+    addStyle: (css, id) => {
         if (!css || typeof css !== 'string') return;
         
-        // 1. Check by ID first (fastest)
-        if (document.getElementById(id)) return;
-        
-        // 2. Check by exact content to prevent duplicate nameless/id-less injections
-        const existingStyles = document.querySelectorAll('style');
-        for (const style of existingStyles) {
-             if (style.textContent === css) return;
+        // Generate a fast hash ID if none is provided to avoid duplicating nameless styles
+        let styleId = id;
+        if (!styleId) {
+            let hash = 0;
+            for (let i = 0; i < css.length; i++) {
+                hash = ((hash << 5) - hash) + css.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            styleId = 'ypp-style-' + Math.abs(hash).toString(36);
         }
+        
+        // 1. Check by ID first (O(1) fastest look up)
+        if (document.getElementById(styleId)) return;
 
         try {
             const style = document.createElement('style');
-            style.id = id;
+            style.id = styleId;
             style.textContent = css;
             (document.head || document.documentElement).appendChild(style);
         } catch (error) {

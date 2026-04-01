@@ -381,8 +381,8 @@
                     return;
                 }
                 
-                // Cache previous context for comparison
-                this.context = {
+                // Compute new context
+                const newContext = {
                     isHome: pathname === '/' || pathname === '/index' || pathname === '/feed/subscriptions',
                     isWatch: pathname.startsWith('/watch'),
                     isSearch: pathname.startsWith('/results'),
@@ -396,8 +396,16 @@
                     isHistory: pathname === '/feed/history'
                 };
 
+                // Cache comparison to avoid unnecessary DOM classList writes
+                const contextId = `${pathname}-${this.settings?.premiumTheme}`;
+                if (this._lastContextId === contextId) {
+                    // No context or theme change occurred; bypass heavy DOM updates
+                    return;
+                }
+                this._lastContextId = contextId;
+                this.context = newContext;
+
                 // Apply context classes to body
-                // Update context classes
                 body.classList.toggle('ypp-watch-page', this.context.isWatch);
                 body.classList.toggle('ypp-shorts-page', this.context.isShortsPage);
                 body.classList.toggle('ypp-home-page', this.context.isHome);
@@ -407,6 +415,8 @@
                 // Re-apply premium theme class (critical for layout)
                 if (this.settings?.premiumTheme) {
                     body.classList.add('yt-premium-plus-theme');
+                } else {
+                    body.classList.remove('yt-premium-plus-theme');
                 }
 
                 this.Utils?.log('Context updated', 'MAIN', 'debug', this.context);

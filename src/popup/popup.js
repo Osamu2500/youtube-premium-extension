@@ -247,15 +247,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 10); // 10ms for practically instant but prevents thread lock
 
-    // Save to valid storage (Higher Debounce)
+    // Save to valid storage using atomic queue (Higher Debounce)
     const persistSettings = Utils.debounce(() => {
         const settings = gatherSettings();
         try {
-            chrome.storage.local.set({ settings }, () => {
-                if (chrome.runtime.lastError) {
-                    Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
-                }
-            });
+            // Check if queueSettingsWrite is initialized (it might be defined later in the file)
+            // Due to our structural refactor, we can dispatch a full state update.
+            if (typeof queueSettingsWrite !== 'undefined') {
+                queueSettingsWrite({ fullState: settings });
+            } else {
+                // Fallback if accessed early
+                chrome.storage.local.set({ settings });
+            }
         } catch (e) {
              Utils.log('Critical Save Error: ' + e.message, 'POPUP', 'error');
         }
@@ -421,28 +424,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initSearchViewMode();
 
-    const updateSetting = (key, value) => {
+    // --- CONCURRENT STORAGE MANAGER ---
+    let _settingsWriteQueue = [];
+    let _isWritingSettings = false;
+
+    const _processWriteQueue = () => {
+        if (_isWritingSettings || _settingsWriteQueue.length === 0) return;
+        _isWritingSettings = true;
+        
+        // Lock and drain current pending updates
+        const updates = [..._settingsWriteQueue];
+        _settingsWriteQueue = [];
+        
         chrome.storage.local.get(['settings'], (result) => {
             const currentSettings = result.settings || {};
-            currentSettings[key] = value;
             
-            // Validate: Ensure we aren't losing other keys
+            // Atomically apply all batched mutations
+            updates.forEach(update => {
+                if (update.fullState) {
+                    Object.assign(currentSettings, update.fullState);
+                } else if (update.key) {
+                    currentSettings[update.key] = update.value;
+                }
+            });
+            
+            // Failsafe validation against accidental wipe
             if (Object.keys(currentSettings).length < 2) {
-                 // Utils.log('Warning: Settings object seems too small, potential wipe?', 'POPUP', 'warn');
-                 // For now, trust the get(), but in a real scenario we might want a backup default merge.
                  const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
                     ? window.YPP.CONSTANTS.DEFAULT_SETTINGS 
                     : {};
-                 // If currentSettings is missing defaults, maybe merge them back in?
-                 // Let's keep it simple: just save what we read + update.
+                 Object.assign(currentSettings, defaultSettings, currentSettings);
             }
 
             chrome.storage.local.set({ settings: currentSettings }, () => {
+                _isWritingSettings = false;
                 if (chrome.runtime.lastError) {
-                    // console.error('Error saving setting:', chrome.runtime.lastError);
+                    Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
+                }
+                // Process any updates appended during async gap
+                if (_settingsWriteQueue.length > 0) {
+                    _processWriteQueue();
                 }
             });
         });
+    };
+
+    const queueSettingsWrite = (payload) => {
+        _settingsWriteQueue.push(payload);
+        _processWriteQueue();
+    };
+
+    const updateSetting = (key, value) => {
+        queueSettingsWrite({ key, value });
     };
 
     const notifyThemeChange = (newTheme) => {
@@ -911,13 +944,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.classList.add('active');
                 const value = opt.dataset.value;
                 
-                // Save to main settings object
-                chrome.storage.local.get(['settings'], (result) => {
-                    const settings = result.settings || {};
-                    settings[storageKey] = value;
-                    chrome.storage.local.set({ settings });
-                    sendPreviewUpdate();
-                });
+                // Save to main settings object using atomic queue
+                if (typeof queueSettingsWrite !== 'undefined') {
+                    queueSettingsWrite({ key: storageKey, value: value });
+                } else {
+                    chrome.storage.local.get(['settings'], (result) => {
+                        const settings = result.settings || {};
+                        settings[storageKey] = value;
+                        chrome.storage.local.set({ settings });
+                    });
+                }
+                sendPreviewUpdate();
                 
                 if (onChange) onChange(value);
                 showSaveIndicator();
@@ -997,12 +1034,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 sw.classList.add('active');
                 const color = sw.dataset.color;
                 
-                chrome.storage.local.get(['settings'], (result) => {
-                    const settings = result.settings || {};
-                    settings.accentColor = color;
-                    chrome.storage.local.set({ settings });
-                    sendPreviewUpdate();
-                });
+                if (typeof queueSettingsWrite !== 'undefined') {
+                    queueSettingsWrite({ key: 'accentColor', value: color });
+                } else {
+                    chrome.storage.local.get(['settings'], (result) => {
+                        const settings = result.settings || {};
+                        settings.accentColor = color;
+                        chrome.storage.local.set({ settings });
+                    });
+                }
+                sendPreviewUpdate();
                 
                 applyAccentColor(color);
                 showSaveIndicator();

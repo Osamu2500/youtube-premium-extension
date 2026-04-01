@@ -450,12 +450,17 @@ window.YPP.CONSTANTS = {
 
 // Deep freeze CONSTANTS.DEFAULT_SETTINGS to prevent accidental state mutation
 const deepFreeze = obj => {
-    Object.keys(obj).forEach(prop => {
-        if (typeof obj[prop] === 'object' && obj[prop] !== null && !Object.isFrozen(obj[prop])) {
-            deepFreeze(obj[prop]);
+    if (obj === null || typeof obj !== 'object' || Object.isFrozen(obj)) {
+        return obj;
+    }
+    Object.freeze(obj);
+    Object.getOwnPropertyNames(obj).forEach(prop => {
+        const val = obj[prop];
+        if (typeof val === 'object' && val !== null && !Object.isFrozen(val)) {
+            deepFreeze(val);
         }
     });
-    return Object.freeze(obj);
+    return obj;
 };
 
 if (window.YPP.CONSTANTS && window.YPP.CONSTANTS.DEFAULT_SETTINGS) {
