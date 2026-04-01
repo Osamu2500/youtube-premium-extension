@@ -9,14 +9,15 @@
 
 ## ✨ Features at a Glance
 
-- 🎨 **Premium Glassmorphism UI** - Modern Material 3 design with stunning visual effects
+- 🎨 **Premium Glassmorphism & Themes** - Modern Material 3 design with full customizability
+- 🎛️ **Customization Suite** - Change typography, layout density, card styles, and accent colors globally
 - 🧭 **Enhanced Navigation** - Custom header buttons with glassmorphic styling
 - 🏠 **Smart Feed Control** - Hide watched videos, remove shorts, customize layouts
 - 🎯 **Focus Modes** - Zen Mode, Study Mode, and distraction-free viewing
-- 🎛️ **Advanced Player Tools** - Volume boost, custom speeds, cinema filters, remaining time display
+- 🎬 **Advanced Player Tools** - Extra UI configurations, customized speeds, retro CRT emulators, cinema filters
 - 🔍 **Search Redesign** - Grid view, clean filters, hide unwanted content
 - 📱 **Custom Sidebar** - Floating squircle design with smooth animations
-- 🎬 **Auto-Quality Control** - Force highest quality playback
+- 🔧 **Auto-Quality Control** - Force highest quality playback
 - 📸 **Screenshot & Loop** - Built-in snapshot and video looping tools
 
 ## 📦 Installation
@@ -68,6 +69,13 @@ For the best experience, enable these features:
 - ✅ Remaining Time Display
 
 ## 🚀 Feature Categories
+
+### 🎛️ Customization Suite
+
+- **Typography & Font Scaling** - Select from Inter, System Defaults, Monospace, and customize font sizes.
+- **Dynamic Layout Density** - Adjust margins dynamically (Compact, Comfortable, Spacious grids).
+- **Accents & Card Styles** - Change UI themes to flat, elevated, or glassmorphic, and replace Youtube's default red color.
+- **Animations & Motion** - Full control over CSS transition easing and general global animations.
 
 ### 🎨 Theme & UI
 

@@ -50,6 +50,17 @@ window.YPP.SettingsSchema = {
         hideEndScreens:      { type: 'boolean', default: false },
         hookFreeHome:        { type: 'boolean', default: false },
 
+        // --- Customization ---
+        fontFamily:          { type: 'string',  default: 'inter', values: ['inter', 'system', 'mono'] },
+        fontScale:           { type: 'number',  default: 100, min: 80, max: 130 },
+        densityMode:         { type: 'string',  default: 'comfortable', values: ['comfortable', 'compact', 'spacious'] },
+        accentColor:         { type: 'string',  default: '#ff4e45' },
+        enableAnimations:    { type: 'boolean', default: true },
+        reducedMotion:       { type: 'boolean', default: false },
+        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated'] },
+        thumbRadius:         { type: 'number',  default: 8, min: 0, max: 24 },
+        sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 },
+
         // --- Player ---
         autoCinema:          { type: 'boolean', default: false },
         blueProgress:        { type: 'boolean', default: false },

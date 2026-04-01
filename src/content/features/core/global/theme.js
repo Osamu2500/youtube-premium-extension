@@ -97,6 +97,9 @@ window.YPP.features.Theme = class ThemeManager {
             // Apply visibility settings
             this._applyVisibilitySettings();
 
+            // Apply global customizations (Typography, density, accent color, etc)
+            this._applyCustomizationSettings();
+
             // Apply UI customization
             this._applyTrueBlack(this._settings.trueBlack);
             this._applyHideScrollbar(this._settings.hideScrollbar);
@@ -341,6 +344,73 @@ window.YPP.features.Theme = class ThemeManager {
         toggle('ypp-clean-search', this._settings.cleanSearch);
         toggle('ypp-hide-search-shorts', this._settings.hideSearchShorts);
         toggle('ypp-search-grid-mode', this._settings.searchGrid);
+    }
+
+    /**
+     * Apply extensive UI customization settings (Typography, layout density, colors)
+     * @private
+     */
+    _applyCustomizationSettings() {
+        if (!this._settings) return;
+        const root = document.documentElement;
+        
+        // Font Family
+        if (this._settings.fontFamily) {
+            const fontMap = {
+                inter: '"Inter", system-ui, -apple-system, sans-serif',
+                system: 'system-ui, -apple-system, sans-serif',
+                mono: '"Courier New", monospace'
+            };
+            const family = fontMap[this._settings.fontFamily] || fontMap.inter;
+            root.style.setProperty('--ypp-font-family', family);
+        }
+
+        // Font Scale
+        if (this._settings.fontScale !== undefined) {
+            root.style.setProperty('--ypp-font-scale', (this._settings.fontScale / 100).toFixed(2));
+        }
+
+        // Density Mode
+        if (this._settings.densityMode) {
+            const densityMap = {
+                compact: { pad: '5px', gap: '4px' },
+                comfortable: { pad: '8px', gap: '6px' },
+                spacious: { pad: '14px', gap: '12px' }
+            };
+            const d = densityMap[this._settings.densityMode] || densityMap.comfortable;
+            root.style.setProperty('--ypp-density-pad', d.pad);
+            root.style.setProperty('--ypp-density-gap', d.gap);
+            root.setAttribute('data-ypp-density', this._settings.densityMode);
+        }
+
+        // Accent Color
+        if (this._settings.accentColor) {
+            const hex = this._settings.accentColor;
+            root.style.setProperty('--ypp-accent-primary', hex);
+            root.style.setProperty('--ypp-accent-glow', hex + '66');
+            root.style.setProperty('--ypp-accent-gradient', `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`);
+            // Subtly inject into YouTube's own variable if needed
+            // root.style.setProperty('--yt-spec-static-brand-red', hex); 
+        }
+
+        // Animations / Reduced Motion
+        root.classList.toggle('ypp-no-animations', this._settings.enableAnimations === false);
+        root.classList.toggle('ypp-reduced-motion', !!this._settings.reducedMotion);
+
+        // Card Style
+        if (this._settings.cardStyle) {
+            root.setAttribute('data-ypp-card-style', this._settings.cardStyle);
+        }
+
+        // Thumb Radius
+        if (this._settings.thumbRadius !== undefined) {
+            root.style.setProperty('--ypp-thumb-radius', this._settings.thumbRadius + 'px');
+        }
+
+        // Sidebar Opacity
+        if (this._settings.sidebarOpacity !== undefined) {
+            root.style.setProperty('--ypp-sidebar-opacity', (this._settings.sidebarOpacity / 100).toFixed(2));
+        }
     }
 
     /**

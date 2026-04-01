@@ -16,6 +16,29 @@ This guide provides in-depth information about every feature in the YouTube Prem
 
 ## Theme & Visual Customization
 
+### 🎛️ Design Customization Suite
+**Location:** Global → Customization
+
+Take complete control over YouTube's core visual architecture:
+- **Typography** 
+  - Change fonts to **Inter**, **System Defaults**, or **Monospace**.
+  - Dynamically scale text size from `80%` to `130%`.
+- **Layout Density** 
+  - Manage grid spacing by toggling between **Compact**, **Comfortable**, and **Spacious** layouts.
+- **Card Styles** 
+  - Swap out YouTube's default video cards to **Flat**, **Elevated**, or rich **Glassmorphic** designs.
+- **Accent Color Control** 
+  - Replace YouTube's standard red with an integrated dynamic color picker handling the entire theme.
+- **Micro-Tuning** 
+  - Granular control over **Thumbnail Corner Radius** and **Sidebar Opacity** via precise sliders.
+
+### 🎭 Animations & Motion Control
+**Location:** Global → Customization
+
+Fine-tune how the interface feels:
+- **Enable/Disable Animations** - Control over CSS transitions and hover effects globally.
+- **Reduced Motion** - Respects user preferences by switching to faster, linear easing transitions to prevent motion sickness.
+
 ### Premium Theme
 **Location:** Global → Theme & UI
 
@@ -199,18 +222,20 @@ Precise playback speed input:
 - Not limited to YouTube's preset speeds
 - Perfect for fine-tuning lecture playback
 
-### Cinema Filters
+### Cinema Filters & Visual Effects
 **Location:** Player → Enhancements
 
-Adjust video appearance with:
-- **Brightness** - Lighten or darken
-- **Contrast** - Increase or decrease
-- **Saturation** - Enhance or mute colors
+Adjust video appearance with dynamic, real-time filters directly on the player:
+- **Artistic Presets** - One-click themes including Cyberpunk, Matrix, Vaporwave, Sunset, Glitch, and CRT Display effects.
+- **CRT Retro Emulator** - Bring back the nostalgic scanlines, screen curvature, and phosphor glow with an authentic CRT preset.
+- **Granular Core Adjustments**: 
+  - **Brightness / Contrast / Saturation**
+  - **Sepia / Grayscale / Color Invert**
 
 **Use Cases:**
-- Fix dark videos
-- Improve visibility
-- Personal preference adjustments
+- Restore or recolor videos based on aesthetic preference.
+- Apply true vintage looks with CRT and Grayscale models.
+- Enhance accessibility formatting through high contrast or inverted colors.
 
 ### Snapshot Button
 **Location:** Player → Enhancements (Grid 2)

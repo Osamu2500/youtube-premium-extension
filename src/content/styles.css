@@ -169,7 +169,112 @@
 }
 
 /* ===================================================================================
-   2. FEATURE TOGGLE CLASSES
+   2. CUSTOMIZATION FEATURE VARIABLES & OVERRIDES
+   =================================================================================== */
+
+/* Typography */
+html.yt-premium-plus-theme, 
+html.yt-premium-plus-theme body, 
+html.yt-premium-plus-theme ytd-app,
+html.yt-premium-plus-theme #content-text {
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+}
+html.yt-premium-plus-theme {
+    --yt-spec-font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+}
+
+html.yt-premium-plus-theme tp-yt-paper-button,
+html.yt-premium-plus-theme ytd-button-renderer {
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+}
+
+/* Animations & Reduced Motion */
+html.ypp-no-animations *,
+html.ypp-no-animations *::before,
+html.ypp-no-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.ypp-reduced-motion *,
+html.ypp-reduced-motion *::before,
+html.ypp-reduced-motion *::after {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+  transition-timing-function: linear !important;
+}
+
+/* Accent Color Overrides via injected variables */
+html.yt-premium-plus-theme {
+  --ypp-accent: var(--ypp-accent-primary, #3ea6ff) !important;
+  --ypp-accent-hover: var(--ypp-accent-glow, #65b8ff) !important;
+  --yt-spec-static-brand-red: var(--ypp-accent-primary, #f00) !important;
+  --yt-spec-icon-active-other: var(--ypp-accent-primary, #3ea6ff) !important;
+  --yt-spec-brand-icon-active: var(--ypp-accent-primary, #3ea6ff) !important;
+  --paper-toggle-button-checked-bar-color: var(--ypp-accent-primary, #3ea6ff) !important;
+  --paper-toggle-button-checked-button-color: var(--ypp-accent-primary, #3ea6ff) !important;
+}
+
+/* Thumbnail Radius */
+html.yt-premium-plus-theme {
+  --ypp-player-radius: var(--ypp-thumb-radius, 12px);
+  --ypp-thumbnail-radius: var(--ypp-thumb-radius, 12px);
+}
+html.yt-premium-plus-theme ytd-thumbnail, 
+html.yt-premium-plus-theme ytd-thumbnail::before, 
+html.yt-premium-plus-theme ytd-thumbnail a, 
+html.yt-premium-plus-theme yt-image, 
+html.yt-premium-plus-theme .ytd-thumbnail {
+  border-radius: var(--ypp-thumbnail-radius, 12px) !important;
+}
+
+/* Card Styles */
+html[data-ypp-card-style="flat"] ytd-rich-item-renderer,
+html[data-ypp-card-style="flat"] ytd-video-renderer,
+html[data-ypp-card-style="flat"] ytd-compact-video-renderer {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+html[data-ypp-card-style="elevated"] ytd-rich-item-renderer,
+html[data-ypp-card-style="elevated"] ytd-video-renderer,
+html[data-ypp-card-style="elevated"] ytd-compact-video-renderer {
+  background: var(--ypp-bg-surface) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  padding: var(--ypp-density-pad, 8px) !important;
+  border-radius: var(--ypp-radius-md);
+  margin-bottom: var(--ypp-density-gap, 16px) !important;
+}
+
+html[data-ypp-card-style="glass"] ytd-rich-item-renderer,
+html[data-ypp-card-style="glass"] ytd-video-renderer,
+html[data-ypp-card-style="glass"] ytd-compact-video-renderer {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: var(--ypp-density-pad, 8px) !important;
+  border-radius: var(--ypp-radius-md);
+  margin-bottom: var(--ypp-density-gap, 16px) !important;
+}
+
+/* Sidebar Opacity */
+html.yt-premium-plus-theme #guide-wrapper {
+  opacity: var(--ypp-sidebar-opacity, 1) !important;
+}
+
+/* Layout Density Grid Gap Override */
+html.yt-premium-plus-theme {
+  --ytd-rich-grid-item-margin: var(--ypp-density-gap, 16px) !important;
+}
+
+/* ===================================================================================
+   3. FEATURE TOGGLE CLASSES
    =================================================================================== */
 
 /* Theme Base */
@@ -2440,21 +2545,7 @@ ytd-menu-renderer ytd-button-renderer:hover {
   align-items: center;
   margin-right: 12px;
   gap: 8px;
-  background: rgba(30, 30, 30, 0.4);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  padding: 4px 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition:
-    transform 0.3s ease,
-    background 0.3s ease;
-}
-
-.ypp-player-controls:hover {
-  background: rgba(40, 40, 40, 0.5);
+  padding: 0 4px;
 }
 
 .ypp-action-btn {
@@ -4682,9 +4773,10 @@ body.yt-premium-plus-theme .ytp-chrome-bottom {
 
 /* Reposition progress bar so it sits cleanly on top of the rounded glass container */
 body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container {
-  bottom: 56px !important; /* Move it completely above the player buttons row */
-  width: calc(100% - 48px) !important;
-  left: 24px !important;
+  bottom: 52px !important; /* Move it completely above the player buttons row */
+  width: auto !important;
+  left: 16px !important;
+  right: 16px !important;
 }
 
 /* Also apply to popups inside the player (e.g. settings menu) */

@@ -159,7 +159,18 @@ document.addEventListener('DOMContentLoaded', () => {
         'shortcut_speedDown',
         'shortcut_speedUp',
         'shortcut_speedReset',
-        'shortcut_ambientMode'
+        'shortcut_ambientMode',
+
+        // Customization
+        'fontFamily',
+        'fontScale',
+        'densityMode',
+        'accentColor',
+        'enableAnimations',
+        'reducedMotion',
+        'cardStyle',
+        'thumbRadius',
+        'sidebarOpacity'
     ];
 
     // --- STORAGE HANDLING ---
@@ -885,8 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = container.querySelectorAll('.pill-option');
 
         // Load saved value
-        chrome.storage.local.get([storageKey], (result) => {
-            const saved = result[storageKey];
+        chrome.storage.local.get(['settings'], (result) => {
+            const saved = result.settings ? result.settings[storageKey] : null;
             if (saved) {
                 options.forEach(opt => {
                     opt.classList.toggle('active', opt.dataset.value === saved);
@@ -899,7 +910,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 options.forEach(o => o.classList.remove('active'));
                 opt.classList.add('active');
                 const value = opt.dataset.value;
-                chrome.storage.local.set({ [storageKey]: value });
+                
+                // Save to main settings object
+                chrome.storage.local.get(['settings'], (result) => {
+                    const settings = result.settings || {};
+                    settings[storageKey] = value;
+                    chrome.storage.local.set({ settings });
+                    sendPreviewUpdate();
+                });
+                
                 if (onChange) onChange(value);
                 showSaveIndicator();
             });
@@ -931,53 +950,41 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Apply accent color to popup */
     function applyAccentColor(hex) {
         if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
-        // Derive lighter version for glow
         document.documentElement.style.setProperty('--accent-primary', hex);
         document.documentElement.style.setProperty('--accent-glow', hex + '66');
-        // Update accent gradient
-        const darker = hex; // simplified: use same
         document.documentElement.style.setProperty('--accent-gradient',
-            `linear-gradient(135deg, ${hex} 0%, ${darker}cc 100%)`
+            `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`
         );
     }
 
     // Init pill selectors
-    initPillSelector('fontFamilySelector', 'ypp_fontFamily', applyFontFamily);
-    initPillSelector('densitySelector', 'ypp_density', applyDensity);
-    initPillSelector('cardStyleSelector', 'ypp_cardStyle', (style) => {
+    initPillSelector('fontFamilySelector', 'fontFamily', applyFontFamily);
+    initPillSelector('densitySelector', 'densityMode', applyDensity);
+    initPillSelector('cardStyleSelector', 'cardStyle', (style) => {
         document.documentElement.setAttribute('data-card-style', style);
     });
 
     // Load & apply saved customization values on startup
-    chrome.storage.local.get(['ypp_fontFamily', 'ypp_density', 'ypp_cardStyle', 'ypp_accentColor',
-        'ypp_fontScale', 'ypp_thumbRadius', 'ypp_sidebarOpacity'], (result) => {
-        if (result.ypp_fontFamily) applyFontFamily(result.ypp_fontFamily);
-        if (result.ypp_density) applyDensity(result.ypp_density);
-        if (result.ypp_accentColor) {
-            applyAccentColor(result.ypp_accentColor);
-            // Update swatch active state
+    chrome.storage.local.get(['settings'], (result) => {
+        const s = result.settings || {};
+        if (s.fontFamily) applyFontFamily(s.fontFamily);
+        if (s.densityMode) applyDensity(s.densityMode);
+        if (s.cardStyle) document.documentElement.setAttribute('data-card-style', s.cardStyle);
+        if (s.accentColor) {
+            applyAccentColor(s.accentColor);
             document.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
-                sw.classList.toggle('active', sw.dataset.color === result.ypp_accentColor);
+                sw.classList.toggle('active', sw.dataset.color === s.accentColor);
             });
+            const customPicker = document.getElementById('accentColorCustom');
+            if (customPicker) customPicker.value = s.accentColor;
         }
-        // Apply slider values
-        const fontScaleSlider = document.getElementById('fontScale');
-        if (fontScaleSlider && result.ypp_fontScale) {
-            fontScaleSlider.value = result.ypp_fontScale;
-            const disp = document.getElementById('fontScaleValue');
-            if (disp) disp.textContent = result.ypp_fontScale + '%';
+        
+        // Disable animations class based on reducedMotion
+        if (s.enableAnimations === false) {
+            document.documentElement.classList.add('ypp-no-animations');
         }
-        const thumbSlider = document.getElementById('thumbRadius');
-        if (thumbSlider && result.ypp_thumbRadius !== undefined) {
-            thumbSlider.value = result.ypp_thumbRadius;
-            const disp = document.getElementById('thumbRadiusValue');
-            if (disp) disp.textContent = result.ypp_thumbRadius + 'px';
-        }
-        const sidebarSlider = document.getElementById('sidebarOpacity');
-        if (sidebarSlider && result.ypp_sidebarOpacity !== undefined) {
-            sidebarSlider.value = result.ypp_sidebarOpacity;
-            const disp = document.getElementById('sidebarOpacityValue');
-            if (disp) disp.textContent = result.ypp_sidebarOpacity + '%';
+        if (s.reducedMotion) {
+            document.documentElement.classList.add('ypp-reduced-motion');
         }
     });
 
@@ -989,7 +996,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 accentSwatches.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
                 sw.classList.add('active');
                 const color = sw.dataset.color;
-                chrome.storage.local.set({ ypp_accentColor: color });
+                
+                chrome.storage.local.get(['settings'], (result) => {
+                    const settings = result.settings || {};
+                    settings.accentColor = color;
+                    chrome.storage.local.set({ settings });
+                    sendPreviewUpdate();
+                });
+                
                 applyAccentColor(color);
                 showSaveIndicator();
             });
@@ -1005,57 +1019,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyAccentColor(customPicker.value);
             });
             customPicker.addEventListener('change', () => {
-                chrome.storage.local.set({ ypp_accentColor: customPicker.value });
+                chrome.storage.local.get(['settings'], (result) => {
+                    const settings = result.settings || {};
+                    settings.accentColor = customPicker.value;
+                    chrome.storage.local.set({ settings });
+                    sendPreviewUpdate();
+                });
                 showSaveIndicator();
             });
         }
     }
 
-    // Customization sliders
+    // Live preview for range sliders handled by main logic now
     const custSliders = [
-        { id: 'fontScale', key: 'ypp_fontScale', dispId: 'fontScaleValue', suffix: '%' },
-        { id: 'thumbRadius', key: 'ypp_thumbRadius', dispId: 'thumbRadiusValue', suffix: 'px' },
-        { id: 'sidebarOpacity', key: 'ypp_sidebarOpacity', dispId: 'sidebarOpacityValue', suffix: '%' }
+        { id: 'fontScale', dispId: 'fontScaleValue', suffix: '%' },
+        { id: 'thumbRadius', dispId: 'thumbRadiusValue', suffix: 'px' },
+        { id: 'sidebarOpacity', dispId: 'sidebarOpacityValue', suffix: '%' }
     ];
-    custSliders.forEach(({ id, key, dispId, suffix }) => {
+    custSliders.forEach(({ id, dispId, suffix }) => {
         const el = document.getElementById(id);
         const disp = document.getElementById(dispId);
         if (el) {
             el.addEventListener('input', () => {
                 if (disp) disp.textContent = el.value + suffix;
-                // Live apply for font scale
                 if (id === 'fontScale') {
                     document.documentElement.style.setProperty('--ui-font-scale', (el.value / 100).toFixed(2));
                 }
-            });
-            el.addEventListener('change', () => {
-                chrome.storage.local.set({ [key]: Number(el.value) });
-                showSaveIndicator();
+                saveSettings(); // To preview changes live
             });
         }
     });
 
-    // Animations toggles
+    // DOM Class toggle callbacks for animations
     const enableAnimationsEl = document.getElementById('enableAnimations');
     if (enableAnimationsEl) {
-        chrome.storage.local.get(['ypp_enableAnimations'], (r) => {
-            enableAnimationsEl.checked = r.ypp_enableAnimations !== false; // default true
-        });
         enableAnimationsEl.addEventListener('change', () => {
-            chrome.storage.local.set({ ypp_enableAnimations: enableAnimationsEl.checked });
             document.documentElement.classList.toggle('ypp-no-animations', !enableAnimationsEl.checked);
-            showSaveIndicator();
         });
     }
     const reducedMotionEl = document.getElementById('reducedMotion');
     if (reducedMotionEl) {
-        chrome.storage.local.get(['ypp_reducedMotion'], (r) => {
-            reducedMotionEl.checked = r.ypp_reducedMotion || false;
-        });
         reducedMotionEl.addEventListener('change', () => {
-            chrome.storage.local.set({ ypp_reducedMotion: reducedMotionEl.checked });
             document.documentElement.classList.toggle('ypp-reduced-motion', reducedMotionEl.checked);
-            showSaveIndicator();
         });
     }
 

@@ -21,6 +21,9 @@ window.YPP.features.Player = class Player {
             contrast: 100,
             saturate: 100,
             hueRotate: 0,
+            sepia: 0,
+            grayscale: 0,
+            invert: 0,
             blur: 0,
             opacity: 100
         };
@@ -43,7 +46,12 @@ window.YPP.features.Player = class Player {
             { name: 'Retro',         css: 'sepia(60%) hue-rotate(330deg) saturate(150%) contrast(120%)', overlay: null },
             { name: 'Fade',          css: 'contrast(80%) brightness(110%) saturate(80%)',                 overlay: null },
             { name: 'Dreamy',        css: 'brightness(110%) contrast(90%) saturate(120%) blur(0.5px)',    overlay: null },
-            { name: '📺 CRT Display',css: 'url(#ypp-crt-rgb) contrast(135%) brightness(70%) saturate(75%)', overlay: 'crt' },
+            { name: 'Cyberpunk',     css: 'hue-rotate(180deg) saturate(180%) contrast(120%) brightness(110%)', overlay: null },
+            { name: 'Matrix',        css: 'sepia(100%) hue-rotate(90deg) saturate(200%) contrast(130%) brightness(95%)', overlay: null },
+            { name: 'Vaporwave',     css: 'hue-rotate(280deg) saturate(160%) contrast(110%) brightness(105%)', overlay: null },
+            { name: 'Sunset',        css: 'sepia(30%) hue-rotate(330deg) saturate(150%) contrast(110%) brightness(105%)', overlay: null },
+            { name: 'Glitch',        css: 'url(#ypp-crt-rgb) contrast(150%) brightness(110%) saturate(140%) hue-rotate(20deg)', overlay: null },
+            { name: '📺 CRT Display',css: 'url(#ypp-crt-rgb) contrast(135%) brightness(110%) saturate(85%)', overlay: 'crt' },
             { name: '📼 VHS Tape',   css: 'contrast(90%) brightness(85%) saturate(60%) hue-rotate(5deg)',overlay: 'vhs' },
             { name: '🎞 Old Film',   css: 'sepia(70%) contrast(90%) brightness(85%) blur(0.3px)',         overlay: 'oldfilm' },
         ];
@@ -359,7 +367,7 @@ window.YPP.features.Player = class Player {
         });
         resetBtn.onclick = () => {
             this.currentFilterIndex = 0;
-            this.filterAdjustments = { brightness: 100, contrast: 100, saturate: 100, hueRotate: 0, blur: 0, opacity: 100 };
+            this.filterAdjustments = { brightness: 100, contrast: 100, saturate: 100, hueRotate: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, opacity: 100 };
             this._applyComputedFilter(video);
             if (btn) { btn.classList.remove('active'); btn.title = 'Cinema Filters'; }
             // Re-render panel
@@ -462,6 +470,9 @@ window.YPP.features.Player = class Player {
             { id: 'contrast',   label: 'Contrast',   min: 0,   max: 200, unit: '%',  default: 100 },
             { id: 'saturate',   label: 'Saturation', min: 0,   max: 200, unit: '%',  default: 100 },
             { id: 'hueRotate',  label: 'Hue Rotate', min: 0,   max: 360, unit: 'deg',default: 0 },
+            { id: 'sepia',      label: 'Sepia',      min: 0,   max: 100, unit: '%',  default: 0 },
+            { id: 'grayscale',  label: 'Grayscale',  min: 0,   max: 100, unit: '%',  default: 0 },
+            { id: 'invert',     label: 'Invert',     min: 0,   max: 100, unit: '%',  default: 0 },
             { id: 'blur',       label: 'Blur',       min: 0,   max: 10,  unit: 'px', default: 0 },
             { id: 'opacity',    label: 'Opacity',    min: 10,  max: 100, unit: '%',  default: 100 },
         ];
@@ -532,6 +543,9 @@ window.YPP.features.Player = class Player {
             `contrast(${adj.contrast}%)`,
             `saturate(${adj.saturate}%)`,
             `hue-rotate(${adj.hueRotate}deg)`,
+            adj.sepia > 0 ? `sepia(${adj.sepia}%)` : '',
+            adj.grayscale > 0 ? `grayscale(${adj.grayscale}%)` : '',
+            adj.invert > 0 ? `invert(${adj.invert}%)` : '',
             adj.blur > 0 ? `blur(${adj.blur}px)` : '',
             `opacity(${adj.opacity}%)`
         ].filter(Boolean).join(' ');
@@ -539,7 +553,8 @@ window.YPP.features.Player = class Player {
         // Combine: preset first (if not 'none'), then adjustments
         const isDefault = (
             adj.brightness === 100 && adj.contrast === 100 && adj.saturate === 100 &&
-            adj.hueRotate === 0 && adj.blur === 0 && adj.opacity === 100
+            adj.hueRotate === 0 && adj.sepia === 0 && adj.grayscale === 0 && adj.invert === 0 &&
+            adj.blur === 0 && adj.opacity === 100
         );
 
         let finalFilter;
@@ -580,11 +595,11 @@ window.YPP.features.Player = class Player {
             // + scanlines (1px dark line every 3px)
             // + edge vignette
             overlay.style.backgroundImage = `
-                radial-gradient(ellipse 85% 85% at 50% 50%, transparent 55%, rgba(0,0,0,0.85) 100%),
+                radial-gradient(ellipse 85% 85% at 50% 50%, transparent 55%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(
                     0deg,
-                    rgba(0,0,0,0.5) 0px,
-                    rgba(0,0,0,0.5) 1px,
+                    rgba(0,0,0,0.15) 0px,
+                    rgba(0,0,0,0.15) 1px,
                     transparent 1px,
                     transparent 3px
                 ),
@@ -738,6 +753,9 @@ window.YPP.features.Player = class Player {
         if (s.cinemaFilterContrast !== undefined)   this.filterAdjustments.contrast   = s.cinemaFilterContrast;
         if (s.cinemaFilterSaturate !== undefined)   this.filterAdjustments.saturate   = s.cinemaFilterSaturate;
         if (s.cinemaFilterHue !== undefined)        this.filterAdjustments.hueRotate  = s.cinemaFilterHue;
+        if (s.cinemaFilterSepia !== undefined)      this.filterAdjustments.sepia      = s.cinemaFilterSepia;
+        if (s.cinemaFilterGrayscale !== undefined)  this.filterAdjustments.grayscale  = s.cinemaFilterGrayscale;
+        if (s.cinemaFilterInvert !== undefined)     this.filterAdjustments.invert     = s.cinemaFilterInvert;
         if (s.cinemaFilterBlur !== undefined)       this.filterAdjustments.blur       = s.cinemaFilterBlur;
         if (s.cinemaFilterOpacity !== undefined)    this.filterAdjustments.opacity    = s.cinemaFilterOpacity;
         if (s.cinemaFilterIndex !== undefined)      this.currentFilterIndex           = s.cinemaFilterIndex;
@@ -746,7 +764,9 @@ window.YPP.features.Player = class Player {
         const hasActiveFilter = this.currentFilterIndex > 0 ||
             this.filterAdjustments.brightness !== 100 || this.filterAdjustments.contrast !== 100 ||
             this.filterAdjustments.saturate !== 100 || this.filterAdjustments.hueRotate !== 0 ||
-            this.filterAdjustments.blur !== 0 || this.filterAdjustments.opacity !== 100;
+            this.filterAdjustments.sepia !== 0 || this.filterAdjustments.grayscale !== 0 ||
+            this.filterAdjustments.invert !== 0 || this.filterAdjustments.blur !== 0 ||
+            this.filterAdjustments.opacity !== 100;
 
         if (hasActiveFilter && this._videoElement) {
             this._applyComputedFilter(this._videoElement);
