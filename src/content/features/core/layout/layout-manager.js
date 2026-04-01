@@ -192,7 +192,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             this.utils.log?.(`Retry ${this._retryCount}/${GridLayoutManager.CONFIG.MAX_RETRIES} in ${delay}ms`, 'LAYOUT', 'debug');
             setTimeout(() => this._applyWithRetry(), delay);
         } else if (!success) {
-            this.utils.log?.('Max retries reached, grid application failed', 'LAYOUT', 'warn');
+            this.utils.log?.('Max retries reached, grid application failed', 'LAYOUT', 'debug');
         }
     }
 

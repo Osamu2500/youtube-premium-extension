@@ -74,8 +74,8 @@ window.YPP.features.HeaderNav = class HeaderNav {
             this.domObserver.stop();
         }
 
-        if (window.YPP.ui) {
-            window.YPP.ui.remove('header-nav-group');
+        if (window.YPP.ui && window.YPP.ui.manager) {
+            window.YPP.ui.manager.remove('header-nav-group');
         }
 
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);

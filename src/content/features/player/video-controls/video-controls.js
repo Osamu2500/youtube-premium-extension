@@ -57,7 +57,7 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
             const settingsBtn = controls.querySelector('.ytp-settings-button');
             controls.insertBefore(btn, settingsBtn);
         } catch (error) {
-            this.utils?.log('Timeout waiting for .ytp-right-controls', 'VideoControls', 'warn');
+            this.utils?.log('Timeout waiting for .ytp-right-controls', 'VideoControls', 'debug');
         }
     }
 

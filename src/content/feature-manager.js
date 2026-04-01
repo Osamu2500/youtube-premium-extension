@@ -195,6 +195,11 @@ window.YPP.FeatureManager = class FeatureManager {
         try {
             await fn();
         } catch (e) {
+            if (e.message && e.message.includes('Extension context invalidated')) {
+                // Ignore silent context invalidation on extension reload
+                return;
+            }
+
             this.errorCounts[name] = (this.errorCounts[name] || 0) + 1;
             window.YPP.Utils.log(`Error in feature '${name}' (${this.errorCounts[name]}/${this.MAX_ERRORS}): ${e.message}`, 'MANAGER', 'error');
             

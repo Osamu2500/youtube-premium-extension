@@ -231,15 +231,30 @@ html.yt-premium-plus-theme .ytd-thumbnail {
 }
 
 /* Card Styles */
+html.yt-premium-plus-theme ytd-rich-item-renderer,
+html.yt-premium-plus-theme ytd-video-renderer,
+html.yt-premium-plus-theme ytd-compact-video-renderer {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* Flat Cards */
 html[data-ypp-card-style="flat"] ytd-rich-item-renderer,
 html[data-ypp-card-style="flat"] ytd-video-renderer,
 html[data-ypp-card-style="flat"] ytd-compact-video-renderer {
   background: transparent !important;
   box-shadow: none !important;
-  border: none !important;
+  border: 1px solid transparent !important;
   padding: 0 !important;
 }
+html[data-ypp-card-style="flat"] ytd-rich-item-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-video-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-compact-video-renderer:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--ypp-radius-md);
+}
 
+/* Elevated Cards */
 html[data-ypp-card-style="elevated"] ytd-rich-item-renderer,
 html[data-ypp-card-style="elevated"] ytd-video-renderer,
 html[data-ypp-card-style="elevated"] ytd-compact-video-renderer {
@@ -250,7 +265,15 @@ html[data-ypp-card-style="elevated"] ytd-compact-video-renderer {
   border-radius: var(--ypp-radius-md);
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
+html[data-ypp-card-style="elevated"] ytd-rich-item-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-video-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-compact-video-renderer:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
+  border-color: var(--ypp-accent-hover) !important;
+}
 
+/* Glass Cards */
 html[data-ypp-card-style="glass"] ytd-rich-item-renderer,
 html[data-ypp-card-style="glass"] ytd-video-renderer,
 html[data-ypp-card-style="glass"] ytd-compact-video-renderer {
@@ -262,6 +285,170 @@ html[data-ypp-card-style="glass"] ytd-compact-video-renderer {
   border-radius: var(--ypp-radius-md);
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
+html[data-ypp-card-style="glass"] ytd-rich-item-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-video-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-compact-video-renderer:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* YouTube Dropdowns & Custom Popups */
+html.yt-premium-plus-theme tp-yt-iron-dropdown,
+html.yt-premium-plus-theme ytd-menu-popup-renderer,
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer,
+html.yt-premium-plus-theme .ytp-popup {
+  border-radius: var(--ypp-radius-md) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+html.yt-premium-plus-theme tp-yt-paper-listbox,
+html.yt-premium-plus-theme ytd-active-account-header-renderer {
+  background: transparent !important;
+}
+
+/* Glass Popups */
+html[data-ypp-card-style="glass"] tp-yt-iron-dropdown,
+html[data-ypp-card-style="glass"] ytd-menu-popup-renderer,
+html[data-ypp-card-style="glass"] ytd-multi-page-menu-renderer,
+html[data-ypp-card-style="glass"] .ytp-popup {
+  background: var(--ypp-bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.6) !important;
+}
+
+/* Elevated/Flat Popups */
+html[data-ypp-card-style="elevated"] tp-yt-iron-dropdown,
+html[data-ypp-card-style="elevated"] ytd-menu-popup-renderer,
+html[data-ypp-card-style="elevated"] ytd-multi-page-menu-renderer,
+html[data-ypp-card-style="elevated"] .ytp-popup,
+html[data-ypp-card-style="flat"] tp-yt-iron-dropdown,
+html[data-ypp-card-style="flat"] ytd-menu-popup-renderer,
+html[data-ypp-card-style="flat"] ytd-multi-page-menu-renderer,
+html[data-ypp-card-style="flat"] .ytp-popup {
+  background: var(--ypp-bg-surface) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+
+/* Popup Inner Structure Overrides */
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer {
+  padding: 8px 0 !important;
+}
+
+html.yt-premium-plus-theme ytd-active-account-header-renderer {
+  padding: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Hide native bottom borders inside header */
+html.yt-premium-plus-theme ytd-active-account-header-renderer #header {
+  border-bottom: none !important;
+}
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer #separator {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  margin: 4px 16px !important;
+}
+
+/* Popup Menu Items Hover & Aesthetics */
+html.yt-premium-plus-theme ytd-compact-link-renderer,
+html.yt-premium-plus-theme ytd-account-item-renderer,
+html.yt-premium-plus-theme .ytp-menuitem,
+html.yt-premium-plus-theme ytd-menu-service-item-renderer,
+html.yt-premium-plus-theme ytd-menu-navigation-item-renderer {
+  margin: 4px 12px !important;
+  width: calc(100% - 24px) !important;
+  border-radius: var(--ypp-radius-md) !important;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  box-sizing: border-box !important;
+}
+
+html.yt-premium-plus-theme ytd-compact-link-renderer:hover,
+html.yt-premium-plus-theme ytd-account-item-renderer:hover,
+html.yt-premium-plus-theme .ytp-menuitem:hover,
+html.yt-premium-plus-theme ytd-menu-service-item-renderer:hover,
+html.yt-premium-plus-theme ytd-menu-navigation-item-renderer:hover {
+  background-color: var(--ypp-bg-hover) !important;
+  transform: translateX(4px);
+}
+
+/* Popup Icon Interactions */
+html.yt-premium-plus-theme ytd-compact-link-renderer yt-icon,
+html.yt-premium-plus-theme ytd-account-item-renderer yt-icon,
+html.yt-premium-plus-theme ytd-menu-service-item-renderer yt-icon,
+html.yt-premium-plus-theme ytd-menu-navigation-item-renderer yt-icon {
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+html.yt-premium-plus-theme ytd-compact-link-renderer:hover yt-icon,
+html.yt-premium-plus-theme ytd-account-item-renderer:hover yt-icon,
+html.yt-premium-plus-theme ytd-menu-service-item-renderer:hover yt-icon,
+html.yt-premium-plus-theme ytd-menu-navigation-item-renderer:hover yt-icon {
+  opacity: 1 !important;
+  color: var(--ypp-accent) !important;
+  transform: scale(1.15);
+}
+
+/* Phase 3: Ultra-Premium Popup Polish */
+
+/* Popup Typography Hierarchy */
+html.yt-premium-plus-theme ytd-active-account-header-renderer #account-name {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  margin-bottom: 2px !important;
+}
+html.yt-premium-plus-theme ytd-active-account-header-renderer #account-byline,
+html.yt-premium-plus-theme ytd-active-account-header-renderer #channel-handle {
+  opacity: 0.65 !important;
+  font-weight: 400 !important;
+  font-size: 1.3rem !important;
+}
+
+/* Entry Animation */
+@keyframes ypp-popup-enter {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+html.yt-premium-plus-theme tp-yt-iron-dropdown,
+html.yt-premium-plus-theme ytd-menu-popup-renderer,
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer,
+html.yt-premium-plus-theme .ytp-popup {
+  animation: ypp-popup-enter 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  transform-origin: top right !important;
+}
+
+/* Inset Edge Lighting for Popups */
+html[data-ypp-card-style="glass"] tp-yt-iron-dropdown,
+html[data-ypp-card-style="glass"] ytd-menu-popup-renderer,
+html[data-ypp-card-style="elevated"] tp-yt-iron-dropdown,
+html[data-ypp-card-style="elevated"] ytd-menu-popup-renderer {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 12px 48px rgba(0,0,0,0.6) !important;
+}
+
+/* Custom Themed Scrollbar for Popups */
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar {
+  width: 4px !important;
+  background: transparent !important;
+}
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar-track,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar-thumb,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px !important;
+}
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar-thumb:hover,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
 
 /* Sidebar Opacity */
 html.yt-premium-plus-theme #guide-wrapper {

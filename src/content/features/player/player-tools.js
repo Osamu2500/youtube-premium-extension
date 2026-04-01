@@ -119,7 +119,7 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
             // Re-check on navigation (Memory-managed)
             this.addListener(window, 'yt-navigate-finish', () => this._checkForPlayer());
         } catch (error) {
-            this.utils.log?.('PlayerTools timeout waiting for controls', 'PLAYER_TOOLS', 'warn');
+            this.utils.log?.('PlayerTools timeout waiting for controls', 'PLAYER_TOOLS', 'debug');
         }
     }
 
@@ -234,9 +234,9 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
      * @private
      */
     _removeControls() {
-        if (window.YPP.ui) {
-            window.YPP.ui.remove('btn-custom-speed-input');
-            window.YPP.ui.remove('custom-speed-input');
+        if (window.YPP.ui && window.YPP.ui.manager) {
+            window.YPP.ui.manager.remove('btn-custom-speed-input');
+            window.YPP.ui.manager.remove('custom-speed-input');
         }
         this._speedInput = null;
     }
