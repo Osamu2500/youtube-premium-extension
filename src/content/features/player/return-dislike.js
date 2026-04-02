@@ -69,12 +69,19 @@ window.YPP.features.ReturnDislike = class ReturnDislike {
         const url = `https://returnyoutubedislikeapi.com/votes?videoId=${videoId}`;
 
         try {
-            const response = await fetch(url, { signal: this.abortController.signal });
-            if (!response.ok) throw new Error('API Error');
+            const response = await new Promise(resolve => {
+                chrome.runtime.sendMessage({ action: 'FETCH_API', url }, resolve);
+            });
             
-            const data = await response.json();
-            this.cache.set(videoId, data);
-            this.updateUI(data);
+            if (this.abortController.signal.aborted) return;
+
+            if (response && response.status === 200 && response.data) {
+                const data = response.data;
+                this.cache.set(videoId, data);
+                this.updateUI(data);
+            } else {
+                throw new Error(response?.error || 'API Error');
+            }
         } catch (e) {
             if (e.name !== 'AbortError') {
                 console.warn('[YPP ReturnDislike] Fetch error:', e);

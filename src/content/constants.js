@@ -444,7 +444,11 @@ window.YPP.CONSTANTS = {
         subscriptionFolders: 'SubscriptionFolders',
         markWatched: 'MarkWatched',
         hideWatched: 'HideWatched',
-        keyboardShortcuts: 'KeyboardShortcuts'
+        keyboardShortcuts: 'KeyboardShortcuts',
+        wheelControls: 'WheelControls',
+        audioCompressor: 'AudioCompressor',
+        videoResumer: 'VideoResumer',
+        commentFilter: 'CommentFilter'
     }
 };
 

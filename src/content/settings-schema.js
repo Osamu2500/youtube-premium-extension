@@ -123,6 +123,12 @@ window.YPP.SettingsSchema = {
         audioModeEnabled:    { type: 'boolean', default: false },
         videoControlsEnabled:{ type: 'boolean', default: true },
         subscriptionFolders: { type: 'boolean', default: true },
+        sponsorBlock:        { type: 'boolean', default: false },
+        returnYouTubeDislike:{ type: 'boolean', default: false },
+        wheelControls:       { type: 'boolean', default: true },
+        audioCompressor:     { type: 'boolean', default: false },
+        videoResumer:        { type: 'boolean', default: true },
+        commentFilter:       { type: 'boolean', default: true },
 
         // --- Watch Time Alert ---
         watchTimeAlert:      { type: 'boolean', default: false },

@@ -207,6 +207,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             return true; // Indicate async response
 
+        case 'FETCH_API':
+            fetch(request.url, request.options)
+                .then((response) => response.json().then(data => ({ status: response.status, data })))
+                .then((result) => sendResponse(result))
+                .catch((error) => sendResponse({ error: error.message }));
+            return true; // Indicate async response
+
         default:
             // Unhandled actions can be ignored or logged
             return false;

@@ -58,6 +58,7 @@ import './features/pages/watch/continue-watching.js';
 import './features/pages/watch/zen-mode.js';
 import './features/pages/watch/focus-mode.js';
 import './features/pages/watch/study-mode.js';
+import './features/pages/watch/comment-filter.js';
 
 // Player features
 import './features/player/player.js';
@@ -69,6 +70,9 @@ import './features/player/sponsor-block.js';
 import './features/player/ambient-mode/ambient-mode.js';
 import './features/player/ambient-mode/audio-mode.js';
 import './features/player/video-controls/video-controls.js';
+import './features/player/wheel-controls.js';
+import './features/player/audio-compressor.js';
+import './features/player/video-resumer.js';
 
 // Feature Manager & Main entry
 import './feature-manager.js';

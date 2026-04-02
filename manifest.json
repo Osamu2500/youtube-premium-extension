@@ -10,7 +10,9 @@
         "alarms"
     ],
     "host_permissions": [
-        "*://www.youtube.com/*"
+        "*://www.youtube.com/*",
+        "*://returnyoutubedislikeapi.com/*",
+        "*://sponsor.ajay.app/*"
     ],
     "icons": {
         "16": "src/assets/icon.png",

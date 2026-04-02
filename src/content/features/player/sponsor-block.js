@@ -167,13 +167,18 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             const categoriesParam = encodeURIComponent(JSON.stringify(this.categories));
             const url = `https://sponsor.ajay.app/api/skipSegments/${prefix}?categories=${categoriesParam}`;
 
-            const response = await fetch(url, { 
-                signal: this.abortController.signal,
-                headers: { 'Accept': 'application/json' }
+            const response = await new Promise(resolve => {
+                chrome.runtime.sendMessage({ 
+                    action: 'FETCH_API', 
+                    url, 
+                    options: { headers: { 'Accept': 'application/json' } } 
+                }, resolve);
             });
             
-            if (response.ok) {
-                const data = await response.json();
+            if (this.abortController.signal.aborted) return;
+            
+            if (response && response.status === 200 && response.data) {
+                const data = response.data;
                 
                 // Filter for our exact video ID
                 const videoData = data.find(item => item.videoID === this.videoId);
@@ -191,7 +196,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
                     this.utils.log?.('SponsorBlock: No segments found for this video', 'SPONSOR');
                     this.clearSegments();
                 }
-            } else if (response.status === 404) {
+            } else if (response && response.status === 404) {
                 this.segments = [];
                 this.segmentCache.set(this.videoId, {
                     segments: [],
@@ -199,7 +204,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
                 });
                 this.clearSegments();
             } else {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(`HTTP ${response?.status || 'Unknown'}`);
             }
         } catch (e) {
             if (e.name === 'AbortError') return;
