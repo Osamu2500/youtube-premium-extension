@@ -1592,7 +1592,7 @@ body.ypp-hide-sidebar ytd-rich-grid-renderer {
    6. SEARCH REDESIGN
    =================================================================================== */
 
-/* Search Grid Mode - Container Overrides */
+/* ── 1. CONTAINER RESETS ──────────────────────────────────────────── */
 body.ypp-search-grid-mode ytd-search,
 body.ypp-search-grid-mode ytd-two-column-search-results-renderer,
 body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
@@ -1602,31 +1602,48 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
   padding: 0 !important;
 }
 
-/* Search Grid Layout */
-body.ypp-search-grid-mode ytd-item-section-renderer #contents,
-body.ypp-search-grid-mode .ypp-flattened-grid {
-  display: grid !important;
-  /* Enforce chosen column count rather than auto-packing to eliminate layout collapse */
-  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
-  grid-auto-flow: dense !important; /* Auto-pack items to fill empty holes and gaps */
-  gap: 16px;
-  width: 100% !important;
-  max-width: 1800px; /* Prevent it from getting TOO wide on ultrawide monitors */
-  padding: 0 24px; /* Balanced padding */
-  margin: 0 auto; /* Center the container itself */
-  box-sizing: border-box;
-  justify-content: center; /* Ensure grid items are centered if they don't fill row */
+body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
+  display: flex !important;
+  justify-content: center !important;
 }
 
-/* Flattened Grid Specific Overrides */
+/* ── 2. MASTER GRID — lives on the section-list, not the item section ─── */
+/* Architecture:
+     ytd-section-list-renderer > #contents   ← CSS GRID (this rule)
+       ytd-item-section-renderer             ← display:contents (transparent)
+         ytd-item-section-renderer > #contents ← display:contents (transparent)
+           ytd-video-renderer                ← GRID CELL
+*/
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  display: grid !important;
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+  grid-auto-flow: dense !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 1800px !important;
+  padding: 0 24px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  align-items: start !important;
+}
+
+/* Flatten item-section wrappers so video cards land directly in master grid */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+  display: contents !important;
+}
+
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
+  display: contents !important;
+}
+
+/* ── 3. FLATTENED ADDITIONAL GRID (shelves promoted to grid) ─────── */
 body.ypp-search-grid-mode .ypp-flattened-grid {
-  padding: 0 !important; /* Internal padding is handled by the parent section */
-  max-width: none !important; /* Allow the grid to fill the full width of the parent */
-  overflow: visible !important; /* Disable any leftover horizontal scrolling */
-  white-space: normal !important; /* Fix inline-block/nowrap behaviors */
-  /* Override original YouTube flex/carousel properties */
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
+  display: grid !important;
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+  gap: 20px !important;
+  width: 100% !important;
+  overflow: visible !important;
+  white-space: normal !important;
   height: auto !important;
   align-items: stretch !important;
 }
@@ -1636,26 +1653,16 @@ body.ypp-search-grid-mode .ypp-flattened-container #scroll-container {
   overflow: visible !important;
 }
 
-/* Ensure the main wrapper is also centered */
-body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
-  display: flex !important;
-  justify-content: center !important;
-}
-
-/* Ensure intermediate containers don't choke the grid */
+/* Ensure intermediate containers don’t choke the grid */
 body.ypp-search-grid-mode .ypp-flattened-container ytd-vertical-list-renderer,
-body.ypp-search-grid-mode
-  .ypp-flattened-container
-  ytd-horizontal-card-list-renderer,
+body.ypp-search-grid-mode .ypp-flattened-container ytd-horizontal-card-list-renderer,
 body.ypp-search-grid-mode .ypp-flattened-container #contents {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
 }
 
-/* Ensure non-grid items (like ad slots, tracking pixels, or continuation tokens) 
-   span the full width of the grid so they don't consume single cells causing gaps. 
-   Items with 0 height will naturally take 0 vertical space. */
+/* ── 4. FULL-WIDTH ITEMS (ads, continuation, non-card types) ─────── */
 body.ypp-search-grid-mode .ypp-full-width-item,
 body.ypp-search-grid-mode ytd-continuation-item-renderer,
 body.ypp-search-grid-mode ytd-search-sub-menu-renderer,
@@ -1665,6 +1672,7 @@ body.ypp-search-grid-mode .ypp-flattened-container {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
+
 
 /* ============================================================
    VIDEO CARDS IN GRID — Mirrored from homepage ytd-rich-item-renderer
@@ -2085,18 +2093,9 @@ body.ypp-search-grid-mode ytd-continuation-item-renderer {
   justify-content: center;
 }
 
-/* Hide parent section when JS marks it as noise */
+/* Section separator spacing – works because item-section is display:contents,
+   these are effectively no-ops on layout but prevent flash of spacing during load */
 body.ypp-search-grid-mode ytd-item-section-renderer.ypp-noise-section {
-  display: none !important;
-}
-
-/* Section separator */
-body.ypp-search-grid-mode ytd-item-section-renderer {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-body.ypp-search-grid-mode ytd-item-section-renderer #separator {
   display: none !important;
 }
 
@@ -3074,20 +3073,10 @@ body.yt-premium-plus-theme ytd-rich-item-renderer:hover .ypp-tag-btn {
 }
 
 /* ===================================================================================
-   6b. SEARCH REDESIGN — Supplement (Grid Flattening & Playlist Specifics)
-   Only contains CSS not covered by the canonical block above.
+   6b. SEARCH REDESIGN — Supplement (Playlist Wrappers & Misc)
+   Grid flattening is handled in section 6 above.
    =================================================================================== */
 
-/* Flatten item sections so all video cards live directly in the master grid */
-body.ypp-search-grid-mode ytd-item-section-renderer {
-  display: contents !important;
-}
-
-body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
-  display: contents !important;
-}
-
-/* Force inner wrappers in Playlists & Mixes to stack vertically */
 body.ypp-search-grid-mode ytd-playlist-renderer > a,
 body.ypp-search-grid-mode ytd-radio-renderer > div,
 body.ypp-search-grid-mode ytd-radio-renderer > ytd-thumbnail,
