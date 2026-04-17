@@ -226,21 +226,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 /**
  * Initialize default settings on extension install
+ * Safely merges new defaults without overwriting user data if a read failure occurs.
  */
 chrome.runtime.onInstalled.addListener(async (details) => {
+    console.log('[YPP] Service Worker Installed:', details.reason);
     try {
-        console.log('[YPP] Service Worker Installed:', details.reason);
+        // Retrieve existing settings
         const data = await chrome.storage.local.get('settings');
-        const newSettings = { ...DEFAULT_SETTINGS, ...data.settings };
+        const existingSettings = data.settings || {};
+
+        // Shallow merge defaults underneath existing user preferences
+        const newSettings = { ...DEFAULT_SETTINGS, ...existingSettings };
+        
+        // Persist the consolidated settings
         await chrome.storage.local.set({ settings: newSettings });
-        console.log('[YPP] Settings initialized successfully');
+        console.log('[YPP] Settings initialized and merged successfully');
     } catch (error) {
-        console.error('[YPP] Error initializing settings:', error);
-        // Fallback: Try to set defaults anyway
-        try {
-            await chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
-        } catch (fallbackError) {
-            console.error('[YPP] Critical: Could not initialize settings:', fallbackError);
-        }
+        // IMPORTANT FIX: Never overwrite with defaults blindly if 'get' fails. 
+        // A transient I/O error here would permanently delete the user's custom layout config.
+        console.error('[YPP] Critical: Error initializing settings (aborted to prevent data loss):', error);
     }
 });

@@ -207,8 +207,10 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
                 throw new Error(`HTTP ${response?.status || 'Unknown'}`);
             }
         } catch (e) {
-            if (e.name === 'AbortError') return;
-            this.utils.log?.(`SponsorBlock API error: ${e.message}`, 'SPONSOR', 'error');
+            if (e.name === 'AbortError' || e.message?.includes('Extension context invalidated')) {
+                return;
+            }
+            this.utils.log?.(`SponsorBlock API error: ${e.message}`, 'SPONSOR', 'debug');
             
             if (!this.retryAttempted) {
                 this.retryAttempted = true;
@@ -233,7 +235,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             const widthPercent = endPercent - startPercent;
             
             const el = document.createElement('div');
-            el.className = 'ypp-sponsor-segment ytp-play-progress';
+            el.className = 'ypp-sponsor-segment';
             el.style.position = 'absolute';
             el.style.left = `${startPercent}%`;
             el.style.width = `${widthPercent}%`;

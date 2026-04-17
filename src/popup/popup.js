@@ -249,15 +249,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save to valid storage using atomic queue (Higher Debounce)
     const persistSettings = Utils.debounce(() => {
-        const settings = gatherSettings();
+        const uiSettings = gatherSettings();
         try {
-            // Check if queueSettingsWrite is initialized (it might be defined later in the file)
-            // Due to our structural refactor, we can dispatch a full state update.
             if (typeof queueSettingsWrite !== 'undefined') {
-                queueSettingsWrite({ fullState: settings });
+                queueSettingsWrite({ fullState: uiSettings });
             } else {
                 // Fallback if accessed early
-                chrome.storage.local.set({ settings });
+                chrome.storage.local.get('settings', (data) => {
+                    const existing = data.settings || {};
+                    const mergedSettings = { ...existing, ...uiSettings };
+                    chrome.storage.local.set({ settings: mergedSettings }, () => {
+                        if (chrome.runtime.lastError) {
+                            Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
+                        }
+                    });
+                });
             }
         } catch (e) {
              Utils.log('Critical Save Error: ' + e.message, 'POPUP', 'error');

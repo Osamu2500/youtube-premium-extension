@@ -50,7 +50,8 @@
             "resources": [
                 "src/assets/*",
                 "src/inject/*",
-                "src/content/themes/*.css"
+                "src/content/themes/*.css",
+                "src/content/features/**/*.css"
             ],
             "matches": [
                 "*://*.youtube.com/*"

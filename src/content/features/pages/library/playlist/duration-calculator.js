@@ -42,24 +42,29 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
     }
 
     calculateDuration() {
-        const timeSpans = document.querySelectorAll('ytd-playlist-video-renderer ytd-thumbnail-overlay-time-status-renderer span#text');
+        // Modern YouTube uses various nested elements for timestamps (e.g., badge-shape). 
+        // We select the whole time status renderer and parse its textContent.
+        const timeElements = document.querySelectorAll('ytd-playlist-video-renderer ytd-thumbnail-overlay-time-status-renderer, ytd-playlist-video-renderer badge-shape[class*="time-status"]');
         
-        // Count specific "not counted" videos? (e.g. [Private], [Deleted])
-        // We can just count total DOM items vs valid times.
         const allItems = document.querySelectorAll('ytd-playlist-video-renderer');
         
         let totalSeconds = 0;
         let validCount = 0;
 
-        timeSpans.forEach(span => {
-            const timeText = span.textContent.trim();
-            const s = this.parseTime(timeText);
-            if (s > 0) {
-                totalSeconds += s;
-                validCount++;
+        timeElements.forEach(el => {
+            const timeText = el.textContent.trim();
+            // Match time format like "1:23:45" or "12:34" or "0:15"
+            if (timeText && timeText.includes(':')) {
+                const cleanTime = timeText.replace(/[^0-9:]/g, '');
+                const s = this.parseTime(cleanTime);
+                if (s > 0) {
+                    totalSeconds += s;
+                    validCount++;
+                }
             }
         });
 
+        // Some items may be missing times entirely if they are deleted/private
         const notCounted = allItems.length - validCount;
 
         if (allItems.length > 0) {
@@ -99,16 +104,20 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
             this.card = document.createElement('div');
             this.card.id = 'ypp-playlist-card';
             this.card.style.cssText = `
-                margin-top: 12px;
-                background: rgba(255, 255, 255, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
-                padding: 16px;
-                font-family: 'Roboto', sans-serif;
+                margin-top: 24px;
+                background: linear-gradient(135deg, rgba(30, 160, 255, 0.15), rgba(30, 160, 255, 0.05));
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-top-color: rgba(255, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 20px;
+                font-family: var(--ypp-font-family, 'Inter', 'Roboto', sans-serif);
                 color: #fff;
                 width: 100%;
                 box-sizing: border-box;
-                backdrop-filter: blur(5px);
+                backdrop-filter: blur(24px) saturate(1.2);
+                -webkit-backdrop-filter: blur(24px) saturate(1.2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
             `;
             // Insert after the stats (privacy, views)
             const stats = container.querySelector('ytd-playlist-byline-renderer') || container.querySelector('.metadata-action-bar');

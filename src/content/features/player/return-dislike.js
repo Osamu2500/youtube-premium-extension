@@ -83,8 +83,13 @@ window.YPP.features.ReturnDislike = class ReturnDislike {
                 throw new Error(response?.error || 'API Error');
             }
         } catch (e) {
-            if (e.name !== 'AbortError') {
-                console.warn('[YPP ReturnDislike] Fetch error:', e);
+            if (e.name !== 'AbortError' && !e.message?.includes('Extension context invalidated')) {
+                const Utils = window.YPP?.Utils;
+                if (Utils && Utils.log) {
+                    Utils.log(`Fetch error: ${e.message}`, 'ReturnDislike', 'debug');
+                } else {
+                    console.debug('[YPP ReturnDislike] Fetch error:', e.message);
+                }
             }
         }
     }

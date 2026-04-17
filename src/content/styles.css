@@ -4951,3 +4951,226 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
   display: flex !important;
   flex-direction: column !important;
 }
+
+/* ===================================================================================
+   XX. PLAYLIST & HISTORY PAGE REDESIGN
+   =================================================================================== */
+
+/* --- Playlist Header (glassmorphic aesthetic) --- */
+.yt-premium-plus-theme ytd-playlist-header-renderer {
+  background: rgba(20, 20, 20, 0.4) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top-color: rgba(255, 255, 255, 0.15) !important;
+  border-radius: var(--ypp-radius-lg, 16px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  overflow: hidden;
+  margin-top: 16px !important;
+}
+
+/* Let the native colored gradient underplay softly */
+.yt-premium-plus-theme ytd-playlist-header-renderer .immersive-header-background-wrapper {
+  opacity: 0.5 !important;
+  filter: blur(40px) saturate(1.5) !important;
+}
+
+/* --- Playlist Items (Horizontal Glass Cards) --- */
+.yt-premium-plus-theme ytd-playlist-video-renderer {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.01)
+  ) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: var(--ypp-radius-md, 12px) !important;
+  padding: 8px 12px !important;
+  margin-bottom: 8px !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.yt-premium-plus-theme ytd-playlist-video-renderer:hover {
+  transform: translateY(-2px) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* --- History Page Items (Horizontal Glass Cards) --- */
+/* Target History Analytics Dashboard */
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-two-column-browse-results-renderer #secondary,
+.yt-premium-plus-theme #history-analytics-renderer {
+  background: rgba(20, 20, 20, 0.4) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--ypp-radius-lg, 16px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+  padding: 16px !important;
+}
+
+/* History Analytics Inner Cards */
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] .analytics-card,
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] .stat-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--ypp-radius-sm, 8px) !important;
+}
+
+/* History List Items */
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.01)
+  ) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: var(--ypp-radius-md, 12px) !important;
+  padding: 12px 16px !important;
+  margin-bottom: 12px !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  min-height: unset !important; /* Overcome rigid history spacing */
+  align-items: center !important;
+}
+
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer:hover {
+  transform: translateX(4px) !important; /* History items hover effect - gentle slide */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Realign thumbnail and content in history cards */
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer ytd-thumbnail {
+  border-radius: var(--ypp-thumbnail-radius, 12px) !important;
+  overflow: hidden !important;
+}
+
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer #content {
+  margin-left: 16px !important;
+  padding: 0 !important;
+}
+
+/* History Subheadings (Dates like "Today", "Yesterday") */
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] #title.ytd-item-section-renderer {
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  color: var(--yt-spec-text-primary) !important;
+  margin-top: 24px !important;
+  margin-bottom: 16px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: capitalize !important;
+}
+
+/* --- Playlist Page Structural Layout Fixes & Overhaul --- */
+/* Completely decouple the playlist from native YouTube flow bugs! */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] {
+  position: relative !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding-top: 24px !important;
+  padding-left: 396px !important; /* 360px header + 36px gap */
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+/* Force the Header into a Fixed Position on the Left */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-playlist-header-renderer {
+  position: fixed !important;
+  top: calc(var(--ytd-masthead-height, 56px) + 24px) !important;
+  /* Centering formula: aligns to max-width 1400 container, clamping at 24px padding */
+  left: max(calc((100vw - 1400px) / 2), 24px) !important;
+  width: 360px !important;
+  max-width: 360px !important;
+  max-height: calc(100vh - var(--ytd-masthead-height, 56px) - 48px) !important;
+  overflow-y: auto !important;
+  margin: 0 !important;
+  z-index: 100 !important;
+  
+  /* Make the header incredibly detailed and majestic */
+  background: linear-gradient(180deg, rgba(30, 40, 50, 0.4) 0%, rgba(15, 15, 15, 0.7) 100%) !important;
+  backdrop-filter: blur(32px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--ypp-radius-lg, 24px) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  padding: 24px !important;
+}
+
+/* Let the video list natural fill */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer,
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-section-list-renderer,
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] > #contents {
+  width: 100% !important;
+  max-width: 1000px !important; /* Cap width for comfortable reading */
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+/* Hide wrappers that might interfere without breaking children */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] #secondary {
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+  overflow: visible !important;
+}
+
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] #primary {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* --- High-End Sort Option Filter --- */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] yt-sort-filter-sub-menu-renderer {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 12px 20px !important;
+  margin-bottom: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
+  max-width: max-content !important; 
+}
+
+/* --- Exquisite Video Cards --- */
+.yt-premium-plus-theme ytd-playlist-video-renderer {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top-color: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 16px !important;
+  padding: 12px 16px !important;
+  margin-bottom: 12px !important;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+  display: flex !important;
+}
+
+.yt-premium-plus-theme ytd-playlist-video-renderer:hover {
+  transform: translateX(6px) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+}

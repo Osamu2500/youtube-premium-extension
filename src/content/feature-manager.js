@@ -207,7 +207,19 @@ window.YPP.FeatureManager = class FeatureManager {
             console.error(`[YPP:${name}]`, e);
 
             if (this.errorCounts[name] >= this.MAX_ERRORS) {
-                window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors.`, 'MANAGER', 'warn');
+                window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors. Attempting cleanup...`, 'MANAGER', 'warn');
+                
+                // CRITICAL FIX: Attempt to gracefully unmount the broken feature
+                // This prevents zombie listeners from continuing to mutate the DOM or leak memory
+                try {
+                    const instance = this.getFeature(name);
+                    if (instance && typeof instance.disable === 'function') {
+                        instance.disable();
+                    }
+                } catch (cleanupError) {
+                    window.YPP.Utils.log(`Failed to cleanly disable broken feature '${name}'`, 'MANAGER', 'debug');
+                }
+
                 if (window.YPP.events) {
                     window.YPP.events.emit('feature:disabled', { name, error: e.message });
                 }

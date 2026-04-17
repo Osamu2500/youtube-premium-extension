@@ -314,8 +314,9 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 const initialResult = conditionFn();
                 if (initialResult) return resolve(initialResult);
             } catch (error) {
-                window.YPP.Utils?.log('Error in initial pollFor condition', 'UTILS', 'warn');
-                return resolve(null);
+                // IMPORTANT FIX: Do NOT resolve(null) here. A null reference error is expected 
+                // if the DOM is still rendering. Proceed to the polling loop.
+                window.YPP.Utils?.log('Initial pollFor missed (expected), proceeding to wait loop...', 'UTILS', 'debug');
             }
 
             const startTime = Date.now();
@@ -376,10 +377,9 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                             return resolve(null); // Timeout reached cleanly
                         }
                     } catch (error) {
-                        window.YPP.Utils?.log('Error in pollFor condition execution', 'UTILS', 'warn');
-                        resolved = true;
-                        cleanup();
-                        return resolve(null);
+                        // IMPORTANT FIX: Swallow transient errors (like null references during DOM load) 
+                        // and allow the loop to try again on the next interval until timeout.
+                        window.YPP.Utils?.log('Transient error in pollFor, retrying...', 'UTILS', 'debug');
                     }
                 }
                 

@@ -3,6 +3,15 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
         super('VideoControls');
         this.panel = null;
         this.isPanelVisible = false;
+
+        // Audio processing chain
+        this._audioCtx = null;
+        this._gainNode = null;
+        this._compressor = null;
+        this._bassFilter = null;
+        this._trebleFilter = null;
+        this._sourceNode = null;
+        this._audioConnected = false;
     }
 
     getConfigKey() {
@@ -32,8 +41,78 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
             this.panel = null;
         }
 
+        // Clean up audio chain
+        this._teardownAudio();
+
         // Remove CSS
         this.utils?.removeStyle('ypp-video-controls-css');
+    }
+
+    // ─── Audio Engine ──────────────────────────────────────────────────────────
+
+    _setupAudio(video) {
+        if (this._audioConnected) return;
+        try {
+            this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Source: the video element
+            this._sourceNode = this._audioCtx.createMediaElementSource(video);
+
+            // Gain node – volume boost (1.0 = native, up to 5.0 = 500%)
+            this._gainNode = this._audioCtx.createGain();
+            this._gainNode.gain.value = 1.0;
+
+            // DynamicsCompressor – prevents clipping / distortion at high gain
+            this._compressor = this._audioCtx.createDynamicsCompressor();
+            this._compressor.threshold.value = -24;  // dB: start compressing
+            this._compressor.knee.value = 10;
+            this._compressor.ratio.value = 4;
+            this._compressor.attack.value = 0.003;
+            this._compressor.release.value = 0.25;
+
+            // Bass shelf filter
+            this._bassFilter = this._audioCtx.createBiquadFilter();
+            this._bassFilter.type = 'lowshelf';
+            this._bassFilter.frequency.value = 250;
+            this._bassFilter.gain.value = 0;
+
+            // Treble shelf filter
+            this._trebleFilter = this._audioCtx.createBiquadFilter();
+            this._trebleFilter.type = 'highshelf';
+            this._trebleFilter.frequency.value = 4000;
+            this._trebleFilter.gain.value = 0;
+
+            // Chain: source → bass → treble → compressor → gain → output
+            this._sourceNode
+                .connect(this._bassFilter)
+                .connect(this._trebleFilter)
+                .connect(this._compressor)
+                .connect(this._gainNode)
+                .connect(this._audioCtx.destination);
+
+            this._audioConnected = true;
+            this.utils?.log('Audio engine started', 'VideoControls');
+        } catch (err) {
+            this.utils?.log('Failed to set up audio engine: ' + err.message, 'VideoControls', 'warn');
+        }
+    }
+
+    _teardownAudio() {
+        try {
+            if (this._sourceNode) this._sourceNode.disconnect();
+            if (this._bassFilter) this._bassFilter.disconnect();
+            if (this._trebleFilter) this._trebleFilter.disconnect();
+            if (this._compressor) this._compressor.disconnect();
+            if (this._gainNode) this._gainNode.disconnect();
+            if (this._audioCtx) this._audioCtx.close();
+        } catch (_) {}
+        this._audioCtx = null;
+        this._gainNode = null;
+        this._compressor = null;
+        this._bassFilter = null;
+        this._trebleFilter = null;
+        this._sourceNode = null;
+        this._audioConnected = false;
     }
 
     async injectToggle() {
@@ -107,6 +186,48 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
                 </div>
             </div>
 
+            <!-- ── Volume Booster ─────────────────────────────────────────── -->
+            <div class="ypp-vcp-divider"></div>
+            <div class="ypp-vcp-section">
+                <div class="ypp-vcp-label-row">
+                    <span class="ypp-vcp-label ypp-label-accent">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        Volume Booster
+                    </span>
+                    <span class="ypp-badge" id="ypp-boost-badge">OFF</span>
+                </div>
+                <div class="ypp-slider-container">
+                    <input type="range" min="1" max="5" step="0.05" value="1" class="ypp-slider ypp-slider-accent" id="ypp-volume-slider">
+                    <span class="ypp-value-display" id="ypp-volume-val">100%</span>
+                </div>
+                <div class="ypp-vcp-hint">Boost beyond native 100% — up to 500%</div>
+            </div>
+
+            <!-- ── Audio Enhancer ─────────────────────────────────────────── -->
+            <div class="ypp-vcp-section">
+                <div class="ypp-vcp-label-row">
+                    <span class="ypp-vcp-label ypp-label-accent">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 3v9.28a4 4 0 1 0 2 3.47V11h4V9h-4V3h-2zM12 19a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
+                        Audio Enhancer
+                    </span>
+                    <button class="ypp-pill-toggle" id="ypp-enhancer-toggle" aria-pressed="false">OFF</button>
+                </div>
+                <div class="ypp-enhancer-body" id="ypp-enhancer-body">
+                    <div class="ypp-vcp-sub-label">Bass Boost</div>
+                    <div class="ypp-slider-container">
+                        <input type="range" min="-12" max="12" step="1" value="0" class="ypp-slider" id="ypp-bass-slider">
+                        <span class="ypp-value-display" id="ypp-bass-val">0 dB</span>
+                    </div>
+                    <div class="ypp-vcp-sub-label">Treble Boost</div>
+                    <div class="ypp-slider-container">
+                        <input type="range" min="-12" max="12" step="1" value="0" class="ypp-slider" id="ypp-treble-slider">
+                        <span class="ypp-value-display" id="ypp-treble-val">0 dB</span>
+                    </div>
+                    <div class="ypp-vcp-hint">Compressor active — audio stays clear at high volumes</div>
+                </div>
+            </div>
+
+            <div class="ypp-vcp-divider"></div>
             <div class="ypp-vcp-section">
                 <div class="ypp-vcp-actions">
                     <button class="ypp-action-btn" id="ypp-loop-btn">
@@ -200,7 +321,81 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
             video.loop = btn.classList.contains('active');
         });
 
-        // Reset
+        // ── Volume Booster ──────────────────────────────────────────────────
+        const volumeSlider = this.panel.querySelector('#ypp-volume-slider');
+        const volumeVal    = this.panel.querySelector('#ypp-volume-val');
+        const boostBadge   = this.panel.querySelector('#ypp-boost-badge');
+
+        const ensureAudio = () => {
+            if (!this._audioConnected) this._setupAudio(video);
+        };
+
+        this.addListener(volumeSlider, 'input', (e) => {
+            const gain = parseFloat(e.target.value);
+            ensureAudio();
+            if (this._gainNode) this._gainNode.gain.value = gain;
+            volumeVal.textContent = Math.round(gain * 100) + '%';
+            volumeSlider.style.setProperty('--pct', ((gain - 1) / 4 * 100) + '%');
+            const boosting = gain > 1.01;
+            boostBadge.textContent = boosting ? Math.round(gain * 100) + '%' : 'OFF';
+            boostBadge.classList.toggle('active', boosting);
+        });
+
+        this.addListener(volumeSlider, 'dblclick', () => {
+            volumeSlider.value = 1;
+            if (this._gainNode) this._gainNode.gain.value = 1;
+            volumeVal.textContent = '100%';
+            boostBadge.textContent = 'OFF';
+            boostBadge.classList.remove('active');
+            volumeSlider.style.setProperty('--pct', '0%');
+        });
+
+        // ── Audio Enhancer ──────────────────────────────────────────────────
+        const enhancerToggle = this.panel.querySelector('#ypp-enhancer-toggle');
+        const enhancerBody   = this.panel.querySelector('#ypp-enhancer-body');
+        const bassSlider     = this.panel.querySelector('#ypp-bass-slider');
+        const bassVal        = this.panel.querySelector('#ypp-bass-val');
+        const trebleSlider   = this.panel.querySelector('#ypp-treble-slider');
+        const trebleVal      = this.panel.querySelector('#ypp-treble-val');
+
+        let enhancerOn = false;
+
+        enhancerBody.style.display = 'none';
+
+        this.addListener(enhancerToggle, 'click', () => {
+            enhancerOn = !enhancerOn;
+            enhancerToggle.textContent = enhancerOn ? 'ON' : 'OFF';
+            enhancerToggle.setAttribute('aria-pressed', String(enhancerOn));
+            enhancerToggle.classList.toggle('on', enhancerOn);
+            enhancerBody.style.display = enhancerOn ? 'flex' : 'none';
+
+            if (enhancerOn) {
+                ensureAudio();
+                // Apply current slider values
+                if (this._bassFilter)   this._bassFilter.gain.value   = parseFloat(bassSlider.value);
+                if (this._trebleFilter) this._trebleFilter.gain.value = parseFloat(trebleSlider.value);
+                if (this._compressor)   this._compressor.ratio.value  = 4;
+            } else {
+                // Bypass enhancer (zero EQ, relax compressor)
+                if (this._bassFilter)   this._bassFilter.gain.value   = 0;
+                if (this._trebleFilter) this._trebleFilter.gain.value = 0;
+                if (this._compressor)   this._compressor.ratio.value  = 1;
+            }
+        });
+
+        this.addListener(bassSlider, 'input', (e) => {
+            const db = parseInt(e.target.value);
+            if (this._bassFilter && enhancerOn) this._bassFilter.gain.value = db;
+            bassVal.textContent = (db >= 0 ? '+' : '') + db + ' dB';
+        });
+
+        this.addListener(trebleSlider, 'input', (e) => {
+            const db = parseInt(e.target.value);
+            if (this._trebleFilter && enhancerOn) this._trebleFilter.gain.value = db;
+            trebleVal.textContent = (db >= 0 ? '+' : '') + db + ' dB';
+        });
+
+        // ── Reset All ───────────────────────────────────────────────────────
         const resetBtn = this.panel.querySelector('#ypp-reset-btn');
         this.addListener(resetBtn, 'click', () => {
              video.playbackRate = 1;
@@ -220,6 +415,28 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
              
              loopBtn.classList.remove('active');
              flipBtn.classList.remove('active');
+
+             // Reset volume booster
+             volumeSlider.value = 1;
+             volumeVal.textContent = '100%';
+             volumeSlider.style.setProperty('--pct', '0%');
+             boostBadge.textContent = 'OFF';
+             boostBadge.classList.remove('active');
+             if (this._gainNode) this._gainNode.gain.value = 1;
+
+             // Reset enhancer
+             enhancerOn = false;
+             enhancerToggle.textContent = 'OFF';
+             enhancerToggle.setAttribute('aria-pressed', 'false');
+             enhancerToggle.classList.remove('on');
+             enhancerBody.style.display = 'none';
+             bassSlider.value = 0;
+             bassVal.textContent = '0 dB';
+             trebleSlider.value = 0;
+             trebleVal.textContent = '0 dB';
+             if (this._bassFilter)   this._bassFilter.gain.value   = 0;
+             if (this._trebleFilter) this._trebleFilter.gain.value = 0;
+             if (this._compressor)   this._compressor.ratio.value  = 1;
         });
 
         // Close

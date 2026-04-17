@@ -352,7 +352,7 @@ class SearchRedesign {
              } else {
                  // Keep polling if not found (don't remove pending class yet)
              }
-        }, 50, 200); // 10s timeout
+        }, 10000, 200); // 10s timeout
         
         // Safety: Remove pending class eventually
         setTimeout(() => {

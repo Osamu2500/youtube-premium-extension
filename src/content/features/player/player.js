@@ -12,6 +12,11 @@ window.YPP.features.Player = class Player {
         this.ctx = null;
         this.source = null;
         this.gainNode = null;
+        this.compressorNode = null;
+        this._bassFilter = null;
+        this._trebleFilter = null;
+        this._audioConnected = false;
+        this._volumePopup = null;
         this.isLooping = false;
 
         // ---- Cinema Filters State ----
@@ -204,6 +209,9 @@ window.YPP.features.Player = class Player {
         if (document.pictureInPictureEnabled) {
             container.appendChild(this._createPiPButton(video));
         }
+
+        // Volume Booster button
+        container.appendChild(this._createVolumeBoosterButton(video));
 
         if (this.settings.enableCinemaFilters) {
             const filterBtn = this._createFilterButton(video);
@@ -879,34 +887,229 @@ window.YPP.features.Player = class Player {
     }
 
     initAudioContext(video) {
-        if (this.ctx || !this.settings.volumeBoost) return;
+        if (this._audioConnected) return;
         const init = () => {
-            if (this.ctx) return;
+            if (this._audioConnected) return;
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                this.ctx = new AudioContext();
+                const AC = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AC();
                 this.source = this.ctx.createMediaElementSource(video);
-                this.compressorNode = this.ctx.createDynamicsCompressor();
-                this.compressorNode.threshold.value = -1;
-                this.compressorNode.knee.value = 10;
-                this.compressorNode.ratio.value = 20;
-                this.compressorNode.attack.value = 0.005;
-                this.compressorNode.release.value = 0.05;
+
+                // Gain node — 1.0 = native, up to 6.0 = 600%
                 this.gainNode = this.ctx.createGain();
-                this.source.connect(this.gainNode);
-                this.gainNode.connect(this.compressorNode);
-                this.compressorNode.connect(this.ctx.destination);
-                this.setVolume(this.settings.volumeLevel || 1);
-            } catch (e) {}
+                this.gainNode.gain.value = 1.0;
+
+                // Compressor — prevents clipping at high gain
+                this.compressorNode = this.ctx.createDynamicsCompressor();
+                this.compressorNode.threshold.value = -24;
+                this.compressorNode.knee.value = 10;
+                this.compressorNode.ratio.value = 4;
+                this.compressorNode.attack.value = 0.003;
+                this.compressorNode.release.value = 0.25;
+
+                // Bass shelf
+                this._bassFilter = this.ctx.createBiquadFilter();
+                this._bassFilter.type = 'lowshelf';
+                this._bassFilter.frequency.value = 250;
+                this._bassFilter.gain.value = 0;
+
+                // Treble shelf
+                this._trebleFilter = this.ctx.createBiquadFilter();
+                this._trebleFilter.type = 'highshelf';
+                this._trebleFilter.frequency.value = 4000;
+                this._trebleFilter.gain.value = 0;
+
+                // Chain: source → bass → treble → compressor → gain → output
+                this.source
+                    .connect(this._bassFilter)
+                    .connect(this._trebleFilter)
+                    .connect(this.compressorNode)
+                    .connect(this.gainNode)
+                    .connect(this.ctx.destination);
+
+                this._audioConnected = true;
+            } catch (e) {
+                console.warn('[YPP:Player] Audio engine init failed:', e);
+            }
         };
         video.addEventListener('play', init, { once: true });
         video.addEventListener('volumechange', init, { once: true });
+        // Also try immediately if already playing
+        if (!video.paused) init();
     }
 
     setVolume(multiplier) {
         if (this.gainNode) {
             this.gainNode.gain.value = multiplier;
         }
+    }
+
+    // =========================================================================
+    // VOLUME BOOSTER BUTTON + POPUP
+    // =========================================================================
+
+    _createVolumeBoosterButton(video) {
+        const icon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
+        const btn = this.createButton(icon, 'Volume Booster', (e) => {
+            e.stopPropagation();
+            this._toggleVolumePopup(video, btn);
+        });
+        btn.id = 'ypp-volume-boost-btn';
+        return btn;
+    }
+
+    _toggleVolumePopup(video, anchorBtn) {
+        if (this._volumePopup) {
+            this._volumePopup.remove();
+            this._volumePopup = null;
+            anchorBtn.classList.remove('active');
+            return;
+        }
+
+        anchorBtn.classList.add('active');
+
+        const popup = document.createElement('div');
+        popup.id = 'ypp-volume-popup';
+        Object.assign(popup.style, {
+            position: 'absolute',
+            bottom: '56px',
+            right: '0',
+            width: '260px',
+            background: 'rgba(15, 15, 15, 0.97)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '14px',
+            zIndex: '9999',
+            padding: '16px',
+            color: '#fff',
+            fontFamily: 'Inter, Roboto, sans-serif',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(16px)',
+            userSelect: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px'
+        });
+
+        // ── Header
+        const header = document.createElement('div');
+        Object.assign(header.style, {
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px'
+        });
+        header.innerHTML = `<span style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;color:#c4b5fd;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            Volume Booster</span>`;
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕';
+        Object.assign(closeBtn.style, {
+            background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+            cursor: 'pointer', fontSize: '13px', padding: '0'
+        });
+        closeBtn.onclick = () => this._toggleVolumePopup(video, anchorBtn);
+        header.appendChild(closeBtn);
+        popup.appendChild(header);
+
+        // ── Helper: create labeled slider
+        const makeSlider = (label, min, max, step, value, unit, onChange) => {
+            const section = document.createElement('div');
+            const labelRow = document.createElement('div');
+            Object.assign(labelRow.style, {
+                display: 'flex', justifyContent: 'space-between', fontSize: '11px',
+                color: 'rgba(255,255,255,0.6)', marginBottom: '6px'
+            });
+            const lbl = document.createElement('span');
+            lbl.textContent = label;
+            const val = document.createElement('span');
+            val.textContent = value + unit;
+            val.style.color = '#c4b5fd';
+            labelRow.append(lbl, val);
+
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = min; slider.max = max; slider.step = step; slider.value = value;
+            Object.assign(slider.style, {
+                width: '100%', accentColor: '#a78bfa', cursor: 'pointer', height: '4px'
+            });
+            slider.oninput = (e) => {
+                const v = parseFloat(e.target.value);
+                val.textContent = onChange(v) + unit;
+            };
+            slider.ondblclick = () => {
+                const resetVal = parseFloat(slider.getAttribute('data-default') || value);
+                slider.value = resetVal;
+                val.textContent = onChange(resetVal) + unit;
+            };
+            slider.setAttribute('data-default', value);
+            section.append(labelRow, slider);
+            return section;
+        };
+
+        // ── Volume Gain slider: 100% → 600%
+        const currentGain = this.gainNode ? this.gainNode.gain.value : 1;
+        popup.appendChild(makeSlider('Volume Boost', 1, 6, 0.05, currentGain, '%', (v) => {
+            this.initAudioContext(video);
+            if (this.gainNode) this.gainNode.gain.value = v;
+            const pct = Math.round(v * 100);
+            anchorBtn.classList.toggle('active', v > 1.01);
+            anchorBtn.title = v > 1.01 ? `Volume: ${pct}%` : 'Volume Booster';
+            return pct;
+        }));
+
+        // ── Bass slider: ±12 dB
+        const currentBass = this._bassFilter ? this._bassFilter.gain.value : 0;
+        popup.appendChild(makeSlider('Bass', -12, 12, 1, currentBass, ' dB', (v) => {
+            this.initAudioContext(video);
+            if (this._bassFilter) this._bassFilter.gain.value = v;
+            return (v >= 0 ? '+' : '') + v;
+        }));
+
+        // ── Treble slider: ±12 dB
+        const currentTreble = this._trebleFilter ? this._trebleFilter.gain.value : 0;
+        popup.appendChild(makeSlider('Treble', -12, 12, 1, currentTreble, ' dB', (v) => {
+            this.initAudioContext(video);
+            if (this._trebleFilter) this._trebleFilter.gain.value = v;
+            return (v >= 0 ? '+' : '') + v;
+        }));
+
+        // ── Hint
+        const hint = document.createElement('div');
+        hint.textContent = 'Compressor active — audio stays clear at high volumes';
+        Object.assign(hint.style, {
+            fontSize: '10px', color: 'rgba(255,255,255,0.25)', lineHeight: '1.3', textAlign: 'center'
+        });
+        popup.appendChild(hint);
+
+        // ── Reset button
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = 'Reset';
+        Object.assign(resetBtn.style, {
+            background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)',
+            color: '#c4b5fd', borderRadius: '8px', cursor: 'pointer', padding: '6px 0',
+            fontSize: '11px', fontWeight: '600', width: '100%', fontFamily: 'inherit'
+        });
+        resetBtn.onclick = () => {
+            if (this.gainNode) this.gainNode.gain.value = 1;
+            if (this._bassFilter) this._bassFilter.gain.value = 0;
+            if (this._trebleFilter) this._trebleFilter.gain.value = 0;
+            anchorBtn.classList.remove('active');
+            anchorBtn.title = 'Volume Booster';
+            this._toggleVolumePopup(video, anchorBtn);
+        };
+        popup.appendChild(resetBtn);
+
+        // Mount
+        const moviePlayer = document.getElementById('movie_player') || document.body;
+        moviePlayer.appendChild(popup);
+        this._volumePopup = popup;
+
+        // Click-outside close
+        const outside = (e) => {
+            if (this._volumePopup && !this._volumePopup.contains(e.target) && !anchorBtn.contains(e.target)) {
+                this._toggleVolumePopup(video, anchorBtn);
+                document.removeEventListener('click', outside);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', outside), 0);
     }
 
     updateSpeedButtons(container, activeSpeed) {
