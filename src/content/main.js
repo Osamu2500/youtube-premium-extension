@@ -264,6 +264,13 @@
                             const videoId = urlParams.get('v');
                             if (videoId) {
                                 window.YPP.events.emit('app:videoChange', videoId);
+                                if (window.YPP.Utils && window.YPP.Utils.VideoSizeTracker) {
+                                    window.YPP.Utils.VideoSizeTracker.init();
+                                }
+                            }
+                        } else {
+                            if (window.YPP.Utils && window.YPP.Utils.VideoSizeTracker) {
+                                window.YPP.Utils.VideoSizeTracker.stop();
                             }
                         }
                     }

@@ -882,7 +882,7 @@ ytd-thumbnail:hover .ypp-watched-icon {
 
 /* Hide Default Elements */
 .yt-premium-plus-theme #guide-button,
-.yt-premium-plus-theme #buttons ytd-button-renderer,
+.yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer,
 .yt-premium-plus-theme ytd-topbar-menu-button-renderer:not(:has(#avatar-btn)) {
   display: none;
 }
@@ -896,11 +896,11 @@ ytd-thumbnail:hover .ypp-watched-icon {
 /* Hide Create Button (All variants) */
 .yt-premium-plus-theme ytd-topbar-menu-button-renderer[aria-label*="Create"],
 .yt-premium-plus-theme ytd-button-renderer:has(a[href*="/upload"]),
-.yt-premium-plus-theme #buttons ytd-topbar-model-builder-renderer,
+.yt-premium-plus-theme ytd-masthead #buttons ytd-topbar-model-builder-renderer,
 .yt-premium-plus-theme
   ytd-topbar-menu-button-renderer:has([aria-label*="Create"]),
-.yt-premium-plus-theme #buttons #create-button,
-.yt-premium-plus-theme #buttons ytd-button-renderer:has([aria-label="Create"]),
+.yt-premium-plus-theme ytd-masthead #buttons #create-button,
+.yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer:has([aria-label="Create"]),
 .yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer {
   /* The big pill button for create is often a generic button renderer in #buttons. 
      Be careful not to hide Sign In if it's there, but we assume signed in. 
@@ -4607,27 +4607,58 @@ ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
 /* 1. Video Player Redesign */
 /* Detach control bar and add glassmorphism */
 body.yt-premium-plus-theme .ytp-chrome-bottom {
-  margin: 0 auto 12px auto !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: calc(100% - 24px) !important;
+  margin: 0 !important;
+  left: calc(var(--ypp-video-left, 0px) + 16px) !important;
+  right: auto !important;
+  width: calc(var(--ypp-video-width, 100%) - 32px) !important;
+  bottom: 16px !important;
   border-radius: 20px !important;
-  background: rgba(20, 20, 20, 0.65) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-  transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1) !important;
+  background: rgba(18, 18, 22, 0.75) !important;
+  backdrop-filter: blur(28px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1), left 0.1s linear, width 0.1s linear !important;
   padding: 0 16px !important;
   box-sizing: border-box !important;
 }
 
 /* Reposition progress bar so it sits cleanly on top of the rounded glass container */
 body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container {
-  bottom: 52px !important; /* Move it completely above the player buttons row */
-  width: auto !important;
-  left: 16px !important;
-  right: 16px !important;
+  bottom: 60px !important; /* Floating entirely above the controls container */
+  width: calc(100% - 24px) !important;
+  left: 12px !important;
+  right: auto !important;
+  height: 6px !important;
+  border-radius: 6px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container:hover {
+  transform: scaleY(1.4) !important;
+}
+
+/* Smooth out the internal progress bars */
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-list {
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-play-progress,
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-load-progress,
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-hover-progress {
+  border-radius: 4px !important;
+}
+
+/* Enhancing the little scrub scrubber (the dot) */
+body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-scrubber-button {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid white !important;
+  transition: transform 0.15s ease !important;
 }
 
 /* Also apply to popups inside the player (e.g. settings menu) */
