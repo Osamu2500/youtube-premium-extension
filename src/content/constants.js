@@ -210,6 +210,7 @@ window.YPP.CONSTANTS = {
         enableTranscript: true,
         enableSnapshot: true,
         enableLoop: true,
+        enableRemainingTime: true,
 
         // Search Redesign
         searchGrid: true,

@@ -141,8 +141,17 @@ window.YPP.features.Player = class Player {
                 }
 
                 if (this.settings.enableRemainingTime) {
-                    const leftControls = controls.parentElement.querySelector('.ytp-left-controls');
-                    this.showRemainingTime(video, leftControls);
+                    const timeDisplay = document.querySelector('.ytp-time-display') || 
+                                       Array.from(document.querySelectorAll('.ytp-left-controls span')).find(el => el.textContent.includes('/'))?.parentElement;
+                    
+                    if (timeDisplay) {
+                        this.showRemainingTime(video, timeDisplay);
+                    } else {
+                         window.YPP.Utils?.log('Time display not found for injection', 'PLAYER', 'debug');
+                         // Try injection into left-controls as safe fallback
+                         const leftControls = document.querySelector('.ytp-left-controls');
+                         if (leftControls) this.showRemainingTime(video, leftControls);
+                    }
                 }
 
                 if (this.settings.autoQuality) {
@@ -1132,35 +1141,103 @@ window.YPP.features.Player = class Player {
         }
     }
 
-    showRemainingTime(video, leftControls) {
-        if (!leftControls) return;
-        let remainingEl = document.getElementById('ypp-remaining-time');
-        if (!remainingEl) {
-            remainingEl = document.createElement('span');
-            remainingEl.id = 'ypp-remaining-time';
-            Object.assign(remainingEl.style, {
-                marginLeft: '10px', opacity: '0.7',
-                fontSize: '12px', fontFamily: 'Roboto, sans-serif'
-            });
-            leftControls.appendChild(remainingEl);
+    showRemainingTime(video, container) {
+        if (!container) return;
+        
+        // 1. Create or get the unified dashboard
+        let dashboard = document.getElementById('ypp-time-dashboard');
+        if (!dashboard) {
+            dashboard = document.createElement('div');
+            dashboard.id = 'ypp-time-dashboard';
+            dashboard.className = 'ypp-time-dashboard';
+            container.appendChild(dashboard);
         }
+
+        // Helper to get or create metric items with optional icon
+        const getOrCreateItem = (id, className, iconSvg) => {
+            let el = document.getElementById(id);
+            if (!el) {
+                el = document.createElement('div');
+                el.id = id;
+                el.className = `ypp-time-item ${className}`;
+                if (iconSvg) {
+                    el.innerHTML = `<span class="ypp-time-icon">${iconSvg}</span><span class="ypp-time-value"></span>`;
+                } else {
+                    el.innerHTML = `<span class="ypp-time-value"></span>`;
+                }
+                dashboard.appendChild(el);
+            }
+            return el.querySelector('.ypp-time-value');
+        };
+
+        const icons = {
+            remaining: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l1.2 0.7 0.8-1.2L12 11.5V7z" transform="scale(1.1) translate(-1, -1)"/></svg>`,
+            saved: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z"/></svg>`
+        };
+
+        const remainingVal = getOrCreateItem('ypp-time-standard', 'standard');
+        const adjustedVal = getOrCreateItem('ypp-time-adjusted', 'adjusted', icons.remaining);
+        const savedVal = getOrCreateItem('ypp-time-saved-metric', 'saved', icons.saved);
+
+        const format = (s) => {
+            if (s === undefined || s === null || isNaN(s) || s < 0) return '0:00';
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = Math.floor(s % 60);
+            if (h > 0) {
+                return `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            }
+            return `${m}:${sec.toString().padStart(2, '0')}`;
+        };
+
         const update = () => {
             if (!video || !video.duration || !isFinite(video.duration) || isNaN(video.currentTime)) {
-                remainingEl.textContent = ''; return;
+                return;
             }
-            const left = video.duration - video.currentTime;
-            if (left <= 0) { remainingEl.textContent = ''; return; }
-            const format = (s) => {
-                const m = Math.floor(s / 60);
-                const sec = Math.floor(s % 60);
-                return `${m}:${sec.toString().padStart(2, '0')}`;
-            };
-            remainingEl.textContent = `(-${format(left)})`;
+
+            const speed = video.playbackRate || 1;
+            const duration = video.duration;
+            const currentTime = video.currentTime;
+            
+            const rawLeft = Math.max(0, duration - currentTime);
+            const adjustedLeft = rawLeft / speed;
+            const totalSaved = duration - (duration / speed);
+
+            // Update Standard Remaining
+            remainingVal.textContent = rawLeft > 0 ? `(-${format(rawLeft)})` : '';
+            remainingVal.parentElement.style.display = rawLeft > 0 ? 'flex' : 'none';
+            
+            // Update Speed-Aware Metrics
+            if (Math.abs(speed - 1) > 0.01) {
+                adjustedVal.textContent = `${format(adjustedLeft)} rem`;
+                
+                if (speed > 1) {
+                    savedVal.textContent = `${format(totalSaved)} saved`;
+                    savedVal.parentElement.classList.remove('negative');
+                    savedVal.parentElement.classList.add('positive');
+                } else {
+                    savedVal.textContent = `${format((duration / speed) - duration)} extra`;
+                    savedVal.parentElement.classList.remove('positive');
+                    savedVal.parentElement.classList.add('negative');
+                }
+                adjustedVal.parentElement.style.display = 'flex';
+                savedVal.parentElement.style.display = 'flex';
+                dashboard.classList.add('active');
+            } else {
+                adjustedVal.parentElement.style.display = 'none';
+                savedVal.parentElement.style.display = 'none';
+                dashboard.classList.remove('active');
+            }
         };
+
         if (this._boundTimeUpdate) {
             video.removeEventListener('timeupdate', this._boundTimeUpdate);
+            video.removeEventListener('ratechange', this._boundTimeUpdate);
         }
+        
         this._boundTimeUpdate = update;
         video.addEventListener('timeupdate', update);
+        video.addEventListener('ratechange', update);
+        update(); 
     }
 };

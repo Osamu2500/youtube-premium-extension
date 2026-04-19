@@ -68,6 +68,7 @@ window.YPP.SettingsSchema = {
         enableTranscript:    { type: 'boolean', default: true },
         enableSnapshot:      { type: 'boolean', default: true },
         enableLoop:          { type: 'boolean', default: true },
+        enableRemainingTime: { type: 'boolean', default: true },
 
         // --- Search ---
         searchGrid:          { type: 'boolean', default: true },

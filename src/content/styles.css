@@ -4671,6 +4671,78 @@ body.yt-premium-plus-theme .ytp-popup {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
 }
 
+/* --- Unified Speed-Aware Time Dashboard --- */
+.ypp-time-dashboard {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-left: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  height: 24px !important;
+  font-family: var(--ypp-font-family, "Inter", sans-serif) !important;
+}
+
+.ypp-time-dashboard.active {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ypp-time-item {
+  display: none; /* Shown via JS */
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 0 6px !important;
+  height: 100% !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Dividing lines between active items */
+.ypp-time-item + .ypp-time-item:not([style*="display: none"]) {
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ypp-time-item.standard {
+  font-weight: 500 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  padding-left: 4px !important;
+}
+
+.ypp-time-item.adjusted {
+  color: #4df3ff !important;
+}
+
+.ypp-time-item.saved.positive {
+  color: #00ffa3 !important;
+}
+
+.ypp-time-item.saved.negative {
+  color: #ff4e45 !important;
+}
+
+.ypp-time-icon {
+  display: flex !important;
+  align-items: center !important;
+  opacity: 0.8 !important;
+  color: inherit !important;
+}
+
+.ypp-time-value {
+  padding-bottom: 1px !important; /* Visual centering */
+}
+
+
 /* 2. Action Buttons Redesign (Beneath Video Title) */
 /* Container for the entire top row (Channel info + Actions) */
 body.yt-premium-plus-theme #top-row.ytd-watch-metadata {
