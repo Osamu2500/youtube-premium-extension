@@ -21,7 +21,10 @@ window.YPP.features.Player = class Player {
 
         // ---- Cinema Filters State ----
         this.currentFilterIndex = 0;
+        this.filterIntensity = 100; // 0-100%
+        this.isComparing = false;   // Toggle for before/after
         this.filterAdjustments = {
+
             brightness: 100,
             contrast: 100,
             saturate: 100,
@@ -38,29 +41,59 @@ window.YPP.features.Player = class Player {
 
         // ---- Cinema Filter Presets ----
         this.filters = [
-            { name: 'Normal',        css: 'none',                                                        overlay: null },
-            { name: 'Sepia',         css: 'sepia(100%)',                                                  overlay: null },
-            { name: 'Noir',          css: 'grayscale(100%) contrast(130%) brightness(85%)',               overlay: null },
-            { name: 'Grayscale',     css: 'grayscale(100%)',                                              overlay: null },
-            { name: 'High Contrast', css: 'contrast(160%) saturate(90%)',                                 overlay: null },
-            { name: 'Vivid',         css: 'saturate(200%) contrast(110%)',                                overlay: null },
-            { name: 'Warm',          css: 'sepia(40%) saturate(130%) contrast(100%) brightness(105%)',    overlay: null },
-            { name: 'Cool',          css: 'hue-rotate(200deg) saturate(130%) brightness(95%)',            overlay: null },
-            { name: 'Night Vision',  css: 'grayscale(100%) brightness(70%) contrast(150%) hue-rotate(90deg) saturate(250%)', overlay: null },
-            { name: 'Invert',        css: 'invert(100%)',                                                 overlay: null },
-            { name: 'Retro',         css: 'sepia(60%) hue-rotate(330deg) saturate(150%) contrast(120%)', overlay: null },
-            { name: 'Fade',          css: 'contrast(80%) brightness(110%) saturate(80%)',                 overlay: null },
-            { name: 'Dreamy',        css: 'brightness(110%) contrast(90%) saturate(120%) blur(0.5px)',    overlay: null },
-            { name: 'Cyberpunk',     css: 'hue-rotate(180deg) saturate(180%) contrast(120%) brightness(110%)', overlay: null },
-            { name: 'Matrix',        css: 'sepia(100%) hue-rotate(90deg) saturate(200%) contrast(130%) brightness(95%)', overlay: null },
-            { name: 'Vaporwave',     css: 'hue-rotate(280deg) saturate(160%) contrast(110%) brightness(105%)', overlay: null },
-            { name: 'Sunset',        css: 'sepia(30%) hue-rotate(330deg) saturate(150%) contrast(110%) brightness(105%)', overlay: null },
-            { name: 'Glitch',        css: 'url(#ypp-crt-rgb) contrast(150%) brightness(110%) saturate(140%) hue-rotate(20deg)', overlay: null },
-            { name: '📺 CRT Display',css: 'url(#ypp-crt-rgb) contrast(135%) brightness(110%) saturate(85%)', overlay: 'crt' },
-            { name: '📼 VHS Tape',   css: 'contrast(90%) brightness(85%) saturate(60%) hue-rotate(5deg)',overlay: 'vhs' },
-            { name: '🎞 Old Film',   css: 'sepia(70%) contrast(90%) brightness(85%) blur(0.3px)',         overlay: 'oldfilm' },
+            { category: 'Classic', name: 'Normal',        css: 'none',                                                        overlay: null },
+            { category: 'Classic', name: 'Sepia',         css: 'sepia(100%)',                                                  overlay: null },
+            { category: 'Classic', name: 'Grayscale',     css: 'grayscale(100%)',                                              overlay: null },
+            { category: 'Classic', name: 'High Contrast', css: 'contrast(160%) saturate(90%)',                                 overlay: null },
+            { category: 'Classic', name: 'Vivid',         css: 'saturate(200%) contrast(110%)',                                overlay: null },
+            { category: 'Classic', name: 'Warm',          css: 'sepia(40%) saturate(130%) contrast(100%) brightness(105%)',    overlay: null },
+            { category: 'Classic', name: 'Cool',          css: 'hue-rotate(200deg) saturate(130%) brightness(95%)',            overlay: null },
+            { category: 'Classic', name: 'Invert',        css: 'invert(100%)',                                                 overlay: null },
+
+            { category: 'Cinematic', name: 'Cinematic',     css: 'contrast(115%) saturate(110%) brightness(95%) hue-rotate(350deg)', overlay: null },
+            { category: 'Cinematic', name: 'Noir',          css: 'grayscale(100%) contrast(130%) brightness(85%)',               overlay: null },
+            { category: 'Cinematic', name: 'B&W Cinematic', css: 'grayscale(100%) contrast(140%) brightness(90%)', overlay: null },
+            { category: 'Cinematic', name: 'Teal & Orange', css: 'hue-rotate(180deg) saturate(130%) contrast(115%) brightness(100%)', overlay: null },
+            { category: 'Cinematic', name: 'Documentary',   css: 'contrast(120%) saturate(90%) brightness(100%)', overlay: null },
+            { category: 'Cinematic', name: 'HDR',           css: 'contrast(140%) saturate(120%) brightness(110%)', overlay: null },
+
+            { category: 'Retro & Analog', name: 'Retro',         css: 'sepia(60%) hue-rotate(330deg) saturate(150%) contrast(120%)', overlay: null },
+            { category: 'Retro & Analog', name: '📺 CRT Display',css: 'url(#ypp-crt-rgb) contrast(135%) brightness(110%) saturate(85%)', overlay: 'crt' },
+            { category: 'Retro & Analog', name: '📼 VHS Tape',   css: 'contrast(90%) brightness(85%) saturate(60%) hue-rotate(5deg)',overlay: 'vhs' },
+            { category: 'Retro & Analog', name: '🎞 Old Film',   css: 'sepia(70%) contrast(90%) brightness(85%) blur(0.3px)',         overlay: 'oldfilm' },
+            { category: 'Retro & Analog', name: 'Film Grain',    css: 'contrast(110%) brightness(100%) saturate(100%)', overlay: 'oldfilm' },
+            { category: 'Retro & Analog', name: '90s TV',        css: 'contrast(85%) brightness(90%) saturate(75%) hue-rotate(5deg)', overlay: 'crt' },
+            { category: 'Retro & Analog', name: 'Polaroid',      css: 'sepia(20%) contrast(105%) brightness(108%) saturate(110%)', overlay: null },
+
+            { category: 'Artistic', name: 'Cyberpunk',     css: 'hue-rotate(180deg) saturate(180%) contrast(120%) brightness(110%)', overlay: null },
+            { category: 'Artistic', name: 'Vaporwave',     css: 'hue-rotate(280deg) saturate(160%) contrast(110%) brightness(105%)', overlay: null },
+            { category: 'Artistic', name: '80s Synthwave', css: 'hue-rotate(300deg) saturate(180%) contrast(130%) brightness(100%)', overlay: null },
+            { category: 'Artistic', name: 'Neon Noir',     css: 'hue-rotate(280deg) saturate(200%) contrast(140%) brightness(85%)', overlay: null },
+            { category: 'Artistic', name: 'Sci-Fi',        css: 'hue-rotate(220deg) saturate(140%) contrast(125%) brightness(90%)', overlay: null },
+            { category: 'Artistic', name: 'Anime',         css: 'saturate(180%) contrast(115%) brightness(110%)', overlay: null },
+            { category: 'Artistic', name: 'Comic Book',    css: 'contrast(200%) saturate(150%) brightness(110%)', overlay: null },
+            { category: 'Artistic', name: 'Lomo',          css: 'saturate(150%) contrast(110%) brightness(95%) vignette(0.5)', overlay: null },
+
+            { category: 'Atmospheric', name: 'Golden Hour',   css: 'sepia(30%) hue-rotate(30deg) saturate(130%) brightness(110%) contrast(105%)', overlay: null },
+            { category: 'Atmospheric', name: 'Blue Hour',     css: 'hue-rotate(210deg) saturate(120%) brightness(95%) contrast(110%)', overlay: null },
+            { category: 'Atmospheric', name: 'Summer',        css: 'sepia(15%) hue-rotate(40deg) saturate(140%) brightness(110%)', overlay: null },
+            { category: 'Atmospheric', name: 'Winter',        css: 'hue-rotate(200deg) saturate(80%) brightness(105%) contrast(110%)', overlay: null },
+            { category: 'Atmospheric', name: 'Autumn',        css: 'sepia(40%) hue-rotate(30deg) saturate(130%) brightness(100%)', overlay: null },
+            { category: 'Atmospheric', name: 'Spring',        css: 'hue-rotate(100deg) saturate(150%) brightness(108%) contrast(105%)', overlay: null },
+            { category: 'Atmospheric', name: 'Sunset',        css: 'sepia(30%) hue-rotate(330deg) saturate(150%) contrast(110%) brightness(105%)', overlay: null },
+
+            { category: 'Mood', name: 'Dreamy',        css: 'brightness(110%) contrast(90%) saturate(120%) blur(0.5px)',    overlay: null },
+            { category: 'Mood', name: 'Muted',         css: 'saturate(70%) contrast(90%) brightness(105%)', overlay: null },
+            { category: 'Mood', name: 'Pastel',        css: 'saturate(60%) brightness(115%) contrast(85%)', overlay: null },
+            { category: 'Mood', name: 'Soft Focus',    css: 'brightness(105%) contrast(95%) saturate(90%) blur(0.8px)', overlay: null },
+            { category: 'Mood', name: 'Horror',        css: 'contrast(130%) brightness(80%) saturate(70%) hue-rotate(10deg)', overlay: null },
+            { category: 'Mood', name: 'Fantasy',       css: 'saturate(140%) brightness(105%) contrast(110%) hue-rotate(300deg)', overlay: null },
+            { category: 'Mood', name: 'Gothic',        css: 'contrast(125%) brightness(85%) saturate(60%) hue-rotate(340deg)', overlay: null },
         ];
 
+
+        this._filterPanelOutsideHandler = null;
+        this._volumePopupOutsideHandler = null;
         this.injectedButtons = false;
         this._boundTimeUpdate = null;
         this._boundPiP = null;
@@ -122,6 +155,12 @@ window.YPP.features.Player = class Player {
         const Utils = window.YPP.Utils;
         if (!Utils) return;
 
+        // Debug logging
+        if (Utils.log) {
+            Utils.log('Player feature starting', 'PLAYER', 'debug');
+            Utils.log(`Cinema filters enabled: ${this.settings.enableCinemaFilters}`, 'PLAYER', 'debug');
+        }
+
         try {
             const elements = await Utils.pollFor(() => {
                 const video = document.querySelector('video');
@@ -141,7 +180,7 @@ window.YPP.features.Player = class Player {
                 }
 
                 if (this.settings.enableRemainingTime) {
-                    const timeDisplay = document.querySelector('.ytp-time-display') || 
+                    const timeDisplay = document.querySelector('.ytp-time-display') ||
                                        Array.from(document.querySelectorAll('.ytp-left-controls span')).find(el => el.textContent.includes('/'))?.parentElement;
                     
                     if (timeDisplay) {
@@ -169,10 +208,20 @@ window.YPP.features.Player = class Player {
                 // Restore saved cinema filter state
                 if (this.settings.enableCinemaFilters) {
                     this._restoreFilterState();
+                    if (Utils.log) {
+                        Utils.log(`Restored filter index: ${this.settings.cinemaFilterIndex}`, 'PLAYER', 'debug');
+                    }
+                }
+            } else {
+                if (Utils.log) {
+                    Utils.log('Player elements not found (video or controls)', 'PLAYER', 'debug');
                 }
             }
         } catch (error) {
             Utils.log('Player initialization timed out or failed', 'PLAYER', 'debug');
+            if (Utils.log) {
+                Utils.log(`Error: ${error.message}`, 'PLAYER', 'debug');
+            }
         }
     }
 
@@ -226,6 +275,15 @@ window.YPP.features.Player = class Player {
             const filterBtn = this._createFilterButton(video);
             this._filterBtn = filterBtn;
             container.appendChild(filterBtn);
+            // Debug logging
+            if (window.YPP?.Utils?.log) {
+                window.YPP.Utils.log('Cinema filters button created and added', 'PLAYER', 'debug');
+            }
+        } else {
+            // Debug logging
+            if (window.YPP?.Utils?.log) {
+                window.YPP.Utils.log('Cinema filters disabled in settings', 'PLAYER', 'debug');
+            }
         }
 
         controls.insertBefore(container, controls.firstChild);
@@ -258,6 +316,11 @@ window.YPP.features.Player = class Player {
             this._filterPanel.remove();
             this._filterPanel = null;
         }
+        // Clean up outside click handler
+        if (this._filterPanelOutsideHandler) {
+            document.removeEventListener('click', this._filterPanelOutsideHandler);
+            this._filterPanelOutsideHandler = null;
+        }
     }
 
     _removeFilterOverlay() {
@@ -277,17 +340,19 @@ window.YPP.features.Player = class Player {
             position: 'absolute',
             bottom: '60px',
             right: '10px',
-            background: 'rgba(15, 15, 15, 0.97)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '14px',
+            background: 'linear-gradient(135deg, rgba(20, 20, 30, 0.85) 0%, rgba(10, 10, 20, 0.9) 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '18px',
             zIndex: '9999',
-            width: '300px',
+            width: '320px',
             color: '#fff',
-            fontFamily: 'Roboto, Inter, sans-serif',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(16px)',
+            fontFamily: 'Roboto, Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
+            backdropFilter: 'blur(24px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
             overflow: 'hidden',
-            userSelect: 'none'
+            userSelect: 'none',
+            transition: 'transform 0.2s ease, opacity 0.2s ease'
         });
 
         // --- Header ---
@@ -296,18 +361,59 @@ window.YPP.features.Player = class Player {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '12px 14px 8px',
-            borderBottom: '1px solid rgba(255,255,255,0.08)'
+            padding: '16px 20px 12px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)'
         });
         header.innerHTML = `
-            <span style="font-size:13px;font-weight:600;letter-spacing:0.3px;">🎬 Cinema Filters</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #ff4e45, #ff9a45); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px;">🎬</div>
+                <span style="font-size:14px;font-weight:700;letter-spacing:0.4px;background: linear-gradient(90deg, #fff, #ff9a45); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">CINEMA FILTERS</span>
+            </div>
+            <div id="ypp-header-actions" style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 12px;"></div>
         `;
+
+        const compareBtn = document.createElement('div');
+        compareBtn.className = `ypp-vcp-compare-toggle ${this.isComparing ? 'active' : ''}`;
+        compareBtn.innerHTML = `<span class="ypp-vcp-compare-icon">${this.isComparing ? '👁️‍🗨️' : '👁️'}</span><span>Before/After</span>`;
+        compareBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.isComparing = !this.isComparing;
+            compareBtn.className = `ypp-vcp-compare-toggle ${this.isComparing ? 'active' : ''}`;
+            compareBtn.querySelector('.ypp-vcp-compare-icon').textContent = this.isComparing ? '👁️‍🗨️' : '👁️';
+            this._applyComputedFilter(video);
+        };
+        header.querySelector('#ypp-header-actions').appendChild(compareBtn);
+
         const closeBtn = document.createElement('button');
-        closeBtn.textContent = '✕';
+        closeBtn.innerHTML = '×';
         Object.assign(closeBtn.style, {
-            background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)',
-            cursor: 'pointer', fontSize: '14px', lineHeight: '1', padding: '0'
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: 'rgba(255, 255, 255, 0.7)',
+            cursor: 'pointer',
+            fontSize: '18px',
+            width: '28px',
+            height: '28px',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0',
+            transition: 'all 0.2s ease'
         });
+        closeBtn.onmouseenter = () => {
+            closeBtn.style.background = 'rgba(255, 78, 69, 0.2)';
+            closeBtn.style.color = '#ff4e45';
+            closeBtn.style.borderColor = 'rgba(255, 78, 69, 0.4)';
+        };
+        closeBtn.onmouseleave = () => {
+            closeBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+            closeBtn.style.color = 'rgba(255, 255, 255, 0.7)';
+            closeBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+        };
         closeBtn.onclick = () => this._removeFilterPanel();
         header.appendChild(closeBtn);
         panel.appendChild(header);
@@ -316,16 +422,25 @@ window.YPP.features.Player = class Player {
         const tabBar = document.createElement('div');
         Object.assign(tabBar.style, {
             display: 'flex',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(255,255,255,0.03)'
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            padding: '0 4px'
         });
 
         let activeTab = 'presets';
         const tabContent = document.createElement('div');
-        Object.assign(tabContent.style, { padding: '10px', maxHeight: '340px', overflowY: 'auto' });
+        Object.assign(tabContent.style, {
+            padding: '16px',
+            maxHeight: '360px',
+            overflowY: 'auto',
+            background: 'rgba(255, 255, 255, 0.02)'
+        });
         // Custom scrollbar via style
         tabContent.style.scrollbarWidth = 'thin';
-        tabContent.style.scrollbarColor = 'rgba(255,255,255,0.2) transparent';
+        tabContent.style.scrollbarColor = 'rgba(255, 255, 255, 0.2) transparent';
+        tabContent.style.scrollbarTrackColor = 'rgba(255, 255, 255, 0.05)';
 
         const presetsContent = this._buildPresetsTab(video, btn);
         const adjustContent = this._buildAdjustTab(video);
@@ -340,25 +455,58 @@ window.YPP.features.Player = class Player {
             }
             tabBtns.forEach(tb => {
                 const isActive = tb.dataset.tab === tab;
-                tb.style.color = isActive ? '#ff4e45' : 'rgba(255,255,255,0.45)';
-                tb.style.borderBottom = isActive ? '2px solid #ff4e45' : '2px solid transparent';
-                tb.style.background = 'none';
+                if (isActive) {
+                    tb.style.background = 'rgba(255, 78, 69, 0.15)';
+                    tb.style.color = '#ff9a45';
+                    tb.style.borderBottom = '3px solid #ff4e45';
+                    tb.style.boxShadow = '0 4px 12px rgba(255, 78, 69, 0.2)';
+                } else {
+                    tb.style.background = 'rgba(255, 255, 255, 0)';
+                    tb.style.color = 'rgba(255, 255, 255, 0.6)';
+                    tb.style.borderBottom = '3px solid transparent';
+                    tb.style.boxShadow = 'none';
+                }
             });
         };
 
         const tabDefs = [
-            { id: 'presets', label: '🎨 Presets' },
-            { id: 'adjust',  label: '🎛️ Adjust' }
+            { id: 'presets', label: '🎨 Presets', icon: '🎨' },
+            { id: 'adjust',  label: '🎛️ Adjust', icon: '🎛️' }
         ];
         const tabBtns = tabDefs.map(def => {
             const t = document.createElement('button');
             t.dataset.tab = def.id;
-            t.textContent = def.label;
+            t.innerHTML = `<span style="margin-right: 6px;">${def.icon}</span>${def.label}`;
             Object.assign(t.style, {
-                flex: '1', background: 'none', border: 'none', borderBottom: '2px solid transparent',
-                color: 'rgba(255,255,255,0.45)', cursor: 'pointer', padding: '9px 4px',
-                fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', transition: 'color 0.15s'
+                flex: '1',
+                background: 'rgba(255, 255, 255, 0)',
+                border: 'none',
+                borderBottom: '3px solid transparent',
+                color: 'rgba(255, 255, 255, 0.6)',
+                cursor: 'pointer',
+                padding: '12px 8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                fontFamily: 'inherit',
+                transition: 'all 0.25s ease',
+                borderRadius: '8px 8px 0 0',
+                margin: '4px 2px 0 2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
             });
+            t.onmouseenter = () => {
+                if (t.dataset.tab !== activeTab) {
+                    t.style.background = 'rgba(255, 255, 255, 0.08)';
+                    t.style.color = 'rgba(255, 255, 255, 0.9)';
+                }
+            };
+            t.onmouseleave = () => {
+                if (t.dataset.tab !== activeTab) {
+                    t.style.background = 'rgba(255, 255, 255, 0)';
+                    t.style.color = 'rgba(255, 255, 255, 0.6)';
+                }
+            };
             t.onclick = () => renderTab(def.id);
             tabBar.appendChild(t);
             return t;
@@ -370,20 +518,50 @@ window.YPP.features.Player = class Player {
         // --- Footer: Reset ---
         const footer = document.createElement('div');
         Object.assign(footer.style, {
-            padding: '8px 14px 12px',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
+            padding: '16px 20px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             display: 'flex',
-            justifyContent: 'flex-end'
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)'
         });
+        
+        const presetCount = document.createElement('div');
+        presetCount.innerHTML = `<span style="font-size: 11px; color: rgba(255, 255, 255, 0.5);">${this.filters.length} presets available</span>`;
+        footer.appendChild(presetCount);
+        
         const resetBtn = document.createElement('button');
-        resetBtn.textContent = 'Reset All';
+        resetBtn.innerHTML = '<span style="margin-right: 6px;">↺</span> Reset All';
         Object.assign(resetBtn.style, {
-            background: 'rgba(255,78,69,0.15)', border: '1px solid rgba(255,78,69,0.4)',
-            color: '#ff4e45', borderRadius: '6px', cursor: 'pointer',
-            fontSize: '11px', padding: '4px 12px', fontFamily: 'inherit'
+            background: 'linear-gradient(135deg, rgba(255, 78, 69, 0.2), rgba(255, 154, 69, 0.2))',
+            border: '1px solid rgba(255, 78, 69, 0.3)',
+            color: '#ff9a45',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: '600',
+            padding: '8px 16px',
+            fontFamily: 'inherit',
+            display: 'flex',
+            alignItems: 'center',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 4px 12px rgba(255, 78, 69, 0.15)'
         });
+        resetBtn.onmouseenter = () => {
+            resetBtn.style.background = 'linear-gradient(135deg, rgba(255, 78, 69, 0.3), rgba(255, 154, 69, 0.3))';
+            resetBtn.style.boxShadow = '0 6px 16px rgba(255, 78, 69, 0.25)';
+            resetBtn.style.transform = 'translateY(-1px)';
+        };
+        resetBtn.onmouseleave = () => {
+            resetBtn.style.background = 'linear-gradient(135deg, rgba(255, 78, 69, 0.2), rgba(255, 154, 69, 0.2))';
+            resetBtn.style.boxShadow = '0 4px 12px rgba(255, 78, 69, 0.15)';
+            resetBtn.style.transform = 'translateY(0)';
+        };
         resetBtn.onclick = () => {
             this.currentFilterIndex = 0;
+            this.filterIntensity = 100;
             this.filterAdjustments = { brightness: 100, contrast: 100, saturate: 100, hueRotate: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, opacity: 100 };
             this._applyComputedFilter(video);
             if (btn) { btn.classList.remove('active'); btn.title = 'Cinema Filters'; }
@@ -391,6 +569,7 @@ window.YPP.features.Player = class Player {
             this._removeFilterPanel();
             this._createFilterPanel(video, btn);
         };
+
         footer.appendChild(resetBtn);
         panel.appendChild(footer);
 
@@ -404,133 +583,221 @@ window.YPP.features.Player = class Player {
         const outside = (e) => {
             if (this._filterPanel && !this._filterPanel.contains(e.target) && !btn?.contains(e.target)) {
                 this._removeFilterPanel();
-                document.removeEventListener('click', outside);
             }
         };
+        this._filterPanelOutsideHandler = outside;
         setTimeout(() => document.addEventListener('click', outside), 0);
     }
 
     _buildPresetsTab(video, btn) {
         const wrap = document.createElement('div');
-        Object.assign(wrap.style, {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '6px'
-        });
+        wrap.className = 'ypp-vcp-tab-content active';
 
-        this.filters.forEach((filter, index) => {
-            const card = document.createElement('div');
-            const isActive = this.currentFilterIndex === index;
-            Object.assign(card.style, {
-                padding: '9px 10px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                border: isActive ? '1px solid rgba(255,78,69,0.7)' : '1px solid rgba(255,255,255,0.08)',
-                background: isActive ? 'rgba(255,78,69,0.12)' : 'rgba(255,255,255,0.04)',
-                transition: 'all 0.15s',
-                fontSize: '12px',
-                fontWeight: isActive ? '600' : '400',
-                color: isActive ? '#ff4e45' : 'rgba(255,255,255,0.85)',
-                lineHeight: '1.3'
+        // ── Search Bar
+        const searchWrap = document.createElement('div');
+        searchWrap.className = 'ypp-vcp-search-wrap';
+        searchWrap.innerHTML = `
+            <span class="ypp-vcp-search-icon">🔍</span>
+            <input type="text" class="ypp-vcp-search-input" placeholder="Search presets (e.g. Noir, Retro, 90s)...">
+        `;
+        const searchInput = searchWrap.querySelector('input');
+        searchWrap.appendChild(searchInput);
+        wrap.appendChild(searchWrap);
+
+        const listContainer = document.createElement('div');
+        wrap.appendChild(listContainer);
+
+        const renderFilteredList = (query = '') => {
+            listContainer.innerHTML = '';
+            const normalizedQuery = query.toLowerCase();
+
+            // Group filters by category
+            const groups = {};
+            this.filters.forEach((filter, index) => {
+                if (query && !filter.name.toLowerCase().includes(normalizedQuery) && !filter.category.toLowerCase().includes(normalizedQuery)) {
+                    return;
+                }
+                const cat = filter.category || 'Other';
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push({ filter, index });
             });
 
-            card.textContent = filter.name;
-            card.title = filter.name;
+            Object.keys(groups).forEach(cat => {
+                const header = document.createElement('div');
+                header.className = 'ypp-vcp-cat-header';
+                header.textContent = cat;
+                listContainer.appendChild(header);
 
-            card.addEventListener('mouseenter', () => {
-                if (!isActive) {
-                    card.style.background = 'rgba(255,255,255,0.09)';
-                    card.style.borderColor = 'rgba(255,255,255,0.2)';
-                }
+                const grid = document.createElement('div');
+                grid.className = 'ypp-filter-card-grid';
+                
+                groups[cat].forEach(({ filter, index }) => {
+                    const card = document.createElement('div');
+                    const isActive = this.currentFilterIndex === index;
+                    card.className = `ypp-filter-card ${isActive ? 'active' : ''}`;
+                    
+                    // Dynamic LUT Preview Gradient
+                    let gradient = 'linear-gradient(135deg, #666, #333)';
+                    if (filter.name === 'Normal') gradient = 'linear-gradient(135deg, #eee, #999)';
+                    else if (filter.css.includes('sepia')) gradient = 'linear-gradient(135deg, #704214, #3b2712)';
+                    else if (filter.css.includes('grayscale')) gradient = 'linear-gradient(135deg, #444, #111)';
+                    else if (filter.name.includes('Teal')) gradient = 'linear-gradient(135deg, #20b2aa, #ff8c00)';
+                    else if (filter.name.includes('Cyber') || filter.name.includes('Neon')) gradient = 'linear-gradient(135deg, #ff00ff, #00ffff)';
+                    else if (filter.name.includes('Golden') || filter.name.includes('Sunset') || filter.name.includes('Warm')) gradient = 'linear-gradient(135deg, #ff8c00, #ff4500)';
+                    else if (filter.name.includes('Blue') || filter.name.includes('Cool') || filter.name.includes('Winter')) gradient = 'linear-gradient(135deg, #1e90ff, #00008b)';
+                    else if (filter.name.includes('Anime') || filter.name.includes('Spring')) gradient = 'linear-gradient(135deg, #32cd32, #ffeb3b)';
+                    else if (filter.name.includes('Noir')) gradient = 'linear-gradient(135deg, #222, #000)';
+
+                    card.innerHTML = `
+                        <div class="ypp-filter-lut-preview" style="background: ${gradient}"></div>
+                        <span style="flex: 1;">${filter.name}</span>
+                        ${isActive ? '<span style="font-size: 10px; opacity: 0.6;">ACTIVE</span>' : ''}
+                    `;
+                    
+                    card.onclick = (e) => {
+                        e.stopPropagation();
+                        this.currentFilterIndex = index;
+                        this._applyComputedFilter(video);
+                        if (btn) {
+                            if (index > 0) btn.classList.add('active');
+                            else btn.classList.remove('active');
+                        }
+                        this._showToast(video, `Filter: ${filter.name}`);
+                        
+                        // Local update to avoid full re-render if possible
+                        Array.from(listContainer.querySelectorAll('.ypp-filter-card')).forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+                    };
+
+                    // Live Hover Preview
+                    card.onmouseenter = () => {
+                        if (this.currentFilterIndex === index) return;
+                        
+                        // Temporarily swap index for preview
+                        const savedIndex = this.currentFilterIndex;
+                        this.currentFilterIndex = index;
+                        this._applyComputedFilter(video);
+                        this.currentFilterIndex = savedIndex; // Swap back for state, but video stays filtered until mouseout
+                    };
+
+                    card.onmouseleave = () => {
+                        this._applyComputedFilter(video); // Reset to truly active index
+                    };
+
+
+                    grid.appendChild(card);
+                });
+                listContainer.appendChild(grid);
             });
-            card.addEventListener('mouseleave', () => {
-                if (this.currentFilterIndex !== index) {
-                    card.style.background = 'rgba(255,255,255,0.04)';
-                    card.style.borderColor = 'rgba(255,255,255,0.08)';
-                }
-            });
 
-            card.onclick = (e) => {
-                e.stopPropagation();
-                this.currentFilterIndex = index;
-                this._applyComputedFilter(video);
+            if (Object.keys(groups).length === 0) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'padding: 40px 20px; text-align: center; color: rgba(255,255,255,0.3); font-size: 13px; font-style: italic;';
+                empty.textContent = 'No filters matching your search...';
+                listContainer.appendChild(empty);
+            }
+        };
 
-                if (btn) {
-                    if (index > 0) {
-                        btn.classList.add('active');
-                        btn.title = `Cinema Filters: ${filter.name}`;
-                    } else {
-                        btn.classList.remove('active');
-                        btn.title = 'Cinema Filters';
-                    }
-                }
-
-                // Show mini toast
-                this._showToast(video, `Filter: ${filter.name}`);
-
-                // Re-render presets to update active state
-                this._removeFilterPanel();
-                this._createFilterPanel(video, btn);
-            };
-
-            wrap.appendChild(card);
-        });
+        searchInput.oninput = (e) => renderFilteredList(e.target.value);
+        renderFilteredList();
 
         return wrap;
     }
 
+
+
     _buildAdjustTab(video) {
         const wrap = document.createElement('div');
+        wrap.className = 'ypp-vcp-tab-content active';
 
-        const sliderConfigs = [
-            { id: 'brightness', label: 'Brightness', min: 0,   max: 200, unit: '%',  default: 100 },
-            { id: 'contrast',   label: 'Contrast',   min: 0,   max: 200, unit: '%',  default: 100 },
-            { id: 'saturate',   label: 'Saturation', min: 0,   max: 200, unit: '%',  default: 100 },
-            { id: 'hueRotate',  label: 'Hue Rotate', min: 0,   max: 360, unit: 'deg',default: 0 },
-            { id: 'sepia',      label: 'Sepia',      min: 0,   max: 100, unit: '%',  default: 0 },
-            { id: 'grayscale',  label: 'Grayscale',  min: 0,   max: 100, unit: '%',  default: 0 },
-            { id: 'invert',     label: 'Invert',     min: 0,   max: 100, unit: '%',  default: 0 },
-            { id: 'blur',       label: 'Blur',       min: 0,   max: 10,  unit: 'px', default: 0 },
-            { id: 'opacity',    label: 'Opacity',    min: 10,  max: 100, unit: '%',  default: 100 },
+        // ── Intensity Slider
+        const intensitySection = document.createElement('div');
+        intensitySection.className = 'ypp-intensity-section';
+        intensitySection.innerHTML = `
+            <div class="ypp-intensity-header">
+                <span><span style="margin-right:8px;">💎</span>Global Intensity</span>
+                <span id="ypp-int-val" style="color:#c4b5fd; font-weight:800;">${this.filterIntensity}%</span>
+            </div>
+        `;
+        const intSlider = document.createElement('input');
+        intSlider.type = 'range';
+        intSlider.className = 'ypp-vcp-slider';
+        intSlider.min = '0';
+        intSlider.max = '100';
+        intSlider.value = this.filterIntensity;
+        intSlider.oninput = (e) => {
+            this.filterIntensity = Number(e.target.value);
+            intensitySection.querySelector('#ypp-int-val').textContent = this.filterIntensity + '%';
+            this._applyComputedFilter(video);
+        };
+        intensitySection.appendChild(intSlider);
+        wrap.appendChild(intensitySection);
+
+        const configs = [
+            { id: 'brightness', label: 'Brightness', icon: '☀️', min: 0, max: 200, def: 100, unit: '%' },
+            { id: 'contrast',   label: 'Contrast',   icon: '🌓', min: 0, max: 200, def: 100, unit: '%' },
+            { id: 'saturate',   label: 'Saturation', icon: '🌈', min: 0, max: 300, def: 100, unit: '%' },
+            { id: 'hueRotate',  label: 'Hue Rotate', icon: '🎨', min: 0, max: 360, def: 0,   unit: '°' },
+            { id: 'sepia',      label: 'Sepia',      icon: '🕰️', min: 0, max: 100, def: 0,   unit: '%' },
+            { id: 'grayscale',  label: 'Grayscale',  icon: '🌑', min: 0, max: 100, def: 0,   unit: '%' },
+            { id: 'invert',     label: 'Invert',     icon: '🔄', min: 0, max: 100, def: 0,   unit: '%' },
+            { id: 'blur',       label: 'Blur',       icon: '🌀', min: 0, max: 20,  def: 0,   unit: 'px' },
+            { id: 'opacity',    label: 'Opacity',    icon: '👁️', min: 0, max: 100, def: 100, unit: '%' }
         ];
 
-        sliderConfigs.forEach(cfg => {
+        configs.forEach(cfg => {
             const row = document.createElement('div');
-            row.style.marginBottom = '10px';
+            row.className = 'ypp-vcp-slider-row';
 
             const labelRow = document.createElement('div');
-            Object.assign(labelRow.style, {
-                display: 'flex', justifyContent: 'space-between',
-                fontSize: '11px', marginBottom: '4px',
-                color: 'rgba(255,255,255,0.7)'
-            });
+            labelRow.className = 'ypp-vcp-slider-label-row';
 
-            const labelEl = document.createElement('span');
-            labelEl.textContent = cfg.label;
+            const labelWrap = document.createElement('div');
+            labelWrap.style.display = 'flex';
+            labelWrap.style.alignItems = 'center';
+            labelWrap.style.gap = '8px';
+            labelWrap.innerHTML = `<span style="font-size:14px;">${cfg.icon}</span><span style="font-size:12px; font-weight:600; color:rgba(255,255,255,0.8);">${cfg.label}</span>`;
 
-            const valueEl = document.createElement('span');
-            valueEl.textContent = this.filterAdjustments[cfg.id] + cfg.unit;
-            valueEl.style.color = 'rgba(255,255,255,0.5)';
+            const valWrap = document.createElement('div');
+            valWrap.style.display = 'flex';
+            valWrap.style.alignItems = 'center';
+            valWrap.style.gap = '8px';
 
-            labelRow.appendChild(labelEl);
-            labelRow.appendChild(valueEl);
+            const val = document.createElement('span');
+            val.className = 'ypp-vcp-slider-value';
+            val.textContent = this.filterAdjustments[cfg.id] + cfg.unit;
+
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'ypp-vcp-slider-reset';
+            resetBtn.innerHTML = '↺';
+            resetBtn.title = `Reset ${cfg.label}`;
+            resetBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.filterAdjustments[cfg.id] = cfg.def;
+                slider.value = cfg.def;
+                val.textContent = cfg.def + cfg.unit;
+                this._applyComputedFilter(video);
+            };
+
+            valWrap.appendChild(val);
+            valWrap.appendChild(resetBtn);
+            labelRow.appendChild(labelWrap);
+            labelRow.appendChild(valWrap);
 
             const slider = document.createElement('input');
             slider.type = 'range';
-            slider.min = cfg.min;
-            slider.max = cfg.max;
+            slider.className = 'ypp-vcp-slider';
+            slider.min = cfg.min; slider.max = cfg.max;
             slider.value = this.filterAdjustments[cfg.id];
-            Object.assign(slider.style, {
-                width: '100%',
-                accentColor: '#ff4e45',
-                cursor: 'pointer',
-                height: '3px'
-            });
-
             slider.oninput = (e) => {
-                this.filterAdjustments[cfg.id] = Number(e.target.value);
-                valueEl.textContent = e.target.value + cfg.unit;
+                const v = Number(e.target.value);
+                this.filterAdjustments[cfg.id] = v;
+                val.textContent = v + cfg.unit;
                 this._applyComputedFilter(video);
+                
+                // Pulse value on change
+                val.style.transform = 'scale(1.1)';
+                setTimeout(() => val.style.transform = 'scale(1)', 100);
             };
 
             row.appendChild(labelRow);
@@ -540,6 +807,7 @@ window.YPP.features.Player = class Player {
 
         return wrap;
     }
+
 
     /**
      * Build and apply the combined CSS filter string from:
@@ -551,34 +819,43 @@ window.YPP.features.Player = class Player {
         if (!video) video = document.querySelector('video');
         if (!video) return;
 
-        const preset = this.filters[this.currentFilterIndex];
-        const adj = this.filterAdjustments;
+        // Bypassing for Before/After comparison
+        if (this.isComparing) {
+            video.style.filter = 'none';
+            video.style.opacity = '1';
+            this._removeFilterOverlay();
+            return;
+        }
 
-        // Build adjustment filter string
+        const preset = this.filters[this.currentFilterIndex];
+
+        const adj = this.filterAdjustments;
+        const inst = this.filterIntensity / 100;
+
+        // Scale formula: default + (value - default) * intensity
+        const s = (v, def = 100) => def + (v - def) * inst;
+
+        // Build adjustment filter string with intensity scaling
         const adjStr = [
-            `brightness(${adj.brightness}%)`,
-            `contrast(${adj.contrast}%)`,
-            `saturate(${adj.saturate}%)`,
-            `hue-rotate(${adj.hueRotate}deg)`,
-            adj.sepia > 0 ? `sepia(${adj.sepia}%)` : '',
-            adj.grayscale > 0 ? `grayscale(${adj.grayscale}%)` : '',
-            adj.invert > 0 ? `invert(${adj.invert}%)` : '',
-            adj.blur > 0 ? `blur(${adj.blur}px)` : '',
-            `opacity(${adj.opacity}%)`
+            adj.brightness !== 100 ? `brightness(${s(adj.brightness)}%)` : '',
+            adj.contrast !== 100 ? `contrast(${s(adj.contrast)}%)` : '',
+            adj.saturate !== 100 ? `saturate(${s(adj.saturate)}%)` : '',
+            adj.hueRotate !== 0 ? `hue-rotate(${adj.hueRotate * inst}deg)` : '',
+            adj.sepia > 0 ? `sepia(${adj.sepia * inst}%)` : '',
+            adj.grayscale > 0 ? `grayscale(${adj.grayscale * inst}%)` : '',
+            adj.invert > 0 ? `invert(${adj.invert * inst}%)` : '',
+            adj.blur > 0 ? `blur(${adj.blur * inst}px)` : '',
+            adj.opacity !== 100 ? `opacity(${s(adj.opacity)}%)` : ''
         ].filter(Boolean).join(' ');
 
-        // Combine: preset first (if not 'none'), then adjustments
-        const isDefault = (
-            adj.brightness === 100 && adj.contrast === 100 && adj.saturate === 100 &&
-            adj.hueRotate === 0 && adj.sepia === 0 && adj.grayscale === 0 && adj.invert === 0 &&
-            adj.blur === 0 && adj.opacity === 100
-        );
-
-        let finalFilter;
-        if (preset.css === 'none') {
-            finalFilter = isDefault ? 'none' : adjStr;
-        } else {
-            finalFilter = isDefault ? preset.css : `${preset.css} ${adjStr}`;
+        // Combine: preset first, then adjustments
+        let finalFilter = 'none';
+        if (preset.css !== 'none' && adjStr) {
+            finalFilter = `${preset.css} ${adjStr}`;
+        } else if (preset.css !== 'none') {
+            finalFilter = preset.css;
+        } else if (adjStr) {
+            finalFilter = adjStr;
         }
 
         video.style.filter = finalFilter;
@@ -589,6 +866,7 @@ window.YPP.features.Player = class Player {
             this._applyOverlay(preset.overlay);
         }
     }
+
 
     _applyOverlay(type) {
         const container = document.getElementById('movie_player');
@@ -972,6 +1250,11 @@ window.YPP.features.Player = class Player {
             this._volumePopup.remove();
             this._volumePopup = null;
             anchorBtn.classList.remove('active');
+            // Clean up outside click handler
+            if (this._volumePopupOutsideHandler) {
+                document.removeEventListener('click', this._volumePopupOutsideHandler);
+                this._volumePopupOutsideHandler = null;
+            }
             return;
         }
 
@@ -1115,9 +1398,9 @@ window.YPP.features.Player = class Player {
         const outside = (e) => {
             if (this._volumePopup && !this._volumePopup.contains(e.target) && !anchorBtn.contains(e.target)) {
                 this._toggleVolumePopup(video, anchorBtn);
-                document.removeEventListener('click', outside);
             }
         };
+        this._volumePopupOutsideHandler = outside;
         setTimeout(() => document.addEventListener('click', outside), 0);
     }
 

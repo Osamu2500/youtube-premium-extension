@@ -93,11 +93,14 @@ window.YPP.SettingsSchema = {
         enableCustomSpeed:       { type: 'boolean', default: true },
         enableCinemaFilters:     { type: 'boolean', default: true },
         // Cinema Filters — persisted state (preset index + slider adjustments)
-        cinemaFilterIndex:       { type: 'number',  default: 0,   min: 0, max: 20 },
+        cinemaFilterIndex:       { type: 'number',  default: 0,   min: 0, max: 42 }, // 43 filters total (0-42)
         cinemaFilterBrightness:  { type: 'number',  default: 100, min: 0, max: 200 },
         cinemaFilterContrast:    { type: 'number',  default: 100, min: 0, max: 200 },
         cinemaFilterSaturate:    { type: 'number',  default: 100, min: 0, max: 200 },
         cinemaFilterHue:         { type: 'number',  default: 0,   min: 0, max: 360 },
+        cinemaFilterSepia:       { type: 'number',  default: 0,   min: 0, max: 100 },
+        cinemaFilterGrayscale:   { type: 'number',  default: 0,   min: 0, max: 100 },
+        cinemaFilterInvert:      { type: 'number',  default: 0,   min: 0, max: 100 },
         cinemaFilterBlur:        { type: 'number',  default: 0,   min: 0, max: 10  },
         cinemaFilterOpacity:     { type: 'number',  default: 100, min: 10, max: 100 },
 

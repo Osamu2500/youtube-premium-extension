@@ -48,253 +48,353 @@
 .ypp-vcp-close {
     background: none;
     border: none;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     font-size: 18px;
-    padding: 4px;
-    transition: color 0.2s;
-}
-
-.ypp-vcp-close:hover {
-    color: #fff;
-}
-
-/* ── Tabs ── */
-.ypp-vcp-tabs {
-    display: flex;
-    gap: 8px;
-    background: rgba(0,0,0,0.2);
-    padding: 4px;
-    border-radius: 8px;
-}
-
-.ypp-vcp-tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.5);
-    padding: 6px 0;
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.ypp-vcp-tab:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.05);
-}
-
-.ypp-vcp-tab.active {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.ypp-vcp-tab-content {
-    display: none;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.ypp-vcp-tab-content.active {
-    display: flex;
-    animation: ypp-fade-in 0.25s ease forwards;
-}
-
-@keyframes ypp-fade-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Control Sections */
-.ypp-vcp-section {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.ypp-vcp-section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.9);
-    margin-bottom: -2px;
-}
-
-.ypp-vcp-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: rgba(255,255,255,0.5);
-    font-weight: 600;
-}
-
-/* Sliders */
-.ypp-slider-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.ypp-slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 4px;
-    border-radius: 2px;
-    outline: none;
-    --pct: 50%;
-    background: linear-gradient(
-        to right,
-        #3ea6ff 0%,
-        #3ea6ff var(--pct),
-        rgba(255, 255, 255, 0.15) var(--pct),
-        rgba(255, 255, 255, 0.15) 100%
-    ) !important;
-}
-
-.ypp-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    border: 2px solid #3ea6ff;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.ypp-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.3);
-}
-
-.ypp-value-display {
-    font-size: 12px;
-    color: #fff;
-    min-width: 36px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-/* Toggles / Buttons */
-.ypp-vcp-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.ypp-action-btn {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #fff;
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    transition: all 0.2s;
+    line-height: 1;
+    padding: 0;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.ypp-vcp-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Section */
+.ypp-vcp-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ypp-vcp-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
     gap: 6px;
 }
 
-.ypp-action-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
+.ypp-vcp-section-title::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #a78bfa;
 }
 
-.ypp-action-btn.active {
-    background: rgba(62, 166, 255, 0.15);
-    border-color: rgba(62, 166, 255, 0.4);
-    color: #3ea6ff;
-    box-shadow: 0 0 12px rgba(62, 166, 255, 0.15);
+/* Slider */
+.ypp-vcp-slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-/* Draggable Handle */
-#ypp-video-control-panel.dragging {
-    opacity: 0.8;
+.ypp-vcp-slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
-/* ── Divider ────────────────────────────────────────────────────────────── */
-.ypp-vcp-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.08);
-    margin: 2px 0;
+.ypp-vcp-slider-value {
+    font-size: 11px;
+    color: #a78bfa;
+    font-weight: 600;
+    background: rgba(167, 139, 250, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
 }
 
-/* ── Label row (label + badge/toggle side by side) ──────────────────────── */
-.ypp-vcp-label-row {
+.ypp-vcp-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+}
+
+.ypp-vcp-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a78bfa;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.ypp-vcp-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a78bfa;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Toggle */
+.ypp-vcp-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 4px;
+    cursor: pointer;
+    padding: 8px 0;
 }
 
-.ypp-label-accent {
-    color: #a78bfa !important;   /* soft violet accent */
+.ypp-vcp-toggle-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-/* ── Boost Badge ─────────────────────────────────────────────────────────── */
-.ypp-badge {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 2px 7px;
+.ypp-vcp-toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #888;
-    transition: all 0.25s;
+    transition: background 0.3s;
 }
 
-.ypp-badge.active {
-    background: rgba(167, 139, 250, 0.25);
+.ypp-vcp-toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    transition: transform 0.3s;
+}
+
+.ypp-vcp-toggle.active .ypp-vcp-toggle-switch {
+    background: #a78bfa;
+}
+
+.ypp-vcp-toggle.active .ypp-vcp-toggle-switch::after {
+    transform: translateX(20px);
+}
+
+/* Badge */
+.ypp-vcp-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(167, 139, 250, 0.15);
+    color: #c4b5fd;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+/* Button Group */
+.ypp-vcp-button-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.ypp-vcp-button {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.ypp-vcp-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ypp-vcp-button.active {
+    background: rgba(167, 139, 250, 0.2);
     border-color: #a78bfa;
     color: #c4b5fd;
-    box-shadow: 0 0 8px rgba(167, 139, 250, 0.35);
 }
 
-/* ── Volume Booster – accent slider track ────────────────────────────────── */
-.ypp-slider-accent {
-    --pct: 0%;
-    background: linear-gradient(
-        to right,
-        #a78bfa 0%,
-        #a78bfa var(--pct),
-        rgba(255, 255, 255, 0.2) var(--pct),
-        rgba(255, 255, 255, 0.2) 100%
-    ) !important;
+/* EQ Sliders */
+.ypp-vcp-eq-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.ypp-slider-accent::-webkit-slider-thumb {
-    background: #a78bfa !important;
-    box-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
+.ypp-vcp-eq-slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* ── Pill Toggle (ON/OFF) ─────────────────────────────────────────────────── */
-.ypp-pill-toggle {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.07);
-    color: #888;
+.ypp-vcp-eq-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    width: 40px;
+}
+
+.ypp-vcp-eq-range {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6);
+    border-radius: 10px;
+    outline: none;
     cursor: pointer;
-    transition: all 0.25s;
-    flex-shrink: 0;
+}
+
+.ypp-vcp-eq-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #8b5cf6;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ypp-vcp-eq-value {
+    font-size: 11px;
+    color: #a78bfa;
+    font-weight: 600;
+    width: 30px;
+    text-align: right;
+}
+
+/* ── Glassmorphic Enhancements ─────────────────────────────────────────────── */
+.ypp-glass-panel {
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.85) 0%, rgba(10, 10, 20, 0.9) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.ypp-glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.ypp-glass-card:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    transform: translateY(-2px);
+}
+
+.ypp-glass-button {
+    background: linear-gradient(135deg, rgba(255, 78, 69, 0.2), rgba(255, 154, 69, 0.2));
+    border: 1px solid rgba(255, 78, 69, 0.3);
+    color: #ff9a45;
+    box-shadow: 0 4px 12px rgba(255, 78, 69, 0.15);
+}
+
+.ypp-glass-button:hover {
+    background: linear-gradient(135deg, rgba(255, 78, 69, 0.3), rgba(255, 154, 69, 0.3));
+    box-shadow: 0 6px 16px rgba(255, 78, 69, 0.25);
+    transform: translateY(-1px);
+}
+
+/* ── Cinema Filters Panel Specific Styles ──────────────────────────────────── */
+#ypp-cinema-panel {
+    /* Styles are applied inline, but these can override or enhance */
+}
+
+#ypp-cinema-panel .glass-tab {
+    background: rgba(255, 255, 255, 0);
+    border-bottom: 3px solid transparent;
+    transition: all 0.25s ease;
+}
+
+#ypp-cinema-panel .glass-tab.active {
+    background: rgba(255, 78, 69, 0.15);
+    border-bottom: 3px solid #ff4e45;
+    color: #ff9a45;
+    box-shadow: 0 4px 12px rgba(255, 78, 69, 0.2);
+}
+
+#ypp-cinema-panel .glass-slider {
+    background: linear-gradient(90deg, rgba(255, 78, 69, 0.3), rgba(255, 154, 69, 0.3));
+    height: 6px;
+    border-radius: 10px;
+}
+
+#ypp-cinema-panel .glass-slider::-webkit-slider-thumb {
+    background: linear-gradient(135deg, #ff4e45, #ff9a45);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes ypp-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ypp-slide-down {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ypp-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 78, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0); }
+}
+
+/* ── Pill Toggle (used in enhancer sections) ───────────────────────────────── */
+.ypp-pill-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .ypp-pill-toggle:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .ypp-pill-toggle.on {
@@ -312,11 +412,6 @@
     animation: ypp-slide-down 0.2s ease;
 }
 
-@keyframes ypp-slide-down {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
 /* ── Sub-label (inside enhancer sections) ────────────────────────────────── */
 .ypp-vcp-sub-label {
     font-size: 11px;
@@ -331,4 +426,220 @@
     color: rgba(255, 255, 255, 0.3);
     line-height: 1.4;
     margin-top: 2px;
+}
+
+/* ── Category Headers ── */
+.ypp-vcp-cat-header {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 800;
+    color: #a78bfa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 8px 0 4px 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.8;
+}
+
+.ypp-vcp-cat-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(167, 139, 250, 0.3), transparent);
+}
+
+/* ── Granular Reset ── */
+.ypp-vcp-slider-reset {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.ypp-vcp-slider-reset:hover {
+    color: #ff4e45;
+    background: rgba(255, 78, 69, 0.1);
+}
+
+/* ── Cinema Dashboard Enhancements ── */
+#ypp-cinema-panel {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: linear-gradient(165deg, rgba(15, 15, 25, 0.95), rgba(5, 5, 10, 0.98)) !important;
+}
+
+.ypp-filter-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.ypp-filter-card {
+    padding: 12px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.25s ease;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.ypp-filter-card:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    transform: translateY(-2px);
+}
+
+.ypp-filter-card.active {
+    border-color: rgba(255, 154, 69, 0.6);
+    background: linear-gradient(135deg, rgba(255, 78, 69, 0.2), rgba(255, 154, 69, 0.15));
+    font-weight: 700;
+    color: #ff9a45;
+    box-shadow: 0 6px 20px rgba(255, 78, 69, 0.2), 0 0 0 1px rgba(255, 154, 69, 0.3) inset;
+}
+
+/* ── Intensity Slider ── */
+.ypp-intensity-section {
+    margin-bottom: 20px;
+    padding: 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(167, 139, 250, 0.05));
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.1);
+}
+
+.ypp-intensity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c4b5fd;
+}
+
+/* ── Search Bar ── */
+.ypp-vcp-search-wrap {
+    margin: 4px 4px 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ypp-vcp-search-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px 10px 34px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.ypp-vcp-search-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(167, 139, 250, 0.5);
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.ypp-vcp-search-icon {
+    position: absolute;
+    left: 10px;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+}
+
+/* ── LUT Previews ── */
+.ypp-filter-lut-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.ypp-filter-lut-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    filter: brightness(1.2) contrast(1.1);
+}
+
+/* ── Before/After Toggle ── */
+.ypp-vcp-compare-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.2s;
+}
+
+.ypp-vcp-compare-toggle.active {
+    background: rgba(167, 139, 250, 0.15);
+    border-color: #a78bfa;
+    color: #c4b5fd;
+}
+
+.ypp-vcp-compare-icon {
+    font-size: 14px;
+}
+
+/* ── Animation Enhancements ── */
+@keyframes ypp-pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 78, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0); }
+}
+
+.ypp-filter-card.active {
+    animation: ypp-pulse-ring 2s infinite;
+}
+
+/* Scrollbar refinement */
+#ypp-cinema-panel *::-webkit-scrollbar {
+    width: 4px;
+}
+
+#ypp-cinema-panel *::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#ypp-cinema-panel *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+#ypp-cinema-panel *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
