@@ -841,13 +841,69 @@ class SearchRedesign {
     }
 
     /**
-     * Remove inline width styles that YouTube JS applies
+     * Remove inline styles that YouTube's Polymer JS injects on card children.
+     * YouTube sets inline width on ytd-thumbnail (~246px) and margin-left on
+     * .text-wrapper (~246px) to achieve its native horizontal list layout.
+     * These inline styles have the highest CSS specificity and will override
+     * even !important rules, so they MUST be cleared via JS.
      * @private
-     * @param {HTMLElement} node 
+     * @param {HTMLElement} node - The ytd-video-renderer / playlist / radio node
      */
     _cleanInlineStyles(node) {
-        if (node.style.width) node.style.width = '';
+        // ── Card element itself ─────────────────────────────────────────────
+        if (node.style.width)    node.style.width    = '';
         if (node.style.maxWidth) node.style.maxWidth = '';
+        if (node.style.minWidth) node.style.minWidth = '';
+        if (node.style.height)   node.style.height   = '';
+        if (node.style.margin)   node.style.margin   = '';
+
+        // ── #dismissible wrapper ────────────────────────────────────────────
+        const dismissible = node.querySelector('#dismissible');
+        if (dismissible) {
+            dismissible.style.display       = '';
+            dismissible.style.flexDirection = '';
+            dismissible.style.width         = '';
+            dismissible.style.height        = '';
+        }
+
+        // ── Thumbnail: YouTube sets width inline (e.g. 246px) ──────────────
+        const thumb = node.querySelector('ytd-thumbnail, ytd-playlist-thumbnail');
+        if (thumb) {
+            thumb.style.width    = '';
+            thumb.style.minWidth = '';
+            thumb.style.maxWidth = '';
+            thumb.style.height   = '';
+            thumb.style.margin   = '';
+            thumb.style.marginRight  = '';
+            thumb.style.flexBasis    = '';
+            thumb.style.flexShrink   = '';
+
+            // Also clean the inner <a> and yt-image wrappers
+            const thumbInner = thumb.querySelector('a, yt-image');
+            if (thumbInner) {
+                thumbInner.style.width    = '';
+                thumbInner.style.height   = '';
+                thumbInner.style.maxWidth = '';
+            }
+        }
+
+        // ── .text-wrapper: YouTube sets margin-left inline (~246px) ─────────
+        const textWrapper = node.querySelector('.text-wrapper');
+        if (textWrapper) {
+            textWrapper.style.marginLeft  = '';
+            textWrapper.style.marginRight = '';
+            textWrapper.style.marginTop   = '';
+            textWrapper.style.width       = '';
+            textWrapper.style.maxWidth    = '';
+        }
+
+        // ── Dismiss button / action-menu inline offsets ───────────────────
+        const actionMenu = node.querySelector('#action-menu, .action-menu');
+        if (actionMenu) {
+            actionMenu.style.width    = '';
+            actionMenu.style.height   = '';
+            actionMenu.style.position = '';
+        }
     }
 
     /**

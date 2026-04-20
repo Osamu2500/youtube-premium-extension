@@ -1768,12 +1768,18 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title {
   letter-spacing: -0.1px;
 }
 
-/* ── INTERNAL LAYOUT: Force vertical stack identical to homepage cards ── */
 
-/* The native ytd-video-renderer uses a HORIZONTAL layout (thumbnail left, details right).
-   We override every layer of its shadow DOM to produce a vertical column card. */
+/* =====================================================================
+   SEARCH GRID: INTERNAL CARD LAYOUT — VERTICAL STACK (matches homepage)
+   =====================================================================
+   The native ytd-video-renderer has a HORIZONTAL layout:
+     • ytd-thumbnail   → fixed width ~246px, floated/positioned left
+     • .text-wrapper   → margin-left ~246px to sit beside the thumbnail
+   We MUST override both CSS AND inline styles (the JS _cleanInlineStyles
+   method clears the inline values; these rules cover any stragglers).
+   ===================================================================== */
 
-/* Layer 1: #dismissible — the primary flex container inside ytd-video-renderer */
+/* ── 1. #dismissible: primary inner wrapper → column stack ────────── */
 body.ypp-search-grid-mode ytd-video-renderer #dismissible {
   display: flex !important;
   flex-direction: column !important;
@@ -1781,43 +1787,181 @@ body.ypp-search-grid-mode ytd-video-renderer #dismissible {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
-  height: 100% !important;
+  height: auto !important;
   flex: 1 !important;
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
 }
 
-/* Layer 2: All direct children of #dismissible — ensures thumbnail and text both go column */
-body.ypp-search-grid-mode ytd-video-renderer #dismissible > * {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
+/* ── 2. Thumbnail: override the inline width YouTube's Polymer injects ─ */
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;       /* beats YouTube's min-width: 246px */
+  max-width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  background-color: transparent !important;
+}
+
+/* ── 3. Thumbnail inner elements ─────────────────────────────────── */
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail a,
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail yt-image {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* ── 4. .text-wrapper: CRITICAL — zero out the side-offset margin ─── */
+body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
+  margin-left: 0 !important;    /* KEY: removes the 246px push to the right */
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+/* ── 5. #channel-info: avatar + channel name row ─────────────────── */
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 6px 0 0 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ── 6. Channel avatar ───────────────────────────────────────────── */
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail,
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail yt-img-shadow,
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail yt-image,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  max-width: 22px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element img {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+/* ── 7. Channel name + ytd-channel-name ──────────────────────────── */
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name,
+body.ypp-search-grid-mode ytd-video-renderer #channel-name {
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name yt-formatted-string,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a,
+body.ypp-search-grid-mode ytd-video-renderer #channel-name yt-formatted-string {
+  font-size: 1.25rem !important;
+  font-weight: 500 !important;
+  color: var(--ypp-text-secondary) !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: color 0.2s ease;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-channel-name a,
+body.ypp-search-grid-mode ytd-video-renderer:hover #channel-name yt-formatted-string {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ── 8. #meta and #metadata-line ─────────────────────────────────── */
+body.ypp-search-grid-mode ytd-video-renderer #meta,
+body.ypp-search-grid-mode ytd-playlist-renderer #meta,
+body.ypp-search-grid-mode ytd-radio-renderer #meta {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 0 4px !important;
+  font-size: 1.2rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  margin-top: 4px !important;
+  line-height: 1.4 !important;
+  width: 100% !important;
+}
+
+/* ── 9. Playlist / radio internal wrappers ───────────────────────── */
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
   flex-shrink: 0 !important;
   margin: 0 !important;
 }
 
-/* CRITICAL: Reset the native margin-left that .text-wrapper uses to sit right of the thumbnail */
-body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
+body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
   margin-left: 0 !important;
-  margin-right: 0 !important;
-  margin-top: 0 !important;
-  padding: 0 !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
   width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: stretch !important;
-  box-sizing: border-box !important;
 }
 
-/* Playlist and radio internal wrappers */
 body.ypp-search-grid-mode ytd-playlist-renderer #content,
 body.ypp-search-grid-mode ytd-playlist-renderer > a,
 body.ypp-search-grid-mode ytd-playlist-renderer > div,
@@ -1827,115 +1971,22 @@ body.ypp-search-grid-mode ytd-radio-renderer > div {
   flex-direction: column !important;
   align-items: stretch !important;
   width: 100% !important;
-  max-width: 100% !important;
   min-width: 0 !important;
   height: auto !important;
-  position: relative;
-  z-index: 2;
 }
 
-/* Playlist and radio text wrapper */
-body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
-body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
-  max-width: 100% !important;
-  min-width: 0 !important;
-  padding: 0 !important;
-  margin-left: 0 !important;
-  flex: 1 !important;
-}
-
-/* Channel info row */
-body.ypp-search-grid-mode ytd-video-renderer #channel-info {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 4px 0 0 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-}
-
-/* Channel thumbnail (avatar) */
-body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  max-width: 20px !important;
-  border-radius: 50% !important;
-  overflow: hidden !important;
-  flex-shrink: 0 !important;
-  flex-direction: row !important; /* Reset the column from the wildcard rule above */
-}
-
-body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img {
-  width: 20px !important;
-  height: 20px !important;
-  border-radius: 50% !important;
-  object-fit: cover !important;
-}
-
-/* Channel name */
-body.ypp-search-grid-mode ytd-video-renderer #channel-name,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name yt-formatted-string,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a {
-  font-size: 1.3rem !important;
-  font-weight: 500 !important;
-  color: var(--ypp-text-secondary) !important;
-  line-height: 1.4 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  letter-spacing: normal !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  display: block !important;
-  flex-direction: row !important; /* Reset column from wildcard */
-  transition: color 0.2s ease;
-}
-
-body.ypp-search-grid-mode ytd-video-renderer:hover #channel-name,
-body.ypp-search-grid-mode ytd-video-renderer:hover ytd-channel-name a {
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-/* Metadata line (views, date) */
-body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
-body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
-body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
-  font-size: 1.2rem !important;
-  font-weight: 400 !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  margin-top: 3px !important;
-  line-height: 1.4 !important;
-  display: flex !important;
-  flex-direction: row !important; /* Reset column from wildcard — metadata items are inline */
-  flex-wrap: wrap !important;
-  align-items: center !important;
-}
-
-/* Meta container — padding reset, column layout */
-body.ypp-search-grid-mode ytd-video-renderer #meta,
-body.ypp-search-grid-mode ytd-playlist-renderer #meta,
-body.ypp-search-grid-mode ytd-radio-renderer #meta {
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  width: 100% !important;
-}
-
-/* Action menu button — push to top-right, don't break column flow */
+/* ── 10. Action menu: pin to top-right corner of card ───────────── */
 body.ypp-search-grid-mode ytd-video-renderer #action-menu,
-body.ypp-search-grid-mode ytd-video-renderer .action-menu {
+body.ypp-search-grid-mode ytd-video-renderer .ytd-video-renderer-action-menu {
   position: absolute !important;
-  top: 8px !important;
+  top: 6px !important;
   right: 4px !important;
-  flex-direction: row !important;
   width: auto !important;
-  min-width: auto !important;
+  height: auto !important;
+  min-width: unset !important;
   z-index: 5 !important;
 }
+
 
 /* Hover: identical float-and-glow to homepage cards */
 body.ypp-search-grid-mode ytd-video-renderer:hover,
