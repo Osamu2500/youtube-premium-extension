@@ -130,9 +130,9 @@
                 await this.waitFor(() => window.YPP?.CONSTANTS !== undefined, timeout);
             }
 
-            // Check if Utils are available after wait
-            if (!window.YPP?.Utils) {
-                throw new Error('Core utilities not loaded after timeout');
+            // Check if Utils and CONSTANTS are available after wait
+            if (!window.YPP?.Utils || !window.YPP?.CONSTANTS) {
+                throw new Error('Core utilities or CONSTANTS not loaded after timeout');
             }
         },
 

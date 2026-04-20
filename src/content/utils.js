@@ -900,15 +900,15 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         // Validate inputs are numbers
         if (typeof value !== 'number' || typeof min !== 'number' || typeof max !== 'number') {
             window.YPP.Utils?.log('Invalid inputs to clamp function', 'UTILS', 'warn');
-            return typeof min === 'number' ? min : 0;
+            return (typeof min === 'number' && !isNaN(min) && isFinite(min)) ? min : 0;
         }
         
         // Handle NaN and Infinity
+        if (isNaN(min) || !isFinite(min)) min = 0;
+        if (isNaN(max) || !isFinite(max)) max = 100;
         if (isNaN(value) || !isFinite(value)) {
            return min;
         }
-        if (isNaN(min) || !isFinite(min)) min = 0;
-        if (isNaN(max) || !isFinite(max)) max = 100;
         
         // Ensure min <= max
         if (min > max) {

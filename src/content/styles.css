@@ -1768,9 +1768,56 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title {
   letter-spacing: -0.1px;
 }
 
-/* Internal structural wrapper: force column layout like homepage */
-body.ypp-search-grid-mode ytd-video-renderer #dismissible,
-body.ypp-search-grid-mode ytd-video-renderer #dismissible > *,
+/* ── INTERNAL LAYOUT: Force vertical stack identical to homepage cards ── */
+
+/* The native ytd-video-renderer uses a HORIZONTAL layout (thumbnail left, details right).
+   We override every layer of its shadow DOM to produce a vertical column card. */
+
+/* Layer 1: #dismissible — the primary flex container inside ytd-video-renderer */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  flex: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Layer 2: All direct children of #dismissible — ensures thumbnail and text both go column */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible > * {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+}
+
+/* CRITICAL: Reset the native margin-left that .text-wrapper uses to sit right of the thumbnail */
+body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+/* Playlist and radio internal wrappers */
 body.ypp-search-grid-mode ytd-playlist-renderer #content,
 body.ypp-search-grid-mode ytd-playlist-renderer > a,
 body.ypp-search-grid-mode ytd-playlist-renderer > div,
@@ -1787,32 +1834,44 @@ body.ypp-search-grid-mode ytd-radio-renderer > div {
   z-index: 2;
 }
 
-/* Text wrapper */
-body.ypp-search-grid-mode ytd-video-renderer .text-wrapper,
+/* Playlist and radio text wrapper */
 body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
 body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
   max-width: 100% !important;
   min-width: 0 !important;
   padding: 0 !important;
+  margin-left: 0 !important;
   flex: 1 !important;
 }
 
 /* Channel info row */
 body.ypp-search-grid-mode ytd-video-renderer #channel-info {
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
   gap: 8px !important;
   padding: 4px 0 0 0 !important;
   margin: 0 !important;
+  width: 100% !important;
 }
 
 /* Channel thumbnail (avatar) */
 body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
   width: 20px !important;
   height: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
   border-radius: 50% !important;
-  overflow: hidden;
-  flex-shrink: 0;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  flex-direction: row !important; /* Reset the column from the wildcard rule above */
+}
+
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
 }
 
 /* Channel name */
@@ -1830,7 +1889,8 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  display: block;
+  display: block !important;
+  flex-direction: row !important; /* Reset column from wildcard */
   transition: color 0.2s ease;
 }
 
@@ -1848,11 +1908,33 @@ body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
   color: rgba(255, 255, 255, 0.5) !important;
   margin-top: 3px !important;
   line-height: 1.4 !important;
+  display: flex !important;
+  flex-direction: row !important; /* Reset column from wildcard — metadata items are inline */
+  flex-wrap: wrap !important;
+  align-items: center !important;
 }
 
-/* Meta padding reset */
-body.ypp-search-grid-mode ytd-video-renderer #meta {
+/* Meta container — padding reset, column layout */
+body.ypp-search-grid-mode ytd-video-renderer #meta,
+body.ypp-search-grid-mode ytd-playlist-renderer #meta,
+body.ypp-search-grid-mode ytd-radio-renderer #meta {
   padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+}
+
+/* Action menu button — push to top-right, don't break column flow */
+body.ypp-search-grid-mode ytd-video-renderer #action-menu,
+body.ypp-search-grid-mode ytd-video-renderer .action-menu {
+  position: absolute !important;
+  top: 8px !important;
+  right: 4px !important;
+  flex-direction: row !important;
+  width: auto !important;
+  min-width: auto !important;
+  z-index: 5 !important;
 }
 
 /* Hover: identical float-and-glow to homepage cards */

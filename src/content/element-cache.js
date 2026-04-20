@@ -28,7 +28,7 @@ class ElementCache {
                 return cached;
             }
             // Cache invalid, remove it
-            this._cache.delete(key);
+            this.remove(key);
         }
 
         // Query for element
@@ -75,7 +75,7 @@ class ElementCache {
         if (cached && document.contains(cached)) {
             return true;
         }
-        this._cache.delete(key);
+        this.remove(key);
         return false;
     }
 
@@ -85,6 +85,11 @@ class ElementCache {
      */
     remove(key) {
         this._cache.delete(key);
+        if (this._observers.has(key)) {
+            const observer = this._observers.get(key);
+            if (observer) observer.disconnect();
+            this._observers.delete(key);
+        }
     }
 
     /**

@@ -226,4 +226,20 @@ window.YPP.FeatureManager = class FeatureManager {
             }
         }
     }
+
+    /**
+     * Gracefully disable all active features instance
+     */
+    disableAll() {
+        if (!this.features) return;
+        Object.entries(this.features).forEach(([name, instance]) => {
+            if (instance && typeof instance.disable === 'function') {
+                try {
+                    instance.disable();
+                } catch (e) {
+                    window.YPP.Utils?.log(`Error disabling feature '${name}': ${e.message}`, 'MANAGER', 'error');
+                }
+            }
+        });
+    }
 };
