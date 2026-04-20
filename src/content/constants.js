@@ -449,7 +449,8 @@ window.YPP.CONSTANTS = {
         wheelControls: 'WheelControls',
         audioCompressor: 'AudioCompressor',
         videoResumer: 'VideoResumer',
-        commentFilter: 'CommentFilter'
+        commentFilter: 'CommentFilter',
+        globalPlayerBar: 'GlobalPlayerBar'
     }
 };
 

@@ -338,234 +338,143 @@ window.YPP.features.Player = class Player {
         panel.id = 'ypp-cinema-panel';
         Object.assign(panel.style, {
             position: 'absolute',
-            bottom: '60px',
-            right: '10px',
-            background: 'linear-gradient(135deg, rgba(20, 20, 30, 0.85) 0%, rgba(10, 10, 20, 0.9) 100%)',
+            bottom: '56px',
+            right: '16px',
+            background: 'rgba(25, 25, 30, 0.55)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '18px',
-            zIndex: '9999',
-            width: '320px',
+            borderRadius: '16px',
+            zIndex: '99999',
+            width: '360px',
             color: '#fff',
-            fontFamily: 'Roboto, Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
-            backdropFilter: 'blur(24px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(30px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(30px) saturate(180%)',
             overflow: 'hidden',
             userSelect: 'none',
-            transition: 'transform 0.2s ease, opacity 0.2s ease'
+            display: 'flex',
+            flexDirection: 'column',
+            animation: 'ypp-panel-glass-in 0.3s cubic-bezier(0.2, 0, 0, 1) forwards'
         });
 
-        // --- Header ---
+        if (!document.getElementById('ypp-glass-anim')) {
+            const s = document.createElement('style');
+            s.id = 'ypp-glass-anim';
+            s.textContent = `
+                @keyframes ypp-panel-glass-in {
+                    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+                    to   { opacity: 1; transform: translateY(0) scale(1); }
+                }
+            `;
+            document.head.appendChild(s);
+        }
+
+        // --- Header (Native YT Style) ---
         const header = document.createElement('div');
         Object.assign(header.style, {
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '16px 20px 12px',
+            padding: '12px 16px',
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)'
+            fontSize: '15px',
+            fontWeight: '500'
         });
+
         header.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #ff4e45, #ff9a45); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px;">🎬</div>
-                <span style="font-size:14px;font-weight:700;letter-spacing:0.4px;background: linear-gradient(90deg, #fff, #ff9a45); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">CINEMA FILTERS</span>
+            <div style="display: flex; align-items: center; gap: 12px; margin-right: auto;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
+                </svg>
+                Filters
             </div>
-            <div id="ypp-header-actions" style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 12px;"></div>
+            <div id="ypp-header-actions" style="display: flex; align-items: center; gap: 12px;"></div>
         `;
 
         const compareBtn = document.createElement('div');
         compareBtn.className = `ypp-vcp-compare-toggle ${this.isComparing ? 'active' : ''}`;
-        compareBtn.innerHTML = `<span class="ypp-vcp-compare-icon">${this.isComparing ? '👁️‍🗨️' : '👁️'}</span><span>Before/After</span>`;
+        compareBtn.innerHTML = `A/B`;
         compareBtn.onclick = (e) => {
             e.stopPropagation();
             this.isComparing = !this.isComparing;
             compareBtn.className = `ypp-vcp-compare-toggle ${this.isComparing ? 'active' : ''}`;
-            compareBtn.querySelector('.ypp-vcp-compare-icon').textContent = this.isComparing ? '👁️‍🗨️' : '👁️';
             this._applyComputedFilter(video);
         };
         header.querySelector('#ypp-header-actions').appendChild(compareBtn);
 
         const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = '×';
+        closeBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
         Object.assign(closeBtn.style, {
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: 'rgba(255, 255, 255, 0.7)',
+            background: 'transparent',
+            border: 'none',
+            color: '#f1f1f1',
             cursor: 'pointer',
-            fontSize: '18px',
-            width: '28px',
-            height: '28px',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             padding: '0',
-            transition: 'all 0.2s ease'
+            display: 'flex',
+            alignItems: 'center'
         });
-        closeBtn.onmouseenter = () => {
-            closeBtn.style.background = 'rgba(255, 78, 69, 0.2)';
-            closeBtn.style.color = '#ff4e45';
-            closeBtn.style.borderColor = 'rgba(255, 78, 69, 0.4)';
-        };
-        closeBtn.onmouseleave = () => {
-            closeBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-            closeBtn.style.color = 'rgba(255, 255, 255, 0.7)';
-            closeBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-        };
         closeBtn.onclick = () => this._removeFilterPanel();
-        header.appendChild(closeBtn);
+        header.querySelector('#ypp-header-actions').appendChild(closeBtn);
         panel.appendChild(header);
 
-        // --- Tabs ---
-        const tabBar = document.createElement('div');
-        Object.assign(tabBar.style, {
-            display: 'flex',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            padding: '0 4px'
-        });
-
-        let activeTab = 'presets';
         const tabContent = document.createElement('div');
         Object.assign(tabContent.style, {
-            padding: '16px',
-            maxHeight: '360px',
+            padding: '8px 0',
+            maxHeight: '380px',
             overflowY: 'auto',
-            background: 'rgba(255, 255, 255, 0.02)'
+            overflowX: 'hidden',
+            background: 'transparent',
+            scrollbarWidth: 'none'
         });
-        // Custom scrollbar via style
-        tabContent.style.scrollbarWidth = 'thin';
-        tabContent.style.scrollbarColor = 'rgba(255, 255, 255, 0.2) transparent';
-        tabContent.style.scrollbarTrackColor = 'rgba(255, 255, 255, 0.05)';
 
         const presetsContent = this._buildPresetsTab(video, btn);
+        tabContent.appendChild(presetsContent);
+        
+        // Add intensity section to bottom natively
         const adjustContent = this._buildAdjustTab(video);
+        tabContent.appendChild(adjustContent);
 
-        const renderTab = (tab) => {
-            activeTab = tab;
-            tabContent.innerHTML = '';
-            if (tab === 'presets') {
-                tabContent.appendChild(presetsContent);
-            } else {
-                tabContent.appendChild(adjustContent);
-            }
-            tabBtns.forEach(tb => {
-                const isActive = tb.dataset.tab === tab;
-                if (isActive) {
-                    tb.style.background = 'rgba(255, 78, 69, 0.15)';
-                    tb.style.color = '#ff9a45';
-                    tb.style.borderBottom = '3px solid #ff4e45';
-                    tb.style.boxShadow = '0 4px 12px rgba(255, 78, 69, 0.2)';
-                } else {
-                    tb.style.background = 'rgba(255, 255, 255, 0)';
-                    tb.style.color = 'rgba(255, 255, 255, 0.6)';
-                    tb.style.borderBottom = '3px solid transparent';
-                    tb.style.boxShadow = 'none';
-                }
-            });
-        };
-
-        const tabDefs = [
-            { id: 'presets', label: '🎨 Presets', icon: '🎨' },
-            { id: 'adjust',  label: '🎛️ Adjust', icon: '🎛️' }
-        ];
-        const tabBtns = tabDefs.map(def => {
-            const t = document.createElement('button');
-            t.dataset.tab = def.id;
-            t.innerHTML = `<span style="margin-right: 6px;">${def.icon}</span>${def.label}`;
-            Object.assign(t.style, {
-                flex: '1',
-                background: 'rgba(255, 255, 255, 0)',
-                border: 'none',
-                borderBottom: '3px solid transparent',
-                color: 'rgba(255, 255, 255, 0.6)',
-                cursor: 'pointer',
-                padding: '12px 8px',
-                fontSize: '13px',
-                fontWeight: '600',
-                fontFamily: 'inherit',
-                transition: 'all 0.25s ease',
-                borderRadius: '8px 8px 0 0',
-                margin: '4px 2px 0 2px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            });
-            t.onmouseenter = () => {
-                if (t.dataset.tab !== activeTab) {
-                    t.style.background = 'rgba(255, 255, 255, 0.08)';
-                    t.style.color = 'rgba(255, 255, 255, 0.9)';
-                }
-            };
-            t.onmouseleave = () => {
-                if (t.dataset.tab !== activeTab) {
-                    t.style.background = 'rgba(255, 255, 255, 0)';
-                    t.style.color = 'rgba(255, 255, 255, 0.6)';
-                }
-            };
-            t.onclick = () => renderTab(def.id);
-            tabBar.appendChild(t);
-            return t;
-        });
-
-        panel.appendChild(tabBar);
         panel.appendChild(tabContent);
 
-        // --- Footer: Reset ---
+        // --- Footer: Stats + Reset ---
         const footer = document.createElement('div');
         Object.assign(footer.style, {
-            padding: '16px 20px',
+            padding: '12px 16px',
             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)'
+            alignItems: 'center'
         });
-        
-        const presetCount = document.createElement('div');
-        presetCount.innerHTML = `<span style="font-size: 11px; color: rgba(255, 255, 255, 0.5);">${this.filters.length} presets available</span>`;
-        footer.appendChild(presetCount);
+
+        // Active filter pill
+        const activeFilterName = this.filters[this.currentFilterIndex]?.name || 'Normal';
+        const activePill = document.createElement('div');
+        activePill.id = 'ypp-active-filter-name';
+        Object.assign(activePill.style, {
+            fontSize: '13px',
+            color: '#aaaaaa'
+        });
+        activePill.textContent = activeFilterName;
+        footer.appendChild(activePill);
         
         const resetBtn = document.createElement('button');
-        resetBtn.innerHTML = '<span style="margin-right: 6px;">↺</span> Reset All';
+        resetBtn.innerHTML = `<span>Reset</span>`;
         Object.assign(resetBtn.style, {
-            background: 'linear-gradient(135deg, rgba(255, 78, 69, 0.2), rgba(255, 154, 69, 0.2))',
-            border: '1px solid rgba(255, 78, 69, 0.3)',
-            color: '#ff9a45',
-            borderRadius: '10px',
+            background: 'transparent',
+            border: 'none',
+            color: '#3ea6ff', // YT link blue
             cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: '600',
-            padding: '8px 16px',
-            fontFamily: 'inherit',
-            display: 'flex',
-            alignItems: 'center',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 4px 12px rgba(255, 78, 69, 0.15)'
+            fontSize: '13px',
+            fontWeight: '500',
+            padding: '0'
         });
-        resetBtn.onmouseenter = () => {
-            resetBtn.style.background = 'linear-gradient(135deg, rgba(255, 78, 69, 0.3), rgba(255, 154, 69, 0.3))';
-            resetBtn.style.boxShadow = '0 6px 16px rgba(255, 78, 69, 0.25)';
-            resetBtn.style.transform = 'translateY(-1px)';
-        };
-        resetBtn.onmouseleave = () => {
-            resetBtn.style.background = 'linear-gradient(135deg, rgba(255, 78, 69, 0.2), rgba(255, 154, 69, 0.2))';
-            resetBtn.style.boxShadow = '0 4px 12px rgba(255, 78, 69, 0.15)';
-            resetBtn.style.transform = 'translateY(0)';
-        };
+        resetBtn.onmouseenter = () => { resetBtn.style.textDecoration = 'underline'; };
+        resetBtn.onmouseleave = () => { resetBtn.style.textDecoration = 'none'; };
         resetBtn.onclick = () => {
             this.currentFilterIndex = 0;
             this.filterIntensity = 100;
             this.filterAdjustments = { brightness: 100, contrast: 100, saturate: 100, hueRotate: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, opacity: 100 };
             this._applyComputedFilter(video);
             if (btn) { btn.classList.remove('active'); btn.title = 'Cinema Filters'; }
-            // Re-render panel
             this._removeFilterPanel();
             this._createFilterPanel(video, btn);
         };
@@ -636,22 +545,40 @@ window.YPP.features.Player = class Player {
                     const isActive = this.currentFilterIndex === index;
                     card.className = `ypp-filter-card ${isActive ? 'active' : ''}`;
                     
-                    // Dynamic LUT Preview Gradient
-                    let gradient = 'linear-gradient(135deg, #666, #333)';
-                    if (filter.name === 'Normal') gradient = 'linear-gradient(135deg, #eee, #999)';
-                    else if (filter.css.includes('sepia')) gradient = 'linear-gradient(135deg, #704214, #3b2712)';
-                    else if (filter.css.includes('grayscale')) gradient = 'linear-gradient(135deg, #444, #111)';
-                    else if (filter.name.includes('Teal')) gradient = 'linear-gradient(135deg, #20b2aa, #ff8c00)';
-                    else if (filter.name.includes('Cyber') || filter.name.includes('Neon')) gradient = 'linear-gradient(135deg, #ff00ff, #00ffff)';
-                    else if (filter.name.includes('Golden') || filter.name.includes('Sunset') || filter.name.includes('Warm')) gradient = 'linear-gradient(135deg, #ff8c00, #ff4500)';
-                    else if (filter.name.includes('Blue') || filter.name.includes('Cool') || filter.name.includes('Winter')) gradient = 'linear-gradient(135deg, #1e90ff, #00008b)';
-                    else if (filter.name.includes('Anime') || filter.name.includes('Spring')) gradient = 'linear-gradient(135deg, #32cd32, #ffeb3b)';
-                    else if (filter.name.includes('Noir')) gradient = 'linear-gradient(135deg, #222, #000)';
+                    // Dynamic LUT Preview Gradient (enhanced)
+                    let gradient = 'linear-gradient(135deg, #555, #2a2a2a)';
+                    if (filter.name === 'Normal')                                  gradient = 'linear-gradient(135deg, #f5f5f5, #aaa)';
+                    else if (filter.name === 'Sepia')                              gradient = 'linear-gradient(135deg, #8B6436, #3b2712)';
+                    else if (filter.name === 'Grayscale' || filter.name === 'Noir' || filter.name === 'B&W Cinematic') gradient = 'linear-gradient(135deg, #666, #111)';
+                    else if (filter.name.includes('High Contrast'))               gradient = 'linear-gradient(135deg, #fff, #000)';
+                    else if (filter.name.includes('Vivid') || filter.name.includes('Anime')) gradient = 'linear-gradient(135deg, #ff6b6b, #ffd93d)';
+                    else if (filter.name.includes('Warm') || filter.name.includes('Retro'))  gradient = 'linear-gradient(135deg, #f4a261, #e76f51)';
+                    else if (filter.name.includes('Cool') || filter.name.includes('Winter')) gradient = 'linear-gradient(135deg, #a8d8ea, #4a90d9)';
+                    else if (filter.name.includes('Teal'))                        gradient = 'linear-gradient(135deg, #20b2aa, #ff8c00)';
+                    else if (filter.name.includes('Cyber') || filter.name.includes('Neon'))  gradient = 'linear-gradient(135deg, #ff00ff, #00ffff)';
+                    else if (filter.name.includes('Golden') || filter.name.includes('Sunset')) gradient = 'linear-gradient(135deg, #f9c74f, #f3722c)';
+                    else if (filter.name.includes('Blue Hour'))                   gradient = 'linear-gradient(135deg, #4361ee, #7209b7)';
+                    else if (filter.name.includes('Spring') || filter.name.includes('Summer')) gradient = 'linear-gradient(135deg, #95d5b2, #52b788)';
+                    else if (filter.name.includes('Autumn'))                      gradient = 'linear-gradient(135deg, #c77dff, #e07a5f)';
+                    else if (filter.name.includes('Vaporwave'))                   gradient = 'linear-gradient(135deg, #ff71ce, #b967ff, #01cdfe)';
+                    else if (filter.name.includes('Synthwave') || filter.name.includes('80s')) gradient = 'linear-gradient(135deg, #f72585, #7209b7)';
+                    else if (filter.name.includes('HDR'))                         gradient = 'linear-gradient(135deg, #fff176, #42a5f5)';
+                    else if (filter.name.includes('Cinematic'))                   gradient = 'linear-gradient(135deg, #1a1a2e, #e94560)';
+                    else if (filter.name.includes('Horror') || filter.name.includes('Gothic')) gradient = 'linear-gradient(135deg, #3d0000, #1a0000)';
+                    else if (filter.name.includes('Fantasy') || filter.name.includes('Dreamy')) gradient = 'linear-gradient(135deg, #c77dff, #48cae4)';
+                    else if (filter.name.includes('Pastel') || filter.name.includes('Muted'))   gradient = 'linear-gradient(135deg, #ffd6ff, #c8b6ff)';
+                    else if (filter.name.includes('Sci-Fi'))                      gradient = 'linear-gradient(135deg, #023e8a, #00b4d8)';
+                    else if (filter.name.includes('CRT'))                         gradient = 'linear-gradient(135deg, #003300, #00ff00)';
+                    else if (filter.name.includes('VHS'))                         gradient = 'linear-gradient(135deg, #2d0036, #ff0080)';
+                    else if (filter.name.includes('Film') || filter.name.includes('Lomo'))      gradient = 'linear-gradient(135deg, #6d4c41, #bcaaa4)';
+                    else if (filter.name.includes('Invert'))                      gradient = 'linear-gradient(135deg, #1e3799, #e55039)';
+                    else if (filter.name.includes('Polaroid'))                    gradient = 'linear-gradient(135deg, #fff9c4, #fff)';
+                    else if (filter.name.includes('Documentary'))                 gradient = 'linear-gradient(135deg, #78909c, #37474f)';
 
                     card.innerHTML = `
                         <div class="ypp-filter-lut-preview" style="background: ${gradient}"></div>
                         <span style="flex: 1;">${filter.name}</span>
-                        ${isActive ? '<span style="font-size: 10px; opacity: 0.6;">ACTIVE</span>' : ''}
+                        ${isActive ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="#f1f1f1"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>' : ''}
                     `;
                     
                     card.onclick = (e) => {
@@ -662,11 +589,19 @@ window.YPP.features.Player = class Player {
                             if (index > 0) btn.classList.add('active');
                             else btn.classList.remove('active');
                         }
-                        this._showToast(video, `Filter: ${filter.name}`);
-                        
-                        // Local update to avoid full re-render if possible
+                        this._showToast(video, `✨ ${filter.name}`);
+                        // Update footer pill
+                        const pill = this._filterPanel && this._filterPanel.querySelector('#ypp-active-filter-name');
+                        if (pill) pill.textContent = filter.name;
+
+                        // Local active state update
                         Array.from(listContainer.querySelectorAll('.ypp-filter-card')).forEach(c => c.classList.remove('active'));
                         card.classList.add('active');
+                        card.innerHTML = `
+                            <div class="ypp-filter-lut-preview" style="background: ${gradient}"></div>
+                            <span style="flex: 1;">${filter.name}</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#f1f1f1"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                        `;
                     };
 
                     // Live Hover Preview
@@ -1265,67 +1200,77 @@ window.YPP.features.Player = class Player {
         Object.assign(popup.style, {
             position: 'absolute',
             bottom: '56px',
-            right: '0',
-            width: '260px',
-            background: 'rgba(15, 15, 15, 0.97)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: '14px',
-            zIndex: '9999',
-            padding: '16px',
+            right: '16px',
+            width: '360px',
+            background: 'rgba(25, 25, 30, 0.55)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '16px',
+            zIndex: '99999',
             color: '#fff',
-            fontFamily: 'Inter, Roboto, sans-serif',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(16px)',
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(30px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(30px) saturate(180%)',
             userSelect: 'none',
             display: 'flex',
             flexDirection: 'column',
-            gap: '14px'
+            paddingBottom: '12px',
+            animation: 'ypp-panel-glass-in 0.3s cubic-bezier(0.2, 0, 0, 1) forwards'
         });
 
         // ── Header
         const header = document.createElement('div');
         Object.assign(header.style, {
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px'
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)',
+            fontSize: '15px', fontWeight: '500', marginBottom: '8px'
         });
-        header.innerHTML = `<span style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;color:#c4b5fd;">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-            Volume Booster</span>`;
+        header.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                Volume Booster
+            </div>`;
         const closeBtn = document.createElement('button');
-        closeBtn.textContent = '✕';
+        closeBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
         Object.assign(closeBtn.style, {
-            background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
-            cursor: 'pointer', fontSize: '13px', padding: '0'
+            background: 'none', border: 'none', color: '#f1f1f1',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0'
         });
         closeBtn.onclick = () => this._toggleVolumePopup(video, anchorBtn);
         header.appendChild(closeBtn);
         popup.appendChild(header);
 
-        // ── Helper: create labeled slider
+        // ── Helper: create native styled slider
         const makeSlider = (label, min, max, step, value, unit, onChange) => {
             const section = document.createElement('div');
+            Object.assign(section.style, {
+                padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: '8px'
+            });
             const labelRow = document.createElement('div');
             Object.assign(labelRow.style, {
                 display: 'flex', justifyContent: 'space-between', fontSize: '11px',
-                color: 'rgba(255,255,255,0.6)', marginBottom: '6px'
+                color: 'rgba(255,255,255,0.6)'
             });
             const lbl = document.createElement('span');
             lbl.textContent = label;
             const val = document.createElement('span');
             val.textContent = value + unit;
             val.style.color = '#c4b5fd';
+            val.style.fontWeight = '700';
             labelRow.append(lbl, val);
 
             const slider = document.createElement('input');
             slider.type = 'range';
             slider.min = min; slider.max = max; slider.step = step; slider.value = value;
-            Object.assign(slider.style, {
-                width: '100%', accentColor: '#a78bfa', cursor: 'pointer', height: '4px'
-            });
+            slider.className = 'ypp-vcp-slider'; 
             slider.oninput = (e) => {
                 const v = parseFloat(e.target.value);
+                const pct = (v - min) / (max - min) * 100;
+                slider.style.setProperty('--pct', `${pct}%`);
                 val.textContent = onChange(v) + unit;
             };
+            const initPct = (value - min) / (max - min) * 100;
+            slider.style.setProperty('--pct', `${initPct}%`);
             slider.ondblclick = () => {
                 const resetVal = parseFloat(slider.getAttribute('data-default') || value);
                 slider.value = resetVal;
@@ -1367,7 +1312,7 @@ window.YPP.features.Player = class Player {
         const hint = document.createElement('div');
         hint.textContent = 'Compressor active — audio stays clear at high volumes';
         Object.assign(hint.style, {
-            fontSize: '10px', color: 'rgba(255,255,255,0.25)', lineHeight: '1.3', textAlign: 'center'
+            fontSize: '10px', color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '0 16px', marginTop: '4px'
         });
         popup.appendChild(hint);
 
@@ -1376,9 +1321,14 @@ window.YPP.features.Player = class Player {
         resetBtn.textContent = 'Reset';
         Object.assign(resetBtn.style, {
             background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)',
-            color: '#c4b5fd', borderRadius: '8px', cursor: 'pointer', padding: '6px 0',
-            fontSize: '11px', fontWeight: '600', width: '100%', fontFamily: 'inherit'
+            color: '#c4b5fd', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '12px', fontWeight: '600',
+            textAlign: 'center', padding: '10px', width: 'calc(100% - 32px)', margin: '8px 16px 0',
+            fontFamily: 'inherit',
+            transition: 'all 0.15s ease'
         });
+        resetBtn.onmouseenter = () => { resetBtn.style.background = 'rgba(167,139,250,0.2)'; };
+        resetBtn.onmouseleave = () => { resetBtn.style.background = 'rgba(167,139,250,0.12)'; };
         resetBtn.onclick = () => {
             if (this.gainNode) this.gainNode.gain.value = 1;
             if (this._bassFilter) this._bassFilter.gain.value = 0;
@@ -1426,41 +1376,40 @@ window.YPP.features.Player = class Player {
 
     showRemainingTime(video, container) {
         if (!container) return;
-        
-        // 1. Create or get the unified dashboard
-        let dashboard = document.getElementById('ypp-time-dashboard');
-        if (!dashboard) {
-            dashboard = document.createElement('div');
-            dashboard.id = 'ypp-time-dashboard';
-            dashboard.className = 'ypp-time-dashboard';
-            container.appendChild(dashboard);
+
+        // Cleanup old structures
+        const oldDashboard = document.getElementById('ypp-time-dashboard');
+        if (oldDashboard) oldDashboard.remove();
+        const inlineMetrics = document.getElementById('ypp-native-time-metrics');
+        if (inlineMetrics) inlineMetrics.remove();
+        const oldDedicated = document.getElementById('ypp-dedicated-time-metrics');
+        if (oldDedicated) oldDedicated.remove();
+
+        const timeDisplay = container.classList.contains('ytp-time-display') 
+            ? container 
+            : container.querySelector('.ytp-time-display');
+
+        const durationNode = timeDisplay ? timeDisplay.querySelector('.ytp-time-duration') : null;
+
+        if (!timeDisplay || !durationNode) return;
+
+        // Ensure single injection
+        let timeRemainingNode = document.querySelector('.ypp-time-remaining');
+        let sepNode = document.querySelector('.ypp-time-separator-appended');
+
+        if (!timeRemainingNode) {
+            sepNode = document.createElement('span');
+            sepNode.className = 'ytp-time-separator ypp-time-separator-appended';
+            sepNode.textContent = ' · ';
+            
+            timeRemainingNode = document.createElement('span');
+            timeRemainingNode.className = 'ypp-time-remaining';
+            timeRemainingNode.style.cssText = 'font-size:inherit;font-family:inherit;color:inherit;opacity:inherit;letter-spacing:inherit;';
+
+            // Insert AFTER duration, before anything else
+            durationNode.insertAdjacentElement('afterend', sepNode);
+            sepNode.insertAdjacentElement('afterend', timeRemainingNode);
         }
-
-        // Helper to get or create metric items with optional icon
-        const getOrCreateItem = (id, className, iconSvg) => {
-            let el = document.getElementById(id);
-            if (!el) {
-                el = document.createElement('div');
-                el.id = id;
-                el.className = `ypp-time-item ${className}`;
-                if (iconSvg) {
-                    el.innerHTML = `<span class="ypp-time-icon">${iconSvg}</span><span class="ypp-time-value"></span>`;
-                } else {
-                    el.innerHTML = `<span class="ypp-time-value"></span>`;
-                }
-                dashboard.appendChild(el);
-            }
-            return el.querySelector('.ypp-time-value');
-        };
-
-        const icons = {
-            remaining: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l1.2 0.7 0.8-1.2L12 11.5V7z" transform="scale(1.1) translate(-1, -1)"/></svg>`,
-            saved: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z"/></svg>`
-        };
-
-        const remainingVal = getOrCreateItem('ypp-time-standard', 'standard');
-        const adjustedVal = getOrCreateItem('ypp-time-adjusted', 'adjusted', icons.remaining);
-        const savedVal = getOrCreateItem('ypp-time-saved-metric', 'saved', icons.saved);
 
         const format = (s) => {
             if (s === undefined || s === null || isNaN(s) || s < 0) return '0:00';
@@ -1478,38 +1427,45 @@ window.YPP.features.Player = class Player {
                 return;
             }
 
+            // Guard against the node being detached (e.g. on yt-navigate-finish)
+            if (!document.contains(timeRemainingNode)) {
+                if (document.contains(timeDisplay) && document.contains(durationNode)) {
+                    durationNode.insertAdjacentElement('afterend', sepNode);
+                    sepNode.insertAdjacentElement('afterend', timeRemainingNode);
+                } else {
+                    return; // Container is truly gone
+                }
+            }
+
             const speed = video.playbackRate || 1;
             const duration = video.duration;
             const currentTime = video.currentTime;
             
             const rawLeft = Math.max(0, duration - currentTime);
             const adjustedLeft = rawLeft / speed;
-            const totalSaved = duration - (duration / speed);
-
-            // Update Standard Remaining
-            remainingVal.textContent = rawLeft > 0 ? `(-${format(rawLeft)})` : '';
-            remainingVal.parentElement.style.display = rawLeft > 0 ? 'flex' : 'none';
             
-            // Update Speed-Aware Metrics
-            if (Math.abs(speed - 1) > 0.01) {
-                adjustedVal.textContent = `${format(adjustedLeft)} rem`;
-                
-                if (speed > 1) {
-                    savedVal.textContent = `${format(totalSaved)} saved`;
-                    savedVal.parentElement.classList.remove('negative');
-                    savedVal.parentElement.classList.add('positive');
-                } else {
-                    savedVal.textContent = `${format((duration / speed) - duration)} extra`;
-                    savedVal.parentElement.classList.remove('positive');
-                    savedVal.parentElement.classList.add('negative');
-                }
-                adjustedVal.parentElement.style.display = 'flex';
-                savedVal.parentElement.style.display = 'flex';
-                dashboard.classList.add('active');
+            // Hide if no time remaining
+            if (rawLeft <= 0) {
+                timeRemainingNode.style.display = 'none';
+                sepNode.style.display = 'none';
+                return;
+            }
+
+            timeRemainingNode.style.display = '';
+            sepNode.style.display = '';
+
+            if (Math.abs(speed - 1) <= 0.01) {
+                // 1x speed - Native remaining time
+                timeRemainingNode.textContent = `-${format(rawLeft)}`;
             } else {
-                adjustedVal.parentElement.style.display = 'none';
-                savedVal.parentElement.style.display = 'none';
-                dashboard.classList.remove('active');
+                // Speed changed - Show adjusted time + saved/extra
+                if (speed > 1) {
+                    const totalSaved = duration - (duration / speed);
+                    timeRemainingNode.textContent = `-${format(adjustedLeft)} · ${format(totalSaved)} saved`;
+                } else {
+                    const totalExtra = (duration / speed) - duration;
+                    timeRemainingNode.textContent = `-${format(adjustedLeft)} · ${format(totalExtra)} extra`;
+                }
             }
         };
 

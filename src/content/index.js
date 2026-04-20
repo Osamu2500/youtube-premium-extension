@@ -62,6 +62,7 @@ import './features/pages/watch/comment-filter.js';
 
 // Player features
 import './features/player/player.js';
+import './features/player/global-bar.js';
 import './features/player/player-tools.js';
 import './features/player/return-dislike.js';
 import './features/player/mini-player.js';

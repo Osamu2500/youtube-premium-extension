@@ -92,6 +92,7 @@ window.YPP.SettingsSchema = {
         // --- Player Tools ---
         enableCustomSpeed:       { type: 'boolean', default: true },
         enableCinemaFilters:     { type: 'boolean', default: true },
+        enableGlobalPlayerBar:   { type: 'boolean', default: true },
         // Cinema Filters — persisted state (preset index + slider adjustments)
         cinemaFilterIndex:       { type: 'number',  default: 0,   min: 0, max: 42 }, // 43 filters total (0-42)
         cinemaFilterBrightness:  { type: 'number',  default: 100, min: 0, max: 200 },

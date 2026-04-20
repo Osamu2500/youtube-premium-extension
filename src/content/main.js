@@ -83,6 +83,12 @@
                 // Load settings and initialize features
                 await this.loadSettings();
                 this.initFeatureManager();
+                
+                // Initial feature application
+                if (this.featureManager) {
+                    this.featureManager.init(this.settings);
+                }
+
                 this.updateContext();
                 this.setupEvents();
 
@@ -91,6 +97,7 @@
                 this.bootstrapLock = false;
 
                 const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log('%c[YPP] YouTube Premium Plus Global Initialized!', 'color: #a78bfa; font-weight: bold; font-size: 12px;');
                 this.Utils?.log(`Extension Initialized Successfully in ${loadTime}ms`, 'MAIN');
 
                 // Visual feedback
