@@ -211,6 +211,7 @@ window.YPP.CONSTANTS = {
         enableSnapshot: true,
         enableLoop: true,
         enableRemainingTime: true,
+        enableVolumeBoost: true,
 
         // Search Redesign
         searchGrid: true,
@@ -450,7 +451,10 @@ window.YPP.CONSTANTS = {
         audioCompressor: 'AudioCompressor',
         videoResumer: 'VideoResumer',
         commentFilter: 'CommentFilter',
-        globalPlayerBar: 'GlobalPlayerBar'
+        globalPlayerBar: 'GlobalPlayerBar',
+        volumeBoost: 'VolumeBooster',
+        autoQuality: 'AutoQuality',
+        timeDisplay: 'TimeDisplay'
     }
 };
 

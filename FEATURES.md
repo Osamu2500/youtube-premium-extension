@@ -1,485 +1,226 @@
-# YouTube Premium Plus - Complete Feature Guide 📚
-
-This guide provides in-depth information about every feature in the YouTube Premium Plus extension.
-
-## Table of Contents
-- [Theme & Visual Customization](#theme--visual-customization)
-- [Navigation Features](#navigation-features)
-- [Home Feed Control](#home-feed-control)
-- [Search Enhancements](#search-enhancements)
-- [Player Tools](#player-tools)
-- [Focus & Viewing Modes](#focus--viewing-modes)
-- [Distraction Management](#distraction-management)
-- [Tips & Tricks](#tips--tricks)
+# YouTube Premium Plus — Feature Registry
+> **This file is the single source of truth for all extension features.**
+> Update it whenever a feature is added, removed, renamed, or moved.
+> Antigravity: Read this file first at the start of every session before touching any code.
 
 ---
 
-## Theme & Visual Customization
+## How to Use This Document
 
-### 🎛️ Design Customization Suite
-**Location:** Global → Customization
-
-Take complete control over YouTube's core visual architecture:
-- **Typography** 
-  - Change fonts to **Inter**, **System Defaults**, or **Monospace**.
-  - Dynamically scale text size from `80%` to `130%`.
-- **Layout Density** 
-  - Manage grid spacing by toggling between **Compact**, **Comfortable**, and **Spacious** layouts.
-- **Card Styles** 
-  - Swap out YouTube's default video cards to **Flat**, **Elevated**, or rich **Glassmorphic** designs.
-- **Accent Color Control** 
-  - Replace YouTube's standard red with an integrated dynamic color picker handling the entire theme.
-- **Micro-Tuning** 
-  - Granular control over **Thumbnail Corner Radius** and **Sidebar Opacity** via precise sliders.
-
-### 🎭 Animations & Motion Control
-**Location:** Global → Customization
-
-Fine-tune how the interface feels:
-- **Enable/Disable Animations** - Control over CSS transitions and hover effects globally.
-- **Reduced Motion** - Respects user preferences by switching to faster, linear easing transitions to prevent motion sickness.
-
-### Premium Theme
-**Location:** Global → Theme & UI
-
-Transforms the entire YouTube interface with:
-- **Glassmorphism effects** - Frosted glass aesthetics with blur and transparency
-- **Modern Material 3 design** - Google's latest design language
-- **Smooth animations** - Polished transitions and hover effects
-- **Enhanced typography** - Clean, readable Inter font family
-- **Pop-out effects** - 3D depth with shadows and scaling
-
-**Best For:** Users who want a stunning, modern YouTube experience
-
-### True Black Mode
-**Location:** Global → Theme & UI
-
-Perfect for OLED displays:
-- Pure `#000000` black backgrounds (not dark gray)
-- Reduces screen burn-in on OLED/AMOLED displays
-- Better battery life on mobile devices
-- Easier on the eyes in dark environments
-
-**Tip:** Combine with Premium Theme for the ultimate dark mode experience
-
-### Hide Scrollbar
-**Location:** Global → Theme & UI
-
-Provides a cleaner, more minimal interface by hiding the scrollbar while maintaining scroll functionality.
+| Column | Meaning |
+|---|---|
+| **Feature Name** | Human-readable name shown in the popup UI |
+| **Class Name** | The JS class name registered in `FEATURE_MAP` in `constants.js` |
+| **File Path** | Path relative to `src/` |
+| **Settings Key** | The key in `DEFAULT_SETTINGS` that enables/disables this feature (`null` = always on) |
+| **Pages** | Which YouTube pages this feature runs on |
+| **Status** | `stable` / `wip` / `broken` / `disabled` |
+| **Depends On** | Other features or systems this feature requires to work |
+| **Description** | One sentence: what it does for the user |
 
 ---
 
-## Navigation Features
+## 🎛️ Player Features
 
-### Custom Header Buttons
-**Location:** Navigation → Header Buttons
-
-Add quick-access buttons to YouTube's top navigation bar for:
-
-| Button | Functionality |
-|--------|--------------|
-| **Trending** | Direct link to trending videos |
-| **Shorts** | Access YouTube Shorts feed |
-| **Subscriptions** | Jump to your subscription feed |
-| **Watch Later** | View your Watch Later playlist |
-| **Playlists** | Access all your playlists |
-| **History** | Browse your watch history |
-
-**Features:**
-- Glassmorphic button styling
-- Smooth hover animations
-- Replaces need for sidebar navigation
-- Always visible regardless of scroll position
-
-**Use Case:** Navigate YouTube faster without using the sidebar
-
-### Force Hide Sidebar
-**Location:** Navigation → Sidebar Control
-
-Completely removes YouTube's default sidebar and relies on header navigation buttons instead.
-
-**Benefits:**
-- More horizontal space for content
-- Cleaner, less cluttered interface
-- Focus on the main content area
-
-**Note:** Make sure to enable necessary header buttons before hiding the sidebar!
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Player Core | `Player` | `content/features/player/player.js` | `null` | watch | stable | — | Core player enhancements: PiP, speed, loop, and snapshot |
+| Volume Booster | `VolumeBooster` | `content/features/player/volume-booster.js` | `enableVolumeBoost` | watch | stable | Player | Increases audio gain past 100% using Web Audio API |
+| Auto Quality | `AutoQuality` | `content/features/player/auto-quality.js` | `autoQuality`, `autoCinema` | watch | stable | — | Forces highest video quality and theater mode |
+| Time Display | `TimeDisplay` | `content/features/player/time-display.js` | `enableRemainingTime` | watch | stable | — | Shows remaining time and saved time adjusted for speed |
+| Player Tools | `PlayerTools` | `content/features/player/player-tools.js` | `videoControlsEnabled` | watch | stable | Player | Custom speed slider, cinema filters panel, brightness/contrast controls |
+| Return Dislike | `ReturnDislike` | `content/features/player/return-dislike.js` | `null` | watch | stable | — | Fetches and displays dislike count via Return YouTube Dislike API |
+| SponsorBlock | `SponsorBlock` | `content/features/player/sponsor-block.js` | `null` | watch | stable | — | Skips sponsored segments using SponsorBlock community database |
+| Mini Player | `MiniPlayer` | `content/features/player/mini-player.js` | `enablePiP` | watch | stable | — | Picture-in-picture and mini player controls |
+| Video Filters | `VideoFilters` | `content/features/player/video-filters.js` | `enableCinemaFilters` | watch | stable | — | Brightness, contrast, saturation, hue CSS filters on the video element |
+| Ambient Mode | `AmbientMode` | `content/features/player/ambient-mode/ambient-mode.js` | `ambientMode` | watch | stable | — | Projects video colors as a glowing backdrop behind the player |
+| Audio Mode | `AudioMode` | `content/features/player/ambient-mode/audio-mode.js` | `audioModeEnabled` | watch | stable | — | Minimises video to audio-only mode with album-art style display |
+| Video Controls | `VideoControls` | `content/features/player/video-controls/video-controls.js` | `videoControlsEnabled` | watch | stable | Player | Injects custom buttons (snapshot, loop, PiP) into player controls bar |
 
 ---
 
-## Home Feed Control
+## 🏠 Home Page Features
 
-### Hook-Free Home
-**Location:** Home → Feed Content
-
-The nuclear option for productivity:
-- Completely hides the entire YouTube home feed
-- Shows a clean, empty page when you visit youtube.com
-- Forces intentional video watching (search or direct links only)
-- Eliminates the endless scroll trap
-
-**Perfect For:** Users struggling with YouTube addiction or time management
-
-### Hide Watched Videos
-**Location:** Home → Feed Content
-
-Automatically hides videos you've already watched:
-- Detects videos with >80% watch progress
-- Applies to home feed and recommendations
-- Keeps your feed fresh with new content
-- Works seamlessly with YouTube's SPA architecture
-
-**Tip:** Combine with "Sort by Upload Date" (if implemented) for the freshest content
-
-### Hide Mixes
-**Location:** Home → Feed Content
-
-Removes algorithmic "Mix" playlists:
-- No more "My Mix" or "Discover Mix"
-- Focuses on individual videos instead of auto-generated playlists
-- Cleaner feed organization
-
-### 4x4 Grid Layout
-**Location:** Home → Layout
-
-Forces a consistent grid layout:
-- Always shows 4 videos per row
-- More predictable and organized appearance
-- Better use of widescreen monitors
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Home Organizer | `HomeOrganizer` | `content/features/pages/home/home-organizer.js` | `hookFreeHome` | home | stable | — | Removes algorithmic sections, promoted content, and hook-free layout |
+| Shorts Tools | `ShortsTools` | `content/features/pages/home/shorts-tools.js` | `hideShorts` | home, search, subscriptions | stable | — | Hides Shorts shelf, Shorts links, and Shorts tab from navigation |
 
 ---
 
-## Search Enhancements
+## 🔍 Search Page Features
 
-### Search Grid View
-**Location:** Search → Search Layout
-
-Transforms search results into a modern grid:
-- Card-based layout similar to home feed
-- Better visual browsing
-- Easier to scan multiple results
-- Modern, premium aesthetic
-
-### Clean Search
-**Location:** Search → Filters
-
-Removes clutter from search results:
-- Hides "For You" suggestions
-- Removes "People also watched" sections
-- Shows only actual search results
-- Faster, more focused searching
-
-### Hide Shorts in Search
-**Location:** Search → Filters
-
-Excludes YouTube Shorts from search results entirely:
-- Shows only long-form content
-- Better for desktop viewing
-- Cleaner search experience
-
-### Shorts Auto-Scroll
-**Location:** Search → Filters
-
-Automatically plays the next Short when one ends (TikTok-style behavior).
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Search Redesign | `SearchRedesign` | `content/features/pages/search/search-redesign.js` | `searchGrid` | search | stable | — | Converts search results from list view to a configurable grid layout |
+| Advanced Filter | `AdvancedFilter` | `content/features/pages/search/advanced-filter.js` | `cleanSearch` | search | stable | — | Hides "For You", "People also watched", channel cards, and Shorts from search |
 
 ---
 
-## Player Tools
+## 📺 Watch Page Features
 
-### Auto-Quality (1080p+)
-**Location:** Player → Enhancements
-
-Forces the highest available quality:
-- Automatically selects 1080p, 1440p, or 4K
-- No manual quality adjustments needed
-- Best viewing experience on every video
-
-**Note:** Requires sufficient bandwidth
-
-### Remaining Time Display
-**Location:** Player → Enhancements
-
-Shows time remaining instead of elapsed time:
-- Example: `-3:45` instead of `2:15` (for a 6-minute video)
-- Better for time management
-- Know exactly how much longer a video will take
-
-### Volume Booster
-**Location:** Player → Enhancements
-
-Amplify audio beyond 100%:
-- Boost up to 600% volume
-- Great for quiet videos
-- Adds a volume slider in the player
-
-**Warning:** Can cause distortion at very high levels
-
-### Custom Speed Control
-**Location:** Player → Enhancements
-
-Precise playback speed input:
-- Enter exact speeds (e.g., 1.73x)
-- Not limited to YouTube's preset speeds
-- Perfect for fine-tuning lecture playback
-
-### Cinema Filters & Visual Effects
-**Location:** Player → Enhancements
-
-Adjust video appearance with dynamic, real-time filters directly on the player:
-- **Artistic Presets** - One-click themes including Cyberpunk, Matrix, Vaporwave, Sunset, Glitch, and CRT Display effects.
-- **CRT Retro Emulator** - Bring back the nostalgic scanlines, screen curvature, and phosphor glow with an authentic CRT preset.
-- **Granular Core Adjustments**: 
-  - **Brightness / Contrast / Saturation**
-  - **Sepia / Grayscale / Color Invert**
-
-**Use Cases:**
-- Restore or recolor videos based on aesthetic preference.
-- Apply true vintage looks with CRT and Grayscale models.
-- Enhance accessibility formatting through high contrast or inverted colors.
-
-### Snapshot Button
-**Location:** Player → Enhancements (Grid 2)
-
-Take screenshots of the current video frame:
-- One-click capture
-- Downloads as PNG
-- Perfect for tutorials, memes, or reference
-
-### Loop Button
-**Location:** Player → Enhancements (Grid 2)
-
-Instantly loop the current video:
-- Repeats indefinitely
-- Great for music, short clips, or studying
-- No need to use YouTube's context menu
-
-### Picture-in-Picture (PiP)
-**Location:** Player → Enhancements (Grid 2)
-
-Easy PiP mode toggle:
-- Watch videos in a floating window
-- Multitask while watching
-- Works across all tabs
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Zen Mode | `ZenMode` | `content/features/pages/watch/zen-mode.js` | `zenMode` | watch | stable | — | Hides all distractions, dims UI, focuses entirely on the video |
+| Focus Mode | `FocusMode` | `content/features/pages/watch/focus-mode.js` | `enableFocusMode` | watch | stable | — | Removes comments, sidebar, merch, and end screens for distraction-free viewing |
+| Study Mode | `StudyMode` | `content/features/pages/watch/study-mode.js` | `studyMode` | watch | stable | — | Forces 1.25x speed, enables focus mode, adds study-optimised layout |
+| Watch History | `WatchHistoryTracker` | `content/features/pages/watch/watch-history.js` | `null` | watch | stable | — | Tracks videos watched in current session for continue-watching feature |
+| Continue Watching | `ContinueWatching` | `content/features/pages/watch/continue-watching.js` | `null` | home | stable | WatchHistoryTracker | Shows a "Continue Watching" row on the home page for unfinished videos |
 
 ---
 
-## Focus & Viewing Modes
+## 📚 Library Features
 
-### Zen Mode
-**Location:** Player → Modes
-
-Distraction-free cinema experience:
-- Hides comments section
-- Removes suggested videos sidebar
-- Hides video description and info
-- Focuses entirely on the video player
-- Optional dark background overlay
-
-**Perfect For:** 
-- Watching movies or documentaries
-- Avoiding spoilers in comments
-- Deep focus sessions
-
-**Tip:** Use with Auto Cinema for instant immersion
-
-### Study Mode
-**Location:** Player → Modes
-
-Optimized for educational content:
-- Automatically sets playback speed to 1.25x
-- Enables closed captions/subtitles
-- Ideal learning speed without too much time loss
-
-**Great For:** Online courses, lectures, tutorials
-
-### Auto Cinema
-**Location:** Player → Modes
-
-Automatically expands videos to theater mode when they load:
-- Instant wide view
-- No manual clicking needed
-- Better for desktop viewing
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| History Tracker | `HistoryTracker` | `content/features/pages/library/history/history-tracker.js` | `null` | history | stable | — | Enhanced watch history with extended metadata and session grouping |
+| History Redesign | `HistoryRedesign` | `content/features/pages/library/history/history-redesign.js` | `null` | history | stable | — | Visual redesign of the history page with grid layout and better filtering |
+| Playlist Redesign | `PlaylistRedesign` | `content/features/pages/library/playlist/playlist-redesign.js` | `null` | playlist | stable | — | Improves playlist page layout with better spacing and controls |
+| Playlist Duration | `PlaylistDuration` | `content/features/pages/library/playlist/duration-calculator.js` | `null` | playlist | stable | — | Calculates and displays total playlist duration and time at current speed |
+| Reverse Playlist | `ReversePlaylist` | `content/features/pages/library/playlist/reverse-playlist.js` | `null` | playlist | stable | — | Adds a button to play a playlist in reverse order |
 
 ---
 
-## Distraction Management
+## 👥 Subscriptions Features
 
-### Focus Mode
-**Location:** Global → Focus
-
-Global distraction reduction:
-- Hides all comment sections
-- Removes suggested video sidebars
-- Similar to Zen Mode but applies everywhere
-
-**Difference from Zen Mode:** Works on all pages, not just the watch page
-
-### Hide Shorts Globally
-**Location:** Global → Focus
-
-Removes Shorts from:
-- Home feed
-- Search results
-- Subscriptions page
-- Everywhere on YouTube
-
-**For Users Who:** Prefer long-form content or find Shorts distracting
-
-### Hide Comments
-**Location:** Player → Distractions
-
-Removes the comments section on watch pages.
-
-**Benefits:**
-- Avoid negativity
-- Prevent spoilers
-- Focus on content
-- Faster page load
-
-### Hide End Screens
-**Location:** Player → Distractions
-
-Removes end screen elements:
-- No video suggestion cards
-- No channel subscribe prompts
-- Clean video endings
-- Better for binge-watching or focus
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Subscription Folders | `SubscriptionFolders` | `content/features/pages/subscriptions/subscription-folders.js` | `subscriptionFolders` | subscriptions | stable | — | Groups subscribed channels into user-defined folders |
+| Subscription Manager | `SubscriptionManager` | `content/features/pages/subscriptions/subscription-manager.js` | `null` | subscriptions | stable | — | Bulk subscription management — sort, filter, unsubscribe |
+| Subscriptions UI | — | `content/features/pages/subscriptions/subscriptions-ui.js` | `null` | subscriptions | stable | SubscriptionFolders | UI components for the subscription folder system |
+| Subscriptions Index | — | `content/features/pages/subscriptions/index.js` | `null` | subscriptions | stable | — | Entry point that initialises all subscription feature modules |
 
 ---
 
-## Tips & Tricks
+## 🌐 Global / Core Features
 
-### Recommended Combinations
-
-**🎯 Maximum Productivity Setup**
-```
-✅ Hook-Free Home
-✅ Hide Shorts Globally
-✅ Focus Mode
-✅ Auto-Quality
-✅ Remaining Time Display
-```
-
-**🎬 Premium Viewing Experience**
-```
-✅ Premium Theme
-✅ True Black Mode
-✅ Zen Mode
-✅ Auto Cinema
-✅ Auto-Quality (1080p+)
-```
-
-**📚 Study & Learning Setup**
-```
-✅ Study Mode
-✅ Custom Speed Control
-✅ Snapshot Button
-✅ Hide Comments
-✅ Remaining Time Display
-```
-
-**🚀 Power User Navigation**
-```
-✅ All Header Nav Buttons
-✅ Force Hide Sidebar
-✅ Search Grid View
-✅ Hide Watched Videos
-```
-
-### Performance Tips
-
-1. **Enable only what you need** - More features = slightly higher resource usage
-2. **Disable Premium Theme on low-end devices** - For better performance
-3. **Use True Black Mode** - Saves battery on OLED screens
-
-### Keyboard Shortcuts
-
-YouTube Premium Plus works seamlessly with YouTube's existing shortcuts:
-- `K` - Play/Pause
-- `J/L` - Skip backward/forward 10 seconds
-- `F` - Fullscreen
-- `M` - Mute
-- `C` - Toggle captions
-- `< / >` - Change playback speed
-
-### Troubleshooting
-
-**Feature not working?**
-1. Refresh the YouTube page
-2. Check if the feature is enabled in the extension popup
-3. Try disabling conflicting extensions
-4. Clear browser cache and reload
-
-**Settings not saving?**
-- Make sure you're allowing Chrome storage permissions
-- Check if you're in Incognito mode (settings may not persist)
-
-**UI looks broken?**
-- Disable Premium Theme temporarily
-- Check for conflicts with other YouTube extensions
-- Report the issue on GitHub
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Theme | `Theme` | `content/features/core/global/theme.js` | `premiumTheme` | all | stable | — | Applies the active CSS theme and CSS variable overrides to YouTube |
+| Content Control | `ContentControl` | `content/features/core/global/content-control.js` | `null` | all | stable | — | Master toggle system for hiding comments, merch, live chat, end screens |
+| Night Mode | `NightModeManager` | `content/features/core/global/night-mode.js` | `blueLight` | all | stable | — | Blue light filter and dim overlay with adjustable intensity sliders |
+| Data API | `DataAPI` | `content/features/core/global/data-api.js` | `null` | all | stable | — | Bridges page context to extension context for accessing YouTube player APIs |
+| Mark Watched | `MarkWatched` | `content/features/core/global/mark-watched.js` | `enableMarkWatched` | all | broken | — | Right-click to manually mark videos as watched; hides watched videos from feed |
+| Keyboard Shortcuts | `KeyboardShortcuts` | `content/features/core/global/keyboard-shortcuts.js` | `keyboardShortcuts` | all | stable | — | Custom hotkeys for zen mode, focus mode, snapshot, speed, PiP, ambient mode |
+| Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `null` | all | wip | HistoryTracker | Displays watch time analytics and stats panel |
 
 ---
 
-## Feature Compatibility Matrix
+## 🗂️ Layout Features
 
-| Feature | Home | Watch | Search | Subscriptions |
-|---------|------|-------|--------|---------------|
-| Premium Theme | ✅ | ✅ | ✅ | ✅ |
-| Header Nav | ✅ | ✅ | ✅ | ✅ |
-| Hide Watched | ✅ | ❌ | ❌ | ✅ |
-| Grid Layout | ✅ | ❌ | ✅ | ❌ |
-| Zen Mode | ❌ | ✅ | ❌ | ❌ |
-| Focus Mode | ✅ | ✅ | ✅ | ✅ |
-| Player Tools | ❌ | ✅ | ❌ | ❌ |
+| Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
+|---|---|---|---|---|---|---|---|
+| Layout Manager | `Layout` | `content/features/core/layout/layout-manager.js` | `homeColumns` | home, search, channel | stable | — | Controls grid column count (1–8) via CSS variable `--ypp-active-columns` |
+| Header Nav | `HeaderNav` | `content/features/core/layout/header-nav.js` | `navTrending` | all | stable | UIManager | Injects quick-nav buttons (Trending, Shorts, History, etc.) into the masthead |
+| Sidebar Manager | `SidebarManager` | `content/features/core/layout/sidebar.js` | `forceHideSidebar` | all | stable | — | Controls sidebar visibility: hover mode, force hide, mini guide override |
 
 ---
 
-## Advanced Usage
+## ⚙️ Infrastructure (Not Features — Do Not Add to FEATURE_MAP)
 
-### Custom CSS (For Developers)
-
-You can further customize the extension by editing `src/content/styles.css`. Common modifications:
-
-**Change accent color:**
-```css
-:root {
-  --accent-color: #ff6b6b; /* Change to your preferred color */
-}
-```
-
-**Adjust glassmorphism intensity:**
-```css
-.glass-effect {
-  backdrop-filter: blur(20px); /* Increase/decrease blur */
-  background: rgba(255, 255, 255, 0.1); /* Adjust transparency */
-}
-```
-
-### Feature Modules
-
-Each feature is self-contained in `src/content/features/`. To modify behavior:
-- `theme.js` - Visual theming
-- `player.js` - Video player enhancements
-- `header-nav.js` - Navigation buttons
-- `zen-mode.js` - Zen mode implementation
-- And more...
+| System | File Path | Purpose |
+|---|---|---|
+| Main Bootstrap | `content/main.js` | Extension entry point, SPA navigation handler, settings loader |
+| Feature Manager | `content/feature-manager.js` | Instantiates and runs all features, error tracking, safeRun wrapper |
+| Base Feature | `content/features/base-feature.js` | Abstract base class all features extend — lifecycle: update/enable/disable |
+| Constants | `content/constants.js` | All DOM selectors, DEFAULT_SETTINGS, FEATURE_MAP, TIMINGS, THEMES |
+| Settings Schema | `content/settings-schema.js` | Schema validation, default merging, migration logic |
+| Utils | `content/utils.js` | DOMObserver, logging, toast, waitFor, loadSettings, performance helpers |
+| Service Worker | `background/service-worker.js` | MV3 background worker — messaging, storage sync, alarms |
+| Vite Entry | `content/index.js` | Import order for Vite bundler — ALL feature files must be listed here |
+| Styles | `content/styles.css` | Global CSS injected into YouTube — theme variables, layout overrides |
 
 ---
 
-## Future Features (Roadmap)
+## 🔴 Known Broken / Incomplete Features
 
-Potential additions based on community feedback:
-
-- 🔄 **Video History Tracker** - Detailed watch history analytics
-- 📊 **Channel Statistics** - Enhanced channel insights
-- 🎨 **Custom Themes** - User-created theme support
-- ⌨️ **Custom Keyboard Shortcuts** - Configurable hotkeys
-- 📥 **Batch Download** - Download multiple videos
-- 🔔 **Smart Notifications** - Advanced subscription alerts
-
-Want to suggest a feature? [Open an issue](https://github.com/Osamu2500/youtube-premium-extension/issues)!
+| Feature | Problem | Priority |
+|---|---|---|
+| Mark Watched / Hide Watched | Runs once on load, misses SPA re-renders, no persistence of watched IDs | High |
+| Stats Visualizer | Partially implemented, not connected to real watch data | Medium |
+| `getConfigKey()` in BaseFeature | Returns `null` by default — many features can't be toggled from popup | High |
+| Search page blank grid space | Same margin/mini-guide bug as homepage — not yet fixed for search | High |
 
 ---
 
-**Need help?** Check the [README](README.md) or open an issue on GitHub.
+## 🗺️ Settings Key Master Index
+
+Every key in `DEFAULT_SETTINGS` mapped to which feature uses it:
+
+| Settings Key | Feature | Type | Default |
+|---|---|---|---|
+| `premiumTheme` | Theme | boolean | `true` |
+| `activeTheme` | Theme | string | `'default'` |
+| `trueBlack` | Theme (legacy) | boolean | `false` |
+| `hideScrollbar` | Theme | boolean | `false` |
+| `homeColumns` | Layout Manager | number | `4` |
+| `searchColumns` | Layout Manager | number | `4` |
+| `channelColumns` | Layout Manager | number | `4` |
+| `hideShorts` | Shorts Tools | boolean | `false` |
+| `hideSearchShorts` | Advanced Filter | boolean | `true` |
+| `hideMixes` | Content Control | boolean | `false` |
+| `hideWatched` | Mark Watched | boolean | `false` |
+| `enableMarkWatched` | Mark Watched | boolean | `true` |
+| `hideMerch` | Content Control | boolean | `false` |
+| `hideComments` | Content Control | boolean | `false` |
+| `hideLiveChat` | Content Control | boolean | `false` |
+| `hideFundraiser` | Content Control | boolean | `false` |
+| `hideEndScreens` | Content Control | boolean | `false` |
+| `hookFreeHome` | Home Organizer | boolean | `false` |
+| `autoCinema` | Player | boolean | `false` |
+| `enablePiP` | Mini Player | boolean | `true` |
+| `enableTranscript` | Player | boolean | `true` |
+| `enableSnapshot` | Video Controls | boolean | `true` |
+| `enableLoop` | Video Controls | boolean | `true` |
+| `enableVolumeBoost` | Volume Booster | boolean | `true` |
+| `searchGrid` | Search Redesign | boolean | `true` |
+| `cleanSearch` | Advanced Filter | boolean | `true` |
+| `navTrending` | Header Nav | boolean | `true` |
+| `forceHideSidebar` | Sidebar Manager | boolean | `false` |
+| `hoverSidebar` | Sidebar Manager | boolean | `true` |
+| `enableCustomSpeed` | Player Tools | boolean | `true` |
+| `enableCinemaFilters` | Player Tools | boolean | `true` |
+| `filterBrightness` | Video Filters | number | `100` |
+| `filterContrast` | Video Filters | number | `100` |
+| `adSkipper` | Player | boolean | `true` |
+| `blueLight` | Night Mode | number | `0` |
+| `dim` | Night Mode | number | `0` |
+| `zenMode` | Zen Mode | boolean | `false` |
+| `enableFocusMode` | Focus Mode | boolean | `false` |
+| `cinemaMode` | Focus Mode | boolean | `false` |
+| `dopamineDetox` | Focus Mode | boolean | `false` |
+| `ambientMode` | Ambient Mode | boolean | `false` |
+| `audioModeEnabled` | Audio Mode | boolean | `false` |
+| `videoControlsEnabled` | Video Controls | boolean | `true` |
+| `subscriptionFolders` | Subscription Folders | boolean | `true` |
+| `studyMode` | Study Mode | boolean | `false` |
+| `keyboardShortcuts` | Keyboard Shortcuts | boolean | `true` |
+| `shortcut_zenMode` | Keyboard Shortcuts | string | `'Shift+Z'` |
+| `shortcut_focusMode` | Keyboard Shortcuts | string | `'Shift+F'` |
+| `shortcut_cinemaMode` | Keyboard Shortcuts | string | `'Shift+C'` |
+| `shortcut_snapshot` | Keyboard Shortcuts | string | `'Shift+S'` |
+| `shortcut_loop` | Keyboard Shortcuts | string | `'Shift+L'` |
+| `shortcut_pip` | Keyboard Shortcuts | string | `'Shift+P'` |
+| `shortcut_speedDown` | Keyboard Shortcuts | string | `'Shift+,'` |
+| `shortcut_speedUp` | Keyboard Shortcuts | string | `'Shift+.'` |
+| `shortcut_speedReset` | Keyboard Shortcuts | string | `'Shift+R'` |
+| `shortcut_ambientMode` | Keyboard Shortcuts | string | `'Shift+M'` |
+
+---
+
+## 📋 Instructions for Antigravity
+
+**At the start of every session:**
+1. Read this file completely before opening any feature file
+2. Check the "Known Broken" table — don't create new features on top of broken foundations
+3. When editing a feature, confirm its `Settings Key` matches `getConfigKey()` in its class
+4. When adding a new feature, add a row to this file AND add it to `FEATURE_MAP` in `constants.js` AND add its import to `src/content/index.js`
+5. Never rename a settings key without a migration entry in `settings-schema.js`
+6. After any edit to a feature file, run `npm run build` before testing
+
+**File size rule:** If any feature file exceeds 300 lines, flag it for splitting before adding more code to it.
+
+**The three files you must never edit carelessly:**
+- `content/constants.js` — changing FEATURE_MAP or DEFAULT_SETTINGS breaks the entire system
+- `content/features/base-feature.js` — changing the lifecycle breaks all 36 features simultaneously  
+- `src/content/index.js` — wrong import order or missing import breaks the Vite bundle silently

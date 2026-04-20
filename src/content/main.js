@@ -180,6 +180,7 @@
             window.YPP.sharedObserver.start();
 
             this.featureManager = new window.YPP.FeatureManager();
+            window.YPP.featureManager = this.featureManager;
 
             if (!this.featureManager || typeof this.featureManager.init !== 'function') {
                 throw new Error('FeatureManager initialization failed');

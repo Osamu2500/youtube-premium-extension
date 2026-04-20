@@ -69,6 +69,10 @@ window.YPP.SettingsSchema = {
         enableSnapshot:      { type: 'boolean', default: true },
         enableLoop:          { type: 'boolean', default: true },
         enableRemainingTime: { type: 'boolean', default: true },
+        enableVolumeBoost:   { type: 'boolean', default: true },
+        volumeLevel:         { type: 'number',  default: 1, min: 1, max: 6 },
+        volumeBoostBass:     { type: 'number',  default: 0, min: -12, max: 12 },
+        volumeBoostTreble:   { type: 'number',  default: 0, min: -12, max: 12 },
 
         // --- Search ---
         searchGrid:          { type: 'boolean', default: true },
