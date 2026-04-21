@@ -270,6 +270,11 @@ window.YPP.CONSTANTS = {
         audioModeEnabled: false,
         videoControlsEnabled: true,
         subscriptionFolders: true,
+        wheelControls: true,
+        audioCompressor: false,
+        videoResumer: true,
+        commentFilter: false,
+        contextMenu: true,
 
         // Study Mode
         studyMode: false,

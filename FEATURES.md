@@ -157,8 +157,8 @@
 | Feature | Problem | Priority |
 |---|---|---|
 | Stats Visualizer | Partially implemented, not connected to real watch data | Medium |
-| `getConfigKey()` in BaseFeature | Returns `null` by default — many features can't be toggled from popup | High |
 | Search page blank grid space | Same margin/mini-guide bug as homepage — not yet fixed for search | High |
+| Popup Settings | Missing feature toggles and `getConfigKey` overrides added, but some keys may still be unverified | Low |
 
 ---
 

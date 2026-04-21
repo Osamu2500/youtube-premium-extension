@@ -99,15 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideChannelCards',
         
         // Player
-        'sponsorBlock',
-        'returnYouTubeDislike',
         'autoQuality',
-        'volumeBoost',
+        'enableVolumeBoost',
+        'wheelControls', // wheel-controls.js
+        'audioCompressor', // audio-compressor.js
+        'videoResumer', // video-resumer.js
         'enableCustomSpeed',
-        'enablePiP', // Button
-        'miniPlayer', // Scroll PiP
-        'loopBtn',
-        'snapshotBtn',
+        'enablePiP', // Button / Scroll PiP
+        'enableLoop',
+        'enableSnapshot',
         'enableRemainingTime',
         'enableStatsForNerds',
 
@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Distractions
         'enableFocusMode',
         'hideComments',
+        'commentFilter', // comment-filter.js
         'hideLiveChat',
         'hideFundraiser',
         'hideEndScreens',
