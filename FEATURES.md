@@ -36,6 +36,12 @@
 | Ambient Mode | `AmbientMode` | `content/features/player/ambient-mode/ambient-mode.js` | `ambientMode` | watch | stable | — | Projects video colors as a glowing backdrop behind the player |
 | Audio Mode | `AudioMode` | `content/features/player/ambient-mode/audio-mode.js` | `audioModeEnabled` | watch | stable | — | Minimises video to audio-only mode with album-art style display |
 | Video Controls | `VideoControls` | `content/features/player/video-controls/video-controls.js` | `videoControlsEnabled` | watch | stable | Player | Injects custom buttons (snapshot, loop, PiP) into player controls bar |
+| Audio Compressor | `AudioCompressor` | `content/features/player/audio-compressor.js` | `audioCompressor` | watch | stable | — | Uses DynamicsCompressorNode to normalize volume levels, boosting quiet sounds |
+| Filter Presets | `FilterPresets` | `content/features/player/filter-presets.js` | `null` | all | stable | — | Shared constants for cinematic and artistic CSS filters |
+| Global Player Bar | `GlobalPlayerBar` | `content/features/player/global-bar.js` | `enableGlobalPlayerBar` | all (non-YT) | stable | GlobalBarUI, FilterPresets | Floating player bar for speed, filters, and PiP on external sites |
+| Global Bar UI | `GlobalBarUI` | `content/features/player/global-bar-ui.js` | `null` | all (non-YT) | stable | — | UI component system for the Global Player Bar |
+| Wheel Controls | `WheelControls` | `content/features/player/wheel-controls.js` | `null` | watch | stable | — | Allows scrolling over the video player while holding modifiers to change speed and volume |
+| Video Resumer | `VideoResumer` | `content/features/player/video-resumer.js` | `null` | watch | stable | — | Remembers exact playback position locally and automatically resumes |
 
 ---
 
@@ -52,8 +58,11 @@
 
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
-| Search Redesign | `SearchRedesign` | `content/features/pages/search/search-redesign.js` | `searchGrid` | search | stable | — | Converts search results from list view to a configurable grid layout |
+| Search Redesign | `SearchRedesign` | `content/features/pages/search/search-redesign.js` | `searchGrid` | search | stable | SearchObserver, SearchViewMode, SearchFilter | Orchestrator for converting search results into a configurable grid layout |
 | Advanced Filter | `AdvancedFilter` | `content/features/pages/search/advanced-filter.js` | `cleanSearch` | search | stable | — | Hides "For You", "People also watched", channel cards, and Shorts from search |
+| Search Filter | `SearchFilter` | `content/features/pages/search/search-filter.js` | `null` | search | stable | — | Auto-video-filter chip detection and session-storage query tracking |
+| Search Observer | `SearchObserver` | `content/features/pages/search/search-observer.js` | `null` | search | stable | — | Modular DOM MutationObserver dedicated to tracking search node insertions |
+| Search View Mode | `SearchViewMode` | `content/features/pages/search/search-view-mode.js` | `null` | search | stable | — | Owns state and UI logic for toggling between Grid and List layouts |
 
 ---
 
@@ -66,6 +75,7 @@
 | Study Mode | `StudyMode` | `content/features/pages/watch/study-mode.js` | `studyMode` | watch | stable | — | Forces 1.25x speed, enables focus mode, adds study-optimised layout |
 | Watch History | `WatchHistoryTracker` | `content/features/pages/watch/watch-history.js` | `null` | watch | stable | — | Tracks videos watched in current session for continue-watching feature |
 | Continue Watching | `ContinueWatching` | `content/features/pages/watch/continue-watching.js` | `null` | home | stable | WatchHistoryTracker | Shows a "Continue Watching" row on the home page for unfinished videos |
+| Comment Filter | `CommentFilter` | `content/features/pages/watch/comment-filter.js` | `null` | watch | stable | — | Autodetects and fades out suspicious spam comments using regex patterns |
 
 ---
 
@@ -85,9 +95,12 @@
 
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
-| Subscription Folders | `SubscriptionFolders` | `content/features/pages/subscriptions/subscription-folders.js` | `subscriptionFolders` | subscriptions | stable | — | Groups subscribed channels into user-defined folders |
+| Subscription Folders | `SubscriptionFolders` | `content/features/pages/subscriptions/subscription-folders.js` | `subscriptionFolders` | subscriptions | stable | FolderStorage, FolderUI | Orchestrator that groups subscribed channels into user-defined folders |
 | Subscription Manager | `SubscriptionManager` | `content/features/pages/subscriptions/subscription-manager.js` | `null` | subscriptions | stable | — | Bulk subscription management — sort, filter, unsubscribe |
-| Subscriptions UI | — | `content/features/pages/subscriptions/subscriptions-ui.js` | `null` | subscriptions | stable | SubscriptionFolders | UI components for the subscription folder system |
+| Subscriptions UI | `SubscriptionUI` | `content/features/pages/subscriptions/subscriptions-ui.js` | `null` | subscriptions | stable | SubscriptionFolders | UI components for the subscription folder system and modals |
+| Folder Storage | `FolderStorage` | `content/features/pages/subscriptions/folder-storage.js` | `null` | subscriptions | stable | — | Infrastructure for managing folder structure in extension storage |
+| Folder UI | `FolderUI` | `content/features/pages/subscriptions/folder-ui.js` | `null` | subscriptions | stable | — | Generates sidebar links, chips, and drag-and-drop context UI |
+| Context Menu | `ContextMenu` | `content/features/pages/subscriptions/context-menu.js` | `null` | all | stable | — | Injects quick Add to Group button on channel name metadata blocks |
 | Subscriptions Index | — | `content/features/pages/subscriptions/index.js` | `null` | subscriptions | stable | — | Entry point that initialises all subscription feature modules |
 
 ---
@@ -103,6 +116,7 @@
 | Mark Watched | `MarkWatched` | `content/features/core/global/mark-watched.js` | `enableMarkWatched` | all | broken | — | Right-click to manually mark videos as watched; hides watched videos from feed |
 | Keyboard Shortcuts | `KeyboardShortcuts` | `content/features/core/global/keyboard-shortcuts.js` | `keyboardShortcuts` | all | stable | — | Custom hotkeys for zen mode, focus mode, snapshot, speed, PiP, ambient mode |
 | Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `null` | all | wip | HistoryTracker | Displays watch time analytics and stats panel |
+| Hide Watched | `HideWatched` | `content/features/core/global/hide-watched.js` | `hideWatched` | all | stable | — | Standalone feature detecting and hiding watched videos via progress parsing |
 
 ---
 
@@ -129,6 +143,12 @@
 | Service Worker | `background/service-worker.js` | MV3 background worker — messaging, storage sync, alarms |
 | Vite Entry | `content/index.js` | Import order for Vite bundler — ALL feature files must be listed here |
 | Styles | `content/styles.css` | Global CSS injected into YouTube — theme variables, layout overrides |
+| Event Bus | `content/core/event-bus.js` | Global message/event dispatcher for loose coupling |
+| DOM API | `content/core/dom-api.js` | Helpers for traversing, checking, and extracting metadata |
+| DOM Observer | `content/core/dom-observer.js` | Shared core MutationObserver tracking document changes |
+| UI Manager | `content/ui/ui-manager.js` | Registry and provider for standard UI components |
+| Button Component | `content/ui/components/button.js` | Abstract button definition for extension UI |
+| Panel Component | `content/ui/components/panel.js` | Abstract dialog/panel component rendering engine |
 
 ---
 
@@ -136,7 +156,6 @@
 
 | Feature | Problem | Priority |
 |---|---|---|
-| Mark Watched / Hide Watched | Runs once on load, misses SPA re-renders, no persistence of watched IDs | High |
 | Stats Visualizer | Partially implemented, not connected to real watch data | Medium |
 | `getConfigKey()` in BaseFeature | Returns `null` by default — many features can't be toggled from popup | High |
 | Search page blank grid space | Same margin/mini-guide bug as homepage — not yet fixed for search | High |
