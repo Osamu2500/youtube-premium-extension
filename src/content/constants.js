@@ -195,6 +195,8 @@ window.YPP.CONSTANTS = {
         hideSearchShorts: true,
         hideMixes: false,
         hideWatched: false,
+        hideWatchedMode: 'dim',
+        hideWatchedThreshold: 80,
         enableMarkWatched: true,
         hideMerch: false,
         hideComments: false,

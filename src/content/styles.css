@@ -786,16 +786,26 @@ body.ypp-hide-shorts
   display: none !important;
 }
 
-/* Hide Watched Videos — attribute set by HideWatched feature (hide-watched.js) */
-body.ypp-hide-watched [data-ypp-watched="true"] {
-  display: none !important;
+/* Watched Badge */
+.ypp-watched-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    background: rgba(16, 185, 129, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
 }
 
-/* Dim mode — soft-hide watched videos (opacity only, still clickable) */
-body.ypp-dim-watched [data-ypp-watched="true"] {
-  opacity: 0.25 !important;
-  pointer-events: none !important;
-  transition: opacity 0.2s ease;
+/* Dim mode for watched videos */
+[data-ypp-hidden="watched"] {
+    transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 /* ===================================================================================

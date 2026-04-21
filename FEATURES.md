@@ -113,10 +113,10 @@
 | Content Control | `ContentControl` | `content/features/core/global/content-control.js` | `null` | all | stable | — | Master toggle system for hiding comments, merch, live chat, end screens |
 | Night Mode | `NightModeManager` | `content/features/core/global/night-mode.js` | `blueLight` | all | stable | — | Blue light filter and dim overlay with adjustable intensity sliders |
 | Data API | `DataAPI` | `content/features/core/global/data-api.js` | `null` | all | stable | — | Bridges page context to extension context for accessing YouTube player APIs |
-| Mark Watched | `MarkWatched` | `content/features/core/global/mark-watched.js` | `enableMarkWatched` | all | broken | — | Right-click to manually mark videos as watched; hides watched videos from feed |
+| Mark Watched | `MarkWatched` | `content/features/core/global/mark-watched.js` | `enableMarkWatched` | all | stable | — | Right-click context menu to mark/unmark watched; checkmark badge on thumbnails; persists across sessions via chrome.storage.local; tracks video progress from watch page |
 | Keyboard Shortcuts | `KeyboardShortcuts` | `content/features/core/global/keyboard-shortcuts.js` | `keyboardShortcuts` | all | stable | — | Custom hotkeys for zen mode, focus mode, snapshot, speed, PiP, ambient mode |
 | Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `null` | all | wip | HistoryTracker | Displays watch time analytics and stats panel |
-| Hide Watched | `HideWatched` | `content/features/core/global/hide-watched.js` | `hideWatched` | all | stable | — | Standalone feature detecting and hiding watched videos via progress parsing |
+| Hide Watched | `HideWatched` | `content/features/core/global/hide-watched.js` | `hideWatched` | all | stable | MarkWatched | Reads watched IDs from MarkWatched; dims or hides watched videos; respects `hideWatchedMode` and `hideWatchedThreshold`; re-runs on every DOM update |
 
 ---
 
@@ -158,7 +158,6 @@
 |---|---|---|
 | Stats Visualizer | Partially implemented, not connected to real watch data | Medium |
 | Search page blank grid space | Same margin/mini-guide bug as homepage — not yet fixed for search | High |
-| Popup Settings | Missing feature toggles and `getConfigKey` overrides added, but some keys may still be unverified | Low |
 
 ---
 
@@ -178,7 +177,9 @@ Every key in `DEFAULT_SETTINGS` mapped to which feature uses it:
 | `hideShorts` | Shorts Tools | boolean | `false` |
 | `hideSearchShorts` | Advanced Filter | boolean | `true` |
 | `hideMixes` | Content Control | boolean | `false` |
-| `hideWatched` | Mark Watched | boolean | `false` |
+| `hideWatched` | Hide Watched | boolean | `false` |
+| `hideWatchedMode` | Hide Watched | string | `'dim'` |
+| `hideWatchedThreshold` | Hide Watched / Mark Watched | number | `80` |
 | `enableMarkWatched` | Mark Watched | boolean | `true` |
 | `hideMerch` | Content Control | boolean | `false` |
 | `hideComments` | Content Control | boolean | `false` |
