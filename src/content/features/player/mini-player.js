@@ -20,7 +20,7 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
     }
 
     getConfigKey() {
-        return 'miniPlayer';
+        return 'enablePiP';
     }
 
     async enable() {

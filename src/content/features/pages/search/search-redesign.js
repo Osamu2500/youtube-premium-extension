@@ -10,7 +10,8 @@
  * - Features a persistent View Toggle (Grid/List).
  */
 
-class SearchRedesign {
+class SearchRedesign extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'searchGrid'; }
 
     // =========================================================================
     // CONSTANTS & CONFIG

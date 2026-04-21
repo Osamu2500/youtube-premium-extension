@@ -6,7 +6,8 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.ZenMode = class ZenMode {
+window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'zenMode'; }
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS || {};
         this.Utils = window.YPP.Utils || {};

@@ -2,7 +2,8 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.AdvancedFilter = class AdvancedFilter {
+window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'cleanSearch'; }
 
     // --- Constants & Selectors ---
     static SELECTORS = {

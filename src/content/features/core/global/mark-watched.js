@@ -5,7 +5,8 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.MarkWatched = class MarkWatched {
+window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'enableMarkWatched'; }
     constructor() {
         this.name = 'MarkWatched';
         this.CONSTANTS = window.YPP.CONSTANTS;

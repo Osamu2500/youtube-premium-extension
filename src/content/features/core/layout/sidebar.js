@@ -7,7 +7,8 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.SidebarManager = class SidebarManager {
+window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'forceHideSidebar'; }
     constructor() {
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;

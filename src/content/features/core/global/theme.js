@@ -19,6 +19,10 @@ window.YPP.features.Theme = class ThemeManager {
         this._initState();
     }
 
+    getConfigKey() {
+        return 'premiumTheme';
+    }
+
     /**
      * Initialize constants from centralized config
      * @private

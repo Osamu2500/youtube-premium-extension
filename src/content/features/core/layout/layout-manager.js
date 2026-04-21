@@ -69,7 +69,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * Feature configuration key
      */
     getConfigKey() {
-        return 'grid4x4';
+        return null;
     }
 
     /**

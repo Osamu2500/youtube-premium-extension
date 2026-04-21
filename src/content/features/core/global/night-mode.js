@@ -3,7 +3,8 @@
  * Handles Blue Light Filter (SVG) and Dim Overlay
  */
 (function() {
-    class NightModeManager {
+    class NightModeManager extends window.YPP.features.BaseFeature {
+    getConfigKey() { return null; }
         constructor() {
             this._Utils = window.YPP.Utils;
             this._elements = {

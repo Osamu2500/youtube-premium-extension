@@ -7,6 +7,7 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'studyMode'; }
     constructor() {
         super('StudyMode');
         this.studyInterval = null;

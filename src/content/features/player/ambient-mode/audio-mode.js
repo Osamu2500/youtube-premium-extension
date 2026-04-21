@@ -2,7 +2,8 @@
  * Audio Mode - Hide video, show audio with thumbnail overlay
  * Enhanced with thumbnail fallbacks and improved UX
  */
-window.YPP.features.AudioMode = class AudioMode {
+window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'audioModeEnabled'; }
     constructor() {
         this.Utils = window.YPP?.Utils || {};
         this.isActive = false;

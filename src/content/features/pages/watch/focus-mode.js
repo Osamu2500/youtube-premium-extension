@@ -34,7 +34,7 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
     }
 
     getConfigKey() {
-        return null; // Focus mode bundles multiple settings, so it's always "enabled" but internal toggles dictate effects
+        return 'enableFocusMode';
     }
 
     async enable() {

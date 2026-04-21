@@ -7,6 +7,7 @@ window.YPP.features = window.YPP.features || {};
  * Manages channel tagging, visual priorities, and feed organization
  */
 window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'hookFreeHome'; }
     constructor() {
         super('HomeOrganizer');
         this.CONSTANTS = window.YPP.CONSTANTS;

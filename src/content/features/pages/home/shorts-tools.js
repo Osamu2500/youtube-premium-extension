@@ -38,7 +38,7 @@ window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.
     }
 
     getConfigKey() {
-        return 'shortsAutoScroll'; // This feature specifically handles auto-scrolling
+        return 'hideShorts';
     }
 
     async enable() {

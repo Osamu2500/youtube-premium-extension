@@ -7,7 +7,8 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
+window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'subscriptionFolders'; }
 
     constructor() {
         this.enabled = false;
