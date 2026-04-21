@@ -445,6 +445,7 @@ window.YPP.CONSTANTS = {
         nightMode: 'NightModeManager',
         continueWatching: 'ContinueWatching',
         subscriptionFolders: 'SubscriptionFolders',
+        contextMenu: 'ContextMenu',
         markWatched: 'MarkWatched',
         hideWatched: 'HideWatched',
         keyboardShortcuts: 'KeyboardShortcuts',
