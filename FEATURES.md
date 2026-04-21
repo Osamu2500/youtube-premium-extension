@@ -175,6 +175,7 @@ Every key in `DEFAULT_SETTINGS` mapped to which feature uses it:
 | `enableVolumeBoost` | Volume Booster | boolean | `true` |
 | `searchGrid` | Search Redesign | boolean | `true` |
 | `cleanSearch` | Advanced Filter | boolean | `true` |
+| `hideSearchShelves` | Search Redesign | boolean | `true` |
 | `navTrending` | Header Nav | boolean | `true` |
 | `forceHideSidebar` | Sidebar Manager | boolean | `false` |
 | `hoverSidebar` | Sidebar Manager | boolean | `true` |

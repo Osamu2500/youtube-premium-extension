@@ -216,6 +216,7 @@ window.YPP.CONSTANTS = {
         // Search Redesign
         searchGrid: true,
         cleanSearch: true,
+        hideSearchShelves: true,
         autoVideoFilter: true,
         hideChannelCards: false,
 

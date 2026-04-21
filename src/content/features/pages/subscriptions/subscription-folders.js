@@ -1,31 +1,35 @@
 /**
- * Subscription Folders
+ * Subscription Folders — Orchestrator
  * Replaces the heavy "PocketTube" extension with a blazing-fast, strictly styled native implementation.
- * Allows users to group their subscribed channels into folders and filter the subscriptions feed.
+ * Owns: Navigation routing, feed filtering engine, Play All implementation, and settings lifecycle.
+ * Delegates storage to FolderStorage and UI to FolderUI.
  */
-
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
+
     constructor() {
         this.enabled = false;
-        this.folders = {
-            "Favorites": [],
-            "Tech": [],
-            "Gaming": []
-        };
-        this.folderConfig = {};
+        this.initialized = false;
         this.activeFolder = null;
-        this.isFeedPage = false;
-        this.isGuidePage = false;
+        this._isFeedPage = false;
+
+        this.hideShortsActive = false;
+        this.hideWatchedActive = false;
         
-        // Use a fast Set for constant-time lookups during grid rendering
+        // Fast Set for constant-time lookups during grid rendering
         this.activeChannelSet = new Set();
-        
         this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
-        this.STORAGE_KEY = 'ypp_subscription_folders';
+
+        // ── Sub-modules ────────────────────────────────────────────────────
+        this.storage = new window.YPP.features.FolderStorage();
+        this.ui = new window.YPP.features.FolderUI(this.storage, this);
     }
+
+    // =========================================================================
+    // LIFECYCLE
+    // =========================================================================
 
     async update(settings) {
         this.enabled = !!settings?.subscriptionFolders;
@@ -35,13 +39,12 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             return;
         }
 
-        // Initialize only once
         if (this.initialized) {
             this.handleNavigation();
             return;
         }
         
-        await this.loadFolders();
+        await this.storage.load();
         this.setupNavigationListener();
         this.handleNavigation();
         
@@ -51,121 +54,25 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
     disable() {
         this.enabled = false;
         this.observer.stop();
-        // Remove active filters
         document.body.classList.remove('ypp-sub-folders-active');
-        this.removeFilterChips();
-        this.removeGuideFolders();
+        this.ui.removeFilterChips();
+        this.ui.removeGuideFolders();
     }
 
-    // ==========================================
-    // DATA & STORAGE
-    // ==========================================
-    
-    async loadFolders() {
-        try {
-            const result = await chrome.storage.local.get([this.STORAGE_KEY, 'ypp_folder_config']);
-            if (result[this.STORAGE_KEY]) {
-                this.folders = result[this.STORAGE_KEY];
-            } else {
-                // Save defaults on first run
-                await this.saveFolders();
-            }
-            this.folderConfig = result['ypp_folder_config'] || {};
-        } catch (e) {
-            window.YPP.Utils.log('Failed to load subscription folders', 'SubFolders', 'error');
-        }
-    }
-
-    async saveFolders() {
-        try {
-            await chrome.storage.local.set({ 
-                [this.STORAGE_KEY]: this.folders,
-                'ypp_folder_config': this.folderConfig
-            });
-        } catch (e) {
-            window.YPP.Utils.log('Failed to save subscription folders', 'SubFolders', 'error');
-        }
-    }
-
-    addFolder(folderName) {
-        if (!folderName || this.folders[folderName]) return false;
-        this.folders[folderName] = [];
-        this.saveFolders();
-        this.renderGuideFolders(); // Re-render sidebar
-        return true;
-    }
-
-    deleteFolder(folderName) {
-        if (this.folders[folderName]) {
-            delete this.folders[folderName];
-            if (this.folderConfig[folderName]) delete this.folderConfig[folderName];
-            if (this.activeFolder === folderName) {
-                this.activeFolder = null;
-                this.updateFilterState();
-            }
-            this.saveFolders();
-            this.renderGuideFolders();
-            return true;
-        }
-        return false;
-    }
-
-    addChannelToFolder(channelName, folderName) {
-        if (!this.folders[folderName]) return false;
-        if (!this.folders[folderName].includes(channelName)) {
-            this.folders[folderName].push(channelName);
-            this.saveFolders();
-            
-            // If we are currently filtering by this folder, update the active set immediately
-            if (this.activeFolder === folderName) {
-                this.activeChannelSet.add(channelName);
-                this.applyFeedFilters();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    removeChannelFromFolder(channelName, folderName) {
-        if (!this.folders[folderName]) return false;
-        
-        const index = this.folders[folderName].indexOf(channelName);
-        if (index > -1) {
-            this.folders[folderName].splice(index, 1);
-            this.saveFolders();
-            
-            if (this.activeFolder === folderName) {
-                this.activeChannelSet.delete(channelName);
-                this.applyFeedFilters();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    // ==========================================
-    // ROUTING & NAVIGATION
-    // ==========================================
+    // =========================================================================
+    // NAVIGATION & ROUTING
+    // =========================================================================
 
     setupNavigationListener() {
-        // Run immediately on init for the first page load
         this.handleNavigation();
-        
-        // Use extension events or standard yt-navigate-finish
         document.addEventListener('yt-navigate-finish', () => this.handleNavigation());
+        window.addEventListener('popstate', () => { setTimeout(() => this.handleNavigation(), 100); });
         
-        // Some SPAs don't fire navigate-finish perfectly, listen to popstate as fallback
-        window.addEventListener('popstate', () => {
-            setTimeout(() => this.handleNavigation(), 100);
-        });
-        
-        // Fallback mutation observer for when the guide or feed loads late
         this.observer.register('fallback-navigation', 'ytd-app', () => {
-             // Non-intrusive re-check to catch delayed DOM renders
              if (!document.getElementById('ypp-sub-folders-container')) {
-                 this.injectGuideFolders();
+                 this.ui.injectGuideFolders();
              }
-             if (this.isFeedPage && !document.getElementById('ypp-folder-chips')) {
+             if (this._isFeedPage && !document.getElementById('ypp-folder-chips')) {
                  this.setupFeedFilters();
              }
         });
@@ -175,149 +82,164 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
         if (!this.enabled) return;
         
         const url = window.location.href;
+        this.ui.injectGuideFolders();
+        this.ui.injectCardBadges();
         
-        // Always try to inject into the sidebar (it persists across pages)
-        this.injectGuideFolders();
-        this.injectCardBadges(); // Inject onto video cards everywhere
-        
-        // 1. Subscriptions Feed
         if (url.includes('/feed/subscriptions')) {
-            this.isFeedPage = true;
+            this._isFeedPage = true;
             this.setupFeedFilters();
         } else {
-            this.isFeedPage = false;
+            this._isFeedPage = false;
             this.clearFeedFilters();
         }
 
-        // 2. Channel Pages (Add to folder badge)
         if (url.includes('/channel/') || url.includes('/@')) {
-            this.injectChannelBadge();
+            this.ui.injectChannelBadge();
         }
     }
 
-    // ==========================================
-    // LEFT SIDEBAR (GUIDE) INTEGRATION
-    // ==========================================
+    // =========================================================================
+    // GETTERS & SETTERS (Called by UI)
+    // =========================================================================
 
-    injectGuideFolders() {
-        this.observer.register('guide-folders', '#guide-inner-content #sections ytd-guide-section-renderer', (elements) => {
-            // Find the active subscriptions section (usually the 2nd one)
-            // It contains links to /feed/channels, etc.
-            const sections = Array.from(document.querySelectorAll('#guide-inner-content ytd-guide-section-renderer'));
-            
-            let subsSection = sections.find(sec => {
-                const title = sec.querySelector('#title')?.textContent?.toLowerCase() || '';
-                return title.includes('subscriptions') || title.includes('abonnements');
-            });
-            
-            if (!subsSection && sections.length > 1) {
-                subsSection = sections[1]; // Fallback
-            }
+    isFeedPage() { return this._isFeedPage; }
+    getActiveFolder() { return this.activeFolder; }
+    getHideShorts() { return this.hideShortsActive; }
+    getHideWatched() { return this.hideWatchedActive; }
+    
+    setHideShorts(val) { this.hideShortsActive = val; }
+    setHideWatched(val) { this.hideWatchedActive = val; }
 
-            if (subsSection) {
-                this.renderGuideFolders(subsSection);
-            }
-        }, { runOnce: true });
+    setActiveFolder(folderName) {
+        if (this.activeFolder === folderName) {
+            this.activeFolder = null; // Toggle off
+        } else {
+            this.activeFolder = folderName;
+        }
+        this.updateFilterState();
+        this.ui.updateChipStylesForFolder(this.activeFolder);
     }
 
-    renderGuideFolders(sectionEl = null) {
-        // If no section provided, try to find the container we previously created
-        const containerId = 'ypp-sub-folders-container';
-        let container = document.getElementById(containerId);
+    forceRefreshFeed() {
+        if (this.activeFolder) {
+            this.activeChannelSet = new Set(this.storage.folders[this.activeFolder] || []);
+            this.applyFeedFilters();
+        }
+    }
+
+    // =========================================================================
+    // ENGINE: FEED FILTERING
+    // =========================================================================
+
+    setupFeedFilters() {
+        const pendingPlayAll = sessionStorage.getItem('ypp_pending_play_all');
+        const pendingFolder = sessionStorage.getItem('ypp_pending_folder');
         
-        if (!container && sectionEl) {
-            // Create the wrapper
-            container = document.createElement('div');
-            container.id = containerId;
-            container.className = 'ypp-sub-folders';
-            
-            const itemsContainer = sectionEl.querySelector('#items');
-            if (itemsContainer) {
-                itemsContainer.parentNode.insertBefore(container, itemsContainer.nextSibling);
-            }
+        if (pendingPlayAll) {
+            this.activeFolder = pendingPlayAll;
+            sessionStorage.removeItem('ypp_pending_play_all');
+            setTimeout(() => this.playAll(pendingPlayAll), 1000);
+        } else if (pendingFolder) {
+            this.activeFolder = pendingFolder;
+            sessionStorage.removeItem('ypp_pending_folder');
         }
         
-        if (!container) return; // Still not found
+        this.ui.renderFilterChips();
+        this.updateFilterState();
         
-        // Clear current folders
-        container.innerHTML = `
-            <div class="ypp-folder-header">
-                <h3>My Folders</h3>
-                <button id="ypp-add-folder-btn" class="ypp-icon-btn">+</button>
-            </div>
-            <div id="ypp-folder-list"></div>
-        `;
+        this.observer.register('feed-filter-loop', 'ytd-rich-grid-renderer #contents ytd-rich-item-renderer', () => {
+            if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive) {
+                this.applyFeedFilters();
+            }
+        });
+    }
+
+    clearFeedFilters() {
+        this.activeFolder = null;
+        document.body.classList.remove('ypp-sub-folders-active');
+        this.ui.removeFilterChips();
+    }
+
+    updateFilterState() {
+        if (!this._isFeedPage) return;
         
-        const list = container.querySelector('#ypp-folder-list');
+        if (this.activeFolder) {
+            document.body.classList.add('ypp-sub-folders-active');
+            this.activeChannelSet = new Set(this.storage.folders[this.activeFolder] || []);
+            this.applyFeedFilters();
+        } else {
+            document.body.classList.remove('ypp-sub-folders-active');
+            this.resetFeedVisibility();
+        }
+    }
+
+    applyFeedFilters() {
+        if (!this._isFeedPage) return;
         
-        // Render each folder
-        Object.keys(this.folders).forEach(folderName => {
-            const config = this.folderConfig[folderName] || {};
-            const el = document.createElement('div');
-            el.className = 'ypp-folder-item';
-            if (this.activeFolder === folderName) el.classList.add('active');
+        const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
+        
+        videoCards.forEach(card => {
+            const channelLink = card.querySelector('#channel-name a');
+            if (!channelLink) return;
             
-            const icon = config.icon || '📁';
-            el.innerHTML = `
-                <div class="ypp-folder-icon">${icon}</div>
-                <div class="ypp-folder-name" style="flex: 1;">${folderName}</div>
-                <div class="ypp-folder-count">${this.folders[folderName].length}</div>
-                <button class="ypp-play-all-btn" title="Play All" style="margin-left: 8px; width: 24px; height: 24px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border: none; cursor: pointer; background: rgba(255,255,255,0.1); color: white;">
-                    <svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-            `;
+            let isVisible = true;
             
-            const playBtn = el.querySelector('.ypp-play-all-btn');
-            el.addEventListener('mouseenter', () => playBtn.style.opacity = '1');
-            el.addEventListener('mouseleave', () => playBtn.style.opacity = '0');
-            
-            playBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.playAll(folderName);
-            });
-            
-            el.addEventListener('click', (e) => {
-                if (e.target.closest('.ypp-play-all-btn')) return;
-                // Navigate to subscriptions feed with this folder active
-                if (!window.location.href.includes('/feed/subscriptions')) {
-                    // Set a session storage flag so the target page knows which folder to activate
-                    sessionStorage.setItem('ypp_pending_folder', folderName);
-                    
-                    // Trigger SPA navigation (fake click)
-                    const tempLink = document.createElement('a');
-                    tempLink.href = '/feed/subscriptions';
-                    document.body.appendChild(tempLink);
-                    tempLink.click();
-                    tempLink.remove();
-                } else {
-                    this.setActiveFolder(folderName);
+            if (this.activeFolder) {
+                const channelName = channelLink.textContent.trim();
+                if (!this.activeChannelSet.has(channelName)) isVisible = false;
+            }
+
+            if (isVisible && this.hideShortsActive) {
+                const isShortsRenderer = card.querySelector('ytd-reel-item-renderer') !== null;
+                const hasShortsAttr = card.hasAttribute('is-shorts');
+                const hasShortsLink = card.querySelector('a[href^="/shorts/"]') !== null;
+                if (isShortsRenderer || hasShortsAttr || hasShortsLink) isVisible = false;
+            }
+
+            if (isVisible && this.hideWatchedActive) {
+                const progressEl = card.querySelector('#progress');
+                if (progressEl) {
+                    const widthStyle = progressEl.style.width;
+                    const progressValue = parseInt(widthStyle.replace('%', ''), 10);
+                    if (!isNaN(progressValue) && progressValue >= 80) isVisible = false;
                 }
-            });
+            }
             
-            list.appendChild(el);
-        });
-        
-        // Add folder button listener
-        container.querySelector('#ypp-add-folder-btn').addEventListener('click', () => {
-            const name = prompt('Enter new folder name:');
-            if (name && name.trim()) {
-                this.addFolder(name.trim());
+            if (isVisible) {
+                card.style.display = '';
+                card.classList.add('ypp-filtered-in');
+            } else {
+                card.style.display = 'none';
+                card.classList.remove('ypp-filtered-in');
             }
         });
+        
+        const spinner = document.querySelector('ytd-continuation-item-renderer');
+        if (spinner && spinner.getBoundingClientRect().top < window.innerHeight * 2) {
+            window.scrollBy(0, 1);
+            window.scrollBy(0, -1);
+        }
     }
 
-    removeGuideFolders() {
-        const container = document.getElementById('ypp-sub-folders-container');
-        if (container) container.remove();
+    resetFeedVisibility() {
+        if (this.hideShortsActive || this.hideWatchedActive) {
+            this.applyFeedFilters();
+            return;
+        }
+
+        const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
+        videoCards.forEach(card => {
+            card.style.display = '';
+            card.classList.remove('ypp-filtered-in');
+        });
     }
 
-    // ==========================================
-    // FEED FILTERING & PLAYLIST INTEGRATION
-    // ==========================================
+    // =========================================================================
+    // ENGINE: PLAYLIST GENERATOR (PLAY ALL)
+    // =========================================================================
 
     async playAll(folderName) {
-        if (!this.isFeedPage || this.activeFolder !== folderName) {
+        if (!this._isFeedPage || this.activeFolder !== folderName) {
             sessionStorage.setItem('ypp_pending_play_all', folderName);
             const tempLink = document.createElement('a');
             tempLink.href = '/feed/subscriptions';
@@ -349,8 +271,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             }
             
             if (videoIds.length > 0) {
-                const playlistUrl = `/watch_videos?video_ids=${videoIds.join(',')}`;
-                window.location.href = playlistUrl;
+                window.location.href = `/watch_videos?video_ids=${videoIds.join(',')}`;
             } else if (scrolls < maxScrolls) {
                 scrolls++;
                 window.scrollBy(0, window.innerHeight * 2);
@@ -360,421 +281,6 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders {
             }
         };
         
-        // Ensure DOM filtering has fully applied
         setTimeout(extractAndPlay, 500);
     }
-
-    setupFeedFilters() {
-        const pendingPlayAll = sessionStorage.getItem('ypp_pending_play_all');
-        const pendingFolder = sessionStorage.getItem('ypp_pending_folder');
-        
-        if (pendingPlayAll) {
-            this.activeFolder = pendingPlayAll;
-            sessionStorage.removeItem('ypp_pending_play_all');
-            
-            // Wait for grid to render, then trigger playAll
-            setTimeout(() => {
-                this.playAll(pendingPlayAll);
-            }, 1000);
-        }
-        else if (pendingFolder) {
-            this.activeFolder = pendingFolder;
-            sessionStorage.removeItem('ypp_pending_folder');
-        }
-        
-        this.renderFilterChips();
-        this.updateFilterState();
-        
-        // Hook into the grid to continuously filter loaded elements
-        this.observer.register('feed-filter-loop', 'ytd-rich-grid-renderer #contents ytd-rich-item-renderer', () => {
-            if (this.activeFolder) {
-                this.applyFeedFilters();
-            }
-        });
-    }
-
-    clearFeedFilters() {
-        this.windowScrollActive = false;
-        this.activeFolder = null;
-        document.body.classList.remove('ypp-sub-folders-active');
-        this.removeFilterChips();
-    }
-
-    setActiveFolder(folderName) {
-        if (this.activeFolder === folderName) {
-            // Toggle off
-            this.activeFolder = null;
-        } else {
-            this.activeFolder = folderName;
-        }
-        
-        this.updateFilterState();
-        
-        // Update Guide UI active states
-        document.querySelectorAll('.ypp-folder-item').forEach(el => {
-            if (el.querySelector('.ypp-folder-name').textContent === this.activeFolder) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
-        });
-    }
-
-    updateFilterState() {
-        if (!this.isFeedPage) return;
-        
-        if (this.activeFolder) {
-            document.body.classList.add('ypp-sub-folders-active');
-            // Cache the active set for blazing-fast lookups during DOM iterations
-            this.activeChannelSet = new Set(this.folders[this.activeFolder] || []);
-            this.applyFeedFilters();
-        } else {
-            document.body.classList.remove('ypp-sub-folders-active');
-            this.resetFeedVisibility();
-        }
-        
-        // Update chip UI
-        document.querySelectorAll('.ypp-filter-chip').forEach(chip => {
-            if (chip.dataset.folder === this.activeFolder) {
-                chip.classList.add('active');
-            } else {
-                chip.classList.remove('active');
-            }
-        });
-    }
-
-    applyFeedFilters() {
-        if (!this.isFeedPage) return;
-        
-        // Extremely fast DOM iteration natively overriding CSS display
-        const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
-        
-        videoCards.forEach(card => {
-            // Prevent touching non-video elements (like Continuation Items, but those are handled by main grid)
-            const channelLink = card.querySelector('#channel-name a');
-            if (!channelLink) return;
-            
-            let isVisible = true;
-            
-            // 1. Folder Filtering
-            if (this.activeFolder) {
-                const channelName = channelLink.textContent.trim();
-                if (!this.activeChannelSet.has(channelName)) {
-                    isVisible = false;
-                }
-            }
-
-            // 2. Hide Shorts Filtering
-            if (isVisible && this.hideShortsActive) {
-                const isShortsRenderer = card.querySelector('ytd-reel-item-renderer') !== null;
-                const hasShortsAttr = card.hasAttribute('is-shorts');
-                const hasShortsLink = card.querySelector('a[href^="/shorts/"]') !== null;
-                
-                if (isShortsRenderer || hasShortsAttr || hasShortsLink) {
-                    isVisible = false;
-                }
-            }
-
-            // 3. Hide Watched Filtering
-            if (isVisible && this.hideWatchedActive) {
-                const progressEl = card.querySelector('#progress');
-                if (progressEl) {
-                    const widthStyle = progressEl.style.width;
-                    const progressValue = parseInt(widthStyle.replace('%', ''), 10);
-                    if (!isNaN(progressValue) && progressValue >= 80) {
-                        isVisible = false;
-                    }
-                }
-            }
-            
-            // Apply Visibility
-            if (isVisible) {
-                card.style.display = '';
-                card.classList.add('ypp-filtered-in');
-            } else {
-                card.style.display = 'none';
-                card.classList.remove('ypp-filtered-in');
-            }
-        });
-        
-        // Force an intersection observer check on the continuation item just in case the filter
-        // hid everything on the screen and we need to load more immediately.
-        const spinner = document.querySelector('ytd-continuation-item-renderer');
-        if (spinner && spinner.getBoundingClientRect().top < window.innerHeight * 2) {
-            window.scrollBy(0, 1);
-            window.scrollBy(0, -1);
-        }
-    }
-
-    resetFeedVisibility() {
-        // If external toggles are active, we must re-evaluate instead of blindly resetting
-        if (this.hideShortsActive || this.hideWatchedActive) {
-            this.applyFeedFilters();
-            return;
-        }
-
-        const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
-        videoCards.forEach(card => {
-            card.style.display = '';
-            card.classList.remove('ypp-filtered-in');
-        });
-    }
-
-    renderFilterChips() {
-        // Target the main grid to ensure we inject the chips on the feed page even if header is missing
-        this.observer.register('inject-filter-chips', 'ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer, ytd-browse[page-subtype="channels"] ytd-rich-grid-renderer', (elements) => {
-            const grid = elements[0];
-            let chipsBar = document.getElementById('ypp-folder-chips');
-            
-            if (!chipsBar) {
-                chipsBar = document.createElement('div');
-                chipsBar.id = 'ypp-folder-chips';
-                chipsBar.className = 'ypp-folder-chips-bar';
-                // Insert before the contents container so it sits at the top of the grid
-                const contents = grid.querySelector('#contents');
-                if (contents) {
-                    grid.insertBefore(chipsBar, contents);
-                } else {
-                    grid.prepend(chipsBar);
-                }
-            }
-            
-            // Re-render contents
-            chipsBar.innerHTML = '';
-            
-            // "All" chip
-            const allChip = document.createElement('button');
-            allChip.className = `ypp-filter-chip ${!this.activeFolder ? 'active' : ''}`;
-            allChip.textContent = 'All Subscriptions';
-            allChip.dataset.folder = '';
-            allChip.addEventListener('click', () => this.setActiveFolder(null));
-            chipsBar.appendChild(allChip);
-            
-            // Render folder chips
-            Object.keys(this.folders).forEach(folderName => {
-                const config = this.folderConfig[folderName] || {};
-                const chip = document.createElement('button');
-                chip.className = `ypp-filter-chip ${this.activeFolder === folderName ? 'active' : ''}`;
-                
-                const icon = config.icon || '';
-                chip.textContent = icon ? `${icon} ${folderName}` : folderName;
-                chip.dataset.folder = folderName;
-                
-                if (this.activeFolder === folderName && config.color) {
-                    chip.style.backgroundColor = config.color;
-                    chip.style.color = '#fff';
-                    chip.style.border = 'none';
-                }
-                
-                chip.addEventListener('click', () => this.setActiveFolder(folderName));
-                
-                // Add right-click to edit/delete folder
-                chip.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    const action = prompt(`Edit Folder "${folderName}"\nType 'icon' to change emoji, 'color' to change color, or 'delete' to remove:`, 'icon');
-                    if (action === 'delete') {
-                        if (confirm(`Are you sure you want to delete "${folderName}"?`)) {
-                            this.deleteFolder(folderName);
-                            if (this.activeFolder === folderName) this.setActiveFolder(null);
-                            this.renderFilterChips();
-                        }
-                    } else if (action === 'icon') {
-                        const newIcon = prompt('Enter a new Emoji for this folder:', config.icon || '📁');
-                        if (newIcon !== null) {
-                            if (!this.folderConfig[folderName]) this.folderConfig[folderName] = {};
-                            this.folderConfig[folderName].icon = newIcon.trim();
-                            this.saveFolders();
-                            this.renderFilterChips();
-                            this.renderGuideFolders();
-                        }
-                    } else if (action === 'color') {
-                        const newColor = prompt('Enter a hex color code (e.g. #ff0000) or leave empty for default:', config.color || '');
-                        if (newColor !== null) {
-                            if (!this.folderConfig[folderName]) this.folderConfig[folderName] = {};
-                            this.folderConfig[folderName].color = newColor.trim();
-                            this.saveFolders();
-                            this.renderFilterChips();
-                            this.renderGuideFolders();
-                            if (this.activeFolder === folderName) this.updateFilterState();
-                        }
-                    }
-                });
-                
-                chipsBar.appendChild(chip);
-            });
-            
-            // Add Play All Button if a folder is active
-            if (this.activeFolder) {
-                const playChip = document.createElement('button');
-                playChip.className = 'ypp-filter-chip ypp-play-action-chip';
-                playChip.innerHTML = `<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
-                playChip.style.backgroundColor = 'var(--ypp-accent, #ff0000)';
-                playChip.style.color = '#fff';
-                playChip.style.border = 'none';
-                playChip.addEventListener('click', () => this.playAll(this.activeFolder));
-                chipsBar.appendChild(playChip);
-            }
-            
-            // Feature Parity: Hide Shorts Toggle
-            const hideShortsChip = document.createElement('button');
-            hideShortsChip.className = `ypp-filter-chip ypp-toggle-chip ${this.hideShortsActive ? 'active' : ''}`;
-            hideShortsChip.textContent = 'Hide Shorts';
-            hideShortsChip.addEventListener('click', () => {
-                this.hideShortsActive = !this.hideShortsActive;
-                hideShortsChip.classList.toggle('active', this.hideShortsActive);
-                this.updateFilterState(); // Re-evaluate feed visibility
-            });
-            chipsBar.appendChild(hideShortsChip);
-
-            // Feature Parity: Hide Watched Toggle
-            const hideWatchedChip = document.createElement('button');
-            hideWatchedChip.className = `ypp-filter-chip ypp-toggle-chip ${this.hideWatchedActive ? 'active' : ''}`;
-            hideWatchedChip.textContent = 'Hide Watched';
-            hideWatchedChip.addEventListener('click', () => {
-                this.hideWatchedActive = !this.hideWatchedActive;
-                hideWatchedChip.classList.toggle('active', this.hideWatchedActive);
-                this.updateFilterState(); // Re-evaluate feed visibility
-            });
-            chipsBar.appendChild(hideWatchedChip);
-
-            // Add Folder Button
-            const addBtn = document.createElement('button');
-            addBtn.className = 'ypp-filter-chip ypp-add-folder-btn';
-            addBtn.textContent = '+ New Folder';
-            addBtn.style.opacity = '0.7';
-            addBtn.style.borderStyle = 'dashed';
-            addBtn.addEventListener('click', () => {
-                const name = prompt('Enter new folder name:');
-                if (name && name.trim()) {
-                    this.addFolder(name.trim());
-                    this.renderFilterChips(); // refresh
-                }
-            });
-            chipsBar.appendChild(addBtn);
-        }, { runOnce: true });
-    }
-
-    removeFilterChips() {
-        const chipsBar = document.getElementById('ypp-folder-chips');
-        if (chipsBar) chipsBar.remove();
-    }
-
-    // ==========================================
-    // CHANNEL & CARD INTEGRATION
-    // ==========================================
-
-    injectCardBadges() {
-        this.observer.register('feed-card-badges', 'ytd-rich-item-renderer #channel-name, ytd-video-renderer #channel-name, ytd-grid-video-renderer #channel-name', (elements) => {
-            if (!elements || !Array.isArray(elements) || elements.length === 0) return;
-            elements.forEach(container => {
-                if (container.querySelector('.ypp-card-folder-btn')) return;
-                
-                // YouTube has multiple deeply nested elements with the id "channel-name". 
-                // We want the one containing the complex-string link.
-                const link = container.querySelector('a');
-                if (!link || !link.textContent.trim()) return;
-                
-                const btn = document.createElement('button');
-                btn.className = 'ypp-card-folder-btn ypp-folder-badge';
-                btn.innerHTML = `<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> Save`;
-                btn.title = "Save to Folder";
-                
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const channelName = link.textContent.trim();
-                    this.renderChannelPopover(btn, channelName);
-                });
-                
-                // Append directly after the channel name formatting
-                container.style.display = 'flex';
-                container.style.alignItems = 'center';
-                container.appendChild(btn);
-            });
-        }, { runOnce: false });
-    }
-
-    injectChannelBadge() {
-        this.observer.register('channel-badge', 'ytd-subscribe-button-renderer', (elements) => {
-            if (!elements || elements.length === 0) return;
-            // Double check we are actually on a channel page banner
-            const container = elements[0].parentNode;
-            if (document.getElementById('ypp-channel-folder-btn')) return;
-            
-            const btn = document.createElement('button');
-            btn.id = 'ypp-channel-folder-btn';
-            btn.className = 'ypp-tactile-btn';
-            btn.innerHTML = `<span style="margin-right:4px;">📁</span> Folders`;
-            
-            // Extract the current channel name from the header
-            const channelNameEl = document.querySelector('ytd-channel-name#channel-name .yt-formatted-string');
-            if (!channelNameEl) return;
-            
-            const channelName = channelNameEl.textContent.trim();
-            
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.renderChannelPopover(btn, channelName);
-            });
-            
-            // Insert it securely before the subscribe button (or append to container)
-            container.insertBefore(btn, elements[0]);
-        }, { runOnce: true });
-    }
-
-    renderChannelPopover(buttonEl, channelName) {
-        let popover = document.getElementById('ypp-folder-popover');
-        if (!popover) {
-            popover = document.createElement('div');
-            popover.id = 'ypp-folder-popover';
-            popover.className = 'ypp-glass-popover';
-            document.body.appendChild(popover);
-            
-            // Click outside to close (use dynamic closest checks instead of stale closures)
-            document.addEventListener('click', (e) => {
-                const clickedInside = popover.contains(e.target);
-                const clickedFolderBtn = e.target.closest('.ypp-card-folder-btn') || e.target.closest('#ypp-channel-folder-btn');
-                
-                if (!clickedInside && !clickedFolderBtn) {
-                    popover.classList.remove('visible');
-                }
-            });
-        }
-        
-        // Position it right below the button
-        const rect = buttonEl.getBoundingClientRect();
-        popover.style.top = `${rect.bottom + window.scrollY + 8}px`;
-        popover.style.left = `${rect.left + window.scrollX}px`;
-        
-        // Generate checklist
-        let html = `<div class="ypp-popover-header">Save <b>${channelName}</b> to:</div><div class="ypp-popover-list">`;
-        
-        Object.keys(this.folders).forEach(folderName => {
-            const isChecked = this.folders[folderName].includes(channelName);
-            html += `
-                <label class="ypp-folder-checkbox">
-                    <input type="checkbox" data-folder="${folderName}" ${isChecked ? 'checked' : ''}>
-                    <span>${folderName}</span>
-                </label>
-            `;
-        });
-        
-        html += `</div>`;
-        popover.innerHTML = html;
-        
-        // Add listeners
-        popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const folder = e.target.dataset.folder;
-                if (e.target.checked) {
-                    this.addChannelToFolder(channelName, folder);
-                } else {
-                    this.removeChannelFromFolder(channelName, folder);
-                }
-                this.renderGuideFolders(); // Live update sidebar counts
-            });
-        });
-        
-        popover.classList.add('visible');
-    }
-}
+};

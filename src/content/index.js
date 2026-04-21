@@ -36,12 +36,17 @@ import './features/pages/home/home-organizer.js';
 import './features/pages/home/shorts-tools.js';
 
 // Subscription features
+import './features/pages/subscriptions/folder-storage.js';
+import './features/pages/subscriptions/folder-ui.js';
 import './features/pages/subscriptions/subscription-folders.js';
 import './features/pages/subscriptions/subscription-manager.js';
 import './features/pages/subscriptions/subscriptions-ui.js';
 import './features/pages/subscriptions/index.js';
 
 // Search features
+import './features/pages/search/search-view-mode.js';
+import './features/pages/search/search-observer.js';
+import './features/pages/search/search-filter.js';
 import './features/pages/search/search-redesign.js';
 import './features/pages/search/advanced-filter.js';
 
@@ -62,6 +67,8 @@ import './features/pages/watch/comment-filter.js';
 
 // Player features
 import './features/player/player.js';
+import './features/player/filter-presets.js';
+import './features/player/global-bar-ui.js';
 import './features/player/global-bar.js';
 import './features/player/player-tools.js';
 import './features/player/return-dislike.js';

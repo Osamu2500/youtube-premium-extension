@@ -1636,37 +1636,43 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
   display: contents !important;
 }
 
-/* ── 3. FLATTENED ADDITIONAL GRID (shelves promoted to grid) ─────── */
-body.ypp-search-grid-mode .ypp-flattened-grid {
-  display: grid !important;
-  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
-  gap: 20px !important;
-  width: 100% !important;
-  overflow: visible !important;
-  white-space: normal !important;
-  height: auto !important;
-  align-items: stretch !important;
+/* BUG 3: Staggered/misaligned middle cards (Image 3) */
+.ypp-search-page.ypp-search-grid-mode #contents.ytd-two-column-search-results-renderer {
+    display: grid !important;
+    grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    align-items: start !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
 }
 
-/* Target internal carousel scroll wrappers and strip their constraints */
-body.ypp-search-grid-mode .ypp-flattened-container #scroll-container {
-  overflow: visible !important;
+/* BUG 4 & OPTION B: Force full width for shelf renderers */
+.ypp-search-page.ypp-search-grid-mode ytd-shelf-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-rich-shelf-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-reel-shelf-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-background-promo-renderer {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin: 8px 0;
+    box-sizing: border-box;
 }
 
-/* Ensure intermediate containers don’t choke the grid */
-body.ypp-search-grid-mode .ypp-flattened-container ytd-vertical-list-renderer,
-body.ypp-search-grid-mode .ypp-flattened-container ytd-horizontal-card-list-renderer,
-body.ypp-search-grid-mode .ypp-flattened-container #contents {
-  display: block !important;
-  width: 100% !important;
-  max-width: none !important;
+/* OPTION A: Hide completely if clean search is on */
+body.ypp-clean-search.ypp-search-page ytd-shelf-renderer,
+body.ypp-clean-search.ypp-search-page ytd-rich-shelf-renderer,
+body.ypp-clean-search.ypp-search-page ytd-reel-shelf-renderer,
+body.ypp-clean-search.ypp-search-page ytd-horizontal-card-list-renderer {
+    display: none !important;
 }
 
 /* ── 4. FULL-WIDTH ITEMS (ads, continuation, non-card types) ─────── */
 body.ypp-search-grid-mode .ypp-full-width-item,
 body.ypp-search-grid-mode ytd-continuation-item-renderer,
-body.ypp-search-grid-mode ytd-search-sub-menu-renderer,
-body.ypp-search-grid-mode .ypp-flattened-container {
+body.ypp-search-grid-mode ytd-search-sub-menu-renderer {
   grid-column: 1 / -1 !important;
   width: 100% !important;
   margin-left: 0 !important;
@@ -1722,6 +1728,7 @@ body.ypp-search-grid-mode ytd-radio-renderer {
 }
 
 /* Thumbnails - identical to homepage card thumbnails */
+/* Thumbnails - identical to homepage card thumbnails */
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
 body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
@@ -1740,6 +1747,49 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   z-index: 2;
 }
 
+/* BUG 2: Cards overlapping and bleeding into each other */
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+    width: 100% !important;
+    aspect-ratio: 16/9 !important;
+    overflow: hidden !important;
+}
+
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail yt-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer #dismissible {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-direction: column !important;
+}
+
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer #meta {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 0 !important;
+}
+
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer #channel-info,
+.ypp-search-page.ypp-search-grid-mode ytd-video-renderer #metadata-line {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail img,
 body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
@@ -1752,12 +1802,14 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
 /* Video Title - identical to homepage card title */
 body.ypp-search-grid-mode ytd-video-renderer #video-title,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
-body.ypp-search-grid-mode ytd-radio-renderer #video-title {
+body.ypp-search-grid-mode ytd-radio-renderer #video-title,
+body.ypp-search-grid-mode ytd-video-renderer #video-title yt-formatted-string,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
   font-family: "Inter", "Roboto", sans-serif !important;
   font-size: 1.6rem !important;
   line-height: 2.2rem !important;
   font-weight: 500 !important;
-  margin: 12px 0 4px 0 !important; /* Top spacing = separation from thumbnail */
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
@@ -1765,7 +1817,8 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title {
   overflow: hidden !important;
   max-height: 4.4rem !important;
   color: var(--ypp-text-primary) !important;
-  letter-spacing: -0.1px;
+  letter-spacing: -0.1px !important;
+  margin: 0 !important;
 }
 
 
@@ -1826,74 +1879,89 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
 }
 
 /* ── 4. .text-wrapper: CRITICAL — zero out the side-offset margin ─── */
+/* ── 4. .text-wrapper: Grid layout to mimic Homepage ─── */
 body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
-  margin-left: 0 !important;    /* KEY: removes the 246px push to the right */
-  margin-right: 0 !important;
-  margin-top: 0 !important;
+  display: grid !important;
+  grid-template-columns: 36px 1fr !important;
+  grid-template-areas:
+    "avatar title"
+    "avatar channel"
+    "avatar metadata";
+  column-gap: 12px !important;
+  row-gap: 4px !important; /* Increased from 2px to match spacing */
+  margin: 12px 0 0 0 !important;
   padding: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
   flex: 1 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
   box-sizing: border-box !important;
 }
 
-/* ── 5. #channel-info: avatar + channel name row ─────────────────── */
-body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+/* Maintain flex behavior for Playlists and Radios since they lack avatars */
+body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
   display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  padding: 6px 0 0 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
+  flex-direction: column !important;
+  margin: 12px 0 0 0 !important;
 }
 
-/* ── 6. Channel avatar ───────────────────────────────────────────── */
-body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail,
-body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail yt-img-shadow,
-body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail yt-image,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element {
-  width: 22px !important;
-  height: 22px !important;
-  min-width: 22px !important;
-  max-width: 22px !important;
-  flex-shrink: 0 !important;
+/* Flatten the internal wrappers to participate in grid */
+body.ypp-search-grid-mode ytd-video-renderer #meta,
+body.ypp-search-grid-mode ytd-video-renderer #channel-info {
+  display: contents !important;
+}
+
+/* Avatar to grid area */
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
+  grid-area: avatar !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-self: start !important;
+  display: flex !important;
   border-radius: 50% !important;
   overflow: hidden !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img,
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element img {
-  width: 22px !important;
-  height: 22px !important;
+  width: 36px !important;
+  height: 36px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
+  display: block !important;
 }
 
-/* ── 7. Channel name + ytd-channel-name ──────────────────────────── */
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name,
-body.ypp-search-grid-mode ytd-video-renderer #channel-name {
-  flex: 1 !important;
+body.ypp-search-grid-mode ytd-video-renderer yt-img-shadow {
+  border-radius: 50% !important;
+  display: block !important;
+}
+
+/* Title wrapper to grid area */
+body.ypp-search-grid-mode ytd-video-renderer #title-wrapper {
+  grid-area: title !important;
+  align-self: start !important;
+  margin: 0 !important;
+}
+
+/* Channel name to grid area */
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name {
+  grid-area: channel !important;
+  margin: 0 !important;
   min-width: 0 !important;
   overflow: hidden !important;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name yt-formatted-string,
-body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a,
-body.ypp-search-grid-mode ytd-video-renderer #channel-name yt-formatted-string {
-  font-size: 1.25rem !important;
-  font-weight: 500 !important;
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a {
+  font-size: 1.3rem !important; /* matched to homepage */
+  font-weight: 400 !important;
   color: var(--ypp-text-secondary) !important;
-  line-height: 1.4 !important;
+  line-height: 1.5 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -1903,37 +1971,40 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-name yt-formatted-string {
   transition: color 0.2s ease;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer:hover ytd-channel-name a,
-body.ypp-search-grid-mode ytd-video-renderer:hover #channel-name yt-formatted-string {
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-channel-name a {
   color: rgba(255, 255, 255, 0.92) !important;
 }
 
-/* ── 8. #meta and #metadata-line ─────────────────────────────────── */
-body.ypp-search-grid-mode ytd-video-renderer #meta,
-body.ypp-search-grid-mode ytd-playlist-renderer #meta,
-body.ypp-search-grid-mode ytd-radio-renderer #meta {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  padding: 0 !important;
+/* Metadata (views/time) to grid area */
+body.ypp-search-grid-mode ytd-video-renderer ytd-video-meta-block {
+  grid-area: metadata !important;
+  margin: 0 !important;
 }
 
 body.ypp-search-grid-mode ytd-video-renderer #metadata-line,
 body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
-body.ypp-search-grid-mode ytd-radio-renderer #metadata-line {
+body.ypp-search-grid-mode ytd-radio-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-video-renderer #metadata-line span,
+body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line span,
+body.ypp-search-grid-mode ytd-radio-renderer #metadata-line span {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: wrap !important;
   align-items: center !important;
   gap: 0 4px !important;
-  font-size: 1.2rem !important;
+  font-size: 1.3rem !important; /* matched to homepage */
   font-weight: 400 !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  margin-top: 4px !important;
-  line-height: 1.4 !important;
-  width: 100% !important;
+  color: var(--ypp-text-secondary) !important;
+  line-height: 1.5 !important;
+  width: auto !important; /* Allows flex wrapping better */
+  margin-top: 0 !important;
+}
+
+/* Hide description text and badges for unified look */
+body.ypp-search-grid-mode ytd-video-renderer yt-formatted-string.metadata-snippet-text,
+body.ypp-search-grid-mode ytd-video-renderer yt-formatted-string#description-text,
+body.ypp-search-grid-mode ytd-video-renderer #badges {
+  display: none !important;
 }
 
 /* ── 9. Playlist / radio internal wrappers ───────────────────────── */
@@ -1991,7 +2062,8 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-video-renderer-action-menu {
 /* Hover: identical float-and-glow to homepage cards */
 body.ypp-search-grid-mode ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-playlist-renderer:hover,
-body.ypp-search-grid-mode ytd-radio-renderer:hover {
+body.ypp-search-grid-mode ytd-radio-renderer:hover,
+body.ypp-search-grid-mode ytd-channel-renderer:hover {
   transform: translateY(-4px) !important;
   background: linear-gradient(
     135deg,
@@ -3302,54 +3374,41 @@ body.ypp-search-grid-mode
   width: 0 !important;
 }
 
-/* Channel Result Card (Vertical Grid Item) */
-body.ypp-search-grid-mode ytd-channel-renderer {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 0;
-  padding: 32px 24px;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  background: linear-gradient(
-    180deg,
-    rgba(40, 40, 40, 0.4) 0%,
-    rgba(20, 20, 20, 0.6) 100%
-  );
-  backdrop-filter: var(--ypp-blur-high);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--ypp-radius-lg);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
-  aspect-ratio: 3/4; /* Make it a nice vertical portrait card */
+/* BUG 1: Channel card taking full viewport height */
+.ypp-search-page.ypp-search-grid-mode ytd-channel-renderer {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-height: 120px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer #content-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
+.ypp-search-page.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
+    width: 60px !important;
+    height: 60px !important;
+    flex-shrink: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer #avatar-section {
-  margin-right: 0;
-  margin-bottom: 16px;
+.ypp-search-page.ypp-search-grid-mode ytd-channel-renderer #avatar-section img#img {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
-body.ypp-search-grid-mode ytd-channel-renderer img#img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-body.ypp-search-grid-mode ytd-channel-renderer #info-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.ypp-search-page.ypp-search-grid-mode ytd-channel-renderer #info-section {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding-left: 16px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start !important;
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer ytd-channel-name {
@@ -3363,18 +3422,18 @@ body.ypp-search-grid-mode ytd-channel-renderer ytd-channel-name {
 body.ypp-search-grid-mode ytd-channel-renderer #subscribers {
   font-size: 13px !important;
   color: rgba(255, 255, 255, 0.6) !important;
-  margin-bottom: 16px;
+  margin-bottom: 0 !important;
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer #subscribe-button {
-  margin-top: 8px;
-  width: 100%;
+  margin-top: 0 !important;
+  width: auto !important;
 }
 
 body.ypp-search-grid-mode ytd-channel-renderer yt-button-shape {
-  width: 100%;
+  width: auto !important;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 /* ===================================================================================
@@ -3549,10 +3608,8 @@ body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*="/shorts/"]) {
    Any renderer that is NOT a card must span the full grid width.
    We explicitly exclude known card types (.ypp-grid-item targets them in JS).
 */
-body.ypp-search-grid-mode ytd-shelf-renderer,
 body.ypp-search-grid-mode ytd-rich-section-renderer,
-body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
-body.ypp-search-grid-mode ytd-channel-renderer {
+body.ypp-search-grid-mode ytd-horizontal-card-list-renderer {
   grid-column: 1 / -1 !important;
   width: 100% !important;
   max-width: 100% !important;
