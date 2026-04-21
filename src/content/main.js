@@ -464,6 +464,10 @@
                 body.classList.toggle('ypp-home-page', this.context.isHome);
                 body.classList.toggle('ypp-search-page', this.context.isSearch);
                 body.classList.toggle('ypp-channel-page', this.context.isChannel);
+                body.classList.toggle('ypp-playlist-page', this.context.isPlaylist);
+                body.classList.toggle('ypp-library-page', this.context.isLibrary);
+                body.classList.toggle('ypp-history-page', this.context.isHistory);
+                body.classList.toggle('ypp-subscriptions-page', this.context.isSubscriptions);
 
                 // Re-apply premium theme class (critical for layout)
                 if (this.settings?.premiumTheme) {

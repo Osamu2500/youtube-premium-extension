@@ -1422,10 +1422,11 @@ ytd-app[mini-guide-visible] #content {
    5. VIDEO GRID & CARDS
    =================================================================================== */
 
-/* Main Grid Container - Full Width, Edge-to-Edge */
-.yt-premium-plus-theme ytd-rich-grid-renderer {
+/* Main Grid Container - Full Width, Edge-to-Edge
+   Guard: never touch the grid on playlist / library / history pages */
+:not(body.ypp-playlist-page):not(body.ypp-library-page):not(body.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer,
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer {
   margin-top: 16px !important;
-  /* Edge-to-edge: no max-width cap, no side margins, no side padding */
   max-width: 100% !important;
   width: 100% !important;
   margin-left: 0 !important;
@@ -1433,7 +1434,6 @@ ytd-app[mini-guide-visible] #content {
   padding-left: 12px !important;
   padding-right: 12px !important;
   box-sizing: border-box !important;
-  /* Allow hover card shadows to paint outside the renderer boundary */
   overflow: visible !important;
 }
 
@@ -1447,15 +1447,14 @@ ytd-app[mini-guide-visible] #content {
   width: 100% !important;
 }
 
-/* Grid Contents - CSS Grid with exact columns from user settings */
-.yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+/* Grid Contents - CSS Grid with exact columns from user settings
+   Guard: skip on playlist / library / history — they use native list layout */
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
   display: grid !important;
-  /* Use active columns as defined by JS Layout Manager, fallback to 4 */
   grid-template-columns: repeat(
     var(--ypp-active-columns, 4),
     minmax(0, 1fr)
   ) !important;
-  /* dense: packs items into any gaps left by hidden/removed elements */
   grid-auto-flow: dense !important;
   gap: var(--ypp-grid-gap, 16px) !important;
   width: 100% !important;
@@ -1468,18 +1467,20 @@ ytd-app[mini-guide-visible] #content {
 }
 
 /* Grid Rows - display:contents flattens ALL row wrappers so items participate directly in parent grid.
-   IMPORTANT: Must cover both the element AND its #contents — YouTube re-stamps these on scroll. */
-.yt-premium-plus-theme ytd-rich-grid-row,
-.yt-premium-plus-theme ytd-rich-grid-row #contents {
+   IMPORTANT: Must cover both the element AND its #contents — YouTube re-stamps these on scroll.
+   Guard: skip on playlist / library / history pages */
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-row,
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-row #contents {
   display: contents !important;
 }
 
 /* Override YouTube's own --ytd-rich-grid-items-per-row at EVERY level.
    YouTube's polymer JS sets this variable on the renderer AND on individual rows/items.
    Setting it to 'auto' makes calc(100%/auto) resolve as invalid, which browsers discard. */
-.yt-premium-plus-theme ytd-rich-grid-renderer,
-.yt-premium-plus-theme ytd-rich-grid-row,
-.yt-premium-plus-theme ytd-rich-item-renderer {
+/* Neuter YouTube's own grid variable — only on pages that use our grid */
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer,
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-row,
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-item-renderer {
   --ytd-rich-grid-items-per-row: auto !important;
   --ytd-rich-grid-posts-per-row: auto !important;
 }
@@ -1500,15 +1501,15 @@ ytd-app[mini-guide-visible] #content {
    NOTE: YouTube's polymer sets an inline 'width' style on this element via JS on scroll.
    We compensate by also declaring width:100% here AND by neutering the --ytd variable above
    so YouTube's own calc(100% / var(--ytd-rich-grid-items-per-row)) resolves as invalid. */
-.yt-premium-plus-theme ytd-rich-item-renderer {
-  /* Size: must fill the grid cell. min-width:0 prevents overflow blowing out the column. */
+/* Individual Video Items - Premium Glassmorphic Card.
+   Guard: skip on playlist / library / history pages */
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-item-renderer {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   margin: 0 !important;
   flex: none !important;
   align-self: stretch !important;
-  /* Glassmorphic Card Style */
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.05),
@@ -1517,12 +1518,7 @@ ytd-app[mini-guide-visible] #content {
   backdrop-filter: blur(24px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-top-color: rgba(
-    255,
-    255,
-    255,
-    0.15
-  ) !important; /* Luminous top edge */
+  border-top-color: rgba(255, 255, 255, 0.15) !important;
   border-radius: var(--ypp-radius-lg);
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.2),
@@ -1534,9 +1530,8 @@ ytd-app[mini-guide-visible] #content {
     box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color 0.3s ease,
     background 0.3s ease !important;
-  transform: translateZ(0); /* Hardware Acceleration */
+  transform: translateZ(0);
   will-change: transform, box-shadow, border-color, background;
-  /* isolation: new stacking context → prevents backdrop-filter leaking outside card */
   isolation: isolate !important;
   overflow: hidden !important;
   background-clip: border-box !important;
@@ -1616,7 +1611,9 @@ ytd-app[mini-guide-visible] #content {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
-.yt-premium-plus-theme ytd-thumbnail {
+/* Global thumbnail rounding — guard excludes playlist/library/history
+   so native list-row thumbnails keep their correct fixed sizing */
+body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-thumbnail {
   border-radius: var(--ypp-radius-md);
   overflow: hidden;
   width: 100%;
@@ -1630,6 +1627,105 @@ body.ypp-hide-sidebar ytd-rich-grid-renderer {
   width: 100% !important;
   padding-left: 12px !important;
   padding-right: 12px !important;
+}
+
+/* ===================================================================================
+   PLAYLIST / LIBRARY / HISTORY PAGE — Restore native YouTube list layout
+   These pages use ytd-playlist-video-renderer which must NOT be touched by
+   the grid/card rules above. All overrides below undo any leakage.
+   =================================================================================== */
+
+/* Reset the grid layout override that leaks from the home grid */
+body.ypp-playlist-page ytd-rich-grid-renderer,
+body.ypp-library-page ytd-rich-grid-renderer,
+body.ypp-history-page ytd-rich-grid-renderer {
+  display: revert !important;
+  grid-template-columns: revert !important;
+  padding: revert !important;
+}
+
+/* Restore playlist video rows to native horizontal list format */
+body.ypp-playlist-page ytd-playlist-video-renderer,
+body.ypp-library-page ytd-playlist-video-renderer,
+body.ypp-history-page ytd-playlist-video-renderer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 60px !important;
+  box-sizing: border-box !important;
+}
+
+/* Restore thumbnail to fixed sidebar size */
+body.ypp-playlist-page ytd-playlist-video-renderer ytd-thumbnail,
+body.ypp-library-page ytd-playlist-video-renderer ytd-thumbnail,
+body.ypp-history-page ytd-playlist-video-renderer ytd-thumbnail {
+  width: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+  height: 68px !important;
+  flex-shrink: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  aspect-ratio: unset !important;
+}
+
+/* Restore metadata visibility */
+body.ypp-playlist-page ytd-playlist-video-renderer #meta,
+body.ypp-playlist-page ytd-playlist-video-renderer #index,
+body.ypp-playlist-page ytd-playlist-video-renderer #video-title,
+body.ypp-library-page ytd-playlist-video-renderer #meta,
+body.ypp-library-page ytd-playlist-video-renderer #index,
+body.ypp-library-page ytd-playlist-video-renderer #video-title,
+body.ypp-history-page ytd-playlist-video-renderer #meta,
+body.ypp-history-page ytd-playlist-video-renderer #index,
+body.ypp-history-page ytd-playlist-video-renderer #video-title {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  max-height: unset !important;
+  -webkit-box-orient: unset !important;
+  -webkit-line-clamp: unset !important;
+}
+
+/* History & Library page — restore compact video renderer list layout */
+body.ypp-history-page ytd-video-renderer,
+body.ypp-library-page ytd-video-renderer {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body.ypp-history-page ytd-video-renderer ytd-thumbnail,
+body.ypp-library-page ytd-video-renderer ytd-thumbnail {
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  height: 94px !important;
+  flex-shrink: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  aspect-ratio: unset !important;
+}
+
+body.ypp-history-page ytd-video-renderer #dismissible,
+body.ypp-library-page ytd-video-renderer #dismissible {
+  flex-direction: row !important;
+}
+
+body.ypp-history-page ytd-video-renderer #video-title,
+body.ypp-library-page ytd-video-renderer #video-title {
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  max-height: unset !important;
 }
 
 /* ===================================================================================
