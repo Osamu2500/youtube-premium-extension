@@ -7,12 +7,13 @@ window.YPP.features.SubscriptionsOrganizer = class SubscriptionsOrganizer extend
     }
 
     getConfigKey() {
-        return null; // Will manually abort if conditions fail
+        // Let BaseFeature toggle this feature via settings.enableSubsManager.
+        // Previously returned null and guarded internally \u2014 now consistent with the
+        // rest of the feature architecture.
+        return 'enableSubsManager';
     }
 
     async enable() {
-        if (!this.settings?.enableSubsManager) return;
-        
         // Prevent collision with the newer Native Subscription Folders feature
         if (this.settings?.subscriptionFolders) {
              this.utils?.log('Native Subscription Folders is active. Legacy SubscriptionsOrganizer is disabled.', 'SubscriptionsOrganizer', 'info');

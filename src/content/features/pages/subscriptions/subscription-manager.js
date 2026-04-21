@@ -9,9 +9,9 @@ window.YPP.features.SubscriptionManager = class SubscriptionManager {
 
     async init() {
         if (this.isInitialized) return;
-        
+
         await this.loadGroups();
-        this.logger.info('Initialized Subscription Manager');
+        window.YPP.Utils.log('Initialized Subscription Manager', 'SubManager');
         this.isInitialized = true;
     }
 
@@ -19,38 +19,39 @@ window.YPP.features.SubscriptionManager = class SubscriptionManager {
         try {
             const result = await chrome.storage.local.get(this.STORAGE_KEY);
             this.groups = result[this.STORAGE_KEY] || {};
-            this.logger.debug('Loaded groups:', this.groups);
+            window.YPP.Utils.log('Loaded groups', 'SubManager', 'debug');
         } catch (error) {
-            this.logger.error('Failed to load groups:', error);
+            window.YPP.Utils.log(`Failed to load groups: ${error?.message}`, 'SubManager', 'error');
         }
     }
 
     async saveGroups() {
         try {
             await chrome.storage.local.set({ [this.STORAGE_KEY]: this.groups });
-            this.logger.debug('Saved groups');
+            window.YPP.Utils.log('Saved groups', 'SubManager', 'debug');
         } catch (error) {
-            this.logger.error('Failed to save groups:', error);
+            window.YPP.Utils.log(`Failed to save groups: ${error?.message}`, 'SubManager', 'error');
         }
     }
 
     createGroup(groupName) {
         if (this.groups[groupName]) {
-            this.logger.warn(`Group "${groupName}" already exists.`);
+            window.YPP.Utils.log(`Group "${groupName}" already exists.`, 'SubManager', 'warn');
             return false;
         }
         this.groups[groupName] = [];
+        // saveGroups is async but we intentionally don't await here — the in-memory
+        // state is updated synchronously and the UI re-renders immediately. Storage
+        // write is fire-and-forget; errors are logged inside saveGroups().
         this.saveGroups();
         return true;
     }
 
     deleteGroup(groupName) {
-        if (this.groups[groupName]) {
-            delete this.groups[groupName];
-            this.saveGroups();
-            return true;
-        }
-        return false;
+        if (!this.groups[groupName]) return false;
+        delete this.groups[groupName];
+        this.saveGroups();
+        return true;
     }
 
     addChannelToGroup(groupName, channel) {

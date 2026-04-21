@@ -8,9 +8,11 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends window.YPP.features.BaseFeature {
-    getConfigKey() { return 'subscriptionFolders'; }
-
     constructor() {
+        // CRITICAL: Must call super() before accessing `this` — sets up name, isEnabled,
+        // utils, events, observer, eventListeners, busListeners from BaseFeature.
+        super('SubscriptionFolders');
+
         this.enabled = false;
         this.initialized = false;
         this.activeFolder = null;
@@ -18,15 +20,22 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
         this.hideShortsActive = false;
         this.hideWatchedActive = false;
-        
+
         // Fast Set for constant-time lookups during grid rendering
         this.activeChannelSet = new Set();
-        this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
+        // Use shared observer from BaseFeature (set by super()); do NOT override with new instance
+        // to avoid unintentionally stopping other features that share the same observer.
 
         // ── Sub-modules ────────────────────────────────────────────────────
         this.storage = new window.YPP.features.FolderStorage();
         this.ui = new window.YPP.features.FolderUI(this.storage, this);
+
+        // Bound nav handler stored for later removal in disable()
+        this._boundHandleNav = () => this.handleNavigation();
+        this._boundHandlePopstate = () => setTimeout(() => this.handleNavigation(), 100);
     }
+
+    getConfigKey() { return 'subscriptionFolders'; }
 
     // =========================================================================
     // LIFECYCLE
@@ -54,7 +63,13 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     disable() {
         this.enabled = false;
-        this.observer.stop();
+        // Unregister only OUR observer slots — do NOT call observer.stop() as it
+        // is the shared observer used by all features.
+        this.observer.unregister('fallback-navigation');
+        this.observer.unregister('feed-filter-loop');
+        // Remove navigation listeners added in setupNavigationListener()
+        document.removeEventListener('yt-navigate-finish', this._boundHandleNav);
+        window.removeEventListener('popstate', this._boundHandlePopstate);
         document.body.classList.remove('ypp-sub-folders-active');
         this.ui.removeFilterChips();
         this.ui.removeGuideFolders();
@@ -66,16 +81,17 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     setupNavigationListener() {
         this.handleNavigation();
-        document.addEventListener('yt-navigate-finish', () => this.handleNavigation());
-        window.addEventListener('popstate', () => { setTimeout(() => this.handleNavigation(), 100); });
-        
+        // Use stored bound references so they can be removed in disable()
+        document.addEventListener('yt-navigate-finish', this._boundHandleNav);
+        window.addEventListener('popstate', this._boundHandlePopstate);
+
         this.observer.register('fallback-navigation', 'ytd-app', () => {
-             if (!document.getElementById('ypp-sub-folders-container')) {
-                 this.ui.injectGuideFolders();
-             }
-             if (this._isFeedPage && !document.getElementById('ypp-folder-chips')) {
-                 this.setupFeedFilters();
-             }
+            if (!document.getElementById('ypp-sub-folders-container')) {
+                this.ui.injectGuideFolders();
+            }
+            if (this._isFeedPage && !document.getElementById('ypp-folder-chips')) {
+                this.setupFeedFilters();
+            }
         });
     }
 
@@ -258,19 +274,25 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         
         const extractAndPlay = () => {
             const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer.ypp-filtered-in');
+            // Use a Set for O(1) deduplication instead of Array.includes() which is O(n)
+            const seenIds = new Set();
             const videoIds = [];
-            
-            for (let card of videoCards) {
+
+            for (const card of videoCards) {
+                if (videoIds.length >= 50) break;
                 const link = card.querySelector('a#video-title-link, a#video-title, #thumbnail.ytd-thumbnail');
-                if (link && link.href) {
-                    const urlObj = new URL(link.href, window.location.origin);
-                    const vid = urlObj.searchParams.get('v');
-                    if (vid && !videoIds.includes(vid) && videoIds.length < 50) {
+                if (!link?.href) continue;
+                try {
+                    const vid = new URL(link.href, window.location.origin).searchParams.get('v');
+                    if (vid && !seenIds.has(vid)) {
+                        seenIds.add(vid);
                         videoIds.push(vid);
                     }
+                } catch {
+                    // Malformed URL — skip silently
                 }
             }
-            
+
             if (videoIds.length > 0) {
                 window.location.href = `/watch_videos?video_ids=${videoIds.join(',')}`;
             } else if (scrolls < maxScrolls) {
@@ -278,7 +300,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 window.scrollBy(0, window.innerHeight * 2);
                 setTimeout(extractAndPlay, 800);
             } else {
-                if (window.YPP.Utils.createToast) window.YPP.Utils.createToast('No videos found in this folder.', 'error');
+                window.YPP.Utils.createToast?.('No videos found in this folder.', 'error');
             }
         };
         

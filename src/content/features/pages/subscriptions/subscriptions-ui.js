@@ -11,19 +11,25 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
     }
 
     enable() {
-        // Resolve dependency if missing
-        if (!this.manager && window.YPP.Main && window.YPP.Main.featureManager) {
-             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionsOrganizer')?.manager 
-                          || window.YPP.Main.featureManager.getFeature('subscriptionFolders');
+        // Resolve dependency if manager wasn't injected via constructor
+        if (!this.manager && window.YPP.Main?.featureManager) {
+            this.manager = window.YPP.Main.featureManager.getFeature('subscriptionsOrganizer')?.manager
+                        || window.YPP.Main.featureManager.getFeature('subscriptionFolders');
         }
 
         if (!this.manager) {
-             this.logger.error('Dependency missing: SubscriptionManager');
-             return;
+            window.YPP.Utils.log('Dependency missing: SubscriptionManager', 'SubUI', 'error');
+            return;
         }
 
-        this.logger.info('Started Subscription UI');
-        this.observer = this.observer || window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
+        window.YPP.Utils.log('Started Subscription UI', 'SubUI');
+        // Use shared observer injected by orchestrator; fall back to sharedObserver directly.
+        // Do NOT instantiate a new DOMObserver — it lives on window.YPP.sharedObserver, not Utils.
+        this.observer = this.observer || window.YPP.sharedObserver;
+        if (!this.observer) {
+            window.YPP.Utils.log('SharedObserver unavailable — SubscriptionUI cannot register DOM watchers', 'SubUI', 'warn');
+            return;
+        }
         this.observePage();
     }
 
@@ -92,9 +98,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
 
     applyGridClass() {
         const container = document.querySelector('ytd-browse[page-subtype="channels"] #contents');
-        if (container && !container.classList.contains('ypp-grid-layout')) {
-            container.classList.add('ypp-grid-layout');
-        }
+        container?.classList.add('ypp-grid-layout');
     }
 
     injectManageButton() {
@@ -259,16 +263,18 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
                 const progress = video.querySelector('#progress');
                 if (progress) {
                     const width = parseFloat(progress.style.width || '0');
-                    if (width > 80) shouldShow = false; // >80% watched
+                    // Respect the global hideWatchedThreshold setting (default: 80)
+                    const threshold = window.YPP?.CONSTANTS?.DEFAULT_SETTINGS?.hideWatchedThreshold ?? 80;
+                    if (width > threshold) shouldShow = false;
                 }
             }
 
             video.style.display = shouldShow ? '' : 'none';
         });
-        
-        // Also trigger a reflow on the grid if needed by dispatching resize
-        window.dispatchEvent(new Event('resize'));
-        this.injectSidebarGroups(); // Refresh sidebar active state
+
+        // Refresh sidebar active state (no resize dispatch — it causes YouTube’s own
+        // layout logic to recalculate unnecessarily on every filter change)
+        this.injectSidebarGroups();
     }
 
     injectSidebarGroups() {
@@ -294,27 +300,31 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         section.innerHTML = `
             <div id="items" class="style-scope ytd-guide-section-renderer">
                 <h3 class="ypp-sidebar-header">Groups</h3>
-                ${Object.keys(groups).map(name => `
-                    <ytd-guide-entry-renderer class="style-scope ytd-guide-section-renderer ypp-sidebar-entry ${activeGroup === name ? 'active' : ''}" role="tab">
+                ${Object.keys(groups).map(name => {
+                    // Sanitize group name before inserting into HTML to prevent XSS
+                    const safeName = name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    const isActive = activeGroup === name ? 'active' : '';
+                    return `
+                    <ytd-guide-entry-renderer class="style-scope ytd-guide-section-renderer ypp-sidebar-entry ${isActive}" role="tab">
                         <a class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" tabindex="-1">
                             <tp-yt-paper-item class="style-scope ytd-guide-entry-renderer" role="link">
                                 <yt-icon class="guide-icon style-scope ytd-guide-entry-renderer"><svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon" style="pointer-events: none; display: block; width: 100%; height: 100%;"><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2,6v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18H4V6h5.17l2,2H20V18z"></path></svg></yt-icon>
-                                <span class="title style-scope ytd-guide-entry-renderer">${name}</span>
+                                <span class="title style-scope ytd-guide-entry-renderer">${safeName}</span>
                             </tp-yt-paper-item>
                         </a>
                     </ytd-guide-entry-renderer>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         `;
 
-        // Add Listeners
+        // Add click handlers after innerHTML is set
         section.querySelectorAll('.ypp-sidebar-entry').forEach(el => {
-            el.onclick = (e) => {
+            el.addEventListener('click', (e) => {
                 e.preventDefault();
-                const name = el.querySelector('.title').textContent;
-                // Navigate with param
-                window.location.href = `/feed/subscriptions?ypp_group=${encodeURIComponent(name)}`;
-            };
+                const name = el.querySelector('.title')?.textContent;
+                if (name) window.location.href = `/feed/subscriptions?ypp_group=${encodeURIComponent(name)}`;
+            });
         });
     }
 
