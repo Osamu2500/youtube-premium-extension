@@ -162,7 +162,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
             position: 'absolute',
             bottom: '56px',
             right: '16px',
-            background: 'rgba(25, 25, 30, 0.55)',
+            background: 'rgba(20, 20, 20, 0.65)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '16px',
             zIndex: '99999',
@@ -258,7 +258,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         const resetBtn = document.createElement('button');
         resetBtn.innerHTML = `<span>Reset</span>`;
         Object.assign(resetBtn.style, {
-            background: 'transparent', border: 'none', color: '#3ea6ff',
+            background: 'transparent', border: 'none', color: '#ffffff',
             cursor: 'pointer', fontSize: '13px', fontWeight: '500', padding: '0'
         });
         resetBtn.onmouseenter = () => { resetBtn.style.textDecoration = 'underline'; };
@@ -333,34 +333,8 @@ window.YPP.features.VideoFilters = class VideoFilters {
                     const isActive = this.currentFilterIndex === index;
                     card.className = `ypp-filter-card ${isActive ? 'active' : ''}`;
                     
-                    let gradient = 'linear-gradient(135deg, #555, #2a2a2a)';
-                    if (filter.name === 'Normal')                                  gradient = 'linear-gradient(135deg, #f5f5f5, #aaa)';
-                    else if (filter.name === 'Sepia')                              gradient = 'linear-gradient(135deg, #8B6436, #3b2712)';
-                    else if (filter.name === 'Grayscale' || filter.name === 'Noir' || filter.name === 'B&W Cinematic') gradient = 'linear-gradient(135deg, #666, #111)';
-                    else if (filter.name.includes('High Contrast'))               gradient = 'linear-gradient(135deg, #fff, #000)';
-                    else if (filter.name.includes('Vivid') || filter.name.includes('Anime')) gradient = 'linear-gradient(135deg, #ff6b6b, #ffd93d)';
-                    else if (filter.name.includes('Warm') || filter.name.includes('Retro'))  gradient = 'linear-gradient(135deg, #f4a261, #e76f51)';
-                    else if (filter.name.includes('Cool') || filter.name.includes('Winter')) gradient = 'linear-gradient(135deg, #a8d8ea, #4a90d9)';
-                    else if (filter.name.includes('Teal'))                        gradient = 'linear-gradient(135deg, #20b2aa, #ff8c00)';
-                    else if (filter.name.includes('Cyber') || filter.name.includes('Neon'))  gradient = 'linear-gradient(135deg, #ff00ff, #00ffff)';
-                    else if (filter.name.includes('Golden') || filter.name.includes('Sunset')) gradient = 'linear-gradient(135deg, #f9c74f, #f3722c)';
-                    else if (filter.name.includes('Blue Hour'))                   gradient = 'linear-gradient(135deg, #4361ee, #7209b7)';
-                    else if (filter.name.includes('Spring') || filter.name.includes('Summer')) gradient = 'linear-gradient(135deg, #95d5b2, #52b788)';
-                    else if (filter.name.includes('Autumn'))                      gradient = 'linear-gradient(135deg, #c77dff, #e07a5f)';
-                    else if (filter.name.includes('Vaporwave'))                   gradient = 'linear-gradient(135deg, #ff71ce, #b967ff, #01cdfe)';
-                    else if (filter.name.includes('Synthwave') || filter.name.includes('80s')) gradient = 'linear-gradient(135deg, #f72585, #7209b7)';
-                    else if (filter.name.includes('HDR'))                         gradient = 'linear-gradient(135deg, #fff176, #42a5f5)';
-                    else if (filter.name.includes('Cinematic'))                   gradient = 'linear-gradient(135deg, #1a1a2e, #e94560)';
-                    else if (filter.name.includes('Horror') || filter.name.includes('Gothic')) gradient = 'linear-gradient(135deg, #3d0000, #1a0000)';
-                    else if (filter.name.includes('Fantasy') || filter.name.includes('Dreamy')) gradient = 'linear-gradient(135deg, #c77dff, #48cae4)';
-                    else if (filter.name.includes('Pastel') || filter.name.includes('Muted'))   gradient = 'linear-gradient(135deg, #ffd6ff, #c8b6ff)';
-                    else if (filter.name.includes('Sci-Fi'))                      gradient = 'linear-gradient(135deg, #023e8a, #00b4d8)';
-                    else if (filter.name.includes('CRT'))                         gradient = 'linear-gradient(135deg, #003300, #00ff00)';
-                    else if (filter.name.includes('VHS'))                         gradient = 'linear-gradient(135deg, #2d0036, #ff0080)';
-                    else if (filter.name.includes('Film') || filter.name.includes('Lomo'))      gradient = 'linear-gradient(135deg, #6d4c41, #bcaaa4)';
-                    else if (filter.name.includes('Invert'))                      gradient = 'linear-gradient(135deg, #1e3799, #e55039)';
-                    else if (filter.name.includes('Polaroid'))                    gradient = 'linear-gradient(135deg, #fff9c4, #fff)';
-                    else if (filter.name.includes('Documentary'))                 gradient = 'linear-gradient(135deg, #78909c, #37474f)';
+                    let gradient = 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02))';
+                    if (filter.name === 'Normal') gradient = 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05))';
 
                     card.innerHTML = `
                         <div class="ypp-filter-lut-preview" style="background: ${gradient}"></div>
@@ -429,7 +403,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         intensitySection.innerHTML = `
             <div class="ypp-intensity-header">
                 <span><span style="margin-right:8px;">💎</span>Global Intensity</span>
-                <span id="ypp-int-val" style="color:#c4b5fd; font-weight:800;">${this.filterIntensity}%</span>
+                <span id="ypp-int-val" style="color:#ffffff; font-weight:800;">${this.filterIntensity}%</span>
             </div>
         `;
         const intSlider = document.createElement('input');

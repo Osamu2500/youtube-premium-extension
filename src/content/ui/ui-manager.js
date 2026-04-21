@@ -39,26 +39,32 @@ class UIManager {
      * @param {string} position - 'append' or 'prepend'
      */
     mount(pointKey, component, position = 'append') {
-        const target = this.mountPoints[pointKey]?.();
-        
-        if (!target) return; // Target not in DOM yet
-        
-        // Prevent duplicate mounting
-        if (this.components.has(component.id) || target.querySelector(`[data-ypp-id="${component.id}"]`)) {
+        const id = component.id;
+
+        // Prevent duplicate registration — if already tracked AND still in DOM, bail out
+        if (this.components.has(id) && document.contains(this.components.get(id).el)) {
             return;
         }
 
-        component.el.dataset.yppId = component.id;
+        // Register/update so heal() can always find it
+        component.el.dataset.yppId = id;
         component.mountPoint = pointKey;
         component.position = position;
+        this.components.set(id, component);
+
+        const target = this.mountPoints[pointKey]?.();
+        if (!target) return; // Target not in DOM yet — heal() will remount when it appears
+
+        // Prevent duplicate DOM insertion
+        if (target.querySelector(`[data-ypp-id="${id}"]`)) {
+            return;
+        }
 
         if (position === 'prepend') {
             target.prepend(component.el);
         } else {
             target.appendChild(component.el);
         }
-
-        this.components.set(component.id, component);
     }
 
     /**

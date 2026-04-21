@@ -33,6 +33,13 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         // Bound nav handler stored for later removal in disable()
         this._boundHandleNav = () => this.handleNavigation();
         this._boundHandlePopstate = () => setTimeout(() => this.handleNavigation(), 100);
+
+        // Debounced filter — coalesces rapid observer callbacks (e.g. 30 cards loading at once)
+        // into a single applyFeedFilters pass per 50ms window.
+        this._debouncedApplyFilters = window.YPP.Utils.debounce(
+            () => this._applyFeedFiltersNow(),
+            50
+        );
     }
 
     getConfigKey() { return 'subscriptionFolders'; }
@@ -166,7 +173,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         
         this.observer.register('feed-filter-loop', 'ytd-rich-grid-renderer #contents ytd-rich-item-renderer', () => {
             if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive) {
-                this.applyFeedFilters();
+                // Debounced: rapid card additions (lazy-load batches) coalesce into one pass
+                this._debouncedApplyFilters();
             }
         });
     }
@@ -190,20 +198,38 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         }
     }
 
+    /**
+     * Public entry point — always goes through the debounce path so rapid
+     * calls (e.g. from setActiveFolder) are still coalesced.
+     */
     applyFeedFilters() {
+        this._debouncedApplyFilters();
+    }
+
+    /**
+     * The real filter implementation — called at most once per 50ms window.
+     * Caches channel names on card elements (dataset.yppChannel) to avoid
+     * repeated textContent lookups across filter passes.
+     * @private
+     */
+    _applyFeedFiltersNow() {
         if (!this._isFeedPage) return;
-        
+
         const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
-        
+
         videoCards.forEach(card => {
-            const channelLink = card.querySelector('#channel-name a');
-            if (!channelLink) return;
-            
             let isVisible = true;
-            
+
             if (this.activeFolder) {
-                const channelName = channelLink.textContent.trim();
-                if (!this.activeChannelSet.has(channelName)) isVisible = false;
+                // Cache channel name on the element — avoids repeated DOM reads
+                if (!card.dataset.yppChannel) {
+                    const channelLink = card.querySelector('#channel-name a');
+                    if (channelLink) {
+                        card.dataset.yppChannel = channelLink.textContent.trim();
+                    }
+                }
+                const channelName = card.dataset.yppChannel;
+                if (!channelName || !this.activeChannelSet.has(channelName)) isVisible = false;
             }
 
             if (isVisible && this.hideShortsActive) {
@@ -216,12 +242,11 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             if (isVisible && this.hideWatchedActive) {
                 const progressEl = card.querySelector('#progress');
                 if (progressEl) {
-                    const widthStyle = progressEl.style.width;
-                    const progressValue = parseInt(widthStyle.replace('%', ''), 10);
+                    const progressValue = parseInt(progressEl.style.width, 10);
                     if (!isNaN(progressValue) && progressValue >= 80) isVisible = false;
                 }
             }
-            
+
             if (isVisible) {
                 card.style.display = '';
                 card.classList.add('ypp-filtered-in');
@@ -230,7 +255,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 card.classList.remove('ypp-filtered-in');
             }
         });
-        
+
         const spinner = document.querySelector('ytd-continuation-item-renderer');
         if (spinner && spinner.getBoundingClientRect().top < window.innerHeight * 2) {
             window.scrollBy(0, 1);
@@ -248,6 +273,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         videoCards.forEach(card => {
             card.style.display = '';
             card.classList.remove('ypp-filtered-in');
+            // Clear cached channel name so stale data doesn't persist across navigations
+            delete card.dataset.yppChannel;
         });
     }
 

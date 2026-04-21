@@ -17,6 +17,10 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         this.draggedChannel = null;
         // Cache the last rendered sidebar group list to avoid needless DOM thrashing
         this._lastSidebarKey = null;
+
+        // Debounced filterFeed: coalesces rapid toggle-chip clicks or reapplyFilters
+        // calls into a single DOM pass (50ms window).
+        this._debouncedFilter = null; // Initialized in enable() once Utils is confirmed available
     }
 
     enable() {
@@ -31,9 +35,15 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
             return;
         }
 
+        // Build debounced filter now that Utils is confirmed loaded
+        if (!this._debouncedFilter) {
+            this._debouncedFilter = window.YPP.Utils.debounce(
+                (groupName) => this._filterFeedNow(groupName),
+                50
+            );
+        }
+
         window.YPP.Utils.log('Started Subscription UI', 'SubUI');
-        // Use shared observer injected by orchestrator; fall back to sharedObserver directly.
-        // Do NOT instantiate a new DOMObserver — it lives on window.YPP.sharedObserver, not Utils.
         this.observer = this.observer || window.YPP.sharedObserver;
         if (!this.observer) {
             window.YPP.Utils.log('SharedObserver unavailable — SubscriptionUI cannot register DOM watchers', 'SubUI', 'warn');
@@ -231,9 +241,26 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         this.filterFeed(groupName);
     }
 
-    // ─── Feed Filtering ────────────────────────────────────────────────────────
+    // ─── Feed Filtering ─────────────────────────────────────────────────────────────────
 
     filterFeed(groupName) {
+        // Delegate to debounced version so rapid calls (chip click + toggle) coalesce
+        if (this._debouncedFilter) {
+            this._debouncedFilter(groupName);
+        } else {
+            // Fallback if called before enable() (e.g. checkRoute)
+            this._filterFeedNow(groupName);
+        }
+    }
+
+    /**
+     * The real filtering implementation.
+     * Channel names are cached on each video element (dataset.yppChannel) after
+     * the first read so repeated filter passes skip the expensive DOM lookup.
+     * @private
+     * @param {string|null} groupName
+     */
+    _filterFeedNow(groupName) {
         const bar = document.getElementById('ypp-subs-filter-bar');
         if (!bar) return;
 

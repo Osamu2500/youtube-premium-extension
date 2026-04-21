@@ -2,9 +2,24 @@
  * Folder UI
  * Owns: DOM injection and rendering for the Guide sidebar (left navigation),
  * filter chips (on feed), channel/card popovers, and DOM observers for these UI elements.
+ *
+ * Performance / security notes:
+ *  - renderChannelPopover: click-outside listener is added exactly once (flag guard)
+ *    to prevent listener accumulation across multiple popover opens.
+ *  - renderGuideFolders: folder names are HTML-escaped before innerHTML injection (XSS).
+ *  - renderGuideFolders: a render-key cache skips full re-renders when data is unchanged.
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
+
+/** Escapes a string for safe insertion into innerHTML. */
+function _escHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
 
 window.YPP.features.FolderUI = class FolderUI {
 
@@ -16,6 +31,11 @@ window.YPP.features.FolderUI = class FolderUI {
         this.storage      = storage;
         this.orchestrator = orchestrator;
         this.observer     = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
+
+        /** @type {boolean} Whether the popover click-outside listener has been attached */
+        this._popoverListenerAttached = false;
+        /** @type {string|null} Cache key for the last renderGuideFolders render */
+        this._guideRenderKey = null;
     }
 
     // =========================================================================
@@ -39,8 +59,16 @@ window.YPP.features.FolderUI = class FolderUI {
         }, { runOnce: true });
     }
 
-    /** Re-render the folder list within the guide. */
+    /** Re-render the folder list within the guide. Skips re-render if data hasn't changed. */
     renderGuideFolders(sectionEl = null) {
+        // --- Render-key cache: skip full re-render when nothing has changed ---
+        const folderNames = Object.keys(this.storage.folders);
+        const activeFolder = this.orchestrator.getActiveFolder();
+        const newRenderKey = folderNames.join(',') + '|' + (activeFolder || '');
+        const containerExists = !!document.getElementById('ypp-sub-folders-container');
+        if (newRenderKey === this._guideRenderKey && containerExists) return;
+        this._guideRenderKey = newRenderKey;
+
         let container = document.getElementById('ypp-sub-folders-container');
 
         if (!container && sectionEl) {
@@ -55,6 +83,7 @@ window.YPP.features.FolderUI = class FolderUI {
         }
         if (!container) return; // Wait for DOM
 
+        // Build header (safe static HTML)
         container.innerHTML = `
             <div class="ypp-folder-header">
                 <h3>My Folders</h3>
@@ -65,17 +94,21 @@ window.YPP.features.FolderUI = class FolderUI {
 
         const list = container.querySelector('#ypp-folder-list');
 
-        Object.keys(this.storage.folders).forEach(folderName => {
+        folderNames.forEach(folderName => {
             const config = this.storage.folderConfig[folderName] || {};
             const el = document.createElement('div');
             el.className = 'ypp-folder-item';
-            if (this.orchestrator.getActiveFolder() === folderName) el.classList.add('active');
+            if (activeFolder === folderName) el.classList.add('active');
 
-            const icon = config.icon || '📁';
+            // Use _escHtml for dynamic values going into innerHTML to prevent XSS
+            const safeIcon = _escHtml(config.icon || '📁');
+            const safeName = _escHtml(folderName);
+            const count = this.storage.folders[folderName].length;
+
             el.innerHTML = `
-                <div class="ypp-folder-icon">${icon}</div>
-                <div class="ypp-folder-name" style="flex: 1;">${folderName}</div>
-                <div class="ypp-folder-count">${this.storage.folders[folderName].length}</div>
+                <div class="ypp-folder-icon">${safeIcon}</div>
+                <div class="ypp-folder-name" style="flex: 1;">${safeName}</div>
+                <div class="ypp-folder-count">${count}</div>
                 <button class="ypp-play-all-btn" title="Play All" style="margin-left: 8px; width: 24px; height: 24px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border: none; cursor: pointer; background: rgba(255,255,255,0.1); color: white;">
                     <svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 </button>
@@ -113,8 +146,9 @@ window.YPP.features.FolderUI = class FolderUI {
             const name = prompt('Enter new folder name:');
             if (name && name.trim()) {
                 if (this.storage.addFolder(name.trim())) {
+                    this._guideRenderKey = null; // Invalidate cache
                     this.renderGuideFolders();
-                    this.renderFilterChips(); // Update chips if visible
+                    this.renderFilterChips();
                 }
             }
         });
@@ -353,12 +387,19 @@ window.YPP.features.FolderUI = class FolderUI {
             popover.id = 'ypp-folder-popover';
             popover.className = 'ypp-glass-popover';
             document.body.appendChild(popover);
+        }
 
+        // Fix: attach the click-outside listener exactly once, not on every popover open.
+        // Previously a new listener was added each time, creating unbounded accumulation.
+        if (!this._popoverListenerAttached) {
+            this._popoverListenerAttached = true;
             document.addEventListener('click', (e) => {
-                const clickedInside = popover.contains(e.target);
+                const popoverEl = document.getElementById('ypp-folder-popover');
+                if (!popoverEl) return;
+                const clickedInside = popoverEl.contains(e.target);
                 const clickedFolderBtn = e.target.closest('.ypp-card-folder-btn') || e.target.closest('#ypp-channel-folder-btn');
                 if (!clickedInside && !clickedFolderBtn) {
-                    popover.classList.remove('visible');
+                    popoverEl.classList.remove('visible');
                 }
             });
         }

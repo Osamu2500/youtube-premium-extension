@@ -6,7 +6,6 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.BaseFeature {
-    getConfigKey() { return 'navTrending'; }
 
     static ICONS = {
         Subscriptions: '<rect x="2" y="6" width="20" height="12" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></rect><polygon points="10 9 15 12 10 15 10 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polygon>',
@@ -17,280 +16,186 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
     };
 
     constructor() {
-        this.CONSTANTS = window.YPP.CONSTANTS;
-        this.Utils = window.YPP.Utils;
-        /** @type {boolean} Internal state tracking if the manager is active */
-        this.isEnabled = false;
-        /** @type {Object|null} Current user settings */
-        this.settings = null;
-        this.domObserver = window.YPP.sharedObserver || new this.Utils.DOMObserver();
+        // FIX 1: super() MUST be called before any `this` access in a derived class
+        super('HeaderNav');
+
         this._currentUrl = window.location.pathname + window.location.search;
-
-        // Bind methods
         this._boundHandleNavigate = this._handleNavigate.bind(this);
+        this._domObserver = window.YPP.sharedObserver;
     }
 
-    run(settings) {
-        this.enable(settings);
+    getConfigKey() {
+        // Feature is enabled if ANY nav button is on, or sidebar/logo settings are active
+        return null; // We handle our own enable logic inside enable()
     }
 
-    /**
-     * Initialize header navigation
-     * @param {Object} settings - User settings object
-     */
-    enable(settings) {
-        this.settings = settings;
-        const shouldRun = settings.navTrending || settings.navShorts ||
-            settings.navSubscriptions || settings.navWatchLater ||
-            settings.navPlaylists || settings.navHistory ||
-            settings.forceHideSidebar || settings.logoRedirectSub;
+    // =========================================================================
+    // LIFECYCLE  (BaseFeature calls enable() / disable() — no settings arg)
+    // =========================================================================
 
-        if (!shouldRun) {
-            this.disable();
-            return;
-        }
+    async enable() {
+        // this.settings is already set by BaseFeature.update() before enable() is called
+        const s = this.settings || {};
 
-        // Styles are now universally handled by styles.css
+        const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
+            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
 
-        if (this.isEnabled) {
-            this.handleSidebarState();
-            // Re-inject if context changed
-            this.scheduleInjection();
-            return;
-        }
+        if (!shouldRun) return; // No nav items configured — nothing to do
 
-        this.isEnabled = true;
-        this.handleSidebarState();
-        this.observeHeader();
+        this._applySidebarState();
+        this._observeHeader();
     }
 
-    /**
-     * Disable header navigation and clean up
-     */
-    disable() {
-        if (!this.isEnabled) return;
-        this.isEnabled = false;
-        
-        if (this.domObserver) {
-            this.domObserver.stop();
+    async disable() {
+        if (this._domObserver) {
+            this._domObserver.unregister('header-nav-end');
         }
 
-        if (window.YPP.ui && window.YPP.ui.manager) {
+        if (window.YPP.ui?.manager) {
             window.YPP.ui.manager.remove('header-nav-group');
         }
 
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
+
+        // Call super to clean up any tracked listeners
+        await super.disable();
     }
 
-    handleSidebarState() {
-        // Toggle body class based on setting
-        document.body.classList.toggle('ypp-hide-sidebar', !!this.settings.forceHideSidebar);
+    // =========================================================================
+    // INTERNAL
+    // =========================================================================
+
+    _applySidebarState() {
+        document.body.classList.toggle('ypp-hide-sidebar', !!(this.settings?.forceHideSidebar));
     }
 
-    // Styles moved to styles.css
+    _observeHeader() {
+        if (!this._domObserver) return;
 
-    observeHeader() {
-        this.domObserver.start();
-        
-        // Register observer for masthead/center changes safely
-        this.domObserver.register(
-            'header-nav-center',
-            'ytd-masthead #center',
-            () => this.scheduleInjection(),
-            true
+        this._domObserver.start();
+
+        // Watch for ytd-masthead #end — our injection target
+        this._domObserver.register(
+            'header-nav-end',
+            'ytd-masthead #end',
+            () => {
+                // #end appeared (or was re-rendered) — re-inject and heal
+                this._scheduleInjection();
+                window.YPP.ui?.manager?.heal();
+            },
+            true  // immediate: trigger if #end already exists
         );
 
-        // Initial check
-        this.scheduleInjection();
+        // Initial injection attempt (covers cases where #end is already in DOM)
+        this._scheduleInjection();
 
-        // Listen for navigations to update active state
+        // Keep active state updated on SPA navigation
         window.addEventListener('yt-navigate-finish', this._boundHandleNavigate);
     }
 
     _handleNavigate() {
-        if (!this.isEnabled) return;
         this._currentUrl = window.location.pathname + window.location.search;
         this._updateActiveStates();
-        // Sometimes navigation wipes the header, so check injection again
-        this.scheduleInjection();
+        // Re-inject in case navigation wiped the header
+        this._scheduleInjection();
     }
 
-    scheduleInjection() {
-        // Use requestAnimationFrame for safer DOM access
-        requestAnimationFrame(() => {
-            this.handleLogoRedirect();
-            this.injectButtons();
-        });
+    _scheduleInjection() {
+        requestAnimationFrame(() => this._injectButtons());
     }
 
-    /**
-     * Override main YouTube logo to redirect to Subscriptions feed
-     */
-    handleLogoRedirect() {
-        return; // Disabled per user request - always go to home
-    }
+    _injectButtons() {
+        const s = this.settings || {};
 
-    /**
-     * Inject navigation buttons into the header
-     * @private
-     */
-    injectButtons() {
-        if (!this.isEnabled) return;
+        // Button definitions (only include enabled ones)
+        const allButtons = [
+            { setting: 'navSubscriptions', label: 'Subscriptions', url: '/feed/subscriptions', icon: HeaderNav.ICONS.Subscriptions },
+            { setting: 'navShorts',        label: 'Shorts',        url: '/shorts',             icon: HeaderNav.ICONS.Shorts },
+            { setting: 'navWatchLater',    label: 'Watch Later',   url: '/playlist?list=WL',   icon: HeaderNav.ICONS.WatchLater },
+            { setting: 'navPlaylists',     label: 'Playlists',     url: '/feed/playlists',     icon: HeaderNav.ICONS.Playlists },
+            { setting: 'navHistory',       label: 'History',       url: '/feed/history',       icon: HeaderNav.ICONS.History }
+        ];
 
-        try {
-            // Define button config for cleaner iteration
-            const buttons = [
-                { setting: 'navSubscriptions', label: 'Subscriptions', url: '/feed/subscriptions', icon: HeaderNav.ICONS.Subscriptions },
-                { setting: 'navShorts', label: 'Shorts', url: '/shorts', icon: HeaderNav.ICONS.Shorts },
-                { setting: 'navWatchLater', label: 'Watch Later', url: '/playlist?list=WL', icon: HeaderNav.ICONS.WatchLater },
-                { setting: 'navPlaylists', label: 'Playlists', url: '/feed/playlists', icon: HeaderNav.ICONS.Playlists },
-                { setting: 'navHistory', label: 'History', url: '/feed/history', icon: HeaderNav.ICONS.History }
-            ];
+        const activeButtons = allButtons.filter(btn => s[btn.setting]);
 
-            // Filter active buttons based on settings
-            const activeButtons = buttons.filter(btn => this.settings[btn.setting]);
+        if (activeButtons.length === 0) return;
 
-            if (activeButtons.length === 0) {
-                this.Utils?.log('No nav buttons enabled in settings', 'HEADERNAV', 'warn');
-                return;
-            }
-
-            // Create a wrapper component for the buttons group so UI manager handles it as one unit
-            const navGroup = document.createElement('div');
-            navGroup.className = 'ypp-nav-group ypp-nav-group-right';
-
-            activeButtons.forEach(btnConfig => {
-                this.createButton(navGroup, btnConfig.label, btnConfig.url, btnConfig.icon, btnConfig.setting);
-            });
-
-            // Submit to UIManager
-            if (window.YPP.ui && window.YPP.ui.manager) {
-                 window.YPP.ui.manager.mount('headerRight', {
-                     id: 'header-nav-group',
-                     el: navGroup
-                 }, 'prepend'); // prepend inserts it before the profile/notifications
-            }
-            
+        // If already mounted and still in DOM, just update active states
+        const existing = document.querySelector('[data-ypp-id="header-nav-group"]');
+        if (existing) {
             this._updateActiveStates();
-        } catch (error) {
-            this.Utils?.log(`Error injecting buttons: ${error.message}`, 'HEADERNAV', 'error');
+            return;
         }
-    }
 
-    /**
-     * Create a single navigation button
-     * @param {HTMLElement} container - Container to append button to
-     * @param {string} label - Button label/title
-     * @param {string} url - Navigation URL
-     * @param {string} svgContent - SVG icon content
-     * @param {string} idSuffix - Unique ID string
-     * @private
-     */
-    createButton(container, label, url, svgContent, idSuffix) {
-        try {
-            const handleClick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (this.isCurrentPage(url)) {
-                    this.Utils?.log(`Already on ${label} page`, 'HEADERNAV');
-                    return;
-                }
-                this.navigateTo(url);
-            };
-
-            // Use the UI Manager component factory if it exists
-            if (window.YPP.ui?.components?.createButton) {
-                const component = window.YPP.ui.components.createButton({
-                    id: `nav-${idSuffix}`,
-                    icon: `<svg viewBox="0 0 24 24" class="ypp-nav-icon" style="pointer-events: none; display: block; width: 24px; height: 24px; fill: currentColor;">${svgContent}</svg>`,
-                    tooltip: label,
-                    onClick: handleClick,
-                    className: 'ypp-nav-btn'
-                });
-                
-                // Add attributes required by CSS state logic
-                component.el.dataset.url = url;
-                component.el.setAttribute('tabindex', '0');
-                component.el.setAttribute('role', 'button');
-                
-                // Listen for keyboard
-                component.el.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleClick(e);
-                    }
-                });
-
-                container.appendChild(component.el);
-            } else {
-                 // Fallback if UI Manager fails to load
-                 this.Utils?.log('UIManager factory not found for HeaderNav button', 'HEADERNAV', 'warn');
-            }
-        } catch (error) {
-            this.Utils?.log(`Error creating button ${label}: ${error.message}`, 'HEADERNAV', 'error');
+        if (!window.YPP.ui?.manager || !window.YPP.ui?.components?.createButton) {
+            this.utils?.log('UIManager or button factory not ready yet', 'HEADERNAV', 'warn');
+            return;
         }
-    }
 
-    /**
-     * Check if the given URL is the current page
-     * @param {string} url - URL to check
-     * @returns {boolean}
-     */
-    isCurrentPage(url) {
-        const currentPath = window.location.pathname;
-        
-        if (url === '/shorts') {
-            return currentPath.startsWith('/shorts/');
-        }
-        
-        if (url.includes('?')) {
-            return currentPath.includes(url.split('?')[0]);
-        }
-        
-        return currentPath === url || currentPath === url + '/';
-    }
+        const navGroup = document.createElement('div');
+        navGroup.className = 'ypp-nav-group';
 
-    /**
-     * Navigate to a URL using YouTube's navigation system
-     * @param {string} url - URL to navigate to
-     */
-    navigateTo(url) {
-        try {
-            // Create a specialized event for YouTube navigation if possible, 
-            // otherwise standard link click is the best way to trigger router.
-            const link = document.createElement('a');
-            link.href = url;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => link.remove(), 100);
-        } catch (error) {
-            // Fallback to direct navigation
-            this.Utils?.log(`Using fallback navigation to ${url}`, 'HEADERNAV');
-            window.location.href = url;
-        }
-    }
-
-    /**
-     * Update active states for navigation buttons
-     * @private
-     */
-    _updateActiveStates() {
-        const btns = document.querySelectorAll('.ypp-nav-btn');
-        btns.forEach(btn => {
-            const url = btn.dataset.url;
-            const isActive = this.isCurrentPage(url);
-            btn.classList.toggle('active', isActive);
-            btn.setAttribute('aria-pressed', isActive);
+        activeButtons.forEach(cfg => {
+            this._createButton(navGroup, cfg.label, cfg.url, cfg.icon, cfg.setting);
         });
+
+        window.YPP.ui.manager.mount('headerRight', { id: 'header-nav-group', el: navGroup }, 'prepend');
+
+        this._updateActiveStates();
     }
 
-    /**
-     * Refresh navigation - re-check current page and update states
-     */
-    refresh() {
-        this._currentUrl = window.location.pathname + window.location.search;
-        this._updateActiveStates();
+    _createButton(container, label, url, svgContent, idSuffix) {
+        const handleClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this._isCurrentPage(url)) {
+                this._navigateTo(url);
+            }
+        };
+
+        const component = window.YPP.ui.components.createButton({
+            id: `nav-${idSuffix}`,
+            icon: `<svg viewBox="0 0 24 24" class="ypp-nav-icon" style="pointer-events:none;display:block;width:24px;height:24px;">${svgContent}</svg>`,
+            tooltip: label,
+            onClick: handleClick,
+            className: 'ypp-nav-btn'
+        });
+
+        component.el.dataset.url = url;
+        component.el.setAttribute('tabindex', '0');
+        component.el.setAttribute('role', 'button');
+        component.el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleClick(e);
+            }
+        });
+
+        container.appendChild(component.el);
+    }
+
+    _isCurrentPage(url) {
+        const path = window.location.pathname;
+        if (url === '/shorts') return path.startsWith('/shorts/');
+        if (url.includes('?')) return path.includes(url.split('?')[0]);
+        return path === url || path === url + '/';
+    }
+
+    _navigateTo(url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => link.remove(), 100);
+    }
+
+    _updateActiveStates() {
+        document.querySelectorAll('.ypp-nav-btn').forEach(btn => {
+            const url = btn.dataset.url;
+            const isActive = this._isCurrentPage(url);
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', String(isActive));
+        });
     }
 };

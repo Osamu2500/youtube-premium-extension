@@ -50,6 +50,8 @@
         RETRY_DELAY: 500,
         /** @type {number} Initialization timeout */
         INIT_TIMEOUT: 30000,
+        /** @type {boolean} Guards against duplicate featureManager.init() within one navigation */
+        _initPending: false,
 
         // =========================================================================
         // INITIALIZATION
@@ -137,30 +139,56 @@
         },
 
         /**
-         * Wait for a condition to be true
+         * Wait for a condition to be true.
+         * Uses MutationObserver for reactivity instead of setInterval polling,
+         * so conditions that depend on DOM changes resolve immediately rather
+         * than waiting up to 100ms per check.
          * @private
          * @param {Function} condition - Function that returns true when condition is met
          * @param {number} timeout - Maximum wait time in ms
          * @returns {Promise<boolean>}
          */
         waitFor(condition, timeout = 10000) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 if (condition()) {
                     resolve(true);
                     return;
                 }
 
-                let elapsed = 0;
-                const interval = setInterval(() => {
-                    elapsed += 100;
+                let resolved = false;
+                let timeoutId = null;
+                let observer = null;
+
+                const cleanup = () => {
+                    if (observer) { observer.disconnect(); observer = null; }
+                    if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+                };
+
+                const check = () => {
+                    if (resolved) return;
                     if (condition()) {
-                        clearInterval(interval);
+                        resolved = true;
+                        cleanup();
                         resolve(true);
-                    } else if (elapsed >= timeout) {
-                        clearInterval(interval);
+                    }
+                };
+
+                // MutationObserver fires synchronously within the same microtask when
+                // a script sets window.YPP.Utils etc., so resolution is near-instant.
+                observer = new MutationObserver(check);
+                observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
+
+                // Also check on a fast initial tick in case condition becomes true
+                // before any mutation fires (e.g. already-loaded scripts).
+                Promise.resolve().then(check);
+
+                timeoutId = setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        cleanup();
                         resolve(false);
                     }
-                }, 100);
+                }, timeout);
             });
         },
 
@@ -256,17 +284,27 @@
             this.removeEventListeners();
 
             // Handle YouTube SPA navigation
+            // Uses requestAnimationFrame + an _initPending flag to coalesce duplicate
+            // events: both yt-navigate-finish and yt-page-data-updated can fire for
+            // the same navigation, which previously caused featureManager.init() to
+            // run twice per page load.
             const handleNavigation = () => {
                 if (this._navTimeout) cancelAnimationFrame(this._navTimeout);
                 this._navTimeout = requestAnimationFrame(() => {
+                    // Guard: if an init is already queued for this navigation tick, skip.
+                    if (this._initPending) return;
+                    this._initPending = true;
+                    // Reset flag after the current task completes so future navigations work.
+                    Promise.resolve().then(() => { this._initPending = false; });
+
                     this.Utils?.log('Navigation detected', 'MAIN', 'debug');
                     this.updateContext();
-                    
+
                     // Fire next-gen EventBus lifecycle hooks
                     if (window.YPP.events) {
                         const url = window.location.href;
                         window.YPP.events.emit('app:pageChange', url);
-                        
+
                         if (window.location.pathname === '/watch') {
                             const urlParams = new URLSearchParams(window.location.search);
                             const videoId = urlParams.get('v');
