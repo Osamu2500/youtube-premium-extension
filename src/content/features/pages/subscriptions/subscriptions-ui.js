@@ -1,3 +1,5 @@
+import './subscriptions.css';
+
 window.YPP.features.SubscriptionUI = class SubscriptionUI {
     constructor(manager) {
         this.manager = manager; 

@@ -3,6 +3,8 @@
  * Detects external <video> tags (non-YouTube) and injects a custom floating
  * player bar for speed/filters/PiP. Relies on GlobalBarUI and FilterPresets.
  */
+import './global-bar.css';
+
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 

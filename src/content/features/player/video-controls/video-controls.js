@@ -1,3 +1,5 @@
+import './video-controls.css';
+
 window.YPP.features.VideoControls = class VideoControls extends window.YPP.features.BaseFeature {
     constructor() {
         super('VideoControls');
