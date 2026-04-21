@@ -7,9 +7,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         this._watchedIds = new Set();
         this._storageKey = 'ypp_watched_ids';
         this._boundProcess = this._processCards.bind(this);
-        
-        // Re-use legacy styling SVG option in case the checkmark requested doesn't fit
-        this.ICON_SVG_LEGACY = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
+        this._boundNavigate = this._onNavigate.bind(this);
     }
 
     getConfigKey() { return 'enableMarkWatched'; }
@@ -20,11 +18,11 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         await this._loadWatchedIds();
         // Process cards already on page
         this._processCards();
-        // Subscribe to new cards appearing
-        window.YPP.events?.on('dom:nodes-added', this._boundProcess);
-        window.YPP.events?.on('page:changed', this._boundProcess);
-        // Listen for current video being watched
-        window.addEventListener('yt-navigate-finish', this._onNavigate.bind(this));
+        // Subscribe to new cards via EventBus (tracked for cleanup via onBusEvent)
+        this.onBusEvent('dom:nodes-added', this._boundProcess);
+        this.onBusEvent('page:changed', this._boundProcess);
+        // Listen for SPA navigation to track video watch progress
+        this.addListener(window, 'yt-navigate-finish', this._boundNavigate);
     }
 
     async disable() {

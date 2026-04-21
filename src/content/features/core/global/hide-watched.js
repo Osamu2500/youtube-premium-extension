@@ -12,20 +12,16 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     async enable() {
         await super.enable();
         this._processCards();
-        window.YPP.events?.on('dom:nodes-added', this._boundProcess);
-        window.YPP.events?.on('page:changed', this._boundProcess);
-        window.YPP.events?.on('watched:updated', this._boundProcess);
+        // Use onBusEvent so subscriptions are tracked and cleaned up on disable()
+        this.onBusEvent('dom:nodes-added', this._boundProcess);
+        this.onBusEvent('page:changed', this._boundProcess);
+        this.onBusEvent('watched:updated', this._boundProcess);
     }
 
     async disable() {
-        await super.disable();
-        window.YPP.events?.off('dom:nodes-added', this._boundProcess);
-        window.YPP.events?.off('page:changed', this._boundProcess);
-        window.YPP.events?.off('watched:updated', this._boundProcess);
-        // Restore all hidden cards
-        document.querySelectorAll(
-            '[data-ypp-hidden="watched"]'
-        ).forEach(card => {
+        await super.disable(); // cleanupEvents + cleanupBusListeners via BaseFeature
+        // Restore all hidden/dimmed cards
+        document.querySelectorAll('[data-ypp-hidden="watched"]').forEach(card => {
             card.style.opacity = '';
             card.style.display = '';
             card.style.pointerEvents = '';
