@@ -347,9 +347,16 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
         // ── Switchable accounts ───────────────────────────────────────────────
         menu.querySelectorAll('ytd-account-item-renderer').forEach((item, nativeIndex) => {
-            const name = item.querySelector(
-                '#account-name, .ytd-account-item-renderer'
-            )?.textContent?.trim() || '';
+            // YouTube nests the display name inside yt-formatted-string or a
+            // span inside #account-name — walk the tree to get the real text.
+            const nameEl = item.querySelector(
+                '#account-name yt-formatted-string,' +
+                '#account-name span,' +
+                '#account-name,' +
+                '#channel-title yt-formatted-string,' +
+                '#channel-title'
+            );
+            const name = nameEl?.textContent?.trim() || '';
             if (!name) return;
 
             const handle = item.querySelector(
@@ -478,7 +485,8 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         // ── Orbital geometry ─────────────────────────────────────────────────
         const R             = 88;           // px from center to satellite midpoint
         const SAT_SIZE      = 40;           // satellite disk diameter
-        const containerSize = R * 2 + SAT_SIZE + 8; // e.g. 232px
+        // Expand container height to accommodate name labels below satellites
+        const containerSize = R * 2 + SAT_SIZE + 28; // extra 20px for labels
 
         const satelliteHTML = otherAccounts.map((acc, i) => {
             // Distribute evenly around the circle, starting from top (−π/2 rad)
@@ -487,6 +495,8 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             const dy    = Math.round(Math.sin(angle) * R);
             // Prefer nativeIndex for clicking the correct ytd-account-item-renderer
             const idx   = acc.nativeIndex ?? i;
+            // Short label: first word of name, max 9 chars
+            const label = (acc.name || '').split(' ')[0].substring(0, 9);
             return `<div class="ypp-satellite"
                          data-account-index="${idx}"
                          title="${this._esc(acc.name)}"
@@ -495,8 +505,19 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                          aria-label="Switch to ${this._esc(acc.name)}"
                          style="position:absolute;top:50%;left:50%;
                                 transform:translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px));
-                                cursor:pointer;">
+                                cursor:pointer;
+                                display:flex;flex-direction:column;
+                                align-items:center;gap:3px;">
                         ${this._diskHTML(acc, SAT_SIZE)}
+                        <span style="font-size:9px;font-weight:500;
+                                     color:rgba(255,255,255,0.65);
+                                     max-width:${SAT_SIZE + 12}px;
+                                     overflow:hidden;text-overflow:ellipsis;
+                                     white-space:nowrap;line-height:1;
+                                     text-align:center;
+                                     font-family:Roboto,Arial,sans-serif;">
+                            ${this._esc(label)}
+                        </span>
                     </div>`;
         }).join('');
 
