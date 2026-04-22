@@ -70,11 +70,35 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         if (!hasAccount) return;
         
         this._injected = true;
+
+        console.log('[YPP DEBUG] Injecting into menu');
+        console.log('[YPP DEBUG] Menu children:', 
+            [...menu.children].map(c => c.tagName + '#' + c.id)
+        );
+        console.log('[YPP DEBUG] All IDs in menu:', 
+            [...menu.querySelectorAll('[id]')]
+                .map(el => el.id + '=' + 
+                    el.textContent?.trim()?.substring(0,20))
+                .filter(Boolean)
+                .join(' | ')
+        );
+
         menu.dataset.yppRedesigned = '1';
         this._inject(menu);
     }
 
     _inject(menu) {
+        // TEMPORARY DEBUG — remove after fixing
+        console.log('[YPP] Menu sections:', 
+            [...menu.querySelectorAll('#sections > *')]
+            .map(el => el.tagName + ' ' + el.id)
+        );
+        console.log('[YPP] All renderers:', 
+            [...menu.querySelectorAll('[id]')]
+            .map(el => el.id + ':' + el.textContent?.trim()?.substring(0,30))
+            .filter(s => s.trim())
+        );
+
         // Hide all native content
         Array.from(menu.children).forEach(child => {
             child.style.display = 'none';
@@ -101,24 +125,70 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     }
 
     _extractAccountData(menu) {
+        // These selectors are confirmed working from DOM diagnostic
+        const name = menu.querySelector('#account-name')
+            ?.textContent?.trim() || 'Account';
+        
+        const channelLink = menu.querySelector('#manage-account');
+        const channelHref = channelLink?.href || '/';
+        
+        // Avatar: only Image 0 had a real src — yt3.ggpht.com domain
+        // All other images were empty (our injected placeholders)
+        let avatarUrl = null;
+        const images = menu.querySelectorAll('img');
+        for (const img of images) {
+            if (img.src && img.src.includes('yt3.ggpht.com')) {
+                avatarUrl = img.src;
+                break;
+            }
+        }
+
         const accounts = [];
-        menu.querySelectorAll(
-            'ytd-account-item-renderer, ' +
-            'yt-decorated-badge-renderer'
-        ).forEach(item => {
-            const name = item.querySelector(
-                '#account-name, .ytd-account-item-renderer'
-            )?.textContent?.trim();
-            const handle = item.querySelector(
-                '#account-email, #channel-handle'
-            )?.textContent?.trim();
-            const avatar = item.querySelector('img')?.src;
-            const isActive = !!item.querySelector(
-                '.ytp-menuitem-checked, [aria-checked="true"], yt-icon[icon="checked"]'
-            );
-            if (name) accounts.push({ name, handle, avatar, isActive });
+        // Try to find account section items using a wider search
+        const possibleAccountContainers = [
+            ...menu.querySelectorAll('ytd-account-item-section-renderer ytd-compact-link-renderer'),
+            ...menu.querySelectorAll('ytd-account-item-renderer'),
+            ...menu.querySelectorAll('ytd-multi-page-menu-renderer #sections ytd-compact-link-renderer')
+        ];
+
+        possibleAccountContainers.forEach((node, i) => {
+            const nodeName =
+                node.querySelector('#label, #title, .title, [class*="label"], span')?.textContent?.trim() ||
+                node.textContent?.trim()?.substring(0, 40);
+                
+            const nodeAvatar = node.querySelector('img')?.src;
+            
+            // Only add if it has a name, is not the active account name, and isn't a duplicate
+            if (nodeName && nodeName !== name && !accounts.some(a => a.name === nodeName)) {
+                accounts.push({
+                    name: nodeName,
+                    avatar: nodeAvatar,
+                    isActive: false,
+                    index: accounts.length + 1,
+                    element: node
+                });
+            }
         });
-        return { accounts };
+
+        // Always include current account as first entry
+        const currentAccount = {
+            name,
+            avatar: avatarUrl,
+            isActive: true
+        };
+        
+        // Only add switcher accounts if found and different from current
+        const allAccounts = accounts.length > 0 
+            ? accounts 
+            : [currentAccount];
+
+        return { 
+            name, 
+            avatarUrl, 
+            channelHref, 
+            accounts: allAccounts,
+            currentAccount 
+        };
     }
 
     async _loadAvatarSafe(imgElement, url) {
@@ -141,28 +211,27 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     }
 
     _avatarHTML(acc, size = 56) {
-        const initial = (acc.name || 'A')[0].toUpperCase();
+        const name = acc.name?.trim() || 'A';
+        // Correctly handle emojis and surrogate pair characters like 𝔑
+        const initial = Array.from(name)[0].toUpperCase();
+        
+        // Generate consistent color using codePointAt to handle surrogates correctly
+        const hue = ((name.codePointAt(0) * 37) % 360) || 0;
+        const bgColor = `hsl(${hue}, 55%, 32%)`;
+        
         return `
             <div class="ypp-avatar-wrap" 
                  style="width:${size}px;height:${size}px">
-                ${acc.avatar 
-                    ? `<img class="ypp-avatar-img" 
-                           src="${acc.avatar}"
-                           referrerpolicy="no-referrer"
-                           crossorigin="anonymous"
-                           style="width:${size}px;height:${size}px;
-                                  border-radius:50%;object-fit:cover"
-                           onerror="this.style.display='none';
-                               this.nextElementSibling.style.display='flex'">`
-                    : ''
-                }
-                <div class="ypp-avatar-placeholder" 
-                     style="display:${acc.avatar ? 'none' : 'flex'};
+                <div class="ypp-avatar-fallback" 
+                     style="display:flex;
                             width:${size}px;height:${size}px;
-                            border-radius:50%;background:rgba(255,255,255,0.1);
+                            border-radius:50%;background:${bgColor};
                             align-items:center;justify-content:center;
-                            font-size:${Math.floor(size/2.5)}px;
-                            color:white;font-weight:500">
+                            font-size:${Math.floor(size/2.2)}px;
+                            color:white;font-weight:600;
+                            border:2px solid rgba(255,255,255,0.2);
+                            font-family:Roboto,sans-serif;
+                            position:relative;z-index:2">
                     ${initial}
                 </div>
             </div>
@@ -176,7 +245,11 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         
         let orbitalHTML = '';
         if (satellites.length > 0) {
-            const radius = 72; // Distance from center
+            const minRadius = 72;
+            const dynamicRadius = (satellites.length * 48) / (2 * Math.PI);
+            const radius = Math.max(minRadius, dynamicRadius); // Distance from center
+            const containerSize = Math.max(220, (radius + 22) * 2 + 10);
+            
             const satelliteHTML = satellites.map((acc, i) => {
                 // start at top (-pi/2)
                 const angle = (i / satellites.length) * 2 * Math.PI - Math.PI / 2;
@@ -193,7 +266,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             }).join('');
             
             orbitalHTML = `
-                <div class="ypp-orbital-container">
+                <div class="ypp-orbital-container" style="width: ${containerSize}px; height: ${containerSize}px;">
                     ${satelliteHTML}
                     <div class="ypp-disk-item active ypp-orbital-center" title="${activeAccount?.name || 'Account'}">
                         <div class="ypp-disk-avatar-wrap" style="width: 72px; height: 72px;">
@@ -404,7 +477,9 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 
                 if (accountObj && accountObj.element) {
                     this._closeMenu();
-                    accountObj.element.click();
+                    const trigger = accountObj.element.querySelector('a, tp-yt-paper-item, #endpoint, yt-formatted-string');
+                    if (trigger) trigger.click();
+                    else accountObj.element.click();
                 } else {
                     // Try to click native switch account button to open submenu
                     const switchBtn = document.querySelector('ytd-compact-link-renderer:has([aria-label*="Switch account"])');
