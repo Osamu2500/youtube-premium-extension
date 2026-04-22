@@ -177,6 +177,7 @@ window.YPP.CONSTANTS = {
         schemaVersion: 1,
         // Theme
         premiumTheme: true,
+        enableAccountMenu: true,
         activeTheme: 'default', // default, ocean, sunset, dracula, forest, midnight, cherry
         trueBlack: false, // Legacy: treated as 'midnight' theme if true during migration
         hideScrollbar: false,
@@ -428,6 +429,7 @@ window.YPP.CONSTANTS = {
         focusMode: 'FocusMode',
         player: 'Player',
         contentControl: 'ContentControl',
+        accountMenu: 'AccountMenu',
         sidebar: 'SidebarManager',
         headerNav: 'HeaderNav',
         searchRedesign: 'SearchRedesign',

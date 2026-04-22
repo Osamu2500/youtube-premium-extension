@@ -109,6 +109,7 @@
 
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
+| Account Menu | `AccountMenu` | `content/features/core/global/account-menu.js` | `enableAccountMenu` | all | stable | — | Redesigns the profile dropdown with disk account switcher and sign-out confirmation |
 | Theme | `Theme` | `content/features/core/global/theme.js` | `premiumTheme` | all | stable | — | Applies the active CSS theme and CSS variable overrides to YouTube |
 | Content Control | `ContentControl` | `content/features/core/global/content-control.js` | `null` | all | stable | — | Master toggle system for hiding comments, merch, live chat, end screens |
 | Night Mode | `NightModeManager` | `content/features/core/global/night-mode.js` | `blueLight` | all | stable | — | Blue light filter and dim overlay with adjustable intensity sliders |
@@ -168,6 +169,7 @@ Every key in `DEFAULT_SETTINGS` mapped to which feature uses it:
 | Settings Key | Feature | Type | Default |
 |---|---|---|---|
 | `premiumTheme` | Theme | boolean | `true` |
+| `enableAccountMenu` | Account Menu | boolean | `true` |
 | `activeTheme` | Theme | string | `'default'` |
 | `trueBlack` | Theme (legacy) | boolean | `false` |
 | `hideScrollbar` | Theme | boolean | `false` |

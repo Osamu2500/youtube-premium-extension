@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingKeys = [
         // Global
         'premiumTheme',
+        'enableAccountMenu',
         'trueBlack',
         'hideScrollbar',
         'customProgressBar',
