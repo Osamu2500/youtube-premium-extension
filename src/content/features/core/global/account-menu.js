@@ -172,54 +172,65 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     _buildMenuHTML(data) {
         const { accounts } = data;
         const activeAccount = accounts.find(a => a.isActive) || accounts[0];
+        const satellites = accounts.filter(a => !a.isActive);
+        
+        let orbitalHTML = '';
+        if (satellites.length > 0) {
+            const radius = 72; // Distance from center
+            const satelliteHTML = satellites.map((acc, i) => {
+                // start at top (-pi/2)
+                const angle = (i / satellites.length) * 2 * Math.PI - Math.PI / 2;
+                const dx = Math.cos(angle) * radius;
+                const dy = Math.sin(angle) * radius;
+                return `
+                    <div class="ypp-disk-item ypp-orbital-satellite" 
+                         style="--dx: ${dx}px; --dy: ${dy}px;"
+                         title="${acc.name || 'Account'}"
+                         data-name="${acc.name || ''}">
+                        ${this._avatarHTML(acc, 44)}
+                    </div>
+                `;
+            }).join('');
+            
+            orbitalHTML = `
+                <div class="ypp-orbital-container">
+                    ${satelliteHTML}
+                    <div class="ypp-disk-item active ypp-orbital-center" title="${activeAccount?.name || 'Account'}">
+                        <div class="ypp-disk-avatar-wrap" style="width: 72px; height: 72px;">
+                            ${this._avatarHTML(activeAccount || {}, 72)}
+                            <div class="ypp-disk-active-ring" style="inset: -4px;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            orbitalHTML = `
+                <div class="ypp-orbital-container" style="height: auto; margin-bottom: 0;">
+                    <div class="ypp-disk-item active" style="margin: 0 auto; cursor: default;">
+                        <div class="ypp-disk-avatar-wrap" style="width: 72px; height: 72px;">
+                            ${this._avatarHTML(activeAccount || {}, 72)}
+                            <div class="ypp-disk-active-ring" style="inset: -4px;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
         
         return `
-        <div class="ypp-menu-header">
-            <div class="ypp-active-avatar">
-                ${this._avatarHTML(activeAccount || {}, 56)}
-            </div>
-            <div class="ypp-active-info">
-                <span class="ypp-active-name">
+        <div class="ypp-menu-header ypp-orbital-header">
+            ${orbitalHTML}
+            <div class="ypp-active-info" style="text-align: center; margin-top: ${satellites.length ? '16px' : '20px'};">
+                <div class="ypp-active-name" style="font-size: 16px; font-weight: 500; color: white;">
                     ${activeAccount?.name || 'Account'}
-                </span>
-                <span class="ypp-active-handle">
-                    ${activeAccount?.handle || ''}
-                </span>
-            </div>
-            <a class="ypp-channel-link" 
-               href="/channel" 
-               id="ypp-view-channel">
-                View channel →
-            </a>
-        </div>
-    
-        <!-- Account Disk Switcher -->
-        ${accounts.length > 1 ? `
-        <div class="ypp-account-switcher">
-            <div class="ypp-disk-label">Switch account</div>
-            <div class="ypp-disk-track">
-                <button class="ypp-disk-arrow ypp-disk-prev">‹</button>
-                <div class="ypp-disk-carousel">
-                    ${accounts.map((acc, i) => `
-                    <div class="ypp-disk-item ${acc.isActive 
-                        ? 'active' : ''}" 
-                        data-index="${i}"
-                        data-account-index="${i}">
-                        <div class="ypp-disk-avatar-wrap">
-                            ${this._avatarHTML(acc, 44)}
-                            ${acc.isActive 
-                                ? '<div class="ypp-disk-active-ring"></div>' 
-                                : ''
-                            }
-                        </div>
-                        <span class="ypp-disk-name">
-                            ${acc.name.split(' ')[0]}
-                        </span>
-                    </div>`).join('')}
                 </div>
-                <button class="ypp-disk-arrow ypp-disk-next">›</button>
+                <div class="ypp-active-handle" style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 2px;">
+                    ${activeAccount?.handle || ''}
+                </div>
+                <a class="ypp-channel-link" href="/channel" id="ypp-view-channel" style="display: inline-block; margin-top: 8px;">
+                    View your channel
+                </a>
             </div>
-        </div>` : ''}
+        </div>
     
         <!-- Main Actions -->
         <div class="ypp-menu-actions">
@@ -384,60 +395,26 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     }
     
     _initDiskSwitcher(panel, data) {
-        const carousel = panel.querySelector('.ypp-disk-carousel');
-        if (!carousel) return;
-    
-        let currentIndex = data.accounts.findIndex(a => a.isActive) || 0;
-        if (currentIndex < 0) currentIndex = 0;
-        
-        const updateActive = (newIndex) => {
-            const items = carousel.querySelectorAll('.ypp-disk-item');
-            items.forEach((item, i) => {
-                item.classList.toggle('active', i === newIndex);
-                // Scale effect — active is larger
-                item.style.transform = i === newIndex 
-                    ? 'scale(1.2)' : 'scale(0.85)';
-                item.style.opacity = i === newIndex ? '1' : '0.5';
+        // Satellite accounts interaction
+        const satellites = panel.querySelectorAll('.ypp-orbital-satellite');
+        satellites.forEach((sat) => {
+            sat.addEventListener('click', (e) => {
+                const name = sat.dataset.name;
+                const accountObj = data.accounts.find(a => a.name === name);
+                
+                if (accountObj && accountObj.element) {
+                    this._closeMenu();
+                    accountObj.element.click();
+                } else {
+                    // Try to click native switch account button to open submenu
+                    const switchBtn = document.querySelector('ytd-compact-link-renderer:has([aria-label*="Switch account"])');
+                    if (switchBtn) {
+                        switchBtn.click();
+                        setTimeout(() => this._closeMenu(), 100);
+                    }
+                }
             });
-            currentIndex = newIndex;
-        };
-    
-        // Click on disk item to select account
-        carousel.querySelectorAll('.ypp-disk-item')
-            .forEach((item, i) => {
-                item.addEventListener('click', () => {
-                    if (i === currentIndex) return;
-                    updateActive(i);
-                    // Switch account via YouTube's native switcher
-                    setTimeout(() => {
-                        const nativeItems = document.querySelectorAll(
-                            'ytd-account-item-renderer'
-                        );
-                        if (nativeItems[i]) nativeItems[i].click();
-                    }, 300);
-                });
-            });
-    
-        // Arrow navigation
-        panel.querySelector('.ypp-disk-prev')
-            ?.addEventListener('click', () => {
-                const items = carousel.querySelectorAll('.ypp-disk-item');
-                if (!items.length) return;
-                const newIndex = (currentIndex - 1 + items.length) 
-                    % items.length;
-                updateActive(newIndex);
-            });
-    
-        panel.querySelector('.ypp-disk-next')
-            ?.addEventListener('click', () => {
-                const items = carousel.querySelectorAll('.ypp-disk-item');
-                if (!items.length) return;
-                const newIndex = (currentIndex + 1) % items.length;
-                updateActive(newIndex);
-            });
-    
-        // Initialize active state
-        updateActive(currentIndex);
+        });
     }
     
     _closeMenu() {

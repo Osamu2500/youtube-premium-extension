@@ -5774,125 +5774,65 @@ tp-yt-iron-dropdown ytd-multi-page-menu-renderer {
     min-width: 300px !important;
 }
 
-.ypp-menu-header {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+.ypp-orbital-header {
+    padding: 24px 16px 16px 16px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.ypp-orbital-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 0 auto;
+}
+
+.ypp-orbital-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) !important;
+    z-index: 2;
+    cursor: default !important;
+}
+
+.ypp-orbital-satellite {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) !important;
+    margin: 0 !important;
+    opacity: 0.7 !important;
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease !important;
+}
+
+.ypp-orbital-satellite:hover {
+    opacity: 1 !important;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.15) !important;
 }
 
 .ypp-active-avatar img,
-.ypp-avatar-placeholder {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.15);
-}
-
-.ypp-active-name {
-    font-size: 15px;
-    font-weight: 500;
-    color: white;
-}
-
-.ypp-active-handle {
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-}
-
-.ypp-channel-link {
-    font-size: 12px;
-    color: #3ea6ff;
-    text-decoration: none;
-    margin-top: 4px;
-}
-
-/* Disk Switcher */
-.ypp-account-switcher {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.ypp-disk-label {
-    font-size: 11px;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 10px;
-}
-
-.ypp-disk-track {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-}
-
-.ypp-disk-carousel {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 16px !important;
-    overflow-x: auto !important;
-    flex: 1 !important;
-    padding: 8px 4px !important;
-    scrollbar-width: none !important;
-    border-radius: 0 !important;
-    /* Explicitly NOT circular */
-    border: none !important;
-    background: none !important;
-}
-
-.ypp-disk-carousel::-webkit-scrollbar {
-    display: none !important;
-}
-
-.ypp-disk-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 6px !important;
-    cursor: pointer !important;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
-                opacity 0.3s ease !important;
-    opacity: 0.5 !important;
-    transform: scale(0.85) !important;
-    flex-shrink: 0 !important;
-    /* No circular positioning */
-    position: static !important;
-    left: auto !important;
-    top: auto !important;
-}
-
-.ypp-disk-item.active {
-    opacity: 1 !important;
-    transform: scale(1.15) !important;
-}
-
-.ypp-disk-avatar-wrap {
-    position: relative;
-    width: 44px;
-    height: 44px;
-}
-
 .ypp-disk-avatar-wrap img,
+.ypp-avatar-placeholder,
 .ypp-disk-avatar-placeholder {
-    width: 44px;
-    height: 44px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
 }
 
+.ypp-avatar-placeholder,
 .ypp-disk-avatar-placeholder {
     background: rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
     color: white;
+}
+
+.ypp-disk-avatar-wrap {
+    position: relative;
+    border-radius: 50%;
 }
 
 .ypp-disk-active-ring {
@@ -5902,34 +5842,29 @@ tp-yt-iron-dropdown ytd-multi-page-menu-renderer {
     border: 2px solid #ff4e45;
 }
 
-.ypp-disk-name {
-    font-size: 11px;
-    color: rgba(255,255,255,0.7);
-    max-width: 52px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.ypp-active-info {
     text-align: center;
+    margin-top: 16px;
 }
 
-.ypp-disk-arrow {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
+.ypp-active-name {
+    font-size: 16px;
+    font-weight: 500;
     color: white;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.15s;
 }
 
-.ypp-disk-arrow:hover {
-    background: rgba(255,255,255,0.12);
+.ypp-active-handle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+}
+
+.ypp-channel-link {
+    font-size: 13px;
+    color: #3ea6ff;
+    text-decoration: none;
+    margin-top: 8px;
+    display: inline-block;
 }
 
 /* Menu Items */
