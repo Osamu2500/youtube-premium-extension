@@ -169,6 +169,74 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 panel.style.transform = 'translateY(0)';
             });
         });
+
+        // YouTube's lazy-loader may fire after we inject. Schedule a follow-up
+        // pass to upgrade any letter-avatar fallbacks with real photos.
+        this._scheduleAvatarRefresh(panel, data);
+    }
+
+    /**
+     * Runs up to 3 refresh passes (at 300ms, 800ms, 1600ms) to replace
+     * letter-avatar disks with real photos once YouTube populates img.src.
+     *
+     * @param {Element} panel  — the injected .ypp-account-menu element
+     * @param {{ accounts: Array }} data — the original extracted data object
+     */
+    _scheduleAvatarRefresh(panel, data) {
+        const delays = [300, 800, 1600];
+        let attempt = 0;
+
+        const refresh = () => {
+            if (!panel.isConnected) return;
+
+            // Re-query the native menu to pick up any newly-loaded avatar URLs.
+            const menu = this._findMenu();
+            if (!menu) return;
+            const freshData = this._extractData(menu);
+
+            freshData.accounts.forEach(acc => {
+                if (!acc.avatar) return; // still no URL — nothing to do
+
+                // Find the matching satellite or center disk by account name.
+                panel.querySelectorAll('.ypp-disk-wrap, .ypp-letter-avatar').forEach(el => {
+                    const isMatch =
+                        el.dataset.fallbackName === acc.name || // disk-wrap
+                        el.title === acc.name ||                 // letter-avatar (no title attr currently, safe)
+                        el.textContent?.trim() === (Array.from(acc.name)[0]?.toUpperCase() || '');
+
+                    if (!isMatch) return;
+
+                    // Only upgrade if currently a letter-avatar (no img inside)
+                    if (el.classList.contains('ypp-letter-avatar')) {
+                        const isActive = el === el.closest('[style*="z-index:2"]')?.querySelector('.ypp-letter-avatar');
+                        const ring = isActive || el.style.boxShadow.includes('#ff4e45');
+                        const size = parseInt(el.style.width, 10) || 40;
+                        const temp = document.createElement('div');
+                        temp.innerHTML = this._diskHTML(acc, size, ring);
+                        el.replaceWith(temp.firstElementChild);
+
+                        // Re-wire the error handler for the new img
+                        const newWrap = panel.querySelector(`.ypp-disk-wrap[data-fallback-name="${CSS.escape(acc.name)}"]`);
+                        newWrap?.querySelector('.ypp-disk-img')?.addEventListener('error', () => {
+                            const w = newWrap;
+                            const n = w.dataset.fallbackName || '';
+                            const s = parseInt(w.dataset.size, 10) || 40;
+                            const r = w.dataset.ring === '1';
+                            const t = document.createElement('div');
+                            t.innerHTML = this._letterAvatar(n, s, r);
+                            w.replaceWith(t.firstElementChild);
+                        });
+                    }
+                });
+            });
+
+            attempt++;
+            if (attempt < delays.length) {
+                this._avatarPollTimer = setTimeout(refresh, delays[attempt] - delays[attempt - 1]);
+            }
+        };
+
+        this._avatarPollTimer = setTimeout(refresh, delays[0]);
     }
 
     // ─── Data extraction ───────────────────────────────────────────────────────
@@ -337,6 +405,41 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     }
 
     /**
+     * Renders an account disk: a real profile photo if an avatar URL is
+     * available, otherwise falls back to a letter avatar.
+     * The wrapping div carries data-* attributes so _wireEvents() can
+     * swap in the letter fallback if the image fails to load.
+     *
+     * @param {{ name: string, avatar: string }} acc
+     * @param {number}  size  — diameter in px
+     * @param {boolean} ring  — whether to show the red active ring
+     * @returns {string} HTML string
+     */
+    _diskHTML(acc, size, ring = false) {
+        const url = acc?.avatar;
+        const ringCSS = ring
+            ? 'box-shadow:0 0 0 3px #ff4e45,0 0 0 5px rgba(255,78,69,0.25);'
+            : '';
+
+        if (url) {
+            return `<div class="ypp-disk-wrap"
+                        data-fallback-name="${this._esc(acc?.name || '')}"
+                        data-size="${size}"
+                        data-ring="${ring ? '1' : '0'}"
+                        style="width:${size}px;height:${size}px;border-radius:50%;
+                               overflow:hidden;flex-shrink:0;position:relative;
+                               ${ringCSS}">
+                       <img class="ypp-disk-img"
+                            src="${this._esc(url)}"
+                            alt="${this._esc(acc?.name || '')}"
+                            loading="eager"
+                            style="width:100%;height:100%;object-fit:cover;display:block;">
+                   </div>`;
+        }
+        return this._letterAvatar(acc?.name, size, ring);
+    }
+
+    /**
      * Builds the full menu HTML string.
      * Layout:
      *  - Header: orbital container (satellites + center) + name + channel link
@@ -373,14 +476,14 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                          style="position:absolute;top:50%;left:50%;
                                 transform:translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px));
                                 cursor:pointer;">
-                        ${this._letterAvatar(acc.name, SAT_SIZE)}
+                        ${this._diskHTML(acc, SAT_SIZE)}
                     </div>`;
         }).join('');
 
         const centerHTML = `
             <div style="position:absolute;top:50%;left:50%;
                         transform:translate(-50%,-50%);z-index:2;pointer-events:none;">
-                ${this._letterAvatar(activeAccount?.name, 64, true)}
+                ${this._diskHTML(activeAccount, 64, true)}
             </div>`;
 
         const orbitalSection = `
@@ -552,6 +655,22 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                     window.location.href = 'https://www.youtube.com/logout';
                 }
             });
+
+        // Profile photo error fallback: if an img fails to load (e.g. CORS,
+        // lazy-load not fired yet), replace the disk-wrap with a letter avatar.
+        panel.querySelectorAll('.ypp-disk-img').forEach(img => {
+            img.addEventListener('error', () => {
+                const wrap = img.closest('.ypp-disk-wrap');
+                if (!wrap) return;
+                const name = wrap.dataset.fallbackName || '';
+                const size = parseInt(wrap.dataset.size, 10) || 40;
+                const ring = wrap.dataset.ring === '1';
+                // Replace the entire disk-wrap element with a letter avatar
+                const temp = document.createElement('div');
+                temp.innerHTML = this._letterAvatar(name, size, ring);
+                wrap.replaceWith(temp.firstElementChild);
+            });
+        });
 
         // Orbital satellite clicks — switch to the chosen account.
         // Each satellite stores the native ytd-account-item-renderer index.
