@@ -72,10 +72,22 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     }
 
     _findMenu() {
-        return document.querySelector(
+        // Scope to menus that actually contain account content.
+        // Without this guard, the Settings menu (also ytd-multi-page-menu-renderer)
+        // triggers polling unnecessarily.
+        const candidates = document.querySelectorAll(
             'ytd-multi-page-menu-renderer[slot="menu"],' +
             'tp-yt-iron-dropdown ytd-multi-page-menu-renderer'
         );
+        for (const el of candidates) {
+            if (
+                el.querySelector('ytd-active-account-header-renderer') ||
+                el.querySelector('ytd-account-item-renderer')
+            ) {
+                return el;
+            }
+        }
+        return null;
     }
 
     // ─── Polling: wait for account data to hydrate, then inject ───────────────
@@ -160,7 +172,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         panel.innerHTML = this._buildMenuHTML(data);
         menu.appendChild(panel);
 
-        this._wireEvents(panel, data);
+        this._wireEvents(panel);
 
         // Animate in on next paint
         requestAnimationFrame(() => {
@@ -172,7 +184,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
         // YouTube's lazy-loader may fire after we inject. Schedule a follow-up
         // pass to upgrade any letter-avatar fallbacks with real photos.
-        this._scheduleAvatarRefresh(panel, data);
+        this._scheduleAvatarRefresh(panel);
     }
 
     /**
@@ -182,57 +194,63 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
      * @param {Element} panel  — the injected .ypp-account-menu element
      * @param {{ accounts: Array }} data — the original extracted data object
      */
-    _scheduleAvatarRefresh(panel, data) {
+    /**
+     * Runs up to 3 refresh passes (at 300 ms, 800 ms, 1600 ms) to replace
+     * letter-avatar disks with real photos once YouTube's lazy-loader fires.
+     *
+     * Matching strategy: satellites are found by their `title` attribute
+     * (= full account name), which is reliable and already present. The center
+     * disk is found via the `.ypp-orbital-wrap` non-satellite child.
+     *
+     * @param {Element} panel — the injected .ypp-account-menu element
+     */
+    _scheduleAvatarRefresh(panel) {
         const delays = [300, 800, 1600];
         let attempt = 0;
 
+        const upgradeDisk = (container, acc, size, ring) => {
+            const letter = container.querySelector('.ypp-letter-avatar');
+            if (!letter) return; // already showing a photo
+            const temp = document.createElement('div');
+            temp.innerHTML = this._diskHTML(acc, size, ring);
+            const newDisk = temp.firstElementChild;
+            letter.replaceWith(newDisk);
+            // Re-wire error handler so a broken photo falls back to letter-avatar
+            newDisk?.querySelector('.ypp-disk-img')?.addEventListener('error', () => {
+                const t = document.createElement('div');
+                t.innerHTML = this._letterAvatar(acc.name, size, ring);
+                newDisk.replaceWith(t.firstElementChild);
+            });
+        };
+
         const refresh = () => {
             if (!panel.isConnected) return;
-
-            // Re-query the native menu to pick up any newly-loaded avatar URLs.
             const menu = this._findMenu();
             if (!menu) return;
             const freshData = this._extractData(menu);
 
             freshData.accounts.forEach(acc => {
-                if (!acc.avatar) return; // still no URL — nothing to do
+                if (!acc.avatar) return;
 
-                // Find the matching satellite or center disk by account name.
-                panel.querySelectorAll('.ypp-disk-wrap, .ypp-letter-avatar').forEach(el => {
-                    const isMatch =
-                        el.dataset.fallbackName === acc.name || // disk-wrap
-                        el.title === acc.name ||                 // letter-avatar (no title attr currently, safe)
-                        el.textContent?.trim() === (Array.from(acc.name)[0]?.toUpperCase() || '');
-
-                    if (!isMatch) return;
-
-                    // Only upgrade if currently a letter-avatar (no img inside)
-                    if (el.classList.contains('ypp-letter-avatar')) {
-                        const isActive = el === el.closest('[style*="z-index:2"]')?.querySelector('.ypp-letter-avatar');
-                        const ring = isActive || el.style.boxShadow.includes('#ff4e45');
-                        const size = parseInt(el.style.width, 10) || 40;
-                        const temp = document.createElement('div');
-                        temp.innerHTML = this._diskHTML(acc, size, ring);
-                        el.replaceWith(temp.firstElementChild);
-
-                        // Re-wire the error handler for the new img
-                        const newWrap = panel.querySelector(`.ypp-disk-wrap[data-fallback-name="${CSS.escape(acc.name)}"]`);
-                        newWrap?.querySelector('.ypp-disk-img')?.addEventListener('error', () => {
-                            const w = newWrap;
-                            const n = w.dataset.fallbackName || '';
-                            const s = parseInt(w.dataset.size, 10) || 40;
-                            const r = w.dataset.ring === '1';
-                            const t = document.createElement('div');
-                            t.innerHTML = this._letterAvatar(n, s, r);
-                            w.replaceWith(t.firstElementChild);
-                        });
-                    }
-                });
+                if (acc.isActive) {
+                    // Center disk: the non-satellite absolute-positioned child
+                    const centerContainer = panel.querySelector(
+                        '.ypp-orbital-wrap > div:not(.ypp-satellite)'
+                    );
+                    if (centerContainer) upgradeDisk(centerContainer, acc, 64, true);
+                } else {
+                    // Satellite disk: find by the title attribute (= full name)
+                    const sat = panel.querySelector(
+                        `.ypp-satellite[title="${CSS.escape(acc.name)}"]`
+                    );
+                    if (sat) upgradeDisk(sat, acc, 40, false);
+                }
             });
 
             attempt++;
             if (attempt < delays.length) {
-                this._avatarPollTimer = setTimeout(refresh, delays[attempt] - delays[attempt - 1]);
+                const nextDelay = delays[attempt] - delays[attempt - 1];
+                this._avatarPollTimer = setTimeout(refresh, nextDelay);
             }
         };
 
@@ -321,8 +339,14 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         // ── Active account (header section) ──────────────────────────────────
         const activeHeader = menu.querySelector('ytd-active-account-header-renderer');
         if (activeHeader) {
+            // Walk into nested yt-formatted-string/span before falling back
+            // to #account-name itself. The old fallback selector
+            // '.ytd-active-account-header-renderer' matched the whole renderer
+            // and returned all concatenated child text.
             activeName = activeHeader.querySelector(
-                '#account-name, .ytd-active-account-header-renderer'
+                '#account-name yt-formatted-string,' +
+                '#account-name span,' +
+                '#account-name'
             )?.textContent?.trim() || '';
 
             const handle = activeHeader.querySelector(
@@ -534,8 +558,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 ${centerHTML}
             </div>`;
 
-        // Safely resolve channel href — strip the yt3 origin prefix if present
-        // so clicks navigate within YouTube rather than opening a new domain.
+        // HTML-escape the channel href for safe insertion into the href attribute.
         const safeChannelHref = this._esc(channelHref);
 
         return `
@@ -595,7 +618,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
             <div class="ypp-more-items" id="ypp-more-items" role="group">
                 <a class="ypp-menu-item ypp-more-item"
-                   href="https://studio.youtube.com" target="_blank" rel="noopener">
+                   href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer">
                     YouTube Studio
                 </a>
                 <a class="ypp-menu-item ypp-more-item" href="/paid_memberships">
@@ -605,7 +628,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                     Your data in YouTube
                 </a>
                 <a class="ypp-menu-item ypp-more-item"
-                   href="https://myaccount.google.com" target="_blank" rel="noopener">
+                   href="https://myaccount.google.com" target="_blank" rel="noopener noreferrer">
                     Google Account
                 </a>
             </div>
@@ -637,7 +660,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
     // ─── Event wiring ──────────────────────────────────────────────────────────
 
-    _wireEvents(panel, data) {
+    _wireEvents(panel) {
         // View channel link — just close the menu; the href handles navigation.
         panel.querySelector('#ypp-view-channel')
             ?.addEventListener('click', () => this._closeMenu());
@@ -736,8 +759,11 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     // ─── Utility ───────────────────────────────────────────────────────────────
 
     _closeMenu() {
-        // Click the iron-dropdown backdrop — closes the menu natively.
-        document.querySelector('tp-yt-iron-overlay-backdrop')?.click();
+        // Primary: click the iron-dropdown backdrop (standard YouTube layout).
+        const backdrop = document.querySelector('tp-yt-iron-overlay-backdrop');
+        if (backdrop) { backdrop.click(); return; }
+        // Fallback: press Escape, which all iron-dropdown variants handle.
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     }
 
     // ─── Cleanup ───────────────────────────────────────────────────────────────
