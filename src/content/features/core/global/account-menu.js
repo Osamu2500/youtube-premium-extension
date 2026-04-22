@@ -11,12 +11,25 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     async enable() {
         await super.enable();
         
+        // Listen to clicks as an ultra-reliable fallback for dropdowns
+        this._clickHandler = (e) => {
+            if (e.target.closest('#avatar-btn, ytd-topbar-menu-button-renderer button, .ytd-topbar-menu-button-renderer')) {
+                setTimeout(() => this._tryInject(), 50);
+                setTimeout(() => this._tryInject(), 200);
+                setTimeout(() => this._tryInject(), 500);
+            }
+        };
+        document.addEventListener('click', this._clickHandler);
+
         this._menuObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 // Check for menu opening
                 for (const node of mutation.addedNodes) {
                     if (node.nodeType !== 1) continue;
                     if (node.tagName === 'TP-YT-IRON-DROPDOWN' ||
+                        node.tagName === 'YTD-MULTI-PAGE-MENU-RENDERER' ||
+                        node.tagName === 'YTD-ACTIVE-ACCOUNT-HEADER-RENDERER' ||
+                        node.tagName === 'YTD-COMPACT-LINK-RENDERER' ||
                         node.querySelector?.('ytd-multi-page-menu-renderer')) {
                         setTimeout(() => this._tryInject(), 50);
                     }
@@ -50,8 +63,9 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         
         // Verify it's the account menu specifically
         const hasAccount = menu.querySelector(
-            'ytd-account-item-section-renderer,' +
-            'ytd-compact-link-renderer[has-separator]'
+            'ytd-active-account-header-renderer,' +
+            '#account-name,' +
+            'ytd-account-item-section-renderer'
         );
         if (!hasAccount) return;
         
@@ -446,6 +460,10 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
     async disable() {
         await super.disable();
+        if (this._clickHandler) {
+            document.removeEventListener('click', this._clickHandler);
+            this._clickHandler = null;
+        }
         this._menuObserver?.disconnect();
         this._injected = false;
         this._cleanup();
