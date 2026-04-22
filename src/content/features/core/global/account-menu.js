@@ -251,8 +251,26 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
      * @param {Element} el
      * @returns {string} URL or empty string
      */
-    _getAvatarUrl(el) {
-        // Strategy 1: Polymer data property (most reliable — bypasses lazy-load)
+    _getAvatarUrl(el, { isActive = false } = {}) {
+        // ── Strategy 1: yt-img-shadow[src] HTML attribute ────────────────────
+        // Polymer reflects its `src` property to an HTML attribute, which IS
+        // accessible from an extension isolated-world (unlike JS properties).
+        const ytImg = el.querySelector('yt-img-shadow');
+        const ytAttr = ytImg?.getAttribute('src');
+        if (ytAttr && !ytAttr.startsWith('data:') && ytAttr !== window.location.href) {
+            return ytAttr;
+        }
+
+        // ── Strategy 2: inner <img> src attribute/property ───────────────────
+        // Populated by yt-img-shadow's IntersectionObserver once in viewport.
+        const img = el.querySelector('img#img, yt-img-shadow img, img');
+        const imgSrc = img?.getAttribute('src') || img?.src || '';
+        if (imgSrc && !imgSrc.startsWith('data:') && imgSrc !== window.location.href) {
+            return imgSrc;
+        }
+
+        // ── Strategy 3: Polymer .data property (page-world JS) ───────────────
+        // Only works if Chrome hasn't isolated it; caught silently if blocked.
         try {
             const d = el.data || el.__data;
             if (d) {
@@ -261,29 +279,31 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                     d.thumbnail?.thumbnails ||
                     d.photo?.thumbnails ||
                     d.thumbnails;
-
                 if (Array.isArray(thumbs) && thumbs.length) {
                     const best = thumbs[thumbs.length - 1];
                     if (best?.url && !best.url.startsWith('data:')) return best.url;
                 }
-                // Some renderers expose a flat .url instead of thumbnails array
                 if (d.accountPhoto?.url) return d.accountPhoto.url;
                 if (d.thumbnail?.url)    return d.thumbnail.url;
             }
-        } catch (_) {
-            // Extension isolated-world may block property access — safe to ignore
+        } catch (_) { /* isolated-world property access denied */ }
+
+        // ── Strategy 4 (active account only): header avatar button ───────────
+        // YouTube always eagerly renders the signed-in user's avatar in the
+        // masthead — use it as a guaranteed fallback for the active account.
+        if (isActive) {
+            const headerImg = document.querySelector(
+                '#masthead #avatar-btn img,' +
+                '#avatar-btn yt-img-shadow img,' +
+                '#avatar-btn img'
+            );
+            const hSrc = headerImg?.getAttribute('src') || headerImg?.src || '';
+            if (hSrc && !hSrc.startsWith('data:') && hSrc !== window.location.href) {
+                return hSrc;
+            }
         }
 
-        // Strategy 2: yt-img-shadow src property
-        const ytImg = el.querySelector('yt-img-shadow');
-        if (ytImg?.src && !ytImg.src.startsWith('data:') && ytImg.src !== window.location.href) {
-            return ytImg.src;
-        }
-
-        // Strategy 3: inner <img> src (populated when element enters viewport)
-        const img = el.querySelector('img#img, yt-img-shadow img, img');
-        const src = img?.src || img?.getAttribute('src') || '';
-        return (src && !src.startsWith('data:') && src !== window.location.href) ? src : '';
+        return '';
     }
 
     /**
@@ -312,7 +332,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             accounts.push({
                 name: activeName,
                 handle,
-                avatar: this._getAvatarUrl(activeHeader),
+                avatar: this._getAvatarUrl(activeHeader, { isActive: true }),
                 isActive: true,
             });
         }
@@ -340,7 +360,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 'yt-icon[icon="checked"], [aria-checked="true"]'
             );
             const isActive = isChecked || (!!activeName && name === activeName);
-            const avatar = this._getAvatarUrl(item);
+            const avatar = this._getAvatarUrl(item, { isActive });
 
             // De-duplicate: the active header and the item list often both
             // contain the active account — merge rather than push a second copy.
