@@ -18,7 +18,7 @@ import './features/base-feature.js';
 
 // Global features
 import './features/core/global/theme.js';
-import './features/core/global/account-menu.js';
+import './features/core/global/account-menu/index.js';
 import './features/core/global/content-control.js';
 import './features/core/global/night-mode.js';
 import './features/core/global/data-api.js';
