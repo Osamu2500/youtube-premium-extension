@@ -50,8 +50,6 @@
         RETRY_DELAY: 500,
         /** @type {number} Initialization timeout */
         INIT_TIMEOUT: 30000,
-        /** @type {boolean} Guards against duplicate featureManager.init() within one navigation */
-        _initPending: false,
 
         // =========================================================================
         // INITIALIZATION
@@ -284,18 +282,18 @@
             this.removeEventListeners();
 
             // Handle YouTube SPA navigation
-            // Uses requestAnimationFrame + an _initPending flag to coalesce duplicate
-            // events: both yt-navigate-finish and yt-page-data-updated can fire for
-            // the same navigation, which previously caused featureManager.init() to
-            // run twice per page load.
+            // Uses a 50ms setTimeout debounce to coalesce duplicate events:
+            // both yt-navigate-finish and yt-page-data-updated can fire for
+            // the same navigation. The previous RAF + _initPending approach
+            // was fragile on slow connections where events fire across
+            // multiple frames, causing featureManager.init() to run twice.
+            // A time-based debounce reliably collapses both events regardless
+            // of frame timing.
+            const NAV_DEBOUNCE_MS = 50;
             const handleNavigation = () => {
-                if (this._navTimeout) cancelAnimationFrame(this._navTimeout);
-                this._navTimeout = requestAnimationFrame(() => {
-                    // Guard: if an init is already queued for this navigation tick, skip.
-                    if (this._initPending) return;
-                    this._initPending = true;
-                    // Reset flag after the current task completes so future navigations work.
-                    Promise.resolve().then(() => { this._initPending = false; });
+                if (this._navTimeout) clearTimeout(this._navTimeout);
+                this._navTimeout = setTimeout(() => {
+                    this._navTimeout = null;
 
                     this.Utils?.log('Navigation detected', 'MAIN', 'debug');
                     this.updateContext();
@@ -328,7 +326,7 @@
                             this.Utils?.log(`Error initializing features on navigation: ${error.message}`, 'MAIN', 'error');
                         }
                     }
-                });
+                }, NAV_DEBOUNCE_MS);
             };
 
             // Listen for page navigation and track listener
