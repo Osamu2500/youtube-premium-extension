@@ -1,221 +1,20 @@
-/**
- * Volume Booster / 10-Band Graphic Equalizer
- * Processes audio through a Web Audio API chain with:
- *  - 10 BiquadFilter nodes (full frequency spectrum)
- *  - A master gain node (100%–600% volume boost)
- *  - A DynamicsCompressor (optional, prevents clipping)
- *  - A live frequency-response curve drawn on <canvas>
- *  - 5 built-in presets (Flat, Bass Boost, Vocal, Cinematic, Lo-Fi)
- */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.VolumeBooster = class VolumeBooster {
-    constructor() {
-        this.name = 'VolumeBooster';
-        this.settings = null;
-
-        // Audio graph nodes
-        this._audioConnected = false;
-        this.ctx = null;
-        this.source = null;
-        this.gainNode = null;
-        this.compressorNode = null;
-        this._eqNodes = [];          // 10 BiquadFilterNodes
-        this._compressorEnabled = true;
-
-        // State
-        this._eqGains = new Array(10).fill(0);   // current dB per band
-        this._volumeGain = 1.0;                  // 1.0 = 100%
-
-        // DOM refs
-        this._volumePopup = null;
-        this._volumePopupOutsideHandler = null;
-        this._boundVideo = null;
-        this._initHandler = null;
-
-        // 10 EQ band definitions — sub-bass → air
-        this._bands = [
-            { label: '60',  freq: 60,    type: 'lowshelf', color: '#ffffff' },
-            { label: '170', freq: 170,   type: 'peaking',  color: '#ffffff' },
-            { label: '310', freq: 310,   type: 'peaking',  color: '#ffffff' },
-            { label: '600', freq: 600,   type: 'peaking',  color: '#ffffff' },
-            { label: '1k',  freq: 1000,  type: 'peaking',  color: '#ffffff' },
-            { label: '3k',  freq: 3000,  type: 'peaking',  color: '#ffffff' },
-            { label: '6k',  freq: 6000,  type: 'peaking',  color: '#ffffff' },
-            { label: '10k', freq: 10000, type: 'peaking',  color: '#ffffff' },
-            { label: '14k', freq: 14000, type: 'peaking',  color: '#ffffff' },
-            { label: '16k', freq: 16000, type: 'highshelf',color: '#ffffff' },
-        ];
-
-        // Presets — array index matches _bands order
-        this._presets = {
-            'Flat':       [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-            'Bass Boost': [ 8,  6,  4,  2,  0, -1,  0,  0,  0,  0],
-            'Vocal':      [-2, -1,  0,  2,  4,  4,  3,  2,  1,  0],
-            'Cinematic':  [ 5,  3,  1, -1, -2,  1,  3,  4,  4,  3],
-            'Lo-Fi':      [ 3,  2,  0, -2, -4, -4, -3, -2, -1,  0],
-        };
-    }
-
-    // =========================================================================
-    // PUBLIC API (unchanged from v1 — used by player.js)
-    // =========================================================================
-
-    getConfigKey() { return 'enableVolumeBoost'; }
-
-    enable(settings) {
-        this.settings = settings;
-        this.run();
-    }
-
-    disable() {
-        if (this._volumePopup) {
-            this._volumePopup.remove();
-            this._volumePopup = null;
-            if (this._volumePopupOutsideHandler) {
-                document.removeEventListener('click', this._volumePopupOutsideHandler);
-                this._volumePopupOutsideHandler = null;
-            }
-        }
-        if (this.gainNode) this.gainNode.gain.value = 1;
-        this._eqNodes.forEach(n => { if (n) n.gain.value = 0; });
-        const btn = document.getElementById('ypp-volume-boost-btn');
-        if (btn) btn.remove();
-        if (this._boundVideo && this._initHandler) {
-            this._boundVideo.removeEventListener('play', this._initHandler);
-            this._boundVideo.removeEventListener('volumechange', this._initHandler);
-        }
-    }
-
-    update(settings) {
-        this.settings = settings;
-        if (this.settings.enableVolumeBoost) {
-            if (this.gainNode && this.settings.volumeLevel) {
-                this.setVolume(this.settings.volumeLevel);
-            }
-            this.run();
-        } else {
-            this.disable();
-        }
-    }
-
-    run() {
-        if (!this.settings || !this.settings.enableVolumeBoost) return;
-        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
-        if (video) this.initAudioContext(video);
-    }
-
-    // =========================================================================
-    // AUDIO ENGINE
-    // =========================================================================
-
-    initAudioContext(video) {
-        if (this._audioConnected) return;
-        this._boundVideo = video;
-
-        this._initHandler = () => {
-            if (this._audioConnected) return;
-            try {
-                const AC = window.AudioContext || window.webkitAudioContext;
-                this.ctx = new AC();
-                this.source = this.ctx.createMediaElementSource(video);
-
-                // Build 10 EQ band nodes
-                this._eqNodes = this._bands.map((band, i) => {
-                    const f = this.ctx.createBiquadFilter();
-                    f.type = band.type;
-                    f.frequency.value = band.freq;
-                    f.gain.value = this._eqGains[i];
-                    if (band.type === 'peaking') f.Q.value = 1.4;
-                    return f;
-                });
-
-                // Compressor — prevents clipping at high gain
-                this.compressorNode = this.ctx.createDynamicsCompressor();
-                this.compressorNode.threshold.value = -24;
-                this.compressorNode.knee.value = 10;
-                this.compressorNode.ratio.value = 4;
-                this.compressorNode.attack.value = 0.003;
-                this.compressorNode.release.value = 0.25;
-
-                // Master gain
-                this.gainNode = this.ctx.createGain();
-                this.gainNode.gain.value = this._volumeGain;
-
-                // Chain: source → eq[0..9] → compressor → gain → destination
-                let node = this.source;
-                this._eqNodes.forEach(eq => { node = node.connect(eq); });
-                node.connect(this.compressorNode);
-                this.compressorNode.connect(this.gainNode);
-                this.gainNode.connect(this.ctx.destination);
-
-                this._audioConnected = true;
-                if (this.settings?.volumeLevel) this.setVolume(this.settings.volumeLevel);
-            } catch (e) {
-                console.warn('[YPP:VolumeBooster] Audio engine init failed:', e);
-            }
-        };
-
-        video.addEventListener('play', this._initHandler, { once: true });
-        video.addEventListener('volumechange', this._initHandler, { once: true });
-        if (!video.paused) this._initHandler();
-    }
-
-    setVolume(multiplier) {
-        this._volumeGain = multiplier;
-        if (this.gainNode) this.gainNode.gain.value = multiplier;
-    }
-
-    _setEQBand(index, db) {
-        this._eqGains[index] = db;
-        if (this._eqNodes[index]) this._eqNodes[index].gain.value = db;
-    }
-
-    _applyPreset(name) {
-        const gains = this._presets[name];
-        if (!gains) return;
-        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-        gains.forEach((db, i) => this._setEQBand(i, db));
-    }
-
-    // =========================================================================
-    // BUTTON (called by player.js)
-    // =========================================================================
-
-    createButton(video) {
-        const icon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff">
-            <path d="M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z"/>
-        </svg>`;
-        const btn = document.createElement('button');
-        btn.innerHTML = icon;
-        btn.title = 'Equalizer';
-        btn.className = 'ypp-action-btn';
-        btn.id = 'ypp-volume-boost-btn';
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            this._toggleEQPanel(video, btn);
-        };
-        return btn;
-    }
-
-    // =========================================================================
-    // EQ PANEL UI
-    // =========================================================================
-
-    _toggleEQPanel(video, anchorBtn) {
-        if (this._volumePopup) {
-            this._volumePopup.remove();
-            this._volumePopup = null;
+window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
+    static toggleEQPanel(ctx, video, anchorBtn) {
+        if (ctx._volumePopup) {
+            ctx._volumePopup.remove();
+            ctx._volumePopup = null;
             anchorBtn.classList.remove('active');
-            if (this._volumePopupOutsideHandler) {
-                document.removeEventListener('click', this._volumePopupOutsideHandler);
-                this._volumePopupOutsideHandler = null;
+            if (ctx._volumePopupOutsideHandler) {
+                document.removeEventListener('click', ctx._volumePopupOutsideHandler);
+                ctx._volumePopupOutsideHandler = null;
             }
             return;
         }
 
-        this._injectEQStyles();
+        this.injectEQStyles();
         anchorBtn.classList.add('active');
 
         const panel = document.createElement('div');
@@ -243,47 +42,47 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
             </button>
         `;
         panel.appendChild(header);
-        header.querySelector('#ypp-eq-close').onclick = () => this._toggleEQPanel(video, anchorBtn);
+        header.querySelector('#ypp-eq-close').onclick = () => this.toggleEQPanel(ctx, video, anchorBtn);
 
         // ── Volume Gain Row
         const gainRow = document.createElement('div');
         gainRow.className = 'ypp-eq-gain-row';
         const gainValue = document.createElement('span');
         gainValue.className = 'ypp-eq-gain-value';
-        gainValue.textContent = Math.round(this._volumeGain * 100) + '%';
+        gainValue.textContent = Math.round(ctx._volumeGain * 100) + '%';
         const gainSlider = document.createElement('input');
         gainSlider.type = 'range'; gainSlider.min = 1; gainSlider.max = 6; gainSlider.step = 0.05;
-        gainSlider.value = this._volumeGain;
+        gainSlider.value = ctx._volumeGain;
         gainSlider.className = 'ypp-eq-hslider';
         gainSlider.oninput = (e) => {
-            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
             const v = parseFloat(e.target.value);
-            this.setVolume(v);
+            ctx.setVolume(v);
             gainValue.textContent = Math.round(v * 100) + '%';
-            anchorBtn.classList.toggle('active', v > 1.01 || this._eqGains.some(g => g !== 0));
+            anchorBtn.classList.toggle('active', v > 1.01 || ctx._eqGains.some(g => g !== 0));
             window.dispatchEvent(new CustomEvent('ypp-setting-update', {
                 detail: { volumeBoost: v > 1.01, volumeLevel: v }
             }));
-            this._updateGainTrack(gainSlider);
+            this.updateGainTrack(gainSlider);
         };
         gainRow.innerHTML = `<span class="ypp-eq-row-label">Volume Boost</span>`;
         gainRow.appendChild(gainSlider);
         gainRow.appendChild(gainValue);
         panel.appendChild(gainRow);
-        this._updateGainTrack(gainSlider);
+        this.updateGainTrack(gainSlider);
 
         // ── Presets
         const presetsRow = document.createElement('div');
         presetsRow.className = 'ypp-eq-presets-row';
         let activePresetBtn = null;
-        Object.keys(this._presets).forEach(name => {
+        Object.keys(ctx._presets).forEach(name => {
             const btn = document.createElement('button');
             btn.className = 'ypp-eq-preset-btn';
             btn.textContent = name;
             if (name === 'Flat') { btn.classList.add('active'); activePresetBtn = btn; }
             btn.onclick = () => {
-                this._applyPreset(name);
-                this._syncBandUI(panel, canvasEl);
+                ctx._applyPreset(name);
+                this.syncBandUI(ctx, panel, canvasEl);
                 if (activePresetBtn) activePresetBtn.classList.remove('active');
                 btn.classList.add('active');
                 activePresetBtn = btn;
@@ -304,14 +103,14 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         const sliderEls = [];
         const dbLabelEls = [];
 
-        this._bands.forEach((band, i) => {
+        ctx._bands.forEach((band, i) => {
             const col = document.createElement('div');
             col.className = 'ypp-eq-band-col';
 
             const dbLabel = document.createElement('div');
             dbLabel.className = 'ypp-eq-band-db';
             dbLabel.style.color = band.color;
-            const cur = this._eqGains[i];
+            const cur = ctx._eqGains[i];
             dbLabel.textContent = (cur >= 0 ? '+' : '') + cur;
             dbLabelEls.push(dbLabel);
 
@@ -323,24 +122,24 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
 
             const slider = document.createElement('input');
             slider.type = 'range'; slider.min = -12; slider.max = 12; slider.step = 0.5;
-            slider.value = this._eqGains[i];
+            slider.value = ctx._eqGains[i];
             slider.className = 'ypp-eq-vslider';
             slider.style.setProperty('--band-color', band.color);
             slider.dataset.band = i;
             slider.oninput = (e) => {
-                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+                if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
                 const db = parseFloat(e.target.value);
-                this._setEQBand(i, db);
+                ctx._setEQBand(i, db);
                 dbLabel.textContent = (db >= 0 ? '+' : '') + db;
-                this._drawCurve(canvasEl);
+                this.drawCurve(ctx, canvasEl);
                 if (activePresetBtn) { activePresetBtn.classList.remove('active'); activePresetBtn = null; }
             };
             slider.ondblclick = () => {
-                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-                this._setEQBand(i, 0);
+                if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+                ctx._setEQBand(i, 0);
                 slider.value = 0;
                 dbLabel.textContent = '0';
-                this._drawCurve(canvasEl);
+                this.drawCurve(ctx, canvasEl);
             };
             sliderEls.push(slider);
 
@@ -359,7 +158,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         footer.className = 'ypp-eq-footer';
 
         const compBtn = document.createElement('button');
-        compBtn.className = 'ypp-eq-comp-btn' + (this._compressorEnabled ? ' active' : '');
+        compBtn.className = 'ypp-eq-comp-btn' + (ctx._compressorEnabled ? ' active' : '');
         compBtn.innerHTML = `
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
@@ -367,13 +166,13 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
             Compressor
         `;
         compBtn.onclick = () => {
-            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-            this._compressorEnabled = !this._compressorEnabled;
-            compBtn.classList.toggle('active', this._compressorEnabled);
-            if (this.compressorNode) {
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            ctx._compressorEnabled = !ctx._compressorEnabled;
+            compBtn.classList.toggle('active', ctx._compressorEnabled);
+            if (ctx.compressorNode) {
                 // Bypass by setting neutral values rather than re-routing
-                this.compressorNode.ratio.value = this._compressorEnabled ? 4 : 1;
-                this.compressorNode.threshold.value = this._compressorEnabled ? -24 : 0;
+                ctx.compressorNode.ratio.value = ctx._compressorEnabled ? 4 : 1;
+                ctx.compressorNode.threshold.value = ctx._compressorEnabled ? -24 : 0;
             }
         };
 
@@ -381,9 +180,9 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         resetBtn.className = 'ypp-eq-reset-btn';
         resetBtn.textContent = 'Reset All';
         resetBtn.onclick = () => {
-            this._eqGains.fill(0);
-            this._eqNodes.forEach(n => { if (n) n.gain.value = 0; });
-            this._syncBandUI(panel, canvasEl);
+            ctx._eqGains.fill(0);
+            ctx._eqNodes.forEach(n => { if (n) n.gain.value = 0; });
+            this.syncBandUI(ctx, panel, canvasEl);
             if (activePresetBtn) activePresetBtn.classList.remove('active');
             presetsRow.querySelector('.ypp-eq-preset-btn').classList.add('active');
             activePresetBtn = presetsRow.querySelector('.ypp-eq-preset-btn');
@@ -401,50 +200,40 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
             || document.querySelector('.html5-video-player')
             || document.body;
         moviePlayer.appendChild(panel);
-        this._volumePopup = panel;
+        ctx._volumePopup = panel;
 
         // Initial curve draw
-        this._drawCurve(canvasEl);
+        this.drawCurve(ctx, canvasEl);
 
         // Click-outside to close (one-time)
         const outside = (e) => {
-            if (this._volumePopup && !this._volumePopup.contains(e.target) && !anchorBtn.contains(e.target)) {
-                this._toggleEQPanel(video, anchorBtn);
+            if (ctx._volumePopup && !ctx._volumePopup.contains(e.target) && !anchorBtn.contains(e.target)) {
+                this.toggleEQPanel(ctx, video, anchorBtn);
             }
         };
-        this._volumePopupOutsideHandler = outside;
+        ctx._volumePopupOutsideHandler = outside;
         setTimeout(() => document.addEventListener('click', outside), 0);
     }
 
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
-
-    /** Sync all band sliders + dB labels to current _eqGains and redraw curve */
-    _syncBandUI(panel, canvas) {
+    static syncBandUI(ctx, panel, canvas) {
         const sliders = panel.querySelectorAll('.ypp-eq-vslider');
         const dbLabels = panel.querySelectorAll('.ypp-eq-band-db');
         sliders.forEach((s, i) => {
-            s.value = this._eqGains[i];
+            s.value = ctx._eqGains[i];
         });
         dbLabels.forEach((el, i) => {
-            const db = this._eqGains[i];
+            const db = ctx._eqGains[i];
             el.textContent = (db >= 0 ? '+' : '') + db;
         });
-        this._drawCurve(canvas);
+        this.drawCurve(ctx, canvas);
     }
 
-    /** Update the CSS fill track gradient on the horizontal gain slider */
-    _updateGainTrack(slider) {
+    static updateGainTrack(slider) {
         const pct = ((parseFloat(slider.value) - 1) / (6 - 1)) * 100;
         slider.style.background = `linear-gradient(90deg, rgba(255,255,255,0.85) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
     }
 
-    /**
-     * Draw an approximate frequency-response curve using a Gaussian
-     * approximation of each peaking/shelf EQ band.
-     */
-    _drawCurve(canvas) {
+    static drawCurve(ctxRef, canvas) {
         const ctx = canvas.getContext('2d');
         const W = canvas.width, H = canvas.height;
         ctx.clearRect(0, 0, W, H);
@@ -458,7 +247,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
 
         // Vertical band markers
-        this._bands.forEach(band => {
+        ctxRef._bands.forEach(band => {
             const x = ((Math.log10(band.freq) - logMin) / (logMax - logMin)) * W;
             ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
@@ -470,8 +259,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         // Compute gain at each pixel using summed Gaussian approximation
         const gainAt = (freq) => {
             let total = 0;
-            this._bands.forEach((band, i) => {
-                const db = this._eqGains[i];
+            ctxRef._bands.forEach((band, i) => {
+                const db = ctxRef._eqGains[i];
                 if (db === 0) return;
                 const bw = band.type === 'peaking' ? 0.85 : 1.6;
                 const logDist = Math.log2(freq / band.freq) / bw;
@@ -510,11 +299,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         ctx.stroke();
     }
 
-    /**
-     * Inject scoped CSS for the EQ panel — only once per page.
-     * Keeps styles contained to avoid conflicts with YouTube's own CSS.
-     */
-    _injectEQStyles() {
+    static injectEQStyles() {
         if (document.getElementById('ypp-eq-styles')) return;
         const style = document.createElement('style');
         style.id = 'ypp-eq-styles';
