@@ -158,7 +158,6 @@
 | Feature | Problem | Priority |
 |---|---|---|
 | Stats Visualizer | Partially implemented, not connected to real watch data | Medium |
-| Search page blank grid space | Same margin/mini-guide bug as homepage — not yet fixed for search | High |
 
 ---
 
