@@ -75,7 +75,7 @@ import './features/player/global-bar.js';
 import './features/player/player-tools.js';
 import './features/player/return-dislike.js';
 import './features/player/mini-player.js';
-import './features/player/video-filters.js';
+import './features/player/video-filters/index.js';
 import './features/player/volume-booster.js';
 import './features/player/auto-quality.js';
 import './features/player/time-display.js';
