@@ -44,7 +44,6 @@ window.YPP.features.Theme = class ThemeManager {
         this._isActive = false;
         this._settings = null;
         this._shortsObserver = null;
-        this._progressBarStyle = null;
         this._SHORTS_DEBOUNCE = this._TIMINGS.DEBOUNCE_DEFAULT || 100;
     }
 
@@ -64,7 +63,6 @@ window.YPP.features.Theme = class ThemeManager {
             this._toggleTheme(false);
             this._applyTrueBlack(false);
             this._applyHideScrollbar(false);
-            this._applyProgressBarColor(null);
             this._cleanupClasses();
 
             this._isActive = false;
@@ -107,13 +105,6 @@ window.YPP.features.Theme = class ThemeManager {
             // Apply UI customization
             this._applyTrueBlack(this._settings.trueBlack);
             this._applyHideScrollbar(this._settings.hideScrollbar);
-
-            // Progress bar
-            if (this._settings.customProgressBar) {
-                this._applyProgressBarColor(this._settings.progressBarColor || '#ff0000');
-            } else {
-                this._applyProgressBarColor(null);
-            }
 
         } catch (error) {
             this._Utils.log?.(`Error running theme: ${error.message}`, 'THEME', 'error');
@@ -294,36 +285,6 @@ window.YPP.features.Theme = class ThemeManager {
     }
 
     /**
-     * Apply custom progress bar color
-     * @private
-     * @param {string|null} color
-     */
-    _applyProgressBarColor(color) {
-        const styleId = 'ypp-progress-bar-color';
-        let style = document.getElementById(styleId);
-
-        if (!color) {
-            if (style) style.remove();
-            return;
-        }
-
-        if (!style) {
-            style = document.createElement('style');
-            style.id = styleId;
-            document.head.appendChild(style);
-        }
-
-        style.textContent = `
-            .ytp-play-progress, .ytp-scrubber-button {
-                background-color: ${color} !important;
-            }
-            .ytp-swatch-background-color {
-                background-color: ${color} !important;
-            }
-        `;
-    }
-
-    /**
      * Apply visibility settings
      * @private
      */
@@ -341,7 +302,6 @@ window.YPP.features.Theme = class ThemeManager {
         toggle(this._CSS_CLASSES.HIDE_LIVE_CHAT, this._settings.hideLiveChat);
         toggle(this._CSS_CLASSES.HIDE_FUNDRAISER, this._settings.hideFundraiser);
         toggle(this._CSS_CLASSES.DISPLAY_FULL_TITLE, this._settings.displayFullTitle);
-        toggle(this._CSS_CLASSES.BLUE_PROGRESS, this._settings.blueProgress);
         toggle(this._CSS_CLASSES.HOOK_FREE, this._settings.hookFreeHome);
 
         // Search specific
@@ -432,7 +392,6 @@ window.YPP.features.Theme = class ThemeManager {
             this._CSS_CLASSES.HIDE_LIVE_CHAT,
             this._CSS_CLASSES.HIDE_FUNDRAISER,
             this._CSS_CLASSES.DISPLAY_FULL_TITLE,
-            this._CSS_CLASSES.BLUE_PROGRESS,
             this._CSS_CLASSES.HOOK_FREE,
             'ypp-clean-search',
             'ypp-hide-search-shorts',

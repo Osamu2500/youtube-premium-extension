@@ -300,7 +300,7 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
     }
 
     setupListeners() {
-        const video = document.querySelector('video');
+        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
         if (!video) return;
 
         // ── Tabs Switching ──────────────────────────────────────────────────
@@ -414,6 +414,7 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
 
         const ensureAudio = () => {
             if (!this._audioConnected) this._setupAudio(video);
+            if (this._audioCtx && this._audioCtx.state === 'suspended') this._audioCtx.resume();
         };
 
         // Volume
@@ -497,6 +498,7 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
         // Delay binding to wait for audio init if needed, but slider just triggers values
         // We capture `this._bassFilter` getter dynamically by passing a wrapper function or just direct
         this.addListener(bassSlider, 'input', (e) => {
+            ensureAudio();
             const db = parseInt(e.target.value);
             if (this._bassFilter && enhancerOn) this._bassFilter.gain.value = db;
             bassVal.textContent = (db > 0 ? '+' : '') + db + ' dB';
@@ -505,6 +507,7 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
         this.addListener(bassSlider, 'dblclick', () => { bassSlider.value = 0; bassSlider.dispatchEvent(new Event('input')); });
 
         this.addListener(midSlider, 'input', (e) => {
+            ensureAudio();
             const db = parseInt(e.target.value);
             if (this._midFilter && enhancerOn) this._midFilter.gain.value = db;
             midVal.textContent = (db > 0 ? '+' : '') + db + ' dB';
@@ -513,6 +516,7 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
         this.addListener(midSlider, 'dblclick', () => { midSlider.value = 0; midSlider.dispatchEvent(new Event('input')); });
 
         this.addListener(trebleSlider, 'input', (e) => {
+            ensureAudio();
             const db = parseInt(e.target.value);
             if (this._trebleFilter && enhancerOn) this._trebleFilter.gain.value = db;
             trebleVal.textContent = (db > 0 ? '+' : '') + db + ' dB';

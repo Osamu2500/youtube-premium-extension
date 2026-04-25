@@ -102,7 +102,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
 
     run() {
         if (!this.settings || !this.settings.enableVolumeBoost) return;
-        const video = document.querySelector('video');
+        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
         if (video) this.initAudioContext(video);
     }
 
@@ -175,6 +175,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
     _applyPreset(name) {
         const gains = this._presets[name];
         if (!gains) return;
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
         gains.forEach((db, i) => this._setEQBand(i, db));
     }
 
@@ -255,6 +256,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         gainSlider.value = this._volumeGain;
         gainSlider.className = 'ypp-eq-hslider';
         gainSlider.oninput = (e) => {
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
             const v = parseFloat(e.target.value);
             this.setVolume(v);
             gainValue.textContent = Math.round(v * 100) + '%';
@@ -326,6 +328,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
             slider.style.setProperty('--band-color', band.color);
             slider.dataset.band = i;
             slider.oninput = (e) => {
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
                 const db = parseFloat(e.target.value);
                 this._setEQBand(i, db);
                 dbLabel.textContent = (db >= 0 ? '+' : '') + db;
@@ -333,6 +336,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
                 if (activePresetBtn) { activePresetBtn.classList.remove('active'); activePresetBtn = null; }
             };
             slider.ondblclick = () => {
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
                 this._setEQBand(i, 0);
                 slider.value = 0;
                 dbLabel.textContent = '0';
@@ -363,6 +367,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
             Compressor
         `;
         compBtn.onclick = () => {
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
             this._compressorEnabled = !this._compressorEnabled;
             compBtn.classList.toggle('active', this._compressorEnabled);
             if (this.compressorNode) {

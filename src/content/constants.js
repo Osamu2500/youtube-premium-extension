@@ -126,7 +126,6 @@ window.YPP.CONSTANTS = {
         DOPAMINE_DETOX: 'ypp-dopamine-detox',
         ZEN_MODE: 'ypp-zen-mode',
         HOOK_FREE: 'ypp-hook-free-home',
-        BLUE_PROGRESS: 'ypp-blue-progress',
         SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed',
 
         // Mark as Watched
@@ -181,8 +180,6 @@ window.YPP.CONSTANTS = {
         activeTheme: 'default', // default, ocean, sunset, dracula, forest, midnight, cherry
         trueBlack: false, // Legacy: treated as 'midnight' theme if true during migration
         hideScrollbar: false,
-        customProgressBar: false,
-        progressBarColor: '#ff0000',
 
         // Layout
         grid4x4: true, // Legacy (can be kept for migration or removed)
@@ -208,7 +205,6 @@ window.YPP.CONSTANTS = {
 
         // Player
         autoCinema: false,
-        blueProgress: false,
         enablePiP: true,
         enableTranscript: true,
         enableSnapshot: true,
@@ -240,6 +236,7 @@ window.YPP.CONSTANTS = {
         // Player Tools
         enableCustomSpeed: true,
         enableCinemaFilters: true,
+        enableGlobalPlayerBar: true,
         // Cinema Filters — persisted state
         cinemaFilterIndex: 0,
         cinemaFilterBrightness: 100,

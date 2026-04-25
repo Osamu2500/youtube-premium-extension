@@ -64,9 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'enableAccountMenu',
         'trueBlack',
         'hideScrollbar',
-        'customProgressBar',
-        'progressBarColor',
-        'blueProgress',
 
         // Navigation
         'navShorts',
@@ -106,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'audioCompressor', // audio-compressor.js
         'videoResumer', // video-resumer.js
         'enableCustomSpeed',
+        'enableGlobalPlayerBar',
         'enablePiP', // Button / Scroll PiP
         'enableLoop',
         'enableSnapshot',
@@ -203,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const display = document.getElementById(key + 'Value');
                             if (display) display.textContent = el.value + '%';
                         } else if (el.type === 'color' || el.type === 'text') {
-                            el.value = settings[key] || (key === 'progressBarColor' ? '#ff4e45' : '');
+                            el.value = settings[key] || '';
                         }
                     }
                 });
@@ -649,17 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI DEPENDENCIES ---
     function updateDependencyUI() {
-        // Custom Progress Bar -> Color Picker
-        const customProgress = document.getElementById('customProgressBar');
-        const colorPicker = document.getElementById('progressBarColor');
-        
-        if (customProgress && colorPicker) {
-            const isDisabled = !customProgress.checked;
-            colorPicker.disabled = isDisabled;
-            colorPicker.parentElement.style.opacity = isDisabled ? '0.5' : '1';
-            colorPicker.parentElement.style.pointerEvents = isDisabled ? 'none' : 'auto';
-        }
-
         // Focus Mode -> Sub-toggles (Optional visual hierarchy)
         const focusMode = document.getElementById('enableFocusMode');
         const distractionGroups = ['hideComments', 'hideEndScreens', 'hideCards', 'hideMerch'];

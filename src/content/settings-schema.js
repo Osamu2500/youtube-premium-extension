@@ -26,8 +26,6 @@ window.YPP.SettingsSchema = {
         activeTheme:         { type: 'string',  default: 'default', values: ['default','ocean','sunset','dracula','forest','midnight','cherry','system'] },
         trueBlack:           { type: 'boolean', default: false },
         hideScrollbar:       { type: 'boolean', default: false },
-        customProgressBar:   { type: 'boolean', default: false },
-        progressBarColor:    { type: 'string',  default: '#ff0000' },
 
         // --- Layout ---
         grid4x4:             { type: 'boolean', default: true },
@@ -63,7 +61,6 @@ window.YPP.SettingsSchema = {
 
         // --- Player ---
         autoCinema:          { type: 'boolean', default: false },
-        blueProgress:        { type: 'boolean', default: false },
         enablePiP:           { type: 'boolean', default: true },
         enableTranscript:    { type: 'boolean', default: true },
         enableSnapshot:      { type: 'boolean', default: true },

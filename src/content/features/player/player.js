@@ -114,9 +114,9 @@ window.YPP.features.Player = class Player {
         const container = document.createElement('div');
         container.className = 'ypp-player-controls';
 
+        container.appendChild(this._createSpeedControls(video));
         container.appendChild(this._createSnapshotButton(video));
         container.appendChild(this._createLoopButton(video));
-        container.appendChild(this._createSpeedControls(video));
 
         if (document.pictureInPictureEnabled) {
             container.appendChild(this._createPiPButton(video));

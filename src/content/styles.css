@@ -835,11 +835,20 @@ body.ypp-hide-shorts
     z-index: 10;
     pointer-events: none;
     backdrop-filter: blur(4px);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    animation: ypp-pulse-badge 2s infinite ease-in-out;
+}
+
+@keyframes ypp-pulse-badge {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 /* Dim mode for watched videos */
 [data-ypp-hidden="watched"] {
     transition: opacity 0.2s ease, filter 0.2s ease;
+    filter: grayscale(0.85) opacity(0.4) !important;
 }
 
 /* ===================================================================================
@@ -1361,18 +1370,24 @@ ytd-app[mini-guide-visible] #content {
   backdrop-filter: blur(4px);
   color: var(--ypp-text-secondary);
   transition:
-    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-    background-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-    color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
   text-decoration: none;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   z-index: 2205; /* Ensure above other elements */
   transform: translateZ(0); /* Hardware Acceleration */
   will-change: transform, box-shadow, background-color, border-color, color;
+}
+
+.ypp-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ypp-accent), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border-color: var(--ypp-accent);
 }
 
 .ypp-nav-btn:hover {
@@ -1518,11 +1533,12 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
   backdrop-filter: blur(24px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-top-color: rgba(255, 255, 255, 0.15) !important;
+  border-top-color: rgba(255, 255, 255, 0.18) !important;
   border-radius: var(--ypp-radius-lg);
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 12px rgba(255, 255, 255, 0.02) !important;
   padding: 16px !important;
   box-sizing: border-box !important;
   transition:
@@ -1569,7 +1585,7 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
 /* Video Title */
 .yt-premium-plus-theme ytd-rich-item-renderer #video-title {
   font-size: 1.6rem !important;
-  line-height: 2.2rem !important;
+  line-height: 2.4rem !important;
   font-weight: 500 !important;
   margin: 12px 0 4px 0 !important;
   display: -webkit-box !important;
@@ -1577,33 +1593,39 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
   line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
-  max-height: 4.4rem !important;
-  color: var(--ypp-text-primary) !important;
+  max-height: 4.8rem !important;
+  color: #ffffff !important;
 }
 
 /* Metadata */
 .yt-premium-plus-theme ytd-rich-item-renderer #metadata-line,
 .yt-premium-plus-theme ytd-rich-item-renderer #channel-name {
   font-size: 1.3rem !important;
-  color: var(--ypp-text-secondary) !important;
+  color: rgba(255, 255, 255, 0.55) !important;
   line-height: 1.5 !important;
+  transition: color 0.2s ease !important;
+}
+
+.yt-premium-plus-theme ytd-rich-item-renderer:hover #metadata-line,
+.yt-premium-plus-theme ytd-rich-item-renderer:hover #channel-name {
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Consolidate Duplicate Hover Effects into One Premium Animation */
 .yt-premium-plus-theme ytd-rich-item-renderer:hover {
   /* Use only translateY — scale() can cause sub-pixel rendering gaps on edges causing artifact */
-  transform: translateY(-4px) !important;
+  transform: translateY(-6px) !important;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.02)
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.03)
   ) !important;
-  border-color: rgba(62, 166, 255, 0.4) !important;
-  border-top-color: rgba(62, 166, 255, 0.6) !important;
+  border-color: rgba(62, 166, 255, 0.5) !important;
+  border-top-color: rgba(62, 166, 255, 0.8) !important;
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.65),
-    0 0 28px rgba(62, 166, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    0 20px 48px rgba(0, 0, 0, 0.75),
+    0 0 32px rgba(62, 166, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
   z-index: 10;
 }
 
@@ -1734,6 +1756,39 @@ body.ypp-library-page ytd-video-renderer #video-title {
    6. SEARCH REDESIGN
    =================================================================================== */
 
+/* ── 0. SEARCH PAGE: MINI-GUIDE & LAYOUT MARGIN FIX ──────────────── */
+/* Reinforces the global mini-guide rule with a search-scoped, higher-specificity
+   selector. This prevents the blank left gutter that appears on /results when
+   YouTube's own search-page stylesheet overrides the generic rule. */
+body.ypp-search-page ytd-app[mini-guide-visible] ytd-page-manager,
+body.ypp-search-page ytd-app[mini-guide-visible] #page-manager,
+body.ypp-search-page ytd-app[mini-guide-visible] #content {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  --ytd-mini-guide-width: 0px !important;
+}
+
+/* Stretch the search container edge-to-edge (applied for ALL search page
+   layouts, not just grid mode, so the fix survives a grid toggle). */
+body.ypp-search-page ytd-search,
+body.ypp-search-page ytd-two-column-search-results-renderer,
+body.ypp-search-page ytd-two-column-search-results-renderer #primary {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Hide the secondary sidebar column (watch-next / ads) on the search page —
+   keeps the layout single-column and prevents a gap on the right. */
+body.ypp-search-page ytd-two-column-search-results-renderer #secondary {
+  display: none !important;
+  width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 /* ── 1. CONTAINER RESETS ──────────────────────────────────────────── */
 body.ypp-search-grid-mode ytd-search,
 body.ypp-search-grid-mode ytd-two-column-search-results-renderer,
@@ -1846,11 +1901,12 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   backdrop-filter: blur(24px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-top-color: rgba(255, 255, 255, 0.15) !important; /* Luminous top edge */
+  border-top-color: rgba(255, 255, 255, 0.18) !important; /* Luminous top edge */
   border-radius: var(--ypp-radius-lg) !important;
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 12px rgba(255, 255, 255, 0.02) !important;
   padding: 16px !important;
   box-sizing: border-box !important;
   display: flex !important;
@@ -1950,15 +2006,15 @@ body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string
 body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
   font-family: "Inter", "Roboto", sans-serif !important;
   font-size: 1.6rem !important;
-  line-height: 2.2rem !important;
+  line-height: 2.4rem !important;
   font-weight: 500 !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
-  max-height: 4.4rem !important;
-  color: var(--ypp-text-primary) !important;
+  max-height: 4.8rem !important;
+  color: #ffffff !important;
   letter-spacing: -0.1px !important;
   margin: 0 !important;
 }
@@ -2261,8 +2317,7 @@ body.ypp-search-grid-mode ytd-playlist-renderer ytd-macro-markers-list-item-rend
   display: none !important;
 }
 
-/* Non-Video Elements Span Full Width */
-body.ypp-search-grid-mode ytd-channel-renderer,
+/* Non-Video Elements Span Full Width (shelves, promos) */
 body.ypp-search-grid-mode ytd-shelf-renderer,
 body.ypp-search-grid-mode ytd-rich-shelf-renderer,
 body.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
@@ -2272,7 +2327,16 @@ body.ypp-search-grid-mode ytd-rich-section-renderer {
   max-width: 100%;
 }
 
-/* Channel Result Card */
+/* Channel banner: full-width row but does NOT stretch to fill row height */
+body.ypp-search-grid-mode ytd-channel-renderer {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 100%;
+  align-self: start !important;  /* Prevents vertical stretch that causes card overlap */
+  z-index: 1;                    /* Sits above video cards in normal state */
+}
+
+/* Channel Result Card — glassmorphic banner spanning full grid row */
 body.ypp-search-grid-mode ytd-channel-renderer {
   background: linear-gradient(
     135deg,
@@ -2285,7 +2349,8 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   border-top-color: rgba(255, 255, 255, 0.18) !important;
   border-radius: var(--ypp-radius-lg);
   padding: 20px 32px !important;
-  margin: 0 auto 24px auto !important; /* Center dynamically if full width */
+  /* margin: 0 (no centering offset) — align-self:start on parent rule handles height */
+  margin: 0 0 24px 0 !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -2300,7 +2365,8 @@ body.ypp-search-grid-mode ytd-channel-renderer {
     background 0.3s ease !important;
   position: relative;
   overflow: hidden;
-  max-width: 1400px; /* Instead of stretching purely full 100%, limit max width so it resembles a controlled banner */
+  isolation: isolate !important;
+  max-width: 1400px;
   width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -2755,23 +2821,23 @@ body.ypp-search-grid-mode ytd-channel-renderer img#img {
 }
 
 /* ===================================================================================
-   7. SEARCH FILTERS (CHIPS)
+   7. CHIPS REDESIGN (GLOBAL)
    =================================================================================== */
 
 /* Chip Container */
-body.ypp-search-grid-mode yt-chip-cloud-renderer {
+body.yt-premium-plus-theme yt-chip-cloud-renderer {
   margin-bottom: 24px;
 }
 
 /* Base Chip Style */
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer {
-  height: 36px;
-  border-radius: 18px;
+body.yt-premium-plus-theme yt-chip-cloud-chip-renderer {
+  height: 38px;
+  border-radius: 19px;
   margin-right: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
   transition:
     transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 0.3s ease,
@@ -2779,50 +2845,44 @@ body.ypp-search-grid-mode yt-chip-cloud-chip-renderer {
     border-color 0.3s ease,
     color 0.3s ease;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateZ(0); /* Hardware Acceleration */
   will-change: transform, box-shadow, background-color, border-color;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+body.yt-premium-plus-theme yt-chip-cloud-chip-renderer:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 /* Active Chip */
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected],
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected {
-  background: rgba(62, 166, 255, 0.2);
-  border-color: rgba(62, 166, 255, 0.5);
-  box-shadow:
-    0 4px 16px rgba(62, 166, 255, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+body.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected],
+body.yt-premium-plus-theme yt-chip-cloud-chip-renderer.selected {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 /* Chip Text */
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer yt-formatted-string,
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer span {
+body.yt-premium-plus-theme yt-chip-cloud-chip-renderer yt-formatted-string,
+body.yt-premium-plus-theme yt-chip-cloud-chip-renderer span {
   color: var(--ypp-text-secondary);
-  font-family: "Roboto", sans-serif;
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif);
   font-weight: 500;
   font-size: 1.4rem;
   padding: 0 16px;
 }
 
-body.ypp-search-grid-mode
+body.yt-premium-plus-theme
   yt-chip-cloud-chip-renderer[selected]
   yt-formatted-string,
-body.ypp-search-grid-mode
+body.yt-premium-plus-theme
   yt-chip-cloud-chip-renderer.selected
   yt-formatted-string {
   color: #fff;
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
 }
 
 /* Next/Prev Buttons */
@@ -2936,18 +2996,18 @@ ytd-menu-renderer ytd-button-renderer:hover {
   margin-right: 8px;
   gap: 4px;
   padding: 2px 6px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-top-color: rgba(255, 255, 255, 0.13);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top-color: rgba(255, 255, 255, 0.1);
   border-radius: 32px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+  box-shadow: none;
   transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 .ypp-player-controls:hover {
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: none;
 }
 
 /* ── Action Buttons ── */
@@ -3010,20 +3070,20 @@ ytd-menu-renderer ytd-button-renderer:hover {
 .ypp-speed-controls {
   display: flex;
   gap: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   padding: 3px 4px;
   border-radius: 20px;
   backdrop-filter: blur(20px) saturate(1.5);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
   margin-left: 4px;
   transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.25s ease;
 }
 .ypp-speed-controls:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow: none;
 }
 
 .ypp-speed-btn {
@@ -3609,67 +3669,7 @@ body.ypp-search-grid-mode ytd-channel-renderer yt-button-shape {
   justify-content: flex-end;
 }
 
-/* ===================================================================================
-   SEARCH FILTERS (CHIPS)
-   =================================================================================== */
-
-/* Chip Container */
-body.ypp-search-grid-mode yt-chip-cloud-renderer {
-  margin-bottom: 24px;
-}
-
-/* Base Chip Style */
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer {
-  height: 38px;
-  border-radius: 19px; /* Perfect pill */
-  margin-right: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: var(--ypp-blur-high);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
-  overflow: hidden;
-  transform: translateZ(0);
-}
-
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    0 0 12px rgba(255, 255, 255, 0.1);
-}
-
-/* Active Chip */
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer[selected],
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer.selected {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
-}
-
-/* Chip Text */
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer yt-formatted-string,
-body.ypp-search-grid-mode yt-chip-cloud-chip-renderer span {
-  color: var(--ypp-text-secondary);
-  font-family: "Roboto", sans-serif;
-  font-weight: 500;
-  font-size: 1.4rem;
-  padding: 0 16px;
-}
-
-body.ypp-search-grid-mode
-  yt-chip-cloud-chip-renderer[selected]
-  yt-formatted-string,
-body.ypp-search-grid-mode
-  yt-chip-cloud-chip-renderer.selected
-  yt-formatted-string {
-  color: #fff;
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-}
+/* Chips rule deleted due to deduplication */
 
 /* Next/Prev Buttons */
 body.ypp-search-grid-mode #left-arrow-button,
@@ -4976,21 +4976,17 @@ body.yt-premium-plus-theme .ytp-chrome-bottom {
   bottom: 14px !important;
   border-radius: 22px !important;
 
-  /* Deep frosted glass — more translucent than before */
-  background: rgba(8, 8, 14, 0.78) !important;
-  backdrop-filter: blur(40px) saturate(200%) brightness(0.9) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(0.9) !important;
+  /* completely transparent and blurry no primary colors like black or white but clear transparent blur */
+  background: transparent !important;
+  backdrop-filter: blur(40px) saturate(120%) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(120%) brightness(1.1) !important;
 
-  /* Layered border: bright top highlight + subtle overall glow */
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.22) !important;
+  /* Layered border: very subtle border for structure without adding strong colors */
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 
-  /* Depth shadows */
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.75),
-    0 6px 16px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    inset 0 -1px 0 rgba(0,0,0,0.3) !important;
+  /* Depth shadows removed to enhance transparency */
+  box-shadow: none !important;
 
   transition:
     opacity 0.3s cubic-bezier(0.2,0.8,0.2,1),
@@ -5005,132 +5001,11 @@ body.yt-premium-plus-theme .ytp-chrome-bottom {
 
 body.yt-premium-plus-theme .ytp-chrome-bottom:hover {
   transform: translateY(-3px) !important;
-  background: rgba(14, 14, 22, 0.86) !important;
-  box-shadow:
-    0 28px 72px rgba(0,0,0,0.85),
-    0 10px 28px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 -1px 0 rgba(0,0,0,0.3) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  box-shadow: none !important;
 }
 
-/* ── 2. Progress Bar — Floats above the glass bar ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container {
-  /* Sit flush at the top inside the glass container, slightly protruding */
-  bottom: 64px !important;
-  width: calc(100% - 28px) !important;
-  left: 14px !important;
-  right: 14px !important;
 
-  /* Thin at rest, expands on hover */
-  height: 4px !important;
-  border-radius: 8px !important;
-  overflow: visible !important;
-  background: transparent !important;
-
-  transition:
-    transform 0.22s cubic-bezier(0.34,1.56,0.64,1),
-    height 0.22s cubic-bezier(0.2,0.8,0.2,1),
-    filter 0.2s ease !important;
-}
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container:hover {
-  transform: scaleY(1.5) !important;
-  filter: drop-shadow(0 0 6px rgba(255, 50, 50, 0.4)) !important;
-}
-
-/* ── 3. Progress Track (the background rail) ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-list {
-  border-radius: 8px !important;
-  overflow: hidden !important;
-  background: rgba(255,255,255,0.12) !important;
-  box-shadow:
-    inset 0 1px 3px rgba(0,0,0,0.55),
-    0 1px 0 rgba(255,255,255,0.04) !important;
-  border: none !important;
-}
-
-/* Base progress bar transition */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-play-progress,
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-load-progress,
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-hover-progress {
-  border-radius: 8px !important;
-  transition: width 0.08s linear !important;
-}
-
-/* ── 4. Play Progress — gradient + shimmer ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-play-progress {
-  background: linear-gradient(
-    90deg,
-    var(--yt-spec-static-brand-red, #ff0000) 0%,
-    #ff4e45 60%,
-    #ff6b4a 100%
-  ) !important;
-  box-shadow:
-    0 0 14px rgba(255, 50, 30, 0.55),
-    0 0 4px rgba(255, 50, 30, 0.8),
-    inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
-  position: relative !important;
-  overflow: hidden !important;
-}
-
-/* Shimmer sweep effect */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-play-progress::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
-  animation: ypp-shimmer-progress 2.5s infinite linear;
-}
-@keyframes ypp-shimmer-progress {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(250%); }
-}
-
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-load-progress {
-  background: rgba(255,255,255,0.28) !important;
-}
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-hover-progress {
-  background: rgba(255,255,255,0.45) !important;
-  box-shadow: 0 0 8px rgba(255,255,255,0.2) !important;
-}
-
-/* ── 5. Scrubber Dot — spring-curve pop with halo ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-scrubber-button {
-  background: #ffffff !important;
-  width: 13px !important;
-  height: 13px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  /* Invisible at rest — appears on hover via container */
-  transform: scale(0) !important;
-  box-shadow:
-    0 0 0 0 rgba(255, 255, 255, 0),
-    0 3px 10px rgba(0, 0, 0, 0.6) !important;
-  transition:
-    transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
-    box-shadow 0.22s ease !important;
-  will-change: transform, box-shadow;
-}
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-progress-bar-container:hover .ytp-scrubber-button {
-  transform: scale(1.4) !important;
-  box-shadow:
-    0 0 0 5px rgba(255, 50, 30, 0.2),
-    0 0 14px rgba(255, 50, 30, 0.55),
-    0 4px 16px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* ── 6. Scrubber container — no clipping ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-scrubber-container {
-  z-index: 60 !important;
-  align-items: center !important;
-  display: flex !important;
-  overflow: visible !important;
-}
-
-/* ── 7. Chapter markers on progress bar ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom .ytp-chapter-hover-container {
-  border-radius: 8px !important;
-  overflow: visible !important;
-}
 
 /* ── 8. Settings / quality popup ── */
 body.yt-premium-plus-theme .ytp-popup {
@@ -5249,6 +5124,19 @@ body.yt-premium-plus-theme #owner.ytd-watch-metadata:hover {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* Subscribe Button Container & Positioning */
+body.yt-premium-plus-theme ytd-watch-metadata #owner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+body.yt-premium-plus-theme ytd-watch-metadata #subscribe-button {
+  margin-left: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
 /* Subscribe Button */
 body.yt-premium-plus-theme
   #subscribe-button
@@ -5262,19 +5150,19 @@ body.yt-premium-plus-theme
   ytd-button-renderer
   yt-button-shape
   > button {
-  background-color: var(--yt-spec-text-primary, #fff) !important;
-  color: var(--yt-spec-text-primary-inverse, #0f0f0f) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+  color: var(--yt-spec-text-primary, #fff) !important;
   border-radius: 100px !important;
-  margin-left: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  padding: 0 20px !important;
+  height: 40px !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease !important;
-  border: none !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
 body.yt-premium-plus-theme
@@ -5289,9 +5177,26 @@ body.yt-premium-plus-theme
   ytd-button-renderer
   yt-button-shape
   > button:hover {
-  background-color: #e5e5e5 !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1)) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Subscribed State */
+body.yt-premium-plus-theme #subscribe-button ytd-subscribe-button-renderer[subscribed] yt-button-shape > button,
+body.yt-premium-plus-theme #subscribe-button ytd-button-renderer.style-text yt-button-shape > button {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--ypp-text-secondary, #aaa) !important;
+  box-shadow: none !important;
+}
+
+body.yt-premium-plus-theme #subscribe-button ytd-subscribe-button-renderer[subscribed] yt-button-shape > button:hover,
+body.yt-premium-plus-theme #subscribe-button ytd-button-renderer.style-text yt-button-shape > button:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--ypp-text-primary, #fff) !important;
 }
 
 body.yt-premium-plus-theme
@@ -5326,7 +5231,7 @@ body.yt-premium-plus-theme
   yt-button-shape
   button,
 body.yt-premium-plus-theme #subscribe-button yt-button-shape button {
-  border: none !important;
+  border: none !important; /* Will be overridden by above specific rules if subscribe */
 }
 
 /* Hide native ripple and dark mode overlay pseudo-elements responsible for the "double view" */

@@ -16,8 +16,6 @@ const DEFAULT_SETTINGS = {
     activeTheme: 'default',
     trueBlack: false,
     hideScrollbar: false,
-    customProgressBar: false,
-    progressBarColor: '#ff0000',
 
     // Layout
     grid4x4: true,
@@ -37,7 +35,6 @@ const DEFAULT_SETTINGS = {
 
     // Player
     autoCinema: false,
-    blueProgress: false,
     enablePiP: true,
     enableTranscript: true,
     enableSnapshot: true,
