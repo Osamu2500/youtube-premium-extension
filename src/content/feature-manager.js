@@ -209,15 +209,24 @@ window.YPP.FeatureManager = class FeatureManager {
             if (this.errorCounts[name] >= this.MAX_ERRORS) {
                 window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors. Attempting cleanup...`, 'MANAGER', 'warn');
                 
-                // CRITICAL FIX: Attempt to gracefully unmount the broken feature
-                // This prevents zombie listeners from continuing to mutate the DOM or leak memory
+                // Step 1: Attempt graceful unmount via the feature's own disable()
+                // This gives features a chance to remove their listeners / timers cleanly.
+                let disableSucceeded = false;
                 try {
                     const instance = this.getFeature(name);
                     if (instance && typeof instance.disable === 'function') {
                         instance.disable();
+                        disableSucceeded = true;
                     }
                 } catch (cleanupError) {
-                    window.YPP.Utils.log(`Failed to cleanly disable broken feature '${name}'`, 'MANAGER', 'debug');
+                    window.YPP.Utils.log(`Failed to cleanly disable broken feature '${name}': ${cleanupError.message}`, 'MANAGER', 'debug');
+                }
+
+                // Step 2: DOM sweep fallback — guaranteed cleanup even when disable() throws.
+                // Removes all elements injected by this feature that carry the
+                // data-ypp-feature="<name>" attribute, preventing zombie DOM nodes.
+                if (!disableSucceeded) {
+                    this._domSweep(name);
                 }
 
                 if (window.YPP.events) {
@@ -226,6 +235,33 @@ window.YPP.FeatureManager = class FeatureManager {
             }
         }
     }
+
+    /**
+     * DOM sweep fallback — removes all elements tagged with
+     * data-ypp-feature="<featureName>" from the document.
+     * Called when a feature's disable() method itself throws.
+     * @param {string} name - Feature key used as the data-ypp-feature value
+     * @private
+     */
+    _domSweep(name) {
+        try {
+            const tagged = document.querySelectorAll(`[data-ypp-feature="${name}"]`);
+            if (tagged.length === 0) return;
+
+            tagged.forEach(el => {
+                try { el.remove(); } catch (_) { /* ignore individual removal errors */ }
+            });
+
+            window.YPP.Utils.log(
+                `DOM sweep removed ${tagged.length} orphaned element(s) for broken feature '${name}'`,
+                'MANAGER', 'warn'
+            );
+        } catch (sweepError) {
+            // Last-resort: even the sweep failed — nothing more we can do.
+            window.YPP.Utils.log(`DOM sweep failed for '${name}': ${sweepError.message}`, 'MANAGER', 'error');
+        }
+    }
+
 
     /**
      * Gracefully disable all active features instance
