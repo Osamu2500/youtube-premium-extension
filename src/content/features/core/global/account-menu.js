@@ -10,8 +10,10 @@ window.YPP.features = window.YPP.features || {};
  *  1. MutationObserver detects when the native menu appears in DOM.
  *  2. A polling loop waits until YouTube has hydrated account data.
  *  3. _doInject() hides native children, appends our panel, wires events.
- *  4. _extractData() reads Polymer/LitElement .data properties for avatars
- *     and falls back to DOM img.src — so it works before lazy-load fires.
+ *  4. _extractData() reads account data from DOM attributes and text content.
+ *     Avatar URLs are extracted via yt-img-shadow[src] getAttribute() first
+ *     (isolated-world safe), falling back to <img>.src and finally the
+ *     Polymer .data property as a last-resort (silently caught if blocked).
  *  5. _cleanup() tears down timers and removes injected HTML on nav/disable.
  */
 window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.BaseFeature {
@@ -94,10 +96,10 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
     /**
      * Polls the native menu at 50ms intervals until YouTube has populated
-     * account data, then calls _doInject().
+     * enough account data for a useful render, then calls _doInject().
      *
-     * YouTube renders account item elements before their Polymer .data
-     * properties are set, so we must wait rather than inject immediately.
+     * YouTube renders account item elements before their text content and
+     * avatar URLs are available, so we must wait rather than inject immediately.
      *
      * @param {Element} menu
      */
@@ -262,9 +264,12 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     /**
      * Reads avatar URL from a YouTube custom element using three strategies
      * in order of reliability:
-     *  1. Polymer/LitElement .data property — available before lazy-load
-     *  2. yt-img-shadow.src property
-     *  3. inner <img>.src attribute
+     *  1. yt-img-shadow[src] HTML attribute — Polymer reflects src to an HTML
+     *     attribute that IS accessible from an extension isolated world.
+     *  2. inner <img>.src — populated by yt-img-shadow's IntersectionObserver
+     *     once the element enters the viewport.
+     *  3. Polymer .data / .__data JS property — last resort, blocked in MV3
+     *     isolated worlds but caught silently; useful in page-world contexts.
      *
      * @param {Element} el
      * @returns {string} URL or empty string
