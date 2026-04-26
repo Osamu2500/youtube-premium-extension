@@ -116,7 +116,7 @@
 | Data API | `DataAPI` | `content/features/core/global/data-api.js` | `null` | all | stable | — | Bridges page context to extension context for accessing YouTube player APIs |
 | Mark Watched | `MarkWatched` | `content/features/core/global/mark-watched.js` | `enableMarkWatched` | all | stable | — | Right-click context menu to mark/unmark watched; checkmark badge on thumbnails; persists across sessions via chrome.storage.local; tracks video progress from watch page |
 | Keyboard Shortcuts | `KeyboardShortcuts` | `content/features/core/global/keyboard-shortcuts.js` | `keyboardShortcuts` | all | stable | — | Custom hotkeys for zen mode, focus mode, snapshot, speed, PiP, ambient mode |
-| Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `null` | all | wip | HistoryTracker | Displays watch time analytics and stats panel |
+| Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `null` | all | stable | HistoryTracker | Displays watch time analytics and stats panel |
 | Hide Watched | `HideWatched` | `content/features/core/global/hide-watched.js` | `hideWatched` | all | stable | MarkWatched | Reads watched IDs from MarkWatched; dims or hides watched videos; respects `hideWatchedMode` and `hideWatchedThreshold`; re-runs on every DOM update |
 
 ---
@@ -157,7 +157,7 @@
 
 | Feature | Problem | Priority |
 |---|---|---|
-| Stats Visualizer | Partially implemented, not connected to real watch data | Medium |
+| — | — | — |
 
 ---
 
