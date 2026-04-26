@@ -25,14 +25,14 @@
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
 | Player Core | `Player` | `content/features/player/player.js` | `null` | watch | stable | — | Core player enhancements: PiP, speed, loop, and snapshot |
-| Volume Booster | `VolumeBooster` | `content/features/player/volume-booster.js` | `enableVolumeBoost` | watch | stable | Player | Increases audio gain past 100% using Web Audio API |
+| Volume Booster | `VolumeBooster` | `content/features/player/volume-booster/index.js` | `enableVolumeBoost` | watch | stable | Player | Increases audio gain past 100% using Web Audio API |
 | Auto Quality | `AutoQuality` | `content/features/player/auto-quality.js` | `autoQuality`, `autoCinema` | watch | stable | — | Forces highest video quality and theater mode |
 | Time Display | `TimeDisplay` | `content/features/player/time-display.js` | `enableRemainingTime` | watch | stable | — | Shows remaining time and saved time adjusted for speed |
 | Player Tools | `PlayerTools` | `content/features/player/player-tools.js` | `videoControlsEnabled` | watch | stable | Player | Custom speed slider, cinema filters panel, brightness/contrast controls |
 | Return Dislike | `ReturnDislike` | `content/features/player/return-dislike.js` | `null` | watch | stable | — | Fetches and displays dislike count via Return YouTube Dislike API |
 | SponsorBlock | `SponsorBlock` | `content/features/player/sponsor-block.js` | `null` | watch | stable | — | Skips sponsored segments using SponsorBlock community database |
 | Mini Player | `MiniPlayer` | `content/features/player/mini-player.js` | `enablePiP` | watch | stable | — | Picture-in-picture and mini player controls |
-| Video Filters | `VideoFilters` | `content/features/player/video-filters.js` | `enableCinemaFilters` | watch | stable | — | Brightness, contrast, saturation, hue CSS filters on the video element |
+| Video Filters | `VideoFilters` | `content/features/player/video-filters/index.js` | `enableCinemaFilters` | watch | stable | — | Brightness, contrast, saturation, hue CSS filters on the video element |
 | Ambient Mode | `AmbientMode` | `content/features/player/ambient-mode/ambient-mode.js` | `ambientMode` | watch | stable | — | Projects video colors as a glowing backdrop behind the player |
 | Audio Mode | `AudioMode` | `content/features/player/ambient-mode/audio-mode.js` | `audioModeEnabled` | watch | stable | — | Minimises video to audio-only mode with album-art style display |
 | Video Controls | `VideoControls` | `content/features/player/video-controls/video-controls.js` | `videoControlsEnabled` | watch | stable | Player | Injects custom buttons (snapshot, loop, PiP) into player controls bar |
@@ -97,7 +97,7 @@
 |---|---|---|---|---|---|---|---|
 | Subscription Folders | `SubscriptionFolders` | `content/features/pages/subscriptions/subscription-folders.js` | `subscriptionFolders` | subscriptions | stable | FolderStorage, FolderUI | Orchestrator that groups subscribed channels into user-defined folders |
 | Subscription Manager | `SubscriptionManager` | `content/features/pages/subscriptions/subscription-manager.js` | `null` | subscriptions | stable | — | Bulk subscription management — sort, filter, unsubscribe |
-| Subscriptions UI | `SubscriptionUI` | `content/features/pages/subscriptions/subscriptions-ui.js` | `null` | subscriptions | stable | SubscriptionFolders | UI components for the subscription folder system and modals |
+| Subscriptions UI | `SubscriptionUI` | `content/features/pages/subscriptions/subscriptions-ui/subscriptions-ui.js` | `null` | subscriptions | stable | SubscriptionFolders | UI components for the subscription folder system and modals |
 | Folder Storage | `FolderStorage` | `content/features/pages/subscriptions/folder-storage.js` | `null` | subscriptions | stable | — | Infrastructure for managing folder structure in extension storage |
 | Folder UI | `FolderUI` | `content/features/pages/subscriptions/folder-ui.js` | `null` | subscriptions | stable | — | Generates sidebar links, chips, and drag-and-drop context UI |
 | Context Menu | `ContextMenu` | `content/features/pages/subscriptions/context-menu.js` | `null` | all | stable | — | Injects quick Add to Group button on channel name metadata blocks |
@@ -109,7 +109,7 @@
 
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
-| Account Menu | `AccountMenu` | `content/features/core/global/account-menu.js` | `enableAccountMenu` | all | stable | — | Redesigns the profile dropdown with disk account switcher and sign-out confirmation |
+| Account Menu | `AccountMenu` | `content/features/core/global/account-menu/index.js` | `enableAccountMenu` | all | stable | — | Redesigns the profile dropdown with disk account switcher and sign-out confirmation |
 | Theme | `Theme` | `content/features/core/global/theme.js` | `premiumTheme` | all | stable | — | Applies the active CSS theme and CSS variable overrides to YouTube |
 | Content Control | `ContentControl` | `content/features/core/global/content-control.js` | `null` | all | stable | — | Master toggle system for hiding comments, merch, live chat, end screens |
 | Night Mode | `NightModeManager` | `content/features/core/global/night-mode.js` | `blueLight` | all | stable | — | Blue light filter and dim overlay with adjustable intensity sliders |
