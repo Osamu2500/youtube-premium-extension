@@ -42,7 +42,7 @@ import './features/pages/subscriptions/folder-ui.js';
 import './features/pages/subscriptions/context-menu.js';
 import './features/pages/subscriptions/subscription-folders.js';
 import './features/pages/subscriptions/subscription-manager.js';
-import './features/pages/subscriptions/subscriptions-ui.js';
+import './features/pages/subscriptions/subscriptions-ui/subscriptions-ui.js';
 import './features/pages/subscriptions/index.js';
 
 // Search features
