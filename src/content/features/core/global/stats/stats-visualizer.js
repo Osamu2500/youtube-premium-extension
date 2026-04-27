@@ -206,8 +206,7 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer {
             if (this.overlay) this.overlay.style.cursor = '';
         });
 
-        const player = document.getElementById('movie_player') || document.body;
-        player.appendChild(el);
+        document.body.appendChild(el);
         this.overlay = el;
     }
 

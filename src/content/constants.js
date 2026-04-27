@@ -279,6 +279,12 @@ window.YPP.CONSTANTS = {
         // Study Mode
         studyMode: false,
 
+        // Stats Visualizer
+        enableStatsForNerds: false,
+
+        // Subscription Organizer (Legacy — superseded by subscriptionFolders)
+        enableSubsManager: false,
+
         // Watch Time Alert
         watchTimeAlert: false,
         watchTimeAlertHours: 2,

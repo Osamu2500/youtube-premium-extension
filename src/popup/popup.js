@@ -372,6 +372,8 @@ document.addEventListener('DOMContentLoaded', () => {
                      // Special handling for column counts (value is just number)
                      if (key.includes('Columns')) {
                          display.textContent = slider.value;
+                     } else if (key === 'watchTimeAlertHours') {
+                         display.textContent = slider.value + 'h';
                      } else {
                          display.textContent = slider.value + '%';
                      }
@@ -713,8 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dates.push(d.toISOString().split('T')[0]);
         }
 
-        const keys = dates.map(date => `ypp_history_${date}`);
-        const todayKey = `ypp_history_${today.toISOString().split('T')[0]}`;
+        const keys = dates.map(date => `ypp_analytics_${date}`);
+        const todayKey = `ypp_analytics_${today.toISOString().split('T')[0]}`;
 
         chrome.storage.local.get([...keys, todayKey], (result) => {
              // Upd Today
@@ -732,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
              // Render Heatmap
              heatmapContainer.innerHTML = '';
              dates.forEach(date => {
-                 const dayData = result[`ypp_history_${date}`];
+                 const dayData = result[`ypp_analytics_${date}`];
                  let seconds = 0;
                  if (typeof dayData === 'number') seconds = dayData;
                  else if (dayData && dayData.totalSeconds) seconds = dayData.totalSeconds;
@@ -782,13 +784,13 @@ document.addEventListener('DOMContentLoaded', () => {
              const d = new Date(year, month, i);
              // handle timezone offset issue by manually formatting
              const dayString = `${year}-${String(month + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-             dateKeys.push(`ypp_history_${dayString}`);
+             dateKeys.push(`ypp_analytics_${dayString}`);
         }
 
         chrome.storage.local.get(dateKeys, (result) => {
              for (let i = 1; i <= daysInMonth; i++) {
                  const dayString = `${year}-${String(month + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                 const data = result[`ypp_history_${dayString}`];
+                 const data = result[`ypp_analytics_${dayString}`];
                  
                  const cell = document.createElement('div');
                  cell.className = 'calendar-day';

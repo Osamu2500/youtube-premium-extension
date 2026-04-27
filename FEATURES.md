@@ -216,6 +216,8 @@ Every key in `DEFAULT_SETTINGS` mapped to which feature uses it:
 | `videoControlsEnabled` | Video Controls | boolean | `true` |
 | `subscriptionFolders` | Subscription Folders | boolean | `true` |
 | `studyMode` | Study Mode | boolean | `false` |
+| `enableStatsForNerds` | Stats Visualizer | boolean | `false` |
+| `enableSubsManager` | Subscriptions Organizer (Legacy) | boolean | `false` |
 | `keyboardShortcuts` | Keyboard Shortcuts | boolean | `true` |
 | `shortcut_zenMode` | Keyboard Shortcuts | string | `'Shift+Z'` |
 | `shortcut_focusMode` | Keyboard Shortcuts | string | `'Shift+F'` |
