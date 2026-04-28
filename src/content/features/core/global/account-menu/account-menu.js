@@ -159,8 +159,19 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
         Array.from(menu.children).forEach(child => {
             if (!child.classList.contains('ypp-account-menu')) {
-                child.style.display = 'none';
+                // Hide visually but keep in DOM for IntersectionObserver lazy loading
+                child.style.position = 'absolute';
+                child.style.opacity = '0';
+                child.style.pointerEvents = 'none';
+                child.style.zIndex = '-1';
             }
+        });
+
+        // Force all native items to overlap at the top so they all trigger IntersectionObserver
+        menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach(item => {
+            item.style.setProperty('position', 'absolute', 'important');
+            item.style.setProperty('top', '0', 'important');
+            item.style.setProperty('left', '0', 'important');
         });
 
         const panel = document.createElement('div');
@@ -333,7 +344,16 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             Array.from(el.children).forEach(child => {
                 if (!child.classList.contains('ypp-account-menu')) {
                     child.style.display = '';
+                    child.style.position = '';
+                    child.style.opacity = '';
+                    child.style.pointerEvents = '';
+                    child.style.zIndex = '';
                 }
+            });
+            el.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach(item => {
+                item.style.position = '';
+                item.style.top = '';
+                item.style.left = '';
             });
             delete el.dataset.yppRedesigned;
             el.querySelector('.ypp-account-menu')?.remove();
