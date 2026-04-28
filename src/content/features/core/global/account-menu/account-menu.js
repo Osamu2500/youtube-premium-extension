@@ -85,6 +85,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         if (this._pollTimer) return;
         let attempts = 0;
         const MAX_ATTEMPTS = 80; // 80 × 50ms = 4s max wait
+        let clickedSwitch = false;
 
         const tick = () => {
             attempts++;
@@ -92,6 +93,22 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             if (!menu.isConnected || attempts > MAX_ATTEMPTS) {
                 this._clearPollTimer();
                 return;
+            }
+
+            if (!clickedSwitch) {
+                clickedSwitch = true;
+                const switchBtn = Array.from(menu.querySelectorAll('ytd-compact-link-renderer, ytd-menu-navigation-item-renderer, tp-yt-paper-item')).find(el => {
+                    const text = el.textContent || '';
+                    return /(switch account|cambiar de|切り替える|wechseln|changer de|trocar de|cambia account|zmień konto|byta konto|skift konto|vaihda tili|mudar de|chuyển đổi|ganti akun|сменить аккаунт|змінити обліковий|تبديل الحساب|खाता बदलें)/i.test(text);
+                });
+                
+                const currentAccounts = menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').length;
+                if (switchBtn && currentAccounts === 0) {
+                    switchBtn.click();
+                    this._waitingForAccounts = true;
+                } else {
+                    this._waitingForAccounts = false;
+                }
             }
 
             const data = window.YPP.features.AccountMenuData.extractData(menu);
@@ -102,9 +119,15 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 return;
             }
 
-            const nativeCount = menu.querySelectorAll('ytd-account-item-renderer').length;
+            const nativeCount = menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').length;
             const parsedOtherCount = data.accounts.filter(a => !a.isActive).length;
-            if (nativeCount > 0 && parsedOtherCount === 0 && attempts < 12) {
+
+            if (this._waitingForAccounts && nativeCount === 0 && attempts < 40) {
+                this._pollTimer = setTimeout(tick, 50);
+                return;
+            }
+
+            if (nativeCount > 0 && parsedOtherCount === 0 && attempts < 40) {
                 this._pollTimer = setTimeout(tick, 50);
                 return;
             }

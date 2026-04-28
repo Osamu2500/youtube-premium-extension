@@ -108,13 +108,14 @@ window.YPP.features.AccountMenuData = class AccountMenuData {
             '/';
 
         // ── Switchable accounts ───────────────────────────────────────────────
-        menu.querySelectorAll('ytd-account-item-renderer').forEach((item, nativeIndex) => {
+        menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach((item, nativeIndex) => {
             const nameEl = item.querySelector(
                 '#account-name yt-formatted-string,' +
                 '#account-name span,' +
                 '#account-name,' +
                 '#channel-title yt-formatted-string,' +
-                '#channel-title'
+                '#channel-title,' +
+                '#name'
             );
             const name = nameEl?.textContent?.trim() || '';
             if (!name) return;

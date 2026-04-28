@@ -2996,17 +2996,16 @@ ytd-menu-renderer ytd-button-renderer:hover {
   margin-right: 8px;
   gap: 4px;
   padding: 2px 6px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top-color: rgba(255, 255, 255, 0.1);
+  background: transparent !important;
+  border: none !important;
   border-radius: 32px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   box-shadow: none;
   transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 .ypp-player-controls:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: transparent !important;
   box-shadow: none;
 }
 
@@ -3070,13 +3069,12 @@ ytd-menu-renderer ytd-button-renderer:hover {
 .ypp-speed-controls {
   display: flex;
   gap: 2px;
-  background: transparent;
+  background: transparent !important;
   padding: 3px 4px;
   border-radius: 20px;
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
   box-shadow: none;
   margin-left: 4px;
   transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.25s ease;
@@ -4978,12 +4976,12 @@ body.yt-premium-plus-theme .ytp-chrome-bottom {
 
   /* completely transparent and blurry no primary colors like black or white but clear transparent blur */
   background: transparent !important;
-  backdrop-filter: blur(40px) saturate(120%) brightness(1.1) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(120%) brightness(1.1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 
   /* Layered border: very subtle border for structure without adding strong colors */
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  border-top: none !important;
 
   /* Depth shadows removed to enhance transparency */
   box-shadow: none !important;
@@ -5001,8 +4999,14 @@ body.yt-premium-plus-theme .ytp-chrome-bottom {
 
 body.yt-premium-plus-theme .ytp-chrome-bottom:hover {
   transform: translateY(-3px) !important;
-  background: rgba(255, 255, 255, 0.02) !important;
+  background: transparent !important;
   box-shadow: none !important;
+}
+
+/* Remove default gradients to ensure pure transparency */
+body.yt-premium-plus-theme .ytp-gradient-bottom,
+body.yt-premium-plus-theme .ytp-gradient-top {
+  display: none !important;
 }
 
 
