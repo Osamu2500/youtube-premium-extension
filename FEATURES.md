@@ -28,9 +28,9 @@
 | Volume Booster | `VolumeBooster` | `content/features/player/volume-booster/index.js` | `enableVolumeBoost` | watch | stable | Player | Increases audio gain past 100% using Web Audio API |
 | Auto Quality | `AutoQuality` | `content/features/player/auto-quality.js` | `autoQuality`, `autoCinema` | watch | stable | — | Forces highest video quality and theater mode |
 | Time Display | `TimeDisplay` | `content/features/player/time-display.js` | `enableRemainingTime` | watch | stable | — | Shows remaining time and saved time adjusted for speed |
-| Player Tools | `PlayerTools` | `content/features/player/player-tools.js` | `videoControlsEnabled` | watch | stable | Player | Custom speed slider, cinema filters panel, brightness/contrast controls |
-| Return Dislike | `ReturnDislike` | `content/features/player/return-dislike.js` | `null` | watch | stable | — | Fetches and displays dislike count via Return YouTube Dislike API |
-| SponsorBlock | `SponsorBlock` | `content/features/player/sponsor-block.js` | `null` | watch | stable | — | Skips sponsored segments using SponsorBlock community database |
+| Player Tools | `PlayerTools` | `content/features/player/player-tools.js` | `enableCustomSpeed` | watch | stable | Player | Custom speed slider, cinema filters panel, brightness/contrast controls |
+| Return Dislike | `ReturnDislike` | `content/features/player/return-dislike.js` | `returnYouTubeDislike` | watch | stable | — | Fetches and displays dislike count via Return YouTube Dislike API |
+| SponsorBlock | `SponsorBlock` | `content/features/player/sponsor-block.js` | `sponsorBlock` | watch | stable | — | Skips sponsored segments using SponsorBlock community database |
 | Mini Player | `MiniPlayer` | `content/features/player/mini-player.js` | `enablePiP` | watch | stable | — | Picture-in-picture and mini player controls |
 | Video Filters | `VideoFilters` | `content/features/player/video-filters/index.js` | `enableCinemaFilters` | watch | stable | — | Brightness, contrast, saturation, hue CSS filters on the video element |
 | Ambient Mode | `AmbientMode` | `content/features/player/ambient-mode/ambient-mode.js` | `ambientMode` | watch | stable | — | Projects video colors as a glowing backdrop behind the player |
@@ -74,7 +74,7 @@
 | Focus Mode | `FocusMode` | `content/features/pages/watch/focus-mode.js` | `enableFocusMode` | watch | stable | — | Removes comments, sidebar, merch, and end screens for distraction-free viewing |
 | Study Mode | `StudyMode` | `content/features/pages/watch/study-mode.js` | `studyMode` | watch | stable | — | Forces 1.25x speed, enables focus mode, adds study-optimised layout |
 | Watch History | `WatchHistoryTracker` | `content/features/pages/watch/watch-history.js` | `null` | watch | stable | — | Tracks videos watched in current session for continue-watching feature |
-| Continue Watching | `ContinueWatching` | `content/features/pages/watch/continue-watching.js` | `null` | home | stable | WatchHistoryTracker | Shows a "Continue Watching" row on the home page for unfinished videos |
+| Continue Watching | `ContinueWatching` | `content/features/pages/watch/continue-watching.js` | `continueWatching` | home | stable | WatchHistoryTracker | Shows a "Continue Watching" row on the home page for unfinished videos |
 | Comment Filter | `CommentFilter` | `content/features/pages/watch/comment-filter.js` | `null` | watch | stable | — | Autodetects and fades out suspicious spam comments using regex patterns |
 
 ---
@@ -84,10 +84,10 @@
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
 | History Tracker | `HistoryTracker` | `content/features/pages/library/history/history-tracker.js` | `null` | history | stable | — | Enhanced watch history with extended metadata and session grouping |
-| History Redesign | `HistoryRedesign` | `content/features/pages/library/history/history-redesign.js` | `null` | history | stable | — | Visual redesign of the history page with grid layout and better filtering |
+| History Redesign | `HistoryRedesign` | `content/features/pages/library/history/history-redesign.js` | `historyRedesign` | history | stable | — | Visual redesign of the history page with grid layout and better filtering |
 | Playlist Redesign | `PlaylistRedesign` | `content/features/pages/library/playlist/playlist-redesign.js` | `null` | playlist | stable | — | Improves playlist page layout with better spacing and controls |
 | Playlist Duration | `PlaylistDuration` | `content/features/pages/library/playlist/duration-calculator.js` | `null` | playlist | stable | — | Calculates and displays total playlist duration and time at current speed |
-| Reverse Playlist | `ReversePlaylist` | `content/features/pages/library/playlist/reverse-playlist.js` | `null` | playlist | stable | — | Adds a button to play a playlist in reverse order |
+| Reverse Playlist | `ReversePlaylist` | `content/features/pages/library/playlist/reverse-playlist.js` | `reversePlaylist` | playlist | stable | — | Adds a button to play a playlist in reverse order |
 
 ---
 
@@ -116,7 +116,7 @@
 | Data API | `DataAPI` | `content/features/core/global/data-api.js` | `null` | all | stable | — | Bridges page context to extension context for accessing YouTube player APIs |
 | Mark Watched | `MarkWatched` | `content/features/core/global/mark-watched.js` | `enableMarkWatched` | all | stable | — | Right-click context menu to mark/unmark watched; checkmark badge on thumbnails; persists across sessions via chrome.storage.local; tracks video progress from watch page |
 | Keyboard Shortcuts | `KeyboardShortcuts` | `content/features/core/global/keyboard-shortcuts.js` | `keyboardShortcuts` | all | stable | — | Custom hotkeys for zen mode, focus mode, snapshot, speed, PiP, ambient mode |
-| Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `null` | all | stable | HistoryTracker | Displays watch time analytics and stats panel |
+| Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `statsVisualizer` | all | stable | HistoryTracker | Displays watch time analytics and stats panel |
 | Hide Watched | `HideWatched` | `content/features/core/global/hide-watched.js` | `hideWatched` | all | stable | MarkWatched | Reads watched IDs from MarkWatched; dims or hides watched videos; respects `hideWatchedMode` and `hideWatchedThreshold`; re-runs on every DOM update |
 
 ---
