@@ -76,46 +76,11 @@
         <section id="tab-dashboard" class="tab-content active">
           <div class="settings-section">
             <div class="section-header">
-               <div class="section-title">Quick Presets</div>
-               <div class="section-subtitle">Instantly configure your environment</div>
-            </div>
-            <div class="preset-grid" style="margin-bottom: 20px;">
-              <div class="preset-card">
-                <div class="preset-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
-                <div class="preset-name">Focus Mode</div>
-                <div class="preset-desc">Minimal player & comments</div>
-                <button id="presetFocus" class="action-btn">Apply</button>
-              </div>
-              <div class="preset-card">
-                <div class="preset-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-                <div class="preset-name">Research</div>
-                <div class="preset-desc">Grid search & comments</div>
-                <button id="presetResearch" class="action-btn">Apply</button>
-              </div>
-              <div class="preset-card">
-                <div class="preset-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 3v18"/></svg></div>
-                <div class="preset-name">Minimal</div>
-                <div class="preset-desc">Hide headers & sidebars</div>
-                <button id="presetMinimal" class="action-btn">Apply</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <div class="section-header">
                <div class="section-title">Quick Toggles</div>
                <div class="section-subtitle">Most frequently used switches</div>
             </div>
             <div class="card-group">
               <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Ambient Mode</span><span class="desc">Ambilight effect behind player</span></div>
-                  <label class="toggle"><input type="checkbox" id="ambientMode" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Audio Mode</span><span class="desc">Listen only, hide video</span></div>
-                  <label class="toggle"><input type="checkbox" id="audioModeEnabled" /><span class="slider"></span></label>
-                </div>
                 <div class="toggle-card">
                   <div class="info"><span class="name">Hide Shorts</span><span class="desc">Remove Shorts entirely</span></div>
                   <label class="toggle"><input type="checkbox" id="hideShorts" /><span class="slider"></span></label>
@@ -124,6 +89,137 @@
                   <div class="info"><span class="name">SponsorBlock</span><span class="desc">Skip sponsored segments</span></div>
                   <label class="toggle"><input type="checkbox" id="sponsorBlock" /><span class="slider"></span></label>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODES SECTION -->
+          <div class="settings-section">
+            <div class="section-header">
+               <div class="section-title">Modes</div>
+               <div class="section-subtitle">Activate a viewing or focus mode</div>
+            </div>
+            <div class="modes-grid">
+              <div class="mode-card" id="modeCard-zenMode">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><path d="M8 12a4 4 0 0 1 4-4"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Zen Mode</span>
+                  <span class="mode-desc">Dim everything but video</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="zenMode" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card" id="modeCard-cinemaMode">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M17 2l5 5M7 2L2 7"/><circle cx="12" cy="14" r="3"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Cinema Mode</span>
+                  <span class="mode-desc">Theater-like viewing</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="cinemaMode" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card" id="modeCard-studyMode">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Study Mode</span>
+                  <span class="mode-desc">Focus + 1.25x Speed</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="studyMode" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card" id="modeCard-enableFocusMode">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Master Focus Mode</span>
+                  <span class="mode-desc">Hide all distractions</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="enableFocusMode" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card" id="modeCard-minimalMode">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Minimal Mode</span>
+                  <span class="mode-desc">Strip non-essentials</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="minimalMode" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card" id="modeCard-ambientMode">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Ambient Mode</span>
+                  <span class="mode-desc">Ambilight effect behind player</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="ambientMode" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card" id="modeCard-audioModeEnabled">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Audio Mode</span>
+                  <span class="mode-desc">Listen only, hide video</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="audioModeEnabled" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="mode-card mode-card--preset" id="modeCard-presetFocus">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Focus Preset</span>
+                  <span class="mode-desc">Minimal player &amp; comments</span>
+                </div>
+                <button id="presetFocus" class="action-btn" style="margin-left: auto;">Apply</button>
+              </div>
+              <div class="mode-card mode-card--preset" id="modeCard-presetResearch">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Research Preset</span>
+                  <span class="mode-desc">Grid search &amp; comments</span>
+                </div>
+                <button id="presetResearch" class="action-btn" style="margin-left: auto;">Apply</button>
+              </div>
+              <div class="mode-card mode-card--preset" id="modeCard-presetMinimal">
+                <div class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6"/></svg>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-name">Minimal Preset</span>
+                  <span class="mode-desc">Hide headers &amp; sidebars</span>
+                </div>
+                <button id="presetMinimal" class="action-btn" style="margin-left: auto;">Apply</button>
               </div>
             </div>
           </div>
@@ -237,28 +333,6 @@
                   <div class="info"><span class="name">Playback Speed</span><span class="desc">Custom speed steps</span></div>
                   <label class="toggle"><input type="checkbox" id="enableCustomSpeed" /><span class="slider"></span></label>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title">Viewing Modes</div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Zen Mode</span><span class="desc">Dim everything but video</span></div>
-                  <label class="toggle"><input type="checkbox" id="zenMode" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Cinema Mode</span><span class="desc">Theater-like viewing</span></div>
-                  <label class="toggle"><input type="checkbox" id="cinemaMode" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Study Mode</span><span class="desc">Focus + 1.25x Speed</span></div>
-                  <label class="toggle"><input type="checkbox" id="studyMode" /><span class="slider"></span></label>
-                </div>
                 <div class="toggle-card">
                   <div class="info"><span class="name">Auto Cinema</span><span class="desc">Expand player on load</span></div>
                   <label class="toggle"><input type="checkbox" id="autoCinema" /><span class="slider"></span></label>
@@ -281,14 +355,6 @@
             </div>
             <div class="card-group">
               <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Master Focus Mode</span><span class="desc">Hide all distractions</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableFocusMode" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Minimal Mode</span><span class="desc">Strip non-essentials</span></div>
-                  <label class="toggle"><input type="checkbox" id="minimalMode" /><span class="slider"></span></label>
-                </div>
                 <div class="toggle-card">
                   <div class="info"><span class="name">Dopamine Detox</span><span class="desc">Aggressive hide feeds</span></div>
                   <label class="toggle"><input type="checkbox" id="dopamineDetox" /><span class="slider"></span></label>

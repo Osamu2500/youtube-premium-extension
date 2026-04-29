@@ -617,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('change', () => {
                 saveSettings(); // Triggers debounced save
                 updateDependencyUI();
+                if (typeof syncModeCards === 'function') syncModeCards();
             });
             // For color picker, also listen to input for real-time responsiveness if needed
             if (el.type === 'color') {
@@ -1108,8 +1109,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- MODE CARD ACTIVE STATE SYNC ---
+    const modeCardIds = [
+        'zenMode', 'cinemaMode', 'studyMode', 'enableFocusMode',
+        'minimalMode', 'ambientMode', 'audioModeEnabled'
+    ];
+
+    const syncModeCards = () => {
+        modeCardIds.forEach(id => {
+            const checkbox = document.getElementById(id);
+            const card = document.getElementById('modeCard-' + id);
+            if (checkbox && card) {
+                card.classList.toggle('mode-active', checkbox.checked);
+            }
+        });
+    };
+
+    // Wire change listeners on each mode checkbox to also update card styling
+    modeCardIds.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', syncModeCards);
+        }
+    });
+
+
+    // --- PRESET ACTIONS ---
+    const applyPresetFromUI = (updates) => {
+        Object.keys(updates).forEach(key => {
+            const el = document.getElementById(key);
+            if (el && el.type === 'checkbox') {
+                el.checked = updates[key];
+                el.dispatchEvent(new Event('change'));
+            }
+        });
+        saveSettings();
+    };
+
+    document.getElementById('presetFocus')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyPresetFromUI({ enableFocusMode: true, hideComments: true, minimalMode: false, cinemaMode: false, zenMode: false });
+    });
+    
+    document.getElementById('presetResearch')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyPresetFromUI({ enableFocusMode: false, searchGrid: true, hideComments: false, minimalMode: false, cinemaMode: false, zenMode: false });
+    });
+    
+    document.getElementById('presetMinimal')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyPresetFromUI({ minimalMode: true, enableFocusMode: false, cinemaMode: false, zenMode: false });
+    });
+
     // Initialize
     loadSettings();
+    // Sync cards after a short microtask delay to allow storage callback to fill values
+    setTimeout(syncModeCards, 120);
     initHistoryWidget(); // Initialize history widget on load
     initBackupTools();
 });

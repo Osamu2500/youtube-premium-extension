@@ -302,13 +302,14 @@ window.YPP.CONSTANTS = {
         shortcut_zenMode:     'Shift+Z',
         shortcut_focusMode:   'Shift+F',
         shortcut_cinemaMode:  'Shift+C',
+        shortcut_minimalMode: 'Shift+M',
         shortcut_snapshot:    'Shift+S',
         shortcut_loop:        'Shift+L',
         shortcut_pip:         'Shift+P',
         shortcut_speedDown:   'Shift+,',
         shortcut_speedUp:     'Shift+.',
         shortcut_speedReset:  'Shift+R',
-        shortcut_ambientMode: 'Shift+M'
+        shortcut_ambientMode: 'Shift+A'
     },
 
 
@@ -437,6 +438,7 @@ window.YPP.CONSTANTS = {
         zenMode: 'ZenMode',
         studyMode: 'StudyMode',
         focusMode: 'FocusMode',
+        modesManager: 'ModesManager',
         player: 'Player',
         contentControl: 'ContentControl',
         accountMenu: 'AccountMenu',
