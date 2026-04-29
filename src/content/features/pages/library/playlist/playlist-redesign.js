@@ -20,6 +20,8 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
         this.RETRY_DELAY     = 800;
     }
 
+    getConfigKey() { return 'playlistRedesign'; }
+
     // ─── Feature lifecycle ───────────────────────────────────────────────────
 
     run(settings) {
@@ -281,7 +283,13 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
 
         const videoRows = videos.map((v, i) => this._renderVideoRow(v, i)).join('');
 
+        const bgHTML = coverUrl
+            ? `<div class="ypp-pl-ambient-bg" style="background-image: url('${this._esc(coverUrl)}')"></div>
+               <div class="ypp-pl-ambient-overlay"></div>`
+            : '';
+
         return `
+        ${bgHTML}
         <div class="ypp-pl-layout">
 
           <!-- ── Sidebar ── -->

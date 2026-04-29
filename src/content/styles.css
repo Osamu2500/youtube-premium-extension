@@ -5823,6 +5823,26 @@ ytd-popup-container ytd-multi-page-menu-renderer {
     pointer-events: none !important;
 }
 
+/* ── Ambient Background ─────────────────────────────────────── */
+.ypp-pl-ambient-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(120px) saturate(1.8);
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    transform: scale(1.2);
+}
+.ypp-pl-ambient-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(15,15,20,0.4) 0%, rgba(10,10,12,0.95) 80%);
+    z-index: 0;
+    pointer-events: none;
+}
+
 /* ── Root container ─────────────────────────────────────────── */
 #ypp-pl-root {
     position: relative;
@@ -5830,7 +5850,7 @@ ytd-popup-container ytd-multi-page-menu-renderer {
     width: 100%;
     min-height: 100vh;
     box-sizing: border-box;
-    padding: 80px 24px 48px;          /* 80px top clears the masthead */
+    padding: 80px 24px 48px;
     font-family: 'Roboto', 'Inter', Arial, sans-serif;
     background: transparent;
 }
@@ -5838,32 +5858,35 @@ ytd-popup-container ytd-multi-page-menu-renderer {
 /* ── Two-column layout ───────────────────────────────────────── */
 .ypp-pl-layout {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 28px;
-    max-width: 1400px;
+    grid-template-columns: 340px 1fr;
+    gap: 32px;
+    max-width: 1500px;
     margin: 0 auto;
     align-items: start;
+    position: relative;
+    z-index: 2;
 }
 
 @media (max-width: 900px) {
-    .ypp-pl-layout { grid-template-columns: 1fr; }
+    .ypp-pl-layout { grid-template-columns: 1fr; gap: 24px; }
     #ypp-pl-root { padding: 80px 12px 48px; }
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
 .ypp-pl-sidebar {
     position: sticky;
-    top: 76px;                         /* Below fixed masthead */
+    top: 90px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    background: rgba(18, 18, 18, 0.7);
-    backdrop-filter: blur(32px) saturate(1.4);
-    -webkit-backdrop-filter: blur(32px) saturate(1.4);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
+    gap: 24px;
+    background: linear-gradient(180deg, rgba(30, 30, 35, 0.4) 0%, rgba(15, 15, 18, 0.6) 100%);
+    backdrop-filter: blur(40px) saturate(1.8);
+    -webkit-backdrop-filter: blur(40px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
     padding: 24px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* ── Cover image ─────────────────────────────────────────────── */
@@ -6080,22 +6103,25 @@ ytd-popup-container ytd-multi-page-menu-renderer {
     display: grid;
     grid-template-columns: 36px 160px 1fr 36px;
     align-items: center;
-    gap: 14px;
-    padding: 10px 14px 10px 10px;
-    border-radius: 12px;
-    border: 1px solid transparent;
+    gap: 16px;
+    padding: 12px 16px 12px 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
     text-decoration: none;
     color: inherit;
     cursor: pointer;
-    transition: background 0.18s ease,
-                border-color 0.18s ease,
-                transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
-    background: rgba(255,255,255,0.02);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 .ypp-pl-v-row:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(4px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(6px) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 2;
 }
 .ypp-pl-v-row:focus-visible {
     outline: 2px solid #3ea6ff;
