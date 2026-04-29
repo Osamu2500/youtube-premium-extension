@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'cleanSearch',
         'hideSearchShelves',
         'hideChannelCards',
+        'autoVideoFilter', // Missing
         
         // Player
         'autoQuality',
@@ -105,10 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'enableCustomSpeed',
         'enableGlobalPlayerBar',
         'enablePiP', // Button / Scroll PiP
+        'miniPlayer', // Missing
         'enableLoop',
         'enableSnapshot',
         'enableRemainingTime',
         'enableStatsForNerds',
+        'enableTranscript', // Missing
 
         // Visuals
         'enableCinemaFilters', // Unified: presets + sliders
@@ -120,12 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'autoPiP',
         'hoverSidebar',
         'studyMode',
+        'cinemaMode', // Missing
+        'minimalMode', // Missing
         'ambientMode',
         'audioModeEnabled',
         'videoControlsEnabled',
 
         // Distractions
         'enableFocusMode',
+        'dopamineDetox', // Missing
         'hideComments',
         'commentFilter', // comment-filter.js
         'hideLiveChat',

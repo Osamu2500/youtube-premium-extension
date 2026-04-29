@@ -193,7 +193,7 @@ window.YPP.CONSTANTS = {
         hideSearchShorts: true,
         hideMixes: false,
         hideWatched: false,
-        hideWatchedMode: 'dim',
+        hideWatchedMode: 'dim',           // 'dim' | 'hide'
         hideWatchedThreshold: 80,
         enableMarkWatched: true,
         hideMerch: false,
@@ -202,6 +202,10 @@ window.YPP.CONSTANTS = {
         hideFundraiser: false,
         hideEndScreens: false,
         hookFreeHome: false,
+        // Search visibility
+        hideSearchShelves: true,
+        hideChannelCards: false,
+        autoVideoFilter: true,
 
         // Player
         autoCinema: false,
@@ -211,6 +215,9 @@ window.YPP.CONSTANTS = {
         enableLoop: true,
         enableRemainingTime: true,
         enableVolumeBoost: true,
+        volumeLevel: 1,
+        volumeBoostBass: 0,
+        volumeBoostTreble: 0,
 
         // Search Redesign
         searchGrid: true,
@@ -282,7 +289,7 @@ window.YPP.CONSTANTS = {
         // Stats Visualizer
         enableStatsForNerds: false,
 
-        // Subscription Organizer (Legacy — superseded by subscriptionFolders)
+        // Subscription Organizer (legacy — superseded by subscriptionFolders)
         enableSubsManager: false,
 
         // Watch Time Alert

@@ -171,9 +171,8 @@ window.YPP.features.Player = class Player {
             btn.className = 'ypp-speed-btn';
             btn.textContent = rate + 'x';
             btn.dataset.speed = rate;
-            if (video.playbackRate == rate) btn.classList.add('active');
+            if (video.playbackRate === parseFloat(rate)) btn.classList.add('active');
             btn.addEventListener('click', (e) => {
-                e.stopPropagation();
                 video.playbackRate = parseFloat(rate);
                 this.updateSpeedButtons(container, rate);
             });

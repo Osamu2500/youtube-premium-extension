@@ -1,9 +1,10 @@
 // Core dependencies
 import './constants.js';
 import './settings-schema.js';
+import './error-handler.js';
+import './element-cache.js';
 import './utils.js';
 
-// Core architecture
 import './core/event-bus.js';
 import './core/dom-api.js';
 import './core/dom-observer.js';

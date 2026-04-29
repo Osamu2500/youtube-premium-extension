@@ -202,7 +202,8 @@
             }
 
             // Initialize and start the global shared DOMObserver
-            window.YPP.sharedObserver = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
+            // NOTE: The class lives at window.YPP.core.DOMObserver, not window.YPP.Utils.DOMObserver
+            window.YPP.sharedObserver = window.YPP.sharedObserver || new window.YPP.core.DOMObserver();
             window.YPP.sharedObserver.start();
 
             this.featureManager = new window.YPP.FeatureManager();
@@ -433,8 +434,10 @@
                 }
                 
                 // Compute new context
+                // NOTE: isHome intentionally excludes /feed/subscriptions to avoid
+                // overlapping with isSubscriptions and setting contradictory CSS classes.
                 const newContext = {
-                    isHome: pathname === '/' || pathname === '/index' || pathname === '/feed/subscriptions',
+                    isHome: pathname === '/' || pathname === '/index',
                     isWatch: pathname.startsWith('/watch'),
                     isSearch: pathname.startsWith('/results'),
                     isChannel: pathname.startsWith('/@') || pathname.startsWith('/channel') || pathname.startsWith('/c/'),

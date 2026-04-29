@@ -22,9 +22,21 @@ window.YPP.core.EventBus = class EventBus {
         }
         this.listeners[event].push(handler);
 
+        // Notify the DOMObserver when 'dom:mutated' gets its first subscriber
+        // so it can enable the raw mutation emit path (which is otherwise suppressed
+        // for performance when nothing is listening).
+        if (event === 'dom:mutated') {
+            window.YPP?.sharedObserver?.setHasMutatedListeners(true);
+        }
+
         // Return unsubscribe mechanism
         return () => {
             this.listeners[event] = this.listeners[event].filter(h => h !== handler);
+            // Update listener flag when the last 'dom:mutated' subscriber unsubscribes
+            if (event === 'dom:mutated') {
+                const remaining = (this.listeners[event] || []).length;
+                window.YPP?.sharedObserver?.setHasMutatedListeners(remaining > 0);
+            }
         };
     }
 

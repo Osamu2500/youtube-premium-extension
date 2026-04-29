@@ -5,10 +5,13 @@
 
 const ALARM_NAME = 'ypp-focus-timer';
 
+
 /**
- * Default settings for the extension
- * @constant
- * @type {Object}
+ * IMPORTANT: This DEFAULT_SETTINGS object is intentionally duplicated from
+ * src/content/constants.js because the service worker cannot import content
+ * scripts at runtime (different execution contexts in MV3).
+ *
+ * When adding or renaming settings, update BOTH this object AND constants.js.
  */
 const DEFAULT_SETTINGS = {
     // Theme
@@ -193,7 +196,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         case 'startTimer':
         case 'stopTimer':
-        case 'resetTimer':
+        case 'resetTimer': {
             const timerAction = action === 'startTimer' ? startTimer() : stopTimer();
             
             timerAction
@@ -203,13 +206,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     sendResponse({ success: false });
                 });
             return true; // Indicate async response
+        }
 
-        case 'FETCH_API':
+        case 'FETCH_API': {
+            // Security: only allow HTTP and HTTPS requests to prevent
+            // the content script from using this as a proxy to chrome-extension://,
+            // file://, or other privileged schemes.
+            let fetchUrl;
+            try {
+                fetchUrl = new URL(request.url);
+            } catch (_) {
+                sendResponse({ error: 'Invalid URL' });
+                return false;
+            }
+            if (fetchUrl.protocol !== 'https:' && fetchUrl.protocol !== 'http:') {
+                sendResponse({ error: `Disallowed URL scheme: ${fetchUrl.protocol}` });
+                return false;
+            }
             fetch(request.url, request.options)
                 .then((response) => response.json().then(data => ({ status: response.status, data })))
                 .then((result) => sendResponse(result))
                 .catch((error) => sendResponse({ error: error.message }));
             return true; // Indicate async response
+        }
 
         default:
             // Unhandled actions can be ignored or logged

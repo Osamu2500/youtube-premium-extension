@@ -181,6 +181,8 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             let observer = null;
             const startUrl = location.href; // Capture URL for early abort
 
+            let rafId = null;
+
             const cleanup = () => {
                 if (observer) {
                     observer.disconnect();
@@ -189,6 +191,10 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 if (timeoutId) {
                     clearTimeout(timeoutId);
                     timeoutId = null;
+                }
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
                 }
                 if (signal) {
                     signal.removeEventListener('abort', handleAbort);
@@ -208,12 +214,15 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             }
 
             const check = () => {
+                rafId = null;
+                if (resolved) return;
+
                 // Abort if the user navigates away before element is found
-                if (location.href !== startUrl && !selector.includes('yt-navigate-finish')) {
+                if (location.href !== startUrl) {
                     resolved = true;
                     cleanup();
                     resolve(null);
-                    return true;
+                    return;
                 }
 
                 try {
@@ -222,15 +231,19 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                         resolved = true;
                         cleanup();
                         resolve(el);
-                        return true;
+                        return;
                     }
                 } catch (e) {
                     // Ignore selector errors during wait
                 }
-                return false;
             };
 
-            observer = new MutationObserver(check);
+            const scheduleCheck = () => {
+                if (rafId) return;
+                rafId = requestAnimationFrame(check);
+            };
+
+            observer = new MutationObserver(scheduleCheck);
             observer.observe(document.documentElement, { childList: true, subtree: true });
 
             if (timeout > 0) {
@@ -260,8 +273,9 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         }
 
         return new Promise((resolve) => {
-            const startUrl = location.href; // Capture URL for early abort
+            const startUrl = location.href;
             let observer = null;
+            let rafId = null;
 
             const checkElements = () => {
                 // Abort if the user navigates away before elements are found
@@ -281,11 +295,22 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 });
 
                 if (remaining === 0) {
+                    if (observer) observer.disconnect();
                     resolve(results);
                 }
             };
 
-            observer = new MutationObserver(checkElements);
+            // Coalesce rapid mutations into one check per animation frame
+            // to avoid iterating all selectors on every single DOM mutation.
+            const scheduleCheck = () => {
+                if (rafId) return;
+                rafId = requestAnimationFrame(() => {
+                    rafId = null;
+                    checkElements();
+                });
+            };
+
+            observer = new MutationObserver(scheduleCheck);
             observer.observe(document.documentElement, { childList: true, subtree: true });
 
             checkElements();
@@ -865,15 +890,14 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
-     * Check if a value is a valid CSS color
+     * Check if a value is a valid CSS color.
+     * Uses CSS.supports() which is native and avoids creating DOM elements.
      * @param {string} value - Color value to check
      * @returns {boolean}
      */
     isValidColor: (value) => {
         if (!value || typeof value !== 'string') return false;
-        const testDiv = document.createElement('div');
-        testDiv.style.color = value;
-        return testDiv.style.color !== '';
+        return CSS.supports('color', value);
     },
 
     /**
@@ -1133,12 +1157,18 @@ window.YPP.Utils.VideoSizeTracker = {
         }
         if (this._pollInterval) {
             clearInterval(this._pollInterval);
+            this._pollInterval = null; // Prevent double-clear on repeated stop() calls
         }
         if (this._boundScheduleUpdate) {
             window.removeEventListener('resize', this._boundScheduleUpdate);
+            this._boundScheduleUpdate = null;
         }
         if (this._rafId) {
             cancelAnimationFrame(this._rafId);
+            this._rafId = null;
         }
+        // Release element references to aid garbage collection
+        this._videoEl = null;
+        this._playerNode = null;
     }
 };

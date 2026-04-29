@@ -47,6 +47,10 @@ window.YPP.SettingsSchema = {
         hideFundraiser:      { type: 'boolean', default: false },
         hideEndScreens:      { type: 'boolean', default: false },
         hookFreeHome:        { type: 'boolean', default: false },
+        // Search visibility
+        hideSearchShelves:   { type: 'boolean', default: true },
+        hideChannelCards:    { type: 'boolean', default: false },
+        autoVideoFilter:     { type: 'boolean', default: true },
 
         // --- Customization ---
         fontFamily:          { type: 'string',  default: 'inter', values: ['inter', 'system', 'mono'] },
@@ -74,7 +78,6 @@ window.YPP.SettingsSchema = {
         // --- Search ---
         searchGrid:          { type: 'boolean', default: true },
         cleanSearch:         { type: 'boolean', default: true },
-        autoVideoFilter:     { type: 'boolean', default: true },
 
         // --- Navigation ---
         navTrending:         { type: 'boolean', default: true },
@@ -135,10 +138,20 @@ window.YPP.SettingsSchema = {
         audioCompressor:     { type: 'boolean', default: false },
         videoResumer:        { type: 'boolean', default: true },
         commentFilter:       { type: 'boolean', default: true },
+        contextMenu:         { type: 'boolean', default: true },
+        enableAccountMenu:   { type: 'boolean', default: true },
+        miniPlayer:          { type: 'boolean', default: false },
+        redirectShorts:      { type: 'boolean', default: false },
 
         // --- Watch Time Alert ---
         watchTimeAlert:      { type: 'boolean', default: false },
         watchTimeAlertHours: { type: 'number',  default: 2, min: 1, max: 8 },
+
+        // --- Stats ---
+        enableStatsForNerds: { type: 'boolean', default: false },
+
+        // --- Subscription Organizer (legacy) ---
+        enableSubsManager:   { type: 'boolean', default: false },
 
         // --- Keyboard Shortcuts ---
         keyboardShortcuts:      { type: 'boolean', default: true },

@@ -66,15 +66,18 @@ class ElementCache {
     }
 
     /**
-     * Check if a key exists and is valid
+     * Check if a key exists and is valid (element still in DOM).
+     * Automatically removes stale entries to keep the cache clean.
      * @param {string} key - Cache key
      * @returns {boolean}
      */
     has(key) {
+        if (!this._cache.has(key)) return false;
         const cached = this._cache.get(key);
         if (cached && document.contains(cached)) {
             return true;
         }
+        // Element was removed from DOM — clean up stale entry
         this.remove(key);
         return false;
     }
@@ -93,9 +96,13 @@ class ElementCache {
     }
 
     /**
-     * Clear all cached elements
+     * Clear all cached elements and disconnect all active observers.
+     * Disconnecting observers prevents MutationObserver leaks when the
+     * cache is reset (e.g. on navigation or feature disable).
      */
     clear() {
+        this._observers.forEach(observer => observer.disconnect());
+        this._observers.clear();
         this._cache.clear();
     }
 
