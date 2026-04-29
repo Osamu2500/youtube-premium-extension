@@ -12,6 +12,8 @@ window.YPP.Features.ContinueWatching = class ContinueWatching {
         this.Utils = window.YPP.Utils;
     }
 
+    getConfigKey() { return 'continueWatching'; }
+
     /**
      * Initialize the feature
      * @param {Object} settings - User settings

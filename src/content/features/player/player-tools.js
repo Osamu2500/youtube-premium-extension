@@ -10,7 +10,7 @@ window.YPP.features = window.YPP.features || {};
  * @class PlayerTools
  */
 window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.BaseFeature {
-    getConfigKey() { return 'videoControlsEnabled'; }
+    getConfigKey() { return 'enableCustomSpeed'; }
     /**
      * Initialize Player Tools
      * @constructor

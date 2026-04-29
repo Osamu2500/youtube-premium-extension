@@ -14,6 +14,8 @@ window.YPP.features.ReversePlaylist = class ReversePlaylist {
         this.handleNavigation = this.handleNavigation.bind(this);
     }
 
+    getConfigKey() { return 'reversePlaylist'; }
+
     enable(settings) {
         if (this.isActive) return;
         this.isActive = true;

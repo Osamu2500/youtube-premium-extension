@@ -13,7 +13,7 @@ window.YPP.features.AutoQuality = class AutoQuality {
         this._pollInterval = null;
     }
 
-    getConfigKey() { return 'autoCinema'; }
+    getConfigKey() { return 'autoQuality'; }
 
     enable(settings) {
         this.settings = settings;

@@ -209,6 +209,7 @@ window.YPP.CONSTANTS = {
 
         // Player
         autoCinema: false,
+        autoQuality: false,
         enablePiP: true,
         enableTranscript: true,
         enableSnapshot: true,
@@ -236,6 +237,11 @@ window.YPP.CONSTANTS = {
         forceHideSidebar: false,
         hoverSidebar: true,
         logoRedirectSub: false,
+        
+        // Playlist & History
+        continueWatching: true,
+        reversePlaylist: false,
+        historyRedesign: true,
 
         // Shorts Tools
         shortsAutoScroll: false,
@@ -255,6 +261,8 @@ window.YPP.CONSTANTS = {
 
         // Ad Skipper
         adSkipper: true,
+        sponsorBlock: true,
+        returnYouTubeDislike: true,
 
         // Night Mode
         blueLight: 0,
@@ -287,7 +295,7 @@ window.YPP.CONSTANTS = {
         studyMode: false,
 
         // Stats Visualizer
-        enableStatsForNerds: false,
+        statsVisualizer: false,
 
         // Subscription Organizer (legacy — superseded by subscriptionFolders)
         enableSubsManager: false,

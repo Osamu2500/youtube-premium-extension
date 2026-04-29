@@ -25,6 +25,8 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer {
         this.STORAGE_PREFIX = 'ypp_analytics_';
     }
 
+    getConfigKey() { return 'statsVisualizer'; }
+
     // ── Public API (called by player.js / feature-manager) ────────────────────
 
     run(settings) {
@@ -35,7 +37,7 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer {
     }
 
     update(settings) {
-        const shouldEnable = settings?.enableStatsForNerds;
+        const shouldEnable = settings?.statsVisualizer;
         if (shouldEnable && !this.enabled) this._enable();
         else if (!shouldEnable && this.enabled) this._disable();
     }

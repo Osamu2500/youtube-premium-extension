@@ -26,7 +26,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
     getConfigKey() {
         // Feature is enabled if ANY nav button is on, or sidebar/logo settings are active
-        return null; // We handle our own enable logic inside enable()
+        return 'navTrending';
     }
 
     // =========================================================================

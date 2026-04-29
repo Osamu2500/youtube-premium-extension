@@ -17,6 +17,8 @@ window.YPP.features.ReturnDislike = class ReturnDislike {
         this.handleNavigation = this.handleNavigation.bind(this);
     }
 
+    getConfigKey() { return 'returnYouTubeDislike'; }
+
     run(settings) {
         if (settings.returnYouTubeDislike) {
             this.enable();

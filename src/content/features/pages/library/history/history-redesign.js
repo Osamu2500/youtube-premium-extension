@@ -12,7 +12,7 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
     }
     
     getConfigKey() {
-        return null;
+        return 'historyRedesign';
     }
 
     async enable() {
