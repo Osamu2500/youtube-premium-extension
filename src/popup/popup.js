@@ -140,9 +140,17 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideCards',
         'hideMerch',
         
-        // Playlist
+        // Integrations & Filters
+        'sponsorBlock',
+        'returnYouTubeDislike',
+        'adSkipper',
+        'enableMarkWatched',
+
+        // Playlist & History Extras
         'reversePlaylist',
         'playlistDuration',
+        'continueWatching',
+        'historyRedesign',
 
         // Subscription Manager
         'enableSubsManager',
