@@ -278,11 +278,13 @@ html[data-ypp-card-style="glass"] ytd-rich-item-renderer,
 html[data-ypp-card-style="glass"] ytd-video-renderer,
 html[data-ypp-card-style="glass"] ytd-compact-video-renderer {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  padding: var(--ypp-density-pad, 8px) !important;
-  border-radius: var(--ypp-radius-md);
+  border-top-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 12px rgba(255, 255, 255, 0.02) !important;
+  padding: var(--ypp-density-pad, 16px) !important;
+  border-radius: var(--ypp-radius-lg, 16px) !important;
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
 html[data-ypp-card-style="glass"] ytd-rich-item-renderer:hover,
@@ -1529,32 +1531,9 @@ body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.y
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-start !important;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.01)
-  ) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-top-color: rgba(255, 255, 255, 0.18) !important;
-  border-radius: var(--ypp-radius-lg);
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 0 12px rgba(255, 255, 255, 0.02) !important;
-  padding: 16px !important;
   box-sizing: border-box !important;
-  transition:
-    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 0.3s ease,
-    background 0.3s ease !important;
-  transform: translateZ(0);
-  will-change: transform, box-shadow, border-color, background;
   isolation: isolate !important;
   overflow: hidden !important;
-  background-clip: border-box !important;
 }
 
 /* Video Cards - Reset Child Styling (Since parent now has card style) */

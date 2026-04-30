@@ -178,6 +178,7 @@ window.YPP.CONSTANTS = {
         premiumTheme: true,
         enableAccountMenu: true,
         activeTheme: 'default', // default, ocean, sunset, dracula, forest, midnight, cherry
+        cardStyle: 'glass', // glass, flat, elevated
         trueBlack: false, // Legacy: treated as 'midnight' theme if true during migration
         hideScrollbar: false,
 
