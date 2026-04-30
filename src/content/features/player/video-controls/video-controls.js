@@ -57,10 +57,15 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
     _setupAudio(video) {
         if (this._audioConnected) return;
         try {
-            this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-            // Source: the video element
-            this._sourceNode = this._audioCtx.createMediaElementSource(video);
+            if (video.__ypp_ctx && video.__ypp_source) {
+                this._audioCtx = video.__ypp_ctx;
+                this._sourceNode = video.__ypp_source;
+            } else {
+                this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                this._sourceNode = this._audioCtx.createMediaElementSource(video);
+                video.__ypp_ctx = this._audioCtx;
+                video.__ypp_source = this._sourceNode;
+            }
 
             // Gain node – volume boost (1.0 = native, up to 5.0 = 500%)
             this._gainNode = this._audioCtx.createGain();

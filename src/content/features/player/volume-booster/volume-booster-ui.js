@@ -20,6 +20,15 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         const panel = document.createElement('div');
         panel.id = 'ypp-eq-panel';
 
+        // Check if opened from Global Bar
+        if (anchorBtn.closest('.ypp-global-player-bar')) {
+            panel.classList.add('ypp-panel-transparent');
+            panel.style.background = 'transparent';
+            panel.style.backdropFilter = 'none';
+            panel.style.webkitBackdropFilter = 'none';
+            panel.style.boxShadow = 'none'; // Optional: remove shadow for "fully transparent" look
+        }
+
         // ── Header
         const header = document.createElement('div');
         header.className = 'ypp-eq-header';
@@ -59,7 +68,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             const v = parseFloat(e.target.value);
             ctx.setVolume(v);
             gainValue.textContent = Math.round(v * 100) + '%';
-            anchorBtn.classList.toggle('active', v > 1.01 || ctx._eqGains.some(g => g !== 0));
+            anchorBtn.classList.toggle('active', v > 1.01 || ctx._eqGains.some(g => g !== 0) || ctx._balance !== 0);
             window.dispatchEvent(new CustomEvent('ypp-setting-update', {
                 detail: { volumeBoost: v > 1.01, volumeLevel: v }
             }));
@@ -70,6 +79,37 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         gainRow.appendChild(gainValue);
         panel.appendChild(gainRow);
         this.updateGainTrack(gainSlider);
+
+        // ── Balance Row
+        const balanceRow = document.createElement('div');
+        balanceRow.className = 'ypp-eq-gain-row';
+        const balanceValue = document.createElement('span');
+        balanceValue.className = 'ypp-eq-gain-value';
+        balanceValue.textContent = ctx._balance === 0 ? 'C' : (ctx._balance < 0 ? 'L' + Math.abs(Math.round(ctx._balance * 100)) : 'R' + Math.round(ctx._balance * 100));
+        const balanceSlider = document.createElement('input');
+        balanceSlider.type = 'range'; balanceSlider.min = -1; balanceSlider.max = 1; balanceSlider.step = 0.05;
+        balanceSlider.value = ctx._balance;
+        balanceSlider.className = 'ypp-eq-hslider ypp-eq-balance-slider';
+        balanceSlider.oninput = (e) => {
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            const v = parseFloat(e.target.value);
+            ctx.setBalance(v);
+            balanceValue.textContent = v === 0 ? 'C' : (v < 0 ? 'L' + Math.abs(Math.round(v * 100)) : 'R' + Math.round(v * 100));
+            anchorBtn.classList.toggle('active', ctx._volumeGain > 1.01 || ctx._eqGains.some(g => g !== 0) || v !== 0);
+            this.updateBalanceTrack(balanceSlider);
+        };
+        balanceSlider.ondblclick = () => {
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            ctx.setBalance(0);
+            balanceSlider.value = 0;
+            balanceValue.textContent = 'C';
+            this.updateBalanceTrack(balanceSlider);
+        };
+        balanceRow.innerHTML = `<span class="ypp-eq-row-label">Balance</span>`;
+        balanceRow.appendChild(balanceSlider);
+        balanceRow.appendChild(balanceValue);
+        panel.appendChild(balanceRow);
+        this.updateBalanceTrack(balanceSlider);
 
         // ── Presets
         const presetsRow = document.createElement('div');
@@ -176,6 +216,20 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             }
         };
 
+        const monoBtn = document.createElement('button');
+        monoBtn.className = 'ypp-eq-comp-btn' + (ctx._monoEnabled ? ' active' : '');
+        monoBtn.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zm-2-10h4v6h-4z"/>
+            </svg>
+            Mono
+        `;
+        monoBtn.onclick = () => {
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            ctx.setMono(!ctx._monoEnabled);
+            monoBtn.classList.toggle('active', ctx._monoEnabled);
+        };
+
         const resetBtn = document.createElement('button');
         resetBtn.className = 'ypp-eq-reset-btn';
         resetBtn.textContent = 'Reset All';
@@ -190,9 +244,9 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
         const hint = document.createElement('div');
         hint.className = 'ypp-eq-hint';
-        hint.textContent = 'Dbl-click band to zero';
+        hint.textContent = 'Dbl-click to center/zero';
 
-        footer.append(compBtn, resetBtn, hint);
+        footer.append(compBtn, monoBtn, resetBtn, hint);
         panel.appendChild(footer);
 
         // Mount panel
@@ -202,12 +256,24 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         moviePlayer.appendChild(panel);
         ctx._volumePopup = panel;
 
-        // Initial curve draw
-        this.drawCurve(ctx, canvasEl);
+        // Visualizer Loop
+        let animFrameId = null;
+        const renderLoop = () => {
+            if (!ctx._volumePopup) return; // Stop if closed
+            if (ctx.analyserNode) {
+                this.drawCurve(ctx, canvasEl, true);
+            }
+            animFrameId = requestAnimationFrame(renderLoop);
+        };
+        renderLoop();
 
-        // Click-outside to close (one-time)
+        // Initial curve draw (if no analyser yet)
+        if (!ctx.analyserNode) this.drawCurve(ctx, canvasEl);
+
+        // Click-outside to close
         const outside = (e) => {
             if (ctx._volumePopup && !ctx._volumePopup.contains(e.target) && !anchorBtn.contains(e.target)) {
+                if (animFrameId) cancelAnimationFrame(animFrameId);
                 this.toggleEQPanel(ctx, video, anchorBtn);
             }
         };
@@ -225,7 +291,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             const db = ctx._eqGains[i];
             el.textContent = (db >= 0 ? '+' : '') + db;
         });
-        this.drawCurve(ctx, canvas);
+        if (!ctx.analyserNode) this.drawCurve(ctx, canvas);
     }
 
     static updateGainTrack(slider) {
@@ -233,13 +299,42 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         slider.style.background = `linear-gradient(90deg, rgba(255,255,255,0.85) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
     }
 
-    static drawCurve(ctxRef, canvas) {
+    static updateBalanceTrack(slider) {
+        const val = parseFloat(slider.value);
+        const pct = ((val + 1) / 2) * 100;
+        
+        if (val < 0) {
+            slider.style.background = `linear-gradient(90deg, rgba(255,255,255,0.1) ${pct}%, rgba(255,255,255,0.85) ${pct}%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.1) 50%)`;
+        } else {
+            slider.style.background = `linear-gradient(90deg, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.85) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+        }
+    }
+
+    static drawCurve(ctxRef, canvas, withSpectrum = false) {
         const ctx = canvas.getContext('2d');
         const W = canvas.width, H = canvas.height;
         ctx.clearRect(0, 0, W, H);
 
         const logMin = Math.log10(20), logMax = Math.log10(20000);
         const dbRange = 13;
+
+        // Draw Spectrum Analyzer
+        if (withSpectrum && ctxRef.analyserNode) {
+            const bufferLength = ctxRef.analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            ctxRef.analyserNode.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            const barWidth = (W / bufferLength) * 2.5;
+            let barHeight;
+            let xPos = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = (dataArray[i] / 255) * H;
+                ctx.fillRect(xPos, H - barHeight, barWidth - 1, barHeight);
+                xPos += barWidth;
+            }
+        }
 
         // Center baseline
         ctx.strokeStyle = 'rgba(255,255,255,0.07)';
@@ -310,17 +405,17 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     bottom: 72px;
     right: 16px;
     width: 480px;
-    background: rgba(10, 10, 18, 0.94);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-top: 1px solid rgba(255,255,255,0.18);
+    background: rgba(0, 0, 0, 0.15); /* Fully transparent with heavy blur */
+    border: 1px solid rgba(255,255,255,0.15);
+    border-top: 1px solid rgba(255,255,255,0.25);
     border-radius: 20px;
     z-index: 99999;
     color: #fff;
     font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.85), 0 8px 24px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.06);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+    backdrop-filter: blur(64px) saturate(180%);
+    -webkit-backdrop-filter: blur(64px) saturate(180%);
     user-select: none;
     overflow: hidden;
     animation: ypp-eq-in 0.28s cubic-bezier(0.2, 0, 0, 1) forwards;
@@ -390,13 +485,19 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 .ypp-eq-presets-row {
     display: flex; gap: 6px; padding: 9px 18px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
 }
+.ypp-eq-presets-row::-webkit-scrollbar { display: none; }
 .ypp-eq-preset-btn {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
     color: rgba(255,255,255,0.6); border-radius: 20px; cursor: pointer;
     font-size: 11px; font-weight: 600; padding: 4px 13px;
     font-family: inherit; transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .ypp-eq-preset-btn:hover {
     background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); color: #fff;

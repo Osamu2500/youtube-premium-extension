@@ -15,12 +15,16 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         this.source = null;
         this.gainNode = null;
         this.compressorNode = null;
+        this.pannerNode = null;
+        this.analyserNode = null;
         this._eqNodes = [];          // 10 BiquadFilterNodes
         this._compressorEnabled = true;
+        this._monoEnabled = false;
 
         // State
         this._eqGains = new Array(10).fill(0);   // current dB per band
         this._volumeGain = 1.0;                  // 1.0 = 100%
+        this._balance = 0.0;                     // -1.0 (Left) to 1.0 (Right)
 
         // DOM refs
         this._volumePopup = null;
@@ -46,9 +50,15 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         this._presets = {
             'Flat':       [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
             'Bass Boost': [ 8,  6,  4,  2,  0, -1,  0,  0,  0,  0],
+            'Acoustic':   [ 4,  4,  3,  1,  1,  1,  3,  4,  3,  2],
+            'Classical':  [ 4,  3,  2,  1, -1, -1,  0,  2,  3,  4],
+            'Dance':      [ 8,  6,  3,  0,  0, -1, -2, -2,  0,  1],
+            'Electronic': [ 6,  5,  2,  0, -2,  1,  0,  1,  4,  5],
+            'Lo-Fi':      [ 3,  2,  0, -2, -4, -4, -3, -2, -1,  0],
+            'Pop':        [-2, -1,  1,  3,  4,  4,  2,  1,  0, -1],
+            'Rock':       [ 6,  4,  2, -1, -2, -1,  1,  3,  4,  5],
             'Vocal':      [-2, -1,  0,  2,  4,  4,  3,  2,  1,  0],
             'Cinematic':  [ 5,  3,  1, -1, -2,  1,  3,  4,  4,  3],
-            'Lo-Fi':      [ 3,  2,  0, -2, -4, -4, -3, -2, -1,  0],
         };
     }
 
@@ -103,9 +113,16 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         this._initHandler = () => {
             if (this._audioConnected) return;
             try {
-                const AC = window.AudioContext || window.webkitAudioContext;
-                this.ctx = new AC();
-                this.source = this.ctx.createMediaElementSource(video);
+                if (video.__ypp_ctx && video.__ypp_source) {
+                    this.ctx = video.__ypp_ctx;
+                    this.source = video.__ypp_source;
+                } else {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AC();
+                    this.source = this.ctx.createMediaElementSource(video);
+                    video.__ypp_ctx = this.ctx;
+                    video.__ypp_source = this.source;
+                }
 
                 // Build 10 EQ band nodes
                 this._eqNodes = this._bands.map((band, i) => {
@@ -116,6 +133,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
                     if (band.type === 'peaking') f.Q.value = 1.4;
                     return f;
                 });
+
+                // Panner Node for Balance
+                this.pannerNode = this.ctx.createStereoPanner();
+                this.pannerNode.pan.value = this._balance;
 
                 // Compressor — prevents clipping at high gain
                 this.compressorNode = this.ctx.createDynamicsCompressor();
@@ -129,15 +150,25 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
                 this.gainNode = this.ctx.createGain();
                 this.gainNode.gain.value = this._volumeGain;
 
-                // Chain: source → eq[0..9] → compressor → gain → destination
+                // Analyser for Visualization
+                this.analyserNode = this.ctx.createAnalyser();
+                this.analyserNode.fftSize = 128; // gives 64 bins, smooth enough for mini spectrum
+                this.analyserNode.smoothingTimeConstant = 0.85;
+
+                // Chain: source → eq[0..9] → panner → compressor → gain → analyser → destination
                 let node = this.source;
                 this._eqNodes.forEach(eq => { node = node.connect(eq); });
-                node.connect(this.compressorNode);
+                node.connect(this.pannerNode);
+                this.pannerNode.connect(this.compressorNode);
                 this.compressorNode.connect(this.gainNode);
-                this.gainNode.connect(this.ctx.destination);
+                this.gainNode.connect(this.analyserNode);
+                this.analyserNode.connect(this.ctx.destination);
 
                 this._audioConnected = true;
                 if (this.settings?.volumeLevel) this.setVolume(this.settings.volumeLevel);
+                
+                // Set mono state if enabled
+                if (this._monoEnabled) this.setMono(true);
             } catch (e) {
                 console.warn('[YPP:VolumeBooster] Audio engine init failed:', e);
             }
@@ -151,6 +182,21 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
     setVolume(multiplier) {
         this._volumeGain = multiplier;
         if (this.gainNode) this.gainNode.gain.value = multiplier;
+    }
+
+    setBalance(value) {
+        this._balance = value;
+        if (this.pannerNode) this.pannerNode.pan.value = value;
+    }
+
+    setMono(enabled) {
+        this._monoEnabled = enabled;
+        if (this.ctx && this.source) {
+            // Re-routing for mono: we disconnect source and downmix it
+            // AudioNode channelCountMode
+            this.source.channelCount = enabled ? 1 : 2;
+            this.source.channelCountMode = 'explicit';
+        }
     }
 
     _setEQBand(index, db) {

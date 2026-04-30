@@ -20,7 +20,11 @@ window.YPP.features.VideoFilters = class VideoFilters {
             grayscale: 0,
             invert: 0,
             blur: 0,
-            opacity: 100
+            opacity: 100,
+            dehaze: 0,
+            clarity: 0,
+            grain: 0,
+            sharpness: 0
         };
         this._filterOverlay = null; // CRT/VHS scanline overlay div
         this._filterPanel = null;   // The open filter panel
@@ -110,9 +114,22 @@ window.YPP.features.VideoFilters = class VideoFilters {
         const inst = this.filterIntensity / 100;
         const s = (v, def = 100) => def + (v - def) * inst;
 
+        // Dehaze / Clarity are derived from contrast and brightness for pure CSS approach,
+        // or we handle them via SVG filter if available. We will use simple CSS derivation for Dehaze.
+        let baseContrast = adj.contrast;
+        let baseBrightness = adj.brightness;
+        
+        if (adj.dehaze > 0) {
+            baseContrast += adj.dehaze * 0.5;
+            baseBrightness -= adj.dehaze * 0.1;
+        }
+        if (adj.clarity > 0) {
+            baseContrast += adj.clarity * 0.3;
+        }
+
         const adjStr = [
-            adj.brightness !== 100 ? `brightness(${s(adj.brightness)}%)` : '',
-            adj.contrast !== 100 ? `contrast(${s(adj.contrast)}%)` : '',
+            baseBrightness !== 100 ? `brightness(${s(baseBrightness)}%)` : '',
+            baseContrast !== 100 ? `contrast(${s(baseContrast)}%)` : '',
             adj.saturate !== 100 ? `saturate(${s(adj.saturate)}%)` : '',
             adj.hueRotate !== 0 ? `hue-rotate(${adj.hueRotate * inst}deg)` : '',
             adj.sepia > 0 ? `sepia(${adj.sepia * inst}%)` : '',
@@ -131,11 +148,17 @@ window.YPP.features.VideoFilters = class VideoFilters {
             finalFilter = adjStr;
         }
 
+        // Apply sharpness via SVG if needed
+        if (adj.sharpness > 0) {
+            window.YPP.features.VideoFiltersOverlay.injectSVGSharpness(adj.sharpness);
+            finalFilter += ` url(#ypp-svg-sharpness)`;
+        }
+
         video.style.filter = finalFilter;
 
         window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
-        if (preset.overlay) {
-            window.YPP.features.VideoFiltersOverlay.applyOverlay(this, preset.overlay);
+        if (preset.overlay || adj.grain > 0 || preset.name === 'Night Vision') {
+            window.YPP.features.VideoFiltersOverlay.applyOverlay(this, preset.overlay, adj.grain);
         }
     }
 
@@ -150,6 +173,10 @@ window.YPP.features.VideoFilters = class VideoFilters {
         if (s.cinemaFilterInvert !== undefined)     this.filterAdjustments.invert     = s.cinemaFilterInvert;
         if (s.cinemaFilterBlur !== undefined)       this.filterAdjustments.blur       = s.cinemaFilterBlur;
         if (s.cinemaFilterOpacity !== undefined)    this.filterAdjustments.opacity    = s.cinemaFilterOpacity;
+        if (s.cinemaFilterDehaze !== undefined)     this.filterAdjustments.dehaze     = s.cinemaFilterDehaze;
+        if (s.cinemaFilterClarity !== undefined)    this.filterAdjustments.clarity    = s.cinemaFilterClarity;
+        if (s.cinemaFilterGrain !== undefined)      this.filterAdjustments.grain      = s.cinemaFilterGrain;
+        if (s.cinemaFilterSharpness !== undefined)  this.filterAdjustments.sharpness  = s.cinemaFilterSharpness;
         if (s.cinemaFilterIndex !== undefined)      this.currentFilterIndex           = s.cinemaFilterIndex;
 
         const hasActiveFilter = this.currentFilterIndex > 0 ||
@@ -157,7 +184,9 @@ window.YPP.features.VideoFilters = class VideoFilters {
             this.filterAdjustments.saturate !== 100 || this.filterAdjustments.hueRotate !== 0 ||
             this.filterAdjustments.sepia !== 0 || this.filterAdjustments.grayscale !== 0 ||
             this.filterAdjustments.invert !== 0 || this.filterAdjustments.blur !== 0 ||
-            this.filterAdjustments.opacity !== 100;
+            this.filterAdjustments.opacity !== 100 || this.filterAdjustments.dehaze !== 0 ||
+            this.filterAdjustments.clarity !== 0 || this.filterAdjustments.grain !== 0 ||
+            this.filterAdjustments.sharpness !== 0;
 
         if (hasActiveFilter && video) {
             this._applyComputedFilter(video);

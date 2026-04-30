@@ -1,166 +1,147 @@
 .ypp-global-player-bar {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    padding: 8px 16px;
-    border-radius: 12px;
+    padding: 16px 8px;
+    border-radius: 32px;
     color: #fff;
     font-family: 'Inter', 'Roboto', sans-serif;
     font-size: 13px;
-    min-width: 400px;
-    height: 48px;
+    width: auto;
+    height: auto;
     pointer-events: auto;
     user-select: none;
-    transition: opacity 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: opacity 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
     opacity: 0.95;
+    background: rgba(12, 12, 20, 0.65) !important;
+    backdrop-filter: blur(24px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    animation: ypp-global-bar-pop-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes ypp-global-bar-pop-left {
+    0% { opacity: 0; transform: translateX(-20px) translateY(-50%) scale(0.95); }
+    100% { opacity: 1; transform: translateX(0) translateY(-50%) scale(1); }
 }
 
 .ypp-global-player-bar:hover {
     opacity: 1;
-    transform: translateX(-50%) translateY(-2px);
+    transform: translateX(4px) translateY(-50%);
 }
 
 .ypp-gpb-controls {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 12px;
     width: 100%;
 }
 
-.ypp-gpb-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+.ypp-gpb-btn, .ypp-action-btn {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
     color: #fff;
     cursor: pointer;
-    font-size: 16px;
-    width: 32px;
-    height: 32px;
+    font-size: 18px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    opacity: 0.85;
 }
 
-.ypp-gpb-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
+.ypp-gpb-btn:hover, .ypp-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.ypp-global-player-bar .ypp-action-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: #fff;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
 }
 
 .ypp-gpb-divider {
-    width: 1px;
-    height: 24px;
+    width: 24px;
+    height: 1px;
     background: rgba(255, 255, 255, 0.15);
 }
 
-.ypp-gpb-section {
+/* Force vertical layout for injected features */
+#ypp-gpb-speed-container .ypp-speed-controls,
+#ypp-gpb-features-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    min-width: 80px;
+    gap: 8px;
+    align-items: center;
 }
 
-.ypp-gpb-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: uppercase;
-    display: flex;
-    justify-content: space-between;
+/* ── Transparent Popups (when opened from Global Bar) ── */
+#ypp-eq-panel.ypp-panel-transparent,
+#ypp-cinema-panel.ypp-panel-transparent {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
-.ypp-gpb-label span {
-    color: #a78bfa;
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-header,
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-footer,
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-presets-row,
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-gain-row,
+#ypp-cinema-panel.ypp-panel-transparent .ypp-cinema-header,
+#ypp-cinema-panel.ypp-panel-transparent .ypp-cinema-tabs {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-.ypp-gpb-slider {
-    width: 100%;
-    height: 5px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
-    border-radius: 4px;
-    outline: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
-    transition: height 0.15s ease;
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-preset-btn,
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-comp-btn,
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-reset-btn {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.ypp-gpb-slider:hover {
-    height: 7px;
+
+.ypp-global-player-bar .ypp-speed-controls {
+    padding: 6px 4px !important;
+    border-radius: 24px !important;
 }
 
-.ypp-gpb-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    background: #fff;
-    border: 3px solid #a78bfa;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(167,139,250,0.15);
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
-}
-
-.ypp-gpb-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.3);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 0 5px rgba(167,139,250,0.25), 0 0 12px #a78bfa;
-}
-
-.ypp-gpb-filter-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 90px;
-}
-
-.ypp-gpb-filter-cat {
-    font-size: 9px;
-    font-weight: 800;
-    color: #a78bfa;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
-}
-
-.ypp-gpb-filter-name {
-    font-size: 11px;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
+.ypp-global-player-bar .ypp-speed-btn {
+    font-size: 11px !important;
+    padding: 4px 2px !important;
+    width: 32px !important;
+    min-width: 0 !important;
 }
 
 #ypp-gpb-close {
-    margin-left: auto;
+    margin-top: auto;
     font-size: 20px;
     font-weight: 300;
 }
 
 /* Iframe Specific Overlay Style */
 .ypp-global-player-bar.ypp-gpb-iframe {
-    min-width: 380px;
-    height: 40px;
-    padding: 4px 12px;
+    padding: 12px 6px;
     background: rgba(10, 10, 20, 0.95);
     border: 1px solid rgba(167, 139, 250, 0.3);
 }
 
 .ypp-gpb-iframe .ypp-gpb-btn {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     font-size: 14px;
 }
 
 .ypp-gpb-iframe .ypp-gpb-divider {
-    height: 20px;
-}
-
-/* Glassmorphism Classes (In case they aren't available globally) */
-.ypp-glass-panel {
-    background: linear-gradient(135deg, rgba(20, 20, 30, 0.85) 0%, rgba(10, 10, 20, 0.9) 100%);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    width: 20px;
 }

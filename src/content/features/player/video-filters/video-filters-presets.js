@@ -51,5 +51,17 @@ window.YPP.features.VideoFiltersPresets = {
         { category: 'Mood', name: 'Horror',        css: 'contrast(130%) brightness(80%) saturate(70%) hue-rotate(10deg)', overlay: null },
         { category: 'Mood', name: 'Fantasy',       css: 'saturate(140%) brightness(105%) contrast(110%) hue-rotate(300deg)', overlay: null },
         { category: 'Mood', name: 'Gothic',        css: 'contrast(125%) brightness(85%) saturate(60%) hue-rotate(340deg)', overlay: null },
+
+        { category: 'Special Effects', name: 'Night Vision', css: 'saturate(0%) sepia(100%) hue-rotate(60deg) brightness(140%) contrast(160%)', overlay: 'nightvision' },
+        { category: 'Special Effects', name: 'Thermal',      css: 'invert(100%) hue-rotate(180deg) saturate(400%) contrast(200%)', overlay: null },
+        { category: 'Special Effects', name: 'X-Ray',        css: 'invert(100%) grayscale(100%) contrast(150%)', overlay: null },
+        { category: 'Special Effects', name: 'Psychedelic',  css: 'hue-rotate(90deg) saturate(300%) contrast(150%) invert(20%)', overlay: null },
+        { category: 'Special Effects', name: 'RGB Glitch',   css: 'url(#ypp-fx-glitch) contrast(120%) brightness(110%) saturate(120%)', overlay: null },
+        { category: 'Special Effects', name: 'The Matrix',   css: 'url(#ypp-fx-matrix) contrast(150%) brightness(130%)', overlay: null },
+        { category: 'Special Effects', name: 'Posterize',    css: 'url(#ypp-fx-posterize) saturate(150%) contrast(120%)', overlay: null },
+        { category: 'Special Effects', name: 'Emboss',       css: 'url(#ypp-fx-emboss) grayscale(100%) contrast(150%) brightness(120%)', overlay: null },
+        { category: 'Special Effects', name: 'Neon Edge',    css: 'url(#ypp-fx-edge) saturate(200%) brightness(120%)', overlay: null },
+        { category: 'Special Effects', name: 'Deep Fried',   css: 'saturate(400%) contrast(300%) brightness(120%) hue-rotate(-10deg)', overlay: null },
+        { category: 'Special Effects', name: 'Duotone Red',  css: 'grayscale(100%) sepia(100%) hue-rotate(320deg) saturate(400%) contrast(140%)', overlay: null }
     ]
 };

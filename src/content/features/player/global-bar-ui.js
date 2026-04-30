@@ -25,26 +25,20 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         
         bar.innerHTML = `
             <div class="ypp-gpb-controls">
-                <button class="ypp-gpb-btn" id="ypp-gpb-play" title="Play/Pause">▶️</button>
+                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-play" title="Play/Pause">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+                </button>
                 <div class="ypp-gpb-divider"></div>
-                <div class="ypp-gpb-section">
-                    <div class="ypp-gpb-label">Speed <span id="ypp-gpb-speed-val">1.0x</span></div>
-                    <input type="range" min="0.25" max="4" step="0.05" value="1" class="ypp-gpb-slider" id="ypp-gpb-speed-slider">
-                </div>
+                <div id="ypp-gpb-speed-container"></div>
                 <div class="ypp-gpb-divider"></div>
-                <div class="ypp-gpb-section">
-                    <div class="ypp-gpb-label">Intensity <span id="ypp-gpb-int-val">100%</span></div>
-                    <input type="range" min="0" max="100" step="1" value="100" class="ypp-gpb-slider" id="ypp-gpb-int-slider">
-                </div>
+                <div id="ypp-gpb-features-container"></div>
                 <div class="ypp-gpb-divider"></div>
-                <button class="ypp-gpb-btn" id="ypp-gpb-filter-cycle" title="Cycle Filters">🎨</button>
-                <div class="ypp-gpb-filter-info">
-                    <div class="ypp-gpb-filter-cat" id="ypp-gpb-filter-cat">Classic</div>
-                    <div class="ypp-gpb-filter-name" id="ypp-gpb-filter-name">Normal</div>
-                </div>
-                <div class="ypp-gpb-divider"></div>
-                <button class="ypp-gpb-btn" id="ypp-gpb-pip" title="Picture-in-Picture">📺</button>
-                <button class="ypp-gpb-btn" id="ypp-gpb-close" title="Hide Bar">×</button>
+                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-pip" title="Picture-in-Picture">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.98h18v14.03z"/></svg>
+                </button>
+                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-close" title="Hide Bar">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
             </div>
         `;
 
@@ -71,35 +65,22 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         this.activeBars.forEach((bar, video) => this.updateBarPosition(video, bar));
     }
 
-    /** Position a single bar immediately below its corresponding video element. */
+    /** Position a single bar on the left edge of the screen. */
     updateBarPosition(video, bar) {
-        const rect = video.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
+        // Find index to stack if there are multiple videos on screen
+        let activeIndex = Array.from(this.activeBars.keys()).indexOf(video);
+        if (activeIndex === -1) activeIndex = this.activeBars.size;
 
-        const isInIframe = window.self !== window.top;
-        
-        if (isInIframe) {
-            Object.assign(bar.style, {
-                position: 'fixed',
-                left: `${rect.left + (rect.width / 2)}px`,
-                bottom: '20px',
-                top: 'auto',
-                transform: 'translateX(-50%)',
-                zIndex: '2147483647',
-            });
-        } else {
-            Object.assign(bar.style, {
-                position: 'fixed',
-                left: `${rect.left + (rect.width / 2)}px`,
-                top: `${rect.bottom + 10}px`,
-                bottom: 'auto',
-                transform: 'translateX(-50%)',
-                zIndex: '2147483647',
-            });
-        }
-        
-        const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-        bar.style.display = isVisible ? 'flex' : 'none';
+        Object.assign(bar.style, {
+            position: 'fixed',
+            left: `${16 + (activeIndex * 60)}px`,
+            top: '50%',
+            bottom: 'auto',
+            transform: 'translateY(-50%)',
+            zIndex: '2147483647',
+            display: 'flex',
+            visibility: 'visible'
+        });
     }
 
     // =========================================================================
@@ -108,71 +89,42 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
 
     _bindEvents(video, bar) {
         const playBtn     = bar.querySelector('#ypp-gpb-play');
-        const speedSlider = bar.querySelector('#ypp-gpb-speed-slider');
-        const speedVal    = bar.querySelector('#ypp-gpb-speed-val');
-        const intSlider   = bar.querySelector('#ypp-gpb-int-slider');
-        const intVal      = bar.querySelector('#ypp-gpb-int-val');
-        const filterBtn   = bar.querySelector('#ypp-gpb-filter-cycle');
-        const filterName  = bar.querySelector('#ypp-gpb-filter-name');
-        const filterCat   = bar.querySelector('#ypp-gpb-filter-cat');
         const pipBtn      = bar.querySelector('#ypp-gpb-pip');
         const closeBtn    = bar.querySelector('#ypp-gpb-close');
+        const speedCont   = bar.querySelector('#ypp-gpb-speed-container');
+        const featsCont   = bar.querySelector('#ypp-gpb-features-container');
 
         // Play/Pause
+        const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>`;
+        const pauseIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>`;
+        
         playBtn.onclick = (e) => {
             e.stopPropagation();
             if (video.paused) video.play(); else video.pause();
         };
-        video.addEventListener('play', () => playBtn.textContent = '⏸️');
-        video.addEventListener('pause', () => playBtn.textContent = '▶️');
-        playBtn.textContent = video.paused ? '▶️' : '⏸️';
+        video.addEventListener('play', () => playBtn.innerHTML = pauseIcon);
+        video.addEventListener('pause', () => playBtn.innerHTML = playIcon);
+        playBtn.innerHTML = video.paused ? playIcon : pauseIcon;
 
-        // Speed
-        const syncSpeed = () => {
-            speedSlider.value = video.playbackRate;
-            speedVal.textContent = video.playbackRate.toFixed(1) + 'x';
-        };
-        video.addEventListener('ratechange', syncSpeed);
-        speedSlider.oninput = (e) => {
-            const val = parseFloat(e.target.value);
-            video.playbackRate = val;
-            speedVal.textContent = val.toFixed(1) + 'x';
-        };
-
-        // Filters
-        let currentFilterIdx = 0;
-        let intensity = 100;
-
-        const applyFilter = () => {
-            const filter = this.filters[currentFilterIdx];
-            const inst = intensity / 100;
-            
-            if (filter.css === 'none') {
-                video.style.filter = 'none';
-                video.style.opacity = '1';
-            } else {
-                video.style.filter = filter.css;
-                video.style.opacity = 0.7 + (0.3 * inst);
+        // Speed (injecting standard speed pill)
+        if (window.YPP.featureManager && window.YPP.featureManager.getFeature('playerControls')) {
+            const playerFeature = window.YPP.featureManager.getFeature('playerControls');
+            if (playerFeature._createSpeedControls) {
+                speedCont.appendChild(playerFeature._createSpeedControls(video));
             }
-            
-            filterName.textContent = filter.name;
-            filterCat.textContent = filter.category;
-        };
+        }
 
-        filterBtn.onclick = (e) => {
-            e.stopPropagation();
-            currentFilterIdx = (currentFilterIdx + 1) % this.filters.length;
-            applyFilter();
-            
-            filterName.style.transform = 'scale(1.1)';
-            setTimeout(() => filterName.style.transform = 'scale(1)', 100);
-        };
-
-        intSlider.oninput = (e) => {
-            intensity = parseInt(e.target.value);
-            intVal.textContent = intensity + '%';
-            applyFilter();
-        };
+        // Feature Buttons (Volume / Filters)
+        if (window.YPP.featureManager) {
+            const volFeature = window.YPP.featureManager.getFeature('volumeBoost');
+            if (volFeature && volFeature.createButton) {
+                featsCont.appendChild(volFeature.createButton(video));
+            }
+            const filterFeature = window.YPP.featureManager.getFeature('videoFilters');
+            if (filterFeature && filterFeature.createButton) {
+                featsCont.appendChild(filterFeature.createButton(video));
+            }
+        }
 
         // PiP
         pipBtn.onclick = async (e) => {
@@ -193,20 +145,15 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             this.activeBars.delete(video);
         };
 
-        // IO / Window bindings
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                bar.style.visibility = entry.isIntersecting ? 'visible' : 'hidden';
-            });
-        }, { threshold: 0.1 });
-        io.observe(video);
+        // Window bindings
+        // (Removed IntersectionObserver so the bar is always visible)
 
         const checkRemoval = setInterval(() => {
             if (!video.isConnected) {
                 bar.remove();
                 this.activeBars.delete(video);
                 clearInterval(checkRemoval);
-                io.disconnect();
+                this.repositionAll(); // Reposition remaining bars
             }
         }, 3000);
     }
