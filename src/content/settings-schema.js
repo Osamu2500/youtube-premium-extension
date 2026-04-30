@@ -59,7 +59,7 @@ window.YPP.SettingsSchema = {
         accentColor:         { type: 'string',  default: '#ff4e45' },
         enableAnimations:    { type: 'boolean', default: true },
         reducedMotion:       { type: 'boolean', default: false },
-        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated'] },
+        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid'] },
         thumbRadius:         { type: 'number',  default: 8, min: 0, max: 24 },
         sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 },
 
