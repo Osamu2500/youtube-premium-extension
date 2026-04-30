@@ -1439,8 +1439,7 @@ ytd-app[mini-guide-visible] #content {
 
 /* Main Grid Container - Full Width, Edge-to-Edge
    Guard: never touch the grid on playlist / library / history pages */
-:not(body.ypp-playlist-page):not(body.ypp-library-page):not(body.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer,
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer {
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-renderer {
   margin-top: 16px !important;
   max-width: 100% !important;
   width: 100% !important;
@@ -1464,7 +1463,7 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
 
 /* Grid Contents - CSS Grid with exact columns from user settings
    Guard: skip on playlist / library / history — they use native list layout */
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer > #contents {
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-renderer > #contents {
   display: grid !important;
   grid-template-columns: repeat(
     var(--ypp-active-columns, 4),
@@ -1478,14 +1477,15 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
   margin: 0 !important;
   box-sizing: border-box !important;
   justify-items: stretch !important;
-  align-items: start !important;
+  align-items: stretch !important;
 }
 
 /* Grid Rows - display:contents flattens ALL row wrappers so items participate directly in parent grid.
    IMPORTANT: Must cover both the element AND its #contents — YouTube re-stamps these on scroll.
    Guard: skip on playlist / library / history pages */
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-row,
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-row #contents {
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-row,
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-row #contents,
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-row > div {
   display: contents !important;
 }
 
@@ -1493,9 +1493,9 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
    YouTube's polymer JS sets this variable on the renderer AND on individual rows/items.
    Setting it to 'auto' makes calc(100%/auto) resolve as invalid, which browsers discard. */
 /* Neuter YouTube's own grid variable — only on pages that use our grid */
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-renderer,
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-grid-row,
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-item-renderer {
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-renderer,
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-grid-row,
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-item-renderer {
   --ytd-rich-grid-items-per-row: auto !important;
   --ytd-rich-grid-posts-per-row: auto !important;
 }
@@ -1518,13 +1518,17 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
    so YouTube's own calc(100% / var(--ytd-rich-grid-items-per-row)) resolves as invalid. */
 /* Individual Video Items - Premium Glassmorphic Card.
    Guard: skip on playlist / library / history pages */
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-rich-item-renderer {
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-rich-item-renderer {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
+  height: 100% !important;
   margin: 0 !important;
   flex: none !important;
   align-self: stretch !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.05),
@@ -1562,6 +1566,12 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
   box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  width: 100% !important;
 }
 
 /* Thumbnail */
@@ -1635,7 +1645,7 @@ body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-p
 
 /* Global thumbnail rounding — guard excludes playlist/library/history
    so native list-row thumbnails keep their correct fixed sizing */
-body:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) .yt-premium-plus-theme ytd-thumbnail {
+body.yt-premium-plus-theme:not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page) ytd-thumbnail {
   border-radius: var(--ypp-radius-md);
   overflow: hidden;
   width: 100%;
@@ -3417,19 +3427,23 @@ body.ypp-hide-shorts
 /* Ensure video thumbnails scale properly */
 body.yt-premium-plus-theme ytd-rich-item-renderer ytd-thumbnail {
   width: 100% !important;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 9 !important;
 }
 
 body.yt-premium-plus-theme ytd-rich-item-renderer img {
   width: 100% !important;
-  height: auto !important;
-  object-fit: cover;
-  border-radius: var(--ypp-radius-md);
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: var(--ypp-radius-md) !important;
 }
 
 /* Video metadata styling */
 body.yt-premium-plus-theme ytd-rich-item-renderer #details {
   margin-top: 12px;
+  display: flex !important;
+  flex-direction: row !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
 }
 
 /* Card hover effects for grid items */
