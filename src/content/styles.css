@@ -233,14 +233,28 @@ html.yt-premium-plus-theme .ytd-thumbnail {
 /* Card Styles */
 html.yt-premium-plus-theme ytd-rich-item-renderer,
 html.yt-premium-plus-theme ytd-video-renderer,
-html.yt-premium-plus-theme ytd-compact-video-renderer {
+html.yt-premium-plus-theme ytd-compact-video-renderer,
+html.yt-premium-plus-theme ytd-playlist-renderer,
+html.yt-premium-plus-theme ytd-radio-renderer,
+html.yt-premium-plus-theme ytd-channel-renderer,
+html.yt-premium-plus-theme ytd-grid-video-renderer,
+html.yt-premium-plus-theme ytd-grid-channel-renderer,
+html.yt-premium-plus-theme ytd-grid-playlist-renderer,
+html.yt-premium-plus-theme ytd-grid-radio-renderer {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 /* Flat Cards */
 html[data-ypp-card-style="flat"] ytd-rich-item-renderer,
 html[data-ypp-card-style="flat"] ytd-video-renderer,
-html[data-ypp-card-style="flat"] ytd-compact-video-renderer {
+html[data-ypp-card-style="flat"] ytd-compact-video-renderer,
+html[data-ypp-card-style="flat"] ytd-playlist-renderer,
+html[data-ypp-card-style="flat"] ytd-radio-renderer,
+html[data-ypp-card-style="flat"] ytd-channel-renderer,
+html[data-ypp-card-style="flat"] ytd-grid-video-renderer,
+html[data-ypp-card-style="flat"] ytd-grid-channel-renderer,
+html[data-ypp-card-style="flat"] ytd-grid-playlist-renderer,
+html[data-ypp-card-style="flat"] ytd-grid-radio-renderer {
   background: transparent !important;
   box-shadow: none !important;
   border: 1px solid transparent !important;
@@ -248,7 +262,14 @@ html[data-ypp-card-style="flat"] ytd-compact-video-renderer {
 }
 html[data-ypp-card-style="flat"] ytd-rich-item-renderer:hover,
 html[data-ypp-card-style="flat"] ytd-video-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-compact-video-renderer:hover {
+html[data-ypp-card-style="flat"] ytd-compact-video-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-playlist-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-radio-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-channel-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-grid-video-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-grid-channel-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-grid-playlist-renderer:hover,
+html[data-ypp-card-style="flat"] ytd-grid-radio-renderer:hover {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: var(--ypp-radius-md);
@@ -257,7 +278,14 @@ html[data-ypp-card-style="flat"] ytd-compact-video-renderer:hover {
 /* Elevated Cards */
 html[data-ypp-card-style="elevated"] ytd-rich-item-renderer,
 html[data-ypp-card-style="elevated"] ytd-video-renderer,
-html[data-ypp-card-style="elevated"] ytd-compact-video-renderer {
+html[data-ypp-card-style="elevated"] ytd-compact-video-renderer,
+html[data-ypp-card-style="elevated"] ytd-playlist-renderer,
+html[data-ypp-card-style="elevated"] ytd-radio-renderer,
+html[data-ypp-card-style="elevated"] ytd-channel-renderer,
+html[data-ypp-card-style="elevated"] ytd-grid-video-renderer,
+html[data-ypp-card-style="elevated"] ytd-grid-channel-renderer,
+html[data-ypp-card-style="elevated"] ytd-grid-playlist-renderer,
+html[data-ypp-card-style="elevated"] ytd-grid-radio-renderer {
   background: var(--ypp-bg-surface) !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
   border: 1px solid rgba(255,255,255,0.05) !important;
@@ -267,7 +295,14 @@ html[data-ypp-card-style="elevated"] ytd-compact-video-renderer {
 }
 html[data-ypp-card-style="elevated"] ytd-rich-item-renderer:hover,
 html[data-ypp-card-style="elevated"] ytd-video-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-compact-video-renderer:hover {
+html[data-ypp-card-style="elevated"] ytd-compact-video-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-playlist-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-radio-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-channel-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-grid-video-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-grid-channel-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-grid-playlist-renderer:hover,
+html[data-ypp-card-style="elevated"] ytd-grid-radio-renderer:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
   border-color: var(--ypp-accent-hover) !important;
@@ -276,7 +311,14 @@ html[data-ypp-card-style="elevated"] ytd-compact-video-renderer:hover {
 /* Glass Cards */
 html[data-ypp-card-style="glass"] ytd-rich-item-renderer,
 html[data-ypp-card-style="glass"] ytd-video-renderer,
-html[data-ypp-card-style="glass"] ytd-compact-video-renderer {
+html[data-ypp-card-style="glass"] ytd-compact-video-renderer,
+html[data-ypp-card-style="glass"] ytd-playlist-renderer,
+html[data-ypp-card-style="glass"] ytd-radio-renderer,
+html[data-ypp-card-style="glass"] ytd-channel-renderer,
+html[data-ypp-card-style="glass"] ytd-grid-video-renderer,
+html[data-ypp-card-style="glass"] ytd-grid-channel-renderer,
+html[data-ypp-card-style="glass"] ytd-grid-playlist-renderer,
+html[data-ypp-card-style="glass"] ytd-grid-radio-renderer {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
   backdrop-filter: blur(24px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
@@ -289,7 +331,14 @@ html[data-ypp-card-style="glass"] ytd-compact-video-renderer {
 }
 html[data-ypp-card-style="glass"] ytd-rich-item-renderer:hover,
 html[data-ypp-card-style="glass"] ytd-video-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-compact-video-renderer:hover {
+html[data-ypp-card-style="glass"] ytd-compact-video-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-playlist-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-radio-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-channel-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-grid-video-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-grid-channel-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-grid-playlist-renderer:hover,
+html[data-ypp-card-style="glass"] ytd-grid-radio-renderer:hover {
   transform: translateY(-4px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)) !important;
   box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
