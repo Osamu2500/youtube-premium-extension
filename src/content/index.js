@@ -36,6 +36,7 @@ import './features/core/layout/sidebar.js';
 // Home page features
 import './features/pages/home/home-organizer.js';
 import './features/pages/home/shorts-tools.js';
+import './features/pages/home/redirect-shorts.js';
 
 // Subscription features
 import './features/pages/subscriptions/folder-storage.js';
@@ -87,6 +88,7 @@ import './features/player/video-controls/video-controls.js';
 import './features/player/wheel-controls.js';
 import './features/player/audio-compressor.js';
 import './features/player/video-resumer.js';
+import './features/player/auto-pause.js';
 
 // Feature Manager & Main entry
 import './feature-manager.js';

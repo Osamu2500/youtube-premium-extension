@@ -137,6 +137,7 @@ window.YPP.SettingsSchema = {
         wheelControls:       { type: 'boolean', default: true },
         audioCompressor:     { type: 'boolean', default: false },
         videoResumer:        { type: 'boolean', default: true },
+        autoPause:           { type: 'boolean', default: false },
         commentFilter:       { type: 'boolean', default: true },
         contextMenu:         { type: 'boolean', default: true },
         enableAccountMenu:   { type: 'boolean', default: true },

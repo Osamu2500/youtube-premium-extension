@@ -1,7 +1,7 @@
 /**
- * Feature: Watch History Tracker
+ * Feature: Watch History Tracker Dashboard
  * Behavioral intelligence layer that extracts, aggregates, and visualizes
- * real watch data from Local Storage (Option A).
+ * real watch data from Local Storage directly on the YouTube History page.
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
@@ -10,6 +10,7 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
     constructor() {
         super('HistoryTracker');
         this.STORAGE_PREFIX = 'ypp_analytics_';
+        
         this.stats = {
             today: { count: 0, seconds: 0 },
             week: { count: 0, seconds: 0 },
@@ -17,11 +18,12 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             streak: 0,
             topChannel: '-'
         };
+        
         this.isExpanded = false;
         this.updateInterval = null;
         
         this._boundLoadStats = this.loadStats.bind(this);
-        this._boundMountUI = this.mountUI.bind(this);
+        this._boundHandleVisibility = this._handleVisibility.bind(this);
     }
     
     getConfigKey() {
@@ -29,40 +31,48 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
     }
 
     async enable() {
-        if (location.pathname !== '/feed/history') return;
         await super.enable();
-
-        // Initial Load
-        this.mountUI();
-        this.loadStats();
-
-        // Update periodically (in case user watches video in another tab or background)
-        this.updateInterval = setInterval(this._boundLoadStats, 5000);
-
-        // Re-check on Focus
-        this.addListener(window, 'focus', this._boundLoadStats);
         
-        // Handle Navigation via BaseFeature's DOMObserver instead of raw MutationObserver
-        this.observer.start();
-        // Just re-mount if the app node updates while we're on the history page
-        this.observer.register('history-tracker-mount', 'ytd-app', () => {
-             if (location.pathname === '/feed/history') {
-                 this.mountUI();
-             }
-        }, false);
+        // Listen to SPA navigation
+        // Note: The actual check if we're on /feed/history happens inside onPageChange
+        if (location.pathname === '/feed/history') {
+            this._mountAndStart();
+        }
     }
     
     async disable() {
         await super.disable();
+        this._stopAndUnmount();
+    }
+
+    onPageChange(url) {
+        if (!this.isEnabled) return;
         
+        if (location.pathname === '/feed/history') {
+            this._mountAndStart();
+        } else {
+            this._stopAndUnmount();
+        }
+    }
+
+    _mountAndStart() {
+        this.mountUI();
+        this.loadStats();
+
+        if (!this.updateInterval) {
+            this.updateInterval = setInterval(() => {
+                if (!document.hidden) this.loadStats();
+            }, 5000);
+        }
+
+        this.addListener(window, 'focus', this._boundLoadStats);
+        this.addListener(document, 'visibilitychange', this._boundHandleVisibility);
+    }
+
+    _stopAndUnmount() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
             this.updateInterval = null;
-        }
-        
-        if (this.observer) {
-            this.observer.unregister('history-tracker-mount');
-            this.observer.stop();
         }
         
         const widget = document.getElementById('ypp-history-tracker-widget');
@@ -71,30 +81,38 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         this.isExpanded = false;
     }
 
+    _handleVisibility() {
+        if (!document.hidden) {
+            this.loadStats();
+        }
+    }
+
     mountUI() {
+        // Find the main header on the history page
         const header = document.querySelector('ytd-browse[page-subtype="history"] #primary');
-        if (!header) return;
+        if (!header) {
+            // If it's not ready, try again shortly (BaseFeature utility isn't strictly needed if we rely on DOMObserver, but a simple timeout works)
+            setTimeout(() => this.mountUI(), 500);
+            return;
+        }
 
         if (!document.getElementById('ypp-history-tracker-widget')) {
             const widget = this.createWidget();
             header.insertBefore(widget, header.firstChild);
             this.injectComponentStyles();
-            // Load stats immediately after mount
             this.updateWidgetValues(); 
         }
     }
 
     async loadStats() {
-        // Generate keys for Today, Last 7 Days, Last 30 Days
         const today = new Date();
         const keysToCheck = [];
         
-        // Helper to formatting keys: ypp_analytics_YYYY-MM-DD
         const getKey = (d) => {
             return this.STORAGE_PREFIX + d.toISOString().split('T')[0];
         };
 
-        // Generate last 30 days of keys + legacy check logic
+        // Last 30 days
         for (let i = 0; i < 31; i++) {
             const d = new Date();
             d.setDate(today.getDate() - i);
@@ -103,7 +121,6 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
 
         const data = await chrome.storage.local.get(keysToCheck);
         
-        // Reset Aggregators
         let tCount = 0, tSec = 0;
         let wCount = 0, wSec = 0;
         let mCount = 0, mSec = 0;
@@ -117,60 +134,46 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             const seconds = dayData.totalSeconds || 0;
             const count = dayData.videos ? Object.keys(dayData.videos).length : 0;
 
-            // Today (index 0)
             if (index === 0) {
                 tCount = count;
                 tSec = seconds;
             }
-
-            // Week (0-6)
             if (index < 7) {
                 wCount += count;
                 wSec += seconds;
             }
-
-            // Month (0-30)
+            // All 31 days
             mCount += count;
             mSec += seconds;
         });
 
         // -------------------------------------------------------------
-        // NEW: Calculate Streak
+        // Calculate Streak (Bugfix applied)
         // -------------------------------------------------------------
         let streak = 0;
-        // Check today
-        if (data[todayKey]?.totalSeconds > 0) {
+        const checkDayHasData = (daysAgo) => {
+            const d = new Date();
+            d.setDate(today.getDate() - daysAgo);
+            return data[getKey(d)]?.totalSeconds > 0;
+        };
+
+        if (checkDayHasData(0)) {
             streak = 1;
-            // Count backwards
-            for (let i = 1; i < 30; i++) {
-                const d = new Date();
-                d.setDate(today.getDate() - i);
-                if (data[getKey(d)]?.totalSeconds > 0) {
-                    streak++;
-                } else {
-                    break;
-                }
+            for (let i = 1; i < 365; i++) { // Check up to a year backwards
+                if (checkDayHasData(i)) streak++;
+                else break;
             }
-        } 
-        else {
-             // If today is 0, check yesterday
-             const yesterday = new Date();
-             yesterday.setDate(today.getDate() - 1);
-             if (data[getKey(yesterday)]?.totalSeconds > 0) {
-                 for (let i = 1; i < 30; i++) { 
-                    const d = new Date();
-                    d.setDate(today.getDate() - i);
-                    if (data[getKey(d)]?.totalSeconds > 0) {
-                        streak++;
-                    } else {
-                        break;
-                    }
-                 }
-             }
+        } else if (checkDayHasData(1)) {
+            streak = 0; // The streak hasn't carried over to today yet, but we can show it as pending
+            // For motivation, we could say "0 (Yesterday: X)", but let's just count from yesterday
+            for (let i = 1; i < 365; i++) {
+                if (checkDayHasData(i)) streak++;
+                else break;
+            }
         }
 
         // -------------------------------------------------------------
-        // NEW: Top Channel (Today)
+        // Top Channel (Today)
         // -------------------------------------------------------------
         let topChannelName = '-';
         let topChannelTime = 0;
@@ -183,16 +186,14 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
                 channelStats[name] += v.seconds;
             });
             
-            // Find max
             Object.entries(channelStats).forEach(([name, time]) => {
-                if (time > topChannelTime) {
+                if (time > topChannelTime && name !== 'Unknown Channel') {
                     topChannelTime = time;
                     topChannelName = name;
                 }
             });
         }
 
-        // Update State
         this.stats = {
             today: { count: tCount, seconds: tSec },
             week: { count: wCount, seconds: wSec },
@@ -211,19 +212,19 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         div.innerHTML = `
             <div class="ypp-tracker-header">
                 <div class="ypp-tracker-title">
-                    <h2>History Analytics</h2>
-                    <span class="ypp-badge">Real-Time</span>
+                    <h2>Personal Analytics</h2>
+                    <span class="ypp-badge pulse">Live</span>
                 </div>
-                <!-- Streak Badge -->
-                <div class="ypp-streak-badge" title="Daily Watch Streak">
+                <div class="ypp-streak-badge" title="Consecutive Days Watched">
                     <span class="fire-icon">🔥</span>
-                    <span id="ypp-stats-streak">0</span>
+                    <span id="ypp-stats-streak">0</span> <span style="font-size: 10px; opacity: 0.8; margin-left: 2px;">Day Streak</span>
                 </div>
-                <button id="ypp-tracker-toggle" class="ypp-icon-btn">▼</button>
+                <button id="ypp-tracker-toggle" class="ypp-icon-btn" aria-label="Toggle Details">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
             </div>
             
-            <div class="ypp-tracker-grid collapsed" id="ypp-tracker-content">
-                <!-- Today (Always Visible) -->
+            <div class="ypp-tracker-grid" id="ypp-tracker-content">
                 <div class="ypp-stat-card primary">
                     <span class="label">Videos Today</span>
                     <span class="value" id="ypp-stats-today-count">-</span>
@@ -233,29 +234,22 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
                     <span class="value" id="ypp-stats-today-time">-</span>
                 </div>
 
-                <!-- Expanded Stats -->
                 <div class="ypp-stat-card secondary hidden">
                     <span class="label">Last 7 Days</span>
                     <span class="value" id="ypp-stats-week-time">-</span>
                 </div>
-                 <div class="ypp-stat-card secondary hidden">
+                <div class="ypp-stat-card secondary hidden">
                     <span class="label">Last 30 Days</span>
                     <span class="value" id="ypp-stats-month-time">-</span>
                 </div>
 
-                <!-- New Top Channel Card -->
-                <div class="ypp-stat-card secondary hidden full-width">
+                <div class="ypp-stat-card secondary hidden full-width premium-card">
                      <span class="label">Top Channel (Today)</span>
                      <span class="value text-value" id="ypp-stats-top-channel">-</span>
                 </div>
             </div>
-            
-            <div class="ypp-tracker-footer hidden" id="ypp-tracker-footer">
-               <small>* Analytics stored locally. History starts from install.</small>
-            </div>
         `;
         
-        // Bind Toggle
         const toggle = div.querySelector('#ypp-tracker-toggle');
         toggle.addEventListener('click', () => {
             this.isExpanded = !this.isExpanded;
@@ -271,25 +265,26 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         style.id = 'ypp-tracker-styles';
         style.textContent = `
             #ypp-history-tracker-widget {
-                background: var(--ypp-bg-surface);
-                backdrop-filter: var(--ypp-blur-lg);
-                border: 1px solid var(--ypp-glass-border);
-                border-radius: var(--ypp-radius-lg);
-                margin-bottom: 32px;
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+                margin: 24px auto 32px auto;
                 overflow: hidden;
-                box-shadow: var(--ypp-shadow-card);
-                max-width: var(--ypp-layout-max-width, 1200px);
-                margin-left: auto;
-                margin-right: auto;
-                transition: var(--ypp-transition);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                max-width: 1000px;
+                transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                color: #fff;
+                font-family: "YouTube Sans", "Inter", sans-serif;
             }
             .ypp-tracker-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 padding: 16px 24px;
-                background: var(--ypp-glass-shine);
-                border-bottom: 1px solid var(--ypp-glass-border);
+                background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
             }
             .ypp-tracker-title {
                 display: flex;
@@ -297,123 +292,140 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             }
             .ypp-tracker-title h2 {
                 margin: 0;
-                font-size: 18px;
-                font-family: 'Inter', sans-serif;
+                font-size: 20px;
                 font-weight: 700;
-                color: var(--ypp-text-primary);
                 margin-right: 12px;
                 letter-spacing: -0.5px;
             }
             .ypp-badge {
-                background: rgba(62,166,255,0.15);
-                color: var(--ypp-accent-blue);
-                padding: 4px 10px;
-                border-radius: 8px;
+                background: rgba(255, 78, 69, 0.15);
+                color: #ff4e45;
+                padding: 4px 8px;
+                border-radius: 6px;
                 font-size: 11px;
-                font-weight: 700;
+                font-weight: 800;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                border: 1px solid rgba(62,166,255,0.3);
+                border: 1px solid rgba(255, 78, 69, 0.3);
+            }
+            .ypp-badge.pulse {
+                animation: pulse-badge 2s infinite;
+            }
+            @keyframes pulse-badge {
+                0% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0.4); }
+                70% { box-shadow: 0 0 0 6px rgba(255, 78, 69, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(255, 78, 69, 0); }
             }
             .ypp-streak-badge {
                 display: flex;
                 align-items: center;
-                background: rgba(255,107,107,0.1);
-                border: 1px solid rgba(255,107,107,0.3);
-                padding: 6px 14px;
+                background: linear-gradient(135deg, rgba(255,152,0,0.2) 0%, rgba(255,87,34,0.2) 100%);
+                border: 1px solid rgba(255,152,0,0.3);
+                padding: 6px 16px;
                 border-radius: 20px;
                 margin-left: auto;
                 margin-right: 16px;
-                backdrop-filter: var(--ypp-blur-sm);
             }
             .ypp-streak-badge .fire-icon {
                 margin-right: 6px;
                 font-size: 16px;
-                filter: drop-shadow(0 2px 4px rgba(255,107,107,0.4));
             }
-            .ypp-streak-badge span:last-child {
-                color: #FF6B6B;
+            .ypp-streak-badge span:nth-child(2) {
+                color: #ff9800;
                 font-weight: 800;
-                font-size: 14px;
-                font-family: 'Inter', sans-serif;
+                font-size: 15px;
             }
             .ypp-tracker-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
                 gap: 16px;
                 padding: 24px;
+                transition: all 0.4s ease;
             }
             .ypp-tracker-grid.expanded {
                 grid-template-columns: repeat(4, 1fr);
             }
-            .ypp-stat-card.full-width {
-                grid-column: 1 / -1; 
-            }
             .ypp-stat-card {
-                background: rgba(255,255,255,0.02);
-                padding: 20px 16px;
-                border-radius: var(--ypp-radius-md);
+                background: rgba(255,255,255,0.03);
+                padding: 24px 16px;
+                border-radius: 12px;
                 text-align: center;
-                border: 1px solid var(--ypp-glass-border);
-                transition: var(--ypp-transition);
+                border: 1px solid rgba(255,255,255,0.05);
+                transition: all 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
             .ypp-stat-card:hover {
-                background: rgba(255,255,255,0.05);
-                transform: translateY(-2px);
-                box-shadow: var(--ypp-shadow-float);
-                border-color: rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.06);
+                transform: translateY(-4px);
+                border-color: rgba(255,255,255,0.15);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            }
+            .ypp-stat-card.full-width {
+                grid-column: 1 / -1; 
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 32px;
+            }
+            .ypp-stat-card.premium-card {
+                background: linear-gradient(135deg, rgba(62,166,255,0.05) 0%, rgba(156,39,176,0.05) 100%);
+                border: 1px solid rgba(62,166,255,0.2);
             }
             .ypp-stat-card .label {
-                display: block;
                 font-size: 12px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: var(--ypp-text-secondary);
+                color: #aaa;
                 margin-bottom: 8px;
                 font-weight: 600;
             }
+            .ypp-stat-card.full-width .label {
+                margin-bottom: 0;
+            }
             .ypp-stat-card .value {
-                font-size: 28px;
+                font-size: 32px;
                 font-weight: 800;
-                color: var(--ypp-text-primary);
-                font-family: 'Inter', sans-serif;
+                color: #fff;
                 letter-spacing: -1px;
             }
             .ypp-stat-card .value.text-value {
-                font-size: 18px;
+                font-size: 20px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                display: block;
-                color: var(--ypp-text-secondary);
+                max-width: 60%;
+                color: #3ea6ff;
             }
-            .ypp-tracker-footer {
-                padding: 12px 24px;
-                background: rgba(0,0,0,0.1);
-                color: var(--ypp-text-muted);
-                font-size: 12px;
-                text-align: center;
-                border-top: 1px solid var(--ypp-glass-border);
-            }
-            .hidden { display: none; }
+            .hidden { display: none !important; }
             
             #ypp-tracker-toggle {
-                background: rgba(255,255,255,0.05);
-                border: 1px solid var(--ypp-glass-border);
-                color: var(--ypp-text-secondary);
+                background: rgba(255,255,255,0.1);
+                border: none;
+                color: #fff;
                 cursor: pointer;
-                font-size: 10px;
-                transition: var(--ypp-transition);
-                width: 32px; height: 32px;
+                transition: all 0.3s ease;
+                width: 36px; height: 36px;
                 display: flex; align-items: center; justify-content: center;
                 border-radius: 50%;
             }
             #ypp-tracker-toggle:hover {
-                background: rgba(255,255,255,0.1);
-                color: var(--ypp-text-primary);
+                background: rgba(255,255,255,0.2);
+                transform: scale(1.05);
             }
-            #ypp-tracker-toggle.rotated {
+            #ypp-tracker-toggle svg {
+                transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+            #ypp-tracker-toggle.rotated svg {
                 transform: rotate(180deg);
+            }
+
+            /* Responsive Adjustments */
+            @media (max-width: 800px) {
+                .ypp-tracker-grid.expanded {
+                    grid-template-columns: 1fr 1fr;
+                }
             }
         `;
         document.head.appendChild(style);
@@ -421,28 +433,29 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
 
     toggleExpand() {
         const content = document.getElementById('ypp-tracker-content');
-        const footer = document.getElementById('ypp-tracker-footer');
         const toggle = document.getElementById('ypp-tracker-toggle');
         const secondary = document.querySelectorAll('.ypp-stat-card.secondary');
         
         if (this.isExpanded) {
             content.classList.add('expanded');
             secondary.forEach(el => el.classList.remove('hidden'));
-            footer.classList.remove('hidden');
             toggle.classList.add('rotated');
         } else {
             content.classList.remove('expanded');
             secondary.forEach(el => el.classList.add('hidden'));
-            footer.classList.add('hidden');
             toggle.classList.remove('rotated');
         }
     }
 
     updateWidgetValues() {
         const fmtTime = (s) => {
-            const h = Math.floor(s / 3600);
+            const days = Math.floor(s / 86400);
+            const h = Math.floor((s % 86400) / 3600);
             const m = Math.floor((s % 3600) / 60);
-            return h > 0 ? `${h}h ${m}m` : `${m}m`;
+            
+            if (days > 0) return `${days}d ${h}h`;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m}m`;
         };
 
         const setVal = (id, val) => {

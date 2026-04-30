@@ -289,6 +289,7 @@ window.YPP.CONSTANTS = {
         wheelControls: true,
         audioCompressor: false,
         videoResumer: true,
+        autoPause: false,
         commentFilter: false,
         contextMenu: true,
 
@@ -455,6 +456,7 @@ window.YPP.CONSTANTS = {
         headerNav: 'HeaderNav',
         searchRedesign: 'SearchRedesign',
         shortsTools: 'ShortsTools',
+        redirectShorts: 'RedirectShorts',
         playerTools: 'PlayerTools',
         // New Features
         playlistDuration: 'PlaylistDuration',
@@ -482,6 +484,7 @@ window.YPP.CONSTANTS = {
         wheelControls: 'WheelControls',
         audioCompressor: 'AudioCompressor',
         videoResumer: 'VideoResumer',
+        autoPause: 'AutoPause',
         commentFilter: 'CommentFilter',
         globalPlayerBar: 'GlobalPlayerBar',
         volumeBoost: 'VolumeBooster',

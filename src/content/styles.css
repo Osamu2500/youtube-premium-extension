@@ -230,62 +230,48 @@ html.yt-premium-plus-theme .ytd-thumbnail {
   border-radius: var(--ypp-thumbnail-radius, 12px) !important;
 }
 
-/* Card Styles */
-html.yt-premium-plus-theme ytd-rich-item-renderer,
-html.yt-premium-plus-theme ytd-video-renderer,
-html.yt-premium-plus-theme ytd-compact-video-renderer,
-html.yt-premium-plus-theme ytd-playlist-renderer,
-html.yt-premium-plus-theme ytd-radio-renderer,
-html.yt-premium-plus-theme ytd-channel-renderer,
-html.yt-premium-plus-theme ytd-grid-video-renderer,
-html.yt-premium-plus-theme ytd-grid-channel-renderer,
-html.yt-premium-plus-theme ytd-grid-playlist-renderer,
-html.yt-premium-plus-theme ytd-grid-radio-renderer {
+/* Card Styles - Optimized with :is() pseudo-class */
+
+/* Base transition for all supported renderers */
+html.yt-premium-plus-theme :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+) {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 /* Flat Cards */
-html[data-ypp-card-style="flat"] ytd-rich-item-renderer,
-html[data-ypp-card-style="flat"] ytd-video-renderer,
-html[data-ypp-card-style="flat"] ytd-compact-video-renderer,
-html[data-ypp-card-style="flat"] ytd-playlist-renderer,
-html[data-ypp-card-style="flat"] ytd-radio-renderer,
-html[data-ypp-card-style="flat"] ytd-channel-renderer,
-html[data-ypp-card-style="flat"] ytd-grid-video-renderer,
-html[data-ypp-card-style="flat"] ytd-grid-channel-renderer,
-html[data-ypp-card-style="flat"] ytd-grid-playlist-renderer,
-html[data-ypp-card-style="flat"] ytd-grid-radio-renderer {
+html[data-ypp-card-style="flat"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+) {
   background: transparent !important;
   box-shadow: none !important;
   border: 1px solid transparent !important;
   padding: 0 !important;
 }
-html[data-ypp-card-style="flat"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-video-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-compact-video-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-playlist-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-radio-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-channel-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-grid-video-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-grid-channel-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-grid-playlist-renderer:hover,
-html[data-ypp-card-style="flat"] ytd-grid-radio-renderer:hover {
+html[data-ypp-card-style="flat"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+):hover {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: var(--ypp-radius-md);
 }
 
 /* Elevated Cards */
-html[data-ypp-card-style="elevated"] ytd-rich-item-renderer,
-html[data-ypp-card-style="elevated"] ytd-video-renderer,
-html[data-ypp-card-style="elevated"] ytd-compact-video-renderer,
-html[data-ypp-card-style="elevated"] ytd-playlist-renderer,
-html[data-ypp-card-style="elevated"] ytd-radio-renderer,
-html[data-ypp-card-style="elevated"] ytd-channel-renderer,
-html[data-ypp-card-style="elevated"] ytd-grid-video-renderer,
-html[data-ypp-card-style="elevated"] ytd-grid-channel-renderer,
-html[data-ypp-card-style="elevated"] ytd-grid-playlist-renderer,
-html[data-ypp-card-style="elevated"] ytd-grid-radio-renderer {
+html[data-ypp-card-style="elevated"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+) {
   background: var(--ypp-bg-surface) !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
   border: 1px solid rgba(255,255,255,0.05) !important;
@@ -293,32 +279,24 @@ html[data-ypp-card-style="elevated"] ytd-grid-radio-renderer {
   border-radius: var(--ypp-radius-md);
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="elevated"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-video-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-compact-video-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-playlist-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-radio-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-channel-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-grid-video-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-grid-channel-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-grid-playlist-renderer:hover,
-html[data-ypp-card-style="elevated"] ytd-grid-radio-renderer:hover {
+html[data-ypp-card-style="elevated"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+):hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
   border-color: var(--ypp-accent-hover) !important;
 }
 
 /* Glass Cards */
-html[data-ypp-card-style="glass"] ytd-rich-item-renderer,
-html[data-ypp-card-style="glass"] ytd-video-renderer,
-html[data-ypp-card-style="glass"] ytd-compact-video-renderer,
-html[data-ypp-card-style="glass"] ytd-playlist-renderer,
-html[data-ypp-card-style="glass"] ytd-radio-renderer,
-html[data-ypp-card-style="glass"] ytd-channel-renderer,
-html[data-ypp-card-style="glass"] ytd-grid-video-renderer,
-html[data-ypp-card-style="glass"] ytd-grid-channel-renderer,
-html[data-ypp-card-style="glass"] ytd-grid-playlist-renderer,
-html[data-ypp-card-style="glass"] ytd-grid-radio-renderer {
+html[data-ypp-card-style="glass"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+) {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
   backdrop-filter: blur(24px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
@@ -329,16 +307,12 @@ html[data-ypp-card-style="glass"] ytd-grid-radio-renderer {
   border-radius: var(--ypp-radius-lg, 16px) !important;
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="glass"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-video-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-compact-video-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-playlist-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-radio-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-channel-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-grid-video-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-grid-channel-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-grid-playlist-renderer:hover,
-html[data-ypp-card-style="glass"] ytd-grid-radio-renderer:hover {
+html[data-ypp-card-style="glass"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+):hover {
   transform: translateY(-4px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)) !important;
   box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
@@ -346,16 +320,12 @@ html[data-ypp-card-style="glass"] ytd-grid-radio-renderer:hover {
 }
 
 /* ── FOLDER STYLE ── */
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer,
-html[data-ypp-card-style="folder"] ytd-video-renderer,
-html[data-ypp-card-style="folder"] ytd-compact-video-renderer,
-html[data-ypp-card-style="folder"] ytd-playlist-renderer,
-html[data-ypp-card-style="folder"] ytd-radio-renderer,
-html[data-ypp-card-style="folder"] ytd-channel-renderer,
-html[data-ypp-card-style="folder"] ytd-grid-video-renderer,
-html[data-ypp-card-style="folder"] ytd-grid-channel-renderer,
-html[data-ypp-card-style="folder"] ytd-grid-playlist-renderer,
-html[data-ypp-card-style="folder"] ytd-grid-radio-renderer {
+html[data-ypp-card-style="folder"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
+  ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
+  ytd-grid-video-renderer, ytd-grid-channel-renderer,
+  ytd-grid-playlist-renderer, ytd-grid-radio-renderer
+) {
     position: relative !important;
     margin-top: 14px !important;
     border-radius: 0 8px 8px 8px !important;
@@ -364,10 +334,10 @@ html[data-ypp-card-style="folder"] ytd-grid-radio-renderer {
     padding: var(--ypp-density-pad, 8px) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer::before,
-html[data-ypp-card-style="folder"] ytd-compact-video-renderer::before,
-html[data-ypp-card-style="folder"] ytd-grid-video-renderer::before {
+html[data-ypp-card-style="folder"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, 
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+)::before {
     content: '' !important;
     position: absolute !important;
     top: -10px !important;
@@ -380,18 +350,12 @@ html[data-ypp-card-style="folder"] ytd-grid-video-renderer::before {
     border-bottom: none !important;
 }
 /* Cycle folder tab colors */
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer:nth-child(6n+1)::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer:nth-child(6n+1)::before { --ypp-folder-tab: #FF6B6B; }
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer:nth-child(6n+2)::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer:nth-child(6n+2)::before { --ypp-folder-tab: #6C63FF; }
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer:nth-child(6n+3)::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer:nth-child(6n+3)::before { --ypp-folder-tab: #10B981; }
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer:nth-child(6n+4)::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer:nth-child(6n+4)::before { --ypp-folder-tab: #F59E0B; }
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer:nth-child(6n+5)::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer:nth-child(6n+5)::before { --ypp-folder-tab: #3EA6FF; }
-html[data-ypp-card-style="folder"] ytd-rich-item-renderer:nth-child(6n+6)::before,
-html[data-ypp-card-style="folder"] ytd-video-renderer:nth-child(6n+6)::before { --ypp-folder-tab: #EC4899; }
+html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+1)::before { --ypp-folder-tab: #FF6B6B; }
+html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+2)::before { --ypp-folder-tab: #6C63FF; }
+html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+3)::before { --ypp-folder-tab: #10B981; }
+html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+4)::before { --ypp-folder-tab: #F59E0B; }
+html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+5)::before { --ypp-folder-tab: #3EA6FF; }
+html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+6)::before { --ypp-folder-tab: #EC4899; }
 
 /* ── BENTO STYLE ── */
 html[data-ypp-card-style="bento"] ytd-rich-grid-renderer > #contents {
@@ -400,10 +364,10 @@ html[data-ypp-card-style="bento"] ytd-rich-grid-renderer > #contents {
     padding: 3px !important;
     border-radius: 16px !important;
 }
-html[data-ypp-card-style="bento"] ytd-rich-item-renderer,
-html[data-ypp-card-style="bento"] ytd-video-renderer,
-html[data-ypp-card-style="bento"] ytd-compact-video-renderer,
-html[data-ypp-card-style="bento"] ytd-grid-video-renderer {
+html[data-ypp-card-style="bento"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer,
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+) {
     border-radius: 12px !important;
     background: #111111 !important;
     border: none !important;
@@ -411,19 +375,19 @@ html[data-ypp-card-style="bento"] ytd-grid-video-renderer {
     margin: 0 !important;
     padding: var(--ypp-density-pad, 8px) !important;
 }
-html[data-ypp-card-style="bento"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="bento"] ytd-video-renderer:hover,
-html[data-ypp-card-style="bento"] ytd-compact-video-renderer:hover,
-html[data-ypp-card-style="bento"] ytd-grid-video-renderer:hover {
+html[data-ypp-card-style="bento"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer,
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+):hover {
     background: #1a1a1a !important;
     transform: none !important;
 }
 
 /* ── NEON STYLE ── */
-html[data-ypp-card-style="neon"] ytd-rich-item-renderer,
-html[data-ypp-card-style="neon"] ytd-video-renderer,
-html[data-ypp-card-style="neon"] ytd-compact-video-renderer,
-html[data-ypp-card-style="neon"] ytd-grid-video-renderer {
+html[data-ypp-card-style="neon"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer,
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+) {
     border: 1px solid rgba(108,99,255,0.25) !important;
     border-radius: 10px !important;
     background: rgba(10,10,20,0.8) !important;
@@ -433,10 +397,10 @@ html[data-ypp-card-style="neon"] ytd-grid-video-renderer {
     padding: var(--ypp-density-pad, 8px) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="neon"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="neon"] ytd-video-renderer:hover,
-html[data-ypp-card-style="neon"] ytd-compact-video-renderer:hover,
-html[data-ypp-card-style="neon"] ytd-grid-video-renderer:hover {
+html[data-ypp-card-style="neon"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer,
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+):hover {
     border-color: rgba(108,99,255,0.6) !important;
     box-shadow: 0 0 20px rgba(108,99,255,0.35),
                 0 0 40px rgba(108,99,255,0.15) !important;
@@ -446,10 +410,10 @@ html[data-ypp-card-style="neon"] ytd-thumbnail {
 }
 
 /* ── COMPACT STYLE ── */
-html[data-ypp-card-style="compact"] ytd-rich-item-renderer,
-html[data-ypp-card-style="compact"] ytd-video-renderer,
-html[data-ypp-card-style="compact"] ytd-compact-video-renderer,
-html[data-ypp-card-style="compact"] ytd-grid-video-renderer {
+html[data-ypp-card-style="compact"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer,
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+) {
     background: transparent !important;
     border: none !important;
     border-radius: 6px !important;
@@ -457,10 +421,10 @@ html[data-ypp-card-style="compact"] ytd-grid-video-renderer {
     padding: 4px !important;
     margin-bottom: 4px !important;
 }
-html[data-ypp-card-style="compact"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="compact"] ytd-video-renderer:hover,
-html[data-ypp-card-style="compact"] ytd-compact-video-renderer:hover,
-html[data-ypp-card-style="compact"] ytd-grid-video-renderer:hover {
+html[data-ypp-card-style="compact"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer,
+  ytd-compact-video-renderer, ytd-grid-video-renderer
+):hover {
     background: rgba(255,255,255,0.04) !important;
     transform: none !important;
 }
@@ -470,15 +434,16 @@ html[data-ypp-card-style="compact"] ytd-thumbnail {
 html[data-ypp-card-style="compact"] #video-title {
     font-size: 12px !important;
     -webkit-line-clamp: 1 !important;
+    line-clamp: 1 !important;
 }
 html[data-ypp-card-style="compact"] #metadata-line {
     font-size: 11px !important;
 }
 
 /* ── POLAROID STYLE ── */
-html[data-ypp-card-style="polaroid"] ytd-rich-item-renderer,
-html[data-ypp-card-style="polaroid"] ytd-video-renderer,
-html[data-ypp-card-style="polaroid"] ytd-grid-video-renderer {
+html[data-ypp-card-style="polaroid"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
+) {
     background: #E8E4D9 !important;
     border-radius: 4px !important;
     padding: 6px 6px 24px !important;
@@ -488,14 +453,14 @@ html[data-ypp-card-style="polaroid"] ytd-grid-video-renderer {
     transform: rotate(0.5deg) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="polaroid"] ytd-rich-item-renderer:nth-child(even),
-html[data-ypp-card-style="polaroid"] ytd-video-renderer:nth-child(even),
-html[data-ypp-card-style="polaroid"] ytd-grid-video-renderer:nth-child(even) {
+html[data-ypp-card-style="polaroid"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
+):nth-child(even) {
     transform: rotate(-0.8deg) !important;
 }
-html[data-ypp-card-style="polaroid"] ytd-rich-item-renderer:hover,
-html[data-ypp-card-style="polaroid"] ytd-video-renderer:hover,
-html[data-ypp-card-style="polaroid"] ytd-grid-video-renderer:hover {
+html[data-ypp-card-style="polaroid"] :is(
+  ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
+):hover {
     transform: rotate(0deg) scale(1.02) !important;
     z-index: 2 !important;
 }
@@ -5779,67 +5744,118 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
   text-transform: capitalize !important;
 }
 
-/* --- Playlist Page Structural Layout Fixes & Overhaul --- */
-/* Completely decouple the playlist from native YouTube flow bugs! */
+/* --- Playlist Page: Two-Column Fixed Layout --- */
+/* Panel width + gap that the video list respects */
+:root {
+  --ypp-playlist-panel-w: 380px;
+  --ypp-playlist-panel-gap: 24px;
+  --ypp-playlist-nav-w: 72px; /* YouTube's collapsed guide width */
+}
+
+/* ── Nuclear hide: fires as soon as body class is added (before _build finishes) ── */
+/* Hides native list so it never bleeds through underneath our custom UI             */
+body.ypp-playlist-redesign ytd-playlist-video-list-renderer,
+body.ypp-playlist-redesign ytd-playlist-header-renderer,
+body.ypp-playlist-redesign ytd-browse[page-subtype="playlist"] #primary > ytd-section-list-renderer,
+body.ypp-playlist-redesign ytd-browse[page-subtype="playlist"] ytd-item-section-renderer,
+body.ypp-playlist-redesign ytd-browse[page-subtype="playlist"] #primary-inner > ytd-section-list-renderer,
+body.ypp-playlist-redesign ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* JS-added class fallback (belt-and-suspenders) */
+.ypp-pl-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Keep our custom wrapper always visible when class is active */
+body.ypp-playlist-redesign #ypp-pl-root {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* 1. Root browse container — full-width, no centering cap */
 .yt-premium-plus-theme ytd-browse[page-subtype="playlist"] {
   position: relative !important;
-  max-width: 1400px !important;
-  margin: 0 auto !important;
-  padding-top: 24px !important;
-  padding-left: 396px !important; /* 360px header + 36px gap */
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   display: block !important;
 }
 
-/* Force the Header into a Fixed Position on the Left */
-.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-playlist-header-renderer {
-  position: fixed !important;
-  top: calc(var(--ytd-masthead-height, 56px) + 24px) !important;
-  /* Centering formula: aligns to max-width 1400 container, clamping at 24px padding */
-  left: max(calc((100vw - 1400px) / 2), 24px) !important;
-  width: 360px !important;
-  max-width: 360px !important;
-  max-height: calc(100vh - var(--ytd-masthead-height, 56px) - 48px) !important;
-  overflow-y: auto !important;
-  margin: 0 !important;
-  z-index: 100 !important;
-  
-  /* Make the header incredibly detailed and majestic */
-  background: linear-gradient(180deg, rgba(30, 40, 50, 0.4) 0%, rgba(15, 15, 15, 0.7) 100%) !important;
-  backdrop-filter: blur(32px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: var(--ypp-radius-lg, 24px) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1) !important;
-  padding: 24px !important;
-}
-
-/* Let the video list natural fill */
-.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer,
-.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-section-list-renderer,
-.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] > #contents {
+/* 2. Kill any flex/grid imposed by two-column wrapper */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer {
+  display: block !important;
   width: 100% !important;
-  max-width: 1000px !important; /* Cap width for comfortable reading */
+  max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  display: block !important;
 }
 
-/* Hide wrappers that might interfere without breaking children */
+/* 3. #secondary — absolute panel pinned to far LEFT of viewport */
 .yt-premium-plus-theme ytd-browse[page-subtype="playlist"] #secondary {
-  width: 0 !important;
-  height: 0 !important;
+  position: fixed !important;
+  top: calc(var(--ytd-masthead-height, 56px) + 20px) !important;
+  /* Sit right after the YouTube nav guide (collapsed = 72px) */
+  left: calc(var(--ypp-playlist-nav-w) + 16px) !important;
+  width: var(--ypp-playlist-panel-w) !important;
+  max-width: var(--ypp-playlist-panel-w) !important;
+  height: calc(100vh - var(--ytd-masthead-height, 56px) - 40px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
   flex: none !important;
-  overflow: visible !important;
+  z-index: 200 !important;
 }
 
-.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] #primary {
+/* 4. The inner header card styling */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-playlist-header-renderer {
+  display: block !important;
+  position: relative !important;
   width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  
+  /* Glassmorphic panel */
+  background: linear-gradient(165deg, rgba(25, 30, 45, 0.55) 0%, rgba(10, 10, 18, 0.80) 100%) !important;
+  backdrop-filter: blur(36px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(1.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  padding: 20px !important;
+}
+
+/* 5. #primary — video list, starts right after the fixed panel */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] #primary {
+  display: block !important;
+  width: auto !important;
+  /* Left margin = nav guide + panel + gap */
+  margin-left: calc(var(--ypp-playlist-nav-w) + var(--ypp-playlist-panel-w) + var(--ypp-playlist-panel-gap) + 16px) !important;
+  margin-right: 24px !important;
+  margin-top: 20px !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+}
+
+/* 6. Section list & contents fill primary fully */
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] ytd-section-list-renderer,
+.yt-premium-plus-theme ytd-browse[page-subtype="playlist"] #primary > #contents {
+  width: 100% !important;
+  max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
+  display: block !important;
 }
 
 /* --- High-End Sort Option Filter --- */
@@ -5878,6 +5894,547 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
   border-color: rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   PLAYLIST REDESIGN — Custom UI Component Styles
+   All scoped to #ypp-pl-root to avoid leaking to native YouTube
+   ══════════════════════════════════════════════════════════════ */
+
+/* Root wrapper */
+#ypp-pl-root {
+    position: relative;
+    z-index: 1;
+    font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+}
+
+/* Layout container: sidebar is fixed so layout is just a block context */
+#ypp-pl-root .ypp-pl-layout {
+    display: block;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure YouTube masthead always sits above our fixed sidebar */
+body.ypp-playlist-redesign ytd-masthead {
+    z-index: 200 !important;
+    position: relative !important;
+}
+
+/* Ambient background */
+#ypp-pl-root .ypp-pl-ambient-bg {
+    position: fixed;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(80px) saturate(1.4);
+    opacity: 0.12;
+    z-index: 0;
+    pointer-events: none;
+}
+#ypp-pl-root .ypp-pl-ambient-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9));
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-sidebar {
+    /* Starts below the 56px YouTube masthead — floating island */
+    position: fixed;
+    top: 80px;
+    /* Flush left with native gap */
+    left: 24px;
+    width: 360px;
+    min-width: 360px;
+    max-width: 360px;
+    height: calc(100vh - 104px); /* 80px top + 24px bottom */
+    z-index: 150;
+    /* Background */
+    background: rgba(18, 18, 20, 0.97);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    /* Large rounded corners like native */
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 24px;
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    /* 24px top = comfortable breathing room */
+    padding: 24px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+#ypp-pl-root .ypp-pl-sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Cover image */
+#ypp-pl-root .ypp-pl-cover-wrap {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    background: rgba(255,255,255,0.05);
+}
+#ypp-pl-root .ypp-pl-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+}
+#ypp-pl-root .ypp-pl-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.2);
+}
+#ypp-pl-root .ypp-pl-cover-placeholder svg { width: 48px; height: 48px; }
+#ypp-pl-root .ypp-pl-cover-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(255,255,255,0.06));
+    pointer-events: none;
+}
+
+/* Meta text */
+#ypp-pl-root .ypp-pl-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.3;
+}
+#ypp-pl-root .ypp-pl-owner {
+    font-size: 13px;
+    color: #6C63FF;
+    text-decoration: none;
+    font-weight: 500;
+}
+#ypp-pl-root .ypp-pl-owner:hover { text-decoration: underline; }
+#ypp-pl-root .ypp-pl-stats {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin: 2px 0 0;
+}
+
+/* Action buttons */
+#ypp-pl-root .ypp-pl-actions {
+    display: flex;
+    gap: 8px;
+}
+#ypp-pl-root .ypp-pl-btn-primary,
+#ypp-pl-root .ypp-pl-btn-secondary {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#ypp-pl-root .ypp-pl-btn-primary {
+    background: #6C63FF;
+    color: #fff;
+}
+#ypp-pl-root .ypp-pl-btn-primary:hover { background: #5a52d5; }
+#ypp-pl-root .ypp-pl-btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+#ypp-pl-root .ypp-pl-btn-secondary:hover { background: rgba(255,255,255,0.14); }
+#ypp-pl-root .ypp-pl-btn-primary svg,
+#ypp-pl-root .ypp-pl-btn-secondary svg { width: 14px; height: 14px; }
+
+/* ── Duration card ────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-duration-card {
+    background: rgba(108, 99, 255, 0.12);
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    border-radius: 12px;
+    padding: 14px;
+    /* Push to bottom of sidebar */
+    margin-top: auto;
+    flex-shrink: 0;
+}
+#ypp-pl-root .ypp-pl-duration-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 5px;
+}
+#ypp-pl-root .ypp-pl-duration-time {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6C63FF;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+}
+#ypp-pl-root .ypp-pl-duration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 8px;
+}
+#ypp-pl-root .ypp-pl-duration-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#ypp-pl-root .ypp-pl-duration-speed {
+    font-size: 11px;
+    color: rgba(255,255,255,0.38);
+}
+#ypp-pl-root .ypp-pl-duration-val {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+}
+
+/* ── Main content area ────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-main {
+    /* offset right of the 360px sidebar + 24px left offset + 24px gap = 408px */
+    margin-left: 408px;
+    /* 80px top padding matches sidebar top */
+    padding: 80px 24px 48px 0;
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-toolbar {
+    position: sticky;
+    top: 56px; /* clears YouTube masthead */
+    z-index: 10;
+    background: rgba(10,10,12,0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 2px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#ypp-pl-root .ypp-pl-count-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+/* Column switcher pill */
+#ypp-pl-root .ypp-pl-col-switcher {
+    display: flex;
+    gap: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 9px;
+    padding: 4px;
+    flex-shrink: 0;
+}
+#ypp-pl-root .ypp-col-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: rgba(255,255,255,0.35);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+#ypp-pl-root .ypp-col-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.8);
+}
+#ypp-pl-root .ypp-col-btn.active {
+    background: rgba(108,99,255,0.28);
+    color: #7b74ff;
+}
+
+/* Filter input */
+#ypp-pl-root .ypp-pl-filter-wrap { flex: 1; }
+#ypp-pl-root .ypp-pl-filter {
+    width: 100%;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+#ypp-pl-root .ypp-pl-filter:focus { border-color: rgba(108,99,255,0.45); }
+#ypp-pl-root .ypp-pl-filter::placeholder { color: rgba(255,255,255,0.22); }
+
+/* ── Grid ─────────────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, 1fr); /* default 2-col */
+}
+#ypp-pl-root .ypp-pl-cols-1 { grid-template-columns: 1fr !important; }
+#ypp-pl-root .ypp-pl-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+#ypp-pl-root .ypp-pl-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+
+/* ── Video card ───────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    cursor: pointer;
+}
+#ypp-pl-root .ypp-pl-card:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.14);
+}
+
+/* Thumbnail area */
+#ypp-pl-root .ypp-pl-card-thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #0f0f0f;
+    overflow: hidden;
+}
+#ypp-pl-root .ypp-pl-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+}
+#ypp-pl-root .ypp-pl-card:hover .ypp-pl-card-thumb img { transform: scale(1.04); }
+
+/* Index badge */
+#ypp-pl-root .ypp-pl-card-index {
+    position: absolute;
+    top: 6px;
+    left: 7px;
+    background: rgba(0,0,0,0.65);
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 5px;
+    backdrop-filter: blur(4px);
+    z-index: 1;
+    line-height: 1.4;
+}
+
+/* Duration badge */
+#ypp-pl-root .ypp-pl-card-duration {
+    position: absolute;
+    bottom: 6px;
+    right: 7px;
+    background: rgba(0,0,0,0.80);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 5px;
+    backdrop-filter: blur(4px);
+    z-index: 1;
+    line-height: 1.4;
+    letter-spacing: 0.3px;
+}
+
+/* Progress bar */
+#ypp-pl-root .ypp-pl-card-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    z-index: 2;
+}
+#ypp-pl-root .ypp-pl-card-progress > div {
+    height: 100%;
+    background: #FF0000;
+    border-radius: 0 2px 2px 0;
+}
+
+/* Card info */
+#ypp-pl-root .ypp-pl-card-info {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+#ypp-pl-root .ypp-pl-card-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+}
+#ypp-pl-root .ypp-pl-card-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Card Menu Button */
+#ypp-pl-root .ypp-pl-card-menu {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    margin: -4px -4px 0 0; /* slight offset */
+}
+#ypp-pl-root .ypp-pl-card:hover .ypp-pl-card-menu {
+    opacity: 1;
+}
+#ypp-pl-root .ypp-pl-card-menu:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* Context Menu */
+.ypp-pl-card-context-menu {
+    background: rgba(22,22,22,0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 6px;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    font-family: 'Inter', 'Roboto', sans-serif;
+}
+.ypp-ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.ypp-ctx-item:hover {
+    background: rgba(255,255,255,0.07);
+    color: white;
+}
+.ypp-ctx-danger {
+    color: rgba(255,90,80,0.8);
+}
+.ypp-ctx-danger:hover {
+    background: rgba(255,78,69,0.1);
+    color: #ff6b6b;
+}
+#ypp-pl-root .ypp-pl-card-chan {
+    font-size: 11px;
+    color: rgba(255,255,255,0.38);
+}
+
+/* ── 1-col horizontal card override ──────────────────────────────── */
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card {
+    flex-direction: row !important;
+    height: 110px !important;
+    overflow: visible;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px;
+    padding: 6px 8px !important;
+    align-items: center;
+    box-shadow: none !important;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card:hover {
+    background: rgba(255,255,255,0.06) !important;
+    transform: none !important;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card-thumb {
+    width: 176px !important;
+    min-width: 176px !important;
+    height: 98px !important;
+    aspect-ratio: 16/9 !important;
+    flex-shrink: 0 !important;
+    border-radius: 8px;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card-info {
+    padding: 0 20px !important;
+    justify-content: center !important;
+    flex: 1;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card-title {
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    font-size: 16px !important;
+    margin-bottom: 6px;
+    font-weight: 500 !important;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card-title-row {
+    align-items: flex-start;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card-chan {
+    font-size: 13px !important;
+    color: rgba(255,255,255,0.5) !important;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card-menu {
+    opacity: 0;
+}
+#ypp-pl-root .ypp-pl-cols-1 .ypp-pl-card:hover .ypp-pl-card-menu {
+    opacity: 1;
+}
+
+/* Placeholder thumbnail */
+#ypp-pl-root .ypp-pl-card-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.15);
+}
+#ypp-pl-root .ypp-pl-card-thumb-placeholder svg { width: 36px; height: 36px; }
+
 
 /* ═══════════════════════════════════════════════
    ACCOUNT MENU REDESIGN — Orbital Layout

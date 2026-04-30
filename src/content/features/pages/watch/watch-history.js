@@ -1,28 +1,27 @@
-// Attach to features namespace
-window.YPP.features = window.YPP.features || {};
-
 /**
  * Feature: Real-Time Playback Tracker
  * Tracks actual watch time on video pages via <video> events.
  * Source of truth for all "Personal Analytics".
  */
-window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
+window.YPP = window.YPP || {};
+window.YPP.features = window.YPP.features || {};
+
+window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends window.YPP.features.BaseFeature {
     constructor() {
+        super('WatchHistoryTracker');
         this.STORAGE_PREFIX = 'ypp_analytics_';
         this.FLUSH_INTERVAL = 10000; // Save every 10s
         
         // State
         this.activeVideoId = null;
-        this.videoTitle = null;
-        this.videoChannel = null;
+        this.videoTitle = 'Unknown Video';
+        this.videoChannel = 'Unknown Channel';
         this.sessionSeconds = 0; // Seconds watched in current memory buffer
         this.lastTickTime = 0;
         this.isTracking = false;
         
         this.flushTimer = null;
         this.videoElement = null;
-
-        // Watch Time Alert state
         this.lastAlertTime = 0; // Timestamp of last alert shown (prevents spam)
 
         // Binds
@@ -30,100 +29,84 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         this.handlePlay = this.handlePlay.bind(this);
         this.handlePause = this.handlePause.bind(this);
         this.saveData = this.saveData.bind(this);
-        this._checkWatchTimeAlert = this._checkWatchTimeAlert.bind(this);
     }
 
-    run(settings) {
-        this.settings = settings;
-        // Always run, but only active on /watch or /shorts
-        // Init once, handling navigation internally
-        if (!this.initialized) {
-            this.init();
-        }
-    }
+    getConfigKey() { return null; } // Always active
 
-    init() {
-        this.initialized = true;
-        window.YPP.Utils?.log('Initialized', 'TRACKER');
+    async enable() {
+        await super.enable();
         
-        // Handle Navigation (SPA)
-        window.addEventListener('yt-navigate-finish', () => this.handleNavigation());
-        
-        // Handle initial load if on watch page
-        if (location.pathname.startsWith('/watch') || location.pathname.startsWith('/shorts')) {
-            this.handleNavigation();
-        }
-
-        // Periodic Flush
         this.flushTimer = setInterval(this.saveData, this.FLUSH_INTERVAL);
+        this.addListener(window, 'beforeunload', this.saveData);
+        
+        this._injectAlertStyles();
 
-        // Save on unload
-        window.addEventListener('beforeunload', () => this.saveData());
+        if (this.utils.isWatchPage() || this._isOnShortsPage()) {
+            this._handleStartTracking();
+        }
     }
 
-    handleNavigation() {
-        // Stop previous
+    async disable() {
+        await super.disable();
+        
+        if (this.flushTimer) {
+            clearInterval(this.flushTimer);
+            this.flushTimer = null;
+        }
+        
+        this.stopTracking();
+        document.querySelector('.ypp-watch-alert')?.remove();
+    }
+
+    onVideoChange(videoId) {
+        if (!this.isEnabled) return;
+        this._handleStartTracking(videoId);
+    }
+
+    _isOnShortsPage() {
+        return location.pathname.startsWith('/shorts/');
+    }
+
+    _handleStartTracking(videoId) {
         this.stopTracking(); 
 
-        // Check if we are on a valid watch/shorts page
-        const isWatch = location.pathname.startsWith('/watch');
-        const isShorts = location.pathname.startsWith('/shorts');
-        
+        const isWatch = this.utils.isWatchPage();
+        const isShorts = this._isOnShortsPage();
         if (!isWatch && !isShorts) return;
 
-        window.YPP.Utils?.log('Navigation: detected watch/shorts page.', 'TRACKER');
-
-        // Extract ID immediately
-        const urlParams = new URLSearchParams(window.location.search);
-        let videoId = urlParams.get('v');
-        if (isShorts) videoId = location.pathname.split('/shorts/')[1];
-
-        if (!videoId) {
-            window.YPP.Utils?.log('No Video ID found yet.', 'TRACKER', 'debug');
-            return;
+        let activeId = videoId;
+        if (!activeId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            activeId = urlParams.get('v');
+            if (isShorts) activeId = location.pathname.split('/shorts/')[1];
         }
 
-        this.activeVideoId = videoId;
+        if (!activeId) return;
+
+        this.activeVideoId = activeId;
         this.sessionSeconds = 0;
-        
-        // Try to attach using pollFor
-        this.attemptAttach();
-    }
+        this.videoTitle = 'Unknown Video';
+        this.videoChannel = 'Unknown Channel';
 
-    async attemptAttach() {
-        try {
-            const Utils = window.YPP.Utils;
-            if (!Utils) return;
-
-            const video = await Utils.pollFor(() => {
-                const v = document.querySelector('video');
-                if (v && v.readyState >= 1) return v;
-                return null;
-            }, 10000, 500);
-
-            if (video) {
-                this.attachListeners(video);
-            }
-        } catch (error) {
-            window.YPP.Utils?.log('Gave up finding video element.', 'TRACKER', 'warn');
-        }
+        this.pollFor('watch-history-video', 'video.html5-main-video', (video) => {
+            this.attachListeners(video);
+        });
     }
 
     attachListeners(video) {
-        if (this.isTracking) return; // Already tracking
+        if (this.isTracking || !this.isEnabled) return;
 
         this.videoElement = video;
         this.isTracking = true;
         this.lastTickTime = Date.now();
 
-        // Extract metadata (Title/Channel) - might need a delay for DOM
         setTimeout(() => this.extractMetadata(), 1000);
 
-        video.addEventListener('timeupdate', this.handleTimeUpdate);
-        video.addEventListener('play', this.handlePlay);
-        video.addEventListener('pause', this.handlePause);
+        this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
+        this.videoElement.addEventListener('play', this.handlePlay);
+        this.videoElement.addEventListener('pause', this.handlePause);
         
-        window.YPP.Utils?.log(`Tracking started for ${this.activeVideoId}`, 'TRACKER');
+        this.utils.log?.(`Tracking started for ${this.activeVideoId}`, 'TRACKER');
     }
 
     stopTracking() {
@@ -133,7 +116,6 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
             this.videoElement.removeEventListener('pause', this.handlePause);
         }
         
-        // Save whatever we have
         this.saveData();
 
         this.isTracking = false;
@@ -144,34 +126,22 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
 
     extractMetadata() {
         try {
-             // Access centralized selectors
-             const SELECTORS = window.YPP.CONSTANTS.SELECTORS.METADATA_SELECTORS || { TITLE: [], CHANNEL: [] };
+             const SELECTORS = window.YPP.CONSTANTS?.SELECTORS?.METADATA_SELECTORS || { TITLE: [], CHANNEL: [] };
              
-             // Try multiple selectors from constants
              const titleEl = SELECTORS.TITLE.map(s => document.querySelector(s)).find(el => el) 
-                             || document.querySelector('h1.ytd-watch-metadata'); // Fallback
+                             || document.querySelector('h1.ytd-watch-metadata');
 
              const channelEl = SELECTORS.CHANNEL.map(s => document.querySelector(s)).find(el => el)
-                               || document.querySelector('ytd-video-owner-renderer #channel-name a'); // Fallback
+                               || document.querySelector('ytd-video-owner-renderer #channel-name a');
 
             this.videoTitle = titleEl ? titleEl.textContent.trim() : 'Unknown Video';
             this.videoChannel = channelEl ? channelEl.textContent.trim() : 'Unknown Channel';
-
-            // Fallback: Use DataAPI if available and metadata is missing
-            if ((this.videoTitle === 'Unknown Video' || this.videoChannel === 'Unknown Channel') && 
-                window.YPP.features.DataAPI && window.YPP.features.DataAPI.context) {
-                // Potential future expansion: use DataAPI context if we can extract it reliably
-                // For now, we just log valid attempts or rely on re-tries
-            }
-        } catch (e) {
-            // ignore
-        }
+        } catch (e) {}
     }
 
     handlePlay() {
         this.lastTickTime = Date.now();
-        // Extract metadata again in case it loaded late
-        if (!this.videoTitle || this.videoTitle === 'Unknown Video') this.extractMetadata();
+        if (this.videoTitle === 'Unknown Video') this.extractMetadata();
     }
 
     handlePause() {
@@ -192,10 +162,8 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
     }
 
     async saveData() {
-        // Use 5s for production to avoid noise
         if (!this.activeVideoId || this.sessionSeconds < 5) return;
 
-        // Capture snapshot of data to save
         const secToSave = Math.floor(this.sessionSeconds);
         const videoId = this.activeVideoId;
         const info = {
@@ -204,27 +172,20 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
             lastWatched: Date.now() 
         };
 
-        // Reset buffer immediately (so we don't double count if async save takes time)
-        this.sessionSeconds -= secToSave; // Keep remainder (fractional seconds)
+        this.sessionSeconds -= secToSave;
 
-        // Generate Date Key
-        const dateKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const dateKey = new Date().toISOString().split('T')[0];
         const storageKey = `${this.STORAGE_PREFIX}${dateKey}`;
 
         try {
             const result = await chrome.storage.local.get(storageKey);
-            let dayRecord = result[storageKey];
+            let dayRecord = result[storageKey] || { videos: {}, totalSeconds: 0 };
 
-            if (!dayRecord) {
-                dayRecord = { videos: {}, totalSeconds: 0 };
-            }
-            if (!dayRecord.videos) dayRecord.videos = {}; // Migration safety
+            if (!dayRecord.videos) dayRecord.videos = {};
             if (!dayRecord.totalSeconds) dayRecord.totalSeconds = 0;
 
-            // Update Total
             dayRecord.totalSeconds += secToSave;
 
-            // Update Video Record
             if (!dayRecord.videos[videoId]) {
                 dayRecord.videos[videoId] = {
                     title: info.title,
@@ -237,55 +198,38 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
             const vRec = dayRecord.videos[videoId];
             vRec.seconds += secToSave;
             vRec.lastWatched = info.lastWatched;
-            // Update metadata if it was "Unknown" previously
-            if ((!vRec.title || vRec.title === 'Unknown Video') && info.title !== 'Unknown Video') vRec.title = info.title;
-            if ((!vRec.channel || vRec.channel === 'Unknown Channel') && info.channel !== 'Unknown Channel') vRec.channel = info.channel;
+            
+            if (vRec.title === 'Unknown Video' && info.title !== 'Unknown Video') vRec.title = info.title;
+            if (vRec.channel === 'Unknown Channel' && info.channel !== 'Unknown Channel') vRec.channel = info.channel;
 
             await chrome.storage.local.set({ [storageKey]: dayRecord });
             
-            window.YPP.Utils?.log(`Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`, 'TRACKER', 'debug');
+            this.utils.log?.(`Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`, 'TRACKER', 'debug');
 
-            // Check watch time alert
             this._checkWatchTimeAlert(dayRecord.totalSeconds);
 
         } catch (e) {
-            if (e.message && e.message.includes('Extension context invalidated')) {
-                // Ignore silent context invalidation on extension reload
-                return;
-            }
-            window.YPP.Utils?.log('Save failed: ' + e.message, 'TRACKER', 'error');
+            if (e.message && e.message.includes('Extension context invalidated')) return;
+            this.utils.log?.('Save failed: ' + e.message, 'TRACKER', 'error');
         }
     }
 
-    /**
-     * Check if today's total watch time has exceeded the user's alert threshold.
-     * Fires at most once per hour to avoid repeated interruptions.
-     * @param {number} totalSecondsToday - Today's total seconds watched
-     */
     _checkWatchTimeAlert(totalSecondsToday) {
-        const settings = this.settings;
-        if (!settings?.watchTimeAlert) return;
+        if (!this.settings?.watchTimeAlert) return;
 
-        const limitHours = settings.watchTimeAlertHours ?? 2;
+        const limitHours = this.settings.watchTimeAlertHours ?? 2;
         const limitSeconds = limitHours * 3600;
 
         if (totalSecondsToday < limitSeconds) return;
 
-        // Throttle: only alert once per hour
         const now = Date.now();
-        if (now - this.lastAlertTime < 60 * 60 * 1000) return;
+        if (now - this.lastAlertTime < 60 * 60 * 1000) return; // Once per hour
 
         this.lastAlertTime = now;
         this._showWatchTimeAlert(totalSecondsToday, limitHours);
     }
 
-    /**
-     * Show a dismissible watch time warning overlay.
-     * @param {number} totalSeconds - Today's total seconds
-     * @param {number} limitHours - The configured limit
-     */
     _showWatchTimeAlert(totalSeconds, limitHours) {
-        // Remove any existing alert
         document.querySelector('.ypp-watch-alert')?.remove();
 
         const h = Math.floor(totalSeconds / 3600);
@@ -309,14 +253,79 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker {
         });
 
         document.body.appendChild(overlay);
-        requestAnimationFrame(() => overlay.classList.add('show'));
+        // Trigger reflow for animation
+        void overlay.offsetWidth;
+        overlay.classList.add('show');
 
-        // Auto-dismiss after 20 seconds
         setTimeout(() => {
             if (overlay.isConnected) {
                 overlay.classList.remove('show');
                 setTimeout(() => overlay.remove(), 300);
             }
         }, 20000);
+    }
+
+    _injectAlertStyles() {
+        if (document.getElementById('ypp-watch-alert-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'ypp-watch-alert-styles';
+        style.textContent = `
+            .ypp-watch-alert {
+                position: fixed;
+                bottom: -100px;
+                right: 24px;
+                background: rgba(20, 20, 20, 0.95);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                z-index: 999999;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                color: white;
+                font-family: 'Inter', Roboto, sans-serif;
+                transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            .ypp-watch-alert.show {
+                bottom: 24px;
+            }
+            .ypp-watch-alert-icon {
+                font-size: 24px;
+                animation: ypp-pulse 2s infinite;
+            }
+            .ypp-watch-alert-title {
+                font-weight: 700;
+                font-size: 14px;
+                margin-bottom: 4px;
+                color: #ff4e45;
+            }
+            .ypp-watch-alert-msg {
+                font-size: 13px;
+                color: #ccc;
+                max-width: 250px;
+                line-height: 1.4;
+            }
+            .ypp-watch-alert-close {
+                background: none;
+                border: none;
+                color: #888;
+                cursor: pointer;
+                font-size: 16px;
+                padding: 4px;
+                margin-left: 8px;
+                transition: color 0.2s;
+            }
+            .ypp-watch-alert-close:hover {
+                color: white;
+            }
+            @keyframes ypp-pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 };

@@ -5,72 +5,98 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.AutoQuality = class AutoQuality {
+window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.BaseFeature {
     constructor() {
-        this.name = 'AutoQuality';
-        this.settings = null;
+        super('AutoQuality');
         this.hasEnforcedTheater = false;
-        this._pollInterval = null;
     }
 
     getConfigKey() { return 'autoQuality'; }
 
-    enable(settings) {
+    // Override update to handle both autoQuality and autoCinema settings
+    async update(settings) {
         this.settings = settings;
-        this.run();
+        
+        const shouldBeEnabled = !!(settings.autoQuality || settings.autoCinema);
+        
+        if (shouldBeEnabled && !this.isEnabled) {
+            this.utils?.log(`Enabling feature: ${this.name}`, 'MAIN', 'debug');
+            this.abortController = new AbortController();
+            await this.enable();
+            this.isEnabled = true;
+        } else if (!shouldBeEnabled && this.isEnabled) {
+            this.utils?.log(`Disabling feature: ${this.name}`, 'MAIN', 'debug');
+            if (this.abortController) {
+                this.abortController.abort();
+                this.abortController = null;
+            }
+            await this.disable();
+            this.isEnabled = false;
+        } else if (this.isEnabled) {
+            this.runAutoTasks();
+        }
     }
 
-    disable() {
-        if (this._pollInterval) {
-            clearInterval(this._pollInterval);
-            this._pollInterval = null;
-        }
+    async enable() {
+        this.runAutoTasks();
+    }
+
+    async disable() {
+        super.disable();
         this.hasEnforcedTheater = false;
     }
 
-    update(settings) {
-        this.settings = settings;
-        if (settings.autoQuality || settings.autoCinema) {
-            this.run();
-        } else {
-            this.disable();
+    onVideoChange() {
+        this.hasEnforcedTheater = false; // Reset for new video
+        if (this.isEnabled) {
+            this.runAutoTasks();
         }
     }
 
-    run() {
+    runAutoTasks() {
         if (!this.settings) return;
 
-        // Apply once
         if (this.settings.autoQuality) {
-            this.applyAutoQuality();
+            // Player might not have quality levels ready immediately
+            this.pollFor(() => {
+                const player = document.getElementById('movie_player');
+                if (player && typeof player.getAvailableQualityLevels === 'function') {
+                    const available = player.getAvailableQualityLevels();
+                    if (available && available.length > 0 && available[0] !== 'auto') {
+                        this.applyAutoQuality(player);
+                        return true; // Stop polling
+                    }
+                }
+                return false;
+            }, 5000, 500).catch(() => {});
         }
 
-        // Continually check for controls/theater if needed, or wait for ready
         if (this.settings.autoCinema && !this.hasEnforcedTheater) {
-            this._pollInterval = setInterval(() => {
+            this.pollFor(() => {
+                if (this.hasEnforcedTheater) return true;
                 const controls = document.querySelector('.ytp-right-controls');
                 if (controls) {
                     this.enforceTheaterMode(controls);
-                    if (this.hasEnforcedTheater) {
-                        clearInterval(this._pollInterval);
-                        this._pollInterval = null;
-                    }
+                    return this.hasEnforcedTheater;
                 }
-            }, 1000);
+                return false;
+            }, 10000, 1000).catch(() => {});
         }
     }
 
-    applyAutoQuality() {
-        const player = document.getElementById('movie_player');
-        if (!player || typeof player.getAvailableQualityLevels !== 'function') return;
+    applyAutoQuality(player) {
         const available = player.getAvailableQualityLevels();
         const preferred = ['highres', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];
         const best = preferred.find(q => available.includes(q));
-        if (best && typeof player.setPlaybackQualityRange === 'function') {
-            const current = player.getPlaybackQuality();
-            if (current !== best) {
+        
+        if (best) {
+            if (typeof player.setPlaybackQualityRange === 'function') {
                 player.setPlaybackQualityRange(best);
             }
+            if (typeof player.setPlaybackQuality === 'function') {
+                player.setPlaybackQuality(best);
+            }
+            this.utils?.log(`Set quality to ${best}`, this.name, 'debug');
         }
     }
 
@@ -83,6 +109,7 @@ window.YPP.features.AutoQuality = class AutoQuality {
             sizeBtn.click();
             this.hasEnforcedTheater = true;
             document.cookie = "wide=1;domain=.youtube.com;path=/";
+            this.utils?.log(`Enforced Theater Mode`, this.name, 'debug');
         } else if (ytdWatch && ytdWatch.hasAttribute('theater')) {
             this.hasEnforcedTheater = true;
         }

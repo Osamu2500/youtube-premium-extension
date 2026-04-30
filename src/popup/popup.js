@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'wheelControls', // wheel-controls.js
         'audioCompressor', // audio-compressor.js
         'videoResumer', // video-resumer.js
+        'autoPause', // auto-pause.js
         'enableCustomSpeed',
         'enableGlobalPlayerBar',
         'enablePiP', // Button / Scroll PiP
@@ -719,8 +720,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Generate last 52 days for mini-heatmap (approx 2 months visually similar to GH)
         // Or 52 weeks? CSS says 52 columns. Let's do 52 days for now to keep it simple, or 52 weeks if vertical.
         // CSS grid-template-columns: repeat(52, 1fr) implies 52 items horizontally.
-        // Let's show the last 52 days.
-        const daysToShow = 52;
+        // Let's show the last 30 days.
+        const daysToShow = 30;
         
         const dates = [];
         const today = new Date();
@@ -787,9 +788,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const daysInMonth = lastDay.getDate();
         const startingDay = firstDay.getDay(); // 0 = Sun
 
+        // Render Day Names Header
+        const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        dayNames.forEach(d => {
+             const headerCell = document.createElement('div');
+             headerCell.className = 'calendar-day-name';
+             headerCell.textContent = d;
+             grid.appendChild(headerCell);
+        });
+
         // Empty slots for start
         for (let i = 0; i < startingDay; i++) {
              const empty = document.createElement('div');
+             empty.className = 'calendar-empty';
              grid.appendChild(empty);
         }
 
@@ -830,6 +841,33 @@ document.addEventListener('DOMContentLoaded', () => {
                      cell.classList.add('selected');
                      selectedCalDateString = dayString;
                      renderVideoList(data);
+                     
+                     // Update Top Display
+                     const topTime = document.getElementById('history-today-time');
+                     const topLabel = document.querySelector('.daily-stat .label');
+                     
+                     let seconds = 0;
+                     if (data) {
+                         if (typeof data === 'number') seconds = data;
+                         else if (data.totalSeconds) seconds = data.totalSeconds;
+                     }
+                     
+                     const h = Math.floor(seconds / 3600);
+                     const m = Math.floor((seconds % 3600) / 60);
+                     if (topTime) {
+                         topTime.textContent = h > 0 ? `${h}h ${m}m` : `${m}m`;
+                     }
+                     
+                     if (topLabel) {
+                         const todayStr = new Date().toISOString().split('T')[0];
+                         if (dayString === todayStr) {
+                             topLabel.textContent = "TODAY'S WATCH TIME";
+                         } else {
+                             const d = new Date(year, month, i);
+                             const formatted = d.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+                             topLabel.textContent = `${formatted.toUpperCase()} WATCH TIME`;
+                         }
+                     }
                  });
 
                  grid.appendChild(cell);
