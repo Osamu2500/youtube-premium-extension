@@ -40,3 +40,8 @@ Thumbs.db
 
 # Temporary
 temp*
+build/
+Temporary/
+*.min.js
+popup.js
+settings.js
