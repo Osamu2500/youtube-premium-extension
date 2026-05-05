@@ -20,6 +20,9 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
         this.hideShortsActive = false;
         this.hideWatchedActive = false;
+        this._durationFilter = 'all';
+        this._dateFilter = 'all';
+        this._sortFilter = 'latest';
 
         // Fast Set for constant-time lookups during grid rendering
         this.activeChannelSet = new Set();
@@ -40,6 +43,13 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             () => this._applyFeedFiltersNow(),
             50
         );
+
+        window.YPP.events?.on('subscriptions:filter-changed', (filters) => {
+            this._durationFilter = filters.duration || 'all';
+            this._dateFilter = filters.date || 'all';
+            this._sortFilter = filters.sort || 'latest';
+            this.applyFeedFilters();
+        });
     }
 
     getConfigKey() { return 'subscriptionFolders'; }
@@ -172,7 +182,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.updateFilterState();
         
         this.observer.register('feed-filter-loop', 'ytd-rich-grid-renderer #contents ytd-rich-item-renderer', () => {
-            if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive) {
+            if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest') {
                 // Debounced: rapid card additions (lazy-load batches) coalesce into one pass
                 this._debouncedApplyFilters();
             }
@@ -194,6 +204,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this.applyFeedFilters();
         } else {
             document.body.classList.remove('ypp-sub-folders-active');
+            this.activeChannelSet = new Set();
             this.resetFeedVisibility();
         }
     }
@@ -204,6 +215,93 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
      */
     applyFeedFilters() {
         this._debouncedApplyFilters();
+    }
+
+    _parseDurationSeconds(card) {
+        const badge = card.querySelector(
+            'ytd-thumbnail-overlay-time-status-renderer span, ' +
+            '.badge-shape-wiz__text'
+        );
+        if (!badge) return null;
+
+        const text = badge.textContent.trim().replace(/\s+/g, '');
+        const parts = text.split(':').map(Number);
+
+        if (parts.length === 2) return parts[0] * 60 + parts[1];
+        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        return null;
+    }
+
+    _parseDateScore(card) {
+        // Returns a score — higher = more recent
+        const meta = card.querySelector('#metadata-line span:last-child, ' +
+            '.inline-metadata-item:last-child');
+        if (!meta) return 0;
+
+        const text = meta.textContent.toLowerCase().trim();
+
+        if (text.includes('hour') || text.includes('minute') || 
+            text.includes('just now')) return 4; // today
+        if (text.includes('day') && !text.includes('week')) {
+            const days = parseInt(text) || 1;
+            return days <= 7 ? 3 : days <= 30 ? 2 : 1;
+        }
+        if (text.includes('week')) {
+            const weeks = parseInt(text) || 1;
+            return weeks <= 4 ? 2 : 1;
+        }
+        if (text.includes('month')) return 1;
+        return 0; // year or unknown
+    }
+
+    _matchesDurationFilter(card) {
+        if (this._durationFilter === 'all') return true;
+        const secs = this._parseDurationSeconds(card);
+        if (secs === null) return true; // unknown — show it
+
+        switch (this._durationFilter) {
+            case 'short':  return secs < 300;         // under 5 min
+            case 'medium': return secs >= 300 && secs <= 1200; // 5-20 min
+            case 'long':   return secs > 1200;        // over 20 min
+            default: return true;
+        }
+    }
+
+    _matchesDateFilter(card) {
+        if (this._dateFilter === 'all') return true;
+        const score = this._parseDateScore(card);
+
+        switch (this._dateFilter) {
+            case 'today': return score >= 4;
+            case 'week':  return score >= 3;
+            case 'month': return score >= 2;
+            default: return true;
+        }
+    }
+
+    _applySortOrder(container) {
+        if (this._sortFilter === 'latest') return; // Default YouTube order
+
+        const cards = [...container.querySelectorAll(
+            'ytd-rich-item-renderer:not([style*="display: none"])'
+        )];
+
+        cards.sort((a, b) => {
+            if (this._sortFilter === 'oldest') {
+                return this._parseDateScore(a) - this._parseDateScore(b);
+            }
+            if (this._sortFilter === 'longest') {
+                return (this._parseDurationSeconds(b) || 0) - 
+                       (this._parseDurationSeconds(a) || 0);
+            }
+            if (this._sortFilter === 'shortest') {
+                return (this._parseDurationSeconds(a) || 0) - 
+                       (this._parseDurationSeconds(b) || 0);
+            }
+            return 0;
+        });
+
+        cards.forEach(card => container.appendChild(card));
     }
 
     /**
@@ -247,6 +345,9 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 }
             }
 
+            if (isVisible && !this._matchesDurationFilter(card)) isVisible = false;
+            if (isVisible && !this._matchesDateFilter(card)) isVisible = false;
+
             if (isVisible) {
                 card.style.display = '';
                 card.classList.add('ypp-filtered-in');
@@ -256,6 +357,11 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             }
         });
 
+        const container = document.querySelector('ytd-rich-grid-renderer #contents');
+        if (container) {
+            this._applySortOrder(container);
+        }
+
         const spinner = document.querySelector('ytd-continuation-item-renderer');
         if (spinner && spinner.getBoundingClientRect().top < window.innerHeight * 2) {
             window.scrollBy(0, 1);
@@ -264,7 +370,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     }
 
     resetFeedVisibility() {
-        if (this.hideShortsActive || this.hideWatchedActive) {
+        if (this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest') {
             this.applyFeedFilters();
             return;
         }
