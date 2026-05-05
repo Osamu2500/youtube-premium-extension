@@ -48,8 +48,8 @@
     "hash": "b588a79bf245e44e35d4846338cc8fa9"
   },
   "F:\\Youtube 2.0\\src\\content\\index.js": {
-    "mtime": 1777959644.415662,
-    "hash": "b4c686b6ccd7aec18708ff44b619cfd3"
+    "mtime": 1777968995.0853662,
+    "hash": "4cd2ffd273886aa769f75947f9ab0c2d"
   },
   "F:\\Youtube 2.0\\src\\content\\main.js": {
     "mtime": 1777622943.1296866,
@@ -215,21 +215,25 @@
     "mtime": 1777622943.0892842,
     "hash": "611ed5c9341a4a1eb22996e0fcc6cd85"
   },
+  "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\deck-mode.js": {
+    "mtime": 1777968991.9978788,
+    "hash": "6de82e410461219660eea20832769f24"
+  },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\folder-storage.js": {
     "mtime": 1777622943.0892842,
     "hash": "340adb46eba80bc727bc7d91e7185ce0"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\folder-ui.js": {
-    "mtime": 1777622943.0908904,
-    "hash": "d6a94985aa0d19222fbc71bc6c83a9a8"
+    "mtime": 1777970630.4063735,
+    "hash": "dce864ee1585f8936cec1d254930f8cf"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\index.js": {
     "mtime": 1777622943.0927432,
     "hash": "39b19615e4bf1cbde6830068e2289522"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\subscription-folders.js": {
-    "mtime": 1777622943.0932562,
-    "hash": "786e8194984bab17d0aeab7f414fce32"
+    "mtime": 1777969496.110593,
+    "hash": "4cded3122961890d9ee330a09b9f3419"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\subscription-manager.js": {
     "mtime": 1777622943.0946672,

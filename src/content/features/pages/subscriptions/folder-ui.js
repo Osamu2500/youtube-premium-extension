@@ -12,6 +12,117 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
+window.YPP.features.CustomDialog = class CustomDialog {
+    static _createOverlay() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:999999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;';
+        document.body.appendChild(overlay);
+        return overlay;
+    }
+
+    static alert(title, message) {
+        return new Promise(resolve => {
+            const overlay = this._createOverlay();
+            overlay.innerHTML = `
+                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
+                    <div style="font-size:18px;font-weight:600;color:#fff;">${title}</div>
+                    <div style="font-size:14px;color:#aaa;line-height:1.5;">${message}</div>
+                    <div style="display:flex;justify-content:flex-end;">
+                        <button id="ypp-alert-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">OK</button>
+                    </div>
+                </div>
+            `;
+            
+            requestAnimationFrame(() => {
+                overlay.style.opacity = '1';
+                overlay.children[0].style.transform = 'scale(1)';
+            });
+
+            const close = () => {
+                overlay.style.opacity = '0';
+                overlay.children[0].style.transform = 'scale(0.95)';
+                setTimeout(() => overlay.remove(), 200);
+                resolve();
+            };
+
+            overlay.querySelector('#ypp-alert-ok').addEventListener('click', close);
+        });
+    }
+
+    static confirm(title, message, confirmText = 'Confirm', danger = false) {
+        return new Promise(resolve => {
+            const overlay = this._createOverlay();
+            const btnColor = danger ? '#ff4e45' : '#6c63ff';
+            overlay.innerHTML = `
+                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
+                    <div style="font-size:18px;font-weight:600;color:#fff;">${title}</div>
+                    <div style="font-size:14px;color:#aaa;line-height:1.5;">${message}</div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;">
+                        <button id="ypp-confirm-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
+                        <button id="ypp-confirm-ok" style="background:${btnColor};color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">${confirmText}</button>
+                    </div>
+                </div>
+            `;
+            
+            requestAnimationFrame(() => {
+                overlay.style.opacity = '1';
+                overlay.children[0].style.transform = 'scale(1)';
+            });
+
+            const close = (val) => {
+                overlay.style.opacity = '0';
+                overlay.children[0].style.transform = 'scale(0.95)';
+                setTimeout(() => overlay.remove(), 200);
+                resolve(val);
+            };
+
+            overlay.querySelector('#ypp-confirm-cancel').addEventListener('click', () => close(false));
+            overlay.querySelector('#ypp-confirm-ok').addEventListener('click', () => close(true));
+        });
+    }
+
+    static prompt(title, message, placeholder = '', defaultValue = '') {
+        return new Promise(resolve => {
+            const overlay = this._createOverlay();
+            overlay.innerHTML = `
+                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
+                    <div style="font-size:18px;font-weight:600;color:#fff;">${title}</div>
+                    <div style="font-size:14px;color:#aaa;line-height:1.5;margin-bottom:-4px;">${message}</div>
+                    <input type="text" id="ypp-prompt-input" placeholder="${placeholder}" value="${defaultValue}" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:12px;border-radius:8px;font-size:14px;outline:none;width:100%;box-sizing:border-box;">
+                    <div style="display:flex;justify-content:flex-end;gap:12px;">
+                        <button id="ypp-prompt-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
+                        <button id="ypp-prompt-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Submit</button>
+                    </div>
+                </div>
+            `;
+            
+            requestAnimationFrame(() => {
+                overlay.style.opacity = '1';
+                overlay.children[0].style.transform = 'scale(1)';
+            });
+
+            const close = (val) => {
+                overlay.style.opacity = '0';
+                overlay.children[0].style.transform = 'scale(0.95)';
+                setTimeout(() => overlay.remove(), 200);
+                resolve(val);
+            };
+
+            const input = overlay.querySelector('#ypp-prompt-input');
+            input.focus();
+            input.select();
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') close(input.value);
+                if (e.key === 'Escape') close(null);
+            });
+
+            overlay.querySelector('#ypp-prompt-cancel').addEventListener('click', () => close(null));
+            overlay.querySelector('#ypp-prompt-ok').addEventListener('click', () => close(input.value));
+        });
+    }
+};
+
 /** Escapes a string for safe insertion into innerHTML. */
 function _escHtml(str) {
     return String(str)
@@ -142,8 +253,8 @@ window.YPP.features.FolderUI = class FolderUI {
         });
 
         // Add Folder Button
-        container.querySelector('#ypp-add-folder-btn').addEventListener('click', () => {
-            const name = prompt('Enter new folder name:');
+        container.querySelector('#ypp-add-folder-btn').addEventListener('click', async () => {
+            const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter new folder name:');
             if (name && name.trim()) {
                 if (this.storage.addFolder(name.trim())) {
                     this._guideRenderKey = null; // Invalidate cache
@@ -213,18 +324,18 @@ window.YPP.features.FolderUI = class FolderUI {
                 chip.addEventListener('click', () => this.orchestrator.setActiveFolder(folderName));
 
                 // Context Menu
-                chip.addEventListener('contextmenu', (e) => {
+                chip.addEventListener('contextmenu', async (e) => {
                     e.preventDefault();
-                    const action = prompt(`Edit "${folderName}"\nType 'icon', 'color', or 'delete':`, 'icon');
+                    const action = await window.YPP.features.CustomDialog.prompt(`Edit Folder: ${folderName}`, `Type 'icon', 'color', or 'delete':`, 'icon', 'icon');
                     if (action === 'delete') {
-                        if (confirm(`Delete "${folderName}"?`)) {
+                        if (await window.YPP.features.CustomDialog.confirm('Delete Folder', `Are you sure you want to delete "${folderName}"?`, 'Delete', true)) {
                             this.storage.deleteFolder(folderName);
                             if (activeFolder === folderName) this.orchestrator.setActiveFolder(null);
                             this.renderFilterChips();
                             this.renderGuideFolders();
                         }
                     } else if (action === 'icon') {
-                        const newIcon = prompt('Enter a new Emoji:', config.icon || '📁');
+                        const newIcon = await window.YPP.features.CustomDialog.prompt('Update Icon', 'Enter a new Emoji for this folder:', config.icon || '📁', config.icon || '📁');
                         if (newIcon !== null) {
                             if (!this.storage.folderConfig[folderName]) this.storage.folderConfig[folderName] = {};
                             this.storage.folderConfig[folderName].icon = newIcon.trim();
@@ -233,7 +344,7 @@ window.YPP.features.FolderUI = class FolderUI {
                             this.renderGuideFolders();
                         }
                     } else if (action === 'color') {
-                        const newColor = prompt('Enter a hex color code (or empty to clear):', config.color || '');
+                        const newColor = await window.YPP.features.CustomDialog.prompt('Update Color', 'Enter a hex color code (or empty to clear):', config.color || '', config.color || '');
                         if (newColor !== null) {
                             if (!this.storage.folderConfig[folderName]) this.storage.folderConfig[folderName] = {};
                             this.storage.folderConfig[folderName].color = newColor.trim();
@@ -277,8 +388,8 @@ window.YPP.features.FolderUI = class FolderUI {
             addBtn.textContent = '+ New Folder';
             addBtn.style.opacity = '0.7';
             addBtn.style.borderStyle = 'dashed';
-            addBtn.addEventListener('click', () => {
-                const name = prompt('New folder name:');
+            addBtn.addEventListener('click', async () => {
+                const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter a name for the new folder:');
                 if (name && name.trim()) {
                     if (this.storage.addFolder(name.trim())) {
                         this.renderFilterChips();
@@ -304,37 +415,43 @@ window.YPP.features.FolderUI = class FolderUI {
 
         const bar = document.createElement('div');
         bar.className = 'ypp-sub-filter-bar';
+        bar.style.cssText = 'display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; flex-wrap: wrap;';
+        
+        const selectStyle = 'background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; min-width: 120px; transition: 0.2s;';
+
         bar.innerHTML = `
-            <div class="ypp-sub-filter-group">
-                <span class="ypp-sub-filter-label">Duration</span>
-                <div class="ypp-sub-filter-pills" id="ypp-duration-filter">
-                    <button class="ypp-filter-pill active" data-duration="all">All</button>
-                    <button class="ypp-filter-pill" data-duration="short">Under 5 min</button>
-                    <button class="ypp-filter-pill" data-duration="medium">5 – 20 min</button>
-                    <button class="ypp-filter-pill" data-duration="long">Over 20 min</button>
-                </div>
+            <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
+                <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Duration</span>
+                <select class="ypp-filter-dropdown" id="ypp-duration-filter" style="${selectStyle}">
+                    <option value="all" style="background:#222">All</option>
+                    <option value="short" style="background:#222">Under 5 min</option>
+                    <option value="medium" style="background:#222">5 – 20 min</option>
+                    <option value="long" style="background:#222">Over 20 min</option>
+                    <option value="custom" style="background:#222">Custom...</option>
+                </select>
             </div>
-            <div class="ypp-sub-filter-group">
-                <span class="ypp-sub-filter-label">Uploaded</span>
-                <div class="ypp-sub-filter-pills" id="ypp-date-filter">
-                    <button class="ypp-filter-pill active" data-date="all">All time</button>
-                    <button class="ypp-filter-pill" data-date="today">Today</button>
-                    <button class="ypp-filter-pill" data-date="week">This week</button>
-                    <button class="ypp-filter-pill" data-date="month">This month</button>
-                </div>
+            <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
+                <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Uploaded</span>
+                <select class="ypp-filter-dropdown" id="ypp-date-filter" style="${selectStyle}">
+                    <option value="all" style="background:#222">All time</option>
+                    <option value="today" style="background:#222">Today</option>
+                    <option value="week" style="background:#222">This week</option>
+                    <option value="month" style="background:#222">This month</option>
+                    <option value="custom" style="background:#222">Custom...</option>
+                </select>
             </div>
-            <div class="ypp-sub-filter-group">
-                <span class="ypp-sub-filter-label">Sort by</span>
-                <div class="ypp-sub-filter-pills" id="ypp-sort-filter">
-                    <button class="ypp-filter-pill active" data-sort="latest">Latest</button>
-                    <button class="ypp-filter-pill" data-sort="oldest">Oldest</button>
-                    <button class="ypp-filter-pill" data-sort="longest">Longest</button>
-                    <button class="ypp-filter-pill" data-sort="shortest">Shortest</button>
-                </div>
+            <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
+                <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Sort by</span>
+                <select class="ypp-filter-dropdown" id="ypp-sort-filter" style="${selectStyle}">
+                    <option value="latest" style="background:#222">Latest</option>
+                    <option value="oldest" style="background:#222">Oldest</option>
+                    <option value="longest" style="background:#222">Longest</option>
+                    <option value="shortest" style="background:#222">Shortest</option>
+                </select>
             </div>
             <div class="ypp-sub-filter-group" style="margin-left: auto;">
-                <button id="ypp-health-btn" class="ypp-btn-primary" style="background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.3); color: #a8a4ff; display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 13px;">
-                    <svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                <button id="ypp-health-btn" class="ypp-btn-primary" style="background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.3); color: #a8a4ff; display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; border-radius: 8px; transition: 0.2s;">
+                    <svg height="18" width="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
                     Channel Health
                 </button>
             </div>
@@ -344,33 +461,57 @@ window.YPP.features.FolderUI = class FolderUI {
         const chipsRow = document.getElementById('ypp-folder-chips');
         chipsRow?.insertAdjacentElement('afterend', bar);
 
-        // Wire filter pills
-        bar.querySelectorAll('.ypp-filter-pill').forEach(pill => {
-            pill.addEventListener('click', () => {
-                // Deactivate siblings
-                pill.closest('.ypp-sub-filter-pills')
-                    .querySelectorAll('.ypp-filter-pill')
-                    .forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
+        // Hover effects for select and button
+        bar.querySelectorAll('.ypp-filter-dropdown').forEach(s => {
+            s.addEventListener('mouseover', () => s.style.background = 'rgba(255,255,255,0.12)');
+            s.addEventListener('mouseout', () => s.style.background = 'rgba(255,255,255,0.08)');
+        });
 
-                // Store active filter values
-                const duration = document.querySelector(
-                    '#ypp-duration-filter .ypp-filter-pill.active'
-                )?.dataset.duration || 'all';
+        const handleFilterChange = async (e) => {
+            const select = e.target;
+            let val = select.value;
 
-                const date = document.querySelector(
-                    '#ypp-date-filter .ypp-filter-pill.active'
-                )?.dataset.date || 'all';
+            if (val === 'custom') {
+                if (select.id === 'ypp-duration-filter') {
+                    const maxMins = await window.YPP.features.CustomDialog.prompt('Custom Duration', "Enter maximum video duration in minutes (e.g., 15):");
+                    if (maxMins && !isNaN(maxMins)) {
+                        val = `custom:${maxMins}`;
+                        const opt = document.createElement('option');
+                        opt.value = val;
+                        opt.textContent = `Under ${maxMins}m`;
+                        opt.style.background = '#222';
+                        select.appendChild(opt);
+                        select.value = val;
+                    } else {
+                        select.value = 'all';
+                        val = 'all';
+                    }
+                } else if (select.id === 'ypp-date-filter') {
+                    const maxDays = await window.YPP.features.CustomDialog.prompt('Custom Date', "Enter maximum days ago (e.g., 3):");
+                    if (maxDays && !isNaN(maxDays)) {
+                        val = `custom:${maxDays}`;
+                        const opt = document.createElement('option');
+                        opt.value = val;
+                        opt.textContent = `Past ${maxDays} days`;
+                        opt.style.background = '#222';
+                        select.appendChild(opt);
+                        select.value = val;
+                    } else {
+                        select.value = 'all';
+                        val = 'all';
+                    }
+                }
+            }
 
-                const sort = document.querySelector(
-                    '#ypp-sort-filter .ypp-filter-pill.active'
-                )?.dataset.sort || 'latest';
+            const duration = document.getElementById('ypp-duration-filter')?.value || 'all';
+            const date = document.getElementById('ypp-date-filter')?.value || 'all';
+            const sort = document.getElementById('ypp-sort-filter')?.value || 'latest';
 
-                // Emit to subscription-folders.js
-                window.YPP.events?.emit('subscriptions:filter-changed', {
-                    duration, date, sort
-                });
-            });
+            window.YPP.events?.emit('subscriptions:filter-changed', { duration, date, sort });
+        };
+
+        bar.querySelectorAll('.ypp-filter-dropdown').forEach(select => {
+            select.addEventListener('change', handleFilterChange);
         });
 
         bar.querySelector('#ypp-health-btn')?.addEventListener('click', () => {
@@ -492,17 +633,29 @@ window.YPP.features.FolderUI = class FolderUI {
         popover.style.top = `${rect.bottom + window.scrollY + 8}px`;
         popover.style.left = `${rect.left + window.scrollX}px`;
 
-        let html = `<div class="ypp-popover-header">Save <b>${channelName}</b> to:</div><div class="ypp-popover-list">`;
-        Object.keys(this.storage.folders).forEach(folderName => {
-            const isChecked = this.storage.folders[folderName].includes(channelName);
-            html += `
-                <label class="ypp-folder-checkbox">
-                    <input type="checkbox" data-folder="${folderName}" ${isChecked ? 'checked' : ''}>
-                    <span>${folderName}</span>
-                </label>
-            `;
-        });
-        html += `</div>`;
+        let html = `
+            <div style="background: rgba(15,15,15,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); width: 240px; overflow: hidden; display: flex; flex-direction: column;">
+                <div class="ypp-popover-header" style="padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600;">Save Channel</div>
+                    <div style="font-size: 15px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${channelName}</div>
+                </div>
+                <div class="ypp-popover-list" style="padding: 8px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;">
+        `;
+        const folderKeys = Object.keys(this.storage.folders);
+        if (folderKeys.length === 0) {
+            html += `<div style="padding: 16px; text-align: center; color: rgba(255,255,255,0.5); font-size: 13px;">No folders exist.</div>`;
+        } else {
+            folderKeys.forEach(folderName => {
+                const isChecked = this.storage.folders[folderName].includes(channelName);
+                html += `
+                    <label class="ypp-folder-checkbox" style="display: flex; align-items: center; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" data-folder="${folderName}" ${isChecked ? 'checked' : ''} style="margin-right: 12px; accent-color: #6c63ff; width: 16px; height: 16px; cursor: pointer;">
+                        <span style="color: #fff; font-size: 14px; font-weight: 500;">${folderName}</span>
+                    </label>
+                `;
+            });
+        }
+        html += `</div></div>`;
         popover.innerHTML = html;
 
         popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -541,48 +694,55 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         document.body.appendChild(overlay);
 
         overlay.innerHTML = `
-            <div class="ypp-modal-content ypp-organizer-modal" style="width: 95vw; height: 90vh; max-width: 1400px; display: flex; flex-direction: column;">
-                <div class="ypp-modal-header">
-                    <span class="ypp-modal-title">Channel Health Dashboard</span>
-                    <button class="ypp-modal-close" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;">&times;</button>
+            <div class="ypp-modal-content ypp-organizer-modal" style="width: 95vw; height: 90vh; max-width: 1400px; display: flex; flex-direction: column; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 24px 64px rgba(0,0,0,0.6); border-radius: 16px; overflow: hidden;">
+                <div class="ypp-modal-header" style="background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span class="ypp-modal-title" style="font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -0.5px;">Channel Health</span>
+                    </div>
+                    <button class="ypp-modal-close" style="background: rgba(255,255,255,0.05); border: none; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">&times;</button>
                 </div>
-                <div class="ypp-organizer-body" style="flex-direction:column; padding: 24px; overflow: hidden; display: flex;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px; align-items: center;">
-                        <span style="color: #aaa; font-size: 14px;">Analyze your subscriptions to find inactive channels.</span>
+                <div class="ypp-organizer-body" style="flex-direction: column; padding: 32px; overflow: hidden; display: flex; flex: 1; background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 100%);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 16px 24px; border-radius: 12px;">
+                        <span style="color: #bbb; font-size: 14px; line-height: 1.5;">Scan your subscriptions to identify dead or inactive channels.<br><strong style="color:#fff;">Keep your feed focused and clean.</strong></span>
                         <div style="display: flex; gap: 12px;">
-                            <button id="ypp-health-scan-btn" class="ypp-btn-primary">Start Scan</button>
-                            <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255, 78, 69, 0.1); color: #ff4e45; border-color: rgba(255, 78, 69, 0.3); display: none;">Unsubscribe Selected</button>
+                            <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: #6c63ff; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(108,99,255,0.3);" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">Start Scan</button>
+                            <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255, 78, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 78, 69, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 78, 69, 0.25)'" onmouseout="this.style.background='rgba(255, 78, 69, 0.15)'">Unsubscribe Selected</button>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-                        <div class="ypp-health-stat" data-filter="active" style="flex: 1; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;">
-                            <div style="color: #4caf50; font-size: 24px; font-weight: bold;" id="ypp-health-active">0</div>
-                            <div style="color: #aaa; font-size: 12px; text-transform: uppercase;">Active (< 30 days)</div>
+                    <div style="display: flex; gap: 20px; margin-bottom: 24px;">
+                        <div class="ypp-health-stat" data-filter="active" style="flex: 1; background: rgba(76, 175, 80, 0.05); border: 1px solid rgba(76, 175, 80, 0.2); padding: 24px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s;">
+                            <div style="color: #4caf50; font-size: 32px; font-weight: 700; margin-bottom: 4px;" id="ypp-health-active">0</div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Active (< 30 days)</div>
                         </div>
-                        <div class="ypp-health-stat" data-filter="warning" style="flex: 1; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;">
-                            <div style="color: #ff9800; font-size: 24px; font-weight: bold;" id="ypp-health-warning">0</div>
-                            <div style="color: #aaa; font-size: 12px; text-transform: uppercase;">Inactive (> 1 month)</div>
+                        <div class="ypp-health-stat" data-filter="warning" style="flex: 1; background: rgba(255, 152, 0, 0.05); border: 1px solid rgba(255, 152, 0, 0.2); padding: 24px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s;">
+                            <div style="color: #ff9800; font-size: 32px; font-weight: 700; margin-bottom: 4px;" id="ypp-health-warning">0</div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Inactive (> 1 month)</div>
                         </div>
-                        <div class="ypp-health-stat" data-filter="dead" style="flex: 1; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;">
-                            <div style="color: #f44336; font-size: 24px; font-weight: bold;" id="ypp-health-dead">0</div>
-                            <div style="color: #aaa; font-size: 12px; text-transform: uppercase;">Dead (> 3 months)</div>
+                        <div class="ypp-health-stat" data-filter="dead" style="flex: 1; background: rgba(244, 67, 54, 0.05); border: 1px solid rgba(244, 67, 54, 0.2); padding: 24px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s;">
+                            <div style="color: #f44336; font-size: 32px; font-weight: 700; margin-bottom: 4px;" id="ypp-health-dead">0</div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Dead (> 3 months)</div>
                         </div>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px;">
-                        <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; outline: none;">
-                            <option value="all">All Channels</option>
-                            <option value="active">Active (< 30 days)</option>
-                            <option value="warning">Inactive (> 1 month)</option>
-                            <option value="dead">Dead (> 3 months)</option>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px; align-items: center;">
+                        <span style="color: #888; font-size: 13px; margin-right: auto;">Filters & Sort:</span>
+                        <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <option value="all" style="background:#222">All Channels</option>
+                            <option value="active" style="background:#222">Active (< 30 days)</option>
+                            <option value="warning" style="background:#222">Inactive (> 1 month)</option>
+                            <option value="dead" style="background:#222">Dead (> 3 months)</option>
                         </select>
-                        <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; outline: none;">
-                            <option value="latest">Latest Upload First</option>
-                            <option value="oldest">Oldest Upload First</option>
-                            <option value="az">Alphabetical (A-Z)</option>
+                        <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <option value="latest" style="background:#222">Latest Upload First</option>
+                            <option value="oldest" style="background:#222">Oldest Upload First</option>
+                            <option value="az" style="background:#222">Alphabetical (A-Z)</option>
                         </select>
                     </div>
-                    <div id="ypp-health-results" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="text-align: center; color: #666; margin-top: 40px;">Click "Start Scan" to fetch channel data.</div>
+                    <div id="ypp-health-results" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 8px;">
+                        <div style="text-align: center; color: #666; margin-top: 60px; font-size: 16px; font-weight: 500;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px; display:block; margin-left:auto; margin-right:auto;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            Click "Start Scan" to fetch channel data.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -669,10 +829,16 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             const res = await fetch('/feed/channels');
             const text = await res.text();
             
-            // Extract ytInitialData
+            // Extract ytInitialData safely
             const match = text.match(/var ytInitialData = (\{.*?\});<\/script>/);
-            if (!match) throw new Error("Could not parse YouTube data");
-            const data = JSON.parse(match[1]);
+            if (!match) throw new Error("Could not parse YouTube data structure.");
+            
+            let data;
+            try {
+                data = JSON.parse(match[1]);
+            } catch (parseError) {
+                throw new Error("Failed to parse YouTube initial data JSON.");
+            }
 
             // Find channel renderers
             const channels = [];
@@ -855,7 +1021,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         const checkboxes = overlay.querySelectorAll('.ypp-unsub-checkbox:checked');
         if (checkboxes.length === 0) return;
 
-        if (!confirm(`Are you sure you want to unsubscribe from ${checkboxes.length} channels?`)) return;
+        if (!(await window.YPP.features.CustomDialog.confirm('Bulk Unsubscribe', `Are you sure you want to permanently unsubscribe from ${checkboxes.length} channels?`, 'Unsubscribe', true))) return;
 
         const getYoutubeConfig = () => new Promise(resolve => {
             const reqId = Math.random().toString();
@@ -890,7 +1056,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         const context = config.context;
 
         if (!apiKey || !context) {
-            alert("Could not get YouTube API credentials.");
+            await window.YPP.features.CustomDialog.alert('Error', "Could not get YouTube API credentials.");
             return;
         }
 
@@ -899,36 +1065,38 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         btn.disabled = true;
 
         let successCount = 0;
+        
+        // Compute authentication headers ONCE for the bulk operation
+        const sapisid = document.cookie.split('; ').find(row => row.startsWith('SAPISID='))?.split('=')[1];
+        const origin = window.location.origin;
+        const time = Math.floor(Date.now() / 1000);
+        
+        const sha1 = async (str) => {
+            const buffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        };
+        
+        let baseHeaders = {
+            'Content-Type': 'application/json',
+            'X-Goog-AuthUser': '0',
+            'X-Goog-Visitor-Id': config.visitorData || '',
+            'X-Youtube-Client-Name': '1',
+            'X-Youtube-Client-Version': config.clientVersion,
+            'Origin': origin,
+        };
+
+        if (sapisid) {
+            const hash = await sha1(`${time} ${sapisid} ${origin}`);
+            baseHeaders['Authorization'] = `SAPISIDHASH ${time}_${hash}`;
+        }
 
         for (const cb of checkboxes) {
             const channelId = cb.value;
             const params = cb.dataset.params;
             
             try {
-                const sapisid = document.cookie.split('; ').find(row => row.startsWith('SAPISID='))?.split('=')[1];
-                const origin = window.location.origin;
-                const time = Math.floor(Date.now() / 1000);
-                
-                const sha1 = async (str) => {
-                    const buffer = new TextEncoder().encode(str);
-                    const hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                };
-                
-                let headers = {
-                    'Content-Type': 'application/json',
-                    'X-Goog-AuthUser': '0',
-                    'X-Goog-Visitor-Id': config.visitorData || '',
-                    'X-Youtube-Client-Name': '1',
-                    'X-Youtube-Client-Version': config.clientVersion,
-                    'Origin': origin,
-                };
-
-                if (sapisid) {
-                    const hash = await sha1(`${time} ${sapisid} ${origin}`);
-                    headers['Authorization'] = `SAPISIDHASH ${time}_${hash}`;
-                }
 
                 const payload = {
                     context: context,
@@ -936,9 +1104,15 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 };
                 if (params) payload.params = params;
 
+                if (!params) {
+                    console.warn("Missing unsubscribe params for channel:", channelId);
+                    // YouTube API often fails without params, but we can try without it
+                }
+
                 const res = await fetch(`/youtubei/v1/subscription/unsubscribe?key=${apiKey}`, {
                     method: 'POST',
-                    headers: headers,
+                    headers: baseHeaders,
+                    credentials: 'include',
                     body: JSON.stringify(payload)
                 });
 
@@ -947,6 +1121,10 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     cb.closest('.ypp-channel-health-row').style.opacity = '0.3';
                     cb.disabled = true;
                     cb.checked = false;
+                } else {
+                    const text = await res.text();
+                    console.error("Unsub failed API response:", res.status, text);
+                    await window.YPP.features.CustomDialog.alert('Error', "Failed to unsubscribe: " + res.status);
                 }
             } catch (e) {
                 console.error("Unsub failed for", channelId, e);

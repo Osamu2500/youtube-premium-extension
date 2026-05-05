@@ -254,10 +254,27 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         return 0; // year or unknown
     }
 
+    _parseDaysAgo(card) {
+        const meta = card.querySelector('#metadata-line span:last-child, .inline-metadata-item:last-child');
+        if (!meta) return 9999;
+        const text = meta.textContent.toLowerCase().trim();
+        if (text.includes('hour') || text.includes('minute') || text.includes('just now')) return 0;
+        if (text.includes('day') && !text.includes('week')) return parseInt(text) || 1;
+        if (text.includes('week')) return (parseInt(text) || 1) * 7;
+        if (text.includes('month')) return (parseInt(text) || 1) * 30;
+        if (text.includes('year')) return (parseInt(text) || 1) * 365;
+        return 9999;
+    }
+
     _matchesDurationFilter(card) {
         if (this._durationFilter === 'all') return true;
         const secs = this._parseDurationSeconds(card);
         if (secs === null) return true; // unknown — show it
+
+        if (this._durationFilter.startsWith('custom:')) {
+            const maxMins = parseInt(this._durationFilter.split(':')[1], 10);
+            return secs <= maxMins * 60;
+        }
 
         switch (this._durationFilter) {
             case 'short':  return secs < 300;         // under 5 min
@@ -269,6 +286,12 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     _matchesDateFilter(card) {
         if (this._dateFilter === 'all') return true;
+        
+        if (this._dateFilter.startsWith('custom:')) {
+            const maxDays = parseInt(this._dateFilter.split(':')[1], 10);
+            return this._parseDaysAgo(card) <= maxDays;
+        }
+
         const score = this._parseDateScore(card);
 
         switch (this._dateFilter) {
