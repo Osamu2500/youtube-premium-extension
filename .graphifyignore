@@ -1,0 +1,28 @@
+# Exclude minified build outputs - these pollute the graph with meaningless names
+Temporary/
+dist/
+
+# Exclude junk root-level files
+test_bundle.js
+fix_escapes.js
+fix_escapes.py
+yt.html
+index_content.txt
+structure.txt
+
+# Exclude graphify's own output files to avoid circular self-reference
+graphify-out/
+.graphify/
+
+# Exclude execution scripts (not part of the extension architecture)
+execution/
+
+# Exclude documentation noise (not code)
+directives/
+.agents/
+.kiro/
+.gemini/
+.claude/
+
+# Exclude config/build files
+vite.config.js

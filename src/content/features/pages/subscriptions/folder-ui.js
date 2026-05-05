@@ -970,12 +970,19 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         </div>
                         <div style="display: flex; align-items: center; gap: 16px;">
                             <a href="/channel/${c.id}" target="_blank" style="color: #3ea6ff; text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer;">Visit Channel</a>
-                            <label style="display: ${c.status === 'dead' ? 'flex' : 'none'}; align-items: center; cursor: pointer; color: #ff4e45; font-size: 13px;">
-                                <input type="checkbox" class="ypp-unsub-checkbox" value="${c.id}" data-params="${c.unsubParams}" style="margin-right: 8px;">
-                                Unsubscribe
+                            <label style="display: flex; align-items: center; cursor: pointer; color: #aaa; font-size: 13px;">
+                                <input type="checkbox" class="ypp-unsub-checkbox" value="${c.id}" data-params="${c.unsubParams}" style="margin-right: 8px;" ${c.status === 'dead' ? 'checked' : ''}>
+                                Select
                             </label>
+                            <button class="ypp-indiv-unsub-btn" style="background:rgba(255,78,69,0.1); color:#ff4e45; border:1px solid rgba(255,78,69,0.2); border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(255,78,69,0.2)'" onmouseout="this.style.background='rgba(255,78,69,0.1)'">Unsub</button>
                         </div>
                     `;
+
+                    const indivBtn = row.querySelector('.ypp-indiv-unsub-btn');
+                    indivBtn.addEventListener('click', () => {
+                        this.individualUnsubscribe(c.id, c.unsubParams, c.name, row, indivBtn);
+                    });
+
                     resultsEl.appendChild(row);
                 });
 
@@ -1017,12 +1024,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         }
     }
 
-    static async bulkUnsubscribe(overlay) {
-        const checkboxes = overlay.querySelectorAll('.ypp-unsub-checkbox:checked');
-        if (checkboxes.length === 0) return;
-
-        if (!(await window.YPP.features.CustomDialog.confirm('Bulk Unsubscribe', `Are you sure you want to permanently unsubscribe from ${checkboxes.length} channels?`, 'Unsubscribe', true))) return;
-
+    static async _doUnsubscribe(channels) {
         const getYoutubeConfig = () => new Promise(resolve => {
             const reqId = Math.random().toString();
             const listener = (e) => {
@@ -1057,16 +1059,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
 
         if (!apiKey || !context) {
             await window.YPP.features.CustomDialog.alert('Error', "Could not get YouTube API credentials.");
-            return;
+            return 0;
         }
 
-        const btn = overlay.querySelector('#ypp-health-unsub-btn');
-        btn.textContent = 'Unsubscribing...';
-        btn.disabled = true;
-
-        let successCount = 0;
-        
-        // Compute authentication headers ONCE for the bulk operation
         const sapisid = document.cookie.split('; ').find(row => row.startsWith('SAPISID='))?.split('=')[1];
         const origin = window.location.origin;
         const time = Math.floor(Date.now() / 1000);
@@ -1092,22 +1087,14 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             baseHeaders['Authorization'] = `SAPISIDHASH ${time}_${hash}`;
         }
 
-        for (const cb of checkboxes) {
-            const channelId = cb.value;
-            const params = cb.dataset.params;
-            
+        let successCount = 0;
+        for (const c of channels) {
             try {
-
                 const payload = {
                     context: context,
-                    channelIds: [channelId]
+                    channelIds: [c.id]
                 };
-                if (params) payload.params = params;
-
-                if (!params) {
-                    console.warn("Missing unsubscribe params for channel:", channelId);
-                    // YouTube API often fails without params, but we can try without it
-                }
+                if (c.params) payload.params = c.params;
 
                 const res = await fetch(`/youtubei/v1/subscription/unsubscribe?key=${apiKey}`, {
                     method: 'POST',
@@ -1118,18 +1105,71 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
 
                 if (res.ok) {
                     successCount++;
-                    cb.closest('.ypp-channel-health-row').style.opacity = '0.3';
-                    cb.disabled = true;
-                    cb.checked = false;
+                    if (c.onSuccess) c.onSuccess();
                 } else {
                     const text = await res.text();
                     console.error("Unsub failed API response:", res.status, text);
                     await window.YPP.features.CustomDialog.alert('Error', "Failed to unsubscribe: " + res.status);
                 }
             } catch (e) {
-                console.error("Unsub failed for", channelId, e);
+                console.error("Unsub failed for", c.id, e);
             }
         }
+        
+        return successCount;
+    }
+
+    static async individualUnsubscribe(channelId, params, channelName, rowEl, btnEl) {
+        if (!(await window.YPP.features.CustomDialog.confirm('Unsubscribe', `Are you sure you want to permanently unsubscribe from ${channelName}?`, 'Unsubscribe', true))) return;
+
+        btnEl.textContent = 'Unsubscribing...';
+        btnEl.disabled = true;
+
+        const channels = [{
+            id: channelId,
+            params: params,
+            onSuccess: () => {
+                rowEl.style.opacity = '0.3';
+                btnEl.textContent = 'Unsubscribed';
+                const cb = rowEl.querySelector('.ypp-unsub-checkbox');
+                if (cb) {
+                    cb.disabled = true;
+                    cb.checked = false;
+                }
+            }
+        }];
+
+        await this._doUnsubscribe(channels);
+    }
+
+    static async bulkUnsubscribe(overlay) {
+        const checkboxes = overlay.querySelectorAll('.ypp-unsub-checkbox:checked');
+        if (checkboxes.length === 0) return;
+
+        if (!(await window.YPP.features.CustomDialog.confirm('Bulk Unsubscribe', `Are you sure you want to permanently unsubscribe from ${checkboxes.length} channels?`, 'Unsubscribe', true))) return;
+
+        const btn = overlay.querySelector('#ypp-health-unsub-btn');
+        btn.textContent = 'Unsubscribing...';
+        btn.disabled = true;
+
+        const channels = Array.from(checkboxes).map(cb => ({
+            id: cb.value,
+            params: cb.dataset.params,
+            onSuccess: () => {
+                const row = cb.closest('.ypp-channel-health-row');
+                row.style.opacity = '0.3';
+                cb.disabled = true;
+                cb.checked = false;
+                
+                const unsubBtn = row.querySelector('.ypp-indiv-unsub-btn');
+                if (unsubBtn) {
+                    unsubBtn.disabled = true;
+                    unsubBtn.textContent = 'Unsubscribed';
+                }
+            }
+        }));
+
+        const successCount = await this._doUnsubscribe(channels);
 
         btn.textContent = `Unsubscribed ${successCount}`;
         setTimeout(() => {
