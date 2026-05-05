@@ -3169,22 +3169,21 @@ ytd-menu-renderer ytd-button-renderer:hover {
   align-items: center;
   margin-right: 14px;
   gap: 8px;
-  padding: 6px 10px;
-  background: rgba(12, 12, 20, 0.65) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 32px;
-  backdrop-filter: blur(24px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08) !important;
-  transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  padding: 4px 6px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
   animation: ypp-bar-pop-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   will-change: transform, opacity;
 }
 
 .ypp-player-controls:hover {
-  background: rgba(18, 18, 28, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* ── Action Buttons ── */
@@ -3247,19 +3246,18 @@ ytd-menu-renderer ytd-button-renderer:hover {
 .ypp-speed-controls {
   display: flex;
   gap: 2px;
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: transparent !important;
   padding: 4px;
   border-radius: 20px;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
   margin-left: 4px;
-  transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.25s ease, background 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1);
 }
 .ypp-speed-controls:hover {
   transform: translateY(-2px);
-  box-shadow: none;
 }
 
 .ypp-speed-btn {
@@ -3280,11 +3278,11 @@ ytd-menu-renderer ytd-button-renderer:hover {
   background: rgba(255, 255, 255, 0.12);
 }
 .ypp-speed-btn.active {
-  color: #0f0f0f;
-  background: rgba(255, 255, 255, 0.95);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.25);
   font-weight: 800;
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.2);
-  text-shadow: 0 0 0 transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
 /* ===================================================================================
