@@ -16,8 +16,8 @@
     "hash": "5d1fea31010a9e9f523821bd9da80deb"
   },
   "F:\\Youtube 2.0\\src\\content\\constants.js": {
-    "mtime": 1777643119335.7466,
-    "hash": "77df042ce3f997bc6c7b024e78df2c48"
+    "mtime": 1777959642349.6472,
+    "hash": "1d9adbc897cd6bd43c5767ef92cafcab"
   },
   "F:\\Youtube 2.0\\src\\content\\core\\dom-api.js": {
     "mtime": 1774623956264.022,
@@ -64,8 +64,8 @@
     "hash": "558d46f77059de069e0dcf55c183088f"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\content-control.js": {
-    "mtime": 1777602887081.8125,
-    "hash": "30247fbc7dead4c64b1ecf03dadd9fd5"
+    "mtime": 1777960062494.5828,
+    "hash": "f804653af34178d1ed190a31a17e0725"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\data-api.js": {
     "mtime": 1775448830666.546,
@@ -328,8 +328,8 @@
     "hash": "77243fcb309632c4afff19809dbe07c9"
   },
   "F:\\Youtube 2.0\\src\\content\\index.js": {
-    "mtime": 1777642515186.9575,
-    "hash": "29a781a9d46a9a452357c3e5f96693df"
+    "mtime": 1777959644415.662,
+    "hash": "b4c686b6ccd7aec18708ff44b619cfd3"
   },
   "F:\\Youtube 2.0\\src\\content\\main.js": {
     "mtime": 1777622943129.6868,
@@ -360,8 +360,8 @@
     "hash": "df6132a7f77e8a2f34663aef827cb8f5"
   },
   "F:\\Youtube 2.0\\src\\popup\\popup.js": {
-    "mtime": 1777643119347.654,
-    "hash": "13a6cc1808736ac782d63d379b21aab1"
+    "mtime": 1777959648627.11,
+    "hash": "97837b04ae72626586bbb603c274b70e"
   },
   "F:\\Youtube 2.0\\test_bundle.js": {
     "mtime": 1774623956355.2788,
@@ -371,6 +371,26 @@
     "mtime": 1774623956356.2898,
     "hash": "9dbb512262d14e06277250fdc25d6fdc"
   },
+  "F:\\Youtube 2.0\\.agents\\rules\\graphify.md": {
+    "mtime": 1777702261580.3752,
+    "hash": "9a4dc15a30e372a06b3720a9e892cfab"
+  },
+  "F:\\Youtube 2.0\\.agents\\workflows\\graphify.md": {
+    "mtime": 1777702261580.3752,
+    "hash": "154a3c95d1f1dddce1925a3bd3e1481a"
+  },
+  "F:\\Youtube 2.0\\.graphify\\GRAPH_REPORT.md": {
+    "mtime": 1777957637833.1506,
+    "hash": "4f70a77504795def7390678c9b911e2c"
+  },
+  "F:\\Youtube 2.0\\.kiro\\skills\\graphify\\SKILL.md": {
+    "mtime": 1777702548143.6719,
+    "hash": "aa4d0e21838ba891e23d9641e5d4166f"
+  },
+  "F:\\Youtube 2.0\\.kiro\\steering\\graphify.md": {
+    "mtime": 1777702548146.0674,
+    "hash": "4909f6d3b229175c2e8e5f6343cd11b5"
+  },
   "F:\\Youtube 2.0\\ARCHITECTURE.md": {
     "mtime": 1771092825520.742,
     "hash": "fc122963ec980b6c96ba2317fc2bfee4"
@@ -379,13 +399,17 @@
     "mtime": 1776394773506.8582,
     "hash": "6162d7be015d7bf0de03947e3b485d7f"
   },
+  "F:\\Youtube 2.0\\CLAUDE.md": {
+    "mtime": 1777702365089.1382,
+    "hash": "2ed67c68f28bc1ef95ac24167431d7e8"
+  },
   "F:\\Youtube 2.0\\CONTRIBUTING.md": {
     "mtime": 1771787382266.4246,
     "hash": "846c686519a55c81fd14644b8d87bd47"
   },
   "F:\\Youtube 2.0\\FEATURES.md": {
-    "mtime": 1777642515183.8928,
-    "hash": "9dc6c6eb2ae82509ee04a40fe37c6171"
+    "mtime": 1777958616189.4368,
+    "hash": "14b08eead4d4e22d1bb52302042e0c57"
   },
   "F:\\Youtube 2.0\\README.md": {
     "mtime": 1776394773511.0122,
@@ -399,13 +423,21 @@
     "mtime": 1777702364643.0708,
     "hash": "68f30fd00b6329d188bec3f74a5cfba8"
   },
+  "F:\\Youtube 2.0\\graphify-out\\GRAPH_REPORT.md": {
+    "mtime": 1777957863401.775,
+    "hash": "88a8739d197f6662f74c3dc43a06c41d"
+  },
+  "F:\\Youtube 2.0\\graphify-out\\graph.html": {
+    "mtime": 1777957863489.871,
+    "hash": "ad608d232c559dcc7fb85d995f541066"
+  },
   "F:\\Youtube 2.0\\index_content.txt": {
     "mtime": 1777622943054.114,
     "hash": "1975de339421145e8b34db6a7da9b9df"
   },
   "F:\\Youtube 2.0\\src\\popup\\popup.html": {
-    "mtime": 1777643119345.464,
-    "hash": "67514228aecbd635015455239105f5f5"
+    "mtime": 1777959906546.7234,
+    "hash": "bd909fc3c4b0f0ff395d21c9ebb6d1c3"
   },
   "F:\\Youtube 2.0\\structure.txt": {
     "mtime": 1777622943144.646,

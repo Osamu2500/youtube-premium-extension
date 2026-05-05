@@ -1,31 +1,11 @@
 {
-  "F:\\Youtube 2.0\\fix_escapes.js": {
-    "mtime": 1777622943.0523875,
-    "hash": "f83d88332f01ab17fba22fe0e9189f62"
-  },
-  "F:\\Youtube 2.0\\fix_escapes.py": {
-    "mtime": 1777622943.0528953,
-    "hash": "4f5fb762c714e1a9740d15a59c735010"
-  },
-  "F:\\Youtube 2.0\\test_bundle.js": {
-    "mtime": 1774623956.355279,
-    "hash": "a70e83cff2138c73f2da58b0f4aed494"
-  },
-  "F:\\Youtube 2.0\\vite.config.js": {
-    "mtime": 1774623956.3562899,
-    "hash": "9dbb512262d14e06277250fdc25d6fdc"
-  },
-  "F:\\Youtube 2.0\\execution\\example_script.py": {
-    "mtime": 1770751231.7194607,
-    "hash": "165acba5b5e97b15609c1136eae9609b"
-  },
   "F:\\Youtube 2.0\\src\\background\\service-worker.js": {
     "mtime": 1777622943.0561247,
     "hash": "5d1fea31010a9e9f523821bd9da80deb"
   },
   "F:\\Youtube 2.0\\src\\content\\constants.js": {
-    "mtime": 1777643119.3357468,
-    "hash": "77df042ce3f997bc6c7b024e78df2c48"
+    "mtime": 1777959642.349647,
+    "hash": "1d9adbc897cd6bd43c5767ef92cafcab"
   },
   "F:\\Youtube 2.0\\src\\content\\element-cache.js": {
     "mtime": 1777622943.0607755,
@@ -40,8 +20,8 @@
     "hash": "b588a79bf245e44e35d4846338cc8fa9"
   },
   "F:\\Youtube 2.0\\src\\content\\index.js": {
-    "mtime": 1777642515.1869574,
-    "hash": "29a781a9d46a9a452357c3e5f96693df"
+    "mtime": 1777959644.415662,
+    "hash": "b4c686b6ccd7aec18708ff44b619cfd3"
   },
   "F:\\Youtube 2.0\\src\\content\\main.js": {
     "mtime": 1777622943.1296866,
@@ -72,12 +52,24 @@
     "hash": "67bd4928460c74ab624bc7a03269374e"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\content-control.js": {
-    "mtime": 1777602887.0818124,
-    "hash": "30247fbc7dead4c64b1ecf03dadd9fd5"
+    "mtime": 1777960062.494583,
+    "hash": "f804653af34178d1ed190a31a17e0725"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\data-api.js": {
     "mtime": 1775448830.6665459,
     "hash": "4ec8fd563dea36373a8e67d4e8621b92"
+  },
+  "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\hide-metrics.js": {
+    "mtime": 1777958410.4741294,
+    "hash": "302537f0e66f04b6c4e290d6d880906a"
+  },
+  "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\hide-playlists-podcasts.js": {
+    "mtime": 1777958406.394177,
+    "hash": "fbf5d58a3df10a48048c345d9ec31902"
+  },
+  "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\hide-thumbnails.js": {
+    "mtime": 1777959600.1139867,
+    "hash": "212b49e0220d59b4b52e7a28887a94d1"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\hide-watched.js": {
     "mtime": 1777622943.068303,
@@ -91,9 +83,17 @@
     "mtime": 1777622943.0693376,
     "hash": "760e27bd9eb4b47d34df41cfa34716d1"
   },
+  "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\multi-select.js": {
+    "mtime": 1777959071.793868,
+    "hash": "a686c5a289aa65cddfe42648ccab5091"
+  },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\night-mode.js": {
     "mtime": 1777622943.0703483,
     "hash": "d8d279a8f54df068f5a568c0cbfeb0bc"
+  },
+  "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\redirect-home.js": {
+    "mtime": 1777959604.957386,
+    "hash": "eb567b580c68d8a291263be987fcb5f8"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\global\\theme.js": {
     "mtime": 1777622943.0728583,
@@ -255,6 +255,10 @@
     "mtime": 1776394773.529815,
     "hash": "280b605f242f646f07e71ff7d12edf9b"
   },
+  "F:\\Youtube 2.0\\src\\content\\features\\player\\auto-like.js": {
+    "mtime": 1777960116.2937565,
+    "hash": "98e61e6f2a25433ef82bcaee13fc9d3b"
+  },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\auto-pause.js": {
     "mtime": 1777622943.1061914,
     "hash": "eaae2384cdcc87aebae43b042ad03745"
@@ -274,6 +278,10 @@
   "F:\\Youtube 2.0\\src\\content\\features\\player\\global-bar.js": {
     "mtime": 1777643119.33924,
     "hash": "24a01ac09e38a1c70bf5d6fd8431fc5a"
+  },
+  "F:\\Youtube 2.0\\src\\content\\features\\player\\intentional-delay.js": {
+    "mtime": 1777959606.9750578,
+    "hash": "0d7b3905edf5bce21e27a325cda2ae06"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\mini-player.js": {
     "mtime": 1777622943.1110065,
@@ -368,144 +376,12 @@
     "hash": "df6132a7f77e8a2f34663aef827cb8f5"
   },
   "F:\\Youtube 2.0\\src\\popup\\popup.js": {
-    "mtime": 1777643119.347654,
-    "hash": "13a6cc1808736ac782d63d379b21aab1"
-  },
-  "F:\\Youtube 2.0\\Temporary\\background.js": {
-    "mtime": 1771179722.0,
-    "hash": "c3dc6c20e41a9222fc30502bebdaab1c"
-  },
-  "F:\\Youtube 2.0\\Temporary\\custom-progress-bar.js": {
-    "mtime": 1770693706.0,
-    "hash": "c2a6b54ec798620c031d5cf47906d610"
-  },
-  "F:\\Youtube 2.0\\Temporary\\options.js": {
-    "mtime": 1770693706.0,
-    "hash": "10cefd64f3197f5571920f0be9b741c7"
-  },
-  "F:\\Youtube 2.0\\Temporary\\popup.js": {
-    "mtime": 1770693706.0,
-    "hash": "ee7ec85106f59f0951c64c0ff7bfce37"
-  },
-  "F:\\Youtube 2.0\\Temporary\\settings.js": {
-    "mtime": 1770693706.0,
-    "hash": "a8b2d88c2d8e87c8108b4d27accfbb0e"
-  },
-  "F:\\Youtube 2.0\\Temporary\\style.js": {
-    "mtime": 1770693706.0,
-    "hash": "1e073825e38775995b51af66f0e15de9"
-  },
-  "F:\\Youtube 2.0\\tmp\\ast_extract.py": {
-    "mtime": 1777630007.7452197,
-    "hash": "a15076f2db1d7308cfb28d14cea6d56d"
-  },
-  "F:\\Youtube 2.0\\tmp\\audit_features.js": {
-    "mtime": 1777463949.7389643,
-    "hash": "62e5a7ef6009d46c9935a9380adfebfc"
-  },
-  "F:\\Youtube 2.0\\tmp\\audit_features.py": {
-    "mtime": 1777470441.6500885,
-    "hash": "773c9919a13c8cea25ab4ed186f8fd30"
-  },
-  "F:\\Youtube 2.0\\tmp\\check-features.js": {
-    "mtime": 1772599287.8580658,
-    "hash": "b76c58d8aca55965b2c34048cf91fe17"
-  },
-  "F:\\Youtube 2.0\\tmp\\check_cache.py": {
-    "mtime": 1777630023.9021838,
-    "hash": "9c1f52f7cc7d5b385645c75b33343009"
-  },
-  "F:\\Youtube 2.0\\tmp\\find_dividers.js": {
-    "mtime": 1773213429.035143,
-    "hash": "fdf1492f69e516faed5c68cb9b8e7cb6"
-  },
-  "F:\\Youtube 2.0\\tmp\\fix_dup.js": {
-    "mtime": 1773213130.0722082,
-    "hash": "94f882892ee9bc2070fc3d10a20c7baf"
-  },
-  "F:\\Youtube 2.0\\tmp\\fix_js.js": {
-    "mtime": 1773213231.2194762,
-    "hash": "cb1845543b6599bc75505d2294d29a28"
-  },
-  "F:\\Youtube 2.0\\tmp\\generate_audit.js": {
-    "mtime": 1777464034.6436515,
-    "hash": "3d74a4ecfd7cebfd96b0fcad3561ad9b"
-  },
-  "F:\\Youtube 2.0\\tmp\\test_popup.js": {
-    "mtime": 1776394967.061638,
-    "hash": "dfe2a57a73e3caeec47422899da09daf"
-  },
-  "F:\\Youtube 2.0\\tmp\\verify.js": {
-    "mtime": 1773213385.64949,
-    "hash": "39d394aa29376ecfe8d1729a1cc1c05d"
-  },
-  "F:\\Youtube 2.0\\ARCHITECTURE.md": {
-    "mtime": 1771092825.520742,
-    "hash": "fc122963ec980b6c96ba2317fc2bfee4"
-  },
-  "F:\\Youtube 2.0\\CHANGELOG.md": {
-    "mtime": 1776394773.506858,
-    "hash": "6162d7be015d7bf0de03947e3b485d7f"
-  },
-  "F:\\Youtube 2.0\\CLAUDE.md": {
-    "mtime": 1777702365.0891383,
-    "hash": "2ed67c68f28bc1ef95ac24167431d7e8"
-  },
-  "F:\\Youtube 2.0\\CONTRIBUTING.md": {
-    "mtime": 1771787382.2664247,
-    "hash": "846c686519a55c81fd14644b8d87bd47"
-  },
-  "F:\\Youtube 2.0\\FEATURES.md": {
-    "mtime": 1777642515.183893,
-    "hash": "9dc6c6eb2ae82509ee04a40fe37c6171"
-  },
-  "F:\\Youtube 2.0\\gemini.md": {
-    "mtime": 1777702364.6430707,
-    "hash": "68f30fd00b6329d188bec3f74a5cfba8"
-  },
-  "F:\\Youtube 2.0\\index_content.txt": {
-    "mtime": 1777622943.0541139,
-    "hash": "1975de339421145e8b34db6a7da9b9df"
-  },
-  "F:\\Youtube 2.0\\README.md": {
-    "mtime": 1776394773.5110123,
-    "hash": "0e3844a0c5f7a8c4a94da0ba35ca6c1e"
-  },
-  "F:\\Youtube 2.0\\structure.txt": {
-    "mtime": 1777622943.144646,
-    "hash": "2ad63a8fb7e8997ddd15137ccbd383e3"
-  },
-  "F:\\Youtube 2.0\\yt.html": {
-    "mtime": 1772288992.2288103,
-    "hash": "a02bfe31990835216acea9cbbd09100d"
-  },
-  "F:\\Youtube 2.0\\directives\\example_directive.md": {
-    "mtime": 1770751229.693666,
-    "hash": "b38d90675b84d7ba72b65dfc65b643d5"
+    "mtime": 1777959648.62711,
+    "hash": "97837b04ae72626586bbb603c274b70e"
   },
   "F:\\Youtube 2.0\\src\\popup\\popup.html": {
-    "mtime": 1777643119.3454642,
-    "hash": "67514228aecbd635015455239105f5f5"
-  },
-  "F:\\Youtube 2.0\\Temporary\\index.html": {
-    "mtime": 1770693706.0,
-    "hash": "bda4996759050dc4bbc64b82e981e46e"
-  },
-  "F:\\Youtube 2.0\\Temporary\\options.html": {
-    "mtime": 1770693706.0,
-    "hash": "75dae2910432764d09fce8526c9aa536"
-  },
-  "F:\\Youtube 2.0\\Temporary\\settings.html": {
-    "mtime": 1770693706.0,
-    "hash": "fdd648cb4849a04b26ed574615358f66"
-  },
-  "F:\\Youtube 2.0\\tmp\\del.txt": {
-    "mtime": 1772343306.5817888,
-    "hash": "ca86fc26d9b722629b8ef5020d4da71c"
-  },
-  "F:\\Youtube 2.0\\tmp\\deleted_files_list.txt": {
-    "mtime": 1772343269.315794,
-    "hash": "ddfaa1653ac25895548bc0044a69fafe"
+    "mtime": 1777959906.5467234,
+    "hash": "bd909fc3c4b0f0ff395d21c9ebb6d1c3"
   },
   "F:\\Youtube 2.0\\src\\assets\\icon.png": {
     "mtime": 1774623956.2563775,
@@ -514,33 +390,5 @@
   "F:\\Youtube 2.0\\src\\assets\\icon.svg": {
     "mtime": 1768720057.6812568,
     "hash": "c548345f9a174fac34c921b3f06a537c"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\logo2.png": {
-    "mtime": 1770693706.0,
-    "hash": "0d4afc847eaedc7fc1e8ba7964d8535a"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\icons\\icon128.png": {
-    "mtime": 1770693706.0,
-    "hash": "0049c399924fec6ee1cade140881fb54"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\icons\\icon256.png": {
-    "mtime": 1770693706.0,
-    "hash": "c4ea8f9982de5a901f55f281765c43e9"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\icons\\icon32.png": {
-    "mtime": 1770693706.0,
-    "hash": "2519f5a8faad92792a25c378d928da71"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\icons\\icon48.png": {
-    "mtime": 1770693706.0,
-    "hash": "4292876dcd61ad11edf2d4df756f9d98"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\icons\\icon64.png": {
-    "mtime": 1770693706.0,
-    "hash": "6bfbe5342927ba9b255ad77eeffe96a9"
-  },
-  "F:\\Youtube 2.0\\Temporary\\assets\\images\\default.png": {
-    "mtime": 1770693706.0,
-    "hash": "aeaff5a7d3f652b19e838cb3ed8a9048"
   }
 }

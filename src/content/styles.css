@@ -7042,3 +7042,281 @@ ytd-popup-container ytd-multi-page-menu-renderer {
     .ypp-pl-cover-img,
     .ypp-pl-v-thumb { transition: none !important; transform: none !important; }
 }
+
+/* CONTENT FILTERS */
+
+/* ── Hide Playlists ── */
+body.ypp-hide-playlists 
+ytd-rich-item-renderer:has(ytd-playlist-thumbnail),
+body.ypp-hide-playlists 
+ytd-rich-item-renderer:has(a[href*="playlist?list"]),
+body.ypp-hide-playlists 
+ytd-playlist-renderer,
+body.ypp-hide-playlists 
+ytd-radio-renderer,
+body.ypp-hide-playlists
+ytd-compact-playlist-renderer {
+    display: none !important;
+}
+
+body.ypp-hide-playlists
+ytd-item-section-renderer ytd-playlist-renderer {
+    display: none !important;
+}
+
+body.ypp-hide-playlists
+ytd-shelf-renderer:has(ytd-playlist-renderer) {
+    display: none !important;
+}
+
+/* ── Hide Podcasts ── */
+body.ypp-hide-podcasts
+ytd-rich-section-renderer:has([href*="podcast"]),
+body.ypp-hide-podcasts
+ytd-shelf-renderer:has([href*="podcast"]),
+body.ypp-hide-podcasts
+ytd-playlist-renderer[podcast] {
+    display: none !important;
+}
+
+body.ypp-hide-podcasts
+tp-yt-paper-tab:has([title*="Podcast"]),
+body.ypp-hide-podcasts
+tp-yt-paper-tab:has([title*="podcast"]) {
+    display: none !important;
+}
+
+/* MULTI-SELECT */
+.ypp-ms-checkbox {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 6px !important;
+    border: 2px solid rgba(255,255,255,0.7) !important;
+    background: rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10 !important;
+    opacity: 0 !important;
+    transition: opacity 0.15s, background 0.15s !important;
+}
+
+ytd-rich-item-renderer:hover .ypp-ms-checkbox,
+ytd-video-renderer:hover .ypp-ms-checkbox,
+ytd-compact-video-renderer:hover .ypp-ms-checkbox,
+ytd-playlist-video-renderer:hover .ypp-ms-checkbox,
+ytd-grid-video-renderer:hover .ypp-ms-checkbox,
+.ypp-ms-selected .ypp-ms-checkbox {
+    opacity: 1 !important;
+}
+
+.ypp-ms-check-icon {
+    opacity: 0 !important;
+    color: white !important;
+    transition: opacity 0.1s !important;
+}
+
+.ypp-ms-checkbox.ypp-ms-checked {
+    background: #6C63FF !important;
+    border-color: #6C63FF !important;
+    opacity: 1 !important;
+}
+
+.ypp-ms-checkbox.ypp-ms-checked .ypp-ms-check-icon {
+    opacity: 1 !important;
+}
+
+.ypp-ms-selected {
+    outline: 2px solid #6C63FF !important;
+    outline-offset: 2px !important;
+    border-radius: 10px !important;
+}
+
+.ypp-ms-bar {
+    position: fixed !important;
+    bottom: 24px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important;
+    background: rgba(18,18,18,0.97) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 14px !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    animation: ypp-ms-bar-in 0.2s cubic-bezier(0.34,1.56,0.64,1) !important;
+    white-space: nowrap !important;
+}
+
+@keyframes ypp-ms-bar-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.ypp-ms-bar-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding-right: 16px !important;
+    border-right: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.ypp-ms-count {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #6C63FF !important;
+    font-family: Roboto, sans-serif !important;
+}
+
+.ypp-ms-label {
+    font-size: 13px !important;
+    color: rgba(255,255,255,0.6) !important;
+    font-family: Roboto, sans-serif !important;
+}
+
+.ypp-ms-bar-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.ypp-ms-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 8px 14px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 13px !important;
+    font-family: Roboto, sans-serif !important;
+    cursor: pointer !important;
+    transition: background 0.12s, color 0.12s !important;
+    white-space: nowrap !important;
+}
+
+.ypp-ms-btn:hover {
+    background: rgba(255,255,255,0.12) !important;
+    color: white !important;
+}
+
+.ypp-ms-btn-clear {
+    color: rgba(255,90,80,0.8) !important;
+    border-color: rgba(255,78,69,0.2) !important;
+}
+
+.ypp-ms-btn-clear:hover {
+    background: rgba(255,78,69,0.1) !important;
+    color: #ff6b6b !important;
+}
+
+/* HIDE METRICS */
+body.ypp-hide-metrics #metadata-line,
+body.ypp-hide-metrics ytd-video-meta-block,
+body.ypp-hide-metrics #info-strings,
+body.ypp-hide-metrics .ytd-video-meta-block {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #count,
+body.ypp-hide-metrics ytd-video-view-count-renderer,
+body.ypp-hide-metrics .view-count,
+body.ypp-hide-metrics #info .style-scope:first-child {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #segmented-like-button 
+    .yt-spec-button-shape-next__button-text-content,
+body.ypp-hide-metrics like-button-view-model 
+    .yt-spec-button-shape-next__button-text-content,
+body.ypp-hide-metrics 
+    ytd-toggle-button-renderer .ytd-toggle-button-renderer {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #owner-sub-count,
+body.ypp-hide-metrics ytd-channel-name + *,
+body.ypp-hide-metrics #subscribers,
+body.ypp-hide-metrics 
+    ytd-subscription-notification-toggle-button-renderer-next,
+body.ypp-hide-metrics 
+    ytd-video-owner-renderer #subscriber-count {
+    display: none !important;
+}
+
+body.ypp-hide-metrics 
+    ytd-channel-tagline-renderer,
+body.ypp-hide-metrics 
+    #channel-header-container #subscribers {
+    display: none !important;
+}
+
+body.ypp-hide-metrics 
+    ytd-video-renderer #metadata-line span:first-child,
+body.ypp-hide-metrics
+    ytd-compact-video-renderer #metadata-line {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #count.ytd-comments-header-renderer {
+    display: none !important;
+}
+
+body.ypp-hide-metrics 
+    ytd-playlist-thumbnail .playlist-items-count {
+    display: none !important;
+}
+
+/* HIDE THUMBNAILS */
+body.ypp-hide-thumbnails ytd-thumbnail img,
+body.ypp-hide-thumbnails #thumbnail img {
+    filter: blur(15px) grayscale(100%) opacity(0.3) !important;
+    transition: filter 0.3s ease !important;
+}
+body.ypp-hide-thumbnails ytd-thumbnail:hover img,
+body.ypp-hide-thumbnails #thumbnail:hover img {
+    filter: blur(0px) grayscale(0%) opacity(1) !important;
+}
+
+/* INTENTIONAL DELAY */
+.ypp-intentional-delay-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(10, 10, 10, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    z-index: 9999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    color: white !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+.ypp-id-content h2 { font-size: 36px !important; margin-bottom: 12px !important; font-weight: 300 !important; }
+.ypp-id-content p { font-size: 18px !important; opacity: 0.7 !important; margin-bottom: 32px !important; }
+.ypp-id-timer { font-size: 64px !important; font-weight: 700 !important; color: #6C63FF !important; }
+.ypp-id-skip {
+    background: #6C63FF !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 32px !important;
+    font-size: 16px !important;
+    border-radius: 24px !important;
+    cursor: pointer !important;
+    margin: 0 auto !important;
+    transition: transform 0.2s, background 0.2s !important;
+}
+.ypp-id-skip:hover { background: #817aff !important; transform: scale(1.05) !important; }

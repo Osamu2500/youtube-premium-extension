@@ -81,6 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'grid4x4',
         'homeColumns', // New
         'displayFullTitle', // New
+        'hidePlaylists',
+        'hidePodcasts',
+        'hideThumbnails',
+        'redirectHome',
         'contextMenu', // Subscription Groups Context Menu
         
         // Shorts
@@ -106,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'autoPause', // auto-pause.js
         'enableCustomSpeed',
         'enableGlobalPlayerBar',
+        'autoLike',
         'enablePiP', // Button / Scroll PiP
         'miniPlayer', // Missing
         'enableLoop',
@@ -138,14 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideLiveChat',
         'hideFundraiser',
         'hideEndScreens',
+        'hideMetrics',
         'hideCards',
         'hideMerch',
+        'intentionalDelay',
         
         // Integrations & Filters
         'sponsorBlock',
         'returnYouTubeDislike',
         'adSkipper',
         'enableMarkWatched',
+        'multiSelect',
 
         // Playlist & History Extras
         'reversePlaylist',

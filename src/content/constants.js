@@ -282,6 +282,14 @@ window.YPP.CONSTANTS = {
         autoPiP: false,
         
         // New Features
+        autoLike: false,
+        hidePlaylists: false,
+        hidePodcasts: false,
+        multiSelect: true,
+        hideMetrics: false,
+        hideThumbnails: false,
+        redirectHome: false,
+        intentionalDelay: false,
         ambientMode: false,
         audioModeEnabled: false,
         videoControlsEnabled: true,
@@ -459,6 +467,13 @@ window.YPP.CONSTANTS = {
         redirectShorts: 'RedirectShorts',
         playerTools: 'PlayerTools',
         // New Features
+        autoLike: 'AutoLike',
+        hidePlaylists: 'HidePlaylistsPodcasts',
+        multiSelect: 'MultiSelect',
+        hideMetrics: 'HideMetrics',
+        hideThumbnails: 'HideThumbnails',
+        redirectHome: 'RedirectHome',
+        intentionalDelay: 'IntentionalDelay',
         playlistDuration: 'PlaylistDuration',
         statsVisualizer: 'StatsVisualizer',
         watchHistory: 'WatchHistoryTracker',

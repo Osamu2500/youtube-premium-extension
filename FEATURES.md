@@ -42,6 +42,7 @@
 | Global Bar UI | `GlobalBarUI` | `content/features/player/global-bar-ui.js` | `null` | all (non-YT) | stable | — | UI component system for the Global Player Bar |
 | Wheel Controls | `WheelControls` | `content/features/player/wheel-controls.js` | `null` | watch | stable | — | Allows scrolling over the video player while holding modifiers to change speed and volume |
 | Video Resumer | `VideoResumer` | `content/features/player/video-resumer.js` | `null` | watch | stable | — | Remembers exact playback position locally and automatically resumes |
+| Auto Like | `AutoLike` | `content/features/player/auto-like.js` | `autoLike` | watch | stable | — | Automatically likes every video you open |
 
 ---
 
@@ -118,6 +119,9 @@
 | Keyboard Shortcuts | `KeyboardShortcuts` | `content/features/core/global/keyboard-shortcuts.js` | `keyboardShortcuts` | all | stable | — | Custom hotkeys for zen mode, focus mode, snapshot, speed, PiP, ambient mode |
 | Stats Visualizer | `StatsVisualizer` | `content/features/core/global/stats/stats-visualizer.js` | `statsVisualizer` | all | stable | HistoryTracker | Displays watch time analytics and stats panel |
 | Hide Watched | `HideWatched` | `content/features/core/global/hide-watched.js` | `hideWatched` | all | stable | MarkWatched | Reads watched IDs from MarkWatched; dims or hides watched videos; respects `hideWatchedMode` and `hideWatchedThreshold`; re-runs on every DOM update |
+| Hide Playlists & Podcasts | `HidePlaylistsPodcasts` | `content/features/core/global/hide-playlists-podcasts.js` | `hidePlaylists`, `hidePodcasts` | home, search | stable | — | Removes playlist and podcast cards from feeds and search |
+| Multi-Select Videos | `MultiSelect` | `content/features/core/global/multi-select.js` | `multiSelect` | all | stable | — | Allows selecting multiple videos to perform batch actions like add to queue or watch later |
+| Hide Metrics | `HideMetrics` | `content/features/core/global/hide-metrics.js` | `hideMetrics` | all | stable | — | Hides views, likes, and subscriber counts to reduce vanity metrics |
 
 ---
 

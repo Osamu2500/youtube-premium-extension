@@ -272,9 +272,12 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
 
     /**
      * Check if current URL is a Short and redirect to standard Watch.
+     * Only runs when BOTH hideShorts AND redirectShorts are enabled.
      */
     checkRedirect() {
         if (!this.settings?.hideShorts) return;
+        // Only redirect to the normal player if the user explicitly enabled "Redirect Shorts"
+        if (!this.settings?.redirectShorts) return;
 
         if (location.pathname.startsWith('/shorts/')) {
             // Extract video ID and validate format
