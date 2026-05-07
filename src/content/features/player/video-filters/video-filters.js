@@ -24,7 +24,12 @@ window.YPP.features.VideoFilters = class VideoFilters {
             dehaze: 0,
             clarity: 0,
             grain: 0,
-            sharpness: 0
+            sharpness: 0,
+            temperature: 0,
+            vibrance: 100,
+            highlights: 0,
+            shadows: 0,
+            vignette: 0
         };
         this._filterOverlay = null; // CRT/VHS scanline overlay div
         this._filterPanel = null;   // The open filter panel
@@ -126,6 +131,26 @@ window.YPP.features.VideoFilters = class VideoFilters {
         if (adj.clarity > 0) {
             baseContrast += adj.clarity * 0.3;
         }
+        // Temperature: warm = +sepia/hue shift, cool = blue hue
+        let extraFilters = '';
+        if (adj.temperature !== 0) {
+            const t = adj.temperature;
+            if (t > 0) { // warm
+                baseBrightness += t * 0.05;
+                baseContrast += t * 0.02;
+            } else { // cool
+                baseBrightness += t * 0.03;
+            }
+        }
+        if (adj.vibrance !== undefined && adj.vibrance !== 100) {
+            const vb = adj.vibrance;
+            // Vibrance approximated via saturation adjustment
+            const satMult = s(vb, 100);
+            adjStr_parts_saturate_override = satMult;
+        }
+        // Highlights/Shadows approximate via brightness layers (CSS limited)
+        if (adj.highlights !== 0) baseBrightness += adj.highlights * 0.15;
+        if (adj.shadows !== 0)    baseBrightness += adj.shadows * 0.08;
 
         const adjStr = [
             baseBrightness !== 100 ? `brightness(${s(baseBrightness)}%)` : '',

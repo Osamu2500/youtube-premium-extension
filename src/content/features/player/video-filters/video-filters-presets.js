@@ -62,6 +62,59 @@ window.YPP.features.VideoFiltersPresets = {
         { category: 'Special Effects', name: 'Emboss',       css: 'url(#ypp-fx-emboss) grayscale(100%) contrast(150%) brightness(120%)', overlay: null },
         { category: 'Special Effects', name: 'Neon Edge',    css: 'url(#ypp-fx-edge) saturate(200%) brightness(120%)', overlay: null },
         { category: 'Special Effects', name: 'Deep Fried',   css: 'saturate(400%) contrast(300%) brightness(120%) hue-rotate(-10deg)', overlay: null },
-        { category: 'Special Effects', name: 'Duotone Red',  css: 'grayscale(100%) sepia(100%) hue-rotate(320deg) saturate(400%) contrast(140%)', overlay: null }
+        { category: 'Special Effects', name: 'Duotone Red',  css: 'grayscale(100%) sepia(100%) hue-rotate(320deg) saturate(400%) contrast(140%)', overlay: null },
+
+        // ── Cinematic Worlds ──
+        // Each filter is tuned to recreate the iconic color grade of a specific film/franchise
+
+        { category: 'Cinematic Worlds', name: 'Dune',
+          // Arrakis: scorched amber sand, bleached sky, high contrast desert heat
+          css: 'sepia(45%) hue-rotate(10deg) saturate(130%) contrast(130%) brightness(105%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Twilight',
+          // Cold blue-green teal desaturated Pacific Northwest romance grade
+          css: 'hue-rotate(175deg) saturate(70%) contrast(110%) brightness(90%) sepia(15%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Disney Magic',
+          // Vibrant, warm, punchy fairy-tale palette — high saturation with lifted blacks
+          css: 'saturate(220%) contrast(105%) brightness(112%) hue-rotate(350deg)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Pixar Glow',
+          // Soft, warm, slightly over-exposed look — bright highlights and clean colours
+          css: 'brightness(118%) contrast(95%) saturate(170%) hue-rotate(355deg)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Avatar: Pandora',
+          // Bioluminescent blue-green lush jungle — deep teal, vivid cyan, boosted saturation
+          css: 'hue-rotate(155deg) saturate(210%) contrast(125%) brightness(95%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Interstellar',
+          // Cold steel blue space / warm wheat field split — desaturated with cool shift
+          css: 'hue-rotate(195deg) saturate(75%) contrast(125%) brightness(98%) sepia(10%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Mad Max: Fury Road',
+          // Scorched orange chrome — bleached sky, hyper-orange foreground, crushed blacks
+          css: 'sepia(60%) hue-rotate(345deg) saturate(200%) contrast(145%) brightness(105%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Lord of the Rings',
+          // New Zealand epic: warm green lands + golden mist — earthy, high contrast
+          css: 'hue-rotate(20deg) saturate(145%) contrast(118%) brightness(102%) sepia(25%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Blade Runner 2049',
+          // Amber smog dystopia: warm orange fog + cold neon accents, heavy contrast
+          css: 'sepia(50%) hue-rotate(15deg) saturate(160%) contrast(140%) brightness(88%)',
+          overlay: null },
+
+        { category: 'Cinematic Worlds', name: 'Marvel Studios',
+          // MCU bright blockbuster: punchy primaries, slightly teal shadows, vivid highlights
+          css: 'saturate(175%) contrast(120%) brightness(108%) hue-rotate(185deg)',
+          overlay: null }
     ]
 };

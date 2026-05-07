@@ -23,7 +23,7 @@ window.YPP.SettingsSchema = {
         schemaVersion:       { type: 'number',  default: 1 },
         // --- Theme ---
         premiumTheme:        { type: 'boolean', default: true },
-        activeTheme:         { type: 'string',  default: 'default', values: ['default','ocean','sunset','dracula','forest','midnight','cherry','system'] },
+        activeTheme:         { type: 'string',  default: 'default', values: ['default','ocean','sunset','dracula','forest','midnight','cherry','system', 'coffee', 'cyberpunk', 'nord'] },
         trueBlack:           { type: 'boolean', default: false },
         hideScrollbar:       { type: 'boolean', default: false },
 
@@ -39,7 +39,10 @@ window.YPP.SettingsSchema = {
         hideShorts:          { type: 'boolean', default: false },
         hideSearchShorts:    { type: 'boolean', default: true },
         hideMixes:           { type: 'boolean', default: false },
+        hideExploreTopics:   { type: 'boolean', default: false },
         hideWatched:         { type: 'boolean', default: false },
+        hideWatchedMode:     { type: 'string',  default: 'dim', values: ['dim', 'hide'] },
+        hideWatchedThreshold:{ type: 'number',  default: 80, min: 0, max: 100 },
         enableMarkWatched:   { type: 'boolean', default: true },
         hideMerch:           { type: 'boolean', default: false },
         hideComments:        { type: 'boolean', default: false },
@@ -62,6 +65,8 @@ window.YPP.SettingsSchema = {
         cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid'] },
         thumbRadius:         { type: 'number',  default: 8, min: 0, max: 24 },
         sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 },
+        customScrollbar:     { type: 'boolean', default: false },
+        grayscaleThumbnails: { type: 'boolean', default: false },
 
         // --- Player ---
         autoCinema:          { type: 'boolean', default: false },

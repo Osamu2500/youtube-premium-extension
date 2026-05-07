@@ -258,12 +258,23 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
     static buildPresetsTab(ctx, video, btn) {
         const wrap = document.createElement('div');
-        
+
+        // ── Favorites (localStorage)
+        const FAV_KEY  = 'ypp-fav-filters';
+        const loadFavs = () => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch { return []; } };
+        const saveFavs = (arr) => localStorage.setItem(FAV_KEY, JSON.stringify(arr));
+        const toggleFav = (idx) => {
+            const f = loadFavs(), pos = f.indexOf(idx);
+            pos === -1 ? f.push(idx) : f.splice(pos, 1);
+            saveFavs(f);
+        };
+
+        // ── Search bar
         const searchWrap = document.createElement('div');
         searchWrap.className = 'ypp-vcp-search-wrap';
         Object.assign(searchWrap.style, { margin: '16px', marginBottom: '8px' });
         searchWrap.innerHTML = `
-            <span class="ypp-vcp-search-icon">🔍</span>
+            <span class="ypp-vcp-search-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
             <input type="text" class="ypp-vcp-search-input" placeholder="Search presets (e.g. Night Vision)...">
         `;
         const searchInput = searchWrap.querySelector('input');
@@ -272,89 +283,108 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const listContainer = document.createElement('div');
         wrap.appendChild(listContainer);
 
+        const starFilled  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#FFD700"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+        const starOutline = `<svg width="13" height="13" viewBox="0 0 24 24" fill="rgba(255,255,255,0.35)"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zm-10 6.93l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.81 4.38.38-3.32 2.88 1 4.28L12 16.17z"/></svg>`;
+
+        // ── Build a single filter card
+        const buildCard = (filter, index) => {
+            const card = document.createElement('div');
+            const isActive = ctx.currentFilterIndex === index;
+            const isFav    = loadFavs().includes(index);
+            card.className = `ypp-filter-card ${isActive ? 'active' : ''}`;
+            const cssFilter = filter.css === 'none' ? 'grayscale(0%)' : filter.css;
+            card.innerHTML = `
+                <div class="ypp-filter-lut-preview" style="filter:${cssFilter}"></div>
+                <span style="font-size:13px;font-weight:600;color:${isActive ? '#fff' : 'rgba(255,255,255,0.8)'};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${filter.name}</span>
+                ${isActive ? '<div class="ypp-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>' : ''}
+                <button class="ypp-star-btn" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}" data-fav="${isFav}">${isFav ? starFilled : starOutline}</button>
+            `;
+            const starBtn = card.querySelector('.ypp-star-btn');
+            starBtn.onclick = (e) => {
+                e.stopPropagation();
+                toggleFav(index);
+                const nowFav = loadFavs().includes(index);
+                starBtn.innerHTML  = nowFav ? starFilled : starOutline;
+                starBtn.dataset.fav = nowFav;
+                starBtn.title = nowFav ? 'Remove from Favorites' : 'Add to Favorites';
+                renderFilteredList(searchInput.value);
+            };
+            card.onclick = (e) => {
+                if (e.target.closest('.ypp-star-btn')) return;
+                e.stopPropagation();
+                ctx.currentFilterIndex = index;
+                ctx._applyComputedFilter(video);
+                if (btn) { index > 0 ? btn.classList.add('active') : btn.classList.remove('active'); }
+                ctx._showToast(video, `✨ ${filter.name}`);
+                const pill = ctx._filterPanel?.querySelector('#ypp-active-filter-name');
+                if (pill) pill.textContent = filter.name;
+                listContainer.querySelectorAll('.ypp-filter-card').forEach(c => {
+                    c.classList.remove('active');
+                    const sp = c.querySelector('span'); if (sp) sp.style.color = 'rgba(255,255,255,0.8)';
+                    const chk = c.querySelector('.ypp-card-check'); if (chk) chk.remove();
+                });
+                card.classList.add('active');
+                const sp = card.querySelector('span'); if (sp) sp.style.color = '#fff';
+                if (!card.querySelector('.ypp-card-check')) {
+                    starBtn.insertAdjacentHTML('beforebegin', '<div class="ypp-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>');
+                }
+            };
+            card.onmouseenter = () => {
+                if (ctx.currentFilterIndex === index) return;
+                const saved = ctx.currentFilterIndex;
+                ctx.currentFilterIndex = index;
+                ctx._applyComputedFilter(video);
+                ctx.currentFilterIndex = saved;
+            };
+            card.onmouseleave = () => ctx._applyComputedFilter(video);
+            return card;
+        };
+
+        // ── Build a <details> category block
+        const buildCategory = (cat, items, open = false) => {
+            const details = document.createElement('details');
+            details.className = 'ypp-filter-cat-details';
+            if (open) details.open = true;
+            const summary = document.createElement('summary');
+            summary.innerHTML = cat === '⭐ Favorites'
+                ? `<span style="display:flex;align-items:center;gap:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#FFD700"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>${cat}</span>`
+                : cat;
+            details.appendChild(summary);
+            const grid = document.createElement('div');
+            grid.className = 'ypp-filter-card-grid';
+            items.forEach(({ filter, index }) => grid.appendChild(buildCard(filter, index)));
+            details.appendChild(grid);
+            return details;
+        };
+
+        // ── Main render
         const renderFilteredList = (query = '') => {
             listContainer.innerHTML = '';
-            const normalizedQuery = query.toLowerCase();
+            const q = query.toLowerCase();
+            const FILTERS = window.YPP.features.VideoFiltersPresets.FILTERS;
+            const favs = loadFavs();
+
+            // Favorites at top — always open, only shown without search
+            if (!query && favs.length > 0) {
+                const favItems = favs.filter(i => FILTERS[i]).map(i => ({ filter: FILTERS[i], index: i }));
+                if (favItems.length) listContainer.appendChild(buildCategory('⭐ Favorites', favItems, true));
+            }
+
+            // Category groups — closed by default; open only when searching
             const groups = {};
-            window.YPP.features.VideoFiltersPresets.FILTERS.forEach((filter, index) => {
-                if (query && !filter.name.toLowerCase().includes(normalizedQuery) && !filter.category.toLowerCase().includes(normalizedQuery)) {
-                    return;
-                }
+            FILTERS.forEach((filter, index) => {
+                if (q && !filter.name.toLowerCase().includes(q) && !filter.category.toLowerCase().includes(q)) return;
                 const cat = filter.category || 'Other';
                 if (!groups[cat]) groups[cat] = [];
                 groups[cat].push({ filter, index });
             });
-
-            Object.keys(groups).forEach((cat, catIdx) => {
-                const details = document.createElement('details');
-                details.className = 'ypp-filter-cat-details';
-                if (catIdx === 0 || query) details.open = true; // Auto open first category or if searching
-
-                const summary = document.createElement('summary');
-                summary.textContent = cat;
-                details.appendChild(summary);
-
-                const grid = document.createElement('div');
-                grid.className = 'ypp-filter-card-grid';
-                
-                groups[cat].forEach(({ filter, index }) => {
-                    const card = document.createElement('div');
-                    const isActive = ctx.currentFilterIndex === index;
-                    card.className = `ypp-filter-card ${isActive ? 'active' : ''}`;
-                    
-                    let cssFilter = filter.css;
-                    if (cssFilter === 'none') cssFilter = 'grayscale(0%)'; // dummy to keep validity
-                    
-                    card.innerHTML = `
-                        <div class="ypp-filter-lut-preview" style="filter: ${cssFilter}"></div>
-                        <span style="font-size: 13px; font-weight: 600; color: ${isActive ? '#fff' : 'rgba(255,255,255,0.8)'}; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${filter.name}</span>
-                        ${isActive ? '<div style="background:#fff; color:#000; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>' : ''}
-                    `;
-                    
-                    card.onclick = (e) => {
-                        e.stopPropagation();
-                        ctx.currentFilterIndex = index;
-                        ctx._applyComputedFilter(video);
-                        if (btn) {
-                            if (index > 0) btn.classList.add('active');
-                            else btn.classList.remove('active');
-                        }
-                        ctx._showToast(video, `✨ ${filter.name}`);
-                        const pill = ctx._filterPanel && ctx._filterPanel.querySelector('#ypp-active-filter-name');
-                        if (pill) pill.textContent = filter.name;
-
-                        Array.from(listContainer.querySelectorAll('.ypp-filter-card')).forEach(c => {
-                            c.classList.remove('active');
-                            c.querySelector('span').style.color = 'rgba(255,255,255,0.8)';
-                            const check = c.querySelector('div[style*="border-radius"]');
-                            if (check && check.className !== 'ypp-filter-lut-preview') check.remove();
-                        });
-                        card.classList.add('active');
-                        card.querySelector('span').style.color = '#fff';
-                        card.insertAdjacentHTML('beforeend', '<div style="background:#fff; color:#000; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>');
-                    };
-
-                    card.onmouseenter = () => {
-                        if (ctx.currentFilterIndex === index) return;
-                        const savedIndex = ctx.currentFilterIndex;
-                        ctx.currentFilterIndex = index;
-                        ctx._applyComputedFilter(video);
-                        ctx.currentFilterIndex = savedIndex; 
-                    };
-
-                    card.onmouseleave = () => {
-                        ctx._applyComputedFilter(video);
-                    };
-
-                    grid.appendChild(card);
-                });
-                details.appendChild(grid);
-                listContainer.appendChild(details);
+            Object.keys(groups).forEach(cat => {
+                listContainer.appendChild(buildCategory(cat, groups[cat], !!query));
             });
 
-            if (Object.keys(groups).length === 0) {
+            if (query && Object.keys(groups).length === 0) {
                 const empty = document.createElement('div');
-                empty.style.cssText = 'padding: 40px 20px; text-align: center; color: rgba(255,255,255,0.3); font-size: 13px; font-style: italic;';
+                empty.style.cssText = 'padding:40px 20px;text-align:center;color:rgba(255,255,255,0.3);font-size:13px;font-style:italic;';
                 empty.textContent = 'No filters matching your search...';
                 listContainer.appendChild(empty);
             }
@@ -363,8 +393,22 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         searchInput.oninput = (e) => renderFilteredList(e.target.value);
         renderFilteredList();
 
+        // Star button styles (once)
+        if (!document.getElementById('ypp-star-btn-style')) {
+            const s = document.createElement('style');
+            s.id = 'ypp-star-btn-style';
+            s.textContent = `
+                .ypp-star-btn{background:transparent;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;width:22px;height:22px;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.85);}
+                .ypp-filter-card:hover .ypp-star-btn,.ypp-star-btn[data-fav="true"]{opacity:1;transform:scale(1);}
+                .ypp-star-btn:hover{background:rgba(255,215,0,0.12);transform:scale(1.15)!important;}
+                .ypp-card-check{background:#fff;color:#000;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+            `;
+            document.head.appendChild(s);
+        }
+
         return wrap;
     }
+
 
     static buildAdjustTab(ctx, video) {
         const wrap = document.createElement('div');
@@ -372,18 +416,31 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
         const intensitySection = document.createElement('div');
         intensitySection.className = 'ypp-intensity-section';
-        intensitySection.innerHTML = `
-            <div class="ypp-intensity-header">
-                <span><span style="margin-right:8px;">💎</span>Global Intensity</span>
-                <span id="ypp-int-val" style="color:#ffffff; font-weight:800;">${ctx.filterIntensity}%</span>
-            </div>
+        Object.assign(intensitySection.style, {
+            padding: '12px 20px 16px',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            background: 'rgba(255,255,255,0.03)'
+        });
+        const intHeader = document.createElement('div');
+        Object.assign(intHeader.style, {
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginBottom: '10px'
+        });
+        intHeader.innerHTML = `
+            <span style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                Global Intensity
+            </span>
+            <span id="ypp-int-val" style="color:#ffffff;font-weight:800;font-size:13px;background:rgba(255,255,255,0.1);padding:2px 10px;border-radius:20px;">${ctx.filterIntensity}%</span>
         `;
+        intensitySection.appendChild(intHeader);
         const intSlider = document.createElement('input');
         intSlider.type = 'range';
         intSlider.className = 'ypp-vcp-slider';
         intSlider.min = '0';
         intSlider.max = '100';
         intSlider.value = ctx.filterIntensity;
+        intSlider.style.cssText = 'width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:rgba(255,255,255,0.15);outline:none;cursor:pointer;';
         intSlider.oninput = (e) => {
             ctx.filterIntensity = Number(e.target.value);
             intensitySection.querySelector('#ypp-int-val').textContent = ctx.filterIntensity + '%';
@@ -392,22 +449,53 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         intensitySection.appendChild(intSlider);
         wrap.appendChild(intensitySection);
 
-        // Core Adjustments
+        // Core Adjustments — SVG icons, no emojis
+        const SVG = {
+            brightness: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-12.37l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0zM7.05 18.36l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0z"/></svg>`,
+            contrast:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18V4c4.41 0 8 3.59 8 8s-3.59 8-8 8z"/></svg>`,
+            saturate:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>`,
+            hueRotate:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+            dehaze:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>`,
+            clarity:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
+            sharpness:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>`,
+            grain:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM11 7h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2zm-4-8h2v2H7zm0 4h2v2H7zm0 4h2v2H7zm8-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"/></svg>`,
+            sepia:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5S15.01 22 17.5 22s4.5-2.01 4.5-4.5S19.99 13 17.5 13zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/></svg>`,
+            grayscale:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3-8c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/></svg>`,
+            invert:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11 1L1 11l10 10L21 11 11 1zm0 17.17L3.83 11 11 3.83V18.17z"/></svg>`,
+            blur:       `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 13c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0-8c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-3 5.5c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zM12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3-7c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0-4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 8c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm3-6c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>`,
+            opacity:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
+            temperature:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-3 7c-1.65 0-3-1.35-3-3 0-1.3.84-2.4 2-2.82V5c0-.55.45-1 1-1s1 .45 1 1v9.18c1.16.42 2 1.52 2 2.82 0 1.65-1.35 3-3 3z"/></svg>`,
+            vibrance:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>`,
+            highlights: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>`,
+            shadows:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L2 21h20L12 3zm0 3.99L19.53 19H4.47L12 6.99z"/></svg>`,
+            vignette:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>`
+        };
         const configs = [
-            { id: 'brightness', label: 'Brightness', icon: '☀️', min: 0, max: 200, def: 100, unit: '%' },
-            { id: 'contrast',   label: 'Contrast',   icon: '🌓', min: 0, max: 200, def: 100, unit: '%' },
-            { id: 'saturate',   label: 'Saturation', icon: '🌈', min: 0, max: 300, def: 100, unit: '%' },
-            { id: 'hueRotate',  label: 'Hue Rotate', icon: '🎨', min: 0, max: 360, def: 0,   unit: '°' },
-            { id: 'dehaze',     label: 'Dehaze',     icon: '🌫️', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'clarity',    label: 'Clarity',    icon: '🔍', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'sharpness',  label: 'Sharpness',  icon: '🔪', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'grain',      label: 'Film Grain', icon: '🎞️', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'sepia',      label: 'Sepia',      icon: '🕰️', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'grayscale',  label: 'Grayscale',  icon: '🌑', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'invert',     label: 'Invert',     icon: '🔄', min: 0, max: 100, def: 0,   unit: '%' },
-            { id: 'blur',       label: 'Blur',       icon: '🌀', min: 0, max: 20,  def: 0,   unit: 'px' },
-            { id: 'opacity',    label: 'Opacity',    icon: '👁️', min: 0, max: 100, def: 100, unit: '%' }
+            { id: 'brightness',  label: 'Brightness',  svgKey: 'brightness',  min: 0,   max: 200, def: 100, unit: '%' },
+            { id: 'contrast',    label: 'Contrast',    svgKey: 'contrast',    min: 0,   max: 200, def: 100, unit: '%' },
+            { id: 'saturate',    label: 'Saturation',  svgKey: 'saturate',    min: 0,   max: 300, def: 100, unit: '%' },
+            { id: 'temperature', label: 'Temperature', svgKey: 'temperature', min: -100,max: 100, def: 0,   unit: 'K' },
+            { id: 'vibrance',    label: 'Vibrance',    svgKey: 'vibrance',    min: 0,   max: 200, def: 100, unit: '%' },
+            { id: 'highlights',  label: 'Highlights',  svgKey: 'highlights',  min: -100,max: 100, def: 0,   unit: '%' },
+            { id: 'shadows',     label: 'Shadows',     svgKey: 'shadows',     min: -100,max: 100, def: 0,   unit: '%' },
+            { id: 'hueRotate',   label: 'Hue Rotate',  svgKey: 'hueRotate',   min: 0,   max: 360, def: 0,   unit: '°' },
+            { id: 'dehaze',      label: 'Dehaze',      svgKey: 'dehaze',      min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'clarity',     label: 'Clarity',     svgKey: 'clarity',     min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'sharpness',   label: 'Sharpness',   svgKey: 'sharpness',   min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'vignette',    label: 'Vignette',    svgKey: 'vignette',    min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'grain',       label: 'Film Grain',  svgKey: 'grain',       min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'sepia',       label: 'Sepia',       svgKey: 'sepia',       min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'grayscale',   label: 'Grayscale',   svgKey: 'grayscale',   min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'invert',      label: 'Invert',      svgKey: 'invert',      min: 0,   max: 100, def: 0,   unit: '%' },
+            { id: 'blur',        label: 'Blur',        svgKey: 'blur',        min: 0,   max: 20,  def: 0,   unit: 'px' },
+            { id: 'opacity',     label: 'Opacity',     svgKey: 'opacity',     min: 0,   max: 100, def: 100, unit: '%' }
         ];
+        // Ensure new adjustment keys are initialized
+        ['temperature','vibrance','highlights','shadows','vignette'].forEach(k => {
+            if (ctx.filterAdjustments[k] === undefined) {
+                ctx.filterAdjustments[k] = (k === 'vibrance') ? 100 : 0;
+            }
+        });
 
         const grid = document.createElement('div');
         grid.className = 'ypp-adjust-grid';
@@ -421,7 +509,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
             const title = document.createElement('div');
             title.className = 'ypp-adjust-card-title';
-            title.innerHTML = `<span>${cfg.icon}</span> <span>${cfg.label}</span>`;
+            title.innerHTML = `<span style="opacity:0.7;display:flex;">${SVG[cfg.svgKey] || ''}</span><span>${cfg.label}</span>`;
 
             const valWrap = document.createElement('div');
             valWrap.style.display = 'flex';

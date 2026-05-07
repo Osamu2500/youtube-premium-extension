@@ -259,6 +259,10 @@
                   <label class="toggle"><input type="checkbox" id="hideShorts" /><span class="slider"></span></label>
                 </div>
                 <div class="toggle-card">
+                  <div class="info"><span class="name">Hide Explore Topics</span><span class="desc">Remove category chip bar</span></div>
+                  <label class="toggle"><input type="checkbox" id="hideExploreTopics" /><span class="slider"></span></label>
+                </div>
+                <div class="toggle-card">
                   <div class="info"><span class="name">Hide Playlists</span><span class="desc">Remove playlist cards</span></div>
                   <label class="toggle"><input type="checkbox" id="hidePlaylists" /><span class="slider"></span></label>
                 </div>
@@ -266,9 +270,29 @@
                   <div class="info"><span class="name">Hide Podcasts</span><span class="desc">Remove podcast cards</span></div>
                   <label class="toggle"><input type="checkbox" id="hidePodcasts" /><span class="slider"></span></label>
                 </div>
-                <div class="toggle-card">
-                  <div class="info"><span class="name">Hide Watched</span><span class="desc">Dim or remove watched videos</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideWatched" /><span class="slider"></span></label>
+                <div class="toggle-card" style="flex-direction: column; align-items: stretch; gap: 0;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
+                    <div class="info"><span class="name">Hide Watched</span><span class="desc">Dim or remove watched videos</span></div>
+                    <label class="toggle"><input type="checkbox" id="hideWatched" /><span class="slider"></span></label>
+                  </div>
+                  <!-- Hide Watched sub-options (visible when hideWatched is on) -->
+                  <div id="hideWatchedOptions" class="sub-options" style="display:none; padding-top: 12px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div class="setting-item" style="margin-bottom: 12px; flex-wrap: wrap; gap: 6px; padding: 0;">
+                      <div class="info"><span class="name" style="font-size:12px;">Mode</span></div>
+                      <div style="display:flex; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
+                        <button type="button" id="hwMode-dim"  class="view-mode-btn hw-mode-btn active" data-mode="dim"  style="font-size:11px; padding:4px 12px;">Dim</button>
+                        <button type="button" id="hwMode-hide" class="view-mode-btn hw-mode-btn"        data-mode="hide" style="font-size:11px; padding:4px 12px;">Hide</button>
+                      </div>
+                      <input type="hidden" id="hideWatchedMode" value="dim" />
+                    </div>
+                    <div class="setting-item" style="flex-direction: column; align-items: flex-start; margin-bottom: 4px; padding: 0;">
+                      <div class="info" style="width:100%; display:flex; justify-content:space-between; flex-direction:row; margin-bottom:4px;">
+                        <span class="name" style="font-size:12px;">Progress Threshold</span>
+                        <span class="desc" id="hideWatchedThresholdValue" style="font-size:12px; font-weight:bold; color:var(--red);">80%</span>
+                      </div>
+                      <input type="range" id="hideWatchedThreshold" min="0" max="100" step="5" value="80" style="width:100%;" />
+                    </div>
+                  </div>
                 </div>
                 <div class="toggle-card">
                   <div class="info"><span class="name">Hide Thumbnails</span><span class="desc">Blur on hover to reveal</span></div>
@@ -507,8 +531,8 @@
                   <span class="name">View Mode</span>
                 </div>
                 <div id="searchViewModeToggle" style="display:flex; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
-                  <button data-mode="grid" class="view-mode-btn active">Grid</button>
-                  <button data-mode="list" class="view-mode-btn">List</button>
+                  <button type="button" data-mode="grid" class="view-mode-btn active">Grid</button>
+                  <button type="button" data-mode="list" class="view-mode-btn">List</button>
                 </div>
               </div>
             </div>
@@ -534,6 +558,14 @@
                 <div class="toggle-card">
                   <div class="info"><span class="name">Context Menu</span><span class="desc">Card context menu</span></div>
                   <label class="toggle"><input type="checkbox" id="contextMenu" checked /><span class="slider"></span></label>
+                </div>
+                <div class="toggle-card">
+                  <div class="info"><span class="name">Filter Bar</span><span class="desc">Show duration/date filters</span></div>
+                  <label class="toggle"><input type="checkbox" id="enableFilterBar" checked /><span class="slider"></span></label>
+                </div>
+                <div class="toggle-card">
+                  <div class="info"><span class="name">Channel Health</span><span class="desc">Show health scanner</span></div>
+                  <label class="toggle"><input type="checkbox" id="enableChannelHealth" checked /><span class="slider"></span></label>
                 </div>
               </div>
               <div class="setting-item" style="margin-top: 6px;">
@@ -701,7 +733,7 @@
                   <div class="color-swatch" data-color="#00bcd4" style="background:#00bcd4" title="Teal"></div>
                   <div class="color-swatch-wrap">
                     <div class="color-swatch custom-swatch" title="Custom"></div>
-                    <input type="color" id="accentColorCustom" class="color-swatch-picker" value="#ff4e45" />
+                    <input type="color" id="accentColor" class="color-swatch-picker" value="#ff4e45" />
                   </div>
                 </div>
               </div>
@@ -759,6 +791,14 @@
                 <div class="toggle-card">
                   <div class="info"><span class="name">Reduced Motion</span></div>
                   <label class="toggle"><input type="checkbox" id="reducedMotion" /><span class="slider"></span></label>
+                </div>
+                <div class="toggle-card">
+                  <div class="info"><span class="name">Custom Scrollbar</span><span class="desc">Stylized scrollbar</span></div>
+                  <label class="toggle"><input type="checkbox" id="customScrollbar" /><span class="slider"></span></label>
+                </div>
+                <div class="toggle-card">
+                  <div class="info"><span class="name">Grayscale Thumbs</span><span class="desc">B&W until hovered</span></div>
+                  <label class="toggle"><input type="checkbox" id="grayscaleThumbnails" /><span class="slider"></span></label>
                 </div>
               </div>
             </div>

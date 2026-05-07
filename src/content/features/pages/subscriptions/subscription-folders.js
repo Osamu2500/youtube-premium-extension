@@ -59,7 +59,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     // =========================================================================
 
     async update(settings) {
-        this.enabled = !!settings?.subscriptionFolders;
+        this.settings = settings || {};
+        this.enabled = this.settings.subscriptionFolders !== false || 
+                       this.settings.enableFilterBar !== false || 
+                       this.settings.enableChannelHealth !== false;
         
         if (!this.enabled) {
             this.disable();
@@ -103,7 +106,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         window.addEventListener('popstate', this._boundHandlePopstate);
 
         this.observer.register('fallback-navigation', 'ytd-app', () => {
-            if (!document.getElementById('ypp-sub-folders-container')) {
+            if (this.settings?.enableSubsManager !== false && !document.getElementById('ypp-sub-folders-container')) {
                 this.ui.injectGuideFolders();
             }
             if (this._isFeedPage && !document.getElementById('ypp-folder-chips')) {
@@ -116,7 +119,13 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         if (!this.enabled) return;
         
         const url = window.location.href;
-        this.ui.injectGuideFolders();
+        
+        if (this.settings?.enableSubsManager !== false) {
+            this.ui.injectGuideFolders();
+        } else {
+            this.ui.removeGuideFolders();
+        }
+        
         this.ui.injectCardBadges();
         
         if (url.includes('/feed/subscriptions')) {

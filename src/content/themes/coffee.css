@@ -1,0 +1,27 @@
+html.yt-premium-plus-theme body {
+    --ypp-bg-base: #2a201c;
+    --ypp-bg-surface: #382c26;
+    --ypp-bg-glass: rgba(42, 32, 28, 0.95);
+    
+    --ypp-text-primary: #f2e6d9;
+    --ypp-text-secondary: #c9b4a4;
+    
+    --ypp-accent: #c98860;
+    --ypp-accent-hover: #e0986b;
+    --ypp-accent-glow: rgba(201, 136, 96, 0.3);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --ypp-shadow-glow: 0 0 24px rgba(201, 136, 96, 0.15);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: transparent;
+    --ytd-searchbox-text-color: #f2e6d9;
+    --ytd-searchbox-border-radius: 18px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 18px 18px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(242, 230, 217, 0.05);
+}

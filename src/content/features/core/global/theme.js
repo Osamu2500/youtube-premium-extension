@@ -61,9 +61,9 @@ window.YPP.features.Theme = class ThemeManager {
     disable() {
         try {
             this._toggleTheme(false);
-            this._applyTrueBlack(false);
             this._applyHideScrollbar(false);
             this._cleanupClasses();
+            this._cleanupCustomVariables();
 
             this._isActive = false;
         } catch (error) {
@@ -103,7 +103,6 @@ window.YPP.features.Theme = class ThemeManager {
             this._applyCustomizationSettings();
 
             // Apply UI customization
-            this._applyTrueBlack(this._settings.trueBlack);
             this._applyHideScrollbar(this._settings.hideScrollbar);
 
         } catch (error) {
@@ -111,11 +110,6 @@ window.YPP.features.Theme = class ThemeManager {
         }
     }
 
-    /**
-     * Toggle the theme based on settings.
-     * Handles premium theme, true black (legacy), and new multi-themes.
-     * @param {boolean} enable - Whether premium theme is enabled
-     */
     /**
      * Toggle the theme based on settings.
      * Handles premium theme, true black (legacy), and new multi-themes.
@@ -267,13 +261,7 @@ window.YPP.features.Theme = class ThemeManager {
         if (link) link.remove();
     }
 
-    /**
-     * Apply True Black overrides (Now handled via Midnight Theme)
-     * Kept for reference or specific edge case overrides if needed in future
-     */
-    _applyTrueBlack() {
-        // Deprecated: Handled by .ypp-theme-midnight class
-    }
+
 
     /**
      * Apply hide scrollbar
@@ -295,6 +283,7 @@ window.YPP.features.Theme = class ThemeManager {
 
         toggle(this._CSS_CLASSES.HIDE_SHORTS, this._settings.hideShorts);
         toggle(this._CSS_CLASSES.HIDE_MIXES, this._settings.hideMixes);
+        toggle(this._CSS_CLASSES.HIDE_EXPLORE_TOPICS, this._settings.hideExploreTopics);
         toggle(this._CSS_CLASSES.HIDE_WATCHED, this._settings.hideWatched);
         toggle(this._CSS_CLASSES.HIDE_MERCH, this._settings.hideMerch);
         toggle(this._CSS_CLASSES.HIDE_COMMENTS, this._settings.hideComments);
@@ -303,6 +292,8 @@ window.YPP.features.Theme = class ThemeManager {
         toggle(this._CSS_CLASSES.HIDE_FUNDRAISER, this._settings.hideFundraiser);
         toggle(this._CSS_CLASSES.DISPLAY_FULL_TITLE, this._settings.displayFullTitle);
         toggle(this._CSS_CLASSES.HOOK_FREE, this._settings.hookFreeHome);
+        toggle(this._CSS_CLASSES.CUSTOM_SCROLLBAR, this._settings.customScrollbar);
+        toggle(this._CSS_CLASSES.GRAYSCALE_THUMBNAILS, this._settings.grayscaleThumbnails);
 
         // Search specific
         toggle('ypp-clean-search', this._settings.cleanSearch);
@@ -382,9 +373,12 @@ window.YPP.features.Theme = class ThemeManager {
      * @private
      */
     _cleanupClasses() {
+        // Collect all potential classes managed by visibility toggles
         const classes = [
             this._CSS_CLASSES.THEME_ENABLED,
+            this._CSS_CLASSES.HIDE_SHORTS,
             this._CSS_CLASSES.HIDE_MIXES,
+            this._CSS_CLASSES.HIDE_EXPLORE_TOPICS,
             this._CSS_CLASSES.HIDE_WATCHED,
             this._CSS_CLASSES.HIDE_MERCH,
             this._CSS_CLASSES.HIDE_COMMENTS,
@@ -393,13 +387,42 @@ window.YPP.features.Theme = class ThemeManager {
             this._CSS_CLASSES.HIDE_FUNDRAISER,
             this._CSS_CLASSES.DISPLAY_FULL_TITLE,
             this._CSS_CLASSES.HOOK_FREE,
+            this._CSS_CLASSES.CUSTOM_SCROLLBAR,
+            this._CSS_CLASSES.GRAYSCALE_THUMBNAILS,
             'ypp-clean-search',
             'ypp-hide-search-shorts',
             'ypp-search-grid-mode',
-            'ypp-hide-scrollbar'
-        ];
+            'ypp-hide-scrollbar',
+            'ypp-no-animations',
+            'ypp-reduced-motion'
+        ].filter(Boolean); // Filter out any undefined constants
 
+        // Clean both documentElement and body just in case
         document.documentElement.classList.remove(...classes);
+        document.body.classList.remove(...classes);
+    }
+
+    /**
+     * Cleanup inline CSS variables injected by customization settings
+     * @private
+     */
+    _cleanupCustomVariables() {
+        const root = document.documentElement;
+        
+        // Remove styling variables
+        root.style.removeProperty('--ypp-font-family');
+        root.style.removeProperty('--ypp-font-scale');
+        root.style.removeProperty('--ypp-density-pad');
+        root.style.removeProperty('--ypp-density-gap');
+        root.style.removeProperty('--ypp-accent-primary');
+        root.style.removeProperty('--ypp-accent-glow');
+        root.style.removeProperty('--ypp-accent-gradient');
+        root.style.removeProperty('--ypp-thumb-radius');
+        root.style.removeProperty('--ypp-sidebar-opacity');
+        
+        // Remove styling data attributes
+        root.removeAttribute('data-ypp-density');
+        root.removeAttribute('data-ypp-card-style');
     }
 
 

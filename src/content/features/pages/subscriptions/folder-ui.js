@@ -3,122 +3,171 @@
  * Owns: DOM injection and rendering for the Guide sidebar (left navigation),
  * filter chips (on feed), channel/card popovers, and DOM observers for these UI elements.
  *
- * Performance / security notes:
- *  - renderChannelPopover: click-outside listener is added exactly once (flag guard)
- *    to prevent listener accumulation across multiple popover opens.
- *  - renderGuideFolders: folder names are HTML-escaped before innerHTML injection (XSS).
- *  - renderGuideFolders: a render-key cache skips full re-renders when data is unchanged.
+ * Security notes:
+ *  - CustomDialog: title/message/confirmText are HTML-escaped; prompt defaultValue is set
+ *    via DOM .value property (never injected into an HTML attribute).
+ *  - renderGuideFolders: folder names HTML-escaped before innerHTML; render-key cache skips
+ *    full re-renders when data is unchanged.
+ *  - renderChannelPopover: rebuilt with DOM methods — no innerHTML for dynamic content,
+ *    no inline event handlers. XSS-safe for channelName and folderName. Click-outside
+ *    listener attached exactly once (flag guard) to prevent unbounded accumulation.
+ *  - ChannelHealthUI / runScan: all onmouseover/onmouseout inline JS removed; replaced
+ *    with addEventListener (required for Chrome MV3 CSP compliance). Checkbox change
+ *    listener guarded against accumulation on Retry.
+ *  - runScan: ytInitialData extracted with string indices rather than a regex, fixing
+ *    silent failure on YouTube's typical multiline JSON payload.
+ *  - _getYoutubeConfig: extracted as a named private static method for clarity and
+ *    independent testability.
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.CustomDialog = class CustomDialog {
+
+    // ── Private helpers ────────────────────────────────────────────────────
+
+    /**
+     * Creates and appends the semi-transparent overlay backdrop to the body.
+     * @returns {HTMLDivElement}
+     */
     static _createOverlay() {
         const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:999999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;';
+        overlay.style.cssText = [
+            'position:fixed;top:0;left:0;width:100%;height:100%',
+            'background:rgba(0,0,0,0.6);backdrop-filter:blur(8px)',
+            'z-index:999999;display:flex;align-items:center;justify-content:center',
+            'opacity:0;transition:opacity 0.2s',
+        ].join(';');
         document.body.appendChild(overlay);
         return overlay;
     }
 
+    /**
+     * Wraps `innerHtml` in the shared dialog card shell and injects it into
+     * `overlay`, then triggers the entry animation.
+     * @param {HTMLElement} overlay
+     * @param {string}      innerHtml  Already-escaped HTML for the card body
+     * @returns {HTMLElement} The card element (overlay.children[0])
+     */
+    static _buildCard(overlay, innerHtml) {
+        overlay.innerHTML = `
+            <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
+                ${innerHtml}
+            </div>
+        `;
+        const card = overlay.children[0];
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+        });
+        return card;
+    }
+
+    /**
+     * Animates the dialog out and removes the overlay from the DOM.
+     * @param {HTMLElement} overlay
+     * @param {Function}    resolve  Promise resolver
+     * @param {*}           value    Value to resolve the promise with
+     */
+    static _closeOverlay(overlay, resolve, value) {
+        overlay.style.opacity = '0';
+        overlay.children[0].style.transform = 'scale(0.95)';
+        setTimeout(() => overlay.remove(), 200);
+        resolve(value);
+    }
+
+    // ── Public API ─────────────────────────────────────────────────────────
+
+    /**
+     * Shows a simple alert dialog with an OK button.
+     * @param {string} title
+     * @param {string} message
+     * @returns {Promise<void>}
+     */
     static alert(title, message) {
         return new Promise(resolve => {
             const overlay = this._createOverlay();
-            overlay.innerHTML = `
-                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
-                    <div style="font-size:18px;font-weight:600;color:#fff;">${title}</div>
-                    <div style="font-size:14px;color:#aaa;line-height:1.5;">${message}</div>
-                    <div style="display:flex;justify-content:flex-end;">
-                        <button id="ypp-alert-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">OK</button>
-                    </div>
+            this._buildCard(overlay, `
+                <div style="font-size:18px;font-weight:600;color:#fff;">${_escHtml(title)}</div>
+                <div style="font-size:14px;color:#aaa;line-height:1.5;">${_escHtml(message)}</div>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button id="ypp-alert-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">OK</button>
                 </div>
-            `;
-            
-            requestAnimationFrame(() => {
-                overlay.style.opacity = '1';
-                overlay.children[0].style.transform = 'scale(1)';
-            });
-
-            const close = () => {
-                overlay.style.opacity = '0';
-                overlay.children[0].style.transform = 'scale(0.95)';
-                setTimeout(() => overlay.remove(), 200);
-                resolve();
-            };
-
-            overlay.querySelector('#ypp-alert-ok').addEventListener('click', close);
+            `);
+            overlay.querySelector('#ypp-alert-ok').addEventListener('click', () =>
+                this._closeOverlay(overlay, resolve, undefined)
+            );
         });
     }
 
+    /**
+     * Shows a confirm dialog with Cancel / Confirm buttons.
+     * @param {string}  title
+     * @param {string}  message
+     * @param {string}  [confirmText='Confirm']
+     * @param {boolean} [danger=false]  When true the confirm button is styled red
+     * @returns {Promise<boolean>}  true = confirmed, false = cancelled
+     */
     static confirm(title, message, confirmText = 'Confirm', danger = false) {
         return new Promise(resolve => {
             const overlay = this._createOverlay();
             const btnColor = danger ? '#ff4e45' : '#6c63ff';
-            overlay.innerHTML = `
-                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
-                    <div style="font-size:18px;font-weight:600;color:#fff;">${title}</div>
-                    <div style="font-size:14px;color:#aaa;line-height:1.5;">${message}</div>
-                    <div style="display:flex;justify-content:flex-end;gap:12px;">
-                        <button id="ypp-confirm-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
-                        <button id="ypp-confirm-ok" style="background:${btnColor};color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">${confirmText}</button>
-                    </div>
+            this._buildCard(overlay, `
+                <div style="font-size:18px;font-weight:600;color:#fff;">${_escHtml(title)}</div>
+                <div style="font-size:14px;color:#aaa;line-height:1.5;">${_escHtml(message)}</div>
+                <div style="display:flex;justify-content:flex-end;gap:12px;">
+                    <button id="ypp-confirm-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
+                    <button id="ypp-confirm-ok" style="background:${btnColor};color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">${_escHtml(confirmText)}</button>
                 </div>
-            `;
-            
-            requestAnimationFrame(() => {
-                overlay.style.opacity = '1';
-                overlay.children[0].style.transform = 'scale(1)';
-            });
-
-            const close = (val) => {
-                overlay.style.opacity = '0';
-                overlay.children[0].style.transform = 'scale(0.95)';
-                setTimeout(() => overlay.remove(), 200);
-                resolve(val);
-            };
-
-            overlay.querySelector('#ypp-confirm-cancel').addEventListener('click', () => close(false));
-            overlay.querySelector('#ypp-confirm-ok').addEventListener('click', () => close(true));
+            `);
+            overlay.querySelector('#ypp-confirm-cancel').addEventListener('click', () =>
+                this._closeOverlay(overlay, resolve, false)
+            );
+            overlay.querySelector('#ypp-confirm-ok').addEventListener('click', () =>
+                this._closeOverlay(overlay, resolve, true)
+            );
         });
     }
 
+    /**
+     * Shows a text-input prompt dialog.
+     * @param {string} title
+     * @param {string} message
+     * @param {string} [placeholder='']
+     * @param {string} [defaultValue='']
+     * @returns {Promise<string|null>}  The input value, or null if cancelled
+     */
     static prompt(title, message, placeholder = '', defaultValue = '') {
         return new Promise(resolve => {
             const overlay = this._createOverlay();
-            overlay.innerHTML = `
-                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform 0.2s;display:flex;flex-direction:column;gap:16px;">
-                    <div style="font-size:18px;font-weight:600;color:#fff;">${title}</div>
-                    <div style="font-size:14px;color:#aaa;line-height:1.5;margin-bottom:-4px;">${message}</div>
-                    <input type="text" id="ypp-prompt-input" placeholder="${placeholder}" value="${defaultValue}" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:12px;border-radius:8px;font-size:14px;outline:none;width:100%;box-sizing:border-box;">
-                    <div style="display:flex;justify-content:flex-end;gap:12px;">
-                        <button id="ypp-prompt-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
-                        <button id="ypp-prompt-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Submit</button>
-                    </div>
+            // Escape values going into HTML attributes to prevent injection
+            const safePlaceholder = _escHtml(placeholder);
+            this._buildCard(overlay, `
+                <div style="font-size:18px;font-weight:600;color:#fff;">${_escHtml(title)}</div>
+                <div style="font-size:14px;color:#aaa;line-height:1.5;margin-bottom:-4px;">${_escHtml(message)}</div>
+                <input type="text" id="ypp-prompt-input" placeholder="${safePlaceholder}" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:12px;border-radius:8px;font-size:14px;outline:none;width:100%;box-sizing:border-box;">
+                <div style="display:flex;justify-content:flex-end;gap:12px;">
+                    <button id="ypp-prompt-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
+                    <button id="ypp-prompt-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Submit</button>
                 </div>
-            `;
-            
-            requestAnimationFrame(() => {
-                overlay.style.opacity = '1';
-                overlay.children[0].style.transform = 'scale(1)';
-            });
+            `);
 
-            const close = (val) => {
-                overlay.style.opacity = '0';
-                overlay.children[0].style.transform = 'scale(0.95)';
-                setTimeout(() => overlay.remove(), 200);
-                resolve(val);
-            };
-
+            // Set defaultValue via DOM property (safe — avoids attribute injection)
             const input = overlay.querySelector('#ypp-prompt-input');
+            input.value = defaultValue;
             input.focus();
             input.select();
 
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') close(input.value);
-                if (e.key === 'Escape') close(null);
+                if (e.key === 'Enter')  this._closeOverlay(overlay, resolve, input.value);
+                if (e.key === 'Escape') this._closeOverlay(overlay, resolve, null);
             });
-
-            overlay.querySelector('#ypp-prompt-cancel').addEventListener('click', () => close(null));
-            overlay.querySelector('#ypp-prompt-ok').addEventListener('click', () => close(input.value));
+            overlay.querySelector('#ypp-prompt-cancel').addEventListener('click', () =>
+                this._closeOverlay(overlay, resolve, null)
+            );
+            overlay.querySelector('#ypp-prompt-ok').addEventListener('click', () =>
+                this._closeOverlay(overlay, resolve, input.value)
+            );
         });
     }
 };
@@ -294,110 +343,116 @@ window.YPP.features.FolderUI = class FolderUI {
                 }
             }
 
-            chipsBar.innerHTML = '';
-            const activeFolder = this.orchestrator.getActiveFolder();
+            if (this.orchestrator.settings?.subscriptionFolders !== false) {
+                chipsBar.innerHTML = '';
+                const activeFolder = this.orchestrator.getActiveFolder();
 
-            // "All" chip
-            const allChip = document.createElement('button');
-            allChip.className = `ypp-filter-chip ${!activeFolder ? 'active' : ''}`;
-            allChip.textContent = 'All Subscriptions';
-            allChip.dataset.folder = '';
-            allChip.addEventListener('click', () => this.orchestrator.setActiveFolder(null));
-            chipsBar.appendChild(allChip);
+                // "All" chip
+                const allChip = document.createElement('button');
+                allChip.className = `ypp-filter-chip ${!activeFolder ? 'active' : ''}`;
+                allChip.textContent = 'All Subscriptions';
+                allChip.dataset.folder = '';
+                allChip.addEventListener('click', () => this.orchestrator.setActiveFolder(null));
+                chipsBar.appendChild(allChip);
 
-            // Folder chips
-            Object.keys(this.storage.folders).forEach(folderName => {
-                const config = this.storage.folderConfig[folderName] || {};
-                const chip = document.createElement('button');
-                chip.className = `ypp-filter-chip ${activeFolder === folderName ? 'active' : ''}`;
+                // Folder chips
+                Object.keys(this.storage.folders).forEach(folderName => {
+                    const config = this.storage.folderConfig[folderName] || {};
+                    const chip = document.createElement('button');
+                    chip.className = `ypp-filter-chip ${activeFolder === folderName ? 'active' : ''}`;
 
-                const icon = config.icon || '';
-                chip.textContent = icon ? `${icon} ${folderName}` : folderName;
-                chip.dataset.folder = folderName;
+                    const icon = config.icon || '';
+                    chip.textContent = icon ? `${icon} ${folderName}` : folderName;
+                    chip.dataset.folder = folderName;
 
-                if (activeFolder === folderName && config.color) {
-                    chip.style.backgroundColor = config.color;
-                    chip.style.color = '#fff';
-                    chip.style.border = 'none';
+                    if (activeFolder === folderName && config.color) {
+                        chip.style.backgroundColor = config.color;
+                        chip.style.color = '#fff';
+                        chip.style.border = 'none';
+                    }
+
+                    chip.addEventListener('click', () => this.orchestrator.setActiveFolder(folderName));
+
+                    // Context Menu
+                    chip.addEventListener('contextmenu', async (e) => {
+                        e.preventDefault();
+                        const action = await window.YPP.features.CustomDialog.prompt(`Edit Folder: ${folderName}`, `Type 'icon', 'color', or 'delete':`, 'icon', 'icon');
+                        if (action === 'delete') {
+                            if (await window.YPP.features.CustomDialog.confirm('Delete Folder', `Are you sure you want to delete "${folderName}"?`, 'Delete', true)) {
+                                this.storage.deleteFolder(folderName);
+                                if (activeFolder === folderName) this.orchestrator.setActiveFolder(null);
+                                this.renderFilterChips();
+                                this.renderGuideFolders();
+                            }
+                        } else if (action === 'icon') {
+                            const newIcon = await window.YPP.features.CustomDialog.prompt('Update Icon', 'Enter a new Emoji for this folder:', config.icon || '📁', config.icon || '📁');
+                            if (newIcon !== null) {
+                                if (!this.storage.folderConfig[folderName]) this.storage.folderConfig[folderName] = {};
+                                this.storage.folderConfig[folderName].icon = newIcon.trim();
+                                this.storage.save();
+                                this.renderFilterChips();
+                                this.renderGuideFolders();
+                            }
+                        } else if (action === 'color') {
+                            const newColor = await window.YPP.features.CustomDialog.prompt('Update Color', 'Enter a hex color code (or empty to clear):', config.color || '', config.color || '');
+                            if (newColor !== null) {
+                                if (!this.storage.folderConfig[folderName]) this.storage.folderConfig[folderName] = {};
+                                this.storage.folderConfig[folderName].color = newColor.trim();
+                                this.storage.save();
+                                this.renderFilterChips();
+                                this.renderGuideFolders();
+                                if (activeFolder === folderName) this.orchestrator.updateFilterState();
+                            }
+                        }
+                    });
+
+                    chipsBar.appendChild(chip);
+                });
+
+                // Play All Action
+                if (activeFolder) {
+                    const playChip = document.createElement('button');
+                    playChip.className = 'ypp-filter-chip ypp-play-action-chip';
+                    playChip.innerHTML = `<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
+                    playChip.style.backgroundColor = 'var(--ypp-accent, #ff0000)';
+                    playChip.style.color = '#fff';
+                    playChip.style.border = 'none';
+                    playChip.addEventListener('click', () => this.orchestrator.playAll(activeFolder));
+                    chipsBar.appendChild(playChip);
                 }
 
-                chip.addEventListener('click', () => this.orchestrator.setActiveFolder(folderName));
+                // Toggles
+                this._createToggleChip(chipsBar, 'Hide Shorts', this.orchestrator.getHideShorts(), (val) => {
+                    this.orchestrator.setHideShorts(val);
+                    this.orchestrator.updateFilterState();
+                });
 
-                // Context Menu
-                chip.addEventListener('contextmenu', async (e) => {
-                    e.preventDefault();
-                    const action = await window.YPP.features.CustomDialog.prompt(`Edit Folder: ${folderName}`, `Type 'icon', 'color', or 'delete':`, 'icon', 'icon');
-                    if (action === 'delete') {
-                        if (await window.YPP.features.CustomDialog.confirm('Delete Folder', `Are you sure you want to delete "${folderName}"?`, 'Delete', true)) {
-                            this.storage.deleteFolder(folderName);
-                            if (activeFolder === folderName) this.orchestrator.setActiveFolder(null);
+                this._createToggleChip(chipsBar, 'Hide Watched', this.orchestrator.getHideWatched(), (val) => {
+                    this.orchestrator.setHideWatched(val);
+                    this.orchestrator.updateFilterState();
+                });
+
+                // Add Folder
+                const addBtn = document.createElement('button');
+                addBtn.className = 'ypp-filter-chip ypp-add-folder-btn';
+                addBtn.textContent = '+ New Folder';
+                addBtn.style.opacity = '0.7';
+                addBtn.style.borderStyle = 'dashed';
+                addBtn.addEventListener('click', async () => {
+                    const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter a name for the new folder:');
+                    if (name && name.trim()) {
+                        if (this.storage.addFolder(name.trim())) {
                             this.renderFilterChips();
                             this.renderGuideFolders();
-                        }
-                    } else if (action === 'icon') {
-                        const newIcon = await window.YPP.features.CustomDialog.prompt('Update Icon', 'Enter a new Emoji for this folder:', config.icon || '📁', config.icon || '📁');
-                        if (newIcon !== null) {
-                            if (!this.storage.folderConfig[folderName]) this.storage.folderConfig[folderName] = {};
-                            this.storage.folderConfig[folderName].icon = newIcon.trim();
-                            this.storage.save();
-                            this.renderFilterChips();
-                            this.renderGuideFolders();
-                        }
-                    } else if (action === 'color') {
-                        const newColor = await window.YPP.features.CustomDialog.prompt('Update Color', 'Enter a hex color code (or empty to clear):', config.color || '', config.color || '');
-                        if (newColor !== null) {
-                            if (!this.storage.folderConfig[folderName]) this.storage.folderConfig[folderName] = {};
-                            this.storage.folderConfig[folderName].color = newColor.trim();
-                            this.storage.save();
-                            this.renderFilterChips();
-                            this.renderGuideFolders();
-                            if (activeFolder === folderName) this.orchestrator.updateFilterState();
                         }
                     }
                 });
-
-                chipsBar.appendChild(chip);
-            });
-
-            // Play All Action
-            if (activeFolder) {
-                const playChip = document.createElement('button');
-                playChip.className = 'ypp-filter-chip ypp-play-action-chip';
-                playChip.innerHTML = `<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
-                playChip.style.backgroundColor = 'var(--ypp-accent, #ff0000)';
-                playChip.style.color = '#fff';
-                playChip.style.border = 'none';
-                playChip.addEventListener('click', () => this.orchestrator.playAll(activeFolder));
-                chipsBar.appendChild(playChip);
+                chipsBar.appendChild(addBtn);
+                chipsBar.style.display = 'flex';
+            } else {
+                chipsBar.style.display = 'none';
+                chipsBar.innerHTML = '';
             }
-
-            // Toggles
-            this._createToggleChip(chipsBar, 'Hide Shorts', this.orchestrator.getHideShorts(), (val) => {
-                this.orchestrator.setHideShorts(val);
-                this.orchestrator.updateFilterState();
-            });
-
-            this._createToggleChip(chipsBar, 'Hide Watched', this.orchestrator.getHideWatched(), (val) => {
-                this.orchestrator.setHideWatched(val);
-                this.orchestrator.updateFilterState();
-            });
-
-            // Add Folder
-            const addBtn = document.createElement('button');
-            addBtn.className = 'ypp-filter-chip ypp-add-folder-btn';
-            addBtn.textContent = '+ New Folder';
-            addBtn.style.opacity = '0.7';
-            addBtn.style.borderStyle = 'dashed';
-            addBtn.addEventListener('click', async () => {
-                const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter a name for the new folder:');
-                if (name && name.trim()) {
-                    if (this.storage.addFolder(name.trim())) {
-                        this.renderFilterChips();
-                        this.renderGuideFolders();
-                    }
-                }
-            });
-            chipsBar.appendChild(addBtn);
 
             this._injectFilterBar();
         }, { runOnce: true });
@@ -413,53 +468,80 @@ window.YPP.features.FolderUI = class FolderUI {
     _injectFilterBar() {
         if (document.querySelector('.ypp-sub-filter-bar')) return;
 
+        const showFilter = this.orchestrator.settings?.enableFilterBar !== false;
+        const showHealth = this.orchestrator.settings?.enableChannelHealth !== false;
+
+        if (!showFilter && !showHealth) return;
+
         const bar = document.createElement('div');
         bar.className = 'ypp-sub-filter-bar';
         bar.style.cssText = 'display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; flex-wrap: wrap;';
         
         const selectStyle = 'background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; min-width: 120px; transition: 0.2s;';
 
-        bar.innerHTML = `
-            <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
-                <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Duration</span>
-                <select class="ypp-filter-dropdown" id="ypp-duration-filter" style="${selectStyle}">
-                    <option value="all" style="background:#222">All</option>
-                    <option value="short" style="background:#222">Under 5 min</option>
-                    <option value="medium" style="background:#222">5 – 20 min</option>
-                    <option value="long" style="background:#222">Over 20 min</option>
-                    <option value="custom" style="background:#222">Custom...</option>
-                </select>
-            </div>
-            <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
-                <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Uploaded</span>
-                <select class="ypp-filter-dropdown" id="ypp-date-filter" style="${selectStyle}">
-                    <option value="all" style="background:#222">All time</option>
-                    <option value="today" style="background:#222">Today</option>
-                    <option value="week" style="background:#222">This week</option>
-                    <option value="month" style="background:#222">This month</option>
-                    <option value="custom" style="background:#222">Custom...</option>
-                </select>
-            </div>
-            <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
-                <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Sort by</span>
-                <select class="ypp-filter-dropdown" id="ypp-sort-filter" style="${selectStyle}">
-                    <option value="latest" style="background:#222">Latest</option>
-                    <option value="oldest" style="background:#222">Oldest</option>
-                    <option value="longest" style="background:#222">Longest</option>
-                    <option value="shortest" style="background:#222">Shortest</option>
-                </select>
-            </div>
-            <div class="ypp-sub-filter-group" style="margin-left: auto;">
-                <button id="ypp-health-btn" class="ypp-btn-primary" style="background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.3); color: #a8a4ff; display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; border-radius: 8px; transition: 0.2s;">
-                    <svg height="18" width="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
-                    Channel Health
-                </button>
-            </div>
-        `;
+        let innerHTML = '';
 
-        // Insert after chips row
+        if (showFilter) {
+            innerHTML += `
+                <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Duration</span>
+                    <select class="ypp-filter-dropdown" id="ypp-duration-filter" style="${selectStyle}">
+                        <option value="all" style="background:#222">All</option>
+                        <option value="short" style="background:#222">Under 5 min</option>
+                        <option value="medium" style="background:#222">5 – 20 min</option>
+                        <option value="long" style="background:#222">Over 20 min</option>
+                        <option value="custom" style="background:#222">Custom...</option>
+                    </select>
+                </div>
+                <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Uploaded</span>
+                    <select class="ypp-filter-dropdown" id="ypp-date-filter" style="${selectStyle}">
+                        <option value="all" style="background:#222">All time</option>
+                        <option value="today" style="background:#222">Today</option>
+                        <option value="week" style="background:#222">This week</option>
+                        <option value="month" style="background:#222">This month</option>
+                        <option value="custom" style="background:#222">Custom...</option>
+                    </select>
+                </div>
+                <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Sort by</span>
+                    <select class="ypp-filter-dropdown" id="ypp-sort-filter" style="${selectStyle}">
+                        <option value="latest" style="background:#222">Latest</option>
+                        <option value="oldest" style="background:#222">Oldest</option>
+                        <option value="longest" style="background:#222">Longest</option>
+                        <option value="shortest" style="background:#222">Shortest</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        if (showHealth) {
+            innerHTML += `
+                <div class="ypp-sub-filter-group" style="margin-left: auto;">
+                    <button id="ypp-health-btn" class="ypp-btn-primary" style="background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.3); color: #a8a4ff; display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; border-radius: 8px; transition: 0.2s;">
+                        <svg height="18" width="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                        Channel Health
+                    </button>
+                </div>
+            `;
+        }
+
+        bar.innerHTML = innerHTML;
+
+        // Insert after chips row, or fallback to grid contents
         const chipsRow = document.getElementById('ypp-folder-chips');
-        chipsRow?.insertAdjacentElement('afterend', bar);
+        if (chipsRow && chipsRow.style.display !== 'none') {
+            chipsRow.insertAdjacentElement('afterend', bar);
+        } else {
+            const grid = document.querySelector('ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer');
+            const contents = grid?.querySelector('#contents');
+            if (contents) {
+                grid.insertBefore(bar, contents);
+            } else if (chipsRow) {
+                // Absolute fallback if #contents isn't ready
+                chipsRow.insertAdjacentElement('afterend', bar);
+            }
+        }
 
         // Hover effects for select and button
         bar.querySelectorAll('.ypp-filter-dropdown').forEach(s => {
@@ -542,7 +624,8 @@ window.YPP.features.FolderUI = class FolderUI {
             }
         });
         document.querySelectorAll('.ypp-folder-item').forEach(el => {
-            if (el.querySelector('.ypp-folder-name').textContent === folderName) {
+            // Optional chaining guards against missing .ypp-folder-name (defensive)
+            if (el.querySelector('.ypp-folder-name')?.textContent === folderName) {
                 el.classList.add('active');
             } else {
                 el.classList.remove('active');
@@ -605,6 +688,18 @@ window.YPP.features.FolderUI = class FolderUI {
         }, { runOnce: true });
     }
 
+    /**
+     * Renders (or re-renders) the folder-membership popover anchored below `buttonEl`.
+     *
+     * Security notes:
+     *  - The outer shell is static HTML with no dynamic values interpolated, so innerHTML is safe.
+     *  - channelName is set via textContent (XSS-safe).
+     *  - Folder list items are built entirely via DOM methods: no innerHTML, no inline handlers,
+     *    and no attribute injection — eliminating both XSS and CSP-violating onmouseover attributes.
+     *
+     * @param {HTMLElement} buttonEl    - Anchor element the popover appears below
+     * @param {string}      channelName - Channel to assign/remove from folders
+     */
     renderChannelPopover(buttonEl, channelName) {
         let popover = document.getElementById('ypp-folder-popover');
         if (!popover) {
@@ -614,14 +709,14 @@ window.YPP.features.FolderUI = class FolderUI {
             document.body.appendChild(popover);
         }
 
-        // Fix: attach the click-outside listener exactly once, not on every popover open.
-        // Previously a new listener was added each time, creating unbounded accumulation.
+        // Attach click-outside listener exactly once — prevents unbounded accumulation
+        // across multiple popover opens.
         if (!this._popoverListenerAttached) {
             this._popoverListenerAttached = true;
             document.addEventListener('click', (e) => {
                 const popoverEl = document.getElementById('ypp-folder-popover');
                 if (!popoverEl) return;
-                const clickedInside = popoverEl.contains(e.target);
+                const clickedInside    = popoverEl.contains(e.target);
                 const clickedFolderBtn = e.target.closest('.ypp-card-folder-btn') || e.target.closest('#ypp-channel-folder-btn');
                 if (!clickedInside && !clickedFolderBtn) {
                     popoverEl.classList.remove('visible');
@@ -630,51 +725,74 @@ window.YPP.features.FolderUI = class FolderUI {
         }
 
         const rect = buttonEl.getBoundingClientRect();
-        popover.style.top = `${rect.bottom + window.scrollY + 8}px`;
+        popover.style.top  = `${rect.bottom + window.scrollY + 8}px`;
         popover.style.left = `${rect.left + window.scrollX}px`;
 
-        let html = `
+        // Static shell only — no dynamic values interpolated here.
+        popover.innerHTML = `
             <div style="background: rgba(15,15,15,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); width: 240px; overflow: hidden; display: flex; flex-direction: column;">
                 <div class="ypp-popover-header" style="padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
                     <div style="font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600;">Save Channel</div>
-                    <div style="font-size: 15px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${channelName}</div>
+                    <div id="ypp-popover-channel-name" style="font-size: 15px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
                 </div>
-                <div class="ypp-popover-list" style="padding: 8px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;">
+                <div class="ypp-popover-list" id="ypp-popover-list" style="padding: 8px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;"></div>
+            </div>
         `;
+
+        // Inject channel name via textContent — XSS-safe, no HTML parsing.
+        popover.querySelector('#ypp-popover-channel-name').textContent = channelName;
+
+        const listEl    = popover.querySelector('#ypp-popover-list');
         const folderKeys = Object.keys(this.storage.folders);
+
         if (folderKeys.length === 0) {
-            html += `<div style="padding: 16px; text-align: center; color: rgba(255,255,255,0.5); font-size: 13px;">No folders exist.</div>`;
+            const emptyMsg = document.createElement('div');
+            emptyMsg.style.cssText = 'padding: 16px; text-align: center; color: rgba(255,255,255,0.5); font-size: 13px;';
+            emptyMsg.textContent = 'No folders exist.';
+            listEl.appendChild(emptyMsg);
         } else {
             folderKeys.forEach(folderName => {
                 const isChecked = this.storage.folders[folderName].includes(channelName);
-                html += `
-                    <label class="ypp-folder-checkbox" style="display: flex; align-items: center; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" data-folder="${folderName}" ${isChecked ? 'checked' : ''} style="margin-right: 12px; accent-color: #6c63ff; width: 16px; height: 16px; cursor: pointer;">
-                        <span style="color: #fff; font-size: 14px; font-weight: 500;">${folderName}</span>
-                    </label>
-                `;
+
+                // Build via DOM — no innerHTML injection, no inline event handler attributes.
+                const label = document.createElement('label');
+                label.className = 'ypp-folder-checkbox';
+                label.style.cssText = 'display: flex; align-items: center; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: background 0.2s;';
+                label.addEventListener('mouseover', () => { label.style.background = 'rgba(255,255,255,0.08)'; });
+                label.addEventListener('mouseout',  () => { label.style.background = 'transparent'; });
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                // dataset assignment is safe — bypasses HTML attribute parsing.
+                checkbox.dataset.folder = folderName;
+                checkbox.checked = isChecked;
+                checkbox.style.cssText = 'margin-right: 12px; accent-color: #6c63ff; width: 16px; height: 16px; cursor: pointer;';
+
+                // Wire up change handler with a closure over the typed `folderName`.
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        this.storage.addChannelToFolder(channelName, folderName);
+                        if (this.orchestrator.getActiveFolder() === folderName) {
+                            this.orchestrator.forceRefreshFeed();
+                        }
+                    } else {
+                        this.storage.removeChannelFromFolder(channelName, folderName);
+                        if (this.orchestrator.getActiveFolder() === folderName) {
+                            this.orchestrator.forceRefreshFeed();
+                        }
+                    }
+                    this.renderGuideFolders(); // Live-update sidebar channel counts
+                });
+
+                const nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'color: #fff; font-size: 14px; font-weight: 500;';
+                nameSpan.textContent = folderName; // XSS-safe
+
+                label.appendChild(checkbox);
+                label.appendChild(nameSpan);
+                listEl.appendChild(label);
             });
         }
-        html += `</div></div>`;
-        popover.innerHTML = html;
-
-        popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const folder = e.target.dataset.folder;
-                if (e.target.checked) {
-                    this.storage.addChannelToFolder(channelName, folder);
-                    if (this.orchestrator.getActiveFolder() === folder) {
-                        this.orchestrator.forceRefreshFeed();
-                    }
-                } else {
-                    this.storage.removeChannelFromFolder(channelName, folder);
-                    if (this.orchestrator.getActiveFolder() === folder) {
-                        this.orchestrator.forceRefreshFeed();
-                    }
-                }
-                this.renderGuideFolders(); // Live update sidebar counts
-            });
-        });
 
         popover.classList.add('visible');
     }
@@ -700,14 +818,14 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                         <span class="ypp-modal-title" style="font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -0.5px;">Channel Health</span>
                     </div>
-                    <button class="ypp-modal-close" style="background: rgba(255,255,255,0.05); border: none; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">&times;</button>
+                    <button class="ypp-modal-close" style="background: rgba(255,255,255,0.05); border: none; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">&times;</button>
                 </div>
                 <div class="ypp-organizer-body" style="flex-direction: column; padding: 32px; overflow: hidden; display: flex; flex: 1; background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 100%);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 16px 24px; border-radius: 12px;">
                         <span style="color: #bbb; font-size: 14px; line-height: 1.5;">Scan your subscriptions to identify dead or inactive channels.<br><strong style="color:#fff;">Keep your feed focused and clean.</strong></span>
                         <div style="display: flex; gap: 12px;">
-                            <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: #6c63ff; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(108,99,255,0.3);" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">Start Scan</button>
-                            <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255, 78, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 78, 69, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 78, 69, 0.25)'" onmouseout="this.style.background='rgba(255, 78, 69, 0.15)'">Unsubscribe Selected</button>
+                            <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: #6c63ff; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(108,99,255,0.3);">Start Scan</button>
+                            <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255, 78, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 78, 69, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: none;">Unsubscribe Selected</button>
                         </div>
                     </div>
                     <div style="display: flex; gap: 20px; margin-bottom: 24px;">
@@ -726,13 +844,13 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     </div>
                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px; align-items: center;">
                         <span style="color: #888; font-size: 13px; margin-right: auto;">Filters & Sort:</span>
-                        <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                        <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s;">
                             <option value="all" style="background:#222">All Channels</option>
                             <option value="active" style="background:#222">Active (< 30 days)</option>
                             <option value="warning" style="background:#222">Inactive (> 1 month)</option>
                             <option value="dead" style="background:#222">Dead (> 3 months)</option>
                         </select>
-                        <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                        <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s;">
                             <option value="latest" style="background:#222">Latest Upload First</option>
                             <option value="oldest" style="background:#222">Oldest Upload First</option>
                             <option value="az" style="background:#222">Alphabetical (A-Z)</option>
@@ -752,6 +870,24 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             overlay.classList.remove('open');
             setTimeout(() => overlay.remove(), 300);
         });
+
+        // Hover effects — using addEventListener instead of inline handlers for CSP compliance.
+        const closeBtn   = overlay.querySelector('.ypp-modal-close');
+        const scanBtn    = overlay.querySelector('#ypp-health-scan-btn');
+        const unsubBtn   = overlay.querySelector('#ypp-health-unsub-btn');
+        const filterSel  = overlay.querySelector('#ypp-health-filter-dropdown');
+        const sortSel    = overlay.querySelector('#ypp-health-sort-dropdown');
+
+        closeBtn.addEventListener('mouseover', () => { closeBtn.style.background  = 'rgba(255,255,255,0.1)'; });
+        closeBtn.addEventListener('mouseout',  () => { closeBtn.style.background  = 'rgba(255,255,255,0.05)'; });
+        scanBtn.addEventListener('mouseover',  () => { scanBtn.style.filter       = 'brightness(1.1)'; });
+        scanBtn.addEventListener('mouseout',   () => { scanBtn.style.filter       = 'brightness(1)'; });
+        unsubBtn.addEventListener('mouseover', () => { unsubBtn.style.background  = 'rgba(255, 78, 69, 0.25)'; });
+        unsubBtn.addEventListener('mouseout',  () => { unsubBtn.style.background  = 'rgba(255, 78, 69, 0.15)'; });
+        filterSel.addEventListener('mouseover',() => { filterSel.style.background = 'rgba(255,255,255,0.12)'; });
+        filterSel.addEventListener('mouseout', () => { filterSel.style.background = 'rgba(255,255,255,0.08)'; });
+        sortSel.addEventListener('mouseover',  () => { sortSel.style.background   = 'rgba(255,255,255,0.12)'; });
+        sortSel.addEventListener('mouseout',   () => { sortSel.style.background   = 'rgba(255,255,255,0.08)'; });
 
         overlay.querySelector('#ypp-health-scan-btn').addEventListener('click', () => {
             this.runScan(overlay);
@@ -829,15 +965,22 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             const res = await fetch('/feed/channels');
             const text = await res.text();
             
-            // Extract ytInitialData safely
-            const match = text.match(/var ytInitialData = (\{.*?\});<\/script>/);
-            if (!match) throw new Error("Could not parse YouTube data structure.");
-            
+            // Extract ytInitialData using string indices rather than a regex.
+            // A non-greedy regex without the dotall flag fails on multiline JSON
+            // (which YouTube's payload almost always is).
+            const START_MARKER = 'var ytInitialData = ';
+            const END_MARKER   = ';</script>';
+            const startIdx = text.indexOf(START_MARKER);
+            if (startIdx === -1) throw new Error('Could not locate ytInitialData in page source.');
+            const jsonStart = startIdx + START_MARKER.length;
+            const endIdx   = text.indexOf(END_MARKER, jsonStart);
+            if (endIdx === -1) throw new Error('Could not determine ytInitialData bounds.');
+
             let data;
             try {
-                data = JSON.parse(match[1]);
+                data = JSON.parse(text.slice(jsonStart, endIdx));
             } catch (parseError) {
-                throw new Error("Failed to parse YouTube initial data JSON.");
+                throw new Error('Failed to parse YouTube initial data JSON.');
             }
 
             // Find channel renderers
@@ -974,11 +1117,13 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                                 <input type="checkbox" class="ypp-unsub-checkbox" value="${c.id}" data-params="${c.unsubParams}" style="margin-right: 8px;" ${c.status === 'dead' ? 'checked' : ''}>
                                 Select
                             </label>
-                            <button class="ypp-indiv-unsub-btn" style="background:rgba(255,78,69,0.1); color:#ff4e45; border:1px solid rgba(255,78,69,0.2); border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(255,78,69,0.2)'" onmouseout="this.style.background='rgba(255,78,69,0.1)'">Unsub</button>
+                            <button class="ypp-indiv-unsub-btn" style="background:rgba(255,78,69,0.1); color:#ff4e45; border:1px solid rgba(255,78,69,0.2); border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:0.2s;">Unsub</button>
                         </div>
                     `;
 
                     const indivBtn = row.querySelector('.ypp-indiv-unsub-btn');
+                    indivBtn.addEventListener('mouseover', () => { indivBtn.style.background = 'rgba(255,78,69,0.2)'; });
+                    indivBtn.addEventListener('mouseout',  () => { indivBtn.style.background = 'rgba(255,78,69,0.1)'; });
                     indivBtn.addEventListener('click', () => {
                         this.individualUnsubscribe(c.id, c.unsubParams, c.name, row, indivBtn);
                     });
@@ -1004,16 +1149,22 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             }
 
             btn.textContent = 'Scan Complete';
-            
-            // Listen for checkbox changes
-            resultsEl.addEventListener('change', (e) => {
-                if (e.target.classList.contains('ypp-unsub-checkbox')) {
-                    const checkedCount = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked').length;
-                    const unsubBtn = overlay.querySelector('#ypp-health-unsub-btn');
-                    unsubBtn.textContent = checkedCount > 0 ? `Unsubscribe Selected (${checkedCount})` : 'Unsubscribe Selected';
-                    unsubBtn.disabled = checkedCount === 0;
-                }
-            });
+
+            // Guard against listener accumulation: if the user hits Retry the overlay
+            // element is the same, so without this flag a second listener would be added.
+            if (!overlay._checkboxListenerAttached) {
+                overlay._checkboxListenerAttached = true;
+                resultsEl.addEventListener('change', (e) => {
+                    if (e.target.classList.contains('ypp-unsub-checkbox')) {
+                        const checkedCount = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked').length;
+                        const unsubBtn = overlay.querySelector('#ypp-health-unsub-btn');
+                        unsubBtn.textContent = checkedCount > 0
+                            ? `Unsubscribe Selected (${checkedCount})`
+                            : 'Unsubscribe Selected';
+                        unsubBtn.disabled = checkedCount === 0;
+                    }
+                });
+            }
 
         } catch (e) {
             console.error(e);
@@ -1024,9 +1175,18 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         }
     }
 
-    static async _doUnsubscribe(channels) {
-        const getYoutubeConfig = () => new Promise(resolve => {
-            const reqId = Math.random().toString();
+    /**
+     * Reads YouTube's internal `ytcfg` object from the page context by injecting
+     * a short-lived <script> tag that posts the config values back via postMessage.
+     * Must be a separate method (not inlined in _doUnsubscribe) to keep that method
+     * focused and allow independent testing.
+     * @returns {Promise<{apiKey: string, context: Object, visitorData: string, clientVersion: string}>}
+     */
+    static _getYoutubeConfig() {
+        return new Promise(resolve => {
+            // Use a random ID to match the response to this specific request,
+            // preventing cross-contamination if multiple calls overlap.
+            const reqId = Math.random().toString(36).slice(2);
             const listener = (e) => {
                 if (e.data && e.data.type === 'YPP_YTCFG_RESPONSE' && e.data.reqId === reqId) {
                     window.removeEventListener('message', listener);
@@ -1041,9 +1201,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         type: 'YPP_YTCFG_RESPONSE',
                         reqId: '${reqId}',
                         config: {
-                            apiKey: window.ytcfg?.get('INNERTUBE_API_KEY'),
-                            context: window.ytcfg?.get('INNERTUBE_CONTEXT'),
-                            visitorData: window.ytcfg?.get('VISITOR_DATA'),
+                            apiKey:        window.ytcfg?.get('INNERTUBE_API_KEY'),
+                            context:       window.ytcfg?.get('INNERTUBE_CONTEXT'),
+                            visitorData:   window.ytcfg?.get('VISITOR_DATA'),
                             clientVersion: window.ytcfg?.get('INNERTUBE_CLIENT_VERSION') || '2.20240101.01.00'
                         }
                     }, '*');
@@ -1052,8 +1212,10 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             document.documentElement.appendChild(script);
             script.remove();
         });
+    }
 
-        const config = await getYoutubeConfig();
+    static async _doUnsubscribe(channels) {
+        const config = await this._getYoutubeConfig();
         const apiKey = config.apiKey;
         const context = config.context;
 

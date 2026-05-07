@@ -116,6 +116,7 @@ window.YPP.CONSTANTS = {
         THEME_ENABLED: 'yt-premium-plus-theme',
         HIDE_SHORTS: 'ypp-hide-shorts',
         HIDE_MIXES: 'ypp-hide-mixes',
+        HIDE_EXPLORE_TOPICS: 'ypp-hide-explore-topics',
         HIDE_WATCHED: 'ypp-hide-watched',
         HIDE_MERCH: 'ypp-hide-merch',
         HIDE_COMMENTS: 'ypp-hide-comments',
@@ -127,6 +128,8 @@ window.YPP.CONSTANTS = {
         ZEN_MODE: 'ypp-zen-mode',
         HOOK_FREE: 'ypp-hook-free-home',
         SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed',
+        CUSTOM_SCROLLBAR: 'ypp-custom-scrollbar',
+        GRAYSCALE_THUMBNAILS: 'ypp-grayscale-thumbnails',
 
         // Mark as Watched
         MANUALLY_WATCHED: 'ypp-manually-watched',
@@ -181,6 +184,8 @@ window.YPP.CONSTANTS = {
         cardStyle: 'glass', // glass, flat, elevated
         trueBlack: false, // Legacy: treated as 'midnight' theme if true during migration
         hideScrollbar: false,
+        customScrollbar: false,
+        grayscaleThumbnails: false,
 
         // Layout
         grid4x4: true, // Legacy (can be kept for migration or removed)
@@ -193,6 +198,7 @@ window.YPP.CONSTANTS = {
         hideShorts: false,
         hideSearchShorts: true,
         hideMixes: false,
+        hideExploreTopics: false,
         hideWatched: false,
         hideWatchedMode: 'dim',           // 'dim' | 'hide'
         hideWatchedThreshold: 80,
@@ -441,7 +447,10 @@ window.YPP.CONSTANTS = {
         DRACULA: { key: 'dracula', label: 'Dracula', class: 'ypp-theme-dracula' },
         FOREST: { key: 'forest', label: 'Forest', class: 'ypp-theme-forest' },
         MIDNIGHT: { key: 'midnight', label: 'Midnight (OLED)', class: 'ypp-theme-midnight' },
-        CHERRY: { key: 'cherry', label: 'Cherry Blossom', class: 'ypp-theme-cherry' }
+        CHERRY: { key: 'cherry', label: 'Cherry Blossom', class: 'ypp-theme-cherry' },
+        COFFEE: { key: 'coffee', label: 'Coffee', class: 'ypp-theme-coffee' },
+        CYBERPUNK: { key: 'cyberpunk', label: 'Cyberpunk', class: 'ypp-theme-cyberpunk' },
+        NORD: { key: 'nord', label: 'Nord Frost', class: 'ypp-theme-nord' }
     },
 
     // =========================================================================

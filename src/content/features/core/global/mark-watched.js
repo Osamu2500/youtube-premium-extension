@@ -246,26 +246,39 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
 
         const videoId = match[1];
 
-        // Mark as watched when video reaches threshold
-        const video = document.querySelector(window.YPP.CONSTANTS.SELECTORS.VIDEO || 'video');
-        if (!video) return;
-
-        // Ensure we only attach once per navigation
-        if (this._onTimeUpdateBinded) {
-             video.removeEventListener('timeupdate', this._onTimeUpdateBinded);
+        // Clean up any previous timeupdate listener from a prior navigation
+        if (this._activeVideoEl && this._onTimeUpdateBinded) {
+            this._activeVideoEl.removeEventListener('timeupdate', this._onTimeUpdateBinded);
+            this._activeVideoEl = null;
+            this._onTimeUpdateBinded = null;
         }
 
-        const checkProgress = () => {
-            if (!video.duration) return;
-            const percent = (video.currentTime / video.duration) * 100;
-            const threshold = this.settings?.hideWatchedThreshold || 80;
-            if (percent >= threshold) {
-                this.markAsWatched(videoId);
-                video.removeEventListener('timeupdate', checkProgress);
-            }
+        // Wait briefly for the <video> element to be inserted (SPA nav)
+        const attach = () => {
+            const video = document.querySelector(
+                window.YPP.CONSTANTS.SELECTORS.VIDEO?.[0] || 'video.html5-main-video, video'
+            );
+            if (!video) return;
+
+            this._activeVideoEl = video;
+
+            const checkProgress = () => {
+                if (!video.duration) return;
+                const percent = (video.currentTime / video.duration) * 100;
+                const threshold = this.settings?.hideWatchedThreshold ?? 80;
+                if (percent >= threshold) {
+                    this.markAsWatched(videoId);
+                    video.removeEventListener('timeupdate', checkProgress);
+                    this._activeVideoEl = null;
+                    this._onTimeUpdateBinded = null;
+                }
+            };
+
+            this._onTimeUpdateBinded = checkProgress;
+            video.addEventListener('timeupdate', checkProgress);
         };
 
-        this._onTimeUpdateBinded = checkProgress;
-        video.addEventListener('timeupdate', this._onTimeUpdateBinded);
+        // Give YouTube 500 ms to render the player after SPA navigation
+        setTimeout(attach, 500);
     }
 };

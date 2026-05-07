@@ -111,7 +111,25 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         panel.appendChild(balanceRow);
         this.updateBalanceTrack(balanceSlider);
 
-        // ── Presets
+        // ── EQ/Dynamics/Spatial Tabs ──
+        const tabBar = document.createElement('div');
+        tabBar.style.cssText = 'display:flex;border-bottom:1px solid rgba(255,255,255,0.08);';
+        const mkTab = (label, active) => {
+            const t = document.createElement('button');
+            t.textContent = label;
+            t.style.cssText = `flex:1;padding:10px;background:transparent;border:none;color:${active ? '#fff' : 'rgba(255,255,255,0.45)'};font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid ${active ? 'rgba(255,255,255,0.7)' : 'transparent'};transition:all 0.2s;font-family:inherit;`;
+            t.onmouseenter = () => { if (!t.classList.contains('active')) t.style.color = 'rgba(255,255,255,0.75)'; };
+            t.onmouseleave = () => { if (!t.classList.contains('active')) t.style.color = 'rgba(255,255,255,0.45)'; };
+            if (active) t.classList.add('active');
+            return t;
+        };
+        const tabEQ  = mkTab('Equalizer', true);
+        const tabDyn = mkTab('Dynamics', false);
+        const tabSpa = mkTab('Spatial', false);
+        tabBar.append(tabEQ, tabDyn, tabSpa);
+        panel.appendChild(tabBar);
+
+        // ── Presets ──
         const presetsRow = document.createElement('div');
         presetsRow.className = 'ypp-eq-presets-row';
         let activePresetBtn = null;
@@ -131,11 +149,11 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         });
         panel.appendChild(presetsRow);
 
-        // ── Canvas Curve
+        // ── Canvas Curve (will be moved to eqContentWrap)
         const canvasEl = document.createElement('canvas');
         canvasEl.width = 444; canvasEl.height = 72;
         canvasEl.className = 'ypp-eq-canvas';
-        panel.appendChild(canvasEl);
+        // NOTE: NOT appended to panel here — appended via eqContentWrap below
 
         // ── 10-Band Vertical EQ Faders
         const bandsSection = document.createElement('div');
@@ -191,9 +209,79 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             col.append(dbLabel, track, freqLabel);
             bandsSection.appendChild(col);
         });
-        panel.appendChild(bandsSection);
+        // NOTE: bandsSection is NOT appended to panel directly — appended via eqContentWrap below
 
-        // ── Footer: Compressor toggle + Reset
+        // ── Footer: tabbed content panels ──
+        // --- EQ content wrapper (bands + canvas)
+        const eqContentWrap = document.createElement('div');
+        eqContentWrap.id = 'ypp-eq-tab-eq';
+        eqContentWrap.appendChild(canvasEl);
+        eqContentWrap.appendChild(bandsSection);
+        panel.appendChild(eqContentWrap);
+
+        // --- Dynamics tab panel
+        const dynPanel = document.createElement('div');
+        dynPanel.id = 'ypp-eq-tab-dyn';
+        dynPanel.style.display = 'none';
+        dynPanel.style.cssText = 'padding:16px 18px;display:none;';
+        const mkDynRow = (label, min, max, step, val, unit, onChange) => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:14px;';
+            const lbl = document.createElement('span');
+            lbl.style.cssText = 'font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.5px;min-width:80px;';
+            lbl.textContent = label;
+            const valEl = document.createElement('span');
+            valEl.style.cssText = 'font-size:11px;font-weight:800;color:#fff;min-width:36px;text-align:right;';
+            valEl.textContent = val + unit;
+            const sl = document.createElement('input');
+            sl.type='range'; sl.min=min; sl.max=max; sl.step=step; sl.value=val;
+            sl.className='ypp-eq-hslider';
+            sl.style.flex='1';
+            sl.oninput = (e) => { valEl.textContent = e.target.value + unit; onChange(parseFloat(e.target.value)); };
+            row.append(lbl, sl, valEl);
+            return row;
+        };
+        if (ctx.compressorNode) {
+            dynPanel.appendChild(mkDynRow('Threshold', -60, 0, 1, -24, 'dB', v => { ctx.compressorNode.threshold.value = v; }));
+            dynPanel.appendChild(mkDynRow('Ratio', 1, 20, 0.5, 4, ':1', v => { ctx.compressorNode.ratio.value = v; }));
+            dynPanel.appendChild(mkDynRow('Attack', 0, 1, 0.01, 0.003, 's', v => { ctx.compressorNode.attack.value = v; }));
+            dynPanel.appendChild(mkDynRow('Release', 0, 1, 0.01, 0.25, 's', v => { ctx.compressorNode.release.value = v; }));
+            dynPanel.appendChild(mkDynRow('Knee', 0, 40, 1, 30, 'dB', v => { ctx.compressorNode.knee.value = v; }));
+        } else {
+            dynPanel.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:12px;">Compressor unavailable — audio not initialised yet.</div>';
+        }
+        panel.appendChild(dynPanel);
+
+        // --- Spatial tab panel
+        const spaPanel = document.createElement('div');
+        spaPanel.id = 'ypp-eq-tab-spa';
+        spaPanel.style.cssText = 'padding:16px 18px;display:none;';
+        const stereoRow = mkDynRow('Stereo Width', 0, 200, 1, 100, '%', v => {
+            if (ctx.setWidth) ctx.setWidth(v / 100);
+        });
+        spaPanel.appendChild(stereoRow);
+        const monoRow2 = mkDynRow('Mono Mix', 0, 100, 1, 0, '%', v => {
+            if (ctx.setMono) ctx.setMono(v > 50);
+        });
+        spaPanel.appendChild(monoRow2);
+        panel.appendChild(spaPanel);
+
+        // --- Tab switching
+        const tabPanels = [eqContentWrap, dynPanel, spaPanel];
+        const tabs = [tabEQ, tabDyn, tabSpa];
+        tabs.forEach((tab, i) => {
+            tab.onclick = () => {
+                tabs.forEach((t, j) => {
+                    const active = i === j;
+                    t.classList.toggle('active', active);
+                    t.style.color = active ? '#fff' : 'rgba(255,255,255,0.45)';
+                    t.style.borderBottom = `2px solid ${active ? 'rgba(255,255,255,0.7)' : 'transparent'}`;
+                    tabPanels[j].style.display = active ? '' : 'none';
+                });
+            };
+        });
+
+        // ── Original Footer: Compressor toggle + Reset + Hint ──
         const footer = document.createElement('div');
         footer.className = 'ypp-eq-footer';
 

@@ -77,7 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Feed & Home
         'hookFreeHome',
         'hideMixes',
+        'hideExploreTopics',
         'hideWatched', // Also in Search
+        'hideWatchedMode',
+        'hideWatchedThreshold',
         'grid4x4',
         'homeColumns', // New
         'displayFullTitle', // New
@@ -166,6 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'channelColumns',
         'subscriptionsColumns',
         'subscriptionFolders',
+        'enableFilterBar',
+        'enableChannelHealth',
 
         // Watch Time Alert
         'watchTimeAlert',
@@ -193,7 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'reducedMotion',
         'cardStyle',
         'thumbRadius',
-        'sidebarOpacity'
+        'sidebarOpacity',
+        'customScrollbar',
+        'grayscaleThumbnails'
     ];
 
     // --- STORAGE HANDLING ---
@@ -219,12 +226,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (el.type === 'checkbox') {
                             el.checked = settings[key] !== undefined ? settings[key] : false;
                         } else if (el.type === 'range') {
-                            el.value = settings[key] || 0;
+                            el.value = settings[key] !== undefined ? settings[key] : el.value;
                             // Update display text if exists
                             const display = document.getElementById(key + 'Value');
-                            if (display) display.textContent = el.value + '%';
-                        } else if (el.type === 'color' || el.type === 'text') {
+                            if (display) {
+                                const isCount = key.toLowerCase().includes('columns');
+                                const isHour  = key === 'watchTimeAlertHours';
+                                display.textContent = isCount ? el.value
+                                                   : isHour  ? el.value + 'h'
+                                                   : el.value + '%';
+                            }
+                        } else if (el.type === 'color' || el.type === 'text' || el.type === 'select-one') {
                             el.value = settings[key] || '';
+                        } else if (el.type === 'hidden') {
+                            // e.g. hideWatchedMode — update the hidden input AND sync any pill UI
+                            el.value = settings[key] || el.value;
+                            if (key === 'hideWatchedMode') {
+                                const mode = el.value;
+                                document.querySelectorAll('.hw-mode-btn').forEach(b => {
+                                    const isActive = b.dataset.mode === mode;
+                                    b.classList.toggle('active', isActive);
+                                    b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+                                    b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
+                                });
+                            }
                         }
                     }
                 });
@@ -250,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (el.type === 'range') {
                     settings[key] = Number(el.value);
                 } else {
+                    // text, color, select, hidden — all string values
                     settings[key] = el.value;
                 }
             }
@@ -335,7 +361,10 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'dracula', label: 'Dracula', meta: 'High Contrast', color: '#282a36' },
             { key: 'midnight', label: 'Midnight', meta: 'OLED Black', color: '#000000' },
             { key: 'forest', label: 'Forest', meta: 'Green', color: '#0f1c15' },
-            { key: 'cherry', label: 'Cherry', meta: 'Pink', color: '#26181b' }
+            { key: 'cherry', label: 'Cherry', meta: 'Pink', color: '#26181b' },
+            { key: 'coffee', label: 'Coffee', meta: 'Latte', color: '#2a201c' },
+            { key: 'cyberpunk', label: 'Cyberpunk', meta: 'Neon', color: '#0a0a0f' },
+            { key: 'nord', label: 'Nord', meta: 'Frost', color: '#2e3440' }
         ];
 
         themes.forEach(theme => {
@@ -386,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours'].forEach(key => {
+    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {
@@ -634,6 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('change', () => {
                 saveSettings(); // Triggers debounced save
                 updateDependencyUI();
+                updateCustomizationPreview();
                 if (typeof syncModeCards === 'function') syncModeCards();
             });
             // For color picker, also listen to input for real-time responsiveness if needed
@@ -641,6 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.addEventListener('input', () => {
                     // We might not want to save on every pixel drag, but updating UI dependency is fine
                     updateDependencyUI();
+                    updateCustomizationPreview();
                     saveSettings(); // Debounce handles the spam
                 });
             }
@@ -675,13 +706,105 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDependencyUI() {
         // Focus Mode -> Sub-toggles (Optional visual hierarchy)
         const focusMode = document.getElementById('enableFocusMode');
-        const distractionGroups = ['hideComments', 'hideEndScreens', 'hideCards', 'hideMerch'];
-        
         if (focusMode) {
-             const isFocusOn = focusMode.checked;
              // Any additional logic for focus mode dependencies
         }
+
+        // Hide Watched sub-panel visibility
+        const hwToggle = document.getElementById('hideWatched');
+        const hwOptions = document.getElementById('hideWatchedOptions');
+        if (hwToggle && hwOptions) {
+            hwOptions.style.display = hwToggle.checked ? 'block' : 'none';
+        }
     }
+
+    function updateCustomizationPreview() {
+        if (elements['fontFamily']) applyFontFamily(elements['fontFamily'].value);
+        if (elements['densityMode']) applyDensity(elements['densityMode'].value);
+        if (elements['cardStyle']) document.documentElement.setAttribute('data-card-style', elements['cardStyle'].value);
+        if (elements['accentColor']) applyAccentColor(elements['accentColor'].value);
+    }
+
+    // --- HIDE WATCHED MODE PILL ---
+    function initHideWatchedModePill() {
+        const btns = document.querySelectorAll('.hw-mode-btn');
+        const hiddenInput = document.getElementById('hideWatchedMode');
+        if (!btns.length || !hiddenInput) return;
+
+        const applyMode = (mode) => {
+            hiddenInput.value = mode;
+            btns.forEach(b => {
+                const isActive = b.dataset.mode === mode;
+                b.classList.toggle('active', isActive);
+                b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+                b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
+            });
+        };
+
+        // Load saved mode into pill
+        chrome.storage.local.get('settings', (data) => {
+            const mode = data.settings?.hideWatchedMode || 'dim';
+            applyMode(mode);
+        });
+
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyMode(btn.dataset.mode);
+                saveSettings();
+            });
+        });
+    }
+
+    initHideWatchedModePill();
+
+    // --- ACCENT COLOR SWATCHES ---
+    function initAccentColorSwatches() {
+        const swatches = document.querySelectorAll('.color-swatch[data-color]');
+        const customInput = document.getElementById('accentColor');
+        if (!customInput) return;
+
+        const applySwatchActive = (color) => {
+            let foundMatch = false;
+            swatches.forEach(swatch => {
+                const isActive = swatch.dataset.color.toLowerCase() === color.toLowerCase();
+                swatch.classList.toggle('active', isActive);
+                if (isActive) foundMatch = true;
+            });
+            // If it's a custom color, ensure the custom wrapper feels active and input matches
+            if (!foundMatch) {
+                customInput.value = color;
+                customInput.previousElementSibling.classList.add('active');
+            } else {
+                customInput.previousElementSibling.classList.remove('active');
+            }
+        };
+
+        // Load initial state
+        chrome.storage.local.get('settings', (data) => {
+            const color = data.settings?.accentColor || '#ff4e45';
+            applySwatchActive(color);
+        });
+
+        // Predefined swatch clicks
+        swatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const color = swatch.dataset.color;
+                customInput.value = color;
+                applySwatchActive(color);
+                
+                // Trigger change event to save
+                const event = new Event('change', { bubbles: true });
+                customInput.dispatchEvent(event);
+            });
+        });
+
+        // Custom picker clicks
+        customInput.addEventListener('input', () => {
+            applySwatchActive(customInput.value);
+        });
+    }
+
+    initAccentColorSwatches();
 
     // --- WATCH HISTORY VISUALIZER ---
     // =========================================================================
@@ -978,47 +1101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- CUSTOMIZATION CONTROLS ---
-
-    /** Generic pill selector init */
-    function initPillSelector(containerId, storageKey, onChange) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const options = container.querySelectorAll('.pill-option');
-
-        // Load saved value
-        chrome.storage.local.get(['settings'], (result) => {
-            const saved = result.settings ? result.settings[storageKey] : null;
-            if (saved) {
-                options.forEach(opt => {
-                    opt.classList.toggle('active', opt.dataset.value === saved);
-                });
-            }
-        });
-
-        options.forEach(opt => {
-            opt.addEventListener('click', () => {
-                options.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                const value = opt.dataset.value;
-                
-                // Save to main settings object using atomic queue
-                if (typeof queueSettingsWrite !== 'undefined') {
-                    queueSettingsWrite({ key: storageKey, value: value });
-                } else {
-                    chrome.storage.local.get(['settings'], (result) => {
-                        const settings = result.settings || {};
-                        settings[storageKey] = value;
-                        chrome.storage.local.set({ settings });
-                    });
-                }
-                sendPreviewUpdate();
-                
-                if (onChange) onChange(value);
-                showSaveIndicator();
-            });
-        });
-    }
+    // --- CUSTOMIZATION POPUP PREVIEW ---
 
     /** Apply font family to popup */
     function applyFontFamily(family) {
@@ -1052,27 +1135,13 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Init pill selectors
-    initPillSelector('fontFamilySelector', 'fontFamily', applyFontFamily);
-    initPillSelector('densitySelector', 'densityMode', applyDensity);
-    initPillSelector('cardStyleSelector', 'cardStyle', (style) => {
-        document.documentElement.setAttribute('data-card-style', style);
-    });
-
     // Load & apply saved customization values on startup
     chrome.storage.local.get(['settings'], (result) => {
         const s = result.settings || {};
         if (s.fontFamily) applyFontFamily(s.fontFamily);
         if (s.densityMode) applyDensity(s.densityMode);
         if (s.cardStyle) document.documentElement.setAttribute('data-card-style', s.cardStyle);
-        if (s.accentColor) {
-            applyAccentColor(s.accentColor);
-            document.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
-                sw.classList.toggle('active', sw.dataset.color === s.accentColor);
-            });
-            const customPicker = document.getElementById('accentColorCustom');
-            if (customPicker) customPicker.value = s.accentColor;
-        }
+        if (s.accentColor) applyAccentColor(s.accentColor);
         
         // Disable animations class based on reducedMotion
         if (s.enableAnimations === false) {
@@ -1082,52 +1151,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.classList.add('ypp-reduced-motion');
         }
     });
-
-    // Accent color swatches
-    const accentSwatches = document.getElementById('accentSwatches');
-    if (accentSwatches) {
-        accentSwatches.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
-            sw.addEventListener('click', () => {
-                accentSwatches.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-                sw.classList.add('active');
-                const color = sw.dataset.color;
-                
-                if (typeof queueSettingsWrite !== 'undefined') {
-                    queueSettingsWrite({ key: 'accentColor', value: color });
-                } else {
-                    chrome.storage.local.get(['settings'], (result) => {
-                        const settings = result.settings || {};
-                        settings.accentColor = color;
-                        chrome.storage.local.set({ settings });
-                    });
-                }
-                sendPreviewUpdate();
-                
-                applyAccentColor(color);
-                showSaveIndicator();
-            });
-        });
-
-        // Custom color picker
-        const customPicker = document.getElementById('accentColorCustom');
-        if (customPicker) {
-            customPicker.addEventListener('input', () => {
-                accentSwatches.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-                const wrap = customPicker.closest('.color-swatch-wrap');
-                if (wrap) wrap.querySelector('.color-swatch').classList.add('active');
-                applyAccentColor(customPicker.value);
-            });
-            customPicker.addEventListener('change', () => {
-                chrome.storage.local.get(['settings'], (result) => {
-                    const settings = result.settings || {};
-                    settings.accentColor = customPicker.value;
-                    chrome.storage.local.set({ settings });
-                    sendPreviewUpdate();
-                });
-                showSaveIndicator();
-            });
-        }
-    }
 
     // Live preview for range sliders handled by main logic now
     const custSliders = [

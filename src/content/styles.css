@@ -652,6 +652,14 @@ html.yt-premium-plus-theme body {
   overflow-x: hidden;
 }
 
+/* Hide Explore Topics */
+body.ypp-hide-explore-topics ytd-feed-filter-chip-bar-renderer,
+body.ypp-hide-explore-topics yt-chip-cloud-renderer,
+body.ypp-hide-explore-topics yt-related-chip-cloud-renderer,
+body.ypp-hide-explore-topics #chips-wrapper {
+  display: none !important;
+}
+
 /* Hide Comments */
 .ypp-hide-comments #comments {
   display: none;
@@ -5194,7 +5202,7 @@ body.yt-premium-plus-theme .ytp-gradient-top {
 /* ── 8. Settings / quality popup ── */
 body.yt-premium-plus-theme .ytp-popup {
   border-radius: 18px !important;
-  background: rgba(10, 10, 18, 0.92) !important;
+  background: rgba(10, 10, 18, 0.45) !important;
   backdrop-filter: blur(36px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(36px) saturate(180%) !important;
   border: 1px solid rgba(255,255,255,0.10) !important;
@@ -7320,3 +7328,43 @@ body.ypp-hide-thumbnails #thumbnail:hover img {
     transition: transform 0.2s, background 0.2s !important;
 }
 .ypp-id-skip:hover { background: #817aff !important; transform: scale(1.05) !important; }
+
+/* --- Custom Scrollbar --- */
+body.ypp-custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+body.ypp-custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--ypp-accent-glow, rgba(255, 255, 255, 0.2));
+    border-radius: 10px;
+}
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ypp-accent, rgba(255, 255, 255, 0.5));
+}
+body.ypp-custom-scrollbar *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+body.ypp-custom-scrollbar *::-webkit-scrollbar-track {
+    background: transparent;
+}
+body.ypp-custom-scrollbar *::-webkit-scrollbar-thumb {
+    background-color: var(--ypp-accent-glow, rgba(255, 255, 255, 0.2));
+    border-radius: 8px;
+}
+body.ypp-custom-scrollbar *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ypp-accent, rgba(255, 255, 255, 0.5));
+}
+
+/* --- Grayscale Thumbnails --- */
+body.ypp-grayscale-thumbnails ytd-thumbnail img {
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+}
+body.ypp-grayscale-thumbnails ytd-thumbnail:hover img {
+    filter: grayscale(0%);
+}
+
