@@ -56,17 +56,19 @@ window.YPP.FeatureManager = class FeatureManager {
         if (!window.YPP.events) return;
 
         window.YPP.events.on('app:pageChange', (url) => {
-            Object.values(this.features).forEach(feature => {
+            Object.entries(this.features).forEach(([name, feature]) => {
+                if (this.errorCounts[name] >= this.MAX_ERRORS) return;
                 if (feature.isEnabled && typeof feature.onPageChange === 'function') {
-                    this.safeRun(feature.name, () => feature.onPageChange(url));
+                    this.safeRun(name, () => feature.onPageChange(url));
                 }
             });
         });
 
         window.YPP.events.on('app:videoChange', (videoId) => {
-            Object.values(this.features).forEach(feature => {
+            Object.entries(this.features).forEach(([name, feature]) => {
+                if (this.errorCounts[name] >= this.MAX_ERRORS) return;
                 if (feature.isEnabled && typeof feature.onVideoChange === 'function') {
-                    this.safeRun(feature.name, () => feature.onVideoChange(videoId));
+                    this.safeRun(name, () => feature.onVideoChange(videoId));
                 }
             });
         });
@@ -192,6 +194,10 @@ window.YPP.FeatureManager = class FeatureManager {
      * @returns {Promise<void>}
      */
     async safeRun(name, fn) {
+        if (this.errorCounts[name] >= this.MAX_ERRORS) {
+            return; // Abort early if feature is considered permanently broken
+        }
+        
         try {
             await fn();
         } catch (e) {
@@ -245,7 +251,8 @@ window.YPP.FeatureManager = class FeatureManager {
      */
     _domSweep(name) {
         try {
-            const tagged = document.querySelectorAll(`[data-ypp-feature="${name}"]`);
+            const safeName = CSS.escape(name);
+            const tagged = document.querySelectorAll(`[data-ypp-feature="${safeName}"]`);
             if (tagged.length === 0) return;
 
             tagged.forEach(el => {

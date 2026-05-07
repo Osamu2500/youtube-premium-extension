@@ -97,6 +97,7 @@ import './features/player/wheel-controls.js';
 import './features/player/audio-compressor.js';
 import './features/player/video-resumer.js';
 import './features/player/auto-pause.js';
+import './features/player/sidebar-layout.js';
 
 // Feature Manager & Main entry
 import './feature-manager.js';

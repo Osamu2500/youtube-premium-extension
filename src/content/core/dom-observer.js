@@ -65,20 +65,26 @@ window.YPP.core.DOMObserver = class DOMObserver {
 
         this.registry.set(id, { selector, callback });
 
-        // If immediate is true, process existing elements matching the selector
         if (immediate) {
+            let existingElements = [];
             try {
-                const existingElements = Array.from(document.querySelectorAll(selector));
-                if (existingElements.length > 0) {
-                    if (callback) {
-                        callback(existingElements);
-                    }
-                    if (this.events) {
-                        this.events.emit(`dom:found:${id}`, existingElements);
-                    }
-                }
+                existingElements = Array.from(document.querySelectorAll(selector));
             } catch (e) {
                 console.error(`[YPP:DOMObserver] Invalid selector registered: ${selector}`);
+                return; // Stop here if selector is invalid
+            }
+
+            if (existingElements.length > 0) {
+                if (callback) {
+                    try {
+                        callback(existingElements);
+                    } catch (e) {
+                        console.error(`[YPP:DOMObserver] Error in immediate callback for '${id}':`, e);
+                    }
+                }
+                if (this.events) {
+                    this.events.emit(`dom:found:${id}`, existingElements);
+                }
             }
         }
     }
@@ -146,27 +152,31 @@ window.YPP.core.DOMObserver = class DOMObserver {
         const matchedBuckets = new Map();
 
         for (const [id, { selector }] of this.registry.entries()) {
-            const matches = [];
+            const matches = new Set(); // Use Set to inherently deduplicate overlapping nodes
 
             for (let k = 0; k < nodesToProcess.length; k++) {
                 const node = nodesToProcess[k];
 
                 // Check if node ITSELF matches
                 if (node.matches && node.matches(selector)) {
-                    matches.push(node);
+                    matches.add(node);
                 }
 
                 // Check if node CONTAINS matches (critical for large rendered blocks)
                 if (node.querySelectorAll) {
-                    const children = node.querySelectorAll(selector);
-                    for (let c = 0; c < children.length; c++) {
-                        matches.push(children[c]);
+                    try {
+                        const children = node.querySelectorAll(selector);
+                        for (let c = 0; c < children.length; c++) {
+                            matches.add(children[c]);
+                        }
+                    } catch(e) {
+                        // ignore bad queries
                     }
                 }
             }
 
-            if (matches.length > 0) {
-                matchedBuckets.set(id, matches);
+            if (matches.size > 0) {
+                matchedBuckets.set(id, Array.from(matches));
             }
         }
 

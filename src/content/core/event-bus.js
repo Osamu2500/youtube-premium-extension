@@ -58,7 +58,8 @@ window.YPP.core.EventBus = class EventBus {
      * @param {any} data - Data to pass to handlers
      */
     emit(event, data) {
-        const handlers = this.listeners[event] || [];
+        // Shallow copy the array to prevent iteration issues if handlers add/remove listeners during execution
+        const handlers = [...(this.listeners[event] || [])];
         for (const handler of handlers) {
             try {
                 handler(data);
@@ -75,8 +76,12 @@ window.YPP.core.EventBus = class EventBus {
     clear(event) {
         if (event) {
             delete this.listeners[event];
+            if (event === 'dom:mutated') {
+                window.YPP?.sharedObserver?.setHasMutatedListeners(false);
+            }
         } else {
             this.listeners = {};
+            window.YPP?.sharedObserver?.setHasMutatedListeners(false);
         }
     }
 };

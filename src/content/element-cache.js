@@ -23,11 +23,12 @@ class ElementCache {
     get(key, selector, context = document) {
         // Check if cached element still exists in DOM
         if (this._cache.has(key)) {
-            const cached = this._cache.get(key);
+            const ref = this._cache.get(key);
+            const cached = ref ? ref.deref() : null;
             if (cached && document.contains(cached)) {
                 return cached;
             }
-            // Cache invalid, remove it
+            // Cache invalid or garbage collected, remove it
             this.remove(key);
         }
 
@@ -35,7 +36,7 @@ class ElementCache {
         const element = context.querySelector(selector);
         
         if (element) {
-            this._cache.set(key, element);
+            this.set(key, element);
         }
         
         return element;
@@ -61,7 +62,7 @@ class ElementCache {
      */
     set(key, element) {
         if (element && element instanceof Element) {
-            this._cache.set(key, element);
+            this._cache.set(key, typeof WeakRef !== 'undefined' ? new WeakRef(element) : element);
         }
     }
 
@@ -73,11 +74,14 @@ class ElementCache {
      */
     has(key) {
         if (!this._cache.has(key)) return false;
-        const cached = this._cache.get(key);
+        
+        const cachedItem = this._cache.get(key);
+        const cached = cachedItem instanceof WeakRef ? cachedItem.deref() : cachedItem;
+        
         if (cached && document.contains(cached)) {
             return true;
         }
-        // Element was removed from DOM — clean up stale entry
+        // Element was removed from DOM or garbage collected — clean up stale entry
         this.remove(key);
         return false;
     }

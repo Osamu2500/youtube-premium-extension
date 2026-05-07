@@ -134,3 +134,90 @@ Rules:
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
 - After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
+
+## Skills System
+
+Skills live in `.agent/skills/skills/`. Read the relevant SKILL.md before acting.
+
+---
+
+### Mandatory Skill Routing Table
+
+| Situation | Skill(s) to Use |
+|-----------|----------------|
+| **Any bug**, unexpected behavior, broken feature | `systematic-debugging` — MUST complete all 4 phases before ANY fix |
+| **Adding any new feature** | `brainstorming` → `browser-extension-builder` → `uncle-bob-craft` |
+| **YouTube DOM interaction** — selectors, CSS override, SPA nav, MutationObserver | `youtube-dom-mastery` — read BEFORE writing any DOM code |
+| **Popup UI building or redesign** | `frontend-design` + `ui-ux-pro-max` + `animejs-animation` |
+| **Popup UI accessibility review** | `web-design-guidelines` |
+| **Code quality review** — after feature complete | `vibe-code-auditor` + `uncle-bob-craft` |
+| **Refactoring messy/long code** | `uncle-bob-craft` |
+| **Adding animations or micro-interactions** | `animejs-animation` |
+| **Pre-feature planning** — unsure how to build something | `brainstorming` |
+
+---
+
+### Non-Negotiable Rules for This Extension
+
+1. **ALWAYS merge settings, never overwrite:**
+   ```js
+   this.settings = { ...this.settings, ...request.settings }; // ✅
+   this.settings = request.settings; // ❌ BREAKS other features
+   ```
+
+2. **ALWAYS clean up observers and DOM stamps in `disable()` / `_teardown()`**
+
+3. **ALWAYS implement `onPageChange()` for any feature that mutates the DOM**
+
+4. **NEVER use `setTimeout` to wait for DOM elements — use `MutationObserver`**
+
+5. **NEVER override YouTube styles with CSS classes alone — use `element.style.setProperty(..., 'important')`**
+
+6. **ALWAYS build before testing:** `npm run build` → reload extension in Chrome
+
+7. **ALWAYS use constants for selectors** — no magic strings scattered in code
+
+8. **ALWAYS stamp processed DOM nodes** to prevent double-processing:
+   ```js
+   if (el.hasAttribute('data-ypp-processed')) return;
+   el.setAttribute('data-ypp-processed', 'true');
+   ```
+
+9. **NEVER animate layout properties** — only `transform` and `opacity`
+
+10. **ALWAYS listen to `yt-navigate-finish`** for SPA navigation — not `DOMContentLoaded`
+
+---
+
+### Skill Trigger Examples
+
+| User Says | Use Skills |
+|-----------|-----------|
+| "thumbnails not changing" | `systematic-debugging` → `youtube-dom-mastery` |
+| "add a new [feature]" | `brainstorming` → `browser-extension-builder` → `uncle-bob-craft` |
+| "the popup looks bad/boring" | `frontend-design` + `ui-ux-pro-max` + `animejs-animation` |
+| "audit the codebase" | `vibe-code-auditor` + `uncle-bob-craft` |
+| "nothing happens when I toggle" | `systematic-debugging` → `browser-extension-builder` |
+| "add animations to popup" | `animejs-animation` |
+| "YouTube styles not applying" | `youtube-dom-mastery` → `systematic-debugging` |
+| "plan how to build X" | `brainstorming` |
+| "review my UI" | `web-design-guidelines` |
+| "refactor this feature" | `uncle-bob-craft` |
+
+---
+
+### Available Skills Registry
+
+| Skill Name | Category | Purpose |
+|------------|----------|---------|
+| `systematic-debugging` | Debugging | Root-cause-first 4-phase debug process |
+| `browser-extension-builder` | Architecture | MV3 patterns, messaging, storage, lifecycle |
+| `youtube-dom-mastery` | YouTube/DOM | Selectors, CSS override, SPA, MutationObserver |
+| `brainstorming` | Planning | Structured feature design before coding |
+| `frontend-design` | UI/Design | Premium dark glassmorphism popup design system |
+| `ui-ux-pro-max` | UI/Design | Design system, animations, 50 styles |
+| `animejs-animation` | Animation | Micro-interactions, stagger, popup polish |
+| `web-design-guidelines` | Accessibility | WCAG + Vercel guidelines audit |
+| `uncle-bob-craft` | Code Quality | SOLID, clean code, naming, code review |
+| `vibe-code-auditor` | Code Quality | Production risk audit of AI-generated code |
+

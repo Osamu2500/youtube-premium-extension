@@ -56,6 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab(lastTab);
     }
 
+    // --- COLLAPSIBLE SECTIONS ---
+    const sectionHeaders = document.querySelectorAll('.section-header');
+    sectionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const section = header.closest('.settings-section');
+            if (section) {
+                section.classList.toggle('collapsed');
+                // Optional: Save state to localStorage to persist user preferences per section
+            }
+        });
+    });
+
     // --- SETTINGS CONFIGURATION ---
     // Must match IDs in popup.html exactly
     const settingKeys = [
@@ -200,7 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'thumbRadius',
         'sidebarOpacity',
         'customScrollbar',
-        'grayscaleThumbnails'
+        'grayscaleThumbnails',
+
+        // Sidebar Layout
+        'sidebarLayout'
     ];
 
     // --- STORAGE HANDLING ---
@@ -245,6 +260,15 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const mode = el.value;
                                 document.querySelectorAll('.hw-mode-btn').forEach(b => {
                                     const isActive = b.dataset.mode === mode;
+                                    b.classList.toggle('active', isActive);
+                                    b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+                                    b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
+                                });
+                            }
+                            if (key === 'sidebarLayout') {
+                                const layout = el.value || 'compact';
+                                document.querySelectorAll('.sidebar-layout-btn').forEach(b => {
+                                    const isActive = b.dataset.layout === layout;
                                     b.classList.toggle('active', isActive);
                                     b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
                                     b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
@@ -482,7 +506,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // --- SIDEBAR LAYOUT PILL TOGGLE ---
+    const initSidebarLayoutToggle = () => {
+        const container = document.getElementById('sidebarLayoutToggle');
+        if (!container) return;
+
+        const btns = container.querySelectorAll('.sidebar-layout-btn');
+        const hiddenInput = document.getElementById('sidebarLayout');
+        if (!hiddenInput) return;
+
+        const applyActiveState = (layout) => {
+            hiddenInput.value = layout;
+            btns.forEach(b => {
+                const isActive = b.dataset.layout === layout;
+                b.classList.toggle('active', isActive);
+                b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+                b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
+            });
+        };
+
+        // Handle clicks — saveSettings() gathers ALL settings including the hidden
+        // input we just updated and calls sendPreviewUpdate() for a near-instant
+        // (10ms debounce) message to the content script, plus persistSettings()
+        // for durable storage. No manual sendMessage needed.
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyActiveState(btn.dataset.layout);
+                saveSettings();
+            });
+        });
+    };
+
     initSearchViewMode();
+    initSidebarLayoutToggle();
 
     // --- CONCURRENT STORAGE MANAGER ---
     let _settingsWriteQueue = [];

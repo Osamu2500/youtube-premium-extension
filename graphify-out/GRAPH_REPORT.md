@@ -1,11 +1,11 @@
-# Graph Report - Youtube 2.0  (2026-05-05)
+# Graph Report - Youtube 2.0  (2026-05-07)
 
 ## Corpus Check
-- 107 files · ~88,132 words
+- 107 files · ~90,754 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1040 nodes · 1488 edges · 78 communities detected
+- 1041 nodes · 1491 edges · 78 communities detected
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -95,8 +95,8 @@
 3. `ElementCache` - 11 edges
 4. `_applyAll()` - 11 edges
 5. `applySettings()` - 10 edges
-6. `_run()` - 10 edges
-7. `SearchRedesign` - 10 edges
+6. `SearchRedesign` - 10 edges
+7. `_run()` - 9 edges
 8. `_run()` - 9 edges
 9. `NightModeManager` - 8 edges
 10. `_toggleTheme()` - 7 edges
@@ -124,16 +124,16 @@ Cohesion: 0.07
 Nodes (14): takeSnapshot(), alert(), bulkUnsubscribe(), confirm(), _doUnsubscribe(), _getYoutubeConfig(), individualUnsubscribe(), prompt() (+6 more)
 
 ### Community 2 - "Community 2"
+Cohesion: 0.1
+Nodes (17): applyAccentColor(), applyDensity(), applyFontFamily(), applyPreset(), applyPresetFromUI(), applyThemeToPopup(), initHistoryWidget(), initThemeSelector() (+9 more)
+
+### Community 3 - "Community 3"
 Cohesion: 0.11
 Nodes (18): applyFeedFilters(), _applyFeedFiltersNow(), _applySortOrder(), clearFeedFilters(), disable(), forceRefreshFeed(), handleNavigation(), _matchesDateFilter() (+10 more)
 
-### Community 3 - "Community 3"
-Cohesion: 0.1
-Nodes (13): applyPreset(), applyPresetFromUI(), applyThemeToPopup(), initHistoryWidget(), initThemeSelector(), _processWriteQueue(), queueSettingsWrite(), renderHeatmap() (+5 more)
-
 ### Community 4 - "Community 4"
 Cohesion: 0.15
-Nodes (20): _applyCustomizationSettings(), _applyHideScrollbar(), _applyTheme(), _applyTrueBlack(), _applyVisibilitySettings(), _cleanupClasses(), constructor(), disable() (+12 more)
+Nodes (20): _applyCustomizationSettings(), _applyHideScrollbar(), _applyTheme(), _applyVisibilitySettings(), _cleanupClasses(), _cleanupCustomVariables(), constructor(), disable() (+12 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.17
@@ -469,6 +469,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._

@@ -56,6 +56,7 @@ const DEFAULT_SETTINGS = {
     navHistory: true,
     forceHideSidebar: false,
     logoRedirectSub: false,
+    sidebarLayout: 'compact', // 'compact' | 'expanded'
 
     // Shorts Tools
     shortsAutoScroll: false,

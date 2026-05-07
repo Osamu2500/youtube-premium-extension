@@ -105,7 +105,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      */
     isChannelPage: () => {
         const path = window.location.pathname;
-        return path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/');
+        return path.startsWith('/@') || path.startsWith('/channel/') || path.startsWith('/c/') || path.startsWith('/user/');
     },
 
     // =====================================================================
@@ -377,6 +377,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 
                 const now = Date.now();
 
+                // Check for timeout independent of the polling interval
+                if (now - startTime >= timeout) {
+                    resolved = true;
+                    cleanup();
+                    return resolve(null); // Timeout reached cleanly
+                }
+
                 // Throttle the checks to match the requested interval
                 if (now - lastCheckTime >= intervalMs) {
                     lastCheckTime = now;
@@ -394,13 +401,6 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                             cleanup();
                             return resolve(result); // Success
                         } 
-                        
-                        // Check for timeout
-                        if (now - startTime >= timeout) {
-                            resolved = true;
-                            cleanup();
-                            return resolve(null); // Timeout reached cleanly
-                        }
                     } catch (error) {
                         // IMPORTANT FIX: Swallow transient errors (like null references during DOM load) 
                         // and allow the loop to try again on the next interval until timeout.
@@ -734,12 +734,12 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         // Generate a fast hash ID if none is provided to avoid duplicating nameless styles
         let styleId = id;
         if (!styleId) {
-            let hash = 0;
-            for (let i = 0; i < css.length; i++) {
-                hash = ((hash << 5) - hash) + css.charCodeAt(i);
-                hash |= 0; // Convert to 32bit integer
-            }
-            styleId = 'ypp-style-' + Math.abs(hash).toString(36);
+            // Fast hash: use string length and sampled characters to avoid O(N) iteration on massive CSS strings
+            const len = css.length;
+            const sample1 = css.charCodeAt(0) || 0;
+            const sample2 = css.charCodeAt(Math.floor(len / 2)) || 0;
+            const sample3 = css.charCodeAt(len - 1) || 0;
+            styleId = `ypp-style-${len}-${sample1}-${sample2}-${sample3}`;
         }
         
         // 1. Check by ID first (O(1) fastest look up)

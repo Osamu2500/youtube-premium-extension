@@ -128,6 +128,7 @@ window.YPP.CONSTANTS = {
         ZEN_MODE: 'ypp-zen-mode',
         HOOK_FREE: 'ypp-hook-free-home',
         SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed',
+        SIDEBAR_EXPANDED: 'ypp-sidebar-expanded',
         CUSTOM_SCROLLBAR: 'ypp-custom-scrollbar',
         GRAYSCALE_THUMBNAILS: 'ypp-grayscale-thumbnails',
 
@@ -244,6 +245,7 @@ window.YPP.CONSTANTS = {
         forceHideSidebar: false,
         hoverSidebar: true,
         logoRedirectSub: false,
+        sidebarLayout: 'compact', // 'compact' | 'expanded'
         
         // Playlist & History
         continueWatching: true,
@@ -513,7 +515,8 @@ window.YPP.CONSTANTS = {
         globalPlayerBar: 'GlobalPlayerBar',
         volumeBoost: 'VolumeBooster',
         autoQuality: 'AutoQuality',
-        timeDisplay: 'TimeDisplay'
+        timeDisplay: 'TimeDisplay',
+        sidebarLayout: 'SidebarLayout'
     }
 };
 

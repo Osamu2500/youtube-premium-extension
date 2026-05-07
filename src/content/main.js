@@ -304,7 +304,7 @@
                         const url = window.location.href;
                         window.YPP.events.emit('app:pageChange', url);
 
-                        if (window.location.pathname === '/watch') {
+                        if (window.location.pathname.startsWith('/watch')) {
                             const urlParams = new URLSearchParams(window.location.search);
                             const videoId = urlParams.get('v');
                             if (videoId) {
@@ -370,7 +370,9 @@
             // Listen for direct messages for instant updates
             const messageHandler = (request, sender, sendResponse) => {
                 if (request.action === 'UPDATE_SETTINGS' && request.settings) {
-                    this.settings = request.settings;
+                    // Merge incoming settings over current state — never replace wholesale,
+                    // as the popup may send partial objects (e.g. just { sidebarLayout })
+                    this.settings = { ...this.settings, ...request.settings };
                     this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
                     if (this.featureManager) {
                         try {
@@ -402,13 +404,15 @@
         removeEventListeners() {
             this.eventListeners.forEach(({ target, event, handler }) => {
                 try {
-                    if (target.removeEventListener) {
+                    if (target && typeof target.removeEventListener === 'function') {
                         target.removeEventListener(event, handler);
-                    } else if (target.removeListener) {
+                    } else if (target && typeof target.removeListener === 'function') {
                         target.removeListener(handler);
+                    } else if (target && typeof target.off === 'function') {
+                        target.off(event, handler);
                     }
                 } catch (error) {
-                    // Ignore cleanup errors
+                    // Ignore cleanup errors to ensure loop completes
                 }
             });
             this.eventListeners = [];
@@ -481,20 +485,14 @@
 
             } catch (error) {
                 this.Utils?.log(`Error updating context: ${error.message}`, 'MAIN', 'error');
-                // Reset context on error with full shape
-                this.context = {
-                    isHome: false,
-                    isWatch: false,
-                    isSearch: false,
-                    isChannel: false,
-                    isShorts: false,
-                    isShortsPage: false,
-                    isPlaylist: false,
-                    isTrending: false,
-                    isSubscriptions: false,
-                    isLibrary: false,
-                    isHistory: false
-                };
+                // Reset context dynamically while preserving shape to avoid brittle hardcoding
+                if (this.context && typeof this.context === 'object') {
+                    Object.keys(this.context).forEach(key => {
+                        this.context[key] = false;
+                    });
+                } else {
+                    this.context = {};
+                }
             } finally {
                 this.Utils?.endPerf('updateContext');
             }
