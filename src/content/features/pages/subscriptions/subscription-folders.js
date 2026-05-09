@@ -160,7 +160,12 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this.activeFolder = folderName;
         }
         this.updateFilterState();
-        this.ui.updateChipStylesForFolder(this.activeFolder);
+        
+        // Update the dropdown UI to reflect the programmatic state change
+        const selectEl = document.getElementById('ypp-folder-select');
+        if (selectEl) {
+            selectEl.value = this.activeFolder || '';
+        }
     }
 
     forceRefreshFeed() {
@@ -349,17 +354,41 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
         videoCards.forEach(card => {
             let isVisible = true;
+            let channelName = card.dataset.yppChannel;
 
-            if (this.activeFolder) {
-                // Cache channel name on the element — avoids repeated DOM reads
-                if (!card.dataset.yppChannel) {
-                    const channelLink = card.querySelector('#channel-name a');
-                    if (channelLink) {
-                        card.dataset.yppChannel = channelLink.textContent.trim();
+            if (!channelName) {
+                // Robust extraction: First try avatar title, then channel text
+                const avatarLink = card.querySelector('a#avatar-link');
+                if (avatarLink && avatarLink.title) {
+                    channelName = avatarLink.title.trim();
+                }
+                if (!channelName) {
+                    const channelEl = card.querySelector('ytd-channel-name yt-formatted-string');
+                    if (channelEl) {
+                        channelName = (channelEl.title || channelEl.textContent).trim();
                     }
                 }
-                const channelName = card.dataset.yppChannel;
-                if (!channelName || !this.activeChannelSet.has(channelName)) isVisible = false;
+                if (channelName) {
+                    card.dataset.yppChannel = channelName;
+                }
+            }
+
+            if (this.activeFolder) {
+                if (this.activeFolder === '__no_folder__') {
+                    if (channelName) {
+                        // Check if it's in ANY folder
+                        let inAnyFolder = false;
+                        for (const list of Object.values(this.storage.folders)) {
+                            if (list.includes(channelName)) {
+                                inAnyFolder = true;
+                                break;
+                            }
+                        }
+                        if (inAnyFolder) isVisible = false;
+                    }
+                } else {
+                    if (!channelName || !this.activeChannelSet.has(channelName)) isVisible = false;
+                }
             }
 
             if (isVisible && this.hideShortsActive) {
@@ -383,6 +412,28 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             if (isVisible) {
                 card.style.display = '';
                 card.classList.add('ypp-filtered-in');
+                
+                // Add Folder Indicator (M3 Glassmorphic Tag)
+                if (channelName) {
+                    let foldersForChannel = [];
+                    for (const [fName, channels] of Object.entries(this.storage.folders)) {
+                        if (channels.includes(channelName)) foldersForChannel.push(fName);
+                    }
+                    
+                    let indicator = card.querySelector('.ypp-feed-folder-indicator');
+                    if (foldersForChannel.length === 0) {
+                        if (indicator) indicator.remove();
+                    } else {
+                        if (!indicator) {
+                            indicator = document.createElement('div');
+                            indicator.className = 'ypp-feed-folder-indicator';
+                            indicator.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(20, 19, 24, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #D0BCFF; font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 500; font-family: "Roboto", "Google Sans", sans-serif; z-index: 10; pointer-events: none; border: 1px solid rgba(208, 188, 255, 0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+                            card.style.position = 'relative';
+                            card.appendChild(indicator);
+                        }
+                        indicator.textContent = foldersForChannel.join(', ');
+                    }
+                }
             } else {
                 card.style.display = 'none';
                 card.classList.remove('ypp-filtered-in');
