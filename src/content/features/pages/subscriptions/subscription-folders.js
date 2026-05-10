@@ -75,10 +75,39 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         }
         
         await this.storage.load();
+        this._injectGridCSS();
         this.setupNavigationListener();
         this.handleNavigation();
         
         this.initialized = true;
+    }
+
+    _injectGridCSS() {
+        if (document.getElementById('ypp-sub-grid-override')) return;
+        const style = document.createElement('style');
+        style.id = 'ypp-sub-grid-override';
+        style.textContent = `
+            /* Completely flatten YouTube's rigid row structure */
+            ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents > ytd-rich-grid-row {
+                display: contents !important;
+            }
+
+            /* Take over the main contents container and make it a fluid CSS Grid */
+            ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer > #contents {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+                grid-gap: 16px !important;
+                width: 100% !important;
+            }
+
+            /* Ensure items stretch to fill the grid cells */
+            ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer {
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     disable() {
@@ -91,6 +120,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         document.removeEventListener('yt-navigate-finish', this._boundHandleNav);
         window.removeEventListener('popstate', this._boundHandlePopstate);
         document.body.classList.remove('ypp-sub-folders-active');
+        
+        const style = document.getElementById('ypp-sub-grid-override');
+        if (style) style.remove();
+        
         this.ui.removeFilterChips();
         this.ui.removeGuideFolders();
     }
