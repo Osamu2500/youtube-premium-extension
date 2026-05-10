@@ -611,13 +611,63 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
                 menu.remove();
             });
             
+            menu.querySelector('[data-action="watch-later"]')?.addEventListener('click', () => {
+                if (card) {
+                    const idx = parseInt(card.dataset.index, 10);
+                    const nativeVideos = document.querySelectorAll('ytd-playlist-video-renderer');
+                    const nativeVideo = nativeVideos[idx];
+                    
+                    if (nativeVideo) {
+                        const menuBtn = nativeVideo.querySelector('ytd-menu-renderer button');
+                        if (menuBtn) {
+                            menuBtn.click();
+                            setTimeout(() => {
+                                const items = document.querySelectorAll('ytd-menu-popup-renderer ytd-menu-service-item-renderer');
+                                for (const item of items) {
+                                    const text = (item.textContent || '').toLowerCase();
+                                    if (text.includes('watch later')) {
+                                        item.click();
+                                        break;
+                                    }
+                                }
+                                // Ensure popup closes
+                                document.body.click();
+                            }, 100);
+                        }
+                    }
+                }
+                menu.remove();
+            });
+            
             menu.querySelector('[data-action="remove"]')?.addEventListener('click', () => {
                 if (card) {
                     card.style.opacity = '0.3';
                     card.style.pointerEvents = 'none';
+                    
+                    const idx = parseInt(card.dataset.index, 10);
+                    const nativeVideos = document.querySelectorAll('ytd-playlist-video-renderer');
+                    const nativeVideo = nativeVideos[idx];
+                    
+                    if (nativeVideo) {
+                        const menuBtn = nativeVideo.querySelector('ytd-menu-renderer button');
+                        if (menuBtn) {
+                            menuBtn.click();
+                            setTimeout(() => {
+                                const items = document.querySelectorAll('ytd-menu-popup-renderer ytd-menu-service-item-renderer');
+                                for (const item of items) {
+                                    const text = (item.textContent || '').toLowerCase();
+                                    if (text.includes('remove from')) {
+                                        item.click();
+                                        break;
+                                    }
+                                }
+                                // Ensure popup closes
+                                document.body.click();
+                            }, 100);
+                        }
+                    }
                 }
                 menu.remove();
-                // trigger native remove by finding native action menu if needed
             });
             
             // Close on outside click (Memory safe implementation)

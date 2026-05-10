@@ -1,51 +1,51 @@
 {
   "F:\\Youtube 2.0\\src\\background\\service-worker.js": {
-    "mtime": 1777622943.0561247,
-    "hash": "5d1fea31010a9e9f523821bd9da80deb"
+    "mtime": 1778161078.996133,
+    "hash": "937e55e1759a034c2b058d617148ed2f"
   },
   "F:\\Youtube 2.0\\src\\content\\constants.js": {
-    "mtime": 1778033950.113704,
-    "hash": "01893255db82813c999967a853594b8f"
+    "mtime": 1778161064.6528256,
+    "hash": "6e39419c145c5a40376bf43b1cb4b509"
   },
   "F:\\Youtube 2.0\\src\\content\\element-cache.js": {
-    "mtime": 1777622943.0607755,
-    "hash": "c545f5660146c6437e91a16f964c6d8d"
+    "mtime": 1778124122.3546343,
+    "hash": "963a31788cf8f2feecd996da233c6a71"
   },
   "F:\\Youtube 2.0\\src\\content\\error-handler.js": {
     "mtime": 1777622943.0617878,
     "hash": "d91aa546ba1b4038d1be1c2315e62ab6"
   },
   "F:\\Youtube 2.0\\src\\content\\feature-manager.js": {
-    "mtime": 1777623702.5550356,
-    "hash": "b588a79bf245e44e35d4846338cc8fa9"
+    "mtime": 1778123684.8622909,
+    "hash": "2c7902ca70695684be67e213e5ae33df"
   },
   "F:\\Youtube 2.0\\src\\content\\index.js": {
-    "mtime": 1777968995.0853662,
-    "hash": "4cd2ffd273886aa769f75947f9ab0c2d"
+    "mtime": 1778161263.5006096,
+    "hash": "66a6f0b2a3ddc3db1dd664fe96a1c22b"
   },
   "F:\\Youtube 2.0\\src\\content\\main.js": {
-    "mtime": 1777622943.1296866,
-    "hash": "b035a0f3f50dfb33971bb21a9e8ee432"
+    "mtime": 1778334432.9555476,
+    "hash": "9a5ef4f5da80c0b1f62a6a9a2142e267"
   },
   "F:\\Youtube 2.0\\src\\content\\settings-schema.js": {
     "mtime": 1778033962.7263827,
     "hash": "5e5fe478fb9dd7a3d089f5b78cd17896"
   },
   "F:\\Youtube 2.0\\src\\content\\utils.js": {
-    "mtime": 1777622943.1370533,
-    "hash": "85450e7b77d105cc47ec1403e04350b8"
+    "mtime": 1778123817.3141923,
+    "hash": "450553b46d066b7c8660a37d614cfda3"
   },
   "F:\\Youtube 2.0\\src\\content\\core\\dom-api.js": {
     "mtime": 1774623956.264022,
     "hash": "fab98674209cc5d2f82ca0103add90ba"
   },
   "F:\\Youtube 2.0\\src\\content\\core\\dom-observer.js": {
-    "mtime": 1777622943.0586436,
-    "hash": "e0a963477aff85f4ac56dfd0f08d0e22"
+    "mtime": 1778124015.9883454,
+    "hash": "572493996d2e0ded073c553e072a1898"
   },
   "F:\\Youtube 2.0\\src\\content\\core\\event-bus.js": {
-    "mtime": 1777622943.05927,
-    "hash": "3eab52a68c02d59d7e72aa85937323db"
+    "mtime": 1778124455.281634,
+    "hash": "90452c4cbe8b2686cb04feba8773062e"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\base-feature.js": {
     "mtime": 1777631694.1806633,
@@ -120,8 +120,8 @@
     "hash": "5af47a783a577e965cb1f6814e3bc77b"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\layout\\header-nav.js": {
-    "mtime": 1777622943.0748725,
-    "hash": "a7636780b94b0a1f396f1590ac3bf8ae"
+    "mtime": 1778334922.4308157,
+    "hash": "b3063d8e08eb9fbeea5469c0223eb215"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\core\\layout\\layout-manager.js": {
     "mtime": 1777622943.0758736,
@@ -156,8 +156,8 @@
     "hash": "722c892c4b3ed21c71a29f1b215d5a89"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js": {
-    "mtime": 1777622943.0824482,
-    "hash": "86c40b514914f55119123abb32bac1fa"
+    "mtime": 1778239545.7905161,
+    "hash": "9ee12414a25554f03d2456367722748a"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\library\\playlist\\reverse-playlist.js": {
     "mtime": 1777622943.0836682,
@@ -196,16 +196,16 @@
     "hash": "340adb46eba80bc727bc7d91e7185ce0"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\folder-ui.js": {
-    "mtime": 1777998533.6934736,
-    "hash": "e955ef926b300a221020c86ebf997625"
+    "mtime": 1778342918.107458,
+    "hash": "df2886a5dcef4f440122cfd3bfb46117"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\index.js": {
     "mtime": 1777622943.0927432,
     "hash": "39b19615e4bf1cbde6830068e2289522"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\subscription-folders.js": {
-    "mtime": 1777995297.5324636,
-    "hash": "ec879ff162958e61139c71aac9c6fdff"
+    "mtime": 1778342719.0130649,
+    "hash": "6245cf84f1a67a527ff65a5ead699e95"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\subscription-manager.js": {
     "mtime": 1777622943.0946672,
@@ -303,6 +303,10 @@
     "mtime": 1777622943.1157966,
     "hash": "a0d4757b39ad30a8fe7941b0c638fb3e"
   },
+  "F:\\Youtube 2.0\\src\\content\\features\\player\\sidebar-layout.js": {
+    "mtime": 1778172039.4257247,
+    "hash": "3785d633fb5e82f22b99cbcff198cc09"
+  },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\sponsor-block.js": {
     "mtime": 1776394773.534815,
     "hash": "3150f43ab65b81def4117819807c5f18"
@@ -380,8 +384,8 @@
     "hash": "df6132a7f77e8a2f34663aef827cb8f5"
   },
   "F:\\Youtube 2.0\\src\\popup\\popup.js": {
-    "mtime": 1778033939.926977,
-    "hash": "2aac6c226dc230576a306d79dffa8df9"
+    "mtime": 1778173414.3115802,
+    "hash": "96fd9b0a0e9da4a4d5ccb53866c029fb"
   },
   "F:\\Youtube 2.0\\tmp\\ast_extract.py": {
     "mtime": 1777630007.7452197,
@@ -423,6 +427,10 @@
     "mtime": 1776394967.061638,
     "hash": "dfe2a57a73e3caeec47422899da09daf"
   },
+  "F:\\Youtube 2.0\\tmp\\upgrade_html.py": {
+    "mtime": 1778173365.8663065,
+    "hash": "3aa81fdc5355fc03331575c94e3e7ec6"
+  },
   "F:\\Youtube 2.0\\tmp\\verify.js": {
     "mtime": 1773213385.64949,
     "hash": "39d394aa29376ecfe8d1729a1cc1c05d"
@@ -448,16 +456,16 @@
     "hash": "14b08eead4d4e22d1bb52302042e0c57"
   },
   "F:\\Youtube 2.0\\gemini.md": {
-    "mtime": 1777702364.6430707,
-    "hash": "68f30fd00b6329d188bec3f74a5cfba8"
+    "mtime": 1778170968.9355986,
+    "hash": "5060b7318e7cd3c49702b7dbdbd25207"
   },
   "F:\\Youtube 2.0\\README.md": {
     "mtime": 1776394773.5110123,
     "hash": "0e3844a0c5f7a8c4a94da0ba35ca6c1e"
   },
   "F:\\Youtube 2.0\\src\\popup\\popup.html": {
-    "mtime": 1778036214.415324,
-    "hash": "b7f6733c3b4aecbd9768e4f48f314f1f"
+    "mtime": 1778339931.1500432,
+    "hash": "4b45ab534451dee28a66744b0ab49c77"
   },
   "F:\\Youtube 2.0\\tmp\\del.txt": {
     "mtime": 1772343306.5817888,

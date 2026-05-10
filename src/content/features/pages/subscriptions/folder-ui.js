@@ -1362,7 +1362,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                             apiKey:        window.ytcfg?.get('INNERTUBE_API_KEY'),
                             context:       window.ytcfg?.get('INNERTUBE_CONTEXT'),
                             visitorData:   window.ytcfg?.get('VISITOR_DATA'),
-                            clientVersion: window.ytcfg?.get('INNERTUBE_CLIENT_VERSION') || '2.20240101.01.00'
+                            clientVersion: window.ytcfg?.get('INNERTUBE_CLIENT_VERSION') || '2.20240101.01.00',
+                            sessionIndex:  window.ytcfg?.get('SESSION_INDEX') || '0',
+                            pageId:        window.ytcfg?.get('DELEGATED_SESSION_ID') || window.ytcfg?.get('PAGE_ID')
                         }
                     }, '*');
                 } catch(e) {}
@@ -1395,12 +1397,16 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         
         let baseHeaders = {
             'Content-Type': 'application/json',
-            'X-Goog-AuthUser': '0',
+            'X-Goog-AuthUser': config.sessionIndex || '0',
             'X-Goog-Visitor-Id': config.visitorData || '',
             'X-Youtube-Client-Name': '1',
             'X-Youtube-Client-Version': config.clientVersion,
             'Origin': origin,
         };
+
+        if (config.pageId) {
+            baseHeaders['X-Goog-PageId'] = config.pageId;
+        }
 
         if (sapisid) {
             const hash = await sha1(`${time} ${sapisid} ${origin}`);
@@ -1546,13 +1552,42 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 }));
 
                 let addedCount = 0;
+                let needFeedRefresh = false;
+                const activeFolder = folderUI.orchestrator.getActiveFolder();
+
                 channels.forEach(c => {
                     if (folderUI.storage.addChannelToFolder(c.name, folder)) {
                         addedCount++;
+                        
+                        if (activeFolder === folder || activeFolder === '__no_folder__') {
+                            needFeedRefresh = true;
+                        }
+
+                        // Update dataset on the modal row for UI syncing
+                        const row = document.querySelector(`.ypp-channel-health-row[data-name="${CSS.escape(c.name)}"]`);
+                        if (row) {
+                            let folders = row.dataset.folders ? row.dataset.folders.split(',').filter(f => f) : [];
+                            if (!folders.includes(folder)) {
+                                folders.push(folder);
+                                row.dataset.folders = folders.join(',');
+                            }
+                            
+                            // Uncheck the checkbox since it was processed
+                            const cb = row.querySelector('.ypp-unsub-checkbox');
+                            if (cb) cb.checked = false;
+                        }
                     }
                 });
 
-                // Re-render folder UI to reflect changes
+                if (needFeedRefresh) {
+                    folderUI.orchestrator.forceRefreshFeed();
+                }
+
+                // Trigger UI update in the modal via the dropdown's change event
+                const folderSel = document.getElementById('ypp-health-folder-filter-dropdown');
+                if (folderSel) folderSel.dispatchEvent(new Event('change'));
+
+                // Re-render sidebar/header filters to reflect new counts
                 if (folderUI.renderGuideFolders) folderUI.renderGuideFolders();
                 if (folderUI.renderFilterChips) folderUI.renderFilterChips();
 

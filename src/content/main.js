@@ -5,6 +5,11 @@
 (function () {
     'use strict';
 
+    // ── YouTube-only guard ────────────────────────────────────────────────────
+    // Defence-in-depth: bail immediately if this script somehow runs outside
+    // www.youtube.com (e.g. manifest misconfiguration in the future).
+    if (window.location.hostname !== 'www.youtube.com') return;
+
     // =========================================================================
     // BOOTSTRAP
     // =========================================================================

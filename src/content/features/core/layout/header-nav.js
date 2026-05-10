@@ -148,7 +148,11 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const handleClick = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!this._isCurrentPage(url)) {
+            // Always navigate for query-string URLs (e.g. /playlist?list=WL vs /playlist?list=XXX)
+            // so switching between playlists always works even when already on a playlist page.
+            if (url.includes('?')) {
+                this._navigateTo(url);
+            } else if (!this._isCurrentPage(url)) {
                 this._navigateTo(url);
             }
         };
@@ -176,8 +180,17 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
     _isCurrentPage(url) {
         const path = window.location.pathname;
+        const search = window.location.search;
+
         if (url === '/shorts') return path.startsWith('/shorts/');
-        if (url.includes('?')) return path.includes(url.split('?')[0]);
+
+        // For URLs with query strings (e.g. /playlist?list=WL), compare
+        // the full path+query so Watch Later and other playlists are distinct.
+        if (url.includes('?')) {
+            const [urlPath, urlQuery] = url.split('?');
+            return path === urlPath && search === `?${urlQuery}`;
+        }
+
         return path === url || path === url + '/';
     }
 

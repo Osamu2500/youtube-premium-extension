@@ -2,6 +2,9 @@ html.yt-premium-plus-theme body {
     --ypp-bg-base: #2e3440;
     --ypp-bg-surface: #3b4252;
     --ypp-bg-glass: rgba(46, 52, 64, 0.95);
+    --ypp-glass-border: rgba(255, 255, 255, 0.08);
+    --ypp-glass-highlight: rgba(255, 255, 255, 0.1);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
     
     --ypp-text-primary: #eceff4;
     --ypp-text-secondary: #d8dee9;
