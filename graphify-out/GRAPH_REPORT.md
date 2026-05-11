@@ -1,11 +1,11 @@
-# Graph Report - Youtube 2.0  (2026-05-10)
+# Graph Report - Youtube 2.0  (2026-05-11)
 
 ## Corpus Check
-- 109 files · ~94,608 words
+- 109 files · ~94,980 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1054 nodes · 1510 edges · 79 communities detected
+- 1056 nodes · 1514 edges · 79 communities detected
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -118,7 +118,7 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
-Nodes (15): takeSnapshot(), alert(), bulkAddToFolder(), bulkUnsubscribe(), confirm(), _doUnsubscribe(), _getYoutubeConfig(), individualUnsubscribe() (+7 more)
+Nodes (17): takeSnapshot(), alert(), bulkAddToFolder(), bulkUnsubscribe(), confirm(), _doUnsubscribe(), _getYoutubeConfig(), individualUnsubscribe() (+9 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.08
@@ -467,8 +467,6 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `toggle()` connect `Community 1` to `Community 9`, `Community 4`, `Community 5`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `_hideDistractions()` connect `Community 5` to `Community 1`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

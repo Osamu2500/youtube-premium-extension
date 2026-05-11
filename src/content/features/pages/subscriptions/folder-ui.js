@@ -1525,26 +1525,82 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
     }
 
     static async individualUnsubscribe(channelId, params, channelName, rowEl, btnEl) {
-        if (!(await window.YPP.features.CustomDialog.confirm('Unsubscribe', `Are you sure you want to permanently unsubscribe from ${channelName}?`, 'Unsubscribe', true))) return;
+        // Confirm before acting
+        const confirmed = await window.YPP.features.CustomDialog.confirm(
+            'Unsubscribe',
+            `Unsubscribe from ${channelName}?`,
+            'Unsubscribe',
+            true
+        );
+        if (!confirmed) return;
 
+        // Show loading state immediately
+        const originalText = btnEl.textContent;
         btnEl.textContent = 'Unsubscribing...';
         btnEl.disabled = true;
 
-        const channels = [{
-            id: channelId,
-            params: params,
-            onSuccess: () => {
-                rowEl.style.opacity = '0.3';
-                btnEl.textContent = 'Unsubscribed';
-                const cb = rowEl.querySelector('.ypp-unsub-checkbox');
-                if (cb) {
-                    cb.disabled = true;
-                    cb.checked = false;
-                }
+        const resetBtn = (text, color) => {
+            btnEl.textContent = text;
+            btnEl.disabled = false;
+            if (color) {
+                btnEl.style.color = color;
+                btnEl.style.borderColor = color;
             }
-        }];
+        };
 
-        await this._doUnsubscribe(channels);
+        try {
+            const config = await this._getYoutubeConfig();
+
+            if (!config.apiKey || !config.context) {
+                resetBtn(originalText, null);
+                await window.YPP.features.CustomDialog.alert('Auth Error', 'Could not get YouTube credentials. Please refresh and try again.');
+                return;
+            }
+
+            // Try API first (fastest path)
+            let succeeded = await this._tryApiUnsubscribe({ id: channelId, params, name: channelName }, config);
+
+            // DOM click fallback
+            if (!succeeded) {
+                succeeded = await this._tryNativeDomUnsubscribe(channelId);
+            }
+
+            if (succeeded) {
+                // Visual success feedback
+                rowEl.style.transition = 'opacity 0.4s ease';
+                rowEl.style.opacity = '0.35';
+                btnEl.textContent = '✓ Unsubscribed';
+                btnEl.style.color = '#81C995';
+                btnEl.style.borderColor = '#81C995';
+                btnEl.disabled = true;
+                // Disable checkbox too
+                const cb = rowEl.querySelector('.ypp-unsub-checkbox');
+                if (cb) { cb.disabled = true; cb.checked = false; }
+                // Remove row after a short delay
+                setTimeout(() => {
+                    rowEl.style.maxHeight = rowEl.offsetHeight + 'px';
+                    rowEl.style.overflow = 'hidden';
+                    rowEl.style.transition = 'max-height 0.4s ease, opacity 0.4s ease, margin 0.4s ease';
+                    requestAnimationFrame(() => {
+                        rowEl.style.maxHeight = '0';
+                        rowEl.style.opacity = '0';
+                        rowEl.style.marginBottom = '0';
+                    });
+                    setTimeout(() => rowEl.remove(), 450);
+                }, 1200);
+            } else {
+                // Reset button and show error
+                resetBtn(originalText, '#F2B8B5');
+                setTimeout(() => resetBtn(originalText, null), 3000);
+                await window.YPP.features.CustomDialog.alert(
+                    'Unsubscribe Failed',
+                    `Could not unsubscribe from ${channelName}.\n\nYouTube may have blocked the request. Try visiting the channel page directly.`
+                );
+            }
+        } catch (e) {
+            console.error('[YPP] individualUnsubscribe error:', e);
+            resetBtn(originalText, null);
+        }
     }
 
     static async bulkUnsubscribe(overlay) {
