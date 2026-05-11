@@ -1336,9 +1336,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
     /**
      * Reads YouTube's internal `ytcfg` object from the page context by injecting
      * a short-lived <script> tag that posts the config values back via postMessage.
-     * Must be a separate method (not inlined in _doUnsubscribe) to keep that method
-     * focused and allow independent testing.
-     * @returns {Promise<{apiKey: string, context: Object, visitorData: string, clientVersion: string}>}
+     * @returns {Promise<{apiKey, context, visitorData, clientVersion, sessionIndex, pageId}>}
      */
     static _getYoutubeConfig() {
         return new Promise(resolve => {
@@ -1374,74 +1372,155 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         });
     }
 
-    static async _doUnsubscribe(channels) {
-        const config = await this._getYoutubeConfig();
-        const apiKey = config.apiKey;
-        const context = config.context;
-
-        if (!apiKey || !context) {
-            await window.YPP.features.CustomDialog.alert('Error', "Could not get YouTube API credentials.");
-            return 0;
-        }
-
-        const sapisid = document.cookie.split('; ').find(row => row.startsWith('SAPISID='))?.split('=')[1];
+    /**
+     * Tier 2: InnerTube API unsubscribe.
+     * Sends a POST to YouTube's internal subscription endpoint.
+     * Returns true on success, false on failure.
+     */
+    static async _tryApiUnsubscribe(channelData, config) {
+        const sapisid = document.cookie.split('; ').find(r => r.startsWith('SAPISID='))?.split('=')[1]
+                     || document.cookie.split('; ').find(r => r.startsWith('__Secure-3PAPISID='))?.split('=')[1];
         const origin = window.location.origin;
         const time = Math.floor(Date.now() / 1000);
-        
+
         const sha1 = async (str) => {
-            const buffer = new TextEncoder().encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const buf = new TextEncoder().encode(str);
+            const hash = await crypto.subtle.digest('SHA-1', buf);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         };
-        
-        let baseHeaders = {
+
+        const headers = {
             'Content-Type': 'application/json',
             'X-Goog-AuthUser': config.sessionIndex || '0',
             'X-Goog-Visitor-Id': config.visitorData || '',
             'X-Youtube-Client-Name': '1',
-            'X-Youtube-Client-Version': config.clientVersion,
+            'X-Youtube-Client-Version': config.clientVersion || '2.20240101.01.00',
             'Origin': origin,
         };
 
-        if (config.pageId) {
-            baseHeaders['X-Goog-PageId'] = config.pageId;
-        }
+        if (config.pageId) headers['X-Goog-PageId'] = config.pageId;
 
         if (sapisid) {
             const hash = await sha1(`${time} ${sapisid} ${origin}`);
-            baseHeaders['Authorization'] = `SAPISIDHASH ${time}_${hash}`;
+            headers['Authorization'] = `SAPISIDHASH ${time}_${hash}`;
+        }
+
+        const makeRequest = async (withParams) => {
+            const payload = { context: config.context, channelIds: [channelData.id] };
+            if (withParams && channelData.params) payload.params = channelData.params;
+            const res = await fetch(`/youtubei/v1/subscription/unsubscribe?key=${config.apiKey}`, {
+                method: 'POST', headers, credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            return res;
+        };
+
+        try {
+            // Attempt 1: with params
+            let res = await makeRequest(true);
+            if (res.ok) return true;
+
+            // Attempt 2: without params (handles stale token / 403)
+            if ((res.status === 400 || res.status === 403) && channelData.params) {
+                res = await makeRequest(false);
+                if (res.ok) return true;
+            }
+
+            console.warn(`[YPP] API unsubscribe failed for ${channelData.id}: HTTP ${res.status}`);
+        } catch (e) {
+            console.error('[YPP] API unsubscribe exception:', e);
+        }
+        return false;
+    }
+
+    /**
+     * Tier 3: Native DOM button click fallback.
+     * Finds YouTube's own subscribe button in the page and clicks it,
+     * then confirms the dialog. Works even without params.
+     * Returns true on success, false if no button found.
+     */
+    static async _tryNativeDomUnsubscribe(channelId) {
+        try {
+            // Find all subscribe button renderers that match this channel
+            const candidates = document.querySelectorAll(
+                `ytd-subscribe-button-renderer[channel-id="${channelId}"], ` +
+                `[channel-id="${channelId}"] ytd-subscribe-button-renderer`
+            );
+
+            for (const renderer of candidates) {
+                const btn = renderer.querySelector('tp-yt-paper-button, yt-button-shape button, button');
+                if (!btn) continue;
+                const text = (btn.textContent || btn.getAttribute('aria-label') || '').toLowerCase().trim();
+                // Only click if the user is subscribed (button says Subscribed/Unsubscribe)
+                if (text === 'subscribed' || text === 'unsubscribe' || text.includes('subscribed')) {
+                    btn.click();
+                    // Wait for YouTube's confirm dialog to appear
+                    await new Promise(r => setTimeout(r, 700));
+                    // Confirm unsubscription in YouTube's native dialog
+                    const confirmBtn = document.querySelector(
+                        'yt-confirm-dialog-renderer #confirm-button button, ' +
+                        'tp-yt-paper-dialog .buttons tp-yt-paper-button:last-of-type'
+                    );
+                    if (confirmBtn) {
+                        confirmBtn.click();
+                        console.log(`[YPP] Native DOM unsubscribe succeeded for ${channelId}`);
+                        return true;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[YPP] Native DOM unsubscribe failed:', e);
+        }
+        return false;
+    }
+
+    /**
+     * Main unsubscribe orchestrator — tries multiple strategies per channel.
+     * Strategy 1 (Primary):   InnerTube API call with proper session auth.
+     * Strategy 2 (Fallback):  Native DOM button click + confirm dialog.
+     * Returns count of successful unsubscriptions.
+     */
+    static async _doUnsubscribe(channels) {
+        const config = await this._getYoutubeConfig();
+
+        if (!config.apiKey || !config.context) {
+            await window.YPP.features.CustomDialog.alert(
+                'Auth Error',
+                'Could not retrieve YouTube session credentials.\nPlease refresh the page and try again.'
+            );
+            return 0;
         }
 
         let successCount = 0;
+        const failedChannels = [];
+
         for (const c of channels) {
-            try {
-                const payload = {
-                    context: context,
-                    channelIds: [c.id]
-                };
-                if (c.params) payload.params = c.params;
+            // Strategy 1: InnerTube API
+            let succeeded = await this._tryApiUnsubscribe(c, config);
 
-                const res = await fetch(`/youtubei/v1/subscription/unsubscribe?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: baseHeaders,
-                    credentials: 'include',
-                    body: JSON.stringify(payload)
-                });
+            // Strategy 2: Native DOM click (fallback)
+            if (!succeeded) {
+                console.warn(`[YPP] API failed for ${c.name || c.id}, trying native DOM fallback...`);
+                succeeded = await this._tryNativeDomUnsubscribe(c.id);
+            }
 
-                if (res.ok) {
-                    successCount++;
-                    if (c.onSuccess) c.onSuccess();
-                } else {
-                    const text = await res.text();
-                    console.error("Unsub failed API response:", res.status, text);
-                    await window.YPP.features.CustomDialog.alert('Error', "Failed to unsubscribe: " + res.status);
-                }
-            } catch (e) {
-                console.error("Unsub failed for", c.id, e);
+            if (succeeded) {
+                successCount++;
+                if (c.onSuccess) c.onSuccess();
+            } else {
+                failedChannels.push(c.name || c.id);
             }
         }
-        
+
+        if (failedChannels.length > 0) {
+            const preview = failedChannels.slice(0, 5).join(', ');
+            const extra = failedChannels.length > 5 ? ` and ${failedChannels.length - 5} more` : '';
+            await window.YPP.features.CustomDialog.alert(
+                `${failedChannels.length} Unsubscribe(s) Failed`,
+                `Could not unsubscribe from:\n${preview}${extra}.\n\nYouTube may have rate-limited the request. Try again in a moment or visit those channel pages directly.`
+            );
+        }
+
         return successCount;
     }
 
