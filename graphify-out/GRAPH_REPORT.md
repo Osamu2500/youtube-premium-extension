@@ -1,11 +1,11 @@
 # Graph Report - Youtube 2.0  (2026-05-11)
 
 ## Corpus Check
-- 109 files · ~94,980 words
+- 109 files · ~95,182 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1056 nodes · 1514 edges · 79 communities detected
+- 1056 nodes · 1517 edges · 79 communities detected
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -109,10 +109,10 @@
   src\content\utils.js → src\content\features\core\global\theme.js
 - `toggle()` --calls--> `_hideDistractions()`  [INFERRED]
   src\content\utils.js → src\content\features\pages\watch\focus-mode.js
+- `alert()` --calls--> `takeSnapshot()`  [INFERRED]
+  src\content\features\pages\subscriptions\folder-ui.js → src\content\features\player\player.js
 - `check()` --calls--> `_pollForElement()`  [INFERRED]
   src\content\utils.js → src\content\features\pages\search\search-filter.js
-- `check()` --calls--> `_pollForElement()`  [INFERRED]
-  src\content\utils.js → src\content\features\pages\search\search-observer.js
 
 ## Communities
 

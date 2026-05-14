@@ -2,6 +2,22 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
+    static saveVolumeSettings(ctx) {
+        if (!this.debouncedSave) {
+            this.debouncedSave = window.YPP.Utils.debounce((ctxArg) => {
+                if (!window.YPP?.MainApp?.saveSettings) return;
+                window.YPP.MainApp.saveSettings({
+                    volumeLevel: ctxArg._volumeGain,
+                    volumeBalance: ctxArg._balance,
+                    volumeCompressor: ctxArg._compressorEnabled,
+                    volumeMono: ctxArg._monoEnabled,
+                    volumeEqBands: JSON.stringify(ctxArg._eqGains)
+                });
+            }, 300);
+        }
+        this.debouncedSave(ctx);
+    }
+
     static toggleEQPanel(ctx, video, anchorBtn) {
         if (ctx._volumePopup) {
             ctx._volumePopup.remove();
@@ -69,9 +85,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             ctx.setVolume(v);
             gainValue.textContent = Math.round(v * 100) + '%';
             anchorBtn.classList.toggle('active', v > 1.01 || ctx._eqGains.some(g => g !== 0) || ctx._balance !== 0);
-            window.dispatchEvent(new CustomEvent('ypp-setting-update', {
-                detail: { volumeBoost: v > 1.01, volumeLevel: v }
-            }));
+            VolumeBoosterUI.saveVolumeSettings(ctx);
             this.updateGainTrack(gainSlider);
         };
         gainRow.innerHTML = `<span class="ypp-eq-row-label">Volume Boost</span>`;
@@ -97,6 +111,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             balanceValue.textContent = v === 0 ? 'C' : (v < 0 ? 'L' + Math.abs(Math.round(v * 100)) : 'R' + Math.round(v * 100));
             anchorBtn.classList.toggle('active', ctx._volumeGain > 1.01 || ctx._eqGains.some(g => g !== 0) || v !== 0);
             this.updateBalanceTrack(balanceSlider);
+            VolumeBoosterUI.saveVolumeSettings(ctx);
         };
         balanceSlider.ondblclick = () => {
             if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
@@ -104,6 +119,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             balanceSlider.value = 0;
             balanceValue.textContent = 'C';
             this.updateBalanceTrack(balanceSlider);
+            VolumeBoosterUI.saveVolumeSettings(ctx);
         };
         balanceRow.innerHTML = `<span class="ypp-eq-row-label">Balance</span>`;
         balanceRow.appendChild(balanceSlider);
@@ -144,6 +160,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 if (activePresetBtn) activePresetBtn.classList.remove('active');
                 btn.classList.add('active');
                 activePresetBtn = btn;
+                VolumeBoosterUI.saveVolumeSettings(ctx);
             };
             presetsRow.appendChild(btn);
         });
@@ -151,7 +168,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
         // ── Canvas Curve (will be moved to eqContentWrap)
         const canvasEl = document.createElement('canvas');
-        canvasEl.width = 444; canvasEl.height = 72;
+        canvasEl.width = 340; canvasEl.height = 72;
         canvasEl.className = 'ypp-eq-canvas';
         // NOTE: NOT appended to panel here — appended via eqContentWrap below
 
@@ -191,6 +208,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 dbLabel.textContent = (db >= 0 ? '+' : '') + db;
                 this.drawCurve(ctx, canvasEl);
                 if (activePresetBtn) { activePresetBtn.classList.remove('active'); activePresetBtn = null; }
+                VolumeBoosterUI.saveVolumeSettings(ctx);
             };
             slider.ondblclick = () => {
                 if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
@@ -198,6 +216,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 slider.value = 0;
                 dbLabel.textContent = '0';
                 this.drawCurve(ctx, canvasEl);
+                VolumeBoosterUI.saveVolumeSettings(ctx);
             };
             sliderEls.push(slider);
 
@@ -261,7 +280,10 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         });
         spaPanel.appendChild(stereoRow);
         const monoRow2 = mkDynRow('Mono Mix', 0, 100, 1, 0, '%', v => {
-            if (ctx.setMono) ctx.setMono(v > 50);
+            if (ctx.setMono) {
+                ctx.setMono(v > 50);
+                VolumeBoosterUI.saveVolumeSettings(ctx);
+            }
         });
         spaPanel.appendChild(monoRow2);
         panel.appendChild(spaPanel);
@@ -302,6 +324,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 ctx.compressorNode.ratio.value = ctx._compressorEnabled ? 4 : 1;
                 ctx.compressorNode.threshold.value = ctx._compressorEnabled ? -24 : 0;
             }
+            VolumeBoosterUI.saveVolumeSettings(ctx);
         };
 
         const monoBtn = document.createElement('button');
@@ -316,6 +339,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
             ctx.setMono(!ctx._monoEnabled);
             monoBtn.classList.toggle('active', ctx._monoEnabled);
+            VolumeBoosterUI.saveVolumeSettings(ctx);
         };
 
         const resetBtn = document.createElement('button');
@@ -328,6 +352,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             if (activePresetBtn) activePresetBtn.classList.remove('active');
             presetsRow.querySelector('.ypp-eq-preset-btn').classList.add('active');
             activePresetBtn = presetsRow.querySelector('.ypp-eq-preset-btn');
+            VolumeBoosterUI.saveVolumeSettings(ctx);
         };
 
         const hint = document.createElement('div');
@@ -492,7 +517,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     position: absolute;
     bottom: 72px;
     right: 16px;
-    width: 480px;
+    width: 380px;
     background: rgba(0, 0, 0, 0.15); /* Fully transparent with heavy blur */
     border: 1px solid rgba(255,255,255,0.15);
     border-top: 1px solid rgba(255,255,255,0.25);

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "YouTube Premium Plus Extension",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build && vite build --config vite.config.external.js"
   },
   "devDependencies": {
     "vite": "^5.0.0"

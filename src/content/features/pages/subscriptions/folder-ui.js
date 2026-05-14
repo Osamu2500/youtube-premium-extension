@@ -365,7 +365,7 @@ window.YPP.features.FolderUI = class FolderUI {
                 select.id = 'ypp-folder-select';
                 select.style.cssText = selectStyle;
                 
-                select.innerHTML = `<option value="" style="background:#222">All Subscriptions</option>`;
+                select.innerHTML = String.raw`<option value="" style="background:#222">All Subscriptions</option>`;
                 
                 Object.keys(this.storage.folders).forEach(folderName => {
                     const opt = document.createElement('option');
@@ -415,7 +415,7 @@ window.YPP.features.FolderUI = class FolderUI {
                 if (activeFolder) {
                     const playBtn = document.createElement('button');
                     playBtn.className = 'ypp-filter-chip ypp-play-action-chip';
-                    playBtn.innerHTML = `<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
+                    playBtn.innerHTML = String.raw`<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
                     playBtn.style.backgroundColor = 'var(--ypp-accent, #ff0000)';
                     playBtn.style.color = '#fff';
                     playBtn.style.border = 'none';
@@ -638,7 +638,7 @@ window.YPP.features.FolderUI = class FolderUI {
 
                 const btn = document.createElement('button');
                 btn.className = 'ypp-card-folder-btn ypp-folder-badge';
-                btn.innerHTML = `<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> Save`;
+                btn.innerHTML = String.raw`<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> Save`;
                 btn.title = "Save to Folder";
 
                 btn.addEventListener('click', (e) => {
@@ -664,7 +664,7 @@ window.YPP.features.FolderUI = class FolderUI {
             const btn = document.createElement('button');
             btn.id = 'ypp-channel-folder-btn';
             btn.className = 'ypp-tactile-btn';
-            btn.innerHTML = `<span style="margin-right:4px;">📁</span> Folders`;
+            btn.innerHTML = String.raw`<span style="margin-right:4px;">📁</span> Folders`;
 
             const channelNameEl = document.querySelector('ytd-channel-name#channel-name .yt-formatted-string');
             if (!channelNameEl) return;
@@ -832,7 +832,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         overlay.id = 'ypp-health-modal';
         document.body.appendChild(overlay);
 
-        overlay.innerHTML = `
+        overlay.innerHTML = String.raw`
             <div class="ypp-modal-content ypp-organizer-modal" style="font-family: 'Roboto', 'Google Sans', sans-serif; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: rgba(20, 19, 24, 0.95); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); overflow: hidden; animation: ypp-scale-in 0.3s cubic-bezier(0.2, 0, 0, 1);">
                 <div class="ypp-modal-header" style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
                     <div style="display: flex; align-items: center; gap: 16px;">
@@ -867,7 +867,11 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         </div>
                     </div>
                     <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 16px; align-items: center;">
-                        <div style="position: relative; flex: 1; max-width: 320px; margin-right: auto; display: flex; align-items: center;">
+                        <div style="display: flex; gap: 8px; margin-right: auto;">
+                            <button id="ypp-health-select-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Select All Visible</button>
+                            <button id="ypp-health-unselect-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Unselect All</button>
+                        </div>
+                        <div style="position: relative; flex: 1; max-width: 320px; display: flex; align-items: center;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CAC4D0" stroke-width="2" style="position: absolute; left: 16px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             <input type="text" id="ypp-health-search-input" placeholder="Search channels..." style="width: 100%; background: rgba(255,255,255,0.05); color: #E6E1E5; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 42px; border-radius: 100px; outline: none; font-size: 14px; transition: background 0.2s;" />
                         </div>
@@ -875,7 +879,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         <select id="ypp-health-folder-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
                             <option value="all" style="background:#1D1B20">All Folders</option>
                             <option value="__no_folder__" style="background:#1D1B20">Uncategorized (No Folder)</option>
-                            ${folderUI ? Object.keys(folderUI.storage.folders).map(f => `<option value="${f}" style="background:#1D1B20">${f}</option>`).join('') : ''}
+                            ${folderUI ? Object.keys(folderUI.storage.folders).map(f => '<option value="' + f + '" style="background:#1D1B20">' + f + '</option>').join('') : ''}
                         </select>
                         <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
                             <option value="all" style="background:#1D1B20">All Statuses</option>
@@ -934,6 +938,35 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         sortSel.addEventListener('mouseover',  () => { sortSel.style.background   = 'rgba(255,255,255,0.12)'; });
         sortSel.addEventListener('mouseout',   () => { sortSel.style.background   = 'rgba(255,255,255,0.08)'; });
 
+        const selectAllBtn = overlay.querySelector('#ypp-health-select-all-btn');
+        const unselectAllBtn = overlay.querySelector('#ypp-health-unselect-all-btn');
+
+        selectAllBtn.addEventListener('click', () => {
+            const rows = resultsEl.querySelectorAll('.ypp-channel-health-row');
+            let changed = false;
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.ypp-unsub-checkbox');
+                    if (cb && !cb.disabled && !cb.checked) {
+                        cb.checked = true;
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) {
+                // Must bubble for the listener on resultsEl to catch it
+                resultsEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+
+        unselectAllBtn.addEventListener('click', () => {
+            const checkboxes = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked');
+            if (checkboxes.length > 0) {
+                checkboxes.forEach(cb => { if (!cb.disabled) cb.checked = false; });
+                resultsEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+
         createBtn.addEventListener('click', async () => {
             if (!folderUI) return;
             const name = await window.YPP.features.CustomDialog.prompt('Create Folder', 'Enter a name for the new folder:');
@@ -956,7 +989,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 return;
             }
             // For simplicity, prompt user to type the name of the folder they want to delete.
-            const name = await window.YPP.features.CustomDialog.prompt('Delete Folder', `Enter the exact name of the folder to delete.\\n\\nAvailable folders:\\n${folderNames.join(', ')}`);
+            const name = await window.YPP.features.CustomDialog.prompt('Delete Folder', `Enter the exact name of the folder to delete.nnAvailable folders:n${folderNames.join(', ')}`);
             if (name && folderNames.includes(name.trim())) {
                 if (await window.YPP.features.CustomDialog.confirm('Delete Folder', `Are you sure you want to permanently delete "${name.trim()}"?`, 'Delete', true)) {
                     folderUI.storage.deleteFolder(name.trim());
@@ -1074,259 +1107,329 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         btn.textContent = 'Scanning...';
         btn.disabled = true;
         btn.style.opacity = '0.5';
-        resultsEl.innerHTML = '<div style="text-align: center; color: #aaa; margin-top: 40px;">Fetching channels list...</div>';
+        resultsEl.innerHTML = `
+            <div id="ypp-scan-status" style="text-align:center; color:#aaa; margin-top:40px; font-size:14px;">
+                <div style="margin-bottom:12px;">Fetching subscriptions list...</div>
+                <div id="ypp-scan-progress" style="font-size:12px; color:#777;"></div>
+            </div>`;
+
+        const progressEl = overlay.querySelector('#ypp-scan-progress');
+        const statusEl   = overlay.querySelector('#ypp-scan-status div');
 
         try {
-            // 1. Fetch /feed/channels
-            const res = await fetch('/feed/channels');
-            const text = await res.text();
+            // Get API config for potential continuation fetches
+            const ytConfig = await this._getYoutubeConfig();
             
-            // Extract ytInitialData using string indices rather than a regex.
-            // A non-greedy regex without the dotall flag fails on multiline JSON
-            // (which YouTube's payload almost always is).
-            const START_MARKER = 'var ytInitialData = ';
-            const END_MARKER   = ';</script>';
-            const startIdx = text.indexOf(START_MARKER);
-            if (startIdx === -1) throw new Error('Could not locate ytInitialData in page source.');
-            const jsonStart = startIdx + START_MARKER.length;
-            const endIdx   = text.indexOf(END_MARKER, jsonStart);
-            if (endIdx === -1) throw new Error('Could not determine ytInitialData bounds.');
+            // ── Step 1 & 2: Fetch /feed/channels and follow continuations ──
+            const channels = [];
+            const seenIds  = new Set();
 
-            let data;
-            try {
-                data = JSON.parse(text.slice(jsonStart, endIdx));
-            } catch (parseError) {
-                throw new Error('Failed to parse YouTube initial data JSON.');
+            const extractChannelsFromData = (data) => {
+                let token = null;
+                const walkNode = (obj) => {
+                    if (!obj || typeof obj !== 'object') return;
+                    if (Array.isArray(obj)) { obj.forEach(walkNode); return; }
+
+                    if (obj.channelRenderer) {
+                        const r = obj.channelRenderer;
+                        if (!seenIds.has(r.channelId)) {
+                            seenIds.add(r.channelId);
+                            let unsubParams = '';
+                            const walkForUnsub = (o) => {
+                                if (!o || typeof o !== 'object') return;
+                                if (o.unsubscribeEndpoint?.params) { unsubParams = o.unsubscribeEndpoint.params; return; }
+                                Object.values(o).forEach(walkForUnsub);
+                            };
+                            walkForUnsub(r.subscribeButton || r);
+                            channels.push({
+                                id: r.channelId,
+                                name: r.title?.simpleText || 'Unknown',
+                                icon: r.thumbnail?.thumbnails?.pop()?.url || '',
+                                unsubParams
+                            });
+                        }
+                        return;
+                    }
+                    if (obj.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token) {
+                        token = obj.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
+                        return;
+                    }
+                    Object.values(obj).forEach(walkNode);
+                };
+                walkNode(data);
+                return token;
+            };
+
+            let nextToken = null;
+            
+            // First page from HTML
+            const res  = await fetch('/feed/channels');
+            const text = await res.text();
+            const START_MARKER = 'var ytInitialData = ';
+            const startIdx = text.indexOf(START_MARKER);
+            if (startIdx !== -1) {
+                const jsonStart = startIdx + START_MARKER.length;
+                const endIdx = text.indexOf(';</script>', jsonStart);
+                if (endIdx !== -1) {
+                    const data = JSON.parse(text.slice(jsonStart, endIdx));
+                    nextToken = extractChannelsFromData(data);
+                }
             }
 
-            // Find channel renderers
-            const channels = [];
-            const seen = new Set();
-            
-            const findUnsubParams = (obj) => {
-                if (!obj) return null;
-                if (obj.unsubscribeEndpoint && obj.unsubscribeEndpoint.params) {
-                    return obj.unsubscribeEndpoint.params;
+            // Follow continuation tokens for users with >100 subscriptions
+            while (nextToken && ytConfig && ytConfig.apiKey) {
+                statusEl.textContent = `Fetching subscriptions list... (${channels.length} found so far)`;
+                try {
+                    const contRes = await fetch(`/youtubei/v1/browse?key=${ytConfig.apiKey}`, {
+                        method: 'POST',
+                        headers: await this._getApiHeaders(ytConfig),
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            context: ytConfig.context,
+                            continuation: nextToken
+                        })
+                    });
+                    if (!contRes.ok) break;
+                    const contData = await contRes.json();
+                    nextToken = extractChannelsFromData(contData);
+                } catch (err) {
+                    console.warn('[YPP] Failed to fetch continuation:', err);
+                    break;
                 }
-                if (typeof obj === 'object') {
-                    for (const key of Object.keys(obj)) {
-                        const res = findUnsubParams(obj[key]);
-                        if (res) return res;
-                    }
-                }
-                return null;
-            };
-
-            const findRenderers = (obj) => {
-                if (!obj || typeof obj !== 'object') return;
-                if (seen.has(obj)) return;
-                seen.add(obj);
-
-                if (obj.channelRenderer) {
-                    const r = obj.channelRenderer;
-                    if (!channels.find(c => c.id === r.channelId)) {
-                        channels.push({
-                            id: r.channelId,
-                            name: r.title?.simpleText || 'Unknown',
-                            icon: r.thumbnail?.thumbnails?.[0]?.url || '',
-                            unsubParams: findUnsubParams(r) || ''
-                        });
-                    }
-                }
-                
-                Object.values(obj).forEach(findRenderers);
-            };
-            findRenderers(data);
+            }
 
             if (channels.length === 0) {
-                resultsEl.innerHTML = '<div style="text-align: center; color: #ff4e45; margin-top: 40px;">No subscriptions found.</div>';
+                resultsEl.innerHTML = '<div style="text-align:center;color:#ff4e45;margin-top:40px;">No subscriptions found.</div>';
                 btn.textContent = 'Scan Complete';
+                btn.disabled = false;
+                btn.style.opacity = '1';
                 return;
             }
 
+            // ── Step 3: Clear and set up streaming UI ─────────────────────
             resultsEl.innerHTML = '';
-            
-            let activeCount = 0;
-            let warningCount = 0;
-            let deadCount = 0;
+            if (statusEl) statusEl.remove();
 
             const now = Date.now();
             const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+            let activeCount = 0, warningCount = 0, deadCount = 0, doneCount = 0;
 
-            // Fetch RSS for each channel to get latest video
-            const batchSize = 10;
-            for (let i = 0; i < channels.length; i += batchSize) {
-                const batch = channels.slice(i, i + batchSize);
-                
-                await Promise.all(batch.map(async (c) => {
-                    try {
-                        const rssRes = await fetch(`/feeds/videos.xml?channel_id=${c.id}`);
-                        const rssText = await rssRes.text();
-                        
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(rssText, "text/xml");
-                        const entries = xmlDoc.querySelectorAll("entry");
-                        
-                        if (entries.length > 0) {
-                            const firstEntry = entries[0];
-                            const pubDateStr = firstEntry.querySelector("published")?.textContent;
-                            if (pubDateStr) {
-                                const pubDate = new Date(pubDateStr).getTime();
-                                const diff = now - pubDate;
-                                c.lastUpload = diff;
-                                c.lastUploadText = new Date(pubDate).toLocaleDateString();
-                                
-                                if (diff < MONTH_MS) {
-                                    c.status = 'active';
-                                    c.color = '#4caf50';
-                                    activeCount++;
-                                } else if (diff < 3 * MONTH_MS) {
-                                    c.status = 'warning';
-                                    c.color = '#ff9800';
-                                    warningCount++;
-                                } else {
-                                    c.status = 'dead';
-                                    c.color = '#f44336';
-                                    deadCount++;
-                                }
-                            } else {
-                                c.status = 'dead';
-                                c.color = '#f44336';
-                                c.lastUploadText = 'Unknown Date';
-                                c.lastUpload = Infinity;
-                                deadCount++;
-                            }
-                        } else {
-                            c.status = 'dead';
-                            c.color = '#f44336';
-                            c.lastUploadText = 'No videos';
-                            c.lastUpload = Infinity;
-                            deadCount++;
-                        }
-                    } catch (e) {
-                        c.status = 'dead';
-                        c.color = '#f44336';
-                        c.lastUploadText = 'Unknown';
-                        c.lastUpload = Infinity;
-                        deadCount++;
-                    }
-                }));
-
-                // Update UI incrementally
-                batch.forEach(c => {
-                    // Extract folders
-                    const channelFolders = [];
-                    if (folderUI && folderUI.storage && folderUI.storage.folders) {
-                        for (const [fName, channelsList] of Object.entries(folderUI.storage.folders)) {
-                            if (channelsList.includes(c.name)) {
-                                channelFolders.push(fName);
-                            }
-                        }
-                    }
-                    const folderBadgesHtml = channelFolders.map(f => `<span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 4px; color: #ddd; display: inline-block; margin-bottom: 2px;">${f}</span>`).join('');
-
-                    const row = document.createElement('div');
-                    row.className = 'ypp-channel-health-row';
-                    row.dataset.status = c.status;
-                    row.dataset.name = c.name;
-                    row.dataset.uploadTime = c.lastUpload;
-                    row.dataset.folders = channelFolders.join(',');
-                    row.style.cssText = `display: flex; align-items: center; padding: 16px 20px; background: rgba(255,255,255,0.02); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ${c.color}; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);`;
-                    
-                    // Hover effect
-                    row.addEventListener('mouseover', () => {
-                        row.style.background = 'rgba(255,255,255,0.04)';
-                        row.style.transform = 'translateY(-1px)';
-                        row.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)';
-                    });
-                    row.addEventListener('mouseout', () => {
-                        row.style.background = 'rgba(255,255,255,0.02)';
-                        row.style.transform = 'translateY(0)';
-                        row.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                    });
-
-                    row.innerHTML = `
-                        <img src="${c.icon}" style="width: 36px; height: 36px; border-radius: 50%; margin-right: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                        <div style="flex: 1;">
-                            <div style="color: #fff; font-size: 15px; font-weight: 500; letter-spacing: 0.2px;">${c.name}</div>
-                            <div style="color: #aaa; font-size: 12px; margin-bottom: 2px;">Last upload: <span style="color:#ccc;">${c.lastUploadText}</span></div>
-                            ${folderBadgesHtml ? `<div style="margin-top: 4px;">${folderBadgesHtml}</div>` : ''}
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <a href="/channel/${c.id}" target="_blank" style="color: #6c63ff; text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='#6c63ff'">Visit Channel</a>
-                            <label style="display: flex; align-items: center; cursor: pointer; color: #aaa; font-size: 13px; font-weight: 500; user-select: none; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">
-                                <input type="checkbox" class="ypp-unsub-checkbox" value="${c.id}" data-params="${c.unsubParams}" style="margin-right: 8px; width: 16px; height: 16px; cursor: pointer; accent-color: #6c63ff;" ${c.status === 'dead' ? 'checked' : ''}>
-                                Select
-                            </label>
-                            <button class="ypp-indiv-folder-btn" style="background:rgba(108,99,255,0.1); color:#8b84ff; border:1px solid rgba(108,99,255,0.2); border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">Folders</button>
-                            <button class="ypp-indiv-unsub-btn" style="background:rgba(255,78,69,0.1); color:#ff4e45; border:1px solid rgba(255,78,69,0.2); border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">Unsub</button>
-                        </div>
-                    `;
-
-                    const indivBtn = row.querySelector('.ypp-indiv-unsub-btn');
-                    indivBtn.addEventListener('mouseover', () => { indivBtn.style.background = 'rgba(255,78,69,0.2)'; });
-                    indivBtn.addEventListener('mouseout',  () => { indivBtn.style.background = 'rgba(255,78,69,0.1)'; });
-                    indivBtn.addEventListener('click', () => {
-                        this.individualUnsubscribe(c.id, c.unsubParams, c.name, row, indivBtn);
-                    });
-
-                    const folderBtn = row.querySelector('.ypp-indiv-folder-btn');
-                    folderBtn.addEventListener('mouseover', () => { folderBtn.style.background = 'rgba(108,99,255,0.2)'; });
-                    folderBtn.addEventListener('mouseout',  () => { folderBtn.style.background = 'rgba(108,99,255,0.1)'; });
-                    folderBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (folderUI) folderUI.renderChannelPopover(folderBtn, c.name);
-                    });
-
-                    resultsEl.appendChild(row);
-                });
-
-                // Update counts
-                overlay.querySelector('#ypp-health-active').textContent = activeCount;
+            const updateCounters = () => {
+                overlay.querySelector('#ypp-health-active').textContent  = activeCount;
                 overlay.querySelector('#ypp-health-warning').textContent = warningCount;
-                overlay.querySelector('#ypp-health-dead').textContent = deadCount;
-                
+                overlay.querySelector('#ypp-health-dead').textContent    = deadCount;
+                btn.textContent = `Scanning… ${doneCount}/${channels.length}`;
                 if (deadCount > 0) {
-                    overlay.querySelector('#ypp-health-unsub-btn').style.display = 'inline-block';
+                    overlay.querySelector('#ypp-health-unsub-btn').style.display    = 'inline-block';
                     overlay.querySelector('#ypp-health-add-folder-btn').style.display = 'inline-block';
                 }
-                
-                // Re-apply sort and filter logic after appending
-                const filterSelect = overlay.querySelector('#ypp-health-filter-dropdown');
-                if (filterSelect) {
-                    // Triggering a 'change' event will run the updateView logic defined above
-                    filterSelect.dispatchEvent(new Event('change'));
+            };
+
+            const buildRow = (c) => {
+                const channelFolders = [];
+                if (folderUI && folderUI.storage && folderUI.storage.folders) {
+                    for (const [fName, list] of Object.entries(folderUI.storage.folders)) {
+                        if (list.includes(c.name)) channelFolders.push(fName);
+                    }
                 }
-            }
 
-            btn.textContent = 'Scan Complete';
+                const colorMap = { active: '#81C995', warning: '#FDD663', dead: '#F2B8B5' };
+                const color = colorMap[c.status] || '#888';
 
-            // Guard against listener accumulation: if the user hits Retry the overlay
-            // element is the same, so without this flag a second listener would be added.
+                const row = document.createElement('div');
+                row.className = 'ypp-channel-health-row';
+                row.dataset.status     = c.status;
+                row.dataset.name       = c.name;
+                row.dataset.uploadTime = c.lastUpload != null ? c.lastUpload : Infinity;
+                row.dataset.folders    = channelFolders.join(',');
+                row.style.cssText = 'display:flex;align-items:center;padding:14px 18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;border-left:3px solid ' + color + ';transition:background 0.15s,transform 0.15s;animation:ypp-fade-in 0.2s ease;';
+
+                row.addEventListener('mouseover', () => { row.style.background = 'rgba(255,255,255,0.045)'; row.style.transform = 'translateY(-1px)'; });
+                row.addEventListener('mouseout',  () => { row.style.background = 'rgba(255,255,255,0.02)';  row.style.transform = 'translateY(0)'; });
+
+                // Build inner DOM safely without template literals (avoids Vite JSX parse errors)
+                const img = document.createElement('img');
+                img.src = c.icon || '';
+                img.style.cssText = 'width:36px;height:36px;border-radius:50%;margin-right:14px;flex-shrink:0;';
+                img.onerror = function() { this.style.display = 'none'; };
+                row.appendChild(img);
+
+                const infoDiv = document.createElement('div');
+                infoDiv.style.cssText = 'flex:1;min-width:0;';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.style.cssText = 'color:#E6E1E5;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                nameDiv.textContent = c.name;
+                infoDiv.appendChild(nameDiv);
+
+                const uploadDiv = document.createElement('div');
+                uploadDiv.style.cssText = 'color:#938F99;font-size:11px;margin-top:1px;';
+                uploadDiv.textContent = 'Last upload: ';
+                const uploadSpan = document.createElement('span');
+                uploadSpan.style.color = color;
+                uploadSpan.textContent = c.lastUploadText || 'Unknown';
+                uploadDiv.appendChild(uploadSpan);
+                infoDiv.appendChild(uploadDiv);
+
+                if (channelFolders.length > 0) {
+                    const badgesDiv = document.createElement('div');
+                    badgesDiv.style.marginTop = '4px';
+                    channelFolders.forEach(f => {
+                        const badge = document.createElement('span');
+                        badge.style.cssText = 'background:rgba(208,188,255,0.12);padding:2px 7px;border-radius:20px;font-size:10px;margin-right:4px;color:#D0BCFF;display:inline-block;margin-bottom:2px;';
+                        badge.textContent = f;
+                        badgesDiv.appendChild(badge);
+                    });
+                    infoDiv.appendChild(badgesDiv);
+                }
+                row.appendChild(infoDiv);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.style.cssText = 'display:flex;align-items:center;gap:10px;flex-shrink:0;';
+
+                const visitLink = document.createElement('a');
+                visitLink.href = '/channel/' + c.id;
+                visitLink.target = '_blank';
+                visitLink.style.cssText = 'color:#D0BCFF;text-decoration:none;font-size:12px;font-weight:500;opacity:0.8;transition:opacity 0.2s;';
+                visitLink.textContent = 'Visit';
+                visitLink.addEventListener('mouseover', () => { visitLink.style.opacity = '1'; });
+                visitLink.addEventListener('mouseout',  () => { visitLink.style.opacity = '0.8'; });
+                actionsDiv.appendChild(visitLink);
+
+                const label = document.createElement('label');
+                label.style.cssText = 'display:flex;align-items:center;cursor:pointer;color:#938F99;font-size:12px;font-weight:500;user-select:none;gap:6px;';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'ypp-unsub-checkbox';
+                cb.value = c.id;
+                cb.dataset.params = c.unsubParams || '';
+                cb.style.cssText = 'width:15px;height:15px;cursor:pointer;accent-color:#D0BCFF;';
+                if (c.status === 'dead') cb.checked = true;
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode('Select'));
+                actionsDiv.appendChild(label);
+
+                const folderBtn = document.createElement('button');
+                folderBtn.className = 'ypp-indiv-folder-btn';
+                folderBtn.style.cssText = 'background:rgba(208,188,255,0.08);color:#D0BCFF;border:1px solid rgba(208,188,255,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+                folderBtn.textContent = 'Folders';
+                folderBtn.addEventListener('mouseover', () => { folderBtn.style.background = 'rgba(208,188,255,0.18)'; });
+                folderBtn.addEventListener('mouseout',  () => { folderBtn.style.background = 'rgba(208,188,255,0.08)'; });
+                folderBtn.addEventListener('click', (e) => { e.stopPropagation(); if (folderUI) folderUI.renderChannelPopover(folderBtn, c.name); });
+                actionsDiv.appendChild(folderBtn);
+
+                const indivBtn = document.createElement('button');
+                indivBtn.className = 'ypp-indiv-unsub-btn';
+                indivBtn.style.cssText = 'background:rgba(242,184,181,0.08);color:#F2B8B5;border:1px solid rgba(242,184,181,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+                indivBtn.textContent = 'Unsub';
+                indivBtn.addEventListener('mouseover', () => { indivBtn.style.background = 'rgba(242,184,181,0.18)'; });
+                indivBtn.addEventListener('mouseout',  () => { indivBtn.style.background = 'rgba(242,184,181,0.08)'; });
+                indivBtn.addEventListener('click', () => this.individualUnsubscribe(c.id, c.unsubParams, c.name, row, indivBtn));
+                actionsDiv.appendChild(indivBtn);
+
+                row.appendChild(actionsDiv);
+                return row;
+            };
+
+            // ── Step 4: Fire RSS fetches with concurrency limit ────────────
+            const RSS_TIMEOUT_MS = 5000;
+            const CONCURRENCY_LIMIT = 15;
+            let currentIndex = 0;
+
+            const fetchChannel = async (c) => {
+                try {
+                    const controller = new AbortController();
+                    const tid = setTimeout(() => controller.abort(), RSS_TIMEOUT_MS);
+
+                    const rssRes  = await fetch(`/feeds/videos.xml?channel_id=${c.id}`, { signal: controller.signal });
+                    clearTimeout(tid);
+                    const rssText = await rssRes.text();
+
+                    const xml   = new DOMParser().parseFromString(rssText, 'text/xml');
+                    const first = xml.querySelector('entry');
+                    const pub   = first?.querySelector('published')?.textContent;
+
+                    if (pub) {
+                        const diff = now - new Date(pub).getTime();
+                        c.lastUpload = diff;
+                        c.lastUploadText = new Date(pub).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                        if      (diff < MONTH_MS)     { c.status = 'active';  activeCount++;  }
+                        else if (diff < 3 * MONTH_MS) { c.status = 'warning'; warningCount++; }
+                        else                           { c.status = 'dead';    deadCount++;    }
+                    } else {
+                        c.status = 'dead'; c.lastUploadText = first ? 'No date' : 'No videos'; c.lastUpload = Infinity; deadCount++;
+                    }
+                } catch (e) {
+                    c.status = e.name === 'AbortError' ? 'warning' : 'dead';
+                    c.lastUploadText = e.name === 'AbortError' ? 'Timeout' : 'Error';
+                    c.lastUpload = Infinity;
+                    if (c.status === 'warning') warningCount++; else deadCount++;
+                }
+
+                doneCount++;
+                const row = buildRow(c);
+                
+                // Directly apply current filter without triggering a full re-sort
+                const filterSel = overlay.querySelector('#ypp-health-filter-dropdown');
+                const folderSel = overlay.querySelector('#ypp-health-folder-dropdown');
+                const searchInput = overlay.querySelector('#ypp-health-search-input');
+                
+                let show = true;
+                if (filterSel && filterSel.value !== 'all' && c.status !== filterSel.value) show = false;
+                if (show && folderSel && folderSel.value !== 'all') {
+                    if (folderSel.value === '__no_folder__') {
+                        if (row.dataset.folders !== '') show = false;
+                    } else {
+                        const folders = row.dataset.folders ? row.dataset.folders.split(',') : [];
+                        if (!folders.includes(folderSel.value)) show = false;
+                    }
+                }
+                if (show && searchInput && searchInput.value) {
+                    if (!c.name.toLowerCase().includes(searchInput.value.toLowerCase())) show = false;
+                }
+                
+                row.style.display = show ? 'flex' : 'none';
+                resultsEl.appendChild(row);
+                updateCounters();
+            };
+
+            const worker = async () => {
+                while (currentIndex < channels.length) {
+                    const c = channels[currentIndex++];
+                    await fetchChannel(c);
+                }
+            };
+
+            const workers = Array.from({ length: Math.min(CONCURRENCY_LIMIT, channels.length) }, () => worker());
+            await Promise.all(workers);
+
+            // ── Step 5: Finalise ───────────────────────────────────────────
+            btn.textContent = `Scan Complete (${channels.length})`;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+
+            // Wire up checkbox counter (idempotent)
             if (!overlay._checkboxListenerAttached) {
                 overlay._checkboxListenerAttached = true;
                 resultsEl.addEventListener('change', (e) => {
-                    if (e.target.classList.contains('ypp-unsub-checkbox')) {
-                        const checkedCount = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked').length;
-                        const unsubBtn = overlay.querySelector('#ypp-health-unsub-btn');
-                        const addFolderBtn = overlay.querySelector('#ypp-health-add-folder-btn');
-                        
-                        unsubBtn.textContent = checkedCount > 0
-                            ? `Unsubscribe Selected (${checkedCount})`
-                            : 'Unsubscribe Selected';
-                        unsubBtn.disabled = checkedCount === 0;
-
-                        addFolderBtn.textContent = checkedCount > 0
-                            ? `Add to Folder (${checkedCount})`
-                            : 'Add to Folder';
-                        addFolderBtn.disabled = checkedCount === 0;
-                    }
+                    if (!e.target.classList.contains('ypp-unsub-checkbox')) return;
+                    const n = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked').length;
+                    const unsubBtn    = overlay.querySelector('#ypp-health-unsub-btn');
+                    const addFolderBtn = overlay.querySelector('#ypp-health-add-folder-btn');
+                    unsubBtn.textContent     = n > 0 ? `Unsubscribe Selected (${n})` : 'Unsubscribe Selected';
+                    addFolderBtn.textContent = n > 0 ? `Add to Folder (${n})`        : 'Add to Folder';
+                    unsubBtn.disabled     = n === 0;
+                    addFolderBtn.disabled = n === 0;
                 });
             }
 
+            // Final filter/sort pass
+            const filterSel = overlay.querySelector('#ypp-health-filter-dropdown');
+            if (filterSel) filterSel.dispatchEvent(new Event('change'));
+
         } catch (e) {
-            console.error(e);
-            resultsEl.innerHTML = `<div style="text-align: center; color: #ff4e45; margin-top: 40px;">Scan failed: ${e.message}</div>`;
+            console.error('[YPP] Scan error:', e);
+            resultsEl.innerHTML = '<div style="text-align:center;color:#F2B8B5;margin-top:40px;font-size:14px;">Scan failed: ' + (e.message || 'Unknown error') + '</div>';
             btn.textContent = 'Retry Scan';
             btn.disabled = false;
             btn.style.opacity = '1';
@@ -1343,13 +1446,29 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             // Use a random ID to match the response to this specific request,
             // preventing cross-contamination if multiple calls overlap.
             const reqId = Math.random().toString(36).slice(2);
+            let resolved = false;
+
             const listener = (e) => {
                 if (e.data && e.data.type === 'YPP_YTCFG_RESPONSE' && e.data.reqId === reqId) {
                     window.removeEventListener('message', listener);
-                    resolve(e.data.config);
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(e.data.config);
+                    }
                 }
             };
             window.addEventListener('message', listener);
+
+            // Fallback timeout in case CSP blocks the script injection
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    window.removeEventListener('message', listener);
+                    console.warn('[YPP] _getYoutubeConfig timed out. Returning empty config.');
+                    resolve({}); // Will trigger the "Auth Error" dialog
+                }
+            }, 1500);
+
             const script = document.createElement('script');
             script.textContent = `
                 try {
@@ -1377,7 +1496,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
      * Sends a POST to YouTube's internal subscription endpoint.
      * Returns true on success, false on failure.
      */
-    static async _tryApiUnsubscribe(channelData, config) {
+    static async _getApiHeaders(config) {
         const sapisid = document.cookie.split('; ').find(r => r.startsWith('SAPISID='))?.split('=')[1]
                      || document.cookie.split('; ').find(r => r.startsWith('__Secure-3PAPISID='))?.split('=')[1];
         const origin = window.location.origin;
@@ -1404,6 +1523,17 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             const hash = await sha1(`${time} ${sapisid} ${origin}`);
             headers['Authorization'] = `SAPISIDHASH ${time}_${hash}`;
         }
+        
+        return headers;
+    }
+
+    /**
+     * Tier 2: InnerTube API unsubscribe.
+     * Sends a POST to YouTube's internal subscription endpoint.
+     * Returns true on success, false on failure.
+     */
+    static async _tryApiUnsubscribe(channelData, config) {
+        const headers = await this._getApiHeaders(config);
 
         const makeRequest = async (withParams) => {
             const payload = { context: config.context, channelIds: [channelData.id] };
@@ -1412,7 +1542,8 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 method: 'POST', headers, credentials: 'include',
                 body: JSON.stringify(payload)
             });
-            return res;
+            const data = await res.json().catch(() => ({}));
+            return { ok: res.ok && !data.error, status: res.status, data };
         };
 
         try {
@@ -1421,12 +1552,12 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             if (res.ok) return true;
 
             // Attempt 2: without params (handles stale token / 403)
-            if ((res.status === 400 || res.status === 403) && channelData.params) {
+            if (!res.ok && channelData.params) {
                 res = await makeRequest(false);
                 if (res.ok) return true;
             }
 
-            console.warn(`[YPP] API unsubscribe failed for ${channelData.id}: HTTP ${res.status}`);
+            console.warn(`[YPP] API unsubscribe failed for ${channelData.id}: HTTP ${res.status}`, res.data);
         } catch (e) {
             console.error('[YPP] API unsubscribe exception:', e);
         }
@@ -1675,7 +1806,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         folderNames.forEach(folder => {
             const item = document.createElement('div');
             item.style.cssText = 'padding: 10px 16px; color: #fff; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px;';
-            item.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> ${folder}`;
+            item.innerHTML = String.raw`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> ${folder}`;
             
             item.addEventListener('mouseover', () => item.style.background = 'rgba(255,255,255,0.1)');
             item.addEventListener('mouseout', () => item.style.background = 'transparent');

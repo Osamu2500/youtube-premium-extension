@@ -79,6 +79,10 @@ window.YPP.SettingsSchema = {
         volumeLevel:         { type: 'number',  default: 1, min: 1, max: 6 },
         volumeBoostBass:     { type: 'number',  default: 0, min: -12, max: 12 },
         volumeBoostTreble:   { type: 'number',  default: 0, min: -12, max: 12 },
+        volumeBalance:       { type: 'number',  default: 0, min: -1, max: 1 },
+        volumeEqBands:       { type: 'string',  default: '[0,0,0,0,0,0,0,0,0,0]' },
+        volumeCompressor:    { type: 'boolean', default: true },
+        volumeMono:          { type: 'boolean', default: false },
 
         // --- Search ---
         searchGrid:          { type: 'boolean', default: true },

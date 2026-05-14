@@ -176,12 +176,40 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         updateLoopIcon();
 
         // ── Speed ──
-        if (window.YPP.featureManager?.getFeature('playerControls')) {
-            const playerFeature = window.YPP.featureManager.getFeature('playerControls');
-            if (playerFeature._createSpeedControls) {
-                speedCont.appendChild(playerFeature._createSpeedControls(video));
+        const speedInput = document.createElement('input');
+        speedInput.type = 'number';
+        speedInput.className = 'ypp-gpb-speed-input';
+        speedInput.min = '0.1';
+        speedInput.max = '5.0';
+        speedInput.step = '0.1';
+        speedInput.value = video.playbackRate.toFixed(1);
+        speedInput.title = 'Playback Speed';
+        speedInput.style.cssText = `
+            width: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+            padding: 2px;
+            font-family: inherit;
+            outline: none;
+        `;
+        
+        const updateSpeedValue = () => { speedInput.value = video.playbackRate.toFixed(1); };
+        video.addEventListener('ratechange', updateSpeedValue);
+        
+        speedInput.oninput = (e) => {
+            e.stopPropagation();
+            let val = parseFloat(e.target.value);
+            if (!isNaN(val) && val >= 0.1 && val <= 16.0) {
+                video.playbackRate = val;
             }
-        }
+        };
+        speedInput.onkeydown = (e) => e.stopPropagation();
+        
+        speedCont.appendChild(speedInput);
 
         // ── Feature Buttons (Volume / Filters) ──
         if (window.YPP.featureManager) {

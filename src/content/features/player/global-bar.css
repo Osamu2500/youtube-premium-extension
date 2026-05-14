@@ -15,11 +15,11 @@
     transition: opacity 0.3s ease, transform 0.2s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.3s ease;
     box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.06);
     opacity: 0.95;
-    background: rgba(18, 18, 28, 0.65) !important;
-    backdrop-filter: blur(32px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(48px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(48px) saturate(120%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
     animation: ypp-global-bar-pop-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
@@ -32,7 +32,7 @@
     opacity: 1;
     box-shadow: 0 16px 48px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.12);
     transform: translateX(3px) translateY(-50%);
-    background: rgba(22, 22, 34, 0.75) !important;
+    background: rgba(0, 0, 0, 0.25) !important;
 }
 
 .ypp-gpb-controls {
@@ -182,8 +182,8 @@
 /* ── Iframe Specific ── */
 .ypp-global-player-bar.ypp-gpb-iframe {
     padding: 10px 6px;
-    background: rgba(10, 10, 20, 0.96) !important;
-    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 .ypp-gpb-iframe .ypp-gpb-btn {

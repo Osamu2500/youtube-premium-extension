@@ -67,8 +67,27 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         return 'enableVolumeBoost'; 
     }
 
+    _loadSettings(settings) {
+        if (!settings) return;
+        if (settings.volumeLevel !== undefined) this._volumeGain = settings.volumeLevel;
+        if (settings.volumeBalance !== undefined) this._balance = settings.volumeBalance;
+        if (settings.volumeCompressor !== undefined) this._compressorEnabled = settings.volumeCompressor;
+        if (settings.volumeMono !== undefined) this._monoEnabled = settings.volumeMono;
+        if (settings.volumeEqBands) {
+            try {
+                const bands = JSON.parse(settings.volumeEqBands);
+                if (Array.isArray(bands) && bands.length === 10) {
+                    this._eqGains = bands.map(v => typeof v === 'number' ? v : 0);
+                }
+            } catch (e) {
+                console.warn('[YPP:VolumeBooster] Failed to parse EQ bands', e);
+            }
+        }
+    }
+
     enable(settings) {
         this.settings = settings;
+        this._loadSettings(settings);
         this.run();
     }
 
@@ -123,6 +142,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
 
     update(settings) {
         this.settings = settings;
+        this._loadSettings(settings);
         if (this.settings.enableVolumeBoost) {
             // Restore states if we were previously disabled
             if (this._audioConnected) {
@@ -234,12 +254,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
      * Useful when re-enabling or after initial graph construction.
      */
     _restoreAudioState() {
-        if (this.settings && this.settings.volumeLevel) {
-            this.setVolume(this.settings.volumeLevel);
-        } else {
-            this.setVolume(this._volumeGain);
-        }
-        
+        this.setVolume(this._volumeGain);
         this.setBalance(this._balance);
         this.setMono(this._monoEnabled);
         this._applyCompressorState();

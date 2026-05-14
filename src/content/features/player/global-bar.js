@@ -36,7 +36,6 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
         if (this.isYouTube) return; // Skip YouTube (handled by native integration)
 
         this.utils?.log('Enabling Global Player Bar', 'GlobalPlayerBar');
-        this.utils?.injectCSS('src/content/features/player/global-bar.css', 'ypp-global-bar-css');
         
         this.scanForVideos();
         this.startObserver();

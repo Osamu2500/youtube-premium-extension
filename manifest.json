@@ -12,7 +12,8 @@
     "host_permissions": [
         "*://www.youtube.com/*",
         "*://returnyoutubedislikeapi.com/*",
-        "*://sponsor.ajay.app/*"
+        "*://sponsor.ajay.app/*",
+        "<all_urls>"
     ],
     "icons": {
         "16": "src/assets/icon.png",
@@ -44,6 +45,19 @@
             "js": [
                 "dist/content.js"
             ]
+        },
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "exclude_matches": [
+                "*://www.youtube.com/*"
+            ],
+            "run_at": "document_idle",
+            "all_frames": true,
+            "js": [
+                "dist/global-bar-external.js"
+            ]
         }
     ],
     "web_accessible_resources": [
@@ -55,7 +69,8 @@
                 "src/content/features/**/*.css"
             ],
             "matches": [
-                "*://www.youtube.com/*"
+                "*://www.youtube.com/*",
+                "<all_urls>"
             ]
         }
     ]

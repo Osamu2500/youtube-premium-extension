@@ -1,5 +1,13 @@
 const fs = require('fs');
-let content = fs.readFileSync('src/content/features/player/video-filters.js', 'utf8');
-content = content.replace(/\\`/g, '`').replace(/\\\${/g, '${');
-fs.writeFileSync('src/content/features/player/video-filters.js', content, 'utf8');
-console.log('Done!');
+
+const path = 'src/content/features/pages/subscriptions/folder-ui.js';
+let txt = fs.readFileSync(path, 'utf8');
+
+// The file was corrupted by double-escaping backticks and dollar signs.
+// Let's replace literally `\`` with ``` and `\${` with `${`
+const newTxt = txt
+    .replace(/\\`/g, '`')
+    .replace(/\\\${/g, '${');
+
+fs.writeFileSync(path, newTxt);
+console.log('Fixed literal escapes.');
