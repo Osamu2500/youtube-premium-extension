@@ -151,6 +151,8 @@ window.YPP.SettingsSchema = {
         contextMenu:         { type: 'boolean', default: true },
         enableAccountMenu:   { type: 'boolean', default: true },
         playlistRedesign:    { type: 'boolean', default: true },
+        glassPlayerUI:       { type: 'boolean', default: true },
+        sidebarComments:     { type: 'boolean', default: false },
         miniPlayer:          { type: 'boolean', default: false },
         redirectShorts:      { type: 'boolean', default: false },
 

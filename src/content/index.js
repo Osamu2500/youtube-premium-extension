@@ -74,6 +74,7 @@ import './features/pages/watch/zen-mode.js';
 import './features/pages/watch/focus-mode.js';
 import './features/pages/watch/study-mode.js';
 import './features/pages/watch/comment-filter.js';
+import './features/pages/watch/watch-redesign.js';
 
 // Player features
 import './features/player/player.js';

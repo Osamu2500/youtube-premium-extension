@@ -516,7 +516,8 @@ window.YPP.CONSTANTS = {
         volumeBoost: 'VolumeBooster',
         autoQuality: 'AutoQuality',
         timeDisplay: 'TimeDisplay',
-        sidebarLayout: 'SidebarLayout'
+        sidebarLayout: 'SidebarLayout',
+        watchRedesign: 'WatchRedesign'
     }
 };
 
