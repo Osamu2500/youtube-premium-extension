@@ -430,7 +430,7 @@
       "label": "validateAndMerge()",
       "file_type": "code",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L194",
+      "source_location": "L195",
       "id": "content_settings_schema_validateandmerge",
       "community": 79,
       "norm_label": "validateandmerge()"
@@ -439,7 +439,7 @@
       "label": "migrate()",
       "file_type": "code",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L269",
+      "source_location": "L270",
       "id": "content_settings_schema_migrate",
       "community": 79,
       "norm_label": "migrate()"
@@ -448,7 +448,7 @@
       "label": "_defaults()",
       "file_type": "code",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L292",
+      "source_location": "L293",
       "id": "content_settings_schema_defaults",
       "community": 79,
       "norm_label": "_defaults()"
@@ -1035,7 +1035,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_content_control_js",
-      "community": 9,
+      "community": 10,
       "norm_label": "content-control.js"
     },
     {
@@ -1044,7 +1044,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L15",
       "id": "global_content_control_constructor",
-      "community": 9,
+      "community": 10,
       "norm_label": "constructor()"
     },
     {
@@ -1053,7 +1053,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L28",
       "id": "global_content_control_getconfigkey",
-      "community": 9,
+      "community": 10,
       "norm_label": "getconfigkey()"
     },
     {
@@ -1062,7 +1062,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L35",
       "id": "global_content_control_enable",
-      "community": 9,
+      "community": 10,
       "norm_label": "enable()"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L45",
       "id": "global_content_control_disable",
-      "community": 9,
+      "community": 10,
       "norm_label": "disable()"
     },
     {
@@ -1080,7 +1080,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L54",
       "id": "global_content_control_onupdate",
-      "community": 9,
+      "community": 10,
       "norm_label": "onupdate()"
     },
     {
@@ -1089,7 +1089,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L61",
       "id": "global_content_control_applysettings",
-      "community": 9,
+      "community": 10,
       "norm_label": "applysettings()"
     },
     {
@@ -1098,7 +1098,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L89",
       "id": "global_content_control_cleanupdom",
-      "community": 9,
+      "community": 10,
       "norm_label": "_cleanupdom()"
     },
     {
@@ -1107,7 +1107,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L104",
       "id": "global_content_control_hideshortsglobally",
-      "community": 9,
+      "community": 10,
       "norm_label": "hideshortsglobally()"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L111",
       "id": "global_content_control_showshortsglobally",
-      "community": 9,
+      "community": 10,
       "norm_label": "showshortsglobally()"
     },
     {
@@ -1125,7 +1125,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L120",
       "id": "global_content_control_removeshortsfromdom",
-      "community": 9,
+      "community": 10,
       "norm_label": "removeshortsfromdom()"
     },
     {
@@ -1134,7 +1134,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L196",
       "id": "global_content_control_isshortselement",
-      "community": 9,
+      "community": 10,
       "norm_label": "_isshortselement()"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L227",
       "id": "global_content_control_removeshortschips",
-      "community": 9,
+      "community": 10,
       "norm_label": "_removeshortschips()"
     },
     {
@@ -1152,7 +1152,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L247",
       "id": "global_content_control_removeshortsbyheuristics",
-      "community": 9,
+      "community": 10,
       "norm_label": "_removeshortsbyheuristics()"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L277",
       "id": "global_content_control_checkredirect",
-      "community": 9,
+      "community": 10,
       "norm_label": "checkredirect()"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L300",
       "id": "global_content_control_startshortsmonitoring",
-      "community": 9,
+      "community": 10,
       "norm_label": "startshortsmonitoring()"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L324",
       "id": "global_content_control_stopshortsmonitoring",
-      "community": 9,
+      "community": 10,
       "norm_label": "stopshortsmonitoring()"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "src\\content\\features\\core\\global\\content-control.js",
       "source_location": "L337",
       "id": "global_content_control_handleshortsadded",
-      "community": 9,
+      "community": 10,
       "norm_label": "handleshortsadded()"
     },
     {
@@ -3663,7 +3663,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L1",
       "id": "src_content_features_pages_library_playlist_playlist_redesign_js",
-      "community": 10,
+      "community": 9,
       "norm_label": "playlist-redesign.js"
     },
     {
@@ -3672,7 +3672,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L11",
       "id": "playlist_playlist_redesign_constructor",
-      "community": 10,
+      "community": 9,
       "norm_label": "constructor()"
     },
     {
@@ -3681,7 +3681,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L25",
       "id": "playlist_playlist_redesign_getconfigkey",
-      "community": 10,
+      "community": 9,
       "norm_label": "getconfigkey()"
     },
     {
@@ -3690,7 +3690,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L29",
       "id": "playlist_playlist_redesign_run",
-      "community": 10,
+      "community": 9,
       "norm_label": "run()"
     },
     {
@@ -3699,7 +3699,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L53",
       "id": "playlist_playlist_redesign_disable",
-      "community": 10,
+      "community": 9,
       "norm_label": "disable()"
     },
     {
@@ -3708,7 +3708,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L64",
       "id": "playlist_playlist_redesign_isplaylistpage",
-      "community": 10,
+      "community": 9,
       "norm_label": "_isplaylistpage()"
     },
     {
@@ -3717,7 +3717,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L69",
       "id": "playlist_playlist_redesign_reset",
-      "community": 10,
+      "community": 9,
       "norm_label": "_reset()"
     },
     {
@@ -3726,7 +3726,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L96",
       "id": "playlist_playlist_redesign_tryinit",
-      "community": 10,
+      "community": 9,
       "norm_label": "_tryinit()"
     },
     {
@@ -3735,7 +3735,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L105",
       "id": "playlist_playlist_redesign_attemptbuild",
-      "community": 10,
+      "community": 9,
       "norm_label": "_attemptbuild()"
     },
     {
@@ -3744,7 +3744,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L127",
       "id": "playlist_playlist_redesign_watchforchanges",
-      "community": 10,
+      "community": 9,
       "norm_label": "_watchforchanges()"
     },
     {
@@ -3753,7 +3753,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L156",
       "id": "playlist_playlist_redesign_extractplaylistdata",
-      "community": 10,
+      "community": 9,
       "norm_label": "_extractplaylistdata()"
     },
     {
@@ -3762,7 +3762,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L266",
       "id": "playlist_playlist_redesign_formatdur",
-      "community": 10,
+      "community": 9,
       "norm_label": "_formatdur()"
     },
     {
@@ -3771,7 +3771,7 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L276",
       "id": "playlist_playlist_redesign_build",
-      "community": 10,
+      "community": 9,
       "norm_label": "_build()"
     },
     {
@@ -3780,44 +3780,53 @@
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
       "source_location": "L312",
       "id": "playlist_playlist_redesign_renderhtml",
-      "community": 10,
+      "community": 9,
       "norm_label": "_renderhtml()"
     },
     {
       "label": "_renderDurationCard()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L428",
+      "source_location": "L451",
       "id": "playlist_playlist_redesign_renderdurationcard",
-      "community": 10,
+      "community": 9,
       "norm_label": "_renderdurationcard()"
     },
     {
       "label": "_renderVideoCard()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L463",
+      "source_location": "L486",
       "id": "playlist_playlist_redesign_rendervideocard",
-      "community": 10,
+      "community": 9,
       "norm_label": "_rendervideocard()"
     },
     {
       "label": "_wireEvents()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L508",
+      "source_location": "L531",
       "id": "playlist_playlist_redesign_wireevents",
-      "community": 10,
+      "community": 9,
       "norm_label": "_wireevents()"
     },
     {
       "label": "_esc()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L695",
+      "source_location": "L769",
       "id": "playlist_playlist_redesign_esc",
-      "community": 10,
+      "community": 9,
       "norm_label": "_esc()"
+    },
+    {
+      "label": "_removeNativeVideo()",
+      "file_type": "code",
+      "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
+      "source_location": "L782",
+      "id": "playlist_playlist_redesign_removenativevideo",
+      "community": 9,
+      "norm_label": "_removenativevideo()"
     },
     {
       "label": "reverse-playlist.js",
@@ -5362,7 +5371,7 @@
       "label": "resetFeedVisibility()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscription-folders.js",
-      "source_location": "L488",
+      "source_location": "L489",
       "id": "subscriptions_subscription_folders_resetfeedvisibility",
       "community": 4,
       "norm_label": "resetfeedvisibility()"
@@ -5371,7 +5380,7 @@
       "label": "playAll()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscription-folders.js",
-      "source_location": "L507",
+      "source_location": "L506",
       "id": "subscriptions_subscription_folders_playall",
       "community": 4,
       "norm_label": "playall()"
@@ -10269,7 +10278,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L194",
+      "source_location": "L195",
       "weight": 1.0,
       "_src": "src_content_settings_schema_js",
       "_tgt": "content_settings_schema_validateandmerge",
@@ -10281,7 +10290,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L269",
+      "source_location": "L270",
       "weight": 1.0,
       "_src": "src_content_settings_schema_js",
       "_tgt": "content_settings_schema_migrate",
@@ -10293,7 +10302,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L292",
+      "source_location": "L293",
       "weight": 1.0,
       "_src": "src_content_settings_schema_js",
       "_tgt": "content_settings_schema_defaults",
@@ -10305,7 +10314,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L197",
+      "source_location": "L198",
       "weight": 1.0,
       "_src": "content_settings_schema_validateandmerge",
       "_tgt": "content_settings_schema_defaults",
@@ -10317,7 +10326,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L201",
+      "source_location": "L202",
       "weight": 1.0,
       "_src": "content_settings_schema_validateandmerge",
       "_tgt": "content_settings_schema_migrate",
@@ -16869,7 +16878,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L428",
+      "source_location": "L451",
       "weight": 1.0,
       "_src": "src_content_features_pages_library_playlist_playlist_redesign_js",
       "_tgt": "playlist_playlist_redesign_renderdurationcard",
@@ -16881,7 +16890,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L463",
+      "source_location": "L486",
       "weight": 1.0,
       "_src": "src_content_features_pages_library_playlist_playlist_redesign_js",
       "_tgt": "playlist_playlist_redesign_rendervideocard",
@@ -16893,7 +16902,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L508",
+      "source_location": "L531",
       "weight": 1.0,
       "_src": "src_content_features_pages_library_playlist_playlist_redesign_js",
       "_tgt": "playlist_playlist_redesign_wireevents",
@@ -16905,12 +16914,24 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L695",
+      "source_location": "L769",
       "weight": 1.0,
       "_src": "src_content_features_pages_library_playlist_playlist_redesign_js",
       "_tgt": "playlist_playlist_redesign_esc",
       "source": "src_content_features_pages_library_playlist_playlist_redesign_js",
       "target": "playlist_playlist_redesign_esc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
+      "source_location": "L782",
+      "weight": 1.0,
+      "_src": "src_content_features_pages_library_playlist_playlist_redesign_js",
+      "_tgt": "playlist_playlist_redesign_removenativevideo",
+      "source": "src_content_features_pages_library_playlist_playlist_redesign_js",
+      "target": "playlist_playlist_redesign_removenativevideo",
       "confidence_score": 1.0
     },
     {
@@ -17049,7 +17070,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\library\\playlist\\playlist-redesign.js",
-      "source_location": "L465",
+      "source_location": "L488",
       "weight": 1.0,
       "_src": "playlist_playlist_redesign_rendervideocard",
       "_tgt": "playlist_playlist_redesign_esc",
@@ -19785,7 +19806,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscription-folders.js",
-      "source_location": "L488",
+      "source_location": "L489",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_subscription_folders_js",
       "_tgt": "subscriptions_subscription_folders_resetfeedvisibility",
@@ -19797,7 +19818,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscription-folders.js",
-      "source_location": "L507",
+      "source_location": "L506",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_subscription_folders_js",
       "_tgt": "subscriptions_subscription_folders_playall",
@@ -19953,7 +19974,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscription-folders.js",
-      "source_location": "L490",
+      "source_location": "L491",
       "weight": 1.0,
       "_src": "subscriptions_subscription_folders_resetfeedvisibility",
       "_tgt": "subscriptions_subscription_folders_applyfeedfilters",
@@ -20001,7 +20022,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscription-folders.js",
-      "source_location": "L478",
+      "source_location": "L479",
       "weight": 1.0,
       "_src": "subscriptions_subscription_folders_applyfeedfiltersnow",
       "_tgt": "subscriptions_subscription_folders_applysortorder",

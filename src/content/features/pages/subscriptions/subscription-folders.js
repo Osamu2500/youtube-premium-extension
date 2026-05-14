@@ -228,7 +228,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.ui.renderFilterChips();
         this.updateFilterState();
         
-        this.observer.register('feed-filter-loop', 'ytd-rich-grid-renderer #contents ytd-rich-item-renderer', () => {
+        this.observer.register('feed-filter-loop', 'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ytd-browse[page-subtype="subscriptions"] ytd-video-renderer', () => {
             if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest') {
                 // Debounced: rapid card additions (lazy-load batches) coalesce into one pass
                 this._debouncedApplyFilters();
@@ -383,7 +383,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     _applyFeedFiltersNow() {
         if (!this._isFeedPage) return;
 
-        const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
+        const videoCards = document.querySelectorAll('ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ytd-browse[page-subtype="subscriptions"] ytd-video-renderer');
 
         videoCards.forEach(card => {
             let isVisible = true;
@@ -474,7 +474,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             }
         });
 
-        const container = document.querySelector('ytd-rich-grid-renderer #contents');
+        const container = document.querySelector('ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents, ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer #contents');
         if (container) {
             this._applySortOrder(container);
         }
@@ -492,7 +492,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             return;
         }
 
-        const videoCards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer');
+        const videoCards = document.querySelectorAll('ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ytd-browse[page-subtype="subscriptions"] ytd-video-renderer');
         videoCards.forEach(card => {
             card.style.display = '';
             card.classList.remove('ypp-filtered-in');

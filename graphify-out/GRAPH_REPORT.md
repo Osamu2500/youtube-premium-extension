@@ -1,11 +1,11 @@
 # Graph Report - Youtube 2.0  (2026-05-14)
 
 ## Corpus Check
-- 114 files · ~408,013 words
+- 114 files · ~408,683 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1076 nodes · 1543 edges · 79 communities detected
+- 1077 nodes · 1544 edges · 79 communities detected
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -153,12 +153,12 @@ Cohesion: 0.21
 Nodes (16): _applyAll(), _clickTheaterButton(), disable(), _disableAutoCinema(), _disableAutoPiP(), _disableCinemaMode(), _disableMinimalMode(), _enableAutoCinema() (+8 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.19
-Nodes (14): applySettings(), checkRedirect(), _cleanupDOM(), disable(), enable(), handleShortsAdded(), hideShortsGlobally(), onUpdate() (+6 more)
+Cohesion: 0.18
+Nodes (14): _attemptBuild(), _build(), disable(), _esc(), _extractPlaylistData(), _isPlaylistPage(), _renderDurationCard(), _renderHTML() (+6 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.19
-Nodes (14): _attemptBuild(), _build(), disable(), _esc(), _extractPlaylistData(), _isPlaylistPage(), _renderDurationCard(), _renderHTML() (+6 more)
+Nodes (14): applySettings(), checkRedirect(), _cleanupDOM(), disable(), enable(), handleShortsAdded(), hideShortsGlobally(), onUpdate() (+6 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.19
@@ -465,7 +465,7 @@ Nodes (2): broadcastStats(), getPlayer()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `toggle()` connect `Community 1` to `Community 9`, `Community 2`, `Community 5`?**
+- **Why does `toggle()` connect `Community 1` to `Community 10`, `Community 2`, `Community 5`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `_applyVisibilitySettings()` connect `Community 2` to `Community 1`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
