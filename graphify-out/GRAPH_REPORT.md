@@ -1,11 +1,11 @@
 # Graph Report - Youtube 2.0  (2026-05-14)
 
 ## Corpus Check
-- 114 files · ~408,692 words
+- 115 files · ~409,578 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1077 nodes · 1544 edges · 79 communities detected
+- 1089 nodes · 1565 edges · 80 communities detected
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -56,7 +56,7 @@
 - [[_COMMUNITY_Community 43|Community 43]]
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 46|Community 46]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 49|Community 49]]
 - [[_COMMUNITY_Community 50|Community 50]]
@@ -73,7 +73,7 @@
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
-- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
@@ -83,12 +83,13 @@
 - [[_COMMUNITY_Community 72|Community 72]]
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
-- [[_COMMUNITY_Community 76|Community 76]]
-- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 82|Community 82]]
-- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 85|Community 85]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `getSelector()` - 18 edges
@@ -107,12 +108,12 @@
   src\content\utils.js → src\content\features\core\global\content-control.js
 - `toggle()` --calls--> `_applyVisibilitySettings()`  [INFERRED]
   src\content\utils.js → src\content\features\core\global\theme.js
-- `toggle()` --calls--> `_hideDistractions()`  [INFERRED]
-  src\content\utils.js → src\content\features\pages\watch\focus-mode.js
 - `alert()` --calls--> `takeSnapshot()`  [INFERRED]
   src\content\features\pages\subscriptions\folder-ui.js → src\content\features\player\player.js
 - `check()` --calls--> `_pollForElement()`  [INFERRED]
   src\content\utils.js → src\content\features\pages\search\search-filter.js
+- `check()` --calls--> `_pollForElement()`  [INFERRED]
+  src\content\utils.js → src\content\features\pages\search\search-observer.js
 
 ## Communities
 
@@ -122,7 +123,7 @@ Nodes (19): takeSnapshot(), alert(), bulkAddToFolder(), bulkUnsubscribe(), confi
 
 ### Community 1 - "Community 1"
 Cohesion: 0.08
-Nodes (20): check(), cleanup(), handleAbort(), init(), startTracking(), toggle(), _updateVars(), _applyDefaultFilter() (+12 more)
+Nodes (19): check(), cleanup(), handleAbort(), init(), startTracking(), _updateVars(), _applyDefaultFilter(), checkAndApply() (+11 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.11
@@ -137,8 +138,8 @@ Cohesion: 0.11
 Nodes (19): applyFeedFilters(), _applyFeedFiltersNow(), _applySortOrder(), clearFeedFilters(), disable(), forceRefreshFeed(), handleNavigation(), _injectGridCSS() (+11 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.17
-Nodes (22): _applyCinemaStyle(), _applyDetoxStyle(), _applyFocusState(), _applyMinimalStyle(), constructor(), disable(), enable(), _ensureTheaterMode() (+14 more)
+Cohesion: 0.16
+Nodes (23): toggle(), _applyCinemaStyle(), _applyDetoxStyle(), _applyFocusState(), _applyMinimalStyle(), constructor(), disable(), enable() (+15 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.24
@@ -269,132 +270,132 @@ Cohesion: 0.23
 Nodes (6): activateDeck(), createColumn(), deactivateDeck(), disable(), distributeItems(), observeFeedMutations()
 
 ### Community 38 - "Community 38"
-Cohesion: 0.27
-Nodes (7): enable(), fetchDislikes(), formatNumber(), handleNavigation(), isWatchPage(), run(), updateUI()
+Cohesion: 0.32
+Nodes (10): _applyFeatures(), _checkRoute(), _cleanup(), disable(), enable(), init(), _injectCSS(), _mountSidebarComments() (+2 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.27
-Nodes (8): cleanup(), disable(), enable(), getVideoId(), handleNavigation(), init(), onUpdate(), restoreTime()
+Nodes (7): enable(), fetchDislikes(), formatNumber(), handleNavigation(), isWatchPage(), run(), updateUI()
 
 ### Community 40 - "Community 40"
-Cohesion: 0.29
-Nodes (8): applyFeatures(), _domSweep(), getFeature(), init(), instantiateFeatures(), resetErrors(), safeRun(), setupLifecycleBindings()
+Cohesion: 0.27
+Nodes (8): cleanup(), disable(), enable(), getVideoId(), handleNavigation(), init(), onUpdate(), restoreTime()
 
 ### Community 41 - "Community 41"
 Cohesion: 0.29
-Nodes (1): SearchRedesign
+Nodes (8): applyFeatures(), _domSweep(), getFeature(), init(), instantiateFeatures(), resetErrors(), safeRun(), setupLifecycleBindings()
 
 ### Community 42 - "Community 42"
+Cohesion: 0.29
+Nodes (1): SearchRedesign
+
+### Community 43 - "Community 43"
 Cohesion: 0.27
 Nodes (7): addChannelToGroup(), createGroup(), deleteGroup(), init(), loadGroups(), removeChannelFromGroup(), saveGroups()
 
-### Community 43 - "Community 43"
+### Community 44 - "Community 44"
 Cohesion: 0.31
 Nodes (7): disable(), disconnectAudio(), enable(), handleVideoLoaded(), init(), onUpdate(), setupAudioNodes()
 
-### Community 44 - "Community 44"
+### Community 45 - "Community 45"
 Cohesion: 0.31
 Nodes (5): disable(), enable(), onVideoChange(), runAutoTasks(), update()
 
-### Community 45 - "Community 45"
+### Community 46 - "Community 46"
 Cohesion: 0.33
 Nodes (7): disable(), enable(), getThumbnailUrl(), getVideoTitle(), injectStyles(), run(), showThumbnailOverlay()
 
-### Community 47 - "Community 47"
+### Community 48 - "Community 48"
 Cohesion: 0.33
 Nodes (1): NightModeManager
 
-### Community 48 - "Community 48"
+### Community 49 - "Community 49"
 Cohesion: 0.33
 Nodes (5): disable(), enable(), ensureSidebarState(), handleNavigation(), update()
 
-### Community 49 - "Community 49"
+### Community 50 - "Community 50"
 Cohesion: 0.31
 Nodes (4): calculateDuration(), enable(), formatTime(), renderCard()
 
-### Community 50 - "Community 50"
+### Community 51 - "Community 51"
 Cohesion: 0.28
 Nodes (3): applyViewMode(), enable(), setViewMode()
 
-### Community 51 - "Community 51"
+### Community 52 - "Community 52"
 Cohesion: 0.33
 Nodes (5): enable(), _getLikeButton(), _isAlreadyLiked(), _tryLike(), _waitAndLike()
 
-### Community 52 - "Community 52"
+### Community 53 - "Community 53"
 Cohesion: 0.31
 Nodes (4): enable(), initDOM(), injectToggleButton(), startLoop()
 
-### Community 53 - "Community 53"
+### Community 54 - "Community 54"
 Cohesion: 0.36
 Nodes (7): C(), k(), L(), n(), o(), r(), t()
 
-### Community 54 - "Community 54"
+### Community 55 - "Community 55"
 Cohesion: 0.36
 Nodes (4): apply(), enable(), handleMutations(), injectStyles()
 
-### Community 55 - "Community 55"
+### Community 56 - "Community 56"
 Cohesion: 0.43
 Nodes (6): addChannelToFolder(), addFolder(), deleteFolder(), load(), removeChannelFromFolder(), save()
 
-### Community 56 - "Community 56"
+### Community 57 - "Community 57"
 Cohesion: 0.32
 Nodes (3): _cacheVideoElement(), enable(), onVideoChange()
 
-### Community 57 - "Community 57"
+### Community 58 - "Community 58"
 Cohesion: 0.32
 Nodes (3): attachBar(), _bindEvents(), updateBarPosition()
 
-### Community 58 - "Community 58"
+### Community 59 - "Community 59"
 Cohesion: 0.36
 Nodes (5): disable(), enable(), scanForVideos(), startObserver(), stopObserver()
 
-### Community 59 - "Community 59"
+### Community 60 - "Community 60"
 Cohesion: 0.39
 Nodes (5): disable(), enable(), _onPageChange(), _removeOverlay(), _showOverlay()
 
-### Community 60 - "Community 60"
+### Community 61 - "Community 61"
 Cohesion: 0.46
 Nodes (6): disable(), enable(), _injectStyle(), onPageChange(), _removeStyle(), update()
 
-### Community 61 - "Community 61"
+### Community 62 - "Community 62"
 Cohesion: 0.39
 Nodes (5): disable(), enable(), run(), showRemainingTime(), update()
 
-### Community 62 - "Community 62"
+### Community 63 - "Community 63"
 Cohesion: 0.33
 Nodes (1): ErrorHandler
 
-### Community 63 - "Community 63"
+### Community 64 - "Community 64"
 Cohesion: 0.38
 Nodes (3): checkUrl(), enable(), onPageChange()
 
-### Community 65 - "Community 65"
+### Community 66 - "Community 66"
 Cohesion: 0.38
 Nodes (3): cleanup(), init(), startObserver()
 
-### Community 66 - "Community 66"
+### Community 67 - "Community 67"
 Cohesion: 0.33
 Nodes (2): getVideoElement(), handleWheel()
 
-### Community 67 - "Community 67"
+### Community 68 - "Community 68"
 Cohesion: 0.43
 Nodes (4): applyOverlay(), injectCRTSVGFilter(), injectOverlayCSS(), injectSpecialEffectsSVG()
 
-### Community 68 - "Community 68"
+### Community 69 - "Community 69"
 Cohesion: 0.29
 Nodes (1): UIManager
 
-### Community 69 - "Community 69"
+### Community 70 - "Community 70"
 Cohesion: 0.4
 Nodes (2): on(), once()
 
-### Community 70 - "Community 70"
+### Community 71 - "Community 71"
 Cohesion: 0.47
 Nodes (3): extractData(), init(), scrapeFromScriptTags()
-
-### Community 71 - "Community 71"
-Cohesion: 0.4
-Nodes (2): _apply(), enable()
 
 ### Community 72 - "Community 72"
 Cohesion: 0.4
@@ -402,72 +403,76 @@ Nodes (2): _apply(), enable()
 
 ### Community 73 - "Community 73"
 Cohesion: 0.4
-Nodes (2): enable(), _update()
+Nodes (2): _apply(), enable()
 
 ### Community 74 - "Community 74"
 Cohesion: 0.4
+Nodes (2): enable(), _update()
+
+### Community 75 - "Community 75"
+Cohesion: 0.4
 Nodes (2): _checkRedirect(), enable()
 
-### Community 76 - "Community 76"
+### Community 77 - "Community 77"
 Cohesion: 0.8
 Nodes (4): buildMenuHTML(), diskHTML(), esc(), letterAvatar()
 
-### Community 78 - "Community 78"
+### Community 79 - "Community 79"
 Cohesion: 0.5
 Nodes (2): injectFilterBar(), renderFilterBar()
 
-### Community 79 - "Community 79"
+### Community 80 - "Community 80"
 Cohesion: 0.83
 Nodes (3): _defaults(), migrate(), validateAndMerge()
 
-### Community 80 - "Community 80"
+### Community 81 - "Community 81"
 Cohesion: 0.83
 Nodes (3): buildAdjustTab(), buildPresetsTab(), createFilterPanel()
 
-### Community 82 - "Community 82"
+### Community 83 - "Community 83"
 Cohesion: 1.0
 Nodes (2): extractData(), getAvatarUrl()
 
-### Community 84 - "Community 84"
+### Community 85 - "Community 85"
 Cohesion: 1.0
 Nodes (2): broadcastStats(), getPlayer()
 
 ## Knowledge Gaps
 - **Thin community `Community 34`** (12 nodes): `ElementCache`, `.clear()`, `.constructor()`, `.destroy()`, `.get()`, `.getAll()`, `.getStats()`, `.has()`, `.remove()`, `.set()`, `.watch()`, `element-cache.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 41`** (11 nodes): `SearchRedesign`, `.constructor()`, `.disable()`, `.enable()`, `.getConfigKey()`, `._handleNavigation()`, `.init()`, `._log()`, `._removeClasses()`, `.run()`, `search-redesign.js`
+- **Thin community `Community 42`** (11 nodes): `SearchRedesign`, `.constructor()`, `.disable()`, `.enable()`, `.getConfigKey()`, `._handleNavigation()`, `.init()`, `._log()`, `._removeClasses()`, `.run()`, `search-redesign.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 47`** (9 nodes): `NightModeManager`, `._applyBlueLight()`, `._applyDim()`, `.constructor()`, `._createBlueLightFilter()`, `.getConfigKey()`, `._removeBlueLight()`, `.run()`, `night-mode.js`
+- **Thin community `Community 48`** (9 nodes): `NightModeManager`, `._applyBlueLight()`, `._applyDim()`, `.constructor()`, `._createBlueLightFilter()`, `.getConfigKey()`, `._removeBlueLight()`, `.run()`, `night-mode.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 62`** (7 nodes): `ErrorHandler`, `.clearErrors()`, `.constructor()`, `.getErrors()`, `.handleError()`, `.logError()`, `error-handler.js`
+- **Thin community `Community 63`** (7 nodes): `ErrorHandler`, `.clearErrors()`, `.constructor()`, `.getErrors()`, `.handleError()`, `.logError()`, `error-handler.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 66`** (7 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `getVideoElement()`, `handleWheel()`, `wheel-controls.js`
+- **Thin community `Community 67`** (7 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `getVideoElement()`, `handleWheel()`, `wheel-controls.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 68`** (7 nodes): `ui-manager.js`, `UIManager`, `.constructor()`, `.destroy()`, `.heal()`, `.mount()`, `.remove()`
+- **Thin community `Community 69`** (7 nodes): `ui-manager.js`, `UIManager`, `.constructor()`, `.destroy()`, `.heal()`, `.mount()`, `.remove()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 69`** (6 nodes): `clear()`, `constructor()`, `emit()`, `on()`, `once()`, `event-bus.js`
+- **Thin community `Community 70`** (6 nodes): `clear()`, `constructor()`, `emit()`, `on()`, `once()`, `event-bus.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 71`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-metrics.js`
+- **Thin community `Community 72`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-metrics.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 72`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-playlists-podcasts.js`
+- **Thin community `Community 73`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-playlists-podcasts.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 73`** (6 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `_update()`, `hide-thumbnails.js`
+- **Thin community `Community 74`** (6 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `_update()`, `hide-thumbnails.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 74`** (6 nodes): `_checkRedirect()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `redirect-home.js`
+- **Thin community `Community 75`** (6 nodes): `_checkRedirect()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `redirect-home.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 78`** (5 nodes): `subs-ui-filter.js`, `_filterFeedNow()`, `injectFilterBar()`, `reapplyFilters()`, `renderFilterBar()`
+- **Thin community `Community 79`** (5 nodes): `subs-ui-filter.js`, `_filterFeedNow()`, `injectFilterBar()`, `reapplyFilters()`, `renderFilterBar()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 82`** (3 nodes): `extractData()`, `getAvatarUrl()`, `account-menu-data.js`
+- **Thin community `Community 83`** (3 nodes): `extractData()`, `getAvatarUrl()`, `account-menu-data.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 84`** (3 nodes): `broadcastStats()`, `getPlayer()`, `stats-bridge.js`
+- **Thin community `Community 85`** (3 nodes): `broadcastStats()`, `getPlayer()`, `stats-bridge.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `toggle()` connect `Community 1` to `Community 10`, `Community 2`, `Community 5`?**
+- **Why does `toggle()` connect `Community 5` to `Community 1`, `Community 10`, `Community 2`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `_applyVisibilitySettings()` connect `Community 2` to `Community 1`?**
+- **Why does `_applyVisibilitySettings()` connect `Community 2` to `Community 5`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
