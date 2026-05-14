@@ -4030,6 +4030,165 @@ body.ypp-search-grid-mode
   flex-direction: column !important;
 }
 
+/* ── Card Style: Search Results Sync ───────────────────────────────────────
+   The .ypp-grid-item reset uses !important which would override the card
+   style selectors. These rules re-apply each card style specifically for
+   .ypp-grid-item so search results stay in sync with the home/feed cards.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* FLAT ── search */
+html[data-ypp-card-style="flat"] .ypp-grid-item {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1px solid transparent !important;
+  padding: 0 !important;
+  border-radius: var(--ypp-radius-md) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+html[data-ypp-card-style="flat"] .ypp-grid-item:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ELEVATED ── search */
+html[data-ypp-card-style="elevated"] .ypp-grid-item {
+  background: var(--ypp-bg-surface) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  padding: var(--ypp-density-pad, 8px) !important;
+  border-radius: var(--ypp-radius-md) !important;
+  margin-bottom: var(--ypp-density-gap, 0px) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+html[data-ypp-card-style="elevated"] .ypp-grid-item:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
+  border-color: var(--ypp-accent-hover) !important;
+}
+
+/* GLASS ── search */
+html[data-ypp-card-style="glass"] .ypp-grid-item {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-top-color: rgba(255,255,255,0.18) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  padding: var(--ypp-density-pad, 12px) !important;
+  border-radius: var(--ypp-radius-lg, 16px) !important;
+  margin-bottom: var(--ypp-density-gap, 0px) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+html[data-ypp-card-style="glass"] .ypp-grid-item:hover {
+  transform: translateY(-4px) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+}
+
+/* FOLDER ── search */
+html[data-ypp-card-style="folder"] .ypp-grid-item {
+  position: relative !important;
+  margin-top: 14px !important;
+  border-radius: 0 8px 8px 8px !important;
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  padding: var(--ypp-density-pad, 8px) !important;
+  margin-bottom: var(--ypp-density-gap, 0px) !important;
+}
+html[data-ypp-card-style="folder"] .ypp-grid-item::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -10px !important;
+  left: -1px !important;
+  width: 64px !important;
+  height: 12px !important;
+  border-radius: 6px 6px 0 0 !important;
+  background: var(--ypp-folder-tab, #6C63FF) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-bottom: none !important;
+}
+html[data-ypp-card-style="folder"] .ypp-grid-item:nth-child(6n+1)::before { --ypp-folder-tab: #FF6B6B; }
+html[data-ypp-card-style="folder"] .ypp-grid-item:nth-child(6n+2)::before { --ypp-folder-tab: #6C63FF; }
+html[data-ypp-card-style="folder"] .ypp-grid-item:nth-child(6n+3)::before { --ypp-folder-tab: #10B981; }
+html[data-ypp-card-style="folder"] .ypp-grid-item:nth-child(6n+4)::before { --ypp-folder-tab: #F59E0B; }
+html[data-ypp-card-style="folder"] .ypp-grid-item:nth-child(6n+5)::before { --ypp-folder-tab: #3EA6FF; }
+html[data-ypp-card-style="folder"] .ypp-grid-item:nth-child(6n+6)::before { --ypp-folder-tab: #EC4899; }
+
+/* BENTO ── search */
+html[data-ypp-card-style="bento"] .ypp-grid-item {
+  border-radius: 12px !important;
+  background: #111111 !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: var(--ypp-density-pad, 8px) !important;
+}
+html[data-ypp-card-style="bento"] .ypp-grid-item:hover {
+  background: #1a1a1a !important;
+  transform: none !important;
+}
+
+/* NEON ── search */
+html[data-ypp-card-style="neon"] .ypp-grid-item {
+  border: 1px solid rgba(108,99,255,0.25) !important;
+  border-radius: 10px !important;
+  background: rgba(10,10,20,0.8) !important;
+  box-shadow: 0 0 10px rgba(108,99,255,0.12), inset 0 0 10px rgba(108,99,255,0.04) !important;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s !important;
+  padding: var(--ypp-density-pad, 8px) !important;
+}
+html[data-ypp-card-style="neon"] .ypp-grid-item:hover {
+  border-color: rgba(108,99,255,0.6) !important;
+  box-shadow: 0 0 20px rgba(108,99,255,0.35), 0 0 40px rgba(108,99,255,0.15) !important;
+}
+
+/* COMPACT ── search */
+html[data-ypp-card-style="compact"] .ypp-grid-item {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+}
+html[data-ypp-card-style="compact"] .ypp-grid-item:hover {
+  background: rgba(255,255,255,0.04) !important;
+  transform: none !important;
+}
+html[data-ypp-card-style="compact"] .ypp-grid-item #video-title {
+  font-size: 12px !important;
+  -webkit-line-clamp: 1 !important;
+  line-clamp: 1 !important;
+}
+html[data-ypp-card-style="compact"] .ypp-grid-item #metadata-line {
+  font-size: 11px !important;
+}
+
+/* POLAROID ── search */
+html[data-ypp-card-style="polaroid"] .ypp-grid-item {
+  background: #E8E4D9 !important;
+  border-radius: 4px !important;
+  padding: 6px 6px 24px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2) !important;
+  border: none !important;
+  transform: rotate(0.5deg) !important;
+}
+html[data-ypp-card-style="polaroid"] .ypp-grid-item:nth-child(even) {
+  transform: rotate(-0.8deg) !important;
+}
+html[data-ypp-card-style="polaroid"] .ypp-grid-item:hover {
+  transform: rotate(0deg) scale(1.02) !important;
+  z-index: 2 !important;
+}
+html[data-ypp-card-style="polaroid"] .ypp-grid-item #video-title {
+  color: #1a1a1a !important;
+  font-size: 12px !important;
+  font-family: 'Courier New', monospace !important;
+}
+html[data-ypp-card-style="polaroid"] .ypp-grid-item #metadata-line span {
+  color: #555 !important;
+}
+
+
 /* Zen Mode Shadow */
 .ypp-zen-shadow {
   transition: box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
