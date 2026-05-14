@@ -6,15 +6,15 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const panel = document.createElement('div');
         panel.id = 'ypp-cinema-panel';
         Object.assign(panel.style, {
-            position: 'absolute',
-            bottom: '56px',
-            right: '16px',
-            background: 'rgba(0, 0, 0, 0.15)', // Transparent translucent
+            position: 'fixed',
+            bottom: '80px',
+            right: '80px',
+            background: 'rgba(0, 0, 0, 0.15)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderTop: '1px solid rgba(255, 255, 255, 0.25)',
             borderRadius: '20px',
-            zIndex: '99999',
-            width: '440px', // Smaller width
+            zIndex: '2147483646',
+            width: '440px',
             color: '#fff',
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
             boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
@@ -243,8 +243,9 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         footer.appendChild(resetBtn);
         panel.appendChild(footer);
 
-        const container = document.getElementById('movie_player') || document.body;
-        container.appendChild(panel);
+        // Bug fix: always mount to document.body with position:fixed
+        // so the panel is visible on external sites (no #movie_player).
+        document.body.appendChild(panel);
         ctx._filterPanel = panel;
 
         const outside = (e) => {

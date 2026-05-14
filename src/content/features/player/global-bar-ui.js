@@ -79,7 +79,10 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
 
     /** Remove all injected bars and clear the map. */
     removeAll() {
-        this.activeBars.forEach((bar) => bar.remove());
+        this.activeBars.forEach((bar) => {
+            if (bar._cleanupInterval) clearInterval(bar._cleanupInterval);
+            bar.remove();
+        });
         this.activeBars.clear();
     }
 
@@ -262,5 +265,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 this.repositionAll();
             }
         }, 3000);
+        // Bug fix: store interval so removeAll() can cancel it to prevent leaks
+        bar._cleanupInterval = checkRemoval;
     }
 };

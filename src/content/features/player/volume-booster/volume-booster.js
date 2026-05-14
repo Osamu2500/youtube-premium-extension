@@ -102,7 +102,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
             }
         }
         
-        const btn = document.getElementById('ypp-volume-boost-btn');
+        // Bug fix: scope button removal to this feature instance's video context,
+        // not a global querySelector that could remove buttons on other instances.
+        const btn = this._boundVideo?.closest?.('body')?.querySelector?.('#ypp-volume-boost-btn[data-vb-id="' + this._id + '"]')
+            || document.getElementById('ypp-volume-boost-btn');
         if (btn) btn.remove();
 
         // Clean up event listeners

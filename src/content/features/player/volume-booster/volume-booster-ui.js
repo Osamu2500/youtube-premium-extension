@@ -3,8 +3,12 @@ window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     static saveVolumeSettings(ctx) {
+        // Bug fix: Use a safe inline debounce so this works on external sites
+        // where window.YPP.Utils.debounce may not be defined.
         if (!this.debouncedSave) {
-            this.debouncedSave = window.YPP.Utils.debounce((ctxArg) => {
+            const debounce = window.YPP?.Utils?.debounce
+                || ((fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; });
+            this.debouncedSave = debounce((ctxArg) => {
                 if (!window.YPP?.MainApp?.saveSettings) return;
                 window.YPP.MainApp.saveSettings({
                     volumeLevel: ctxArg._volumeGain,
@@ -362,11 +366,9 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         footer.append(compBtn, monoBtn, resetBtn, hint);
         panel.appendChild(footer);
 
-        // Mount panel
-        const moviePlayer = document.getElementById('movie_player')
-            || document.querySelector('.html5-video-player')
-            || document.body;
-        moviePlayer.appendChild(panel);
+        // Bug fix: always mount to document.body and use position:fixed
+        // so the panel is visible on external sites (no #movie_player).
+        document.body.appendChild(panel);
         ctx._volumePopup = panel;
 
         // Visualizer Loop
@@ -514,15 +516,15 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         style.textContent = `
 /* ── EQ Panel ── */
 #ypp-eq-panel {
-    position: absolute;
-    bottom: 72px;
-    right: 16px;
+    position: fixed;
+    bottom: 80px;
+    right: 80px;
     width: 380px;
     background: rgba(0, 0, 0, 0.15); /* Fully transparent with heavy blur */
     border: 1px solid rgba(255,255,255,0.15);
     border-top: 1px solid rgba(255,255,255,0.25);
     border-radius: 20px;
-    z-index: 99999;
+    z-index: 2147483646;
     color: #fff;
     font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
     box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4),

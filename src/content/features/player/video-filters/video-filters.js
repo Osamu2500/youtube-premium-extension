@@ -145,8 +145,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         if (adj.vibrance !== undefined && adj.vibrance !== 100) {
             const vb = adj.vibrance;
             // Vibrance approximated via saturation adjustment
-            const satMult = s(vb, 100);
-            adjStr_parts_saturate_override = satMult;
+            adj.saturate = s(vb, 100);
         }
         // Highlights/Shadows approximate via brightness layers (CSS limited)
         if (adj.highlights !== 0) baseBrightness += adj.highlights * 0.15;

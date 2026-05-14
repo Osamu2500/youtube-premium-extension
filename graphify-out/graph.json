@@ -4,12 +4,39 @@
   "graph": {},
   "nodes": [
     {
+      "label": "check_ticks.mjs",
+      "file_type": "code",
+      "source_file": "check_ticks.mjs",
+      "source_location": "L1",
+      "id": "check_ticks_mjs",
+      "community": 92,
+      "norm_label": "check_ticks.mjs"
+    },
+    {
+      "label": "fix_build.mjs",
+      "file_type": "code",
+      "source_file": "fix_build.mjs",
+      "source_location": "L1",
+      "id": "fix_build_mjs",
+      "community": 93,
+      "norm_label": "fix_build.mjs"
+    },
+    {
+      "label": "vite.config.external.js",
+      "file_type": "code",
+      "source_file": "vite.config.external.js",
+      "source_location": "L1",
+      "id": "vite_config_external_js",
+      "community": 94,
+      "norm_label": "vite.config.external.js"
+    },
+    {
       "label": "service-worker.js",
       "file_type": "code",
       "source_file": "src\\background\\service-worker.js",
       "source_location": "L1",
       "id": "src_background_service_worker_js",
-      "community": 80,
+      "community": 82,
       "norm_label": "service-worker.js"
     },
     {
@@ -18,7 +45,7 @@
       "source_file": "src\\background\\service-worker.js",
       "source_location": "L109",
       "id": "background_service_worker_starttimer",
-      "community": 80,
+      "community": 82,
       "norm_label": "starttimer()"
     },
     {
@@ -27,7 +54,7 @@
       "source_file": "src\\background\\service-worker.js",
       "source_location": "L127",
       "id": "background_service_worker_stoptimer",
-      "community": 80,
+      "community": 82,
       "norm_label": "stoptimer()"
     },
     {
@@ -36,7 +63,7 @@
       "source_file": "src\\content\\constants.js",
       "source_location": "L1",
       "id": "src_content_constants_js",
-      "community": 84,
+      "community": 86,
       "norm_label": "constants.js"
     },
     {
@@ -45,7 +72,7 @@
       "source_file": "src\\content\\constants.js",
       "source_location": "L524",
       "id": "content_constants_deepfreeze",
-      "community": 84,
+      "community": 86,
       "norm_label": "deepfreeze()"
     },
     {
@@ -162,7 +189,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L1",
       "id": "src_content_error_handler_js",
-      "community": 61,
+      "community": 63,
       "norm_label": "error-handler.js"
     },
     {
@@ -171,7 +198,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L13",
       "id": "content_error_handler_errorhandler",
-      "community": 61,
+      "community": 63,
       "norm_label": "errorhandler"
     },
     {
@@ -180,7 +207,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L14",
       "id": "content_error_handler_errorhandler_constructor",
-      "community": 61,
+      "community": 63,
       "norm_label": ".constructor()"
     },
     {
@@ -189,7 +216,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L23",
       "id": "content_error_handler_errorhandler_logerror",
-      "community": 61,
+      "community": 63,
       "norm_label": ".logerror()"
     },
     {
@@ -198,7 +225,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L33",
       "id": "content_error_handler_errorhandler_geterrors",
-      "community": 61,
+      "community": 63,
       "norm_label": ".geterrors()"
     },
     {
@@ -207,7 +234,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L40",
       "id": "content_error_handler_errorhandler_clearerrors",
-      "community": 61,
+      "community": 63,
       "norm_label": ".clearerrors()"
     },
     {
@@ -216,7 +243,7 @@
       "source_file": "src\\content\\error-handler.js",
       "source_location": "L49",
       "id": "content_error_handler_errorhandler_handleerror",
-      "community": 61,
+      "community": 63,
       "norm_label": ".handleerror()"
     },
     {
@@ -319,12 +346,57 @@
       "norm_label": "disableall()"
     },
     {
+      "label": "global-bar-external.js",
+      "file_type": "code",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L1",
+      "id": "src_content_global_bar_external_js",
+      "community": 76,
+      "norm_label": "global-bar-external.js"
+    },
+    {
+      "label": "constructor()",
+      "file_type": "code",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L42",
+      "id": "content_global_bar_external_constructor",
+      "community": 76,
+      "norm_label": "constructor()"
+    },
+    {
+      "label": "enable()",
+      "file_type": "code",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L48",
+      "id": "content_global_bar_external_enable",
+      "community": 76,
+      "norm_label": "enable()"
+    },
+    {
+      "label": "disable()",
+      "file_type": "code",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L49",
+      "id": "content_global_bar_external_disable",
+      "community": 76,
+      "norm_label": "disable()"
+    },
+    {
+      "label": "getConfigKey()",
+      "file_type": "code",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L50",
+      "id": "content_global_bar_external_getconfigkey",
+      "community": 76,
+      "norm_label": "getconfigkey()"
+    },
+    {
       "label": "index.js",
       "file_type": "code",
       "source_file": "src\\content\\index.js",
       "source_location": "L1",
       "id": "src_content_index_js",
-      "community": 90,
+      "community": 95,
       "norm_label": "index.js"
     },
     {
@@ -333,7 +405,7 @@
       "source_file": "src\\content\\main.js",
       "source_location": "L1",
       "id": "src_content_main_js",
-      "community": 85,
+      "community": 87,
       "norm_label": "main.js"
     },
     {
@@ -342,7 +414,7 @@
       "source_file": "src\\content\\main.js",
       "source_location": "L29",
       "id": "content_main_safelog",
-      "community": 85,
+      "community": 87,
       "norm_label": "safelog()"
     },
     {
@@ -351,34 +423,34 @@
       "source_file": "src\\content\\settings-schema.js",
       "source_location": "L1",
       "id": "src_content_settings_schema_js",
-      "community": 78,
+      "community": 80,
       "norm_label": "settings-schema.js"
     },
     {
       "label": "validateAndMerge()",
       "file_type": "code",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L190",
+      "source_location": "L194",
       "id": "content_settings_schema_validateandmerge",
-      "community": 78,
+      "community": 80,
       "norm_label": "validateandmerge()"
     },
     {
       "label": "migrate()",
       "file_type": "code",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L265",
+      "source_location": "L269",
       "id": "content_settings_schema_migrate",
-      "community": 78,
+      "community": 80,
       "norm_label": "migrate()"
     },
     {
       "label": "_defaults()",
       "file_type": "code",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L288",
+      "source_location": "L292",
       "id": "content_settings_schema_defaults",
-      "community": 78,
+      "community": 80,
       "norm_label": "_defaults()"
     },
     {
@@ -783,7 +855,7 @@
       "source_file": "src\\content\\core\\event-bus.js",
       "source_location": "L1",
       "id": "src_content_core_event_bus_js",
-      "community": 69,
+      "community": 70,
       "norm_label": "event-bus.js"
     },
     {
@@ -792,7 +864,7 @@
       "source_file": "src\\content\\core\\event-bus.js",
       "source_location": "L9",
       "id": "core_event_bus_constructor",
-      "community": 69,
+      "community": 70,
       "norm_label": "constructor()"
     },
     {
@@ -801,7 +873,7 @@
       "source_file": "src\\content\\core\\event-bus.js",
       "source_location": "L19",
       "id": "core_event_bus_on",
-      "community": 69,
+      "community": 70,
       "norm_label": "on()"
     },
     {
@@ -810,7 +882,7 @@
       "source_file": "src\\content\\core\\event-bus.js",
       "source_location": "L48",
       "id": "core_event_bus_once",
-      "community": 69,
+      "community": 70,
       "norm_label": "once()"
     },
     {
@@ -819,7 +891,7 @@
       "source_file": "src\\content\\core\\event-bus.js",
       "source_location": "L60",
       "id": "core_event_bus_emit",
-      "community": 69,
+      "community": 70,
       "norm_label": "emit()"
     },
     {
@@ -828,7 +900,7 @@
       "source_file": "src\\content\\core\\event-bus.js",
       "source_location": "L76",
       "id": "core_event_bus_clear",
-      "community": 69,
+      "community": 70,
       "norm_label": "clear()"
     },
     {
@@ -1125,7 +1197,7 @@
       "source_file": "src\\content\\features\\core\\global\\data-api.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_data_api_js",
-      "community": 70,
+      "community": 71,
       "norm_label": "data-api.js"
     },
     {
@@ -1134,7 +1206,7 @@
       "source_file": "src\\content\\features\\core\\global\\data-api.js",
       "source_location": "L10",
       "id": "global_data_api_constructor",
-      "community": 70,
+      "community": 71,
       "norm_label": "constructor()"
     },
     {
@@ -1143,7 +1215,7 @@
       "source_file": "src\\content\\features\\core\\global\\data-api.js",
       "source_location": "L18",
       "id": "global_data_api_init",
-      "community": 70,
+      "community": 71,
       "norm_label": "init()"
     },
     {
@@ -1152,7 +1224,7 @@
       "source_file": "src\\content\\features\\core\\global\\data-api.js",
       "source_location": "L24",
       "id": "global_data_api_extractdata",
-      "community": 70,
+      "community": 71,
       "norm_label": "extractdata()"
     },
     {
@@ -1161,7 +1233,7 @@
       "source_file": "src\\content\\features\\core\\global\\data-api.js",
       "source_location": "L44",
       "id": "global_data_api_scrapefromscripttags",
-      "community": 70,
+      "community": 71,
       "norm_label": "scrapefromscripttags()"
     },
     {
@@ -1170,7 +1242,7 @@
       "source_file": "src\\content\\features\\core\\global\\data-api.js",
       "source_location": "L65",
       "id": "global_data_api_getheaders",
-      "community": 70,
+      "community": 71,
       "norm_label": "getheaders()"
     },
     {
@@ -1179,7 +1251,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-metrics.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_hide_metrics_js",
-      "community": 71,
+      "community": 72,
       "norm_label": "hide-metrics.js"
     },
     {
@@ -1188,7 +1260,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-metrics.js",
       "source_location": "L7",
       "id": "global_hide_metrics_constructor",
-      "community": 71,
+      "community": 72,
       "norm_label": "constructor()"
     },
     {
@@ -1197,7 +1269,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-metrics.js",
       "source_location": "L12",
       "id": "global_hide_metrics_getconfigkey",
-      "community": 71,
+      "community": 72,
       "norm_label": "getconfigkey()"
     },
     {
@@ -1206,7 +1278,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-metrics.js",
       "source_location": "L14",
       "id": "global_hide_metrics_enable",
-      "community": 71,
+      "community": 72,
       "norm_label": "enable()"
     },
     {
@@ -1215,7 +1287,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-metrics.js",
       "source_location": "L20",
       "id": "global_hide_metrics_disable",
-      "community": 71,
+      "community": 72,
       "norm_label": "disable()"
     },
     {
@@ -1224,7 +1296,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-metrics.js",
       "source_location": "L26",
       "id": "global_hide_metrics_apply",
-      "community": 71,
+      "community": 72,
       "norm_label": "_apply()"
     },
     {
@@ -1233,7 +1305,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-playlists-podcasts.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_hide_playlists_podcasts_js",
-      "community": 72,
+      "community": 73,
       "norm_label": "hide-playlists-podcasts.js"
     },
     {
@@ -1242,7 +1314,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-playlists-podcasts.js",
       "source_location": "L7",
       "id": "global_hide_playlists_podcasts_constructor",
-      "community": 72,
+      "community": 73,
       "norm_label": "constructor()"
     },
     {
@@ -1251,7 +1323,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-playlists-podcasts.js",
       "source_location": "L12",
       "id": "global_hide_playlists_podcasts_getconfigkey",
-      "community": 72,
+      "community": 73,
       "norm_label": "getconfigkey()"
     },
     {
@@ -1260,7 +1332,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-playlists-podcasts.js",
       "source_location": "L14",
       "id": "global_hide_playlists_podcasts_enable",
-      "community": 72,
+      "community": 73,
       "norm_label": "enable()"
     },
     {
@@ -1269,7 +1341,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-playlists-podcasts.js",
       "source_location": "L21",
       "id": "global_hide_playlists_podcasts_disable",
-      "community": 72,
+      "community": 73,
       "norm_label": "disable()"
     },
     {
@@ -1278,7 +1350,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-playlists-podcasts.js",
       "source_location": "L29",
       "id": "global_hide_playlists_podcasts_apply",
-      "community": 72,
+      "community": 73,
       "norm_label": "_apply()"
     },
     {
@@ -1287,7 +1359,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-thumbnails.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_hide_thumbnails_js",
-      "community": 73,
+      "community": 74,
       "norm_label": "hide-thumbnails.js"
     },
     {
@@ -1296,7 +1368,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-thumbnails.js",
       "source_location": "L5",
       "id": "global_hide_thumbnails_constructor",
-      "community": 73,
+      "community": 74,
       "norm_label": "constructor()"
     },
     {
@@ -1305,7 +1377,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-thumbnails.js",
       "source_location": "L9",
       "id": "global_hide_thumbnails_getconfigkey",
-      "community": 73,
+      "community": 74,
       "norm_label": "getconfigkey()"
     },
     {
@@ -1314,7 +1386,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-thumbnails.js",
       "source_location": "L10",
       "id": "global_hide_thumbnails_enable",
-      "community": 73,
+      "community": 74,
       "norm_label": "enable()"
     },
     {
@@ -1323,7 +1395,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-thumbnails.js",
       "source_location": "L15",
       "id": "global_hide_thumbnails_disable",
-      "community": 73,
+      "community": 74,
       "norm_label": "disable()"
     },
     {
@@ -1332,7 +1404,7 @@
       "source_file": "src\\content\\features\\core\\global\\hide-thumbnails.js",
       "source_location": "L20",
       "id": "global_hide_thumbnails_update",
-      "community": 73,
+      "community": 74,
       "norm_label": "_update()"
     },
     {
@@ -1611,7 +1683,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_mark_watched_js",
-      "community": 14,
+      "community": 15,
       "norm_label": "mark-watched.js"
     },
     {
@@ -1620,7 +1692,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L5",
       "id": "global_mark_watched_constructor",
-      "community": 14,
+      "community": 15,
       "norm_label": "constructor()"
     },
     {
@@ -1629,7 +1701,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L13",
       "id": "global_mark_watched_getconfigkey",
-      "community": 14,
+      "community": 15,
       "norm_label": "getconfigkey()"
     },
     {
@@ -1638,7 +1710,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L15",
       "id": "global_mark_watched_enable",
-      "community": 14,
+      "community": 15,
       "norm_label": "enable()"
     },
     {
@@ -1647,7 +1719,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L28",
       "id": "global_mark_watched_disable",
-      "community": 14,
+      "community": 15,
       "norm_label": "disable()"
     },
     {
@@ -1656,7 +1728,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L37",
       "id": "global_mark_watched_loadwatchedids",
-      "community": 14,
+      "community": 15,
       "norm_label": "_loadwatchedids()"
     },
     {
@@ -1665,7 +1737,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L50",
       "id": "global_mark_watched_savewatchedids",
-      "community": 14,
+      "community": 15,
       "norm_label": "_savewatchedids()"
     },
     {
@@ -1674,7 +1746,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L57",
       "id": "global_mark_watched_markaswatched",
-      "community": 14,
+      "community": 15,
       "norm_label": "markaswatched()"
     },
     {
@@ -1683,7 +1755,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L67",
       "id": "global_mark_watched_unmarkaswatched",
-      "community": 14,
+      "community": 15,
       "norm_label": "unmarkaswatched()"
     },
     {
@@ -1692,7 +1764,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L75",
       "id": "global_mark_watched_iswatched",
-      "community": 14,
+      "community": 15,
       "norm_label": "iswatched()"
     },
     {
@@ -1701,7 +1773,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L80",
       "id": "global_mark_watched_getvideoid",
-      "community": 14,
+      "community": 15,
       "norm_label": "_getvideoid()"
     },
     {
@@ -1710,7 +1782,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L96",
       "id": "global_mark_watched_processcards",
-      "community": 14,
+      "community": 15,
       "norm_label": "_processcards()"
     },
     {
@@ -1719,7 +1791,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L112",
       "id": "global_mark_watched_processcard",
-      "community": 14,
+      "community": 15,
       "norm_label": "_processcard()"
     },
     {
@@ -1728,7 +1800,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L138",
       "id": "global_mark_watched_addwatchedbadge",
-      "community": 14,
+      "community": 15,
       "norm_label": "_addwatchedbadge()"
     },
     {
@@ -1737,7 +1809,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L161",
       "id": "global_mark_watched_removewatchedbadge",
-      "community": 14,
+      "community": 15,
       "norm_label": "_removewatchedbadge()"
     },
     {
@@ -1746,7 +1818,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L166",
       "id": "global_mark_watched_addcontextmenu",
-      "community": 14,
+      "community": 15,
       "norm_label": "_addcontextmenu()"
     },
     {
@@ -1755,7 +1827,7 @@
       "source_file": "src\\content\\features\\core\\global\\mark-watched.js",
       "source_location": "L242",
       "id": "global_mark_watched_onnavigate",
-      "community": 14,
+      "community": 15,
       "norm_label": "_onnavigate()"
     },
     {
@@ -1989,7 +2061,7 @@
       "source_file": "src\\content\\features\\core\\global\\redirect-home.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_redirect_home_js",
-      "community": 74,
+      "community": 75,
       "norm_label": "redirect-home.js"
     },
     {
@@ -1998,7 +2070,7 @@
       "source_file": "src\\content\\features\\core\\global\\redirect-home.js",
       "source_location": "L5",
       "id": "global_redirect_home_constructor",
-      "community": 74,
+      "community": 75,
       "norm_label": "constructor()"
     },
     {
@@ -2007,7 +2079,7 @@
       "source_file": "src\\content\\features\\core\\global\\redirect-home.js",
       "source_location": "L9",
       "id": "global_redirect_home_getconfigkey",
-      "community": 74,
+      "community": 75,
       "norm_label": "getconfigkey()"
     },
     {
@@ -2016,7 +2088,7 @@
       "source_file": "src\\content\\features\\core\\global\\redirect-home.js",
       "source_location": "L10",
       "id": "global_redirect_home_enable",
-      "community": 74,
+      "community": 75,
       "norm_label": "enable()"
     },
     {
@@ -2025,7 +2097,7 @@
       "source_file": "src\\content\\features\\core\\global\\redirect-home.js",
       "source_location": "L15",
       "id": "global_redirect_home_disable",
-      "community": 74,
+      "community": 75,
       "norm_label": "disable()"
     },
     {
@@ -2034,7 +2106,7 @@
       "source_file": "src\\content\\features\\core\\global\\redirect-home.js",
       "source_location": "L19",
       "id": "global_redirect_home_checkredirect",
-      "community": 74,
+      "community": 75,
       "norm_label": "_checkredirect()"
     },
     {
@@ -2268,7 +2340,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-data.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_account_menu_account_menu_data_js",
-      "community": 81,
+      "community": 83,
       "norm_label": "account-menu-data.js"
     },
     {
@@ -2277,7 +2349,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-data.js",
       "source_location": "L22",
       "id": "account_menu_account_menu_data_getavatarurl",
-      "community": 81,
+      "community": 83,
       "norm_label": "getavatarurl()"
     },
     {
@@ -2286,7 +2358,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-data.js",
       "source_location": "L79",
       "id": "account_menu_account_menu_data_extractdata",
-      "community": 81,
+      "community": 83,
       "norm_label": "extractdata()"
     },
     {
@@ -2295,7 +2367,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-ui.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_account_menu_account_menu_ui_js",
-      "community": 75,
+      "community": 77,
       "norm_label": "account-menu-ui.js"
     },
     {
@@ -2304,7 +2376,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-ui.js",
       "source_location": "L15",
       "id": "account_menu_account_menu_ui_esc",
-      "community": 75,
+      "community": 77,
       "norm_label": "esc()"
     },
     {
@@ -2313,7 +2385,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-ui.js",
       "source_location": "L34",
       "id": "account_menu_account_menu_ui_letteravatar",
-      "community": 75,
+      "community": 77,
       "norm_label": "letteravatar()"
     },
     {
@@ -2322,7 +2394,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-ui.js",
       "source_location": "L61",
       "id": "account_menu_account_menu_ui_diskhtml",
-      "community": 75,
+      "community": 77,
       "norm_label": "diskhtml()"
     },
     {
@@ -2331,7 +2403,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\account-menu-ui.js",
       "source_location": "L96",
       "id": "account_menu_account_menu_ui_buildmenuhtml",
-      "community": 75,
+      "community": 77,
       "norm_label": "buildmenuhtml()"
     },
     {
@@ -2475,7 +2547,7 @@
       "source_file": "src\\content\\features\\core\\global\\account-menu\\index.js",
       "source_location": "L1",
       "id": "src_content_features_core_global_account_menu_index_js",
-      "community": 91,
+      "community": 96,
       "norm_label": "index.js"
     },
     {
@@ -3105,7 +3177,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L1",
       "id": "src_content_features_pages_home_redirect_shorts_js",
-      "community": 62,
+      "community": 64,
       "norm_label": "redirect-shorts.js"
     },
     {
@@ -3114,7 +3186,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L5",
       "id": "home_redirect_shorts_constructor",
-      "community": 62,
+      "community": 64,
       "norm_label": "constructor()"
     },
     {
@@ -3123,7 +3195,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L10",
       "id": "home_redirect_shorts_getconfigkey",
-      "community": 62,
+      "community": 64,
       "norm_label": "getconfigkey()"
     },
     {
@@ -3132,7 +3204,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L14",
       "id": "home_redirect_shorts_enable",
-      "community": 62,
+      "community": 64,
       "norm_label": "enable()"
     },
     {
@@ -3141,7 +3213,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L19",
       "id": "home_redirect_shorts_disable",
-      "community": 62,
+      "community": 64,
       "norm_label": "disable()"
     },
     {
@@ -3150,7 +3222,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L23",
       "id": "home_redirect_shorts_onpagechange",
-      "community": 62,
+      "community": 64,
       "norm_label": "onpagechange()"
     },
     {
@@ -3159,7 +3231,7 @@
       "source_file": "src\\content\\features\\pages\\home\\redirect-shorts.js",
       "source_location": "L28",
       "id": "home_redirect_shorts_checkurl",
-      "community": 62,
+      "community": 64,
       "norm_label": "checkurl()"
     },
     {
@@ -3303,7 +3375,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L1",
       "id": "src_content_features_pages_library_history_history_redesign_js",
-      "community": 53,
+      "community": 54,
       "norm_label": "history-redesign.js"
     },
     {
@@ -3312,7 +3384,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L6",
       "id": "history_history_redesign_constructor",
-      "community": 53,
+      "community": 54,
       "norm_label": "constructor()"
     },
     {
@@ -3321,7 +3393,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L14",
       "id": "history_history_redesign_getconfigkey",
-      "community": 53,
+      "community": 54,
       "norm_label": "getconfigkey()"
     },
     {
@@ -3330,7 +3402,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L18",
       "id": "history_history_redesign_enable",
-      "community": 53,
+      "community": 54,
       "norm_label": "enable()"
     },
     {
@@ -3339,7 +3411,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L28",
       "id": "history_history_redesign_disable",
-      "community": 53,
+      "community": 54,
       "norm_label": "disable()"
     },
     {
@@ -3348,7 +3420,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L40",
       "id": "history_history_redesign_apply",
-      "community": 53,
+      "community": 54,
       "norm_label": "apply()"
     },
     {
@@ -3357,7 +3429,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L49",
       "id": "history_history_redesign_injectstyles",
-      "community": 53,
+      "community": 54,
       "norm_label": "injectstyles()"
     },
     {
@@ -3366,7 +3438,7 @@
       "source_file": "src\\content\\features\\pages\\library\\history\\history-redesign.js",
       "source_location": "L274",
       "id": "history_history_redesign_handlemutations",
-      "community": 53,
+      "community": 54,
       "norm_label": "handlemutations()"
     },
     {
@@ -4662,7 +4734,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L1",
       "id": "src_content_features_pages_subscriptions_folder_storage_js",
-      "community": 54,
+      "community": 55,
       "norm_label": "folder-storage.js"
     },
     {
@@ -4671,7 +4743,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L11",
       "id": "subscriptions_folder_storage_constructor",
-      "community": 54,
+      "community": 55,
       "norm_label": "constructor()"
     },
     {
@@ -4680,7 +4752,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L30",
       "id": "subscriptions_folder_storage_load",
-      "community": 54,
+      "community": 55,
       "norm_label": "load()"
     },
     {
@@ -4689,7 +4761,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L48",
       "id": "subscriptions_folder_storage_save",
-      "community": 54,
+      "community": 55,
       "norm_label": "save()"
     },
     {
@@ -4698,7 +4770,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L68",
       "id": "subscriptions_folder_storage_addfolder",
-      "community": 54,
+      "community": 55,
       "norm_label": "addfolder()"
     },
     {
@@ -4707,7 +4779,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L80",
       "id": "subscriptions_folder_storage_deletefolder",
-      "community": 54,
+      "community": 55,
       "norm_label": "deletefolder()"
     },
     {
@@ -4716,7 +4788,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L98",
       "id": "subscriptions_folder_storage_addchanneltofolder",
-      "community": 54,
+      "community": 55,
       "norm_label": "addchanneltofolder()"
     },
     {
@@ -4725,7 +4797,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-storage.js",
       "source_location": "L112",
       "id": "subscriptions_folder_storage_removechannelfromfolder",
-      "community": 54,
+      "community": 55,
       "norm_label": "removechannelfromfolder()"
     },
     {
@@ -4921,7 +4993,7 @@
       "label": "runScan()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1070",
+      "source_location": "L1103",
       "id": "subscriptions_folder_ui_runscan",
       "community": 0,
       "norm_label": "runscan()"
@@ -4930,16 +5002,25 @@
       "label": "_getYoutubeConfig()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1341",
+      "source_location": "L1444",
       "id": "subscriptions_folder_ui_getyoutubeconfig",
       "community": 0,
       "norm_label": "_getyoutubeconfig()"
     },
     {
+      "label": "_getApiHeaders()",
+      "file_type": "code",
+      "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
+      "source_location": "L1499",
+      "id": "subscriptions_folder_ui_getapiheaders",
+      "community": 0,
+      "norm_label": "_getapiheaders()"
+    },
+    {
       "label": "_tryApiUnsubscribe()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1380",
+      "source_location": "L1535",
       "id": "subscriptions_folder_ui_tryapiunsubscribe",
       "community": 0,
       "norm_label": "_tryapiunsubscribe()"
@@ -4948,7 +5029,7 @@
       "label": "_tryNativeDomUnsubscribe()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1442",
+      "source_location": "L1573",
       "id": "subscriptions_folder_ui_trynativedomunsubscribe",
       "community": 0,
       "norm_label": "_trynativedomunsubscribe()"
@@ -4957,7 +5038,7 @@
       "label": "_doUnsubscribe()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1483",
+      "source_location": "L1614",
       "id": "subscriptions_folder_ui_dounsubscribe",
       "community": 0,
       "norm_label": "_dounsubscribe()"
@@ -4966,7 +5047,7 @@
       "label": "individualUnsubscribe()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1527",
+      "source_location": "L1658",
       "id": "subscriptions_folder_ui_individualunsubscribe",
       "community": 0,
       "norm_label": "individualunsubscribe()"
@@ -4975,7 +5056,7 @@
       "label": "bulkUnsubscribe()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1606",
+      "source_location": "L1737",
       "id": "subscriptions_folder_ui_bulkunsubscribe",
       "community": 0,
       "norm_label": "bulkunsubscribe()"
@@ -4984,7 +5065,7 @@
       "label": "bulkAddToFolder()",
       "file_type": "code",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1641",
+      "source_location": "L1772",
       "id": "subscriptions_folder_ui_bulkaddtofolder",
       "community": 0,
       "norm_label": "bulkaddtofolder()"
@@ -4995,7 +5076,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\index.js",
       "source_location": "L1",
       "id": "src_content_features_pages_subscriptions_index_js",
-      "community": 76,
+      "community": 78,
       "norm_label": "index.js"
     },
     {
@@ -5004,7 +5085,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\index.js",
       "source_location": "L3",
       "id": "subscriptions_index_constructor",
-      "community": 76,
+      "community": 78,
       "norm_label": "constructor()"
     },
     {
@@ -5013,7 +5094,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\index.js",
       "source_location": "L9",
       "id": "subscriptions_index_getconfigkey",
-      "community": 76,
+      "community": 78,
       "norm_label": "getconfigkey()"
     },
     {
@@ -5022,7 +5103,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\index.js",
       "source_location": "L16",
       "id": "subscriptions_index_enable",
-      "community": 76,
+      "community": 78,
       "norm_label": "enable()"
     },
     {
@@ -5031,7 +5112,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\index.js",
       "source_location": "L36",
       "id": "subscriptions_index_disable",
-      "community": 76,
+      "community": 78,
       "norm_label": "disable()"
     },
     {
@@ -5400,7 +5481,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-filter.js",
       "source_location": "L1",
       "id": "src_content_features_pages_subscriptions_subscriptions_ui_subs_ui_filter_js",
-      "community": 77,
+      "community": 79,
       "norm_label": "subs-ui-filter.js"
     },
     {
@@ -5409,7 +5490,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-filter.js",
       "source_location": "L5",
       "id": "subscriptions_ui_subs_ui_filter_injectfilterbar",
-      "community": 77,
+      "community": 79,
       "norm_label": "injectfilterbar()"
     },
     {
@@ -5418,7 +5499,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-filter.js",
       "source_location": "L28",
       "id": "subscriptions_ui_subs_ui_filter_renderfilterbar",
-      "community": 77,
+      "community": 79,
       "norm_label": "renderfilterbar()"
     },
     {
@@ -5427,7 +5508,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-filter.js",
       "source_location": "L71",
       "id": "subscriptions_ui_subs_ui_filter_reapplyfilters",
-      "community": 77,
+      "community": 79,
       "norm_label": "reapplyfilters()"
     },
     {
@@ -5436,7 +5517,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-filter.js",
       "source_location": "L77",
       "id": "subscriptions_ui_subs_ui_filter_filterfeednow",
-      "community": 77,
+      "community": 79,
       "norm_label": "_filterfeednow()"
     },
     {
@@ -5526,7 +5607,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-sidebar.js",
       "source_location": "L1",
       "id": "src_content_features_pages_subscriptions_subscriptions_ui_subs_ui_sidebar_js",
-      "community": 82,
+      "community": 84,
       "norm_label": "subs-ui-sidebar.js"
     },
     {
@@ -5535,7 +5616,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-sidebar.js",
       "source_location": "L4",
       "id": "subscriptions_ui_subs_ui_sidebar_eschtml",
-      "community": 82,
+      "community": 84,
       "norm_label": "eschtml()"
     },
     {
@@ -5544,7 +5625,7 @@
       "source_file": "src\\content\\features\\pages\\subscriptions\\subscriptions-ui\\subs-ui-sidebar.js",
       "source_location": "L13",
       "id": "subscriptions_ui_subs_ui_sidebar_injectsidebargroups",
-      "community": 82,
+      "community": 84,
       "norm_label": "injectsidebargroups()"
     },
     {
@@ -5697,7 +5778,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L1",
       "id": "src_content_features_pages_watch_comment_filter_js",
-      "community": 63,
+      "community": 65,
       "norm_label": "comment-filter.js"
     },
     {
@@ -5706,7 +5787,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L9",
       "id": "watch_comment_filter_constructor",
-      "community": 63,
+      "community": 65,
       "norm_label": "constructor()"
     },
     {
@@ -5715,7 +5796,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L28",
       "id": "watch_comment_filter_getconfigkey",
-      "community": 63,
+      "community": 65,
       "norm_label": "getconfigkey()"
     },
     {
@@ -5724,7 +5805,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L32",
       "id": "watch_comment_filter_enable",
-      "community": 63,
+      "community": 65,
       "norm_label": "enable()"
     },
     {
@@ -5733,7 +5814,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L46",
       "id": "watch_comment_filter_disable",
-      "community": 63,
+      "community": 65,
       "norm_label": "disable()"
     },
     {
@@ -5742,7 +5823,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L57",
       "id": "watch_comment_filter_onupdate",
-      "community": 63,
+      "community": 65,
       "norm_label": "onupdate()"
     },
     {
@@ -5751,7 +5832,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\comment-filter.js",
       "source_location": "L66",
       "id": "watch_comment_filter_handlecomments",
-      "community": 63,
+      "community": 65,
       "norm_label": "handlecomments()"
     },
     {
@@ -5760,7 +5841,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L1",
       "id": "src_content_features_pages_watch_continue_watching_js",
-      "community": 64,
+      "community": 66,
       "norm_label": "continue-watching.js"
     },
     {
@@ -5769,7 +5850,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L9",
       "id": "watch_continue_watching_constructor",
-      "community": 64,
+      "community": 66,
       "norm_label": "constructor()"
     },
     {
@@ -5778,7 +5859,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L15",
       "id": "watch_continue_watching_getconfigkey",
-      "community": 64,
+      "community": 66,
       "norm_label": "getconfigkey()"
     },
     {
@@ -5787,7 +5868,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L21",
       "id": "watch_continue_watching_init",
-      "community": 64,
+      "community": 66,
       "norm_label": "init()"
     },
     {
@@ -5796,7 +5877,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L33",
       "id": "watch_continue_watching_startobserver",
-      "community": 64,
+      "community": 66,
       "norm_label": "startobserver()"
     },
     {
@@ -5805,7 +5886,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L55",
       "id": "watch_continue_watching_handlenewvideo",
-      "community": 64,
+      "community": 66,
       "norm_label": "handlenewvideo()"
     },
     {
@@ -5814,7 +5895,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\continue-watching.js",
       "source_location": "L67",
       "id": "watch_continue_watching_cleanup",
-      "community": 64,
+      "community": 66,
       "norm_label": "cleanup()"
     },
     {
@@ -6228,7 +6309,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L1",
       "id": "src_content_features_pages_watch_study_mode_js",
-      "community": 15,
+      "community": 16,
       "norm_label": "study-mode.js"
     },
     {
@@ -6237,7 +6318,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L10",
       "id": "watch_study_mode_getconfigkey",
-      "community": 15,
+      "community": 16,
       "norm_label": "getconfigkey()"
     },
     {
@@ -6246,7 +6327,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L11",
       "id": "watch_study_mode_constructor",
-      "community": 15,
+      "community": 16,
       "norm_label": "constructor()"
     },
     {
@@ -6255,7 +6336,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L35",
       "id": "watch_study_mode_run",
-      "community": 15,
+      "community": 16,
       "norm_label": "run()"
     },
     {
@@ -6264,7 +6345,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L47",
       "id": "watch_study_mode_update",
-      "community": 15,
+      "community": 16,
       "norm_label": "update()"
     },
     {
@@ -6273,7 +6354,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L54",
       "id": "watch_study_mode_enable",
-      "community": 15,
+      "community": 16,
       "norm_label": "enable()"
     },
     {
@@ -6282,7 +6363,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L76",
       "id": "watch_study_mode_disable",
-      "community": 15,
+      "community": 16,
       "norm_label": "disable()"
     },
     {
@@ -6291,7 +6372,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L101",
       "id": "watch_study_mode_injectspeedcontrol",
-      "community": 15,
+      "community": 16,
       "norm_label": "injectspeedcontrol()"
     },
     {
@@ -6300,7 +6381,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L132",
       "id": "watch_study_mode_togglespeedpanel",
-      "community": 15,
+      "community": 16,
       "norm_label": "togglespeedpanel()"
     },
     {
@@ -6309,7 +6390,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L144",
       "id": "watch_study_mode_createspeedpanel",
-      "community": 15,
+      "community": 16,
       "norm_label": "createspeedpanel()"
     },
     {
@@ -6318,7 +6399,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L279",
       "id": "watch_study_mode_removespeedpanel",
-      "community": 15,
+      "community": 16,
       "norm_label": "removespeedpanel()"
     },
     {
@@ -6327,7 +6408,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L290",
       "id": "watch_study_mode_removeui",
-      "community": 15,
+      "community": 16,
       "norm_label": "removeui()"
     },
     {
@@ -6336,7 +6417,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L303",
       "id": "watch_study_mode_setspeed",
-      "community": 15,
+      "community": 16,
       "norm_label": "setspeed()"
     },
     {
@@ -6345,7 +6426,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L328",
       "id": "watch_study_mode_enforcestate",
-      "community": 15,
+      "community": 16,
       "norm_label": "_enforcestate()"
     },
     {
@@ -6354,7 +6435,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L348",
       "id": "watch_study_mode_enablecaptions",
-      "community": 15,
+      "community": 16,
       "norm_label": "_enablecaptions()"
     },
     {
@@ -6363,7 +6444,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L363",
       "id": "watch_study_mode_loadconfig",
-      "community": 15,
+      "community": 16,
       "norm_label": "loadconfig()"
     },
     {
@@ -6372,7 +6453,7 @@
       "source_file": "src\\content\\features\\pages\\watch\\study-mode.js",
       "source_location": "L378",
       "id": "watch_study_mode_saveconfig",
-      "community": 15,
+      "community": 16,
       "norm_label": "saveconfig()"
     },
     {
@@ -6876,7 +6957,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L1",
       "id": "src_content_features_player_auto_pause_js",
-      "community": 55,
+      "community": 56,
       "norm_label": "auto-pause.js"
     },
     {
@@ -6885,7 +6966,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L10",
       "id": "player_auto_pause_constructor",
-      "community": 55,
+      "community": 56,
       "norm_label": "constructor()"
     },
     {
@@ -6894,7 +6975,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L25",
       "id": "player_auto_pause_getconfigkey",
-      "community": 55,
+      "community": 56,
       "norm_label": "getconfigkey()"
     },
     {
@@ -6903,7 +6984,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L33",
       "id": "player_auto_pause_enable",
-      "community": 55,
+      "community": 56,
       "norm_label": "enable()"
     },
     {
@@ -6912,7 +6993,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L48",
       "id": "player_auto_pause_disable",
-      "community": 55,
+      "community": 56,
       "norm_label": "disable()"
     },
     {
@@ -6921,7 +7002,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L58",
       "id": "player_auto_pause_onvideochange",
-      "community": 55,
+      "community": 56,
       "norm_label": "onvideochange()"
     },
     {
@@ -6930,7 +7011,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L71",
       "id": "player_auto_pause_cachevideoelement",
-      "community": 55,
+      "community": 56,
       "norm_label": "_cachevideoelement()"
     },
     {
@@ -6939,7 +7020,7 @@
       "source_file": "src\\content\\features\\player\\auto-pause.js",
       "source_location": "L86",
       "id": "player_auto_pause_handlevisibilitychange",
-      "community": 55,
+      "community": 56,
       "norm_label": "handlevisibilitychange()"
     },
     {
@@ -7038,7 +7119,7 @@
       "source_file": "src\\content\\features\\player\\filter-presets.js",
       "source_location": "L1",
       "id": "src_content_features_player_filter_presets_js",
-      "community": 92,
+      "community": 97,
       "norm_label": "filter-presets.js"
     },
     {
@@ -7047,7 +7128,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L1",
       "id": "src_content_features_player_global_bar_ui_js",
-      "community": 56,
+      "community": 57,
       "norm_label": "global-bar-ui.js"
     },
     {
@@ -7056,7 +7137,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L11",
       "id": "player_global_bar_ui_constructor",
-      "community": 56,
+      "community": 57,
       "norm_label": "constructor()"
     },
     {
@@ -7065,7 +7146,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L17",
       "id": "player_global_bar_ui_attachbar",
-      "community": 56,
+      "community": 57,
       "norm_label": "attachbar()"
     },
     {
@@ -7074,7 +7155,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L81",
       "id": "player_global_bar_ui_removeall",
-      "community": 56,
+      "community": 57,
       "norm_label": "removeall()"
     },
     {
@@ -7083,7 +7164,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L87",
       "id": "player_global_bar_ui_hasbar",
-      "community": 56,
+      "community": 57,
       "norm_label": "hasbar()"
     },
     {
@@ -7092,7 +7173,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L92",
       "id": "player_global_bar_ui_repositionall",
-      "community": 56,
+      "community": 57,
       "norm_label": "repositionall()"
     },
     {
@@ -7101,7 +7182,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L97",
       "id": "player_global_bar_ui_updatebarposition",
-      "community": 56,
+      "community": 57,
       "norm_label": "updatebarposition()"
     },
     {
@@ -7110,7 +7191,7 @@
       "source_file": "src\\content\\features\\player\\global-bar-ui.js",
       "source_location": "L117",
       "id": "player_global_bar_ui_bindevents",
-      "community": 56,
+      "community": 57,
       "norm_label": "_bindevents()"
     },
     {
@@ -7119,7 +7200,7 @@
       "source_file": "src\\content\\features\\player\\global-bar.js",
       "source_location": "L1",
       "id": "src_content_features_player_global_bar_js",
-      "community": 57,
+      "community": 58,
       "norm_label": "global-bar.js"
     },
     {
@@ -7128,7 +7209,7 @@
       "source_file": "src\\content\\features\\player\\global-bar.js",
       "source_location": "L13",
       "id": "player_global_bar_constructor",
-      "community": 57,
+      "community": 58,
       "norm_label": "constructor()"
     },
     {
@@ -7137,7 +7218,7 @@
       "source_file": "src\\content\\features\\player\\global-bar.js",
       "source_location": "L27",
       "id": "player_global_bar_getconfigkey",
-      "community": 57,
+      "community": 58,
       "norm_label": "getconfigkey()"
     },
     {
@@ -7146,43 +7227,43 @@
       "source_file": "src\\content\\features\\player\\global-bar.js",
       "source_location": "L35",
       "id": "player_global_bar_enable",
-      "community": 57,
+      "community": 58,
       "norm_label": "enable()"
     },
     {
       "label": "disable()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L48",
+      "source_location": "L47",
       "id": "player_global_bar_disable",
-      "community": 57,
+      "community": 58,
       "norm_label": "disable()"
     },
     {
       "label": "startObserver()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L61",
+      "source_location": "L60",
       "id": "player_global_bar_startobserver",
-      "community": 57,
+      "community": 58,
       "norm_label": "startobserver()"
     },
     {
       "label": "stopObserver()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L76",
+      "source_location": "L75",
       "id": "player_global_bar_stopobserver",
-      "community": 57,
+      "community": 58,
       "norm_label": "stopobserver()"
     },
     {
       "label": "scanForVideos()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L83",
+      "source_location": "L82",
       "id": "player_global_bar_scanforvideos",
-      "community": 57,
+      "community": 58,
       "norm_label": "scanforvideos()"
     },
     {
@@ -7191,7 +7272,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L1",
       "id": "src_content_features_player_intentional_delay_js",
-      "community": 58,
+      "community": 59,
       "norm_label": "intentional-delay.js"
     },
     {
@@ -7200,7 +7281,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L5",
       "id": "player_intentional_delay_constructor",
-      "community": 58,
+      "community": 59,
       "norm_label": "constructor()"
     },
     {
@@ -7209,7 +7290,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L11",
       "id": "player_intentional_delay_getconfigkey",
-      "community": 58,
+      "community": 59,
       "norm_label": "getconfigkey()"
     },
     {
@@ -7218,7 +7299,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L12",
       "id": "player_intentional_delay_enable",
-      "community": 58,
+      "community": 59,
       "norm_label": "enable()"
     },
     {
@@ -7227,7 +7308,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L17",
       "id": "player_intentional_delay_disable",
-      "community": 58,
+      "community": 59,
       "norm_label": "disable()"
     },
     {
@@ -7236,7 +7317,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L22",
       "id": "player_intentional_delay_onpagechange",
-      "community": 58,
+      "community": 59,
       "norm_label": "_onpagechange()"
     },
     {
@@ -7245,7 +7326,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L32",
       "id": "player_intentional_delay_showoverlay",
-      "community": 58,
+      "community": 59,
       "norm_label": "_showoverlay()"
     },
     {
@@ -7254,7 +7335,7 @@
       "source_file": "src\\content\\features\\player\\intentional-delay.js",
       "source_location": "L73",
       "id": "player_intentional_delay_removeoverlay",
-      "community": 58,
+      "community": 59,
       "norm_label": "_removeoverlay()"
     },
     {
@@ -7794,7 +7875,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L1",
       "id": "src_content_features_player_sidebar_layout_js",
-      "community": 59,
+      "community": 60,
       "norm_label": "sidebar-layout.js"
     },
     {
@@ -7803,7 +7884,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L36",
       "id": "player_sidebar_layout_constructor",
-      "community": 59,
+      "community": 60,
       "norm_label": "constructor()"
     },
     {
@@ -7812,7 +7893,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L40",
       "id": "player_sidebar_layout_enable",
-      "community": 59,
+      "community": 60,
       "norm_label": "enable()"
     },
     {
@@ -7821,7 +7902,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L42",
       "id": "player_sidebar_layout_disable",
-      "community": 59,
+      "community": 60,
       "norm_label": "disable()"
     },
     {
@@ -7830,7 +7911,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L47",
       "id": "player_sidebar_layout_update",
-      "community": 59,
+      "community": 60,
       "norm_label": "update()"
     },
     {
@@ -7839,7 +7920,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L65",
       "id": "player_sidebar_layout_onpagechange",
-      "community": 59,
+      "community": 60,
       "norm_label": "onpagechange()"
     },
     {
@@ -7848,7 +7929,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L76",
       "id": "player_sidebar_layout_injectstyle",
-      "community": 59,
+      "community": 60,
       "norm_label": "_injectstyle()"
     },
     {
@@ -7857,7 +7938,7 @@
       "source_file": "src\\content\\features\\player\\sidebar-layout.js",
       "source_location": "L165",
       "id": "player_sidebar_layout_removestyle",
-      "community": 59,
+      "community": 60,
       "norm_label": "_removestyle()"
     },
     {
@@ -8001,7 +8082,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L1",
       "id": "src_content_features_player_time_display_js",
-      "community": 60,
+      "community": 61,
       "norm_label": "time-display.js"
     },
     {
@@ -8010,7 +8091,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L9",
       "id": "player_time_display_constructor",
-      "community": 60,
+      "community": 61,
       "norm_label": "constructor()"
     },
     {
@@ -8019,7 +8100,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L17",
       "id": "player_time_display_getconfigkey",
-      "community": 60,
+      "community": 61,
       "norm_label": "getconfigkey()"
     },
     {
@@ -8028,7 +8109,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L19",
       "id": "player_time_display_enable",
-      "community": 60,
+      "community": 61,
       "norm_label": "enable()"
     },
     {
@@ -8037,7 +8118,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L24",
       "id": "player_time_display_disable",
-      "community": 60,
+      "community": 61,
       "norm_label": "disable()"
     },
     {
@@ -8046,7 +8127,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L44",
       "id": "player_time_display_update",
-      "community": 60,
+      "community": 61,
       "norm_label": "update()"
     },
     {
@@ -8055,7 +8136,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L53",
       "id": "player_time_display_run",
-      "community": 60,
+      "community": 61,
       "norm_label": "run()"
     },
     {
@@ -8064,7 +8145,7 @@
       "source_file": "src\\content\\features\\player\\time-display.js",
       "source_location": "L82",
       "id": "player_time_display_showremainingtime",
-      "community": 60,
+      "community": 61,
       "norm_label": "showremainingtime()"
     },
     {
@@ -8181,7 +8262,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L1",
       "id": "src_content_features_player_wheel_controls_js",
-      "community": 65,
+      "community": 67,
       "norm_label": "wheel-controls.js"
     },
     {
@@ -8190,7 +8271,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L9",
       "id": "player_wheel_controls_constructor",
-      "community": 65,
+      "community": 67,
       "norm_label": "constructor()"
     },
     {
@@ -8199,7 +8280,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L16",
       "id": "player_wheel_controls_getconfigkey",
-      "community": 65,
+      "community": 67,
       "norm_label": "getconfigkey()"
     },
     {
@@ -8208,7 +8289,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L20",
       "id": "player_wheel_controls_enable",
-      "community": 65,
+      "community": 67,
       "norm_label": "enable()"
     },
     {
@@ -8217,7 +8298,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L31",
       "id": "player_wheel_controls_disable",
-      "community": 65,
+      "community": 67,
       "norm_label": "disable()"
     },
     {
@@ -8226,7 +8307,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L39",
       "id": "player_wheel_controls_getvideoelement",
-      "community": 65,
+      "community": 67,
       "norm_label": "getvideoelement()"
     },
     {
@@ -8235,7 +8316,7 @@
       "source_file": "src\\content\\features\\player\\wheel-controls.js",
       "source_location": "L44",
       "id": "player_wheel_controls_handlewheel",
-      "community": 65,
+      "community": 67,
       "norm_label": "handlewheel()"
     },
     {
@@ -8532,7 +8613,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\index.js",
       "source_location": "L1",
       "id": "src_content_features_player_video_filters_index_js",
-      "community": 93,
+      "community": 98,
       "norm_label": "index.js"
     },
     {
@@ -8541,7 +8622,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L1",
       "id": "src_content_features_player_video_filters_video_filters_overlay_js",
-      "community": 66,
+      "community": 68,
       "norm_label": "video-filters-overlay.js"
     },
     {
@@ -8550,7 +8631,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L5",
       "id": "video_filters_video_filters_overlay_applyoverlay",
-      "community": 66,
+      "community": 68,
       "norm_label": "applyoverlay()"
     },
     {
@@ -8559,7 +8640,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L102",
       "id": "video_filters_video_filters_overlay_injectsvgsharpness",
-      "community": 66,
+      "community": 68,
       "norm_label": "injectsvgsharpness()"
     },
     {
@@ -8568,7 +8649,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L130",
       "id": "video_filters_video_filters_overlay_injectcrtsvgfilter",
-      "community": 66,
+      "community": 68,
       "norm_label": "injectcrtsvgfilter()"
     },
     {
@@ -8577,7 +8658,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L171",
       "id": "video_filters_video_filters_overlay_injectspecialeffectssvg",
-      "community": 66,
+      "community": 68,
       "norm_label": "injectspecialeffectssvg()"
     },
     {
@@ -8586,7 +8667,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L220",
       "id": "video_filters_video_filters_overlay_injectoverlaycss",
-      "community": 66,
+      "community": 68,
       "norm_label": "injectoverlaycss()"
     },
     {
@@ -8595,7 +8676,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-overlay.js",
       "source_location": "L255",
       "id": "video_filters_video_filters_overlay_removeoverlay",
-      "community": 66,
+      "community": 68,
       "norm_label": "removeoverlay()"
     },
     {
@@ -8604,7 +8685,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-presets.js",
       "source_location": "L1",
       "id": "src_content_features_player_video_filters_video_filters_presets_js",
-      "community": 94,
+      "community": 99,
       "norm_label": "video-filters-presets.js"
     },
     {
@@ -8613,7 +8694,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-ui.js",
       "source_location": "L1",
       "id": "src_content_features_player_video_filters_video_filters_ui_js",
-      "community": 79,
+      "community": 81,
       "norm_label": "video-filters-ui.js"
     },
     {
@@ -8622,7 +8703,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-ui.js",
       "source_location": "L5",
       "id": "video_filters_video_filters_ui_createfilterpanel",
-      "community": 79,
+      "community": 81,
       "norm_label": "createfilterpanel()"
     },
     {
@@ -8631,7 +8712,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-ui.js",
       "source_location": "L259",
       "id": "video_filters_video_filters_ui_buildpresetstab",
-      "community": 79,
+      "community": 81,
       "norm_label": "buildpresetstab()"
     },
     {
@@ -8640,7 +8721,7 @@
       "source_file": "src\\content\\features\\player\\video-filters\\video-filters-ui.js",
       "source_location": "L413",
       "id": "video_filters_video_filters_ui_buildadjusttab",
-      "community": 79,
+      "community": 81,
       "norm_label": "buildadjusttab()"
     },
     {
@@ -8766,7 +8847,7 @@
       "source_file": "src\\content\\features\\player\\volume-booster\\index.js",
       "source_location": "L1",
       "id": "src_content_features_player_volume_booster_index_js",
-      "community": 95,
+      "community": 100,
       "norm_label": "index.js"
     },
     {
@@ -8775,61 +8856,70 @@
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
       "source_location": "L1",
       "id": "src_content_features_player_volume_booster_volume_booster_ui_js",
-      "community": 67,
+      "community": 62,
       "norm_label": "volume-booster-ui.js"
+    },
+    {
+      "label": "saveVolumeSettings()",
+      "file_type": "code",
+      "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
+      "source_location": "L5",
+      "id": "volume_booster_volume_booster_ui_savevolumesettings",
+      "community": 62,
+      "norm_label": "savevolumesettings()"
     },
     {
       "label": "toggleEQPanel()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L5",
+      "source_location": "L21",
       "id": "volume_booster_volume_booster_ui_toggleeqpanel",
-      "community": 67,
+      "community": 62,
       "norm_label": "toggleeqpanel()"
     },
     {
       "label": "syncBandUI()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L372",
+      "source_location": "L397",
       "id": "volume_booster_volume_booster_ui_syncbandui",
-      "community": 67,
+      "community": 62,
       "norm_label": "syncbandui()"
     },
     {
       "label": "updateGainTrack()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L385",
+      "source_location": "L410",
       "id": "volume_booster_volume_booster_ui_updategaintrack",
-      "community": 67,
+      "community": 62,
       "norm_label": "updategaintrack()"
     },
     {
       "label": "updateBalanceTrack()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L390",
+      "source_location": "L415",
       "id": "volume_booster_volume_booster_ui_updatebalancetrack",
-      "community": 67,
+      "community": 62,
       "norm_label": "updatebalancetrack()"
     },
     {
       "label": "drawCurve()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L401",
+      "source_location": "L426",
       "id": "volume_booster_volume_booster_ui_drawcurve",
-      "community": 67,
+      "community": 62,
       "norm_label": "drawcurve()"
     },
     {
       "label": "injectEQStyles()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L485",
+      "source_location": "L510",
       "id": "volume_booster_volume_booster_ui_injecteqstyles",
-      "community": 67,
+      "community": 62,
       "norm_label": "injecteqstyles()"
     },
     {
@@ -8838,7 +8928,7 @@
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
       "source_location": "L1",
       "id": "src_content_features_player_volume_booster_volume_booster_js",
-      "community": 16,
+      "community": 14,
       "norm_label": "volume-booster.js"
     },
     {
@@ -8847,7 +8937,7 @@
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
       "source_location": "L9",
       "id": "volume_booster_volume_booster_constructor",
-      "community": 16,
+      "community": 14,
       "norm_label": "constructor()"
     },
     {
@@ -8856,133 +8946,142 @@
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
       "source_location": "L66",
       "id": "volume_booster_volume_booster_getconfigkey",
-      "community": 16,
+      "community": 14,
       "norm_label": "getconfigkey()"
+    },
+    {
+      "label": "_loadSettings()",
+      "file_type": "code",
+      "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
+      "source_location": "L70",
+      "id": "volume_booster_volume_booster_loadsettings",
+      "community": 14,
+      "norm_label": "_loadsettings()"
     },
     {
       "label": "enable()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L70",
+      "source_location": "L88",
       "id": "volume_booster_volume_booster_enable",
-      "community": 16,
+      "community": 14,
       "norm_label": "enable()"
     },
     {
       "label": "disable()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L75",
+      "source_location": "L94",
       "id": "volume_booster_volume_booster_disable",
-      "community": 16,
+      "community": 14,
       "norm_label": "disable()"
     },
     {
       "label": "update()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L124",
+      "source_location": "L143",
       "id": "volume_booster_volume_booster_update",
-      "community": 16,
+      "community": 14,
       "norm_label": "update()"
     },
     {
       "label": "run()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L137",
+      "source_location": "L157",
       "id": "volume_booster_volume_booster_run",
-      "community": 16,
+      "community": 14,
       "norm_label": "run()"
     },
     {
       "label": "initAudioContext()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L148",
+      "source_location": "L168",
       "id": "volume_booster_volume_booster_initaudiocontext",
-      "community": 16,
+      "community": 14,
       "norm_label": "initaudiocontext()"
     },
     {
       "label": "_buildAudioGraph()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L190",
+      "source_location": "L210",
       "id": "volume_booster_volume_booster_buildaudiograph",
-      "community": 16,
+      "community": 14,
       "norm_label": "_buildaudiograph()"
     },
     {
       "label": "_restoreAudioState()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L236",
+      "source_location": "L256",
       "id": "volume_booster_volume_booster_restoreaudiostate",
-      "community": 16,
+      "community": 14,
       "norm_label": "_restoreaudiostate()"
     },
     {
       "label": "_applyCompressorState()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L253",
+      "source_location": "L268",
       "id": "volume_booster_volume_booster_applycompressorstate",
-      "community": 16,
+      "community": 14,
       "norm_label": "_applycompressorstate()"
     },
     {
       "label": "setVolume()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L268",
+      "source_location": "L283",
       "id": "volume_booster_volume_booster_setvolume",
-      "community": 16,
+      "community": 14,
       "norm_label": "setvolume()"
     },
     {
       "label": "setBalance()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L276",
+      "source_location": "L291",
       "id": "volume_booster_volume_booster_setbalance",
-      "community": 16,
+      "community": 14,
       "norm_label": "setbalance()"
     },
     {
       "label": "setMono()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L283",
+      "source_location": "L298",
       "id": "volume_booster_volume_booster_setmono",
-      "community": 16,
+      "community": 14,
       "norm_label": "setmono()"
     },
     {
       "label": "_setEQBand()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L292",
+      "source_location": "L307",
       "id": "volume_booster_volume_booster_seteqband",
-      "community": 16,
+      "community": 14,
       "norm_label": "_seteqband()"
     },
     {
       "label": "_applyPreset()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L299",
+      "source_location": "L314",
       "id": "volume_booster_volume_booster_applypreset",
-      "community": 16,
+      "community": 14,
       "norm_label": "_applypreset()"
     },
     {
       "label": "createButton()",
       "file_type": "code",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L306",
+      "source_location": "L321",
       "id": "volume_booster_volume_booster_createbutton",
-      "community": 16,
+      "community": 14,
       "norm_label": "createbutton()"
     },
     {
@@ -8991,7 +9090,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L1",
       "id": "src_content_ui_ui_manager_js",
-      "community": 68,
+      "community": 69,
       "norm_label": "ui-manager.js"
     },
     {
@@ -9000,7 +9099,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L11",
       "id": "ui_ui_manager_uimanager",
-      "community": 68,
+      "community": 69,
       "norm_label": "uimanager"
     },
     {
@@ -9009,7 +9108,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L12",
       "id": "ui_ui_manager_uimanager_constructor",
-      "community": 68,
+      "community": 69,
       "norm_label": ".constructor()"
     },
     {
@@ -9018,7 +9117,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L41",
       "id": "ui_ui_manager_uimanager_mount",
-      "community": 68,
+      "community": 69,
       "norm_label": ".mount()"
     },
     {
@@ -9027,7 +9126,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L73",
       "id": "ui_ui_manager_uimanager_remove",
-      "community": 68,
+      "community": 69,
       "norm_label": ".remove()"
     },
     {
@@ -9036,7 +9135,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L84",
       "id": "ui_ui_manager_uimanager_heal",
-      "community": 68,
+      "community": 69,
       "norm_label": ".heal()"
     },
     {
@@ -9045,7 +9144,7 @@
       "source_file": "src\\content\\ui\\ui-manager.js",
       "source_location": "L97",
       "id": "ui_ui_manager_uimanager_destroy",
-      "community": 68,
+      "community": 69,
       "norm_label": ".destroy()"
     },
     {
@@ -9054,7 +9153,7 @@
       "source_file": "src\\content\\ui\\components\\button.js",
       "source_location": "L1",
       "id": "src_content_ui_components_button_js",
-      "community": 96,
+      "community": 101,
       "norm_label": "button.js"
     },
     {
@@ -9063,7 +9162,7 @@
       "source_file": "src\\content\\ui\\components\\panel.js",
       "source_location": "L1",
       "id": "src_content_ui_components_panel_js",
-      "community": 97,
+      "community": 102,
       "norm_label": "panel.js"
     },
     {
@@ -9072,7 +9171,7 @@
       "source_file": "src\\inject\\stats-bridge.js",
       "source_location": "L1",
       "id": "src_inject_stats_bridge_js",
-      "community": 83,
+      "community": 85,
       "norm_label": "stats-bridge.js"
     },
     {
@@ -9081,7 +9180,7 @@
       "source_file": "src\\inject\\stats-bridge.js",
       "source_location": "L9",
       "id": "inject_stats_bridge_getplayer",
-      "community": 83,
+      "community": 85,
       "norm_label": "getplayer()"
     },
     {
@@ -9090,7 +9189,7 @@
       "source_file": "src\\inject\\stats-bridge.js",
       "source_location": "L13",
       "id": "inject_stats_bridge_broadcaststats",
-      "community": 83,
+      "community": 85,
       "norm_label": "broadcaststats()"
     },
     {
@@ -9364,12 +9463,93 @@
       "norm_label": "applypresetfromui()"
     },
     {
+      "label": "purify2.min.js",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L1",
+      "id": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "community": 53,
+      "norm_label": "purify2.min.js"
+    },
+    {
+      "label": "e()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_e",
+      "community": 53,
+      "norm_label": "e()"
+    },
+    {
+      "label": "t()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_t",
+      "community": 53,
+      "norm_label": "t()"
+    },
+    {
+      "label": "n()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "community": 53,
+      "norm_label": "n()"
+    },
+    {
+      "label": "r()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_r",
+      "community": 53,
+      "norm_label": "r()"
+    },
+    {
+      "label": "o()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "community": 53,
+      "norm_label": "o()"
+    },
+    {
+      "label": "k()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "community": 53,
+      "norm_label": "k()"
+    },
+    {
+      "label": "L()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_l",
+      "community": 53,
+      "norm_label": "l()"
+    },
+    {
+      "label": "C()",
+      "file_type": "code",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "id": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_c",
+      "community": 53,
+      "norm_label": "c()"
+    },
+    {
       "label": "ast_extract.py",
       "file_type": "code",
       "source_file": "tmp\\ast_extract.py",
       "source_location": "L1",
       "id": "tmp_ast_extract_py",
-      "community": 98,
+      "community": 103,
       "norm_label": "ast_extract.py"
     },
     {
@@ -9378,7 +9558,7 @@
       "source_file": "tmp\\audit_features.js",
       "source_location": "L1",
       "id": "tmp_audit_features_js",
-      "community": 86,
+      "community": 88,
       "norm_label": "audit_features.js"
     },
     {
@@ -9387,7 +9567,7 @@
       "source_file": "tmp\\audit_features.js",
       "source_location": "L4",
       "id": "tmp_audit_features_getfiles",
-      "community": 86,
+      "community": 88,
       "norm_label": "getfiles()"
     },
     {
@@ -9396,7 +9576,7 @@
       "source_file": "tmp\\audit_features.py",
       "source_location": "L1",
       "id": "tmp_audit_features_py",
-      "community": 99,
+      "community": 104,
       "norm_label": "audit_features.py"
     },
     {
@@ -9405,7 +9585,7 @@
       "source_file": "tmp\\check-features.js",
       "source_location": "L1",
       "id": "tmp_check_features_js",
-      "community": 87,
+      "community": 89,
       "norm_label": "check-features.js"
     },
     {
@@ -9414,7 +9594,7 @@
       "source_file": "tmp\\check-features.js",
       "source_location": "L27",
       "id": "tmp_check_features_walkdir",
-      "community": 87,
+      "community": 89,
       "norm_label": "walkdir()"
     },
     {
@@ -9423,7 +9603,7 @@
       "source_file": "tmp\\check_cache.py",
       "source_location": "L1",
       "id": "tmp_check_cache_py",
-      "community": 100,
+      "community": 105,
       "norm_label": "check_cache.py"
     },
     {
@@ -9432,7 +9612,7 @@
       "source_file": "tmp\\find_dividers.js",
       "source_location": "L1",
       "id": "tmp_find_dividers_js",
-      "community": 101,
+      "community": 106,
       "norm_label": "find_dividers.js"
     },
     {
@@ -9441,7 +9621,7 @@
       "source_file": "tmp\\fix_dup.js",
       "source_location": "L1",
       "id": "tmp_fix_dup_js",
-      "community": 102,
+      "community": 107,
       "norm_label": "fix_dup.js"
     },
     {
@@ -9450,7 +9630,7 @@
       "source_file": "tmp\\fix_js.js",
       "source_location": "L1",
       "id": "tmp_fix_js_js",
-      "community": 103,
+      "community": 108,
       "norm_label": "fix_js.js"
     },
     {
@@ -9459,7 +9639,7 @@
       "source_file": "tmp\\generate_audit.js",
       "source_location": "L1",
       "id": "tmp_generate_audit_js",
-      "community": 88,
+      "community": 90,
       "norm_label": "generate_audit.js"
     },
     {
@@ -9468,7 +9648,7 @@
       "source_file": "tmp\\generate_audit.js",
       "source_location": "L150",
       "id": "tmp_generate_audit_getfiles",
-      "community": 88,
+      "community": 90,
       "norm_label": "getfiles()"
     },
     {
@@ -9477,7 +9657,7 @@
       "source_file": "tmp\\test_popup.js",
       "source_location": "L1",
       "id": "tmp_test_popup_js",
-      "community": 104,
+      "community": 109,
       "norm_label": "test_popup.js"
     },
     {
@@ -9486,7 +9666,7 @@
       "source_file": "tmp\\upgrade_html.py",
       "source_location": "L1",
       "id": "tmp_upgrade_html_py",
-      "community": 89,
+      "community": 91,
       "norm_label": "upgrade_html.py"
     },
     {
@@ -9495,7 +9675,7 @@
       "source_file": "tmp\\upgrade_html.py",
       "source_location": "L3",
       "id": "tmp_upgrade_html_update_html",
-      "community": 89,
+      "community": 91,
       "norm_label": "update_html()"
     },
     {
@@ -9504,7 +9684,7 @@
       "source_file": "tmp\\verify.js",
       "source_location": "L1",
       "id": "tmp_verify_js",
-      "community": 105,
+      "community": 110,
       "norm_label": "verify.js"
     }
   ],
@@ -10028,6 +10208,54 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "src_content_global_bar_external_js",
+      "_tgt": "content_global_bar_external_constructor",
+      "source": "src_content_global_bar_external_js",
+      "target": "content_global_bar_external_constructor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "src_content_global_bar_external_js",
+      "_tgt": "content_global_bar_external_enable",
+      "source": "src_content_global_bar_external_js",
+      "target": "content_global_bar_external_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_src": "src_content_global_bar_external_js",
+      "_tgt": "content_global_bar_external_disable",
+      "source": "src_content_global_bar_external_js",
+      "target": "content_global_bar_external_disable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\global-bar-external.js",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "src_content_global_bar_external_js",
+      "_tgt": "content_global_bar_external_getconfigkey",
+      "source": "src_content_global_bar_external_js",
+      "target": "content_global_bar_external_getconfigkey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src\\content\\main.js",
       "source_location": "L29",
       "weight": 1.0,
@@ -10041,7 +10269,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L190",
+      "source_location": "L194",
       "weight": 1.0,
       "_src": "src_content_settings_schema_js",
       "_tgt": "content_settings_schema_validateandmerge",
@@ -10053,7 +10281,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L265",
+      "source_location": "L269",
       "weight": 1.0,
       "_src": "src_content_settings_schema_js",
       "_tgt": "content_settings_schema_migrate",
@@ -10065,7 +10293,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L288",
+      "source_location": "L292",
       "weight": 1.0,
       "_src": "src_content_settings_schema_js",
       "_tgt": "content_settings_schema_defaults",
@@ -10077,7 +10305,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L193",
+      "source_location": "L197",
       "weight": 1.0,
       "_src": "content_settings_schema_validateandmerge",
       "_tgt": "content_settings_schema_defaults",
@@ -10089,7 +10317,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\settings-schema.js",
-      "source_location": "L197",
+      "source_location": "L201",
       "weight": 1.0,
       "_src": "content_settings_schema_validateandmerge",
       "_tgt": "content_settings_schema_migrate",
@@ -18873,7 +19101,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1070",
+      "source_location": "L1103",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_runscan",
@@ -18885,7 +19113,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1341",
+      "source_location": "L1444",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_getyoutubeconfig",
@@ -18897,7 +19125,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1380",
+      "source_location": "L1499",
+      "weight": 1.0,
+      "_src": "src_content_features_pages_subscriptions_folder_ui_js",
+      "_tgt": "subscriptions_folder_ui_getapiheaders",
+      "source": "src_content_features_pages_subscriptions_folder_ui_js",
+      "target": "subscriptions_folder_ui_getapiheaders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
+      "source_location": "L1535",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_tryapiunsubscribe",
@@ -18909,7 +19149,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1442",
+      "source_location": "L1573",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_trynativedomunsubscribe",
@@ -18921,7 +19161,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1483",
+      "source_location": "L1614",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_dounsubscribe",
@@ -18933,7 +19173,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1527",
+      "source_location": "L1658",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_individualunsubscribe",
@@ -18945,7 +19185,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1606",
+      "source_location": "L1737",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_bulkunsubscribe",
@@ -18957,7 +19197,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1641",
+      "source_location": "L1772",
       "weight": 1.0,
       "_src": "src_content_features_pages_subscriptions_folder_ui_js",
       "_tgt": "subscriptions_folder_ui_bulkaddtofolder",
@@ -18969,7 +19209,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1487",
+      "source_location": "L1618",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_dounsubscribe",
       "_tgt": "subscriptions_folder_ui_alert",
@@ -18981,7 +19221,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1556",
+      "source_location": "L1687",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_individualunsubscribe",
       "_tgt": "subscriptions_folder_ui_alert",
@@ -18993,7 +19233,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1653",
+      "source_location": "L1784",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_bulkaddtofolder",
       "_tgt": "subscriptions_folder_ui_alert",
@@ -19017,7 +19257,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1529",
+      "source_location": "L1660",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_individualunsubscribe",
       "_tgt": "subscriptions_folder_ui_confirm",
@@ -19029,7 +19269,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1610",
+      "source_location": "L1741",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_bulkunsubscribe",
       "_tgt": "subscriptions_folder_ui_confirm",
@@ -19053,7 +19293,31 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1484",
+      "source_location": "L1121",
+      "weight": 1.0,
+      "_src": "subscriptions_folder_ui_runscan",
+      "_tgt": "subscriptions_folder_ui_getyoutubeconfig",
+      "source": "subscriptions_folder_ui_runscan",
+      "target": "subscriptions_folder_ui_getyoutubeconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
+      "source_location": "L1185",
+      "weight": 1.0,
+      "_src": "subscriptions_folder_ui_runscan",
+      "_tgt": "subscriptions_folder_ui_getapiheaders",
+      "source": "subscriptions_folder_ui_runscan",
+      "target": "subscriptions_folder_ui_getapiheaders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
+      "source_location": "L1615",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_dounsubscribe",
       "_tgt": "subscriptions_folder_ui_getyoutubeconfig",
@@ -19065,7 +19329,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1552",
+      "source_location": "L1683",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_individualunsubscribe",
       "_tgt": "subscriptions_folder_ui_getyoutubeconfig",
@@ -19077,7 +19341,19 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1499",
+      "source_location": "L1536",
+      "weight": 1.0,
+      "_src": "subscriptions_folder_ui_tryapiunsubscribe",
+      "_tgt": "subscriptions_folder_ui_getapiheaders",
+      "source": "subscriptions_folder_ui_getapiheaders",
+      "target": "subscriptions_folder_ui_tryapiunsubscribe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
+      "source_location": "L1630",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_dounsubscribe",
       "_tgt": "subscriptions_folder_ui_tryapiunsubscribe",
@@ -19089,7 +19365,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1561",
+      "source_location": "L1692",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_individualunsubscribe",
       "_tgt": "subscriptions_folder_ui_tryapiunsubscribe",
@@ -19101,7 +19377,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1504",
+      "source_location": "L1635",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_dounsubscribe",
       "_tgt": "subscriptions_folder_ui_trynativedomunsubscribe",
@@ -19113,7 +19389,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1565",
+      "source_location": "L1696",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_individualunsubscribe",
       "_tgt": "subscriptions_folder_ui_trynativedomunsubscribe",
@@ -19125,7 +19401,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\pages\\subscriptions\\folder-ui.js",
-      "source_location": "L1633",
+      "source_location": "L1764",
       "weight": 1.0,
       "_src": "subscriptions_folder_ui_bulkunsubscribe",
       "_tgt": "subscriptions_folder_ui_dounsubscribe",
@@ -23493,7 +23769,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0,
       "_src": "src_content_features_player_global_bar_js",
       "_tgt": "player_global_bar_disable",
@@ -23505,7 +23781,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L61",
+      "source_location": "L60",
       "weight": 1.0,
       "_src": "src_content_features_player_global_bar_js",
       "_tgt": "player_global_bar_startobserver",
@@ -23517,7 +23793,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L76",
+      "source_location": "L75",
       "weight": 1.0,
       "_src": "src_content_features_player_global_bar_js",
       "_tgt": "player_global_bar_stopobserver",
@@ -23529,7 +23805,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L83",
+      "source_location": "L82",
       "weight": 1.0,
       "_src": "src_content_features_player_global_bar_js",
       "_tgt": "player_global_bar_scanforvideos",
@@ -23541,7 +23817,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L41",
+      "source_location": "L40",
       "weight": 1.0,
       "_src": "player_global_bar_enable",
       "_tgt": "player_global_bar_scanforvideos",
@@ -23553,7 +23829,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L42",
+      "source_location": "L41",
       "weight": 1.0,
       "_src": "player_global_bar_enable",
       "_tgt": "player_global_bar_startobserver",
@@ -23565,7 +23841,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\global-bar.js",
-      "source_location": "L49",
+      "source_location": "L48",
       "weight": 1.0,
       "_src": "player_global_bar_disable",
       "_tgt": "player_global_bar_stopobserver",
@@ -26616,6 +26892,18 @@
       "source_location": "L5",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
+      "_tgt": "volume_booster_volume_booster_ui_savevolumesettings",
+      "source": "src_content_features_player_volume_booster_volume_booster_ui_js",
+      "target": "volume_booster_volume_booster_ui_savevolumesettings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "_tgt": "volume_booster_volume_booster_ui_toggleeqpanel",
       "source": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "target": "volume_booster_volume_booster_ui_toggleeqpanel",
@@ -26625,7 +26913,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L372",
+      "source_location": "L397",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "_tgt": "volume_booster_volume_booster_ui_syncbandui",
@@ -26637,7 +26925,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L385",
+      "source_location": "L410",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "_tgt": "volume_booster_volume_booster_ui_updategaintrack",
@@ -26649,7 +26937,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L390",
+      "source_location": "L415",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "_tgt": "volume_booster_volume_booster_ui_updatebalancetrack",
@@ -26661,7 +26949,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L401",
+      "source_location": "L426",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "_tgt": "volume_booster_volume_booster_ui_drawcurve",
@@ -26673,7 +26961,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L485",
+      "source_location": "L510",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_ui_js",
       "_tgt": "volume_booster_volume_booster_ui_injecteqstyles",
@@ -26685,7 +26973,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L17",
+      "source_location": "L33",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_ui_toggleeqpanel",
       "_tgt": "volume_booster_volume_booster_ui_injecteqstyles",
@@ -26697,7 +26985,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L81",
+      "source_location": "L95",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_ui_toggleeqpanel",
       "_tgt": "volume_booster_volume_booster_ui_updategaintrack",
@@ -26709,7 +26997,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L112",
+      "source_location": "L128",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_ui_toggleeqpanel",
       "_tgt": "volume_booster_volume_booster_ui_updatebalancetrack",
@@ -26721,7 +27009,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L359",
+      "source_location": "L384",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_ui_toggleeqpanel",
       "_tgt": "volume_booster_volume_booster_ui_drawcurve",
@@ -26733,7 +27021,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster-ui.js",
-      "source_location": "L382",
+      "source_location": "L407",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_ui_syncbandui",
       "_tgt": "volume_booster_volume_booster_ui_drawcurve",
@@ -26772,6 +27060,18 @@
       "source_location": "L70",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
+      "_tgt": "volume_booster_volume_booster_loadsettings",
+      "source": "src_content_features_player_volume_booster_volume_booster_js",
+      "target": "volume_booster_volume_booster_loadsettings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_enable",
       "source": "src_content_features_player_volume_booster_volume_booster_js",
       "target": "volume_booster_volume_booster_enable",
@@ -26781,7 +27081,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L75",
+      "source_location": "L94",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_disable",
@@ -26793,7 +27093,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L124",
+      "source_location": "L143",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_update",
@@ -26805,7 +27105,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L137",
+      "source_location": "L157",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_run",
@@ -26817,7 +27117,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L148",
+      "source_location": "L168",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_initaudiocontext",
@@ -26829,7 +27129,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L190",
+      "source_location": "L210",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_buildaudiograph",
@@ -26841,7 +27141,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L236",
+      "source_location": "L256",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_restoreaudiostate",
@@ -26853,7 +27153,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L253",
+      "source_location": "L268",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_applycompressorstate",
@@ -26865,7 +27165,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L268",
+      "source_location": "L283",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_setvolume",
@@ -26877,7 +27177,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L276",
+      "source_location": "L291",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_setbalance",
@@ -26889,7 +27189,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L283",
+      "source_location": "L298",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_setmono",
@@ -26901,7 +27201,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L292",
+      "source_location": "L307",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_seteqband",
@@ -26913,7 +27213,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L299",
+      "source_location": "L314",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_applypreset",
@@ -26925,7 +27225,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L306",
+      "source_location": "L321",
       "weight": 1.0,
       "_src": "src_content_features_player_volume_booster_volume_booster_js",
       "_tgt": "volume_booster_volume_booster_createbutton",
@@ -26937,7 +27237,31 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L72",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "volume_booster_volume_booster_enable",
+      "_tgt": "volume_booster_volume_booster_loadsettings",
+      "source": "volume_booster_volume_booster_loadsettings",
+      "target": "volume_booster_volume_booster_enable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
+      "source_location": "L145",
+      "weight": 1.0,
+      "_src": "volume_booster_volume_booster_update",
+      "_tgt": "volume_booster_volume_booster_loadsettings",
+      "source": "volume_booster_volume_booster_loadsettings",
+      "target": "volume_booster_volume_booster_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
+      "source_location": "L91",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_enable",
       "_tgt": "volume_booster_volume_booster_run",
@@ -26949,7 +27273,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L133",
+      "source_location": "L153",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_update",
       "_tgt": "volume_booster_volume_booster_disable",
@@ -26961,7 +27285,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L129",
+      "source_location": "L149",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_update",
       "_tgt": "volume_booster_volume_booster_restoreaudiostate",
@@ -26973,7 +27297,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L131",
+      "source_location": "L151",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_update",
       "_tgt": "volume_booster_volume_booster_run",
@@ -26985,7 +27309,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L140",
+      "source_location": "L160",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_run",
       "_tgt": "volume_booster_volume_booster_initaudiocontext",
@@ -26997,7 +27321,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L207",
+      "source_location": "L227",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_buildaudiograph",
       "_tgt": "volume_booster_volume_booster_applycompressorstate",
@@ -27009,7 +27333,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L238",
+      "source_location": "L257",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_restoreaudiostate",
       "_tgt": "volume_booster_volume_booster_setvolume",
@@ -27021,7 +27345,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L243",
+      "source_location": "L258",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_restoreaudiostate",
       "_tgt": "volume_booster_volume_booster_setbalance",
@@ -27033,7 +27357,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L244",
+      "source_location": "L259",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_restoreaudiostate",
       "_tgt": "volume_booster_volume_booster_setmono",
@@ -27045,7 +27369,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src\\content\\features\\player\\volume-booster\\volume-booster.js",
-      "source_location": "L245",
+      "source_location": "L260",
       "weight": 1.0,
       "_src": "volume_booster_volume_booster_restoreaudiostate",
       "_tgt": "volume_booster_volume_booster_applycompressorstate",
@@ -27663,6 +27987,162 @@
       "_tgt": "popup_popup_setupcalendarlisteners",
       "source": "popup_popup_inithistorywidget",
       "target": "popup_popup_setupcalendarlisteners",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_e",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_e",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_t",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_r",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_r",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_l",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_l",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_c",
+      "source": "temp_kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_js",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_t",
+      "source": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_t",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "source": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_n",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_r",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "source": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_r",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_c",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "source": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_o",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "temp\\kdmnjgijlmjgmimahnillepgcgeemffb\\purify2.min.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "_tgt": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_l",
+      "source": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_k",
+      "target": "kdmnjgijlmjgmimahnillepgcgeemffb_purify2_min_l",
       "confidence_score": 1.0
     },
     {
