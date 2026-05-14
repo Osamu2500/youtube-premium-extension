@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'autoCinema',
         'autoPiP',
         'hoverSidebar',
+        'floatingGuide',
         'studyMode',
         'cinemaMode', // Missing
         'minimalMode', // Missing

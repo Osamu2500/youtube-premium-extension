@@ -750,6 +750,120 @@ body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar {
 }
 
 /* ==========================================================================
+   FLOATING GLASSMORPHIC GUIDE DOCK
+   body.ypp-floating-guide — floats the left nav as a peekable glass panel.
+   ========================================================================== */
+
+/* Break YouTube's normal layout so the guide can float freely */
+body.ypp-floating-guide ytd-app {
+  --ytd-nav-drawer-width: 0px !important; /* collapse the space the guide would normally take */
+}
+
+/* Float the guide container */
+body.ypp-floating-guide #guide {
+  position: fixed !important;
+  top: calc(var(--ytd-masthead-height, 56px) + 12px) !important;
+  left: 0 !important;
+  z-index: 2025 !important;
+  pointer-events: all !important;
+  transform: translateX(calc(-100% + 8px)) !important; /* 8px peeks out so you can hover */
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease,
+    opacity 0.32s ease !important;
+  opacity: 0.85 !important;
+  will-change: transform !important;
+}
+
+/* Slide fully open on hover */
+body.ypp-floating-guide #guide:hover {
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.6),
+    0 2px 12px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+/* Glass panel on the guide renderer */
+body.ypp-floating-guide ytd-guide-renderer {
+  background: rgba(12, 12, 18, 0.82) !important;
+  backdrop-filter: blur(32px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.4) !important;
+  border-radius: 0 18px 18px 0 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-left: none !important; /* flush against left edge */
+  border-right-color: rgba(255,255,255,0.12) !important;
+  border-top-color: rgba(255,255,255,0.12) !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.35) !important;
+  overflow: hidden !important;
+  height: calc(100vh - var(--ytd-masthead-height, 56px) - 24px) !important;
+  overflow-y: auto !important;
+}
+
+/* Peek strip — the 8px visible sliver on the left edge */
+body.ypp-floating-guide #guide::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; right: 0 !important;
+  width: 8px !important;
+  height: 100% !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(255,255,255,0.18) 100%
+  ) !important;
+  border-radius: 0 4px 4px 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease !important;
+}
+
+/* Hide the peek strip once fully open */
+body.ypp-floating-guide #guide:hover::before {
+  opacity: 0 !important;
+}
+
+/* Custom scrollbar inside the floating guide */
+body.ypp-floating-guide ytd-guide-renderer::-webkit-scrollbar {
+  width: 4px !important;
+}
+body.ypp-floating-guide ytd-guide-renderer::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+body.ypp-floating-guide ytd-guide-renderer::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15) !important;
+  border-radius: 4px !important;
+}
+
+/* Guide entry items — glass-friendly */
+body.ypp-floating-guide ytd-guide-entry-renderer {
+  border-radius: 10px !important;
+  transition: background 0.15s ease !important;
+}
+body.ypp-floating-guide ytd-guide-entry-renderer:hover {
+  background: rgba(255,255,255,0.07) !important;
+}
+body.ypp-floating-guide ytd-guide-entry-renderer[active] {
+  background: rgba(62,166,255,0.15) !important;
+  border-left: 2px solid rgba(62,166,255,0.7) !important;
+}
+
+/* Section dividers inside the guide */
+body.ypp-floating-guide ytd-guide-section-renderer > h3 {
+  color: rgba(255,255,255,0.35) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+/* Expand main page content to fill the vacated guide space */
+body.ypp-floating-guide #content.ytd-app,
+body.ypp-floating-guide ytd-page-manager {
+  margin-left: 0 !important;
+}
+
+/* ==========================================================================
    YPP UI Component Frame (Phase 6 UI Consistency)
    ========================================================================== */
 

@@ -27,8 +27,8 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
      */
     update(settings) {
         this.settings = settings;
-        // Logic: if forceHideSidebar or hoverSidebar is enabled, enable manager
-        if (settings.forceHideSidebar || settings.hoverSidebar) {
+        // Logic: if forceHideSidebar, hoverSidebar, or floatingGuide is enabled, enable manager
+        if (settings.forceHideSidebar || settings.hoverSidebar || settings.floatingGuide) {
             this.enable(); 
         } else {
             this.disable(); 
@@ -55,7 +55,7 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
         if (!this.isEnabled) return;
 
         this.isEnabled = false;
-        document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar');
+        document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar', 'ypp-floating-guide');
 
         window.removeEventListener('yt-page-data-updated', this.handleNavigation);
         window.removeEventListener('yt-navigate-finish', this.handleNavigation);
@@ -90,6 +90,9 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
             } else {
                 document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar');
             }
+
+            // Floating guide dock — independent of sidebar hiding
+            document.body.classList.toggle('ypp-floating-guide', !!this.settings.floatingGuide);
         });
     }
 
