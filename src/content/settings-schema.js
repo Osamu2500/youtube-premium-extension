@@ -138,6 +138,8 @@ window.YPP.SettingsSchema = {
 
         // --- New Features ---
         ambientMode:         { type: 'boolean', default: false },
+        ambientIntensity:    { type: 'number',  default: 0.6, min: 0.1, max: 1.0 },
+        ambientBlur:         { type: 'number',  default: 120, min: 20, max: 200 },
         audioModeEnabled:    { type: 'boolean', default: false },
         videoControlsEnabled:{ type: 'boolean', default: true },
         subscriptionFolders: { type: 'boolean', default: true },

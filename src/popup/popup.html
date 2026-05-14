@@ -174,18 +174,30 @@
                   <span class="slider"></span>
                 </label>
               </div>
-              <div class="mode-card" id="modeCard-ambientMode">
-                <div class="mode-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              <div class="mode-card" id="modeCard-ambientMode" style="flex-wrap: wrap;">
+                <div style="display:flex; width:100%; align-items:center; justify-content:space-between;">
+                  <div class="mode-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                  </div>
+                  <div class="mode-info">
+                    <span class="mode-name">Ambient Theater</span>
+                    <span class="mode-desc">Massive canvas ambilight</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="ambientMode" />
+                    <span class="slider"></span>
+                  </label>
                 </div>
-                <div class="mode-info">
-                  <span class="mode-name">Ambient Mode</span>
-                  <span class="mode-desc">Ambilight effect behind player</span>
+                <div class="mode-settings" style="width:100%; display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1);">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:12px; color:rgba(255,255,255,0.7);">Intensity</span>
+                    <input type="range" id="ambientIntensity" min="0.1" max="1.0" step="0.1" value="0.6" style="width:100px;">
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12px; color:rgba(255,255,255,0.7);">Blur Amount</span>
+                    <input type="range" id="ambientBlur" min="20" max="200" step="10" value="120" style="width:100px;">
+                  </div>
                 </div>
-                <label class="toggle">
-                  <input type="checkbox" id="ambientMode" />
-                  <span class="slider"></span>
-                </label>
               </div>
               <div class="mode-card" id="modeCard-audioModeEnabled">
                 <div class="mode-icon">

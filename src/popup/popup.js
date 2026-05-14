@@ -147,6 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'cinemaMode', // Missing
         'minimalMode', // Missing
         'ambientMode',
+        'ambientIntensity',
+        'ambientBlur',
         'audioModeEnabled',
         'videoControlsEnabled',
 
@@ -439,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
-    ['blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold'].forEach(key => {
+    ['ambientIntensity', 'ambientBlur', 'blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold'].forEach(key => {
         const slider = elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {
@@ -760,6 +762,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI DEPENDENCIES ---
     function updateDependencyUI() {
+        // Ambient Mode -> Show Sliders
+        const ambientModeToggle = document.getElementById('ambientMode');
+        const ambientCard = document.getElementById('modeCard-ambientMode');
+        if (ambientModeToggle && ambientCard) {
+            const settingsTray = ambientCard.querySelector('.mode-settings');
+            if (settingsTray) {
+                settingsTray.style.display = ambientModeToggle.checked ? 'block' : 'none';
+            }
+        }
+
         // Focus Mode -> Sub-toggles (Optional visual hierarchy)
         const focusMode = document.getElementById('enableFocusMode');
         if (focusMode) {

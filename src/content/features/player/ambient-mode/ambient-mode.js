@@ -52,8 +52,14 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
     }
 
     async onUpdate() {
-        // If settings update and it's already enabled, we don't need to do much
-        // unless we add color/intensity settings later.
+        // Handle live updates from the popup sliders
+        if (this.isEnabled && this.canvas && this.container) {
+            const intensity = this.settings?.ambientIntensity ?? 0.6;
+            const blurAmount = this.settings?.ambientBlur ?? 120;
+            
+            this.container.style.opacity = intensity;
+            this.canvas.style.filter = `blur(${blurAmount}px) saturate(2.0) brightness(0.85)`;
+        }
     }
 
     async injectToggleButton() {
@@ -109,41 +115,52 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         this.video = document.querySelector('video');
         if (!this.video) return;
 
-        // Find the player container to append the ambient canvas behind it
-        const player = document.querySelector('#ytd-player') || document.querySelector('.html5-video-player');
-        if (!player) return;
+        // Find the watch page container to append the ambient canvas behind EVERYTHING
+        const watchContainer = document.querySelector('ytd-watch-flexy');
+        if (!watchContainer) return;
 
-        // Create container for the glow
+        // Create container for the massive glow
         this.container = document.createElement('div');
-        this.container.id = 'ypp-ambient-container';
+        this.container.id = 'ypp-massive-ambient-container';
         this.container.style.cssText = `
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            z-index: -1;
+            height: 150vh; /* Bleed way down the page */
+            z-index: -1; /* Behind all content */
             pointer-events: none;
             overflow: hidden;
             transform: translateZ(0); /* Hardware acceleration */
+            opacity: ${this.settings?.ambientIntensity || 0.6};
+            transition: opacity 0.5s ease;
         `;
 
         // Create canvas
         this.canvas = document.createElement('canvas');
-        this.canvas.id = 'ypp-ambient-canvas';
+        this.canvas.id = 'ypp-massive-ambient-canvas';
+        
+        const blurAmount = this.settings?.ambientBlur || 120;
+        
         this.canvas.style.cssText = `
             position: absolute;
-            top: 50%;
+            top: 0;
             left: 50%;
-            transform: translate(-50%, -50%) scale(1.5);
-            width: 100%;
-            height: 100%;
-            filter: blur(80px) saturate(1.5) brightness(0.8);
-            opacity: 0.6;
+            transform: translateX(-50%) scale(1.2);
+            width: 100vw;
+            height: 100vh;
+            filter: blur(${blurAmount}px) saturate(2.0) brightness(0.85);
+            mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
         `;
         
         this.container.appendChild(this.canvas);
-        player.prepend(this.container);
+        
+        // Ensure ytd-watch-flexy doesn't clip our absolute child, and has relative positioning
+        watchContainer.style.position = 'relative';
+        
+        // Insert at the very beginning of watch container
+        watchContainer.insertBefore(this.container, watchContainer.firstChild);
 
         this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
     }
