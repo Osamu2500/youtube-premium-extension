@@ -212,7 +212,7 @@
     "hash": "340adb46eba80bc727bc7d91e7185ce0"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\folder-ui.js": {
-    "mtime": 1778601741.1280448,
+    "mtime": 1778731539.6444232,
     "hash": "99149a884c5d8479de7a33866d0e6ff5"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\pages\\subscriptions\\index.js": {
@@ -292,8 +292,8 @@
     "hash": "aed4bd668aa58bb7c4aa287344b427dc"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\global-bar-ui.js": {
-    "mtime": 1778731149.1765575,
-    "hash": "aaca8341b9bbcd46979d107a35b0775c"
+    "mtime": 1778733156.2283993,
+    "hash": "b08094e7a03a88ed8759e61777af1c80"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\global-bar.js": {
     "mtime": 1778600533.313804,
@@ -364,24 +364,24 @@
     "hash": "644aee6750555ba69593e15fa56319b9"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\video-filters\\video-filters-ui.js": {
-    "mtime": 1778731387.733057,
-    "hash": "b1741be6d1de800e7c4180e8aa0387a5"
+    "mtime": 1778733124.3252673,
+    "hash": "58ea949e574ac34e714dc63716af9c17"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\video-filters\\video-filters.js": {
-    "mtime": 1778118927.4515507,
-    "hash": "732c4518433d5c87a64a015cd68a5592"
+    "mtime": 1778733044.2187223,
+    "hash": "e09963d59a7391957edb09ddba50ca46"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\volume-booster\\index.js": {
     "mtime": 1777622943.125072,
     "hash": "b884285fee73ad1d2a3035ed34e72580"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\volume-booster\\volume-booster-ui.js": {
-    "mtime": 1778731367.4317513,
-    "hash": "6ac0db76e9d7ae3d3eed5e253210a44e"
+    "mtime": 1778733106.679628,
+    "hash": "d74e07b13e13edf6f858e455756da274"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\volume-booster\\volume-booster.js": {
-    "mtime": 1778641182.1325796,
-    "hash": "b1a9dccc306e0462b0d92e1c0afef245"
+    "mtime": 1778733136.4124217,
+    "hash": "ef03ef8248f730c920a589eb01cc510e"
   },
   "F:\\Youtube 2.0\\src\\content\\ui\\ui-manager.js": {
     "mtime": 1777622943.1360564,

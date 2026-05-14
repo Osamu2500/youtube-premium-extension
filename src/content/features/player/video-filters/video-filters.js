@@ -131,8 +131,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         if (adj.clarity > 0) {
             baseContrast += adj.clarity * 0.3;
         }
-        // Temperature: warm = +sepia/hue shift, cool = blue hue
-        let extraFilters = '';
+        // Temperature: warm = +brightness/contrast, cool = blue hue
         if (adj.temperature !== 0) {
             const t = adj.temperature;
             if (t > 0) { // warm
@@ -142,10 +141,12 @@ window.YPP.features.VideoFilters = class VideoFilters {
                 baseBrightness += t * 0.03;
             }
         }
+        // Bug fix: use local variables so we never mutate this.filterAdjustments
+        // (Bug 7 — adj.saturate was permanently overwritten on every call)
+        let localSaturate = adj.saturate;
         if (adj.vibrance !== undefined && adj.vibrance !== 100) {
-            const vb = adj.vibrance;
-            // Vibrance approximated via saturation adjustment
-            adj.saturate = s(vb, 100);
+            // Vibrance approximated via saturation adjustment (local only, not persisted)
+            localSaturate = s(adj.vibrance, 100);
         }
         // Highlights/Shadows approximate via brightness layers (CSS limited)
         if (adj.highlights !== 0) baseBrightness += adj.highlights * 0.15;
@@ -154,7 +155,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         const adjStr = [
             baseBrightness !== 100 ? `brightness(${s(baseBrightness)}%)` : '',
             baseContrast !== 100 ? `contrast(${s(baseContrast)}%)` : '',
-            adj.saturate !== 100 ? `saturate(${s(adj.saturate)}%)` : '',
+            localSaturate !== 100 ? `saturate(${s(localSaturate)}%)` : '',
             adj.hueRotate !== 0 ? `hue-rotate(${adj.hueRotate * inst}deg)` : '',
             adj.sepia > 0 ? `sepia(${adj.sepia * inst}%)` : '',
             adj.grayscale > 0 ? `grayscale(${adj.grayscale * inst}%)` : '',
@@ -180,9 +181,19 @@ window.YPP.features.VideoFilters = class VideoFilters {
 
         video.style.filter = finalFilter;
 
-        window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
-        if (preset.overlay || adj.grain > 0 || preset.name === 'Night Vision') {
+        // Performance fix: only rebuild the overlay when preset or grain actually changed —
+        // prevents constant DOM remove+append on every slider `oninput` event.
+        const overlayKey = `${this.currentFilterIndex}:${adj.grain}`;
+        const needsOverlay = preset.overlay || adj.grain > 0 || preset.name === 'Night Vision';
+        const overlayChanged = this._lastOverlayKey !== overlayKey;
+
+        if (!needsOverlay) {
+            window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
+            this._lastOverlayKey = null;
+        } else if (overlayChanged) {
+            window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
             window.YPP.features.VideoFiltersOverlay.applyOverlay(this, preset.overlay, adj.grain);
+            this._lastOverlayKey = overlayKey;
         }
     }
 
@@ -221,7 +232,8 @@ window.YPP.features.VideoFilters = class VideoFilters {
         const toast = document.createElement('div');
         toast.className = 'ypp-toast-mini';
         toast.textContent = message;
-        const parent = video.parentElement || document.getElementById('movie_player');
+        // Bug fix: fall back to document.body on external sites (#movie_player absent)
+        const parent = video?.parentElement || document.getElementById('movie_player') || document.body;
         if (parent) {
             parent.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
