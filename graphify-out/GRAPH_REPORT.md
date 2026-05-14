@@ -1,7 +1,7 @@
 # Graph Report - Youtube 2.0  (2026-05-14)
 
 ## Corpus Check
-- 115 files · ~409,578 words
+- 115 files · ~409,885 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -315,7 +315,7 @@ Nodes (5): disable(), enable(), ensureSidebarState(), handleNavigation(), update
 
 ### Community 50 - "Community 50"
 Cohesion: 0.31
-Nodes (4): calculateDuration(), enable(), formatTime(), renderCard()
+Nodes (4): calculateDuration(), enable(), formatTimeText(), renderCard()
 
 ### Community 51 - "Community 51"
 Cohesion: 0.28

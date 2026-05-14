@@ -265,6 +265,38 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 window.location.href = '/account';
             });
 
+        // Helper to click native sub-menu items by matching aria-labels or text
+        const clickNativeItem = (keywords) => {
+            this._closeMenu();
+            setTimeout(() => {
+                const items = Array.from(document.querySelectorAll('ytd-compact-link-renderer, ytd-menu-navigation-item-renderer, ytd-toggle-theme-compact-link-renderer'));
+                const target = items.find(el => {
+                    const text = (el.textContent || '').toLowerCase();
+                    const aria = (el.getAttribute('aria-label') || '').toLowerCase();
+                    return keywords.some(k => text.includes(k) || aria.includes(k));
+                });
+                if (target) target.click();
+            }, 100);
+        };
+
+        panel.querySelector('#ypp-language')?.addEventListener('click', () => clickNativeItem(['language', 'idioma', 'langue', 'sprache', 'język']));
+        panel.querySelector('#ypp-location')?.addEventListener('click', () => clickNativeItem(['location', 'ubicación', 'lieu', 'standort', 'lokalizacja']));
+        panel.querySelector('#ypp-restricted')?.addEventListener('click', () => clickNativeItem(['restricted', 'restringido', 'restreint', 'eingeschränkt']));
+        
+        panel.querySelector('#ypp-keyboard')?.addEventListener('click', () => {
+            this._closeMenu();
+            setTimeout(() => {
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: '?', shiftKey: true, bubbles: true }));
+            }, 100);
+        });
+
+        panel.querySelector('#ypp-help')?.addEventListener('click', () => {
+            this._closeMenu();
+            window.open('https://support.google.com/youtube/', '_blank');
+        });
+
+        panel.querySelector('#ypp-feedback')?.addEventListener('click', () => clickNativeItem(['feedback', 'comentarios', 'commentaires', 'feedback']));
+
         const moreToggle = panel.querySelector('#ypp-more-toggle');
         const moreItems  = panel.querySelector('#ypp-more-items');
         const chevron    = panel.querySelector('.ypp-chevron');
