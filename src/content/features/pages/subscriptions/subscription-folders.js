@@ -387,22 +387,23 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
         videoCards.forEach(card => {
             let isVisible = true;
-            let channelName = card.dataset.yppChannel;
+            let channelName = null;
 
+            // Robust extraction: First try the exact same element used when saving to folder
+            const channelLink = card.querySelector('#channel-name a');
+            if (channelLink && channelLink.textContent) {
+                channelName = channelLink.textContent.trim();
+            }
             if (!channelName) {
-                // Robust extraction: First try avatar title, then channel text
                 const avatarLink = card.querySelector('a#avatar-link');
                 if (avatarLink && avatarLink.title) {
                     channelName = avatarLink.title.trim();
                 }
-                if (!channelName) {
-                    const channelEl = card.querySelector('ytd-channel-name yt-formatted-string');
-                    if (channelEl) {
-                        channelName = (channelEl.title || channelEl.textContent).trim();
-                    }
-                }
-                if (channelName) {
-                    card.dataset.yppChannel = channelName;
+            }
+            if (!channelName) {
+                const channelEl = card.querySelector('ytd-channel-name yt-formatted-string');
+                if (channelEl) {
+                    channelName = (channelEl.title || channelEl.textContent).trim();
                 }
             }
 
@@ -495,8 +496,6 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         videoCards.forEach(card => {
             card.style.display = '';
             card.classList.remove('ypp-filtered-in');
-            // Clear cached channel name so stale data doesn't persist across navigations
-            delete card.dataset.yppChannel;
         });
     }
 

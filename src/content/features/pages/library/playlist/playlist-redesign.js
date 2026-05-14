@@ -370,6 +370,29 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
               </button>
             </div>
 
+            <div class="ypp-pl-actions-secondary">
+              <button class="ypp-pl-btn-icon" id="ypp-pl-save" title="Save playlist">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              </button>
+              <button class="ypp-pl-btn-icon" id="ypp-pl-share" title="Share">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </button>
+              <button class="ypp-pl-btn-icon" id="ypp-pl-menu" title="Menu">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+              </button>
+            </div>
+
+            <button class="ypp-pl-btn-remove-watched" id="ypp-pl-remove-watched">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M9 6V4h6v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+              Remove Watched Videos
+            </button>
+
             ${durCard}
           </aside>
 
@@ -480,7 +503,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
 
         return `
         <a class="ypp-pl-card" href="${this._esc(v.href)}"
-           data-title="${this._esc(v.title.toLowerCase())}" data-index="${i}">
+           data-title="${this._esc(v.title.toLowerCase())}" data-index="${i}" data-progress="${v.progress}">
           <div class="ypp-pl-card-thumb">
             <div class="ypp-pl-card-index">${this._esc(v.index)}</div>
             ${thumbHTML}
@@ -520,6 +543,68 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             if (!vids.length) return;
             const pick = vids[Math.floor(Math.random() * vids.length)];
             window.location.href = pick.href;
+        });
+
+        // ── Secondary Actions ──────────────────────────────────────────────
+        root.querySelector('#ypp-pl-save')?.addEventListener('click', () => {
+            const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer ytd-toggle-button-renderer button, ytd-playlist-header-renderer ytd-button-renderer button'));
+            const saveBtn = btns.find(b => {
+                const label = (b.getAttribute('aria-label') || b.title || '').toLowerCase();
+                return label.includes('save');
+            });
+            if (saveBtn) saveBtn.click();
+        });
+
+        root.querySelector('#ypp-pl-share')?.addEventListener('click', () => {
+            const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer ytd-button-renderer button'));
+            const shareBtn = btns.find(b => {
+                const label = (b.getAttribute('aria-label') || b.title || '').toLowerCase();
+                return label.includes('share');
+            });
+            if (shareBtn) shareBtn.click();
+        });
+
+        root.querySelector('#ypp-pl-menu')?.addEventListener('click', () => {
+            const menuBtn = document.querySelector('ytd-playlist-header-renderer ytd-menu-renderer button');
+            if (menuBtn) menuBtn.click();
+        });
+
+        // ── Remove Watched Videos ──────────────────────────────────────────
+        root.querySelector('#ypp-pl-remove-watched')?.addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            const watchedCards = Array.from(root.querySelectorAll('.ypp-pl-card[data-progress]'))
+                .filter(c => parseInt(c.dataset.progress, 10) > 0);
+
+            if (!watchedCards.length) {
+                btn.textContent = 'No watched videos found';
+                setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Remove Watched Videos'; }, 2000);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = `Removing 0 / ${watchedCards.length}…`;
+
+            let removed = 0;
+            for (const card of watchedCards) {
+                const idx = parseInt(card.dataset.index, 10);
+                const success = await this._removeNativeVideo(idx);
+                if (success) {
+                    card.style.transition = 'opacity 0.3s, transform 0.3s';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 320);
+                    removed++;
+                    btn.textContent = `Removing ${removed} / ${watchedCards.length}…`;
+                }
+                // Small gap between each removal so YouTube can process
+                await new Promise(r => setTimeout(r, 800));
+            }
+
+            btn.disabled = false;
+            btn.textContent = removed > 0 ? `✓ Removed ${removed} video${removed !== 1 ? 's' : ''}` : 'None removed';
+            setTimeout(() => {
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Remove Watched Videos';
+            }, 3000);
         });
 
         // ── Column switcher ───────────────────────────────────────────────
@@ -641,31 +726,20 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             
             menu.querySelector('[data-action="remove"]')?.addEventListener('click', () => {
                 if (card) {
-                    card.style.opacity = '0.3';
-                    card.style.pointerEvents = 'none';
-                    
                     const idx = parseInt(card.dataset.index, 10);
-                    const nativeVideos = document.querySelectorAll('ytd-playlist-video-renderer');
-                    const nativeVideo = nativeVideos[idx];
-                    
-                    if (nativeVideo) {
-                        const menuBtn = nativeVideo.querySelector('ytd-menu-renderer button');
-                        if (menuBtn) {
-                            menuBtn.click();
-                            setTimeout(() => {
-                                const items = document.querySelectorAll('ytd-menu-popup-renderer ytd-menu-service-item-renderer');
-                                for (const item of items) {
-                                    const text = (item.textContent || '').toLowerCase();
-                                    if (text.includes('remove from')) {
-                                        item.click();
-                                        break;
-                                    }
-                                }
-                                // Ensure popup closes
-                                document.body.click();
-                            }, 100);
+                    this._removeNativeVideo(idx).then(success => {
+                        if (success) {
+                            card.style.transition = 'opacity 0.3s, transform 0.3s';
+                            card.style.opacity = '0';
+                            card.style.transform = 'scale(0.95)';
+                            setTimeout(() => card.remove(), 320);
+                        } else {
+                            card.style.opacity = '';
+                            card.style.pointerEvents = '';
                         }
-                    }
+                    });
+                    card.style.opacity = '0.4';
+                    card.style.pointerEvents = 'none';
                 }
                 menu.remove();
             });
@@ -699,5 +773,51 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             .replace(/'/g,  '&#39;')
             .replace(/</g,  '&lt;')
             .replace(/>/g,  '&gt;');
+    }
+
+    /**
+     * Clicks a native video's three-dot menu and selects "Remove from playlist".
+     * Returns a Promise<boolean> — true if the item was found and clicked.
+     */
+    _removeNativeVideo(nativeIndex) {
+        return new Promise(resolve => {
+            const nativeVideos = document.querySelectorAll('ytd-playlist-video-renderer');
+            const nativeVideo  = nativeVideos[nativeIndex];
+            if (!nativeVideo) return resolve(false);
+
+            const menuBtn = nativeVideo.querySelector('ytd-menu-renderer button');
+            if (!menuBtn) return resolve(false);
+
+            // Close any open popup first
+            document.body.click();
+
+            setTimeout(() => {
+                menuBtn.click();
+
+                // Wait for the popup to render, then click Remove
+                const tryClick = (attempts) => {
+                    if (attempts <= 0) return resolve(false);
+                    const popup = document.querySelector('ytd-menu-popup-renderer');
+                    if (!popup) {
+                        setTimeout(() => tryClick(attempts - 1), 150);
+                        return;
+                    }
+                    const items = popup.querySelectorAll('ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer');
+                    for (const item of items) {
+                        const text = (item.textContent || '').toLowerCase();
+                        if (text.includes('remove from')) {
+                            item.click();
+                            // Dismiss any lingering popup
+                            setTimeout(() => document.body.click(), 100);
+                            return resolve(true);
+                        }
+                    }
+                    // Popup rendered but button not found yet
+                    setTimeout(() => tryClick(attempts - 1), 150);
+                };
+
+                tryClick(10); // up to 10 × 150ms = 1.5s wait
+            }, 80);
+        });
     }
 };

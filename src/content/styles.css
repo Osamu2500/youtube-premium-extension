@@ -5929,22 +5929,23 @@ body.ypp-playlist-redesign ytd-masthead {
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-sidebar {
-    /* Sticky ensures it stays on screen while scrolling */
-    position: sticky;
+    position: fixed;
     top: 80px;
+    left: 24px;
     /* Width constraints */
     width: 360px;
     min-width: 360px;
     max-width: 360px;
     height: calc(100vh - 104px); /* 80px top + 24px bottom */
     z-index: 150;
-    /* Background */
-    background: rgba(18, 18, 20, 0.97);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    /* Large rounded corners like native */
-    border: 1px solid rgba(255,255,255,0.05);
+    /* Background (Premium Glassmorphism) */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(32px) saturate(1.2);
+    -webkit-backdrop-filter: blur(32px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     /* Layout */
     display: flex;
     flex-direction: column;
@@ -6033,28 +6034,90 @@ body.ypp-playlist-redesign ytd-masthead {
     transition: all 0.2s;
 }
 #ypp-pl-root .ypp-pl-btn-primary {
-    background: #6C63FF;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
     color: #fff;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
-#ypp-pl-root .ypp-pl-btn-primary:hover { background: #5a52d5; }
+#ypp-pl-root .ypp-pl-btn-primary:hover { 
+    background: linear-gradient(135deg, #4f46e5, #9333ea);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    transform: translateY(-1px);
+}
 #ypp-pl-root .ypp-pl-btn-secondary {
     background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.8);
-    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.15);
 }
-#ypp-pl-root .ypp-pl-btn-secondary:hover { background: rgba(255,255,255,0.14); }
+#ypp-pl-root .ypp-pl-btn-secondary:hover { 
+    background: rgba(255,255,255,0.14); 
+    transform: translateY(-1px);
+}
 #ypp-pl-root .ypp-pl-btn-primary svg,
 #ypp-pl-root .ypp-pl-btn-secondary svg { width: 14px; height: 14px; }
 
+#ypp-pl-root .ypp-pl-actions-secondary {
+    display: flex;
+    gap: 8px;
+}
+#ypp-pl-root .ypp-pl-btn-icon {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#ypp-pl-root .ypp-pl-btn-icon:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transform: translateY(-1px);
+}
+#ypp-pl-root .ypp-pl-btn-icon svg { width: 16px; height: 16px; }
+
 /* ── Duration card ────────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-duration-card {
-    background: rgba(108, 99, 255, 0.12);
-    border: 1px solid rgba(108, 99, 255, 0.22);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     padding: 14px;
     /* Push to bottom of sidebar */
     margin-top: auto;
     flex-shrink: 0;
+}
+
+/* Remove Watched button */
+#ypp-pl-root .ypp-pl-btn-remove-watched {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.08);
+    color: rgba(239, 68, 68, 0.85);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+#ypp-pl-root .ypp-pl-btn-remove-watched:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.55);
+    color: #f87171;
+    transform: translateY(-1px);
+}
+#ypp-pl-root .ypp-pl-btn-remove-watched:disabled {
+    opacity: 0.7;
+    cursor: wait;
 }
 #ypp-pl-root .ypp-pl-duration-label {
     font-size: 10px;
@@ -6093,6 +6156,7 @@ body.ypp-playlist-redesign ytd-masthead {
 /* ── Main content area ────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-main {
     flex: 1;
+    margin-left: 384px; /* 360px sidebar + 24px gap */
     /* padding-top 0 since layout handles the 24px gap */
     padding: 0 24px 48px 0;
     box-sizing: border-box;

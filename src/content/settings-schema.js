@@ -150,6 +150,7 @@ window.YPP.SettingsSchema = {
         commentFilter:       { type: 'boolean', default: true },
         contextMenu:         { type: 'boolean', default: true },
         enableAccountMenu:   { type: 'boolean', default: true },
+        playlistRedesign:    { type: 'boolean', default: true },
         miniPlayer:          { type: 'boolean', default: false },
         redirectShorts:      { type: 'boolean', default: false },
 
