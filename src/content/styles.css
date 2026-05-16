@@ -243,7 +243,7 @@ html.yt-premium-plus-theme :is(
 }
 
 /* Flat Cards */
-html[data-ypp-card-style="flat"] :is(
+html[data-ypp-card-style="flat"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -254,7 +254,7 @@ html[data-ypp-card-style="flat"] :is(
   border: 1px solid transparent !important;
   padding: 0 !important;
 }
-html[data-ypp-card-style="flat"] :is(
+html[data-ypp-card-style="flat"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -266,7 +266,7 @@ html[data-ypp-card-style="flat"] :is(
 }
 
 /* Elevated Cards */
-html[data-ypp-card-style="elevated"] :is(
+html[data-ypp-card-style="elevated"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -279,7 +279,7 @@ html[data-ypp-card-style="elevated"] :is(
   border-radius: var(--ypp-radius-md);
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="elevated"] :is(
+html[data-ypp-card-style="elevated"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -291,7 +291,7 @@ html[data-ypp-card-style="elevated"] :is(
 }
 
 /* Glass Cards */
-html[data-ypp-card-style="glass"] :is(
+html[data-ypp-card-style="glass"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -307,7 +307,7 @@ html[data-ypp-card-style="glass"] :is(
   border-radius: var(--ypp-radius-lg, 16px) !important;
   margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="glass"] :is(
+html[data-ypp-card-style="glass"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -320,7 +320,7 @@ html[data-ypp-card-style="glass"] :is(
 }
 
 /* ── FOLDER STYLE ── */
-html[data-ypp-card-style="folder"] :is(
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
@@ -334,7 +334,7 @@ html[data-ypp-card-style="folder"] :is(
     padding: var(--ypp-density-pad, 8px) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="folder"] :is(
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, 
   ytd-compact-video-renderer, ytd-grid-video-renderer
 )::before {
@@ -350,21 +350,21 @@ html[data-ypp-card-style="folder"] :is(
     border-bottom: none !important;
 }
 /* Cycle folder tab colors */
-html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+1)::before { --ypp-folder-tab: #FF6B6B; }
-html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+2)::before { --ypp-folder-tab: #6C63FF; }
-html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+3)::before { --ypp-folder-tab: #10B981; }
-html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+4)::before { --ypp-folder-tab: #F59E0B; }
-html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+5)::before { --ypp-folder-tab: #3EA6FF; }
-html[data-ypp-card-style="folder"] :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+6)::before { --ypp-folder-tab: #EC4899; }
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+1)::before { --ypp-folder-tab: #FF6B6B; }
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+2)::before { --ypp-folder-tab: #6C63FF; }
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+3)::before { --ypp-folder-tab: #10B981; }
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+4)::before { --ypp-folder-tab: #F59E0B; }
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+5)::before { --ypp-folder-tab: #3EA6FF; }
+html[data-ypp-card-style="folder"] body:not(.ypp-channel-page) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+6)::before { --ypp-folder-tab: #EC4899; }
 
 /* ── BENTO STYLE ── */
-html[data-ypp-card-style="bento"] ytd-rich-grid-renderer > #contents {
+html[data-ypp-card-style="bento"] body:not(.ypp-channel-page) ytd-rich-grid-renderer > #contents {
     gap: 3px !important;
     background: rgba(255,255,255,0.06) !important;
     padding: 3px !important;
     border-radius: 16px !important;
 }
-html[data-ypp-card-style="bento"] :is(
+html[data-ypp-card-style="bento"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer,
   ytd-compact-video-renderer, ytd-grid-video-renderer
 ) {
@@ -375,7 +375,7 @@ html[data-ypp-card-style="bento"] :is(
     margin: 0 !important;
     padding: var(--ypp-density-pad, 8px) !important;
 }
-html[data-ypp-card-style="bento"] :is(
+html[data-ypp-card-style="bento"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer,
   ytd-compact-video-renderer, ytd-grid-video-renderer
 ):hover {
@@ -384,7 +384,7 @@ html[data-ypp-card-style="bento"] :is(
 }
 
 /* ── NEON STYLE ── */
-html[data-ypp-card-style="neon"] :is(
+html[data-ypp-card-style="neon"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer,
   ytd-compact-video-renderer, ytd-grid-video-renderer
 ) {
@@ -397,7 +397,7 @@ html[data-ypp-card-style="neon"] :is(
     padding: var(--ypp-density-pad, 8px) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="neon"] :is(
+html[data-ypp-card-style="neon"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer,
   ytd-compact-video-renderer, ytd-grid-video-renderer
 ):hover {
@@ -405,12 +405,12 @@ html[data-ypp-card-style="neon"] :is(
     box-shadow: 0 0 20px rgba(108,99,255,0.35),
                 0 0 40px rgba(108,99,255,0.15) !important;
 }
-html[data-ypp-card-style="neon"] ytd-thumbnail {
+html[data-ypp-card-style="neon"] body:not(.ypp-channel-page) ytd-thumbnail {
     border-radius: 8px 8px 0 0 !important;
 }
 
 /* ── COMPACT STYLE ── */
-html[data-ypp-card-style="compact"] :is(
+html[data-ypp-card-style="compact"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer,
   ytd-compact-video-renderer, ytd-grid-video-renderer
 ) {
@@ -421,27 +421,27 @@ html[data-ypp-card-style="compact"] :is(
     padding: 4px !important;
     margin-bottom: 4px !important;
 }
-html[data-ypp-card-style="compact"] :is(
+html[data-ypp-card-style="compact"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer,
   ytd-compact-video-renderer, ytd-grid-video-renderer
 ):hover {
     background: rgba(255,255,255,0.04) !important;
     transform: none !important;
 }
-html[data-ypp-card-style="compact"] ytd-thumbnail {
+html[data-ypp-card-style="compact"] body:not(.ypp-channel-page) ytd-thumbnail {
     border-radius: 4px !important;
 }
-html[data-ypp-card-style="compact"] #video-title {
+html[data-ypp-card-style="compact"] body:not(.ypp-channel-page) #video-title {
     font-size: 12px !important;
     -webkit-line-clamp: 1 !important;
     line-clamp: 1 !important;
 }
-html[data-ypp-card-style="compact"] #metadata-line {
+html[data-ypp-card-style="compact"] body:not(.ypp-channel-page) #metadata-line {
     font-size: 11px !important;
 }
 
 /* ── POLAROID STYLE ── */
-html[data-ypp-card-style="polaroid"] :is(
+html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
 ) {
     background: #E8E4D9 !important;
@@ -453,26 +453,26 @@ html[data-ypp-card-style="polaroid"] :is(
     transform: rotate(0.5deg) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
 }
-html[data-ypp-card-style="polaroid"] :is(
+html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
 ):nth-child(even) {
     transform: rotate(-0.8deg) !important;
 }
-html[data-ypp-card-style="polaroid"] :is(
+html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
 ):hover {
     transform: rotate(0deg) scale(1.02) !important;
     z-index: 2 !important;
 }
-html[data-ypp-card-style="polaroid"] ytd-thumbnail {
+html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) ytd-thumbnail {
     border-radius: 2px !important;
 }
-html[data-ypp-card-style="polaroid"] #video-title {
+html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) #video-title {
     color: #1a1a1a !important;
     font-size: 12px !important;
     font-family: 'Courier New', monospace !important;
 }
-html[data-ypp-card-style="polaroid"] #metadata-line span {
+html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) #metadata-line span {
     color: #555 !important;
 }
 
@@ -7007,60 +7007,5 @@ body.ypp-grayscale-thumbnails ytd-thumbnail img {
 }
 body.ypp-grayscale-thumbnails ytd-thumbnail:hover img {
     filter: grayscale(0%);
-}
-
-/* ===================================================================================
-   CHANNEL PAGE — SURGICAL LAYOUT GUARD
-   Only undoes the exact 3 properties that break channel page layout.
-   Does NOT touch masthead margin or any global theme styles.
-   =================================================================================== */
-
-/* 1. Undo the display:contents that flattens grid rows on every page */
-body.ypp-channel-page ytd-rich-grid-row,
-body.ypp-channel-page ytd-rich-grid-row > #contents,
-body.ypp-channel-page ytd-rich-grid-row > div {
-  display: unset !important;
-}
-
-/* 2. Undo forced grid columns on the grid renderer */
-body.ypp-channel-page ytd-rich-grid-renderer > #contents {
-  display: unset !important;
-  grid-template-columns: unset !important;
-  grid-auto-flow: unset !important;
-}
-
-/* 3. Undo forced widths and flex overrides on individual items */
-body.ypp-channel-page ytd-rich-item-renderer {
-  width: unset !important;
-  max-width: unset !important;
-  min-width: unset !important;
-  height: unset !important;
-  display: unset !important;
-  flex: unset !important;
-  flex-direction: unset !important;
-  margin: unset !important;
-  align-self: unset !important;
-  box-sizing: unset !important;
-  overflow: unset !important;
-  isolation: unset !important;
-}
-
-/* 4. Undo the CSS variable that disables YouTube's own layout calculations */
-body.ypp-channel-page ytd-rich-grid-renderer,
-body.ypp-channel-page ytd-rich-grid-row,
-body.ypp-channel-page ytd-rich-item-renderer {
-  --ytd-rich-grid-items-per-row: unset !important;
-  --ytd-rich-grid-posts-per-row: unset !important;
-}
-
-/* 5. Undo the section renderer's forced grid-column span */
-body.ypp-channel-page ytd-rich-section-renderer {
-  grid-column: unset !important;
-  width: unset !important;
-}
-
-/* 6. Undo hidden empty section renderers — channel sections must stay visible */
-body.ypp-channel-page ytd-rich-section-renderer {
-  display: unset !important;
 }
 
