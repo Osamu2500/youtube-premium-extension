@@ -3,11 +3,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 14px 8px;
-    border-radius: 32px;
+    padding: 10px 6px;
+    border-radius: 28px;
     color: #fff;
     font-family: 'Inter', 'Roboto', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     width: auto;
     height: auto;
     pointer-events: auto;
@@ -50,9 +50,9 @@
     border-radius: 50%;
     color: rgba(255,255,255,0.85);
     cursor: pointer;
-    font-size: 18px;
-    width: 36px;
-    height: 36px;
+    font-size: 15px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,8 +73,8 @@
 }
 
 .ypp-global-player-bar .ypp-action-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     fill: currentColor;
     filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
 }
@@ -107,14 +107,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 60px;
-    width: 18px;
+    height: 50px;
+    width: 14px;
 }
 
 .ypp-gpb-vol-slider {
     -webkit-appearance: none;
     appearance: none;
-    width: 56px;
+    width: 46px;
     height: 3px;
     border-radius: 3px;
     background: rgba(255,255,255,0.15);
@@ -154,9 +154,9 @@
 }
 
 .ypp-global-player-bar .ypp-speed-btn {
-    font-size: 11px !important;
-    padding: 4px 2px !important;
-    width: 32px !important;
+    font-size: 10px !important;
+    padding: 3px 2px !important;
+    width: 28px !important;
     min-width: 0 !important;
 }
 
@@ -169,14 +169,227 @@
     background: rgba(255,60,60,0.18) !important;
 }
 
-/* ── Transparent Popups (when opened from Global Bar) ── */
+/* ── Frosted Glass Popups (when opened from Global Bar) ── */
 #ypp-eq-panel.ypp-panel-transparent,
 #ypp-cinema-panel.ypp-panel-transparent {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    border: none !important;
+    background: rgba(8, 8, 18, 0.62) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPACT MODE — Global Bar popups (220px, scaled-down UI)
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Shared container ── */
+#ypp-eq-panel.ypp-panel-transparent,
+#ypp-cinema-panel.ypp-panel-transparent {
+    width: 360px !important;
+    font-size: 11px !important;
+    border-radius: 14px !important;
+    overflow: visible !important; /* panels are in a dialog portal — must not self-clip */
+}
+
+/* ════ VIDEO FILTER PANEL compact overrides ════ */
+
+/* Header row */
+#ypp-cinema-panel.ypp-panel-transparent > div:first-child {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+}
+
+/* Tab bar buttons */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-cinema-tab-btn {
+    padding: 7px 6px !important;
+    font-size: 10px !important;
+}
+
+/* Category accordion summary */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-filter-cat-details summary {
+    padding: 7px 10px !important;
+    font-size: 10px !important;
+}
+
+/* Filter card grid — 2 columns to fill the wider panel */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-filter-card-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5px !important;
+    padding: 8px 10px !important;
+}
+
+/* Filter cards */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-filter-card {
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+    gap: 6px !important;
+    border-radius: 8px !important;
+}
+
+/* LUT colour preview swatch */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-filter-lut-preview {
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 5px !important;
+}
+
+/* Search bar */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-vcp-search-wrap {
+    margin: 8px 8px 4px !important;
+    padding: 0 !important;
+}
+#ypp-cinema-panel.ypp-panel-transparent .ypp-vcp-search-input {
+    font-size: 10px !important;
+    padding: 5px 8px 5px 24px !important;
+    border-radius: 8px !important;
+}
+#ypp-cinema-panel.ypp-panel-transparent .ypp-vcp-search-icon {
+    left: 10px !important;
+    font-size: 11px !important;
+}
+
+/* Adjustments grid — single column */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-adjust-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+}
+#ypp-cinema-panel.ypp-panel-transparent .ypp-adjust-card {
+    padding: 7px 8px !important;
+    gap: 5px !important;
+    border-radius: 8px !important;
+}
+#ypp-cinema-panel.ypp-panel-transparent .ypp-adjust-card-title {
+    font-size: 10px !important;
+}
+#ypp-cinema-panel.ypp-panel-transparent .ypp-adjust-card-val {
+    font-size: 10px !important;
+    padding: 1px 5px !important;
+    border-radius: 6px !important;
+}
+
+/* Intensity section */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-intensity-section {
+    padding: 8px 10px 10px !important;
+    border-radius: 10px !important;
+}
+#ypp-cinema-panel.ypp-panel-transparent .ypp-intensity-header {
+    font-size: 10px !important;
+    margin-bottom: 6px !important;
+}
+
+/* Footer */
+#ypp-cinema-panel.ypp-panel-transparent > div:last-child {
+    padding: 7px 10px !important;
+    font-size: 10px !important;
+}
+
+/* Compare A/B toggle */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-vcp-compare-toggle {
+    font-size: 9px !important;
+    padding: 4px 8px !important;
+}
+
+/* Category header text */
+#ypp-cinema-panel.ypp-panel-transparent .ypp-vcp-cat-header {
+    font-size: 9px !important;
+    margin: 8px 10px 4px !important;
+}
+
+/* ════ VOLUME BOOSTER / EQ PANEL compact overrides ════ */
+
+/* Header */
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-header {
+    padding: 8px 12px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-icon {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 7px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-title {
+    font-size: 11px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-subtitle {
+    font-size: 8px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-close-btn {
+    width: 22px !important;
+    height: 22px !important;
+}
+
+/* Volume / Balance rows */
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-gain-row {
+    padding: 6px 12px !important;
+    gap: 6px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-row-label {
+    font-size: 9px !important;
+    min-width: 52px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-gain-value {
+    font-size: 9px !important;
+    min-width: 28px !important;
+}
+
+/* Presets strip */
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-presets-row {
+    padding: 5px 12px !important;
+    gap: 4px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-preset-btn {
+    font-size: 9px !important;
+    padding: 2px 7px !important;
+}
+
+/* EQ canvas */
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-canvas {
+    height: 44px !important;
+    margin: 0 10px 2px !important;
+    width: calc(100% - 20px) !important;
+}
+
+/* Band columns */
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-bands {
+    padding: 3px 8px 8px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-band-col {
+    padding: 0 1px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-band-track {
+    height: 56px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-band-db {
+    font-size: 7px !important;
+    min-height: 10px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-band-freq {
+    font-size: 6px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-vslider {
+    width: 54px !important;
+}
+
+/* Footer controls */
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-footer {
+    padding: 0 12px 8px !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-comp-btn {
+    font-size: 9px !important;
+    padding: 3px 7px !important;
+    gap: 3px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-reset-btn {
+    font-size: 9px !important;
+    padding: 3px 9px !important;
+}
+#ypp-eq-panel.ypp-panel-transparent .ypp-eq-hint {
+    font-size: 7px !important;
+    width: 100% !important;
+    margin-left: 0 !important;
 }
 
 /* ── Iframe Specific ── */

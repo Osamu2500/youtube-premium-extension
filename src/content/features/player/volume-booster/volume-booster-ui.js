@@ -31,6 +31,10 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 document.removeEventListener('click', ctx._volumePopupOutsideHandler);
                 ctx._volumePopupOutsideHandler = null;
             }
+            if (ctx._volumePopupEscapeHandler) {
+                document.removeEventListener('keydown', ctx._volumePopupEscapeHandler);
+                ctx._volumePopupEscapeHandler = null;
+            }
             return;
         }
 
@@ -41,13 +45,18 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         panel.id = 'ypp-eq-panel';
 
         // Check if opened from Global Bar
-        if (anchorBtn.closest('.ypp-global-player-bar')) {
+        const isGlobalBar = !!anchorBtn.closest('.ypp-global-player-bar');
+        if (isGlobalBar) {
             panel.classList.add('ypp-panel-transparent');
-            panel.style.background = 'transparent';
-            panel.style.backdropFilter = 'none';
-            panel.style.webkitBackdropFilter = 'none';
-            panel.style.boxShadow = 'none'; // Optional: remove shadow for "fully transparent" look
+            panel.style.background = 'rgba(8, 8, 18, 0.62)';
+            panel.style.backdropFilter = 'blur(24px) saturate(160%)';
+            panel.style.webkitBackdropFilter = 'blur(24px) saturate(160%)';
+            panel.style.boxShadow = '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)';
+            panel.style.border = '1px solid rgba(255,255,255,0.1)';
+            panel.style.width = '360px';
+            // bottom/right reset not needed — position switches to absolute in portal
         }
+
 
         // ── Header
         const header = document.createElement('div');
@@ -137,7 +146,9 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         const mkTab = (label, active) => {
             const t = document.createElement('button');
             t.textContent = label;
-            t.style.cssText = `flex:1;padding:10px;background:transparent;border:none;color:${active ? '#fff' : 'rgba(255,255,255,0.45)'};font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid ${active ? 'rgba(255,255,255,0.7)' : 'transparent'};transition:all 0.2s;font-family:inherit;`;
+            const pad = isGlobalBar ? '6px' : '10px';
+            const fs  = isGlobalBar ? '10px' : '12px';
+            t.style.cssText = `flex:1;padding:${pad};background:transparent;border:none;color:${active ? '#fff' : 'rgba(255,255,255,0.45)'};font-size:${fs};font-weight:600;cursor:pointer;border-bottom:2px solid ${active ? 'rgba(255,255,255,0.7)' : 'transparent'};transition:all 0.2s;font-family:inherit;`;
             t.onmouseenter = () => { if (!t.classList.contains('active')) t.style.color = 'rgba(255,255,255,0.75)'; };
             t.onmouseleave = () => { if (!t.classList.contains('active')) t.style.color = 'rgba(255,255,255,0.45)'; };
             if (active) t.classList.add('active');
@@ -172,7 +183,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
         // ── Canvas Curve (will be moved to eqContentWrap)
         const canvasEl = document.createElement('canvas');
-        canvasEl.width = 340; canvasEl.height = 72;
+        canvasEl.width = isGlobalBar ? 268 : 340;
+        canvasEl.height = isGlobalBar ? 52 : 72;
         canvasEl.className = 'ypp-eq-canvas';
         // NOTE: NOT appended to panel here — appended via eqContentWrap below
 
@@ -366,9 +378,30 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         footer.append(compBtn, monoBtn, resetBtn, hint);
         panel.appendChild(footer);
 
-        // Bug fix: always mount to document.body and use position:fixed
-        // so the panel is visible on external sites (no #movie_player).
-        document.body.appendChild(panel);
+        // Mount into the shared top-layer dialog portal — escapes all CSS containment.
+        if (isGlobalBar) {
+            const dlg = window.YPP.Utils.getPopupPortal();
+            panel.style.pointerEvents = 'auto';
+            panel.style.position = 'absolute';
+            panel.style.overflow = 'visible';
+            panel.style.clip     = 'auto';
+            panel.style.clipPath = 'none';
+            dlg.appendChild(panel);
+
+            // Position now (estimate), reposition after layout (actual scrollHeight)
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, anchorBtn, video, 360);
+            reposition();
+            requestAnimationFrame(reposition);
+
+            // Self-cleaning resize listener
+            const onResize = () => {
+                if (ctx._volumePopup) { reposition(); }
+                else { window.removeEventListener('resize', onResize); }
+            };
+            window.addEventListener('resize', onResize);
+        } else {
+            document.body.appendChild(panel);
+        }
         ctx._volumePopup = panel;
 
         // Visualizer Loop
@@ -394,6 +427,17 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         };
         ctx._volumePopupOutsideHandler = outside;
         setTimeout(() => document.addEventListener('click', outside), 0);
+
+        // Escape key closes the EQ panel
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape' && ctx._volumePopup) {
+                e.stopPropagation();
+                if (animFrameId) cancelAnimationFrame(animFrameId);
+                this.toggleEQPanel(ctx, video, anchorBtn);
+            }
+        };
+        ctx._volumePopupEscapeHandler = onKeyDown;
+        document.addEventListener('keydown', onKeyDown);
     }
 
     static syncBandUI(ctx, panel, canvas) {

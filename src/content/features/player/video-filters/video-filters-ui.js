@@ -28,14 +28,17 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         });
         
         // Check if opened from Global Bar
-        if (btn.closest('.ypp-global-player-bar')) {
+        const isGlobalBar = !!btn.closest('.ypp-global-player-bar');
+        if (isGlobalBar) {
             panel.classList.add('ypp-panel-transparent');
             Object.assign(panel.style, {
-                background: 'transparent',
-                backdropFilter: 'none',
-                WebkitBackdropFilter: 'none',
-                boxShadow: 'none',
-                border: 'none'
+                background: 'rgba(8, 8, 18, 0.62)',
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                width: '360px'
+                // bottom/right reset not needed — position switches to absolute in portal
             });
         }
 
@@ -81,7 +84,12 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 }
                 .ypp-filter-card.active {
                     background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5);
-                    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+                    box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35);
+                    animation: ypp-card-active-glow 2.5s ease-in-out infinite;
+                }
+                @keyframes ypp-card-active-glow {
+                    0%, 100% { box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35); }
+                    50%       { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.65), 0 0 12px rgba(255,255,255,0.12); }
                 }
                 .ypp-filter-lut-preview {
                     width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
@@ -180,29 +188,42 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         tabsWrap.appendChild(tabAdjustBtn);
         panel.appendChild(tabsWrap);
 
+        // Tab content — uses opacity crossfade instead of instant show/hide
         const tabContent = document.createElement('div');
         Object.assign(tabContent.style, {
-            padding: '0', maxHeight: '520px', overflowY: 'auto', overflowX: 'hidden',
-            background: 'transparent', scrollbarWidth: 'none'
+            padding: '0', maxHeight: isGlobalBar ? '380px' : '520px', overflowY: 'auto', overflowX: 'hidden',
+            background: 'transparent', scrollbarWidth: 'none', position: 'relative'
         });
 
         const presetsContent = this.buildPresetsTab(ctx, video, btn);
-        const adjustContent = this.buildAdjustTab(ctx, video);
-        adjustContent.style.display = 'none';
+        const adjustContent  = this.buildAdjustTab(ctx, video);
 
-        tabFiltersBtn.onclick = () => {
-            tabFiltersBtn.classList.add('active');
-            tabAdjustBtn.classList.remove('active');
-            presetsContent.style.display = 'block';
-            adjustContent.style.display = 'none';
+        // Fade wrappers so switching feels smooth
+        const fadeWrap = (el) => {
+            el.style.cssText += ';transition:opacity 0.18s ease;';
+            return el;
+        };
+        fadeWrap(presetsContent);
+        fadeWrap(adjustContent);
+        adjustContent.style.display   = 'none';
+        adjustContent.style.opacity   = '0';
+        presetsContent.style.opacity  = '1';
+
+        const switchTab = (show, hide, activeBtn, inactiveBtn) => {
+            inactiveBtn.classList.remove('active');
+            activeBtn.classList.add('active');
+            hide.style.opacity = '0';
+            setTimeout(() => {
+                hide.style.display = 'none';
+                show.style.display = 'block';
+                // Trigger reflow before fading in
+                void show.offsetWidth;
+                show.style.opacity = '1';
+            }, 180);
         };
 
-        tabAdjustBtn.onclick = () => {
-            tabAdjustBtn.classList.add('active');
-            tabFiltersBtn.classList.remove('active');
-            adjustContent.style.display = 'block';
-            presetsContent.style.display = 'none';
-        };
+        tabFiltersBtn.onclick = () => switchTab(presetsContent, adjustContent, tabFiltersBtn, tabAdjustBtn);
+        tabAdjustBtn.onclick  = () => switchTab(adjustContent, presetsContent, tabAdjustBtn, tabFiltersBtn);
 
         tabContent.appendChild(presetsContent);
         tabContent.appendChild(adjustContent);
@@ -243,9 +264,41 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         footer.appendChild(resetBtn);
         panel.appendChild(footer);
 
-        // Bug fix: always mount to document.body with position:fixed
-        // so the panel is visible on external sites (no #movie_player).
-        document.body.appendChild(panel);
+        // Mount into the shared top-layer dialog portal — escapes all CSS containment.
+        if (isGlobalBar) {
+            const dlg = window.YPP.Utils.getPopupPortal();
+            panel.style.pointerEvents = 'auto';
+            // position:absolute inside inset:0 dialog maps 1:1 to viewport coords
+            panel.style.position = 'absolute';
+            panel.style.overflow = 'visible';
+            panel.style.clip     = 'auto';
+            panel.style.clipPath = 'none';
+            // Override the default translateY entrance — use scale-from-center instead
+            panel.style.animation = 'ypp-panel-scale-in 0.22s cubic-bezier(0.2, 0, 0, 1) forwards';
+            dlg.appendChild(panel);
+
+            // Inject scale-in keyframe once
+            if (!document.getElementById('ypp-scale-anim')) {
+                const ka = document.createElement('style');
+                ka.id = 'ypp-scale-anim';
+                ka.textContent = '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}';
+                (document.head || document.documentElement).appendChild(ka);
+            }
+
+            // Position now (estimate), then reposition after first layout (actual scrollHeight)
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 360);
+            reposition();
+            requestAnimationFrame(reposition);
+
+            // Keep popup correctly placed when user resizes the window
+            const onResize = () => {
+                if (ctx._filterPanel) { reposition(); }
+                else { window.removeEventListener('resize', onResize); }
+            };
+            window.addEventListener('resize', onResize);
+        } else {
+            document.body.appendChild(panel);
+        }
         ctx._filterPanel = panel;
 
         const outside = (e) => {
@@ -255,6 +308,22 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         };
         ctx._filterPanelOutsideHandler = outside;
         setTimeout(() => document.addEventListener('click', outside), 0);
+
+        // Escape key closes the panel
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape' && ctx._filterPanel) {
+                e.stopPropagation();
+                ctx._removeFilterPanel();
+            }
+        };
+        document.addEventListener('keydown', onKeyDown);
+        // Piggyback cleanup on the existing outside handler removal
+        const origRemove = ctx._removeFilterPanel.bind(ctx);
+        ctx._removeFilterPanel = function() {
+            document.removeEventListener('keydown', onKeyDown);
+            ctx._removeFilterPanel = origRemove; // restore
+            origRemove();
+        };
     }
 
     static buildPresetsTab(ctx, video, btn) {
@@ -313,6 +382,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             card.onclick = (e) => {
                 if (e.target.closest('.ypp-star-btn')) return;
                 e.stopPropagation();
+                // Clear preview state FIRST — prevents mouseleave from reverting this commit
+                ctx._previewFilterIndex = undefined;
                 ctx.currentFilterIndex = index;
                 ctx._applyComputedFilter(video);
                 if (btn) { index > 0 ? btn.classList.add('active') : btn.classList.remove('active'); }
@@ -332,12 +403,16 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             };
             card.onmouseenter = () => {
                 if (ctx.currentFilterIndex === index) return;
-                const saved = ctx.currentFilterIndex;
+                ctx._previewFilterIndex = ctx.currentFilterIndex;
                 ctx.currentFilterIndex = index;
                 ctx._applyComputedFilter(video);
-                ctx.currentFilterIndex = saved;
             };
-            card.onmouseleave = () => ctx._applyComputedFilter(video);
+            card.onmouseleave = () => {
+                if (ctx._previewFilterIndex === undefined) return;
+                ctx.currentFilterIndex = ctx._previewFilterIndex;
+                ctx._previewFilterIndex = undefined;
+                ctx._applyComputedFilter(video);
+            };
             return card;
         };
 

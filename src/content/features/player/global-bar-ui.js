@@ -74,13 +74,17 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         document.body.appendChild(bar);
         this.activeBars.set(video, bar);
 
-        this._bindEvents(video, bar, ICONS);
+        // AbortController lets us cancel ALL event listeners in one call on cleanup
+        const ac = new AbortController();
+        bar._abortController = ac;
+        this._bindEvents(video, bar, ICONS, ac.signal);
     }
 
     /** Remove all injected bars and clear the map. */
     removeAll() {
         this.activeBars.forEach((bar) => {
-            if (bar._cleanupInterval) clearInterval(bar._cleanupInterval);
+            bar._disconnectObserver?.disconnect();
+            bar._abortController?.abort(); // cancels all video + document listeners
             bar.remove();
         });
         this.activeBars.clear();
@@ -117,7 +121,9 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     // EVENT BINDINGS
     // =========================================================================
 
-    _bindEvents(video, bar, ICONS) {
+    _bindEvents(video, bar, ICONS, signal) {
+        const opts = { signal }; // all listeners share the same abort signal
+
         const playBtn       = bar.querySelector('#ypp-gpb-play');
         const muteBtn       = bar.querySelector('#ypp-gpb-mute');
         const volSlider     = bar.querySelector('#ypp-gpb-vol');
@@ -134,8 +140,8 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             playBtn.innerHTML = video.paused ? ICONS.play : ICONS.pause;
         };
         playBtn.onclick = (e) => { e.stopPropagation(); video.paused ? video.play() : video.pause(); };
-        video.addEventListener('play', updatePlayIcon);
-        video.addEventListener('pause', updatePlayIcon);
+        video.addEventListener('play',  updatePlayIcon, opts);
+        video.addEventListener('pause', updatePlayIcon, opts);
         updatePlayIcon();
 
         // ── Mute ──
@@ -145,7 +151,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             volSlider.value = video.muted ? 0 : video.volume;
         };
         muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; updateMuteIcon(); };
-        video.addEventListener('volumechange', updateMuteIcon);
+        video.addEventListener('volumechange', updateMuteIcon, opts);
         updateMuteIcon();
 
         // ── Volume Slider ──
@@ -167,7 +173,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 ? `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`
                 : formatTime(video.currentTime);
         };
-        video.addEventListener('timeupdate', updateTime);
+        video.addEventListener('timeupdate', updateTime, opts);
         updateTime();
 
         // ── Loop ──
@@ -183,7 +189,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         speedInput.type = 'number';
         speedInput.className = 'ypp-gpb-speed-input';
         speedInput.min = '0.1';
-        speedInput.max = '5.0';
+        speedInput.max = '16.0'; // matches input validation below
         speedInput.step = '0.1';
         speedInput.value = video.playbackRate.toFixed(1);
         speedInput.title = 'Playback Speed';
@@ -201,7 +207,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         `;
         
         const updateSpeedValue = () => { speedInput.value = video.playbackRate.toFixed(1); };
-        video.addEventListener('ratechange', updateSpeedValue);
+        video.addEventListener('ratechange', updateSpeedValue, opts);
         
         speedInput.oninput = (e) => {
             e.stopPropagation();
@@ -245,27 +251,34 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`
                 : ICONS.fullscreen;
         };
-        document.addEventListener('fullscreenchange', updateFsIcon);
+        // Use the shared AbortSignal so this listener is also removed on cleanup
+        document.addEventListener('fullscreenchange', updateFsIcon, { signal });
 
         // ── Close ──
         closeBtn.onclick = (e) => {
             e.stopPropagation();
+            bar._abortController?.abort(); // cancels all listeners including fullscreenchange
+            clearInterval(bar._cleanupInterval);
             bar.remove();
             this.activeBars.delete(video);
-            document.removeEventListener('fullscreenchange', updateFsIcon);
+            this.repositionAll();
         };
 
         // ── Auto-remove when video disconnects ──
-        const checkRemoval = setInterval(() => {
+        // MutationObserver fires immediately on DOM removal — no polling lag or overhead.
+        const disconnectObserver = new MutationObserver(() => {
             if (!video.isConnected) {
+                disconnectObserver.disconnect();
+                bar._abortController?.abort();
                 bar.remove();
                 this.activeBars.delete(video);
-                clearInterval(checkRemoval);
-                document.removeEventListener('fullscreenchange', updateFsIcon);
                 this.repositionAll();
             }
-        }, 3000);
-        // Bug fix: store interval so removeAll() can cancel it to prevent leaks
-        bar._cleanupInterval = checkRemoval;
+        });
+        // Observe the video's parent; if the parent itself is removed we won't catch it,
+        // so also observe document.body as a fallback root.
+        const observeTarget = video.parentElement || document.body;
+        disconnectObserver.observe(observeTarget, { childList: true, subtree: true });
+        bar._disconnectObserver = disconnectObserver;
     }
 };

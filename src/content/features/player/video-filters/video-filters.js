@@ -35,6 +35,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
         this._filterPanel = null;   // The open filter panel
         this._filterBtn = null;     // Reference to filter button for active state
         this._filterPanelOutsideHandler = null;
+        this._previewFilterIndex = undefined; // Transient hover-preview state
     }
 
     getConfigKey() { return 'enableCinemaFilters'; }
@@ -101,6 +102,7 @@ window.YPP.features.VideoFilters = class VideoFilters {
             document.removeEventListener('click', this._filterPanelOutsideHandler);
             this._filterPanelOutsideHandler = null;
         }
+        this._previewFilterIndex = undefined; // always reset on close
     }
 
     _applyComputedFilter(video) {
@@ -145,8 +147,8 @@ window.YPP.features.VideoFilters = class VideoFilters {
         // (Bug 7 — adj.saturate was permanently overwritten on every call)
         let localSaturate = adj.saturate;
         if (adj.vibrance !== undefined && adj.vibrance !== 100) {
-            // Vibrance approximated via saturation adjustment (local only, not persisted)
-            localSaturate = s(adj.vibrance, 100);
+            // Vibrance approximated via saturation — use raw value so s() applies once below
+            localSaturate = adj.vibrance;
         }
         // Highlights/Shadows approximate via brightness layers (CSS limited)
         if (adj.highlights !== 0) baseBrightness += adj.highlights * 0.15;
@@ -199,20 +201,26 @@ window.YPP.features.VideoFilters = class VideoFilters {
 
     _restoreFilterState(video) {
         const s = this.settings || {};
-        if (s.cinemaFilterBrightness !== undefined) this.filterAdjustments.brightness = s.cinemaFilterBrightness;
-        if (s.cinemaFilterContrast !== undefined)   this.filterAdjustments.contrast   = s.cinemaFilterContrast;
-        if (s.cinemaFilterSaturate !== undefined)   this.filterAdjustments.saturate   = s.cinemaFilterSaturate;
-        if (s.cinemaFilterHue !== undefined)        this.filterAdjustments.hueRotate  = s.cinemaFilterHue;
-        if (s.cinemaFilterSepia !== undefined)      this.filterAdjustments.sepia      = s.cinemaFilterSepia;
-        if (s.cinemaFilterGrayscale !== undefined)  this.filterAdjustments.grayscale  = s.cinemaFilterGrayscale;
-        if (s.cinemaFilterInvert !== undefined)     this.filterAdjustments.invert     = s.cinemaFilterInvert;
-        if (s.cinemaFilterBlur !== undefined)       this.filterAdjustments.blur       = s.cinemaFilterBlur;
-        if (s.cinemaFilterOpacity !== undefined)    this.filterAdjustments.opacity    = s.cinemaFilterOpacity;
-        if (s.cinemaFilterDehaze !== undefined)     this.filterAdjustments.dehaze     = s.cinemaFilterDehaze;
-        if (s.cinemaFilterClarity !== undefined)    this.filterAdjustments.clarity    = s.cinemaFilterClarity;
-        if (s.cinemaFilterGrain !== undefined)      this.filterAdjustments.grain      = s.cinemaFilterGrain;
-        if (s.cinemaFilterSharpness !== undefined)  this.filterAdjustments.sharpness  = s.cinemaFilterSharpness;
-        if (s.cinemaFilterIndex !== undefined)      this.currentFilterIndex           = s.cinemaFilterIndex;
+        if (s.cinemaFilterBrightness !== undefined) this.filterAdjustments.brightness  = s.cinemaFilterBrightness;
+        if (s.cinemaFilterContrast !== undefined)   this.filterAdjustments.contrast    = s.cinemaFilterContrast;
+        if (s.cinemaFilterSaturate !== undefined)   this.filterAdjustments.saturate    = s.cinemaFilterSaturate;
+        if (s.cinemaFilterHue !== undefined)        this.filterAdjustments.hueRotate   = s.cinemaFilterHue;
+        if (s.cinemaFilterSepia !== undefined)      this.filterAdjustments.sepia       = s.cinemaFilterSepia;
+        if (s.cinemaFilterGrayscale !== undefined)  this.filterAdjustments.grayscale   = s.cinemaFilterGrayscale;
+        if (s.cinemaFilterInvert !== undefined)     this.filterAdjustments.invert      = s.cinemaFilterInvert;
+        if (s.cinemaFilterBlur !== undefined)       this.filterAdjustments.blur        = s.cinemaFilterBlur;
+        if (s.cinemaFilterOpacity !== undefined)    this.filterAdjustments.opacity     = s.cinemaFilterOpacity;
+        if (s.cinemaFilterDehaze !== undefined)     this.filterAdjustments.dehaze      = s.cinemaFilterDehaze;
+        if (s.cinemaFilterClarity !== undefined)    this.filterAdjustments.clarity     = s.cinemaFilterClarity;
+        if (s.cinemaFilterGrain !== undefined)      this.filterAdjustments.grain       = s.cinemaFilterGrain;
+        if (s.cinemaFilterSharpness !== undefined)  this.filterAdjustments.sharpness   = s.cinemaFilterSharpness;
+        if (s.cinemaFilterIndex !== undefined)      this.currentFilterIndex            = s.cinemaFilterIndex;
+        // Restore extended adjustments (added later — guard with undefined check)
+        if (s.cinemaFilterTemperature !== undefined) this.filterAdjustments.temperature = s.cinemaFilterTemperature;
+        if (s.cinemaFilterVibrance !== undefined)    this.filterAdjustments.vibrance    = s.cinemaFilterVibrance;
+        if (s.cinemaFilterHighlights !== undefined)  this.filterAdjustments.highlights  = s.cinemaFilterHighlights;
+        if (s.cinemaFilterShadows !== undefined)     this.filterAdjustments.shadows     = s.cinemaFilterShadows;
+        if (s.cinemaFilterVignette !== undefined)    this.filterAdjustments.vignette    = s.cinemaFilterVignette;
 
         const hasActiveFilter = this.currentFilterIndex > 0 ||
             this.filterAdjustments.brightness !== 100 || this.filterAdjustments.contrast !== 100 ||
@@ -232,8 +240,8 @@ window.YPP.features.VideoFilters = class VideoFilters {
         const toast = document.createElement('div');
         toast.className = 'ypp-toast-mini';
         toast.textContent = message;
-        // Bug fix: fall back to document.body on external sites (#movie_player absent)
-        const parent = video?.parentElement || document.getElementById('movie_player') || document.body;
+        // Prefer movie_player (YouTube) then video parent, then body
+        const parent = document.getElementById('movie_player') || video?.parentElement || document.body;
         if (parent) {
             parent.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);

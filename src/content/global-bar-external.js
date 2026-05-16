@@ -35,7 +35,62 @@
             [document.getElementById(id), document.querySelector(`link#${id}`)]
                 .forEach(el => el?.remove());
         },
+        positionPopupBesideVideo: (panel, triggerBtn, video, panelW) => {
+            const GAP = 10, MARGIN = 8;
+            const W = window.innerWidth, H = window.innerHeight;
+            const btnRect = triggerBtn.getBoundingClientRect();
+            const estH = Math.min(panel.scrollHeight > 40 ? panel.scrollHeight : 400, H - MARGIN * 2);
+
+            const clampTop  = t => Math.max(MARGIN, Math.min(t, H - estH - MARGIN));
+            const clampLeft = l => Math.max(MARGIN, Math.min(l, W - panelW - MARGIN));
+            const centredTop  = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
+            const alignedLeft = clampLeft(btnRect.left);
+
+            const vRect    = video?.getBoundingClientRect?.() || null;
+            const hasVideo = vRect && vRect.width > 20 && vRect.height > 20;
+
+            let left, top, placed = false;
+            if (hasVideo) {
+                if (W - vRect.right - GAP >= panelW + MARGIN) {
+                    left = vRect.right + GAP; top = centredTop; placed = true;
+                } else if (vRect.left - GAP >= panelW + MARGIN) {
+                    left = vRect.left - GAP - panelW; top = centredTop; placed = true;
+                } else if (H - vRect.bottom - GAP >= Math.min(estH, 200)) {
+                    left = alignedLeft; top = vRect.bottom + GAP; placed = true;
+                } else if (vRect.top - GAP >= Math.min(estH, 200)) {
+                    left = alignedLeft; top = vRect.top - GAP - estH; placed = true;
+                }
+                if (!placed) { left = btnRect.right + GAP; top = centredTop; }
+            } else {
+                left = btnRect.right + GAP; top = centredTop;
+            }
+            panel.style.left = clampLeft(left) + 'px';
+            panel.style.top  = clampTop(top)  + 'px';
+        },
+        getPopupPortal: () => {
+            let dlg = document.getElementById('ypp-popup-portal');
+            if (dlg) return dlg;
+            dlg = document.createElement('dialog');
+            dlg.id = 'ypp-popup-portal';
+            dlg.style.cssText =
+                'position:fixed;inset:0;width:100%;height:100%;' +
+                'max-width:100%;max-height:100%;' +
+                'border:0;outline:0;padding:0;margin:0;' +
+                'background:transparent;overflow:visible;' +
+                'pointer-events:none;z-index:2147483647;';
+            document.documentElement.appendChild(dlg);
+            if (!document.getElementById('ypp-portal-backdrop')) {
+                const bs = document.createElement('style');
+                bs.id = 'ypp-portal-backdrop';
+                bs.textContent = '#ypp-popup-portal::backdrop{display:none!important;pointer-events:none!important;}';
+                (document.head || document.documentElement).appendChild(bs);
+            }
+            dlg.addEventListener('cancel', e => e.preventDefault());
+            try { dlg.showModal(); } catch(e) { try { dlg.show(); } catch(e2) {} }
+            return dlg;
+        },
     };
+
 
     // Minimal BaseFeature — GlobalPlayerBar extends this
     window.YPP.features.BaseFeature = class BaseFeature {

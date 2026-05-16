@@ -100,6 +100,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
                 document.removeEventListener('click', this._volumePopupOutsideHandler);
                 this._volumePopupOutsideHandler = null;
             }
+            if (this._volumePopupEscapeHandler) {
+                document.removeEventListener('keydown', this._volumePopupEscapeHandler);
+                this._volumePopupEscapeHandler = null;
+            }
         }
         
         // Bug fix: scope button removal to this feature instance's video context,
@@ -112,6 +116,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         if (this._boundVideo && this._initHandler) {
             this._boundVideo.removeEventListener('play', this._initHandler);
             this._boundVideo.removeEventListener('volumechange', this._initHandler);
+            this._initHandler = null; // release closure reference
         }
 
         // Safely bypass audio effects without destroying the graph
@@ -301,9 +306,14 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
     setMono(enabled) {
         this._monoEnabled = enabled;
         if (this.ctx && this.source) {
-            // Re-routing for mono: we downmix at the source level
-            this.source.channelCount = enabled ? 1 : 2;
-            this.source.channelCountMode = enabled ? 'explicit' : 'max';
+            // Guard: channelCount setter may throw in some browsers on MediaElementAudioSourceNode
+            try {
+                this.source.channelCount = enabled ? 1 : 2;
+                this.source.channelCountMode = enabled ? 'explicit' : 'max';
+            } catch (e) {
+                // Fallback: channelCountMode alone achieves a useful approximation
+                this.source.channelCountMode = enabled ? 'explicit' : 'max';
+            }
         }
     }
 
