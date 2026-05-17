@@ -71,7 +71,26 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         `;
 
         this.updateBarPosition(video, bar);
-        document.body.appendChild(bar);
+        
+        let targetContainer = document.body;
+        try {
+            if (window.top && window.top.document && window.top.document.body) {
+                targetContainer = window.top.document.body;
+            }
+        } catch (e) {
+            window.YPP.Utils?.log('Cross-origin iframe detected, anchoring to local body.', 'GlobalBarUI', 'debug');
+        }
+        
+        // Use Popover API to escape ALL CSS containment (transforms, overflow: hidden)
+        if ('popover' in bar) {
+            bar.popover = "manual";
+        }
+        
+        targetContainer.appendChild(bar);
+        
+        if ('popover' in bar) {
+            try { bar.showPopover(); } catch (e) {}
+        }
         this.activeBars.set(video, bar);
 
         // AbortController lets us cancel ALL event listeners in one call on cleanup
@@ -100,14 +119,15 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         this.activeBars.forEach((bar, video) => this.updateBarPosition(video, bar));
     }
 
-    /** Position a single bar on the left edge of the screen. */
+    /** Position a single bar on the right edge of the screen. */
     updateBarPosition(video, bar) {
         let activeIndex = Array.from(this.activeBars.keys()).indexOf(video);
         if (activeIndex === -1) activeIndex = this.activeBars.size;
 
         Object.assign(bar.style, {
             position: 'fixed',
-            left: `${16 + (activeIndex * 60)}px`,
+            right: `${16 + (activeIndex * 60)}px`,
+            left: 'auto',
             top: '50%',
             bottom: 'auto',
             transform: 'translateY(-50%)',

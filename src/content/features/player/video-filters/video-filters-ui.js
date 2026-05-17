@@ -28,7 +28,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         });
         
         // Check if opened from Global Bar
-        const isGlobalBar = !!btn.closest('.ypp-global-player-bar');
+        const isGlobalBar = !!(btn?.closest?.('.ypp-global-player-bar'));
         if (isGlobalBar) {
             panel.classList.add('ypp-panel-transparent');
             Object.assign(panel.style, {
@@ -37,102 +37,96 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 WebkitBackdropFilter: 'blur(24px) saturate(160%)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                width: '360px'
+                width: '440px'
                 // bottom/right reset not needed — position switches to absolute in portal
             });
         }
 
-        if (!document.getElementById('ypp-glass-anim')) {
-            const s = document.createElement('style');
-            s.id = 'ypp-glass-anim';
-            s.textContent = `
-                @keyframes ypp-panel-glass-in {
-                    from { opacity: 0; transform: translateY(12px) scale(0.96); }
-                    to   { opacity: 1; transform: translateY(0) scale(1); }
-                }
-                .ypp-cinema-tab-btn {
-                    flex: 1; padding: 14px; background: transparent; border: none; color: rgba(255,255,255,0.5);
-                    font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
-                    transition: all 0.2s;
-                }
-                .ypp-cinema-tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-                .ypp-cinema-tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
-                .ypp-filter-cat-details summary {
-                    list-style: none; padding: 12px 20px; cursor: pointer; font-size: 14px; font-weight: 600;
-                    background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.9);
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    display: flex; align-items: center; justify-content: space-between;
-                }
-                .ypp-filter-cat-details summary::-webkit-details-marker { display: none; }
-                .ypp-filter-cat-details summary:hover { background: rgba(255,255,255,0.08); color: #fff; }
-                .ypp-filter-cat-details summary::after { content: '▼'; font-size: 10px; opacity: 0.5; transition: transform 0.2s; }
-                .ypp-filter-cat-details[open] summary::after { transform: rotate(180deg); }
-                
-                .ypp-filter-card-grid { 
-                    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px 20px; 
-                }
-                .ypp-filter-card {
-                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: row;
-                    align-items: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.2,0,0,1);
-                    text-align: left; position: relative; gap: 10px; overflow: hidden;
-                }
-                .ypp-filter-card:hover {
-                    background: rgba(255,255,255,0.08); transform: translateY(-2px);
-                    border-color: rgba(255,255,255,0.2);
-                    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-                }
-                .ypp-filter-card.active {
-                    background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5);
-                    box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35);
-                    animation: ypp-card-active-glow 2.5s ease-in-out infinite;
-                }
-                @keyframes ypp-card-active-glow {
-                    0%, 100% { box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35); }
-                    50%       { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.65), 0 0 12px rgba(255,255,255,0.12); }
-                }
-                .ypp-filter-lut-preview {
-                    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-                    background: linear-gradient(135deg, #ff4b4b, #4b6fff, #4bff8b);
-                    border: 1px solid rgba(255,255,255,0.2);
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                    transition: all 0.3s;
-                }
-                .ypp-filter-card:hover .ypp-filter-lut-preview {
-                    transform: scale(1.05); border-color: rgba(255,255,255,0.4);
-                }
-                
-                .ypp-adjust-grid {
-                    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 20px;
-                }
-                .ypp-adjust-card {
-                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
-                }
-                .ypp-adjust-card-header {
-                    display: flex; justify-content: space-between; align-items: center;
-                }
-                .ypp-adjust-card-title {
-                    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
-                }
-                .ypp-adjust-card-val {
-                    font-size: 13px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 12px;
-                }
-                
-                .ypp-vcp-slider {
-                    -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
-                    background: rgba(255,255,255,0.1); outline: none; margin: 8px 0;
-                }
-                .ypp-vcp-slider::-webkit-slider-thumb {
-                    -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
-                    border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-                    transition: transform 0.1s;
-                }
-                .ypp-vcp-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
-            `;
-            document.head.appendChild(s);
-        }
+        this._injectStyle('ypp-glass-anim', `
+            @keyframes ypp-panel-glass-in {
+                from { opacity: 0; transform: translateY(12px) scale(0.96); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            .ypp-cinema-tab-btn {
+                flex: 1; padding: 14px; background: transparent; border: none; color: rgba(255,255,255,0.5);
+                font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
+                transition: all 0.2s;
+            }
+            .ypp-cinema-tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+            .ypp-cinema-tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
+            .ypp-filter-cat-details summary {
+                list-style: none; padding: 12px 20px; cursor: pointer; font-size: 14px; font-weight: 600;
+                background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.9);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                display: flex; align-items: center; justify-content: space-between;
+            }
+            .ypp-filter-cat-details summary::-webkit-details-marker { display: none; }
+            .ypp-filter-cat-details summary:hover { background: rgba(255,255,255,0.08); color: #fff; }
+            .ypp-filter-cat-details summary::after { content: '▼'; font-size: 10px; opacity: 0.5; transition: transform 0.2s; }
+            .ypp-filter-cat-details[open] summary::after { transform: rotate(180deg); }
+            
+            .ypp-filter-card-grid { 
+                display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px 20px; 
+            }
+            .ypp-filter-card {
+                background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: row;
+                align-items: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.2,0,0,1);
+                text-align: left; position: relative; gap: 10px; overflow: hidden;
+            }
+            .ypp-filter-card:hover {
+                background: rgba(255,255,255,0.08); transform: translateY(-2px);
+                border-color: rgba(255,255,255,0.2);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            }
+            .ypp-filter-card.active {
+                background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35);
+                animation: ypp-card-active-glow 2.5s ease-in-out infinite;
+            }
+            @keyframes ypp-card-active-glow {
+                0%, 100% { box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35); }
+                50%       { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.65), 0 0 12px rgba(255,255,255,0.12); }
+            }
+            .ypp-filter-lut-preview {
+                width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+                background: linear-gradient(135deg, #ff4b4b, #4b6fff, #4bff8b);
+                border: 1px solid rgba(255,255,255,0.2);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                transition: all 0.3s;
+            }
+            .ypp-filter-card:hover .ypp-filter-lut-preview {
+                transform: scale(1.05); border-color: rgba(255,255,255,0.4);
+            }
+            
+            .ypp-adjust-grid {
+                display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 20px;
+            }
+            .ypp-adjust-card {
+                background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+            }
+            .ypp-adjust-card-header {
+                display: flex; justify-content: space-between; align-items: center;
+            }
+            .ypp-adjust-card-title {
+                display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+            }
+            .ypp-adjust-card-val {
+                font-size: 13px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 12px;
+            }
+            
+            .ypp-vcp-slider {
+                -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
+                background: rgba(255,255,255,0.1); outline: none; margin: 8px 0;
+            }
+            .ypp-vcp-slider::-webkit-slider-thumb {
+                -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+                border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                transition: transform 0.1s;
+            }
+            .ypp-vcp-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        `);
 
         const header = document.createElement('div');
         Object.assign(header.style, {
@@ -191,7 +185,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // Tab content — uses opacity crossfade instead of instant show/hide
         const tabContent = document.createElement('div');
         Object.assign(tabContent.style, {
-            padding: '0', maxHeight: isGlobalBar ? '380px' : '520px', overflowY: 'auto', overflowX: 'hidden',
+            padding: '0', maxHeight: isGlobalBar ? '480px' : '520px', overflowY: 'auto', overflowX: 'hidden',
             background: 'transparent', scrollbarWidth: 'none', position: 'relative'
         });
 
@@ -209,11 +203,14 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         adjustContent.style.opacity   = '0';
         presetsContent.style.opacity  = '1';
 
+        let tabTransitionTimeout;
         const switchTab = (show, hide, activeBtn, inactiveBtn) => {
+            if (activeBtn.classList.contains('active')) return;
             inactiveBtn.classList.remove('active');
             activeBtn.classList.add('active');
             hide.style.opacity = '0';
-            setTimeout(() => {
+            clearTimeout(tabTransitionTimeout);
+            tabTransitionTimeout = setTimeout(() => {
                 hide.style.display = 'none';
                 show.style.display = 'block';
                 // Trigger reflow before fading in
@@ -236,7 +233,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         });
 
-        const activeFilterName = window.YPP.features.VideoFiltersPresets.FILTERS[ctx.currentFilterIndex]?.name || 'Normal';
+        const activeFilterName = window.YPP?.features?.VideoFiltersPresets?.FILTERS?.[ctx.currentFilterIndex]?.name || 'Normal';
         const activePill = document.createElement('div');
         activePill.id = 'ypp-active-filter-name';
         Object.assign(activePill.style, { fontSize: '13px', color: '#aaaaaa' });
@@ -254,7 +251,11 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         resetBtn.onclick = () => {
             ctx.currentFilterIndex = 0;
             ctx.filterIntensity = 100;
-            ctx.filterAdjustments = { brightness: 100, contrast: 100, saturate: 100, hueRotate: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, opacity: 100, dehaze: 0, clarity: 0, grain: 0, sharpness: 0 };
+            ctx.filterAdjustments = { 
+                brightness: 100, contrast: 100, saturate: 100, hueRotate: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, opacity: 100, 
+                dehaze: 0, clarity: 0, grain: 0, sharpness: 0,
+                temperature: 0, vibrance: 100, highlights: 0, shadows: 0, vignette: 0
+            };
             ctx._applyComputedFilter(video);
             if (btn) { btn.classList.remove('active'); btn.title = 'Cinema Filters'; }
             ctx._removeFilterPanel();
@@ -278,23 +279,21 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             dlg.appendChild(panel);
 
             // Inject scale-in keyframe once
-            if (!document.getElementById('ypp-scale-anim')) {
-                const ka = document.createElement('style');
-                ka.id = 'ypp-scale-anim';
-                ka.textContent = '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}';
-                (document.head || document.documentElement).appendChild(ka);
-            }
+            this._injectStyle('ypp-scale-anim', '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}');
 
             // Position now (estimate), then reposition after first layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 360);
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 440);
             reposition();
             requestAnimationFrame(reposition);
 
             // Keep popup correctly placed when user resizes the window
             const onResize = () => {
                 if (ctx._filterPanel) { reposition(); }
-                else { window.removeEventListener('resize', onResize); }
+                else if (ctx._filterPanelResizeHandler) { 
+                    window.removeEventListener('resize', ctx._filterPanelResizeHandler); 
+                }
             };
+            ctx._filterPanelResizeHandler = onResize;
             window.addEventListener('resize', onResize);
         } else {
             document.body.appendChild(panel);
@@ -316,11 +315,24 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 ctx._removeFilterPanel();
             }
         };
+        ctx._filterPanelKeydownHandler = onKeyDown;
         document.addEventListener('keydown', onKeyDown);
+        
         // Piggyback cleanup on the existing outside handler removal
         const origRemove = ctx._removeFilterPanel.bind(ctx);
         ctx._removeFilterPanel = function() {
-            document.removeEventListener('keydown', onKeyDown);
+            if (ctx._filterPanelKeydownHandler) {
+                document.removeEventListener('keydown', ctx._filterPanelKeydownHandler);
+                ctx._filterPanelKeydownHandler = null;
+            }
+            if (ctx._filterPanelOutsideHandler) {
+                document.removeEventListener('click', ctx._filterPanelOutsideHandler);
+                ctx._filterPanelOutsideHandler = null;
+            }
+            if (ctx._filterPanelResizeHandler) {
+                window.removeEventListener('resize', ctx._filterPanelResizeHandler);
+                ctx._filterPanelResizeHandler = null;
+            }
             ctx._removeFilterPanel = origRemove; // restore
             origRemove();
         };
@@ -332,7 +344,13 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // ── Favorites (localStorage)
         const FAV_KEY  = 'ypp-fav-filters';
         const loadFavs = () => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch { return []; } };
-        const saveFavs = (arr) => localStorage.setItem(FAV_KEY, JSON.stringify(arr));
+        const saveFavs = (arr) => {
+            try {
+                localStorage.setItem(FAV_KEY, JSON.stringify(arr));
+            } catch (e) {
+                console.warn('YPP: Failed to save favorite filters', e);
+            }
+        };
         const toggleFav = (idx) => {
             const f = loadFavs(), pos = f.indexOf(idx);
             pos === -1 ? f.push(idx) : f.splice(pos, 1);
@@ -437,7 +455,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const renderFilteredList = (query = '') => {
             listContainer.innerHTML = '';
             const q = query.toLowerCase();
-            const FILTERS = window.YPP.features.VideoFiltersPresets.FILTERS;
+            const FILTERS = window.YPP?.features?.VideoFiltersPresets?.FILTERS || [];
             const favs = loadFavs();
 
             // Favorites at top — always open, only shown without search
@@ -470,17 +488,12 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         renderFilteredList();
 
         // Star button styles (once)
-        if (!document.getElementById('ypp-star-btn-style')) {
-            const s = document.createElement('style');
-            s.id = 'ypp-star-btn-style';
-            s.textContent = `
-                .ypp-star-btn{background:transparent;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;width:22px;height:22px;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.85);}
-                .ypp-filter-card:hover .ypp-star-btn,.ypp-star-btn[data-fav="true"]{opacity:1;transform:scale(1);}
-                .ypp-star-btn:hover{background:rgba(255,215,0,0.12);transform:scale(1.15)!important;}
-                .ypp-card-check{background:#fff;color:#000;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-            `;
-            document.head.appendChild(s);
-        }
+        this._injectStyle('ypp-star-btn-style', `
+            .ypp-star-btn{background:transparent;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;width:22px;height:22px;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.85);}
+            .ypp-filter-card:hover .ypp-star-btn,.ypp-star-btn[data-fav="true"]{opacity:1;transform:scale(1);}
+            .ypp-star-btn:hover{background:rgba(255,215,0,0.12);transform:scale(1.15)!important;}
+            .ypp-card-check{background:#fff;color:#000;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        `);
 
         return wrap;
     }
@@ -515,7 +528,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         intSlider.className = 'ypp-vcp-slider';
         intSlider.min = '0';
         intSlider.max = '100';
-        intSlider.value = ctx.filterIntensity;
+        intSlider.value = ctx.filterIntensity !== undefined ? ctx.filterIntensity : 100;
         intSlider.style.cssText = 'width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:rgba(255,255,255,0.15);outline:none;cursor:pointer;';
         intSlider.oninput = (e) => {
             ctx.filterIntensity = Number(e.target.value);
@@ -592,9 +605,11 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             valWrap.style.alignItems = 'center';
             valWrap.style.gap = '6px';
 
+            const currentValue = ctx.filterAdjustments[cfg.id] !== undefined ? ctx.filterAdjustments[cfg.id] : cfg.def;
+
             const val = document.createElement('div');
             val.className = 'ypp-adjust-card-val';
-            val.textContent = (ctx.filterAdjustments[cfg.id] || cfg.def) + cfg.unit;
+            val.textContent = currentValue + cfg.unit;
 
             const resetBtn = document.createElement('button');
             resetBtn.innerHTML = '↺';
@@ -622,7 +637,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             slider.type = 'range';
             slider.className = 'ypp-vcp-slider';
             slider.min = cfg.min; slider.max = cfg.max;
-            slider.value = ctx.filterAdjustments[cfg.id] || cfg.def;
+            slider.value = currentValue;
             slider.oninput = (e) => {
                 const v = Number(e.target.value);
                 ctx.filterAdjustments[cfg.id] = v;
@@ -637,5 +652,14 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
         wrap.appendChild(grid);
         return wrap;
+    }
+
+    static _injectStyle(id, css) {
+        if (!document.getElementById(id)) {
+            const s = document.createElement('style');
+            s.id = id;
+            s.textContent = css;
+            (document.head || document.documentElement).appendChild(s);
+        }
     }
 };

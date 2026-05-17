@@ -11,6 +11,14 @@
     "mtime": 1778601060.9925869,
     "hash": "664fe098e13aa95dfadee92c81012d2f"
   },
+  "F:\\Youtube 2.0\\scripts\\audit_channel.py": {
+    "mtime": 1778815698.0974424,
+    "hash": "53992bef0800688b645ec4fa7c844a29"
+  },
+  "F:\\Youtube 2.0\\scripts\\fix_channel_guards.py": {
+    "mtime": 1778815739.5842323,
+    "hash": "439fd7d8c395cf0e7251627271e5705e"
+  },
   "F:\\Youtube 2.0\\src\\background\\service-worker.js": {
     "mtime": 1778161078.996133,
     "hash": "937e55e1759a034c2b058d617148ed2f"
@@ -32,8 +40,8 @@
     "hash": "2c7902ca70695684be67e213e5ae33df"
   },
   "F:\\Youtube 2.0\\src\\content\\global-bar-external.js": {
-    "mtime": 1778731220.0601497,
-    "hash": "85ec7c759dbccd7232a845bf60d94b39"
+    "mtime": 1778897409.1188247,
+    "hash": "b9ef1e86e0166ad49eeecfbf860d8e3c"
   },
   "F:\\Youtube 2.0\\src\\content\\index.js": {
     "mtime": 1778737638.927253,
@@ -48,8 +56,8 @@
     "hash": "356c84612073ee1eb03e29390e8914ca"
   },
   "F:\\Youtube 2.0\\src\\content\\utils.js": {
-    "mtime": 1778123817.3141923,
-    "hash": "450553b46d066b7c8660a37d614cfda3"
+    "mtime": 1778897394.5090008,
+    "hash": "8a55ac73db4c7e6b08ac8f1c0b403484"
   },
   "F:\\Youtube 2.0\\src\\content\\core\\dom-api.js": {
     "mtime": 1774623956.264022,
@@ -296,8 +304,8 @@
     "hash": "aed4bd668aa58bb7c4aa287344b427dc"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\global-bar-ui.js": {
-    "mtime": 1778733156.2283993,
-    "hash": "b08094e7a03a88ed8759e61777af1c80"
+    "mtime": 1778900953.2254455,
+    "hash": "4ea7d59c9cd2cea54935b59da3fe43e4"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\global-bar.js": {
     "mtime": 1778600533.313804,
@@ -368,24 +376,24 @@
     "hash": "644aee6750555ba69593e15fa56319b9"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\video-filters\\video-filters-ui.js": {
-    "mtime": 1778733124.3252673,
-    "hash": "58ea949e574ac34e714dc63716af9c17"
+    "mtime": 1778900895.1008444,
+    "hash": "d25457d22e17ff0490220ce9423e9069"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\video-filters\\video-filters.js": {
-    "mtime": 1778739470.223809,
-    "hash": "3c15ba8e20e2dc59403b67c3080ce0b4"
+    "mtime": 1778900845.676407,
+    "hash": "71e1dbca37dd7f8f7d8493b275826c9e"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\volume-booster\\index.js": {
     "mtime": 1777622943.125072,
     "hash": "b884285fee73ad1d2a3035ed34e72580"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\volume-booster\\volume-booster-ui.js": {
-    "mtime": 1778733106.679628,
-    "hash": "d74e07b13e13edf6f858e455756da274"
+    "mtime": 1778901077.3344886,
+    "hash": "c23278d8de3dd2a5a5f7abd7b9a524a6"
   },
   "F:\\Youtube 2.0\\src\\content\\features\\player\\volume-booster\\volume-booster.js": {
-    "mtime": 1778733136.4124217,
-    "hash": "ef03ef8248f730c920a589eb01cc510e"
+    "mtime": 1778901094.4629831,
+    "hash": "fd960be41596d08e3cfd1ae1c9551388"
   },
   "F:\\Youtube 2.0\\src\\content\\ui\\ui-manager.js": {
     "mtime": 1777622943.1360564,

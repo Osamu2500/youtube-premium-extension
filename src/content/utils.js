@@ -1286,6 +1286,201 @@ window.YPP.Utils.positionPopupBesideVideo = (panel, triggerBtn, video, panelW) =
  * layer.  Elements appended here escape ALL site overflow/clip/transform
  * containment — including overflow:clip and clip-path on the body/html.
  *
+        this._isActive = true;
+        this._videoEl = document.querySelector('video.video-stream.html5-main-video');
+        this._playerNode = document.getElementById('movie_player') || document.querySelector('.html5-video-player');
+        
+        if (!this._videoEl || !this._playerNode) {
+            // Wait for it if it isn't ready
+            setTimeout(() => { if (this._isActive) this.startTracking(); }, 500);
+            return;
+        }
+
+        // Apply immediately
+        this._updateVars();
+        
+        // Track resize via ResizeObserver and attribute MutationObserver 
+        // to catch style injections by YouTube
+        if (window.ResizeObserver) {
+            this._observer = new ResizeObserver(() => this._scheduleUpdate());
+            this._observer.observe(this._videoEl);
+            this._observer.observe(this._playerNode);
+        } else {
+            this._observer = new MutationObserver(() => this._scheduleUpdate());
+            this._observer.observe(this._videoEl, { attributes: true, attributeFilter: ['style', 'class'] });
+        }
+        
+        // Polling fallback to catch inline style jumps
+        this._pollInterval = setInterval(() => this._scheduleUpdate(), 2000);
+        
+        // Also listen to window resize
+        window.addEventListener('resize', this._boundScheduleUpdate = this._scheduleUpdate.bind(this));
+    },
+
+    _scheduleUpdate() {
+        if (this._rafId) return;
+        this._rafId = requestAnimationFrame(() => {
+            this._updateVars();
+            this._rafId = null;
+        });
+    },
+
+    _updateVars() {
+        if (!this._videoEl || !this._playerNode) return;
+        
+        // Read actual dimensions & offsets
+        const videoRect = this._videoEl.getBoundingClientRect();
+        const playerRect = this._playerNode.getBoundingClientRect();
+        
+        // Calculate the relative left offset inside the player container
+        const relativeLeft = Math.max(0, videoRect.left - playerRect.left);
+        const width = videoRect.width;
+        
+        // Don't apply if values are 0 (e.g. video hidden)
+        if (width <= 0) return;
+        
+        // Set variables on player node to be consumed by styles.css
+        this._playerNode.style.setProperty('--ypp-video-width', `${width}px`);
+        this._playerNode.style.setProperty('--ypp-video-left', `${relativeLeft}px`);
+    },
+
+    stop() {
+        this._isActive = false;
+        if (this._observer) {
+            this._observer.disconnect();
+            this._observer = null;
+        }
+        if (this._pollInterval) {
+            clearInterval(this._pollInterval);
+            this._pollInterval = null; // Prevent double-clear on repeated stop() calls
+        }
+        if (this._boundScheduleUpdate) {
+            window.removeEventListener('resize', this._boundScheduleUpdate);
+            this._boundScheduleUpdate = null;
+        }
+        if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
+        // Release element references to aid garbage collection
+        this._videoEl = null;
+        this._playerNode = null;
+    }
+};
+
+// =====================================================================
+// POPUP POSITIONING — beside-video helper
+// =====================================================================
+
+/**
+ * Positions a fixed popup panel beside the video, never on top of it.
+ *
+ * Strategy — tries sides in order of available space:
+ *   1. RIGHT of video  (preferred — most room on sidebar layouts)
+ *   2. LEFT  of video  (between global-bar and video edge)
+ *   3. BELOW the video (when video is in the upper portion of the page)
+ *   4. ABOVE the video
+ *   5. Fallback: right of trigger button, clamped to viewport
+ *
+ * Vertically (for options 1 & 2) the popup is centred on the trigger button.
+ * Horizontally (for options 3 & 4) the popup is aligned to the button's left edge.
+ *
+ * @param {HTMLElement}      panel      - Panel already appended to document.body
+ * @param {HTMLElement}      triggerBtn - The button that was clicked
+ * @param {HTMLVideoElement} video      - The <video> element to avoid overlapping
+ * @param {number}           panelW     - Desired panel width in px
+ */
+window.YPP.Utils.positionPopupBesideVideo = (panel, triggerBtn, video, panelW) => {
+    const GAP    = 10; // px gap between panel and video edge
+    const MARGIN = 8;  // minimum distance from viewport edges
+
+    // Guard: panel must have a positioning context; default to absolute
+    if (!panel.style.position || panel.style.position === 'static') {
+        panel.style.position = 'absolute';
+    }
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    const btnRect = triggerBtn.getBoundingClientRect();
+    // Use actual rendered height if available, otherwise estimate
+    const estH = Math.min(panel.scrollHeight > 40 ? panel.scrollHeight : 400, H - MARGIN * 2);
+
+    // Helper: clamp a panel's top so it stays in the viewport
+    const clampTop = (t) => Math.max(MARGIN, Math.min(t, H - estH - MARGIN));
+    // Helper: clamp a panel's left so it stays in the viewport
+    const clampLeft = (l) => Math.max(MARGIN, Math.min(l, W - panelW - MARGIN));
+
+    // Vertical centre aligned to button midpoint (used for left/right placement)
+    const centredTop  = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
+    // Horizontal start at button left (used for above/below placement)
+    const alignedLeft = clampLeft(btnRect.left);
+
+    let left, top;
+    let placed = false;
+
+    // ── Only do smart positioning if we have a valid video rect ──────────────
+    const vRect = video?.getBoundingClientRect?.() || null;
+    const hasVideo = vRect && vRect.width > 20 && vRect.height > 20;
+
+    if (hasVideo) {
+        const spaceRight  = W - vRect.right - GAP;   // room to the right
+        const spaceLeft   = vRect.left - GAP;         // room to the left
+        const spaceBelow  = H - vRect.bottom - GAP;  // room below
+        const spaceAbove  = vRect.top - GAP;          // room above
+
+        if (spaceRight >= panelW + MARGIN) {
+            // ✅ Best case: right of the video
+            left = vRect.right + GAP;
+            top  = centredTop;
+            placed = true;
+        } else if (spaceLeft >= panelW + MARGIN) {
+            // ✅ Left of the video (between bar and video)
+            left = vRect.left - GAP - panelW;
+            top  = centredTop;
+            placed = true;
+        } else if (spaceBelow >= Math.min(estH, 200)) {
+            // ✅ Below the video (partial overlap ok if estH > spaceBelow)
+            left = alignedLeft;
+            top  = vRect.bottom + GAP;
+            placed = true;
+        } else if (spaceAbove >= Math.min(estH, 200)) {
+            // ✅ Above the video
+            left = alignedLeft;
+            top  = vRect.top - GAP - estH;
+            placed = true;
+        }
+        // If all four sides fail (video fills the entire viewport), fall through
+        // to the fallback below — at least position at the nearest free corner.
+        if (!placed) {
+            // Place at the right edge of the bar, vertically centred on the button.
+            // This minimises how much of the video centre gets covered.
+            left = btnRect.right + GAP;
+            top  = centredTop;
+        }
+    } else {
+        // No video element found — just anchor to the right of the button
+        left = btnRect.right + GAP;
+        top  = centredTop;
+    }
+
+    // Final viewport clamp
+    left = clampLeft(left);
+    top  = clampTop(top);
+
+    panel.style.left = left + 'px';
+    panel.style.top  = top  + 'px';
+};
+
+// =====================================================================
+// POPUP PORTAL — shared CSS top-layer dialog host
+// =====================================================================
+
+/**
+ * Returns (creating if necessary) a shared <dialog> element in the CSS top
+ * layer.  Elements appended here escape ALL site overflow/clip/transform
+ * containment — including overflow:clip and clip-path on the body/html.
+ *
  * Usage:
  *   const dlg = window.YPP.Utils.getPopupPortal();
  *   dlg.appendChild(myPanel);
@@ -1297,7 +1492,7 @@ window.YPP.Utils.getPopupPortal = () => {
     let dlg = document.getElementById('ypp-popup-portal');
     if (dlg) return dlg;
 
-    dlg = document.createElement('dialog');
+    dlg = document.createElement('div');
     dlg.id = 'ypp-popup-portal';
     dlg.style.cssText =
         'position:fixed;inset:0;width:100%;height:100%;' +
@@ -1305,20 +1500,16 @@ window.YPP.Utils.getPopupPortal = () => {
         'border:0;outline:0;padding:0;margin:0;' +
         'background:transparent;overflow:visible;' +
         'pointer-events:none;z-index:2147483647;';
-    document.documentElement.appendChild(dlg);
 
-    // Inject backdrop style once
-    if (!document.getElementById('ypp-portal-backdrop')) {
-        const bs = document.createElement('style');
-        bs.id = 'ypp-portal-backdrop';
-        bs.textContent =
-            '#ypp-popup-portal::backdrop{display:none!important;pointer-events:none!important;}';
-        (document.head || document.documentElement).appendChild(bs);
+    if ('popover' in dlg) {
+        dlg.popover = "manual";
     }
 
-    // Prevent the browser's default Escape-key close behaviour
-    dlg.addEventListener('cancel', e => e.preventDefault());
+    document.documentElement.appendChild(dlg);
 
-    try { dlg.showModal(); } catch(e) { try { dlg.show(); } catch(e2) {} }
+    if ('popover' in dlg) {
+        try { dlg.showPopover(); } catch(e) {}
+    }
+
     return dlg;
 };

@@ -1,11 +1,11 @@
-# Graph Report - Youtube 2.0  (2026-05-14)
+# Graph Report - Youtube 2.0  (2026-05-16)
 
 ## Corpus Check
-- 115 files · ~410,654 words
+- 117 files · ~412,972 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1089 nodes · 1565 edges · 80 communities detected
+- 1100 nodes · 1574 edges · 82 communities detected
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -73,8 +73,7 @@
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
-- [[_COMMUNITY_Community 64|Community 64]]
-- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
@@ -84,12 +83,15 @@
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
 - [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
 - [[_COMMUNITY_Community 77|Community 77]]
-- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 80|Community 80]]
 - [[_COMMUNITY_Community 81|Community 81]]
-- [[_COMMUNITY_Community 83|Community 83]]
-- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `getSelector()` - 18 edges
@@ -106,8 +108,8 @@
 ## Surprising Connections (you probably didn't know these)
 - `toggle()` --calls--> `applySettings()`  [INFERRED]
   src\content\utils.js → src\content\features\core\global\content-control.js
-- `toggle()` --calls--> `_applyVisibilitySettings()`  [INFERRED]
-  src\content\utils.js → src\content\features\core\global\theme.js
+- `toggle()` --calls--> `_hideDistractions()`  [INFERRED]
+  src\content\utils.js → src\content\features\pages\watch\focus-mode.js
 - `alert()` --calls--> `takeSnapshot()`  [INFERRED]
   src\content\features\pages\subscriptions\folder-ui.js → src\content\features\player\player.js
 - `check()` --calls--> `_pollForElement()`  [INFERRED]
@@ -127,7 +129,7 @@ Nodes (19): check(), cleanup(), handleAbort(), init(), startTracking(), _updateV
 
 ### Community 2 - "Community 2"
 Cohesion: 0.11
-Nodes (28): _applyCustomizationSettings(), _applyHideScrollbar(), _applyTheme(), _applyVisibilitySettings(), _cleanupClasses(), _cleanupCustomVariables(), constructor(), debounce() (+20 more)
+Nodes (29): toggle(), _applyCustomizationSettings(), _applyHideScrollbar(), _applyTheme(), _applyVisibilitySettings(), _cleanupClasses(), _cleanupCustomVariables(), constructor() (+21 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.1
@@ -138,8 +140,8 @@ Cohesion: 0.11
 Nodes (19): applyFeedFilters(), _applyFeedFiltersNow(), _applySortOrder(), clearFeedFilters(), disable(), forceRefreshFeed(), handleNavigation(), _injectGridCSS() (+11 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.16
-Nodes (23): toggle(), _applyCinemaStyle(), _applyDetoxStyle(), _applyFocusState(), _applyMinimalStyle(), constructor(), disable(), enable() (+15 more)
+Cohesion: 0.17
+Nodes (22): _applyCinemaStyle(), _applyDetoxStyle(), _applyFocusState(), _applyMinimalStyle(), constructor(), disable(), enable(), _ensureTheaterMode() (+14 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.24
@@ -369,37 +371,33 @@ Nodes (5): disable(), enable(), run(), showRemainingTime(), update()
 Cohesion: 0.33
 Nodes (1): ErrorHandler
 
-### Community 64 - "Community 64"
+### Community 65 - "Community 65"
 Cohesion: 0.38
 Nodes (3): checkUrl(), enable(), onPageChange()
 
-### Community 66 - "Community 66"
+### Community 67 - "Community 67"
 Cohesion: 0.38
 Nodes (3): cleanup(), init(), startObserver()
 
-### Community 67 - "Community 67"
+### Community 68 - "Community 68"
 Cohesion: 0.33
 Nodes (2): getVideoElement(), handleWheel()
 
-### Community 68 - "Community 68"
+### Community 69 - "Community 69"
 Cohesion: 0.43
 Nodes (4): applyOverlay(), injectCRTSVGFilter(), injectOverlayCSS(), injectSpecialEffectsSVG()
 
-### Community 69 - "Community 69"
+### Community 70 - "Community 70"
 Cohesion: 0.29
 Nodes (1): UIManager
 
-### Community 70 - "Community 70"
+### Community 71 - "Community 71"
 Cohesion: 0.4
 Nodes (2): on(), once()
 
-### Community 71 - "Community 71"
+### Community 72 - "Community 72"
 Cohesion: 0.47
 Nodes (3): extractData(), init(), scrapeFromScriptTags()
-
-### Community 72 - "Community 72"
-Cohesion: 0.4
-Nodes (2): _apply(), enable()
 
 ### Community 73 - "Community 73"
 Cohesion: 0.4
@@ -407,37 +405,51 @@ Nodes (2): _apply(), enable()
 
 ### Community 74 - "Community 74"
 Cohesion: 0.4
-Nodes (2): enable(), _update()
+Nodes (2): _apply(), enable()
 
 ### Community 75 - "Community 75"
+Cohesion: 0.4
+Nodes (2): enable(), _update()
+
+### Community 76 - "Community 76"
 Cohesion: 0.4
 Nodes (2): _checkRedirect(), enable()
 
 ### Community 77 - "Community 77"
+Cohesion: 0.4
+Nodes (3): add_channel_guard(), Fix styles.css: add .ypp-channel-page exclusion guards to all rules that could b, Insert :not(.ypp-channel-page) after the body selector.
+
+### Community 78 - "Community 78"
 Cohesion: 0.8
 Nodes (4): buildMenuHTML(), diskHTML(), esc(), letterAvatar()
 
-### Community 79 - "Community 79"
+### Community 80 - "Community 80"
 Cohesion: 0.5
 Nodes (2): injectFilterBar(), renderFilterBar()
 
-### Community 80 - "Community 80"
+### Community 81 - "Community 81"
 Cohesion: 0.83
 Nodes (3): _defaults(), migrate(), validateAndMerge()
 
-### Community 81 - "Community 81"
+### Community 82 - "Community 82"
 Cohesion: 0.83
 Nodes (3): buildAdjustTab(), buildPresetsTab(), createFilterPanel()
 
-### Community 83 - "Community 83"
+### Community 84 - "Community 84"
 Cohesion: 1.0
 Nodes (2): extractData(), getAvatarUrl()
 
-### Community 85 - "Community 85"
+### Community 86 - "Community 86"
 Cohesion: 1.0
 Nodes (2): broadcastStats(), getPlayer()
 
+### Community 87 - "Community 87"
+Cohesion: 1.0
+Nodes (1): Audit styles.css to find selectors that could bleed into the channel page. Print
+
 ## Knowledge Gaps
+- **3 isolated node(s):** `Audit styles.css to find selectors that could bleed into the channel page. Print`, `Fix styles.css: add .ypp-channel-page exclusion guards to all rules that could b`, `Insert :not(.ypp-channel-page) after the body selector.`
+  These have ≤1 connection - possible missing edges or undocumented components.
 - **Thin community `Community 34`** (12 nodes): `ElementCache`, `.clear()`, `.constructor()`, `.destroy()`, `.get()`, `.getAll()`, `.getStats()`, `.has()`, `.remove()`, `.set()`, `.watch()`, `element-cache.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 42`** (11 nodes): `SearchRedesign`, `.constructor()`, `.disable()`, `.enable()`, `.getConfigKey()`, `._handleNavigation()`, `.init()`, `._log()`, `._removeClasses()`, `.run()`, `search-redesign.js`
@@ -446,34 +458,38 @@ Nodes (2): broadcastStats(), getPlayer()
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 63`** (7 nodes): `ErrorHandler`, `.clearErrors()`, `.constructor()`, `.getErrors()`, `.handleError()`, `.logError()`, `error-handler.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 67`** (7 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `getVideoElement()`, `handleWheel()`, `wheel-controls.js`
+- **Thin community `Community 68`** (7 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `getVideoElement()`, `handleWheel()`, `wheel-controls.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 69`** (7 nodes): `ui-manager.js`, `UIManager`, `.constructor()`, `.destroy()`, `.heal()`, `.mount()`, `.remove()`
+- **Thin community `Community 70`** (7 nodes): `ui-manager.js`, `UIManager`, `.constructor()`, `.destroy()`, `.heal()`, `.mount()`, `.remove()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 70`** (6 nodes): `clear()`, `constructor()`, `emit()`, `on()`, `once()`, `event-bus.js`
+- **Thin community `Community 71`** (6 nodes): `clear()`, `constructor()`, `emit()`, `on()`, `once()`, `event-bus.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 72`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-metrics.js`
+- **Thin community `Community 73`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-metrics.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 73`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-playlists-podcasts.js`
+- **Thin community `Community 74`** (6 nodes): `_apply()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `hide-playlists-podcasts.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 74`** (6 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `_update()`, `hide-thumbnails.js`
+- **Thin community `Community 75`** (6 nodes): `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `_update()`, `hide-thumbnails.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 75`** (6 nodes): `_checkRedirect()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `redirect-home.js`
+- **Thin community `Community 76`** (6 nodes): `_checkRedirect()`, `constructor()`, `disable()`, `enable()`, `getConfigKey()`, `redirect-home.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 79`** (5 nodes): `subs-ui-filter.js`, `_filterFeedNow()`, `injectFilterBar()`, `reapplyFilters()`, `renderFilterBar()`
+- **Thin community `Community 80`** (5 nodes): `subs-ui-filter.js`, `_filterFeedNow()`, `injectFilterBar()`, `reapplyFilters()`, `renderFilterBar()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 83`** (3 nodes): `extractData()`, `getAvatarUrl()`, `account-menu-data.js`
+- **Thin community `Community 84`** (3 nodes): `extractData()`, `getAvatarUrl()`, `account-menu-data.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 85`** (3 nodes): `broadcastStats()`, `getPlayer()`, `stats-bridge.js`
+- **Thin community `Community 86`** (3 nodes): `broadcastStats()`, `getPlayer()`, `stats-bridge.js`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 87`** (2 nodes): `audit_channel.py`, `Audit styles.css to find selectors that could bleed into the channel page. Print`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `toggle()` connect `Community 5` to `Community 1`, `Community 10`, `Community 2`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `_applyVisibilitySettings()` connect `Community 2` to `Community 5`?**
+- **Why does `toggle()` connect `Community 2` to `Community 1`, `Community 10`, `Community 5`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `applySettings()` connect `Community 10` to `Community 2`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **What connects `Audit styles.css to find selectors that could bleed into the channel page. Print`, `Fix styles.css: add .ypp-channel-page exclusion guards to all rules that could b`, `Insert :not(.ypp-channel-page) after the body selector.` to the rest of the system?**
+  _3 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
@@ -482,5 +498,3 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.11 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
-- **Should `Community 4` be split into smaller, more focused modules?**
-  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
