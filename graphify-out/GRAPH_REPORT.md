@@ -1,11 +1,11 @@
-# Graph Report - Youtube 2.0  (2026-05-16)
+# Graph Report - Youtube 2.0  (2026-05-17)
 
 ## Corpus Check
-- 117 files · ~412,972 words
+- 117 files · ~413,893 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1100 nodes · 1574 edges · 82 communities detected
+- 1101 nodes · 1577 edges · 82 communities detected
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -428,12 +428,12 @@ Cohesion: 0.5
 Nodes (2): injectFilterBar(), renderFilterBar()
 
 ### Community 81 - "Community 81"
-Cohesion: 0.83
-Nodes (3): _defaults(), migrate(), validateAndMerge()
+Cohesion: 0.8
+Nodes (4): buildAdjustTab(), buildPresetsTab(), createFilterPanel(), _injectStyle()
 
 ### Community 82 - "Community 82"
 Cohesion: 0.83
-Nodes (3): buildAdjustTab(), buildPresetsTab(), createFilterPanel()
+Nodes (3): _defaults(), migrate(), validateAndMerge()
 
 ### Community 84 - "Community 84"
 Cohesion: 1.0

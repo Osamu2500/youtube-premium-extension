@@ -20,19 +20,75 @@
     -webkit-backdrop-filter: blur(48px) saturate(120%) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
-    animation: ypp-global-bar-pop-right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-@keyframes ypp-global-bar-pop-right {
-    0%   { opacity: 0; transform: translateX(20px) translateY(-50%) scale(0.95); }
-    100% { opacity: 1; transform: translateX(0)     translateY(-50%) scale(1); }
 }
 
 .ypp-global-player-bar:hover {
     opacity: 1;
     box-shadow: 0 16px 48px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.12);
-    transform: translateX(-3px) translateY(-50%);
     background: rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ── Positions ── */
+
+/* Right (Default) */
+.ypp-bar-pos-right {
+    animation: ypp-global-bar-pop-right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes ypp-global-bar-pop-right {
+    0%   { opacity: 0; transform: translateX(20px) translateY(-50%) scale(0.95); }
+    100% { opacity: 1; transform: translateX(0)     translateY(-50%) scale(1); }
+}
+.ypp-bar-pos-right:hover {
+    transform: translateX(-3px) translateY(-50%);
+}
+
+/* Left */
+.ypp-bar-pos-left {
+    animation: ypp-global-bar-pop-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes ypp-global-bar-pop-left {
+    0%   { opacity: 0; transform: translateX(-20px) translateY(-50%) scale(0.95); }
+    100% { opacity: 1; transform: translateX(0)     translateY(-50%) scale(1); }
+}
+.ypp-bar-pos-left:hover {
+    transform: translateX(3px) translateY(-50%);
+}
+
+/* Top (Horizontal) */
+.ypp-bar-pos-top {
+    flex-direction: row;
+    padding: 6px 12px;
+    animation: ypp-global-bar-pop-top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes ypp-global-bar-pop-top {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.95); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+}
+.ypp-bar-pos-top:hover {
+    transform: translateX(-50%) translateY(3px);
+}
+
+.ypp-bar-pos-top .ypp-gpb-controls {
+    flex-direction: row;
+}
+
+.ypp-bar-pos-top .ypp-gpb-divider {
+    width: 1px;
+    height: 24px;
+}
+
+.ypp-bar-pos-top .ypp-gpb-vol-wrap {
+    width: 50px;
+    height: 14px;
+}
+
+.ypp-bar-pos-top .ypp-gpb-vol-slider {
+    transform: rotate(0deg);
+}
+
+.ypp-bar-pos-top #ypp-gpb-speed-container .ypp-speed-controls,
+.ypp-bar-pos-top #ypp-gpb-features-container {
+    flex-direction: row;
 }
 
 .ypp-gpb-controls {

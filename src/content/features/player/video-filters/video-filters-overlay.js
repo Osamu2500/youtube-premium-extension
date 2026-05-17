@@ -233,6 +233,30 @@ window.YPP.features.VideoFiltersOverlay = class VideoFiltersOverlay {
                         <feFuncB type="discrete" tableValues="0 0.1 0.25 0.5 0.75 0.9 1"/>
                     </feComponentTransfer>
                 </filter>
+                <filter id="ypp-fx-colorize" color-interpolation-filters="sRGB">
+                    <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 1 0" result="gray"/>
+                    <feComponentTransfer in="gray">
+                        <feFuncR type="table" tableValues="0.05 0.3 0.8 1.0 1.0"/>
+                        <feFuncG type="table" tableValues="0.00 0.0 0.1 0.7 1.0"/>
+                        <feFuncB type="table" tableValues="0.10 0.4 0.3 0.1 1.0"/>
+                    </feComponentTransfer>
+                </filter>
+                <filter id="ypp-fx-technicolor" color-interpolation-filters="sRGB">
+                    <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 1 0" result="gray"/>
+                    <feComponentTransfer in="gray">
+                        <feFuncR type="table" tableValues="0.0 0.3 0.7 0.9 1.0"/>
+                        <feFuncG type="table" tableValues="0.1 0.2 0.5 0.8 0.95"/>
+                        <feFuncB type="table" tableValues="0.2 0.4 0.2 0.4 0.9"/>
+                    </feComponentTransfer>
+                </filter>
+                <filter id="ypp-fx-dreamcolor" color-interpolation-filters="sRGB">
+                    <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 1 0" result="gray"/>
+                    <feComponentTransfer in="gray">
+                        <feFuncR type="table" tableValues="0.1 0.4 0.8 0.5 0.9"/>
+                        <feFuncG type="table" tableValues="0.0 0.2 0.5 0.8 1.0"/>
+                        <feFuncB type="table" tableValues="0.3 0.5 0.7 0.9 0.9"/>
+                    </feComponentTransfer>
+                </filter>
                 <filter id="ypp-fx-glitch" color-interpolation-filters="sRGB">
                     <feOffset in="SourceGraphic" dx="6" dy="0" result="red-shift"/>
                     <feOffset in="SourceGraphic" dx="-6" dy="0" result="blue-shift"/>

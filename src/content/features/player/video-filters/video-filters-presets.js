@@ -63,6 +63,9 @@ window.YPP.features.VideoFiltersPresets = {
         { category: 'Special Effects', name: 'Neon Edge',    css: 'url(#ypp-fx-edge) saturate(200%) brightness(120%)', overlay: null },
         { category: 'Special Effects', name: 'Deep Fried',   css: 'saturate(400%) contrast(300%) brightness(120%) hue-rotate(-10deg)', overlay: null },
         { category: 'Special Effects', name: 'Duotone Red',  css: 'grayscale(100%) sepia(100%) hue-rotate(320deg) saturate(400%) contrast(140%)', overlay: null },
+        { category: 'Special Effects', name: 'Colorize B&W', css: 'url(#ypp-fx-colorize) saturate(120%) contrast(110%)', overlay: null },
+        { category: 'Special Effects', name: 'Vintage Colorize', css: 'url(#ypp-fx-technicolor) saturate(110%) contrast(115%)', overlay: null },
+        { category: 'Special Effects', name: 'Dream Colorize', css: 'url(#ypp-fx-dreamcolor) saturate(130%) contrast(110%)', overlay: null },
 
         // ── Cinematic Worlds ──
         // Each filter is tuned to recreate the iconic color grade of a specific film/franchise

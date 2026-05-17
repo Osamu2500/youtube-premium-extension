@@ -11,6 +11,12 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     constructor(filters) {
         this.activeBars = new Map(); // videoElement -> barElement
         this.filters = filters || window.YPP.features.FilterPresets?.PRESETS || [];
+        this.settings = {};
+    }
+
+    updateSettings(settings) {
+        this.settings = settings;
+        this.repositionAll();
     }
 
     /** Attach a global player bar to a specific video element. */
@@ -124,17 +130,49 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         let activeIndex = Array.from(this.activeBars.keys()).indexOf(video);
         if (activeIndex === -1) activeIndex = this.activeBars.size;
 
-        Object.assign(bar.style, {
-            position: 'fixed',
-            right: `${16 + (activeIndex * 60)}px`,
-            left: 'auto',
-            top: '50%',
-            bottom: 'auto',
-            transform: 'translateY(-50%)',
-            zIndex: '2147483647',
-            display: 'flex',
-            visibility: 'visible'
-        });
+        const pos = this.settings.globalPlayerBarPosition || 'right';
+        
+        bar.classList.remove('ypp-bar-pos-right', 'ypp-bar-pos-left', 'ypp-bar-pos-top');
+        bar.classList.add(`ypp-bar-pos-${pos}`);
+
+        if (pos === 'top') {
+            Object.assign(bar.style, {
+                position: 'fixed',
+                top: `${16 + (activeIndex * 60)}px`,
+                bottom: 'auto',
+                left: '50%',
+                right: 'auto',
+                zIndex: '2147483647',
+                display: 'flex',
+                visibility: 'visible',
+                // transform is handled by CSS for animation/hover
+                transform: ''
+            });
+        } else if (pos === 'left') {
+            Object.assign(bar.style, {
+                position: 'fixed',
+                left: `${16 + (activeIndex * 60)}px`,
+                right: 'auto',
+                top: '50%',
+                bottom: 'auto',
+                zIndex: '2147483647',
+                display: 'flex',
+                visibility: 'visible',
+                transform: ''
+            });
+        } else {
+            Object.assign(bar.style, {
+                position: 'fixed',
+                right: `${16 + (activeIndex * 60)}px`,
+                left: 'auto',
+                top: '50%',
+                bottom: 'auto',
+                zIndex: '2147483647',
+                display: 'flex',
+                visibility: 'visible',
+                transform: ''
+            });
+        }
     }
 
     // =========================================================================

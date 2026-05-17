@@ -10,14 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tab Title Mapping
     const titles = {
+        'dashboard': 'Dashboard',
         'home': 'Home & Feed',
-        'player': 'Player & Tools',
-        'search': 'Search Results',
+        'shorts': 'Shorts Tools',
+        'player': 'Player Features',
+        'search': 'Search Settings',
         'subscriptions': 'Subscriptions',
-        'history': 'History & Library',
-        'themes': 'Themes & Appearance',
-        'customization': 'Customization',
-        'global': 'Global Settings'
+        'history': 'History & Watch Time',
+        'wellness': 'Focus & Wellness',
+        'customization': 'Appearance & UI',
+        'advanced': 'Advanced & System',
+        'global': 'Global Configuration'
     };
 
     function switchTab(tabId) {
@@ -125,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'autoPause', // auto-pause.js
         'enableCustomSpeed',
         'enableGlobalPlayerBar',
+        'globalPlayerBarPosition',
         'autoLike',
         'enablePiP', // Button / Scroll PiP
         'miniPlayer', // Missing

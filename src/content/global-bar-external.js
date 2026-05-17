@@ -137,6 +137,7 @@
 
     // ── 4. Boot the feature ──────────────────────────────────────────────────
     const bar = new window.YPP.features.GlobalPlayerBar();
+    if (bar.update) bar.update(settings);
     bar.isEnabled = false;
     await bar.enable();
     bar.isEnabled = true;
@@ -155,6 +156,7 @@
                 bar.disable();
                 bar.isEnabled = false;
             }
+            if (bar.update) bar.update(newSettings);
 
             // Update sub-features
             if (instances['volumeBoost']) {
