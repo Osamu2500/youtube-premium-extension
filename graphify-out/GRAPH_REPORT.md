@@ -1,11 +1,11 @@
 # Graph Report - Youtube 2.0  (2026-05-17)
 
 ## Corpus Check
-- 117 files · ~413,893 words
+- 117 files · ~414,439 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1101 nodes · 1577 edges · 82 communities detected
+- 1103 nodes · 1580 edges · 82 communities detected
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -108,8 +108,8 @@
 ## Surprising Connections (you probably didn't know these)
 - `toggle()` --calls--> `applySettings()`  [INFERRED]
   src\content\utils.js → src\content\features\core\global\content-control.js
-- `toggle()` --calls--> `_hideDistractions()`  [INFERRED]
-  src\content\utils.js → src\content\features\pages\watch\focus-mode.js
+- `toggle()` --calls--> `_applyVisibilitySettings()`  [INFERRED]
+  src\content\utils.js → src\content\features\core\global\theme.js
 - `alert()` --calls--> `takeSnapshot()`  [INFERRED]
   src\content\features\pages\subscriptions\folder-ui.js → src\content\features\player\player.js
 - `check()` --calls--> `_pollForElement()`  [INFERRED]
@@ -129,7 +129,7 @@ Nodes (19): check(), cleanup(), handleAbort(), init(), startTracking(), _updateV
 
 ### Community 2 - "Community 2"
 Cohesion: 0.11
-Nodes (29): toggle(), _applyCustomizationSettings(), _applyHideScrollbar(), _applyTheme(), _applyVisibilitySettings(), _cleanupClasses(), _cleanupCustomVariables(), constructor() (+21 more)
+Nodes (28): _applyCustomizationSettings(), _applyHideScrollbar(), _applyTheme(), _applyVisibilitySettings(), _cleanupClasses(), _cleanupCustomVariables(), constructor(), debounce() (+20 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.1
@@ -140,8 +140,8 @@ Cohesion: 0.11
 Nodes (19): applyFeedFilters(), _applyFeedFiltersNow(), _applySortOrder(), clearFeedFilters(), disable(), forceRefreshFeed(), handleNavigation(), _injectGridCSS() (+11 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.17
-Nodes (22): _applyCinemaStyle(), _applyDetoxStyle(), _applyFocusState(), _applyMinimalStyle(), constructor(), disable(), enable(), _ensureTheaterMode() (+14 more)
+Cohesion: 0.16
+Nodes (23): toggle(), _applyCinemaStyle(), _applyDetoxStyle(), _applyFocusState(), _applyMinimalStyle(), constructor(), disable(), enable() (+15 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.24
@@ -329,31 +329,31 @@ Nodes (5): enable(), _getLikeButton(), _isAlreadyLiked(), _tryLike(), _waitAndLi
 
 ### Community 53 - "Community 53"
 Cohesion: 0.31
-Nodes (4): enable(), initDOM(), injectToggleButton(), startLoop()
+Nodes (5): attachBar(), _bindEvents(), repositionAll(), updateBarPosition(), updateSettings()
 
 ### Community 54 - "Community 54"
+Cohesion: 0.31
+Nodes (5): disable(), enable(), scanForVideos(), startObserver(), stopObserver()
+
+### Community 55 - "Community 55"
+Cohesion: 0.31
+Nodes (4): enable(), initDOM(), injectToggleButton(), startLoop()
+
+### Community 56 - "Community 56"
 Cohesion: 0.36
 Nodes (7): C(), k(), L(), n(), o(), r(), t()
 
-### Community 55 - "Community 55"
+### Community 57 - "Community 57"
 Cohesion: 0.36
 Nodes (4): apply(), enable(), handleMutations(), injectStyles()
 
-### Community 56 - "Community 56"
+### Community 58 - "Community 58"
 Cohesion: 0.43
 Nodes (6): addChannelToFolder(), addFolder(), deleteFolder(), load(), removeChannelFromFolder(), save()
 
-### Community 57 - "Community 57"
+### Community 59 - "Community 59"
 Cohesion: 0.32
 Nodes (3): _cacheVideoElement(), enable(), onVideoChange()
-
-### Community 58 - "Community 58"
-Cohesion: 0.32
-Nodes (3): attachBar(), _bindEvents(), updateBarPosition()
-
-### Community 59 - "Community 59"
-Cohesion: 0.36
-Nodes (5): disable(), enable(), scanForVideos(), startObserver(), stopObserver()
 
 ### Community 60 - "Community 60"
 Cohesion: 0.39
@@ -484,9 +484,11 @@ Nodes (1): Audit styles.css to find selectors that could bleed into the channel 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `toggle()` connect `Community 2` to `Community 1`, `Community 10`, `Community 5`?**
+- **Why does `toggle()` connect `Community 5` to `Community 1`, `Community 10`, `Community 2`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `applySettings()` connect `Community 10` to `Community 2`?**
+- **Why does `applySettings()` connect `Community 10` to `Community 5`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `_applyVisibilitySettings()` connect `Community 2` to `Community 5`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `Audit styles.css to find selectors that could bleed into the channel page. Print`, `Fix styles.css: add .ypp-channel-page exclusion guards to all rules that could b`, `Insert :not(.ypp-channel-page) after the body selector.` to the rest of the system?**
   _3 weakly-connected nodes found - possible documentation gaps or missing edges._
@@ -496,5 +498,3 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.11 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.1 - nodes in this community are weakly interconnected._

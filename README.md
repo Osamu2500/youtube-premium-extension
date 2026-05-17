@@ -14,7 +14,7 @@
 - 🧭 **Enhanced Navigation** - Custom header buttons with glassmorphic styling
 - 🏠 **Smart Feed Control** - Hide watched videos, remove shorts, customize layouts
 - 🎯 **Focus Modes** - Zen Mode, Study Mode, and distraction-free viewing
-- 🎬 **Advanced Player Tools** - Extra UI configurations, customized speeds, retro CRT emulators, cinema filters
+- 🎬 **Advanced Player Tools** - Extra UI configurations, customized speeds, retro CRT emulators, cinema filters, colorization filters, and decoupled global player popovers
 - 🔍 **Search Redesign** - Grid view, clean filters, hide unwanted content
 - 📱 **Custom Sidebar** - Floating squircle design with smooth animations
 - 🔧 **Auto-Quality Control** - Force highest quality playback
@@ -81,6 +81,8 @@ For the best experience, enable these features:
 
 - **Premium Theme** - Glassmorphism with modern aesthetics
 - **True Black Mode** - OLED-friendly pure black backgrounds
+- **Redesigned Glassmorphic Popup** - Premium neon-indigo interface with grid layout and spring animations
+- **Glassmorphic Topbar** - Modernized YouTube navigation header with circular widgets
 - **Hide Scrollbar** - Clean, minimal interface
 
 ### 🏠 Home Feed Control
@@ -106,7 +108,7 @@ For the best experience, enable these features:
 
 - **Auto-Quality** - Force 1080p+ quality on all videos
 - **Remaining Time** - Show time left instead of elapsed time
-- **Volume Booster** - Boost audio up to 600%
+- **Volume Booster** - Boost audio up to 600% with persistent custom EQ, balance, and compressor settings
 - **Custom Speed Control** - Precise playback speed input
 - **Cinema Filters** - Brightness, contrast, and saturation controls
 - **Snapshot Tool** - Take screenshots of the current frame

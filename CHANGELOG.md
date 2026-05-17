@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-05-17
+
+### Added
+- **Global Player Popovers**: Decoupled the Global Player Bar from iframe constraints, introducing persistent, fixed-position popovers for Cinema Filters and Volume Booster on the right edge of the screen.
+- **Colorization Video Filter**: Advanced cinematic colorization tools applied directly to the video element.
+- **Persistent Audio Settings**: Volume Booster state (gain, balance, EQ, compressor) is now saved and remembered across sessions.
+
+### Improved
+- **Premium Popup Redesign**: Entire extension popup rebuilt with a grid-based layout, neon-indigo dark glassmorphism aesthetic, and spring-based animations.
+- **Playlist & Channel Pages Layout**: Fixed layout overlap issues and implemented a flush grid layout beneath the masthead.
+- **Topbar Aesthetics**: Upgraded the main YouTube navigation bar with a premium glassmorphic UI and circular widgets.
+
 ## [1.1.0] - 2026-04-01
 
 ### Added
