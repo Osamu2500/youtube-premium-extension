@@ -92,6 +92,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
                 this.videoElement = video;
                 this.addListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
                 this.addListener(this.videoElement, 'loadedmetadata', this.handleVideoLoaded);
+                this.addListener(this.videoElement, 'durationchange', this.handleVideoLoaded);
                 
                 // If it already has duration, render directly
                 if (this.videoElement.duration) {
@@ -223,6 +224,10 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         this.clearSegments();
         
         if (!this.videoElement || !this.videoElement.duration || this.segments.length === 0) return;
+        
+        // Prevent rendering when an ad is playing, as video.duration will be the ad's duration, causing incorrect scaling
+        const player = document.querySelector('.html5-video-player');
+        if (player && player.classList.contains('ad-showing')) return;
         
         const progressList = document.querySelector('.ytp-progress-list');
         if (!progressList) return;

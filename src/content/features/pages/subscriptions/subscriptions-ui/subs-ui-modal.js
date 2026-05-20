@@ -155,9 +155,15 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
             const delBtn = document.createElement('button');
             delBtn.className = 'ypp-del-cat-btn';
             delBtn.textContent = '×';
-            delBtn.addEventListener('click', (e) => {
+            delBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                if (confirm(`Delete category "${groupName}"?`)) {
+                const confirmed = await window.YPP.features.CustomDialog.confirm(
+                    'Delete Category',
+                    `Delete category "${groupName}"? This cannot be undone.`,
+                    'Delete',
+                    true // danger = red button
+                );
+                if (confirmed) {
                     ctx.manager.deleteGroup(groupName);
                     this.renderCategoriesList(ctx);
                 }
@@ -203,8 +209,11 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
         }
     }
 
-    static promptNewCategory(ctx) {
-        const name = prompt('Enter category name:');
+    static async promptNewCategory(ctx) {
+        const name = await window.YPP.features.CustomDialog.prompt(
+            'New Category',
+            'Enter a name for the new category:'
+        );
         if (!name?.trim()) return;
         if (ctx.manager.createGroup(name.trim())) {
             this.renderCategoriesList(ctx);

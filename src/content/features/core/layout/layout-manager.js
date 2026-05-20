@@ -201,6 +201,15 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * @returns {boolean} True if layout was successfully applied
      */
     applyGridLayout() {
+        // Calculate global UI scale factor for fixed elements (like player bars)
+        if (this.settings?.autoScaleLayout) {
+            const availableWidth = window.innerWidth;
+            const uiScale = Math.max(0.7, Math.min(1.3, availableWidth / 1280));
+            document.documentElement.style.setProperty('--ypp-auto-scale', uiScale);
+        } else {
+            document.documentElement.style.setProperty('--ypp-auto-scale', 1);
+        }
+
         if (!this._isValidPage(window.location.pathname)) return false;
 
         const gridRenderer = document.querySelector(GridLayoutManager.SELECTORS.GRID_RENDERER);
@@ -220,18 +229,31 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             cols = this.settings?.subscriptionsColumns || 4;
         }
 
+        // Auto-scale grid items based on window width (zoom/resize)
+        if (this.settings?.autoScaleLayout) {
+            const minCardWidth = path.startsWith('/results') ? 280 : 320;
+            const availableWidth = window.innerWidth;
+            const padding = 100; // Account for sidebar and margins
+            cols = Math.max(1, Math.floor((availableWidth - padding) / minCardWidth));
+            cols = Math.min(8, cols);
+        }
+
         // Performance: Skip if already processed and unchanged
         if (this._processedContainers.has(contents)) {
-            // Restore inline style if it was wiped by YouTube
-            if (!contents.style.gridTemplateColumns) {
+            const lastCols = parseInt(contents.getAttribute('data-ypp-cols'), 10);
+            if (lastCols !== cols || !contents.style.gridTemplateColumns) {
+                contents.setAttribute('data-ypp-cols', cols);
                 contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
                 contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+                document.documentElement.style.setProperty('--ypp-active-columns', cols);
+                document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
             }
             return true;
         }
 
         // Apply grid container class
         contents.classList.add('ypp-grid-container');
+        contents.setAttribute('data-ypp-cols', cols);
 
 
 
@@ -283,7 +305,8 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                path.startsWith('/channel') || 
                path.startsWith('/c/') || 
                path.startsWith('/@') ||
-               path === '/feed/subscriptions';
+               path === '/feed/subscriptions' ||
+               path.startsWith('/results');
     }
 
     /**

@@ -44,8 +44,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
         this._injectStyle('ypp-glass-anim', `
             @keyframes ypp-panel-glass-in {
-                from { opacity: 0; transform: translateY(12px) scale(0.96); }
-                to   { opacity: 1; transform: translateY(0) scale(1); }
+                from { opacity: 0; transform: translateY(12px) scale(calc(0.96 * var(--ypp-auto-scale, 1))); }
+                to   { opacity: 1; transform: translateY(0) scale(var(--ypp-auto-scale, 1)); }
             }
             .ypp-cinema-tab-btn {
                 flex: 1; padding: 14px; background: transparent; border: none; color: rgba(255,255,255,0.5);
@@ -279,7 +279,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             dlg.appendChild(panel);
 
             // Inject scale-in keyframe once
-            this._injectStyle('ypp-scale-anim', '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}');
+            this._injectStyle('ypp-scale-anim', '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(calc(0.92 * var(--ypp-auto-scale, 1)))}to{opacity:1;transform:scale(var(--ypp-auto-scale, 1))}}');
 
             // Position now (estimate), then reposition after first layout (actual scrollHeight)
             const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 440);
@@ -311,7 +311,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // Escape key closes the panel
         const onKeyDown = (e) => {
             if (e.key === 'Escape' && ctx._filterPanel) {
-                e.stopPropagation();
+                // DO NOT stop propagation here; allow YouTube to handle the ESC key natively
+                // (e.g. to exit fullscreen) to prevent the "ESC button toggle issue"
                 ctx._removeFilterPanel();
             }
         };

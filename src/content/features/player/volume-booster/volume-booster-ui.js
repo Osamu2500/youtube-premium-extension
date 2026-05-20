@@ -431,7 +431,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         // Escape key closes the EQ panel
         const onKeyDown = (e) => {
             if (e.key === 'Escape' && ctx._volumePopup) {
-                e.stopPropagation();
+                // DO NOT stop propagation here; allow YouTube to handle the ESC key natively
+                // (e.g. to exit fullscreen) to prevent the "ESC button toggle issue"
                 if (animFrameId) cancelAnimationFrame(animFrameId);
                 this.toggleEQPanel(ctx, video, anchorBtn);
             }
@@ -580,8 +581,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     animation: ypp-eq-in 0.28s cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 @keyframes ypp-eq-in {
-    from { opacity:0; transform:translateY(12px) scale(0.96); }
-    to   { opacity:1; transform:translateY(0)   scale(1);    }
+    from { opacity:0; transform:translateY(12px) scale(calc(0.96 * var(--ypp-auto-scale, 1))); }
+    to   { opacity:1; transform:translateY(0)   scale(var(--ypp-auto-scale, 1));    }
 }
 
 /* Header */

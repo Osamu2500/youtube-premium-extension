@@ -28,6 +28,7 @@ window.YPP.SettingsSchema = {
         hideScrollbar:       { type: 'boolean', default: false },
 
         // --- Layout ---
+        autoScaleLayout:     { type: 'boolean', default: false },
         grid4x4:             { type: 'boolean', default: true },
         homeColumns:         { type: 'number',  default: 4, min: 1, max: 8 },
         searchColumns:       { type: 'number',  default: 4, min: 1, max: 8 },

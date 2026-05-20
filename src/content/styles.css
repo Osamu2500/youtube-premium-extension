@@ -3470,18 +3470,6 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer {
   pointer-events: none !important;
 }
 
-/* Hidden Clutter Class */
-.ypp-hidden-clutter,
-.ypp-hidden-empty-container {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-}
-
 /* [Legacy Search Grid Styles Removed - Consolidated into Section 6] */
 
 /* --- 6. View Toggle Button --- */
@@ -3567,7 +3555,6 @@ body.ypp-search-grid-mode ytd-continuation-item-renderer {
    =================================================================================== */
 
 /* Unified Card Hover Effect */
-.ypp-card-hover-effect,
 body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer,
 body.yt-premium-plus-theme ytd-video-renderer,
 body.ypp-search-grid-mode ytd-video-renderer,
@@ -3583,7 +3570,6 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   will-change: transform, box-shadow, border-color, background-color;
 }
 
-.ypp-card-hover-effect:hover,
 body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover,
 body.yt-premium-plus-theme ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-video-renderer:hover,
@@ -3601,7 +3587,6 @@ body.ypp-search-grid-mode ytd-channel-renderer:hover {
 }
 
 /* Button Hover Pattern */
-.ypp-button-hover,
 .ypp-nav-btn,
 .ypp-player-controls button {
   transition:
@@ -3611,14 +3596,12 @@ body.ypp-search-grid-mode ytd-channel-renderer:hover {
   will-change: background-color, transform;
 }
 
-.ypp-button-hover:hover,
 .ypp-nav-btn:hover,
 .ypp-player-controls button:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: scale(1.05);
 }
 
-.ypp-button-hover:active,
 .ypp-nav-btn:active,
 .ypp-player-controls button:active {
   transform: scale(0.98);
@@ -5390,54 +5373,6 @@ body.yt-premium-plus-theme .ytp-popup {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
-.ypp-time-item {
-  display: none; /* Shown via JS */
-  align-items: center !important;
-  gap: 5px !important;
-  padding: 0 6px !important;
-  height: 100% !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-variant-numeric: tabular-nums !important;
-  white-space: nowrap !important;
-  transition: all 0.2s ease !important;
-}
-
-/* Dividing lines between active items */
-.ypp-time-item + .ypp-time-item:not([style*="display: none"]) {
-  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.ypp-time-item.standard {
-  font-weight: 500 !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  padding-left: 4px !important;
-}
-
-.ypp-time-item.adjusted {
-  color: #4df3ff !important;
-}
-
-.ypp-time-item.saved.positive {
-  color: #00ffa3 !important;
-}
-
-.ypp-time-item.saved.negative {
-  color: #ff4e45 !important;
-}
-
-.ypp-time-icon {
-  display: flex !important;
-  align-items: center !important;
-  opacity: 0.8 !important;
-  color: inherit !important;
-}
-
-.ypp-time-value {
-  padding-bottom: 1px !important; /* Visual centering */
-}
-
 
 /* 2. Action Buttons Redesign (Beneath Video Title) */
 /* Container for the entire top row (Channel info + Actions) */
@@ -6605,7 +6540,7 @@ ytd-popup-container ytd-multi-page-menu-renderer {
 .ypp-channel-link:hover { text-decoration: underline; }
 
 /* ── Menu items ──────────────────────────────── */
-.ypp-menu-actions { padding: 8px; }
+
 .ypp-menu-item {
     display: flex;
     align-items: center;

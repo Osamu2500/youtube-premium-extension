@@ -323,131 +323,162 @@ window.YPP.features.FolderUI = class FolderUI {
     // FILTER CHIPS UI (Feed Page)
     // =========================================================================
 
-    /** Force-render the top filtering chips. */
+    /** Force-inject the chips bar into the DOM (waits for the grid via observer). */
     renderFilterChips() {
-        if (!this.orchestrator.isFeedPage()) return; // Don't inject off-feed
+        if (!this.orchestrator.isFeedPage()) return;
 
-        this.observer.register('inject-filter-chips', 'ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer', (elements) => {
-            const grid = elements[0];
-            let chipsBar = document.getElementById('ypp-folder-chips');
+        this.observer.register(
+            'inject-filter-chips',
+            'ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer',
+            (elements) => {
+                const grid = elements[0];
+                let chipsBar = document.getElementById('ypp-folder-chips');
 
-            if (!chipsBar) {
-                chipsBar = document.createElement('div');
-                chipsBar.id = 'ypp-folder-chips';
-                chipsBar.className = 'ypp-folder-chips-bar';
-                const contents = grid.querySelector('#contents');
-                if (contents) {
-                    grid.insertBefore(chipsBar, contents);
-                } else {
-                    grid.prepend(chipsBar);
-                }
-            }
-
-            if (this.orchestrator.settings?.subscriptionFolders !== false) {
-                chipsBar.innerHTML = '';
-                const activeFolder = this.orchestrator.getActiveFolder();
-
-                const selectStyle = 'background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; min-width: 160px; transition: 0.2s;';
-                
-                const folderSelectContainer = document.createElement('div');
-                folderSelectContainer.className = 'ypp-sub-filter-group ypp-folder-dropdown-container';
-                folderSelectContainer.style.display = 'flex';
-                folderSelectContainer.style.alignItems = 'center';
-                folderSelectContainer.style.gap = '8px';
-                
-                const label = document.createElement('span');
-                label.className = 'ypp-sub-filter-label';
-                label.style.cssText = 'color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;';
-                label.textContent = 'Folder';
-                
-                const select = document.createElement('select');
-                select.className = 'ypp-filter-dropdown';
-                select.id = 'ypp-folder-select';
-                select.style.cssText = selectStyle;
-                
-                select.innerHTML = String.raw`<option value="" style="background:#222">All Subscriptions</option>`;
-                
-                Object.keys(this.storage.folders).forEach(folderName => {
-                    const opt = document.createElement('option');
-                    opt.value = folderName;
-                    opt.style.background = '#222';
-                    opt.textContent = folderName;
-                    if (activeFolder === folderName) opt.selected = true;
-                    select.appendChild(opt);
-                });
-                
-                const noFolderOpt = document.createElement('option');
-                noFolderOpt.value = '__no_folder__';
-                noFolderOpt.style.background = '#222';
-                noFolderOpt.textContent = 'Uncategorized (No Folder)';
-                if (activeFolder === '__no_folder__') noFolderOpt.selected = true;
-                select.appendChild(noFolderOpt);
-                
-                const manageOpt = document.createElement('option');
-                manageOpt.value = '__new__';
-                manageOpt.style.background = '#222';
-                manageOpt.textContent = '+ Create New Folder';
-                select.appendChild(manageOpt);
-
-                select.addEventListener('mouseover', () => select.style.background = 'rgba(255,255,255,0.12)');
-                select.addEventListener('mouseout', () => select.style.background = 'rgba(255,255,255,0.08)');
-                
-                select.addEventListener('change', async (e) => {
-                    const val = e.target.value;
-                    if (val === '__new__') {
-                        e.target.value = activeFolder || '';
-                        const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter a name for the new folder:');
-                        if (name && name.trim()) {
-                            if (this.storage.addFolder(name.trim())) {
-                                this.renderFilterChips();
-                                this.renderGuideFolders();
-                            }
-                        }
+                if (!chipsBar) {
+                    chipsBar = document.createElement('div');
+                    chipsBar.id = 'ypp-folder-chips';
+                    chipsBar.className = 'ypp-folder-chips-bar';
+                    const contents = grid.querySelector('#contents');
+                    if (contents) {
+                        grid.insertBefore(chipsBar, contents);
                     } else {
-                        this.orchestrator.setActiveFolder(val || null);
+                        grid.prepend(chipsBar);
                     }
-                });
-
-                folderSelectContainer.appendChild(label);
-                folderSelectContainer.appendChild(select);
-
-                // Play All Action
-                if (activeFolder) {
-                    const playBtn = document.createElement('button');
-                    playBtn.className = 'ypp-filter-chip ypp-play-action-chip';
-                    playBtn.innerHTML = String.raw`<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
-                    playBtn.style.backgroundColor = 'var(--ypp-accent, #ff0000)';
-                    playBtn.style.color = '#fff';
-                    playBtn.style.border = 'none';
-                    playBtn.addEventListener('click', () => this.orchestrator.playAll(activeFolder));
-                    folderSelectContainer.appendChild(playBtn);
                 }
 
-                const leftContainer = document.createElement('div');
-                leftContainer.className = 'ypp-folder-chips-left';
-                leftContainer.appendChild(folderSelectContainer);
+                this.rebuildChipsContent(chipsBar);
+            }
+        );
+    }
 
-                // Toggles
-                this._createToggleChip(leftContainer, 'Hide Shorts', this.orchestrator.getHideShorts(), (val) => {
-                    this.orchestrator.setHideShorts(val);
-                    this.orchestrator.updateFilterState();
-                });
+    /**
+     * Re-render the left side of the chips bar in-place.
+     * Safe to call at any time; creates the bar if missing.
+     */
+    rebuildChipsContent(chipsBar) {
+        if (!chipsBar) chipsBar = document.getElementById('ypp-folder-chips');
+        if (!chipsBar) return; // Bar not injected yet — observer will handle it
 
-                this._createToggleChip(leftContainer, 'Hide Watched', this.orchestrator.getHideWatched(), (val) => {
-                    this.orchestrator.setHideWatched(val);
-                    this.orchestrator.updateFilterState();
-                });
+        if (this.orchestrator.settings?.subscriptionFolders !== false) {
+            // Wipe and rebuild only the left container — preserves the right filter bar
+            const existingLeft = chipsBar.querySelector('.ypp-folder-chips-left');
+            if (existingLeft) existingLeft.remove();
 
-                chipsBar.appendChild(leftContainer);
-                
-                chipsBar.style.display = 'flex';
-            } else {
-                chipsBar.style.display = 'none';
-                chipsBar.innerHTML = '';
+            const activeFolder = this.orchestrator.getActiveFolder();
+
+            const selectStyle = 'background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; min-width: 160px; transition: 0.2s;';
+
+            const folderSelectContainer = document.createElement('div');
+            folderSelectContainer.className = 'ypp-sub-filter-group ypp-folder-dropdown-container';
+            folderSelectContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+
+            const label = document.createElement('span');
+            label.className = 'ypp-sub-filter-label';
+            label.style.cssText = 'color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;';
+            label.textContent = 'Folder';
+
+            const select = document.createElement('select');
+            select.className = 'ypp-filter-dropdown';
+            select.id = 'ypp-folder-select';
+            select.style.cssText = selectStyle;
+
+            // "All Subscriptions" default
+            const allOpt = document.createElement('option');
+            allOpt.value = '';
+            allOpt.style.background = '#222';
+            allOpt.textContent = 'All Subscriptions';
+            if (!activeFolder) allOpt.selected = true;
+            select.appendChild(allOpt);
+
+            Object.keys(this.storage.folders).forEach(folderName => {
+                const opt = document.createElement('option');
+                opt.value = folderName;
+                opt.style.background = '#222';
+                opt.textContent = folderName;
+                if (activeFolder === folderName) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            const noFolderOpt = document.createElement('option');
+            noFolderOpt.value = '__no_folder__';
+            noFolderOpt.style.background = '#222';
+            noFolderOpt.textContent = 'Uncategorized (No Folder)';
+            if (activeFolder === '__no_folder__') noFolderOpt.selected = true;
+            select.appendChild(noFolderOpt);
+
+            const newOpt = document.createElement('option');
+            newOpt.value = '__new__';
+            newOpt.style.background = '#222';
+            newOpt.textContent = '+ Create New Folder';
+            select.appendChild(newOpt);
+
+            select.addEventListener('mouseover', () => select.style.background = 'rgba(255,255,255,0.12)');
+            select.addEventListener('mouseout',  () => select.style.background = 'rgba(255,255,255,0.08)');
+
+            select.addEventListener('change', async (e) => {
+                const val = e.target.value;
+                if (val === '__new__') {
+                    // Reset visual selection while dialog is open
+                    e.target.value = this.orchestrator.getActiveFolder() || '';
+                    const name = await window.YPP.features.CustomDialog.prompt(
+                        'New Folder', 'Enter a name for the new folder:'
+                    );
+                    if (name && name.trim()) {
+                        if (this.storage.addFolder(name.trim())) {
+                            this.renderGuideFolders();
+                            this.rebuildChipsContent();
+                        }
+                    }
+                } else {
+                    // Use Direct setter — dropdown is always a definitive choice, never a toggle
+                    this.orchestrator.setActiveFolderDirect(val || null);
+                }
+            });
+
+            folderSelectContainer.appendChild(label);
+            folderSelectContainer.appendChild(select);
+
+            // Play All button — only shown when a folder is active
+            if (activeFolder && activeFolder !== '__no_folder__') {
+                const playBtn = document.createElement('button');
+                playBtn.className = 'ypp-filter-chip ypp-play-action-chip';
+                playBtn.innerHTML = String.raw`<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
+                playBtn.style.cssText = 'background: var(--ypp-accent, #6c63ff); color: #fff; border: none; cursor: pointer;';
+                playBtn.addEventListener('click', () => this.orchestrator.playAll(activeFolder));
+                folderSelectContainer.appendChild(playBtn);
             }
 
-            this._injectFilterBar(chipsBar);
-        }, { runOnce: true });
+            const leftContainer = document.createElement('div');
+            leftContainer.className = 'ypp-folder-chips-left';
+            leftContainer.appendChild(folderSelectContainer);
+
+            this._createToggleChip(leftContainer, 'Hide Shorts', this.orchestrator.getHideShorts(), (val) => {
+                this.orchestrator.setHideShorts(val);
+                this.orchestrator.applyFeedFilters();
+            });
+            this._createToggleChip(leftContainer, 'Hide Watched', this.orchestrator.getHideWatched(), (val) => {
+                this.orchestrator.setHideWatched(val);
+                this.orchestrator.applyFeedFilters();
+            });
+
+            // Insert the left container BEFORE the separator / right container
+            const separator = chipsBar.querySelector('.ypp-filter-separator');
+            if (separator) {
+                chipsBar.insertBefore(leftContainer, separator);
+            } else {
+                chipsBar.appendChild(leftContainer);
+            }
+
+            chipsBar.style.display = 'flex';
+
+            // Inject / refresh the right filter bar only if it hasn't been built yet
+            if (!chipsBar.querySelector('.ypp-folder-chips-right')) {
+                this._injectFilterBar(chipsBar);
+            }
+        } else {
+            chipsBar.style.display = 'none';
+            chipsBar.innerHTML = '';
+        }
     }
 
     removeFilterChips() {
@@ -701,10 +732,10 @@ window.YPP.features.FolderUI = class FolderUI {
         }
 
         // Attach click-outside listener exactly once — prevents unbounded accumulation
-        // across multiple popover opens.
+        // across multiple popover opens. Stored as a named handler for _teardown() removal.
         if (!this._popoverListenerAttached) {
             this._popoverListenerAttached = true;
-            document.addEventListener('click', (e) => {
+            this._popoverClickOutsideHandler = (e) => {
                 const popoverEl = document.getElementById('ypp-folder-popover');
                 if (!popoverEl) return;
                 const clickedInside    = popoverEl.contains(e.target);
@@ -712,8 +743,10 @@ window.YPP.features.FolderUI = class FolderUI {
                 if (!clickedInside && !clickedFolderBtn) {
                     popoverEl.classList.remove('visible');
                 }
-            });
+            };
+            document.addEventListener('click', this._popoverClickOutsideHandler);
         }
+
 
         const rect = buttonEl.getBoundingClientRect();
         popover.style.top  = `${rect.bottom + window.scrollY + 8}px`;

@@ -55,7 +55,7 @@
         getPopupPortal: () => {
             let dlg = document.getElementById('ypp-popup-portal');
             if (dlg) return dlg;
-            dlg = document.createElement('dialog');
+            dlg = document.createElement('div');
             dlg.id = 'ypp-popup-portal';
             dlg.style.cssText =
                 'position:fixed;inset:0;width:100%;height:100%;' +
@@ -63,15 +63,16 @@
                 'border:0;outline:0;padding:0;margin:0;' +
                 'background:transparent;overflow:visible;' +
                 'pointer-events:none;z-index:2147483647;';
-            document.documentElement.appendChild(dlg);
-            if (!document.getElementById('ypp-portal-backdrop')) {
-                const bs = document.createElement('style');
-                bs.id = 'ypp-portal-backdrop';
-                bs.textContent = '#ypp-popup-portal::backdrop{display:none!important;pointer-events:none!important;}';
-                (document.head || document.documentElement).appendChild(bs);
+            
+            if ('popover' in dlg) {
+                dlg.popover = "manual";
             }
-            dlg.addEventListener('cancel', e => e.preventDefault());
-            try { dlg.showModal(); } catch(e) { try { dlg.show(); } catch(e2) {} }
+            
+            document.documentElement.appendChild(dlg);
+            
+            if ('popover' in dlg) {
+                try { dlg.showPopover(); } catch(e) {}
+            }
             return dlg;
         },
     };

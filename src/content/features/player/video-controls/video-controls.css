@@ -43,17 +43,18 @@
                 transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-8px) scale(0.97);
+    transform: translateY(-8px) scale(calc(0.97 * var(--ypp-auto-scale, 1)));
     display: flex;
     flex-direction: column;
     font-family: var(--ypp-font);
     overflow: hidden;
+    transform-origin: top right;
 }
 
 #ypp-video-control-panel.visible {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(var(--ypp-auto-scale, 1));
 }
 
 #ypp-video-control-panel.dragging {

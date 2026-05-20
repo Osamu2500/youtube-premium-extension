@@ -86,8 +86,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
     }
 
     enable(settings) {
-        this.settings = settings;
-        this._loadSettings(settings);
+        this.settings = { ...this.settings, ...settings };
+        this._loadSettings(this.settings);
         this.run();
     }
 
@@ -149,8 +149,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
     }
 
     update(settings) {
-        this.settings = settings;
-        this._loadSettings(settings);
+        this.settings = { ...this.settings, ...settings };
+        this._loadSettings(this.settings);
         if (this.settings.enableVolumeBoost) {
             // Restore states if we were previously disabled
             if (this._audioConnected) {
@@ -168,13 +168,28 @@ window.YPP.features.VolumeBooster = class VolumeBooster {
         if (video) this.initAudioContext(video);
     }
 
+    onPageChange() {
+        if (!this.settings || !this.settings.enableVolumeBoost) return;
+        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
+        if (video) this.initAudioContext(video);
+    }
+
     /**
      * Initializes the Web Audio API context and binds it to the video element.
      * Uses lazy initialization on 'play' or 'volumechange' to respect browser autoplay policies.
      * @param {HTMLVideoElement} video 
      */
     initAudioContext(video) {
-        if (this._audioConnected) return;
+        // If we are already connected to THIS video, do nothing.
+        // If video changed, we must disconnect the old and reconnect.
+        if (this._audioConnected && this._boundVideo === video) return;
+        
+        // If we were connected to a DIFFERENT video, clean up the old bindings
+        if (this._audioConnected && this._boundVideo && this._boundVideo !== video) {
+            this.disable();
+            this._audioConnected = false;
+        }
+
         this._boundVideo = video;
 
         this._initHandler = () => {

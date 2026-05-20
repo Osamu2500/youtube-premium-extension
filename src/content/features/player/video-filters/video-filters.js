@@ -147,8 +147,8 @@ window.YPP.features.VideoFilters = class VideoFilters {
         // (Bug 7 — adj.saturate was permanently overwritten on every call)
         let localSaturate = adj.saturate;
         if (adj.vibrance !== undefined && adj.vibrance !== 100) {
-            // Vibrance approximated via saturation — use raw value so s() applies once below
-            localSaturate = adj.vibrance;
+            // Vibrance approximated via saturation
+            localSaturate = localSaturate * (adj.vibrance / 100);
         }
         // Highlights/Shadows approximate via brightness layers (CSS limited)
         if (adj.highlights !== 0) baseBrightness += adj.highlights * 0.15;
@@ -183,10 +183,9 @@ window.YPP.features.VideoFilters = class VideoFilters {
 
         video.style.filter = finalFilter;
 
-        // Performance fix: only rebuild the overlay when preset or grain actually changed —
-        // prevents constant DOM remove+append on every slider `oninput` event.
-        const overlayKey = `${this.currentFilterIndex}:${adj.grain}`;
-        const needsOverlay = preset.overlay || adj.grain > 0 || preset.name === 'Night Vision';
+        // Performance fix: only rebuild the overlay when preset, grain, or vignette actually changed
+        const overlayKey = `${this.currentFilterIndex}:${adj.grain}:${adj.vignette}`;
+        const needsOverlay = preset.overlay || adj.grain > 0 || adj.vignette > 0 || preset.name === 'Night Vision';
         const overlayChanged = this._lastOverlayKey !== overlayKey;
 
         if (!needsOverlay) {
