@@ -375,10 +375,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const allVideos = document.querySelectorAll('#contents > ytd-rich-item-renderer, #contents > ytd-rich-section-renderer ytd-rich-item-renderer');
         const newQueue = Array.from(allVideos).filter(item => item.querySelector('#video-title-link'));
 
+        let queueUpdated = false;
         if (newQueue.length !== this._videoQueue.length) {
             this._videoQueue = newQueue;
             this._currentVideoIndex = 0;
-            clearTimeout(this._videoTimer);
+            queueUpdated = true;
 
             newQueue.forEach(video => {
                 // Skip processing if already stamped
@@ -398,24 +399,26 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 // Stamp processed node
                 video.setAttribute('data-ypp-processed', 'true');
             });
+        }
 
-            const firstVideo = this._videoQueue[0];
-            
-            if (firstVideo) {
-                if (this._heroState.status === 'inactive') {
-                    // Retry making hero preview if it failed initially due to skeleton loaders
-                    this._makeHeroPreview(firstVideo).then(() => {
+        const firstVideo = this._videoQueue[0];
+        
+        if (firstVideo) {
+            if (this._heroState.status === 'inactive') {
+                // Retry making hero preview if it failed initially due to skeleton loaders
+                this._makeHeroPreview(firstVideo).then(() => {
+                    if (this._heroState.status === 'ready') {
                         firstVideo.classList.add('netflix-active-preview');
                         this._updateHeroContent(firstVideo);
                         clearTimeout(this._videoTimer);
                         this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-                    });
-                } else if (this._heroState.status === 'ready') {
-                    firstVideo.classList.add('netflix-active-preview');
-                    this._updateHeroContent(firstVideo);
-                    clearTimeout(this._videoTimer);
-                    this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-                }
+                    }
+                });
+            } else if (this._heroState.status === 'ready' && queueUpdated) {
+                firstVideo.classList.add('netflix-active-preview');
+                this._updateHeroContent(firstVideo);
+                clearTimeout(this._videoTimer);
+                this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
             }
         }
     }
