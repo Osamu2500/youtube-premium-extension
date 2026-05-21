@@ -3,6 +3,18 @@
  * Handles background tasks including timer logic and initial setup
  */
 
+// Ported from temp2.0/background/background.js
+chrome.runtime.onInstalled.addListener(details => {
+  if (details.reason === 'install') {
+    chrome.storage.sync.set({
+      cinematicEnabled: true,
+      cinematicMuted: false, 
+    }).then(() => {
+      chrome.tabs.create({ url: 'https://www.youtube.com/', active: true }).catch(err => console.error(err));
+    }).catch(err => console.error(err));
+  }
+});
+
 const ALARM_NAME = 'ypp-focus-timer';
 
 

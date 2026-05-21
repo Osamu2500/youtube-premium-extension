@@ -42,6 +42,7 @@ import './features/core/layout/sidebar.js';
 import './features/pages/home/home-organizer.js';
 import './features/pages/home/shorts-tools.js';
 import './features/pages/home/redirect-shorts.js';
+import './features/pages/home/cinematic-mode.js';
 
 // Subscription features
 import './features/pages/subscriptions/folder-storage.js';

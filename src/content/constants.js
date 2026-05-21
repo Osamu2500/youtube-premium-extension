@@ -42,6 +42,7 @@ window.YPP.CONSTANTS = {
         VIDEO: ['video.html5-main-video', 'video'],
         VIDEO_CONTROLS: ['.ytp-right-controls', '.html5-video-controls .ytp-right-controls'],
         SUBTITLES_BTN: ['.ytp-subtitles-button', '.ytp-captions-button'],
+        CAPTIONS_WINDOW: ['.ytp-caption-window-bottom', '.ytp-caption-window-top'],
 
         // Content
         COMMENTS_SECTION: ['ytd-comments', '#comments'],
@@ -106,7 +107,18 @@ window.YPP.CONSTANTS = {
         },
         
         // Mark as Watched
-        THUMBNAIL_CONTAINER: 'ytd-thumbnail'
+        THUMBNAIL_CONTAINER: 'ytd-thumbnail',
+
+        // Playlist Redesign
+        PLAYLIST: {
+            HEADER: 'ytd-playlist-header-renderer',
+            VIDEO_LIST_RENDERER: 'ytd-playlist-video-list-renderer',
+            VIDEO_RENDERER: 'ytd-playlist-video-renderer',
+            BROWSE: 'ytd-browse[page-subtype="playlist"]',
+            TWO_COLUMN: 'ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer',
+            SECTION_LIST: 'ytd-browse[page-subtype="playlist"] #primary > ytd-section-list-renderer',
+            ITEM_SECTION: 'ytd-browse[page-subtype="playlist"] ytd-item-section-renderer'
+        }
     },
 
     // =========================================================================
@@ -144,6 +156,7 @@ window.YPP.CONSTANTS = {
         GRID_ITEM: 'ypp-grid-item',
         FULL_WIDTH: 'ypp-full-width-item',
         HIDDEN_SHORT: 'ypp-hidden-short',
+        CINEMATIC_MODE: 'ypp-cinematic-mode',
 
         // View Toggle
         VIEW_TOGGLE: 'ypp-view-mode-toggle',
@@ -151,6 +164,7 @@ window.YPP.CONSTANTS = {
 
         // Focus Mode
         FOCUS_MODE: 'ypp-focus-mode',
+        CINEMATIC_MODE: 'ypp-cinematic-mode',
         CINEMA_MODE: 'ypp-cinema-mode',
         MINIMAL_MODE: 'ypp-minimal-mode',
         DOPAMINE_DETOX_STYLE: 'ypp-detox-style',
@@ -308,6 +322,8 @@ window.YPP.CONSTANTS = {
         autoPause: false,
         commentFilter: false,
         contextMenu: true,
+        enableBookmarks: true,
+        cinematicMode: false,
 
         // Study Mode
         studyMode: false,
@@ -517,7 +533,9 @@ window.YPP.CONSTANTS = {
         autoQuality: 'AutoQuality',
         timeDisplay: 'TimeDisplay',
         sidebarLayout: 'SidebarLayout',
-        watchRedesign: 'WatchRedesign'
+        watchRedesign: 'WatchRedesign',
+        bookmarksManager: 'BookmarksManager',
+        cinematicMode: 'CinematicMode'
     }
 };
 

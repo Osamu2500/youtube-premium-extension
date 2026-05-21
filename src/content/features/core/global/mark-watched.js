@@ -29,8 +29,30 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         await super.disable();
         window.YPP.events?.off('dom:nodes-added', this._boundProcess);
         window.YPP.events?.off('page:changed', this._boundProcess);
+        
         // Clean up visual badges
         document.querySelectorAll('.ypp-watched-badge').forEach(e => e.remove());
+        
+        // Clean up context menus and their listeners
+        document.querySelectorAll('.ypp-watch-context-menu').forEach(e => e.remove());
+        document.querySelectorAll('[data-ypp-context-menu]').forEach(card => {
+            if (card._yppContextHandler) {
+                card.removeEventListener('contextmenu', card._yppContextHandler);
+                delete card._yppContextHandler;
+            }
+            delete card.dataset.yppContextMenu;
+        });
+        if (this._contextMenuCloseHandler) {
+            document.removeEventListener('click', this._contextMenuCloseHandler);
+            this._contextMenuCloseHandler = null;
+        }
+
+        // Clean up timeupdate listener
+        if (this._activeVideoEl && this._onTimeUpdateBinded) {
+            this._activeVideoEl.removeEventListener('timeupdate', this._onTimeUpdateBinded);
+            this._activeVideoEl = null;
+            this._onTimeUpdateBinded = null;
+        }
     }
 
     // Load watched IDs from chrome.storage.local
@@ -167,9 +189,13 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         if (card.dataset.yppContextMenu) return;
         card.dataset.yppContextMenu = '1';
 
-        card.addEventListener('contextmenu', (e) => {
+        const handler = (e) => {
             // Remove existing menu
-            document.querySelector('.ypp-watch-context-menu')?.remove();
+            document.querySelectorAll('.ypp-watch-context-menu').forEach(el => el.remove());
+            if (this._contextMenuCloseHandler) {
+                document.removeEventListener('click', this._contextMenuCloseHandler);
+                this._contextMenuCloseHandler = null;
+            }
 
             const isWatched = this._watchedIds.has(videoId);
             const menu = document.createElement('div');
@@ -232,10 +258,16 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
                 if (!menu.contains(ev.target)) {
                     menu.remove();
                     document.removeEventListener('click', close);
+                    if (this._contextMenuCloseHandler === close) {
+                        this._contextMenuCloseHandler = null;
+                    }
                 }
             };
+            this._contextMenuCloseHandler = close;
             setTimeout(() => document.addEventListener('click', close), 0);
-        });
+        };
+        card._yppContextHandler = handler;
+        card.addEventListener('contextmenu', handler);
     }
 
     // When navigating to a watch page, track the video

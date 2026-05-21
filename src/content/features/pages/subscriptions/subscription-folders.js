@@ -181,20 +181,68 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this._filterChangedUnsub = null;
         }
 
-        // Remove the document-level popover click-outside handler if FolderUI registered one
-        if (this.ui?._popoverClickOutsideHandler) {
-            document.removeEventListener('click', this.ui._popoverClickOutsideHandler);
-            this.ui._popoverClickOutsideHandler = null;
-            this.ui._popoverListenerAttached = false;
-        }
-
-        // Delegate to disable() for nav listeners, observer slots, and DOM cleanup
+        // Delegate to disable() for full cleanup
         this.disable();
     }
 
     // =========================================================================
     // NAVIGATION & ROUTING
     // =========================================================================
+
+    async disable() {
+        await super.disable();
+
+        // Cancel debounced filters
+        if (this._debouncedApplyFilters?.cancel) {
+            this._debouncedApplyFilters.cancel();
+        }
+
+        // Remove EventBus subscription
+        if (this._filterChangedUnsub) {
+            this._filterChangedUnsub();
+            this._filterChangedUnsub = null;
+        }
+
+        // Remove popover click-outside handler
+        if (this.ui?._popoverClickOutsideHandler) {
+            document.removeEventListener('click', this.ui._popoverClickOutsideHandler);
+            this.ui._popoverClickOutsideHandler = null;
+            this.ui._popoverListenerAttached = false;
+        }
+
+        // Remove Navigation listeners
+        document.removeEventListener('yt-navigate-finish', this._boundHandleNav);
+        window.removeEventListener('popstate', this._boundHandlePopstate);
+
+        // Remove DOM nodes
+        this.ui?.removeGuideFolders?.();
+        this.ui?.removeFilterChips?.();
+
+        const gridOverride = document.getElementById('ypp-sub-grid-override');
+        if (gridOverride) gridOverride.remove();
+
+        const popover = document.getElementById('ypp-folder-popover');
+        if (popover) popover.remove();
+
+        const modal = document.getElementById('ypp-health-modal');
+        if (modal) modal.remove();
+
+        document.querySelectorAll('.ypp-card-folder-btn, .ypp-feed-folder-indicator').forEach(e => e.remove());
+        document.getElementById('ypp-channel-folder-btn')?.remove();
+
+        // Clear observer registrations specific to this feature
+        this.observer?.unregister?.('feed-card-badges');
+        this.observer?.unregister?.('channel-badge');
+        this.observer?.unregister?.('fallback-navigation');
+
+        // Reset feed cards to visible
+        document.querySelectorAll('ytd-rich-item-renderer.ypp-filtered-out').forEach(card => {
+            card.classList.remove('ypp-filtered-out');
+            card.style.display = '';
+        });
+
+        this.initialized = false;
+    }
 
     setupNavigationListener() {
         this.handleNavigation();

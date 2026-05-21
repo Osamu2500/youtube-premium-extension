@@ -40,23 +40,19 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
         }
 
         this._tryInit();
-        this.navHandler = () => {
-            this._reset();
-            if (this._isPlaylistPage()) {
-                setTimeout(() => this._tryInit(), 400);
-            }
-        };
-        window.addEventListener('yt-navigate-finish',    this.navHandler);
-        window.addEventListener('yt-page-data-updated',  this.navHandler);
+    }
+
+    onPageChange() {
+        this._reset();
+        if (this._isPlaylistPage()) {
+            this._tryInit();
+        }
     }
 
     disable() {
         if (!this.isActive) return;
         this.isActive = false;
         this._reset();
-        window.removeEventListener('yt-navigate-finish',   this.navHandler);
-        window.removeEventListener('yt-page-data-updated', this.navHandler);
-        this.navHandler = null;
     }
 
     // ─── Internal helpers ────────────────────────────────────────────────────
@@ -93,32 +89,22 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
         document.body.classList.remove('ypp-playlist-redesign');
     }
 
-    _tryInit() {
+    async _tryInit() {
         if (!this._isPlaylistPage()) return;
-        // Add class immediately so CSS hide rules fire right away,
-        // before we even confirm the DOM is ready.
+        // Add class immediately so CSS hide rules fire right away
         document.body.classList.add('ypp-playlist-redesign');
-        this._retryCount = 0;
-        this._attemptBuild();
-    }
+        
+        // Wait up to 10 seconds for the native playlist DOM to load
+        const isReady = await window.YPP.Utils.waitFor(() => {
+            return document.querySelector('ytd-playlist-header-renderer') &&
+                   document.querySelectorAll('ytd-playlist-video-renderer').length > 0;
+        }, 10000);
 
-    _attemptBuild() {
-        // Minimum data we need: header + at least one video renderer
-        const header = document.querySelector('ytd-playlist-header-renderer');
-        const videos = document.querySelectorAll('ytd-playlist-video-renderer');
-
-        if (header && videos.length > 0) {
+        if (isReady && this.isActive) {
+            const header = document.querySelector('ytd-playlist-header-renderer');
+            const videos = document.querySelectorAll('ytd-playlist-video-renderer');
             this._build(header, videos);
             this._watchForChanges();
-            return;
-        }
-
-        if (this._retryCount < this.MAX_RETRIES) {
-            this._retryCount++;
-            this._retryTimer = setTimeout(
-                () => this._attemptBuild(),
-                this.RETRY_DELAY
-            );
         }
     }
 
@@ -177,26 +163,26 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
 
         // ── Videos ──
         const videos = [];
-        videoEls.forEach((el, idx) => {
+        videoEls.forEach((videoElement, idx) => {
             // Title
-            const vtitle = el.querySelector(
+            const videoTitle = videoElement.querySelector(
                 'a#video-title, yt-formatted-string#video-title, h3 a'
             )?.textContent?.trim() || `Video ${idx + 1}`;
 
             // Watch URL
-            const vhref  = el.querySelector(
+            const videoUrl  = videoElement.querySelector(
                 'a#video-title, a.yt-simple-endpoint[href*="watch"]'
             )?.href || '';
 
             // Channel
-            const vchan  = el.querySelector(
+            const videoChannel  = videoElement.querySelector(
                 'ytd-channel-name a, #channel-name a, .ytd-channel-name a'
             )?.textContent?.trim() || '';
 
             // Duration — layer 1: find the badge span and read ONLY its own text
             // avoiding concatenated child markup that produces "0:320:32"
-            let vdur = '';
-            const timeOverlay = el.querySelector('ytd-thumbnail-overlay-time-status-renderer');
+            let videoDuration = '';
+            const timeOverlay = videoElement.querySelector('ytd-thumbnail-overlay-time-status-renderer');
             if (timeOverlay) {
                 // Try the innermost badge text span first
                 const badgeSpan = timeOverlay.querySelector(
@@ -207,46 +193,46 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
                     const collapsed = (badgeSpan.innerText || badgeSpan.textContent || '')
                         .replace(/\s+/g, '').trim();
                     const m = collapsed.match(/(\d{1,3}:\d{2}(?::\d{2})?)/);
-                    if (m) vdur = m[1];
+                    if (m) videoDuration = m[1];
                 }
                 // Layer 2: aria-label attribute (clean human-readable timestamp)
-                if (!vdur) {
+                if (!videoDuration) {
                     const ariaRaw = timeOverlay.getAttribute('aria-label') || '';
                     const m2 = ariaRaw.match(/(\d+:\d{2}(?::\d{2})?)/);
-                    if (m2) vdur = m2[1];
+                    if (m2) videoDuration = m2[1];
                 }
             }
 
             // Thumbnail
-            let vthumb = '';
-            const thumbImg = el.querySelector('ytd-thumbnail img, img#img');
+            let videoThumb = '';
+            const thumbImg = videoElement.querySelector('ytd-thumbnail img, img#img');
             if (thumbImg?.src && !thumbImg.src.includes('data:')) {
-                vthumb = thumbImg.src;
+                videoThumb = thumbImg.src;
             }
             // Fallback: build from video ID
-            if (!vthumb && vhref) {
-                const vidMatch = vhref.match(/[?&]v=([^&]+)/);
+            if (!videoThumb && videoUrl) {
+                const vidMatch = videoUrl.match(/[?&]v=([^&]+)/);
                 if (vidMatch) {
-                    vthumb = `https://i.ytimg.com/vi/${vidMatch[1]}/mqdefault.jpg`;
+                    videoThumb = `https://i.ytimg.com/vi/${vidMatch[1]}/mqdefault.jpg`;
                 }
             }
 
             // Index number
-            const vindex = el.querySelector(
+            const videoIndex = videoElement.querySelector(
                 '#index-container, .index-message-wrapper, yt-formatted-string#index'
             )?.textContent?.trim() || String(idx + 1);
 
             // Watched progress
-            const prog = el.querySelector(
-                'ytd-thumbnail-overlay-resume-playback-renderer #progress'
+            const prog = videoElement.querySelector(
+                window.YPP.CONSTANTS?.SELECTORS?.WATCHED_OVERLAY || 'ytd-thumbnail-overlay-resume-playback-renderer #progress'
             );
             const progressPct = prog
                 ? parseInt(prog.style.width, 10) || 0
                 : 0;
 
-            videos.push({ title: vtitle, href: vhref, channel: vchan,
-                          duration: vdur, thumb: vthumb,
-                          index: vindex, progress: progressPct });
+            videos.push({ title: videoTitle, href: videoUrl, channel: videoChannel,
+                          duration: videoDuration, thumb: videoThumb,
+                          index: videoIndex, progress: progressPct });
         });
 
         // ── Duration totals (from PlaylistDuration if available) ──
@@ -276,16 +262,18 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
     _build(header, videoEls) {
         const data = this._extractPlaylistData(header, videoEls);
 
+        const PLAYLIST = window.YPP.CONSTANTS?.SELECTORS?.PLAYLIST || {};
+        
         // Hide native playlist layout (not remove — YouTube needs it for data + navigation)
         // We hide via class so _reset() can restore them on disable/navigate-away
-        const nativeTargets = document.querySelectorAll(
-            'ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer, ' +
-            'ytd-browse[page-subtype="playlist"] #header, ' +
-            'ytd-browse[page-subtype="playlist"] ytd-playlist-header-renderer, ' +
-            'ytd-browse[page-subtype="playlist"] ytd-playlist-video-list-renderer, ' +
-            'ytd-browse[page-subtype="playlist"] #primary > ytd-section-list-renderer, ' +
-            'ytd-browse[page-subtype="playlist"] ytd-item-section-renderer'
-        );
+        const nativeTargets = document.querySelectorAll(`
+            ${PLAYLIST.TWO_COLUMN || 'ytd-browse[page-subtype="playlist"] ytd-two-column-browse-results-renderer'},
+            ${PLAYLIST.BROWSE || 'ytd-browse[page-subtype="playlist"]'} #header,
+            ${PLAYLIST.BROWSE || 'ytd-browse[page-subtype="playlist"]'} ${PLAYLIST.HEADER || 'ytd-playlist-header-renderer'},
+            ${PLAYLIST.BROWSE || 'ytd-browse[page-subtype="playlist"]'} ${PLAYLIST.VIDEO_LIST_RENDERER || 'ytd-playlist-video-list-renderer'},
+            ${PLAYLIST.SECTION_LIST || 'ytd-browse[page-subtype="playlist"] #primary > ytd-section-list-renderer'},
+            ${PLAYLIST.ITEM_SECTION || 'ytd-browse[page-subtype="playlist"] ytd-item-section-renderer'}
+        `);
         nativeTargets.forEach(el => el.classList.add('ypp-pl-hidden'));
 
         // Remove old container
@@ -310,8 +298,24 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
     // ─── HTML rendering ──────────────────────────────────────────────────────
 
     _renderHTML(data) {
-        const { title, owner, ownerHref, stats, coverUrl, videos, totalSecs } = data;
+        const { coverUrl } = data;
+        
+        const bgHTML = coverUrl
+            ? `<div class="ypp-pl-ambient-bg" style="background-image: url('${this._esc(coverUrl)}')"></div>
+               <div class="ypp-pl-ambient-overlay"></div>`
+            : '';
 
+        return `
+        ${bgHTML}
+        <div class="ypp-pl-layout">
+          ${this._renderSidebar(data)}
+          ${this._renderMain(data)}
+        </div>`;
+    }
+    
+    _renderSidebar(data) {
+        const { title, owner, ownerHref, stats, coverUrl, videos, totalSecs } = data;
+        
         const coverHTML = coverUrl
             ? `<img src="${this._esc(coverUrl)}" alt="${this._esc(title)}" class="ypp-pl-cover-img" loading="lazy">`
             : `<div class="ypp-pl-cover-placeholder">
@@ -326,21 +330,9 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             ? `<a class="ypp-pl-owner" href="${this._esc(ownerHref)}">${this._esc(owner)}</a>`
             : '';
 
-        // ── Duration card with speed breakdowns ──
         const durCard = this._renderDurationCard(totalSecs, videos.length);
-
-        // ── Video cards ──
-        const videoCards = videos.map((v, i) => this._renderVideoCard(v, i)).join('');
-
-        const bgHTML = coverUrl
-            ? `<div class="ypp-pl-ambient-bg" style="background-image: url('${this._esc(coverUrl)}')"></div>
-               <div class="ypp-pl-ambient-overlay"></div>`
-            : '';
-
+        
         return `
-        ${bgHTML}
-        <div class="ypp-pl-layout">
-
           <!-- ── Sidebar ── -->
           <aside class="ypp-pl-sidebar">
             <div class="ypp-pl-cover-wrap">
@@ -394,11 +386,16 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             </button>
 
             ${durCard}
-          </aside>
+          </aside>`;
+    }
+    
+    _renderMain(data) {
+        const { videos } = data;
+        const videoCards = videos.map((v, i) => this._renderVideoCard(v, i)).join('');
 
+        return `
           <!-- ── Video Grid ── -->
           <main class="ypp-pl-main">
-
             <!-- toolbar: count + column switcher + filter -->
             <div class="ypp-pl-toolbar">
               <span class="ypp-pl-count-label" id="ypp-pl-count">
@@ -441,10 +438,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             <div class="ypp-pl-grid ypp-pl-cols-2" id="ypp-pl-grid">
               ${videoCards}
             </div>
-
-          </main>
-
-        </div>`;
+          </main>`;
     }
 
     // ── Duration card (sidebar) ────────────────────────────────────────────

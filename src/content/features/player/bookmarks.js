@@ -1,0 +1,182 @@
+/**
+ * Bookmarks Manager
+ * Captures video timestamps and highlights
+ */
+window.YPP = window.YPP || {};
+window.YPP.features = window.YPP.features || {};
+
+window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP.features.BaseFeature {
+    getConfigKey() { return 'enableBookmarks'; }
+
+    constructor() {
+        super('BookmarksManager');
+        this._initConstants();
+        this._isActive = false;
+        this._captureBtn = null;
+    }
+
+    _initConstants() {
+        this._CONSTANTS = window.YPP.CONSTANTS || {};
+        this._SELECTORS = this._CONSTANTS.SELECTORS || {};
+    }
+
+    async enable() {
+        if (this._isActive) return;
+        this._isActive = true;
+        this.utils.log('Enabled BookmarksManager', 'BOOKMARKS');
+
+        this._startMonitoring();
+    }
+
+    async disable() {
+        this._isActive = false;
+        this._removeControls();
+        super.disable(); // Cleanup events via BaseFeature
+    }
+
+    async _startMonitoring() {
+        if (!this.utils.pollFor) return;
+
+        try {
+            // Wait for player controls
+            const controls = await this.utils.pollFor(() => document.querySelector(this._SELECTORS.VIDEO_CONTROLS), 10000, 500);
+            if (!this._isActive || !controls) return;
+            
+            this._injectControls();
+            
+            // Re-check on navigation
+            this.addListener(window, 'yt-navigate-finish', () => this._checkForPlayer());
+        } catch (error) {
+            this.utils.log('BookmarksManager timeout waiting for controls', 'BOOKMARKS', 'debug');
+        }
+    }
+
+    _checkForPlayer() {
+        if (!this._isActive) return;
+        if (window.YPP.DomAPI?.getVideoControls()) {
+            this._injectControls();
+        }
+    }
+
+    _injectControls() {
+        if (document.querySelector('.ypp-capture-btn')) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'ytp-button ypp-capture-btn';
+        btn.title = 'Capture Highlight (Bookmark)';
+        btn.setAttribute('aria-label', 'Capture Highlight');
+        // A simple bookmark/highlight icon SVG
+        btn.innerHTML = `<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><path d="M12 8v20l6-4 6 4V8z" fill="#fff"></path></svg>`;
+        
+        btn.style.opacity = '0.9';
+        btn.style.transition = 'opacity 0.2s';
+        
+        btn.addEventListener('mouseenter', () => btn.style.opacity = '1');
+        btn.addEventListener('mouseleave', () => btn.style.opacity = '0.9');
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._captureHighlight();
+        });
+
+        this._captureBtn = btn;
+
+        const component = {
+            id: 'bookmark-capture-btn',
+            el: btn
+        };
+
+        // Prepend to controls
+        if (window.YPP.ui && window.YPP.ui.mount) {
+            window.YPP.ui.mount('playerControls', component, 'prepend');
+        } else {
+            const controls = document.querySelector(this._SELECTORS.VIDEO_CONTROLS);
+            if (controls) {
+                controls.prepend(btn);
+            }
+        }
+    }
+
+    _removeControls() {
+        if (window.YPP.ui && window.YPP.ui.manager) {
+            window.YPP.ui.manager.remove('bookmark-capture-btn');
+        } else if (this._captureBtn && this._captureBtn.parentNode) {
+            this._captureBtn.parentNode.removeChild(this._captureBtn);
+        }
+        this._captureBtn = null;
+    }
+
+    async _captureHighlight() {
+        const video = window.YPP.DomAPI?.getVideoElement() || document.querySelector(this._SELECTORS.VIDEO);
+        if (!video) return;
+
+        const currentTime = video.currentTime;
+        const videoId = this.utils.getVideoId();
+        const title = this._getVideoTitle();
+        
+        // Extract caption text
+        let transcriptText = this._extractCaptionText();
+        if (!transcriptText) {
+            transcriptText = "No transcript captured (CC was off or unavailable).";
+        }
+
+        const newBookmark = {
+            id: 'bm_' + Date.now(),
+            videoId: videoId,
+            videoTitle: title,
+            timestamp: currentTime,
+            text: transcriptText,
+            createdAt: Date.now()
+        };
+
+        await this._saveBookmark(newBookmark);
+        this._showToast('Highlight captured!');
+    }
+
+    _getVideoTitle() {
+        let titleEl = null;
+        const selectors = this._SELECTORS.METADATA_SELECTORS?.TITLE || ['h1.ytd-watch-metadata', '#title h1'];
+        for (const selector of selectors) {
+            titleEl = document.querySelector(selector);
+            if (titleEl && titleEl.textContent) break;
+        }
+        return titleEl ? titleEl.textContent.trim() : 'Unknown Video';
+    }
+
+    _extractCaptionText() {
+        // Look for the currently active caption segments
+        const captionSelectors = this._SELECTORS.CAPTIONS_WINDOW || ['.ytp-caption-window-bottom', '.ytp-caption-window-top'];
+        let fullText = [];
+        
+        for (const selector of captionSelectors) {
+            const container = document.querySelector(selector);
+            if (container && container.style.display !== 'none') {
+                const segments = container.querySelectorAll('.ytp-caption-segment');
+                segments.forEach(seg => {
+                    const text = seg.textContent.trim();
+                    if (text) fullText.push(text);
+                });
+            }
+        }
+        
+        return fullText.join(' ');
+    }
+
+    async _saveBookmark(bookmark) {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(['ypp_bookmarks'], (result) => {
+                const bookmarks = result.ypp_bookmarks || [];
+                bookmarks.unshift(bookmark);
+                chrome.storage.local.set({ ypp_bookmarks: bookmarks }, () => {
+                    resolve();
+                });
+            });
+        });
+    }
+
+    _showToast(message) {
+        if (this.utils.createToast) {
+            this.utils.createToast(message);
+        }
+    }
+};

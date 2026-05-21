@@ -102,6 +102,10 @@ window.YPP.features.VideoFilters = class VideoFilters {
             document.removeEventListener('click', this._filterPanelOutsideHandler);
             this._filterPanelOutsideHandler = null;
         }
+        if (this._filterPanelResizeHandler) {
+            window.removeEventListener('resize', this._filterPanelResizeHandler);
+            this._filterPanelResizeHandler = null;
+        }
         this._previewFilterIndex = undefined; // always reset on close
     }
 

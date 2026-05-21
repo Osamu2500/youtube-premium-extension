@@ -5,7 +5,9 @@
     "description": "Enhance YouTube UI and add features globally.",
     "permissions": [
         "storage",
-        "alarms"
+        "alarms",
+        "unlimitedStorage",
+        "tabs"
     ],
     "host_permissions": [
         "*://www.youtube.com/*",

@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Feed & Home
         'hookFreeHome',
+        'cinematicMode',
         'hideMixes',
         'hideExploreTopics',
         'hideWatched', // Also in Search
@@ -1311,10 +1312,107 @@ document.addEventListener('DOMContentLoaded', () => {
         applyPresetFromUI({ minimalMode: true, enableFocusMode: false, cinemaMode: false, zenMode: false });
     });
 
+    // --- BOOKMARKS MANAGER ---
+    function initBookmarksManager() {
+        const listEl = document.getElementById('bookmarksList');
+        const searchInput = document.getElementById('bookmarkSearchInput');
+        if (!listEl) return;
+
+        let allBookmarks = [];
+
+        const renderBookmarks = (filter = '') => {
+            const filtered = allBookmarks.filter(b => 
+                (b.videoTitle || '').toLowerCase().includes(filter) ||
+                (b.text || '').toLowerCase().includes(filter)
+            );
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state" style="text-align:center; padding: 40px 20px; color:rgba(255,255,255,0.5);">
+                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px; height:48px; margin-bottom:10px; opacity:0.5; display: block; margin: 0 auto 10px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                       <div style="font-size:14px; font-weight:500;">No bookmarks found</div>
+                    </div>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            filtered.forEach(bm => {
+                const date = new Date(bm.createdAt).toLocaleDateString();
+                const card = document.createElement('div');
+                card.className = 'bookmark-card';
+                card.innerHTML = `
+                    <div class="bookmark-header">
+                        <div style="flex:1;">
+                            <div class="bookmark-title">${bm.videoTitle}</div>
+                            <span class="bookmark-time">${Utils.formatTime(bm.timestamp)}</span>
+                        </div>
+                        <button class="bookmark-delete" data-id="${bm.id}" title="Delete Bookmark">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                        </button>
+                    </div>
+                    <div class="bookmark-text">"${bm.text}"</div>
+                    <div class="bookmark-date">${date}</div>
+                `;
+
+                // Click card to open video at timestamp
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.bookmark-delete')) return;
+                    const url = `https://www.youtube.com/watch?v=${bm.videoId}&t=${Math.floor(bm.timestamp)}s`;
+                    chrome.tabs.create({ url });
+                });
+
+                // Delete button
+                const delBtn = card.querySelector('.bookmark-delete');
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete this bookmark?')) {
+                        allBookmarks = allBookmarks.filter(b => b.id !== bm.id);
+                        chrome.storage.local.set({ ypp_bookmarks: allBookmarks }, () => {
+                            renderBookmarks(searchInput ? searchInput.value.toLowerCase().trim() : '');
+                        });
+                    }
+                });
+
+                listEl.appendChild(card);
+            });
+        };
+
+        // Load bookmarks
+        const loadBookmarks = () => {
+            chrome.storage.local.get(['ypp_bookmarks'], (result) => {
+                allBookmarks = result.ypp_bookmarks || [];
+                renderBookmarks();
+            });
+        };
+
+        // Listen for tab switch to bookmarks
+        const tabs = document.querySelectorAll('.nav-item[data-tab]');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (tab.dataset.tab === 'bookmarks') {
+                    loadBookmarks();
+                }
+            });
+        });
+
+        // Search listener
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                renderBookmarks(e.target.value.toLowerCase().trim());
+            });
+        }
+
+        // Initial load if we start on bookmarks tab
+        if (document.getElementById('tab-bookmarks').classList.contains('active')) {
+            loadBookmarks();
+        }
+    }
+
     // Initialize
     loadSettings();
     // Sync cards after a short microtask delay to allow storage callback to fill values
     setTimeout(syncModeCards, 120);
     initHistoryWidget(); // Initialize history widget on load
     initBackupTools();
+    initBookmarksManager();
 });

@@ -212,6 +212,12 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
 
         if (!this._isValidPage(window.location.pathname)) return false;
 
+        // Skip layout manager entirely if cinematic mode is active
+        if (document.body.classList.contains('cinematic-home') || document.body.classList.contains('cinematic')) {
+            this._cleanup();
+            return false;
+        }
+
         const gridRenderer = document.querySelector(GridLayoutManager.SELECTORS.GRID_RENDERER);
         if (!gridRenderer) return false;
 
@@ -328,9 +334,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         // Clear processed containers
         this._processedContainers = new WeakSet();
 
-        // Remove applied classes
-        const containers = document.querySelectorAll('.ypp-grid-container');
-        containers.forEach(el => el.classList.remove('ypp-grid-container'));
+        // Remove applied classes and inline grid styles
+        const containers = document.querySelectorAll('.ypp-grid-container, #contents[data-ypp-cols]');
+        containers.forEach(el => {
+            el.classList.remove('ypp-grid-container');
+            el.removeAttribute('data-ypp-cols');
+            el.style.removeProperty('grid-template-columns');
+            el.style.removeProperty('grid-auto-flow');
+        });
         
         const items = document.querySelectorAll('.ypp-grid-item');
         items.forEach(el => el.classList.remove('ypp-grid-item'));

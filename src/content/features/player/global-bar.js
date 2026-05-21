@@ -21,7 +21,7 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             window.YPP.features.FilterPresets?.PRESETS || []
         );
 
-        this._repositionListener = () => this.ui.repositionAll();
+        this._repositionListener = () => this.ui.updatePosition();
     }
 
     update(settings) {
@@ -90,15 +90,15 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
         const videos = document.querySelectorAll('video');
         
         videos.forEach(video => {
-            if (this.ui.hasBar(video)) return;
+            if (this.ui.hasVideo(video)) return;
             
             // Wait for video to have layout dimensions
             if (video.offsetWidth > 0 && video.offsetHeight > 0) {
-                this.ui.attachBar(video);
+                this.ui.trackVideo(video);
             } else {
                 setTimeout(() => {
-                    if (video.isConnected && !this.ui.hasBar(video) && video.offsetWidth > 0) {
-                        this.ui.attachBar(video);
+                    if (video.isConnected && !this.ui.hasVideo(video) && video.offsetWidth > 0) {
+                        this.ui.trackVideo(video);
                     }
                 }, 2000);
             }

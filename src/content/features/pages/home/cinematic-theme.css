@@ -1,0 +1,994 @@
+/* ============================================================================
+** Core Variables and Root Settings
+============================================================================ */
+:root {
+  --netflix-red: #e50914;
+  --netflix-black: #141414;
+  --netflix-dark-gray: #181818;
+  --netflix-light-gray: #e5e5e5;
+}
+
+/* ============================================================================
+** Base Layout and Global Styles
+============================================================================ */
+
+body {
+  overflow: scroll !important;
+  opacity: 0;
+  -moz-animation: fadeIn 1s ease-in-out;
+  -webkit-animation: fadeIn 1s ease-in-out;
+  animation: fadeIn 1s ease-in-out;
+  -moz-animation-delay: 1s;
+  -webkit-animation-delay: 1s;
+  animation-delay: 1s;
+  -moz-animation-fill-mode: forwards;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+}
+
+body.cinematic-home {
+  overflow: hidden !important;
+  background: var(--netflix-black) !important;
+}
+
+body.cinematic-home ytd-page-manager.ytd-app {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 90vw !important;
+}
+
+/* Ensure header icons and text maintain dark mode appearance regardless of system theme */
+body.cinematic ytd-masthead #center *,
+body.cinematic ytd-masthead #end *,
+body.cinematic ytd-masthead #end yt-icon,
+body.cinematic ytd-masthead #end .yt-spec-icon-shape,
+body.cinematic ytd-masthead #end svg {
+  fill: #fff !important;
+  color: #fff !important;
+}
+
+body.cinematic
+  .yt-spec-button-shape-next--mono.yt-spec-button-shape-next--text {
+  color: #fff !important;
+}
+
+/* ============================================================================
+** Header and Navigation Styling
+============================================================================ */
+/* Main header styling */
+body.cinematic-home.yt-premium-plus-theme #masthead-container,
+body.cinematic-home #masthead-container,
+body.cinematic-home.yt-premium-plus-theme #masthead-container.ytd-app,
+body.cinematic-home #masthead-container.ytd-app,
+body.cinematic-home.yt-premium-plus-theme ytd-masthead,
+body.cinematic-home ytd-masthead,
+body.cinematic-home.yt-premium-plus-theme ytd-masthead::after,
+body.cinematic-home ytd-masthead::after,
+body.cinematic-home.yt-premium-plus-theme #background.ytd-masthead,
+body.cinematic-home #background.ytd-masthead {
+  background: transparent !important;
+  background-color: transparent !important;
+  --yt-spec-base-background: transparent !important;
+  --yt-spec-raised-background: transparent !important;
+  --yt-spec-menu-background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.cinematic-home.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer,
+body.cinematic-home ytd-feed-filter-chip-bar-renderer,
+body.cinematic-home.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer #chips-wrapper,
+body.cinematic-home ytd-feed-filter-chip-bar-renderer #chips-wrapper,
+body.cinematic-home.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer #scroll-container,
+body.cinematic-home ytd-feed-filter-chip-bar-renderer #scroll-container,
+body.cinematic-home.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer #right-arrow,
+body.cinematic-home ytd-feed-filter-chip-bar-renderer #right-arrow,
+body.cinematic-home.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer #left-arrow,
+body.cinematic-home ytd-feed-filter-chip-bar-renderer #left-arrow {
+  background: transparent !important;
+  background-color: transparent !important;
+  --yt-spec-base-background: transparent !important;
+  --yt-spec-raised-background: transparent !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+body.cinematic-home yt-chip-cloud-chip-renderer,
+body.cinematic-home .ypp-filter-chip {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+body.cinematic-home yt-chip-cloud-chip-renderer:hover,
+body.cinematic-home .ypp-filter-chip:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+body.cinematic-home yt-chip-cloud-chip-renderer[selected],
+body.cinematic-home .ypp-filter-chip.active {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+}
+body.cinematic-home yt-chip-cloud-chip-renderer[selected] *,
+body.cinematic-home .ypp-filter-chip.active * {
+  color: #000 !important;
+}
+
+/* Drawer Menu */
+body.cinematic-home #contentContainer.tp-yt-app-drawer {
+  -moz-animation: fadeIn 0.3s ease-in-out;
+  -webkit-animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
+  -moz-animation-delay: 1.5s;
+  -webkit-animation-delay: 1.5s;
+  animation-delay: 1.5s;
+  -moz-animation-fill-mode: forwards;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+
+  opacity: 0;
+}
+
+/* YouTube logo */
+body.cinematic-home ytd-masthead #logo-icon {
+  fill: var(--netflix-red) !important;
+}
+
+/* Make the background dark Netflix style */
+body.cinematic-home html[dark] {
+  background: var(--netflix-black) !important;
+}
+
+/* ============================================================================
+** Hero Section Styling
+============================================================================ */
+body.cinematic-home .netflix-hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70vh;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
+body.cinematic-home ytd-miniplayer[is-watch-page] ~ * .netflix-hero {
+  display: none !important;
+}
+
+/* Hero Video Container and Inner Elements */
+body.cinematic-home .netflix-hero ytd-video-preview,
+body.cinematic-home .netflix-hero ytd-video-preview #video-preview-container,
+body.cinematic-home .netflix-hero ytd-video-preview #player-container,
+body.cinematic-home .netflix-hero ytd-video-preview ytd-player,
+body.cinematic-home .netflix-hero ytd-video-preview #container.ytd-player,
+body.cinematic-home .netflix-hero ytd-video-preview .html5-video-player,
+body.cinematic-home .netflix-hero ytd-video-preview #movie_player,
+body.cinematic-home .netflix-hero ytd-video-preview .html5-video-container,
+body.cinematic-home .netflix-hero ytd-video-preview video {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  --ytd-video-preview-width: 100vw !important;
+  --ytd-video-preview-height: 70vh !important;
+  --ytd-inline-preview-player-width: 100vw !important;
+  --ytd-inline-preview-player-height: 70vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  border-radius: 0 !important;
+}
+
+body.cinematic-home .netflix-hero ytd-video-preview video {
+  object-fit: cover !important;
+  z-index: 0 !important;
+}
+
+body.cinematic-home .netflix-hero ytd-video-preview {
+  pointer-events: none !important;
+}
+
+/* Hero Content Overlay */
+body.cinematic-home .netflix-hero-content {
+  position: absolute;
+  bottom: 20vh;
+  left: 5%;
+  color: white;
+  z-index: 3 !important;
+  max-width: 45%;
+  pointer-events: auto !important;
+  transition: opacity 1.5s ease-in-out !important;
+  -moz-animation: fadeIn 1.5s ease-in-out !important;
+  -webkit-animation: fadeIn 1.5s ease-in-out !important;
+  animation: fadeIn 1.5s ease-in-out !important;
+  transition: opacity 1.5s ease-in-out !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@-moz-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hero Gradient Overlay */
+body.cinematic-home .netflix-hero-gradient {
+  position: absolute;
+  bottom: -120px;
+  left: 0;
+  right: 0;
+  height: 85vh;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    transparent 10%,
+    transparent 70%,
+    rgba(15, 15, 15, 0.4) 85%,
+    rgb(15, 15, 15) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ============================================================================
+** Hero Content Typography and Layout
+============================================================================ */
+body.cinematic-home .netflix-hero-content h1 {
+  font-size: 5em !important;
+  margin-bottom: 2rem !important;
+  max-width: 780px !important;
+}
+
+/* Channel Info Section */
+body.cinematic-home .netflix-hero-content .channel-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 1.5rem !important;
+}
+
+body.cinematic-home .netflix-hero-content .channel-info h2 {
+  font-size: 1.5em !important;
+  font-weight: normal !important;
+  max-width: 780px !important;
+}
+
+body.cinematic-home .netflix-hero-content .channel-info .channel-avatar {
+  border-radius: 100% !important;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  width: 40px !important;
+}
+
+/* ============================================================================
+** Recently Added Badge
+============================================================================ */
+
+body.cinematic .recently-badge-container {
+  position: absolute;
+  top: -17px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 8px;
+}
+
+body.cinematic .recently-badge {
+  background-color: #e50914;
+  color: white;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 500;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+}
+
+body.cinematic .netflix-hero-content .recently-badge {
+  margin-bottom: 14px;
+  display: inline-block;
+}
+
+/* ============================================================================
+** Button Styles
+============================================================================ */
+body.cinematic-home .netflix-hero-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+body.cinematic-home .netflix-hero-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8em 2em;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.5em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+body.cinematic-home .netflix-hero-buttons button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Button Variants */
+body.cinematic-home .netflix-hero-buttons .netflix-unmute-button {
+  background: white;
+  color: black;
+  display: flex;
+  opacity: 0;
+  /* transition: opacity 0.5s ease-in-out !important; */
+}
+
+/* body.cinematic-home.yes-mute-button .netflix-hero-buttons .netflix-unmute-button {
+  opacity: 1;
+} */
+
+body.cinematic-home .netflix-unmute-button:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+body.cinematic-home .netflix-hero-buttons .secondary {
+  background-color: rgba(109, 109, 110, 0.7);
+  color: white;
+}
+
+body.cinematic-home .netflix-hero-buttons .secondary:hover {
+  background-color: rgba(109, 109, 110, 0.4);
+}
+
+/* ============================================================================
+** Hero Navigation
+============================================================================ */
+body.cinematic-home .netflix-hero-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  pointer-events: none;
+}
+
+body.cinematic-home .netflix-nav-button {
+  position: relative;
+  top: -80px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease-in-out;
+  pointer-events: auto;
+  opacity: 0.15;
+}
+
+body.cinematic-home .netflix-nav-button:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: white;
+  color: black;
+  transform: scale(1.1);
+}
+
+body.cinematic-home .netflix-nav-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Fade animation for navigation buttons */
+@keyframes fadeInNav {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+body.cinematic-home .netflix-nav-button {
+  animation: fadeInNav 0.3s ease;
+}
+
+/* ============================================================================
+** Filter Chips Styling
+============================================================================ */
+body.cinematic-home #chips-wrapper {
+  border-radius: 15px !important;
+  overflow: hidden !important;
+}
+
+/* Only move the outermost header container. Do not apply fixed to children to avoid stacking offsets. */
+body.cinematic-home ytd-rich-grid-renderer > #header {
+  position: fixed !important;
+  bottom: 300px !important; /* sits exactly above the 300px tall row container */
+  top: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2000 !important;
+  margin-bottom: 0 !important;
+  padding: 10px 24px !important;
+  background: transparent !important;
+  transform: none !important;
+  max-width: 100vw !important;
+}
+
+body.cinematic-home ytd-feed-filter-chip-bar-renderer,
+body.cinematic-home ytd-feed-filter-chip-bar-renderer #chips-wrapper {
+  position: static !important;
+  transform: none !important;
+}
+
+body.cinematic-home yt-chip-cloud-chip-renderer {
+  transition: font-size 0.2s ease-in-out;
+  background-color: transparent !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  padding-bottom: 1.5rem !important;
+  margin-bottom: -1rem !important;
+}
+
+body.cinematic-home #chips-wrapper.ytd-feed-filter-chip-bar-renderer {
+  justify-content: flex-start !important;
+}
+
+body.cinematic-home yt-chip-cloud-chip-renderer:hover {
+  font-size: 2.5rem;
+}
+
+body.cinematic-home yt-chip-cloud-chip-renderer.iron-selected {
+  font-size: 2.5rem;
+  color: white !important;
+}
+
+body.cinematic-home yt-chip-cloud-chip-renderer yt-formatted-string {
+  padding: 3rem 0 !important;
+}
+
+/* ============================================================================
+** Grid and Content Layout
+============================================================================ */
+body.cinematic-home ytd-browse:has(ytd-thumbnail) {
+  padding: 0 !important;
+  position: static !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 999 !important;
+  max-width: 100vw !important;
+}
+
+body.cinematic-home ytd-rich-grid-renderer {
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9 !important;
+  pointer-events: none !important; /* let clicks pass through the background */
+}
+
+/* Re-enable pointer events for actual content rows so cards are clickable */
+body.cinematic-home ytd-rich-grid-renderer > * {
+  pointer-events: auto !important;
+}
+
+/* body.cinematic-home ytd-rich-grid-media {
+  margin-bottom: -80px !important;
+} */
+
+body.cinematic-home #contents:has(ytd-rich-item-renderer):last-child {
+  margin-right: 5000px !important;
+}
+
+body.cinematic-home
+  #contents:has(ytd-rich-item-renderer):not(
+    :has(ytd-background-promo-renderer)
+  ) {
+  z-index: 9 !important;
+  /* Use absolute instead of fixed to avoid creating a small containing block for the hero video */
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  /* Height: card (260px) + details peek (~40px) + padding + scrollbar room */
+  height: 300px !important;
+  padding-left: 24px !important;
+  padding-bottom: 16px !important;
+  padding-top: 16px !important;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(122, 122, 122, 0.15) transparent;
+  /* Hide default scrollbar in IE/Edge */
+  -ms-overflow-style: none;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  gap: 20px !important;
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+  /* Subtle background fade so cards sit over the hero naturally */
+  background: linear-gradient(to top, rgba(15,15,15,0.98) 60%, transparent 100%) !important;
+}
+
+/* Add fade gradients */
+body.cinematic-home #contents:has(ytd-rich-item-renderer)::before,
+body.cinematic-home #contents:has(ytd-rich-item-renderer)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+body.cinematic-home #contents:has(ytd-rich-item-renderer)::before {
+  left: 0;
+  background: linear-gradient(to right, #0f0f0f, transparent);
+}
+
+body.cinematic-home #contents:has(ytd-rich-item-renderer)::after {
+  right: 0;
+  background: linear-gradient(to left, #0f0f0f, transparent);
+}
+
+body.cinematic-home
+  #contents:has(ytd-rich-item-renderer):has(ytd-feed-nudge-renderer) {
+  flex-direction: column !important;
+}
+
+/* Hide paid content overlay and CC */
+body.cinematic-home ytp-paid-content-overlay,
+body.cinematic-home .ytp-paid-content-overlay,
+body.cinematic-home ytp-caption-window-container,
+body.cinematic-home .caption-window,
+body.cinematic-home #masthead-ad,
+body.cinematic ytd-ad-slot-renderer,
+body.cinematic-home .ytp-paid-content-overlay-link,
+body.cinematic tp-yt-paper-dialog:has(yt-mealbar-promo-renderer),
+body.cinematic #player-ads,
+body.cinematic .ytp-ad-overlay-slot,
+body.cinematic ytd-page-top-ad-layout-renderer,
+body.cinematic-home
+  ytd-rich-item-renderer:has(yt-collection-thumbnail-view-model),
+body.cinematic-home ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+body.cinematic-home ytd-rich-item-renderer:has(ytd-rich-shelf-renderer),
+body.cinematic
+  ytd-engagement-panel-section-list-renderer[target-id='engagement-panel-ads'] {
+  display: none !important;
+}
+
+/* Webkit/Blink Scrollbar Styling (Chrome, Safari, Edge Chromium) */
+/* cinematic Home Scrollbar */
+body.cinematic-home #contents::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+body.cinematic-home #contents::-webkit-scrollbar-track {
+  background: transparent;
+  border: none;
+}
+
+body.cinematic-home #contents::-webkit-scrollbar-thumb {
+  background-color: rgba(122, 122, 122, 0.15);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  /* Minimum height for the thumb */
+  min-height: 40px;
+}
+
+body.cinematic-home #contents::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(122, 122, 122, 0.3);
+}
+
+body.cinematic-home #contents::-webkit-scrollbar-button {
+  display: none;
+}
+
+body.cinematic-home #contents::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ============================================================================
+** Thumbnail and Video Item Styling
+============================================================================ */
+body.cinematic-home ytd-rich-item-renderer {
+  height: 260px !important;
+  width: 280px !important;
+  flex: 0 0 280px !important;
+  aspect-ratio: unset !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  margin-bottom: 0 !important;
+  overflow: visible !important;
+}
+
+body.cinematic-home ytd-rich-item-renderer ytd-thumbnail {
+  border: 2px solid transparent;
+  transition:
+    top 0.2s ease-in-out,
+    scale 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
+  scale: 0.95 !important;
+  position: relative !important;
+  top: 0px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+body.cinematic-home ytd-rich-item-renderer:hover ytd-thumbnail {
+  scale: 0.85 !important;
+  top: -20px !important;
+  opacity: 0.6 !important;
+}
+
+body.cinematic-home .netflix-active-preview ytd-thumbnail {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+  transition:
+    box-shadow 0.3s ease-in-out,
+    border-color 0.3s ease-in-out,
+    top 0.2s ease-in-out,
+    scale 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+}
+
+body.cinematic-home #contents:has(ytd-rich-item-renderer:hover) ytd-thumbnail {
+  box-shadow: none;
+  border-color: transparent !important;
+  animation: none;
+}
+
+/* Video Details Styling */
+body.cinematic-home ytd-rich-grid-media #details {
+  padding: 1rem !important;
+  background: var(--netflix-dark-gray) !important;
+  border-radius: 4px !important;
+  margin-top: -4px !important;
+  transition: all 0.2s ease-in-out !important;
+  opacity: 0 !important;
+  top: -50px !important;
+}
+
+body.cinematic-home ytd-rich-grid-media:hover #details {
+  opacity: 1 !important;
+  top: -80px !important;
+}
+
+body.cinematic-home ytd-rich-grid-media #details #channel-name {
+  opacity: 0.7 !important;
+}
+
+/* ============================================================================
+** UI Element Modifications and Hiding
+============================================================================ */
+/* Hide YouTube's default UI elements */
+body.cinematic-home .ytp-gradient-top,
+body.cinematic-home .ytp-gradient-bottom,
+body.cinematic-home .ytp-chrome-top,
+body.cinematic-home .ytp-chrome-bottom,
+body.cinematic-home ytd-mini-guide-renderer,
+body.cinematic-home yt-closed-captions-toggle-button,
+body.cinematic-home .YtInlinePlayerControlsTopRightControls,
+body.cinematic-home .YtInlinePlayerControlsTopLeftControls,
+body.cinematic-home yt-progress-bar,
+body.cinematic-home ytd-rich-shelf-renderer[is-shorts],
+body.cinematic-home ytd-rich-shelf-renderer:has(ytd-statement-banner-renderer),
+body.cinematic-home #rich-shelf-header {
+  display: none !important;
+}
+
+/* Position fix for rich section renderer */
+body.cinematic-home
+  ytd-rich-section-renderer:not(:has(ytd-feed-nudge-renderer)) {
+  position: fixed !important;
+  left: -999999999999px !important;
+}
+
+/* ============================================================================
+** Ad Overlay Styling
+============================================================================ */
+body.cinematic .ad-skipper-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+}
+
+body.cinematic .ad-skipper-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+** Animation and Transition States
+============================================================================ */
+/* Hero Video Animation */
+@keyframes heroKenBurns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+/* Apply animation to hero video */
+body.cinematic-home .netflix-hero ytd-video-preview video,
+body.cinematic-home #video-preview-container.ytd-video-preview video,
+body.cinematic-home .netflix-hero #media-container video {
+  animation: heroKenBurns 9s ease-in-out forwards;
+  transform-origin: center center;
+  width: 100vw !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* Fade States */
+body.cinematic-home .netflix-hero.fading ytd-video-preview,
+body.cinematic-home .netflix-hero.fading .netflix-hero-content {
+  opacity: 0 !important;
+  transition: opacity 1.5s ease-in-out !important;
+}
+
+/* Force show preview elements */
+body.cinematic-home .netflix-hero ytd-video-preview * {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.cinematic-home .netflix-hero ytd-video-preview {
+  transition: opacity 1.5s ease-in-out !important;
+}
+
+/* ============================================================================
+** Media Queries (Reverse Breakpoints)
+============================================================================ */
+/* Extra Large (xl) - 1280px and down */
+@media (max-width: 1280px) {
+  /* xl breakpoint styles */
+  body.cinematic-home .netflix-hero-content h1 {
+    font-size: 4em !important;
+    margin-bottom: 2rem !important;
+    max-width: 700px !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info h2 {
+    max-width: 700px !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info .channel-avatar {
+    width: 40px !important;
+  }
+
+  body.cinematic-home .netflix-hero-buttons button {
+    font-size: 1.45em !important;
+    padding: 0.8em 1.7em !important;
+  }
+
+  body.cinematic-home .netflix-hero-nav {
+    display: none !important;
+  }
+}
+
+/* Large (lg) - 1024px and down */
+@media (max-width: 1024px) {
+  /* lg breakpoint styles */
+  body.cinematic-home .netflix-hero-content h1 {
+    font-size: 3.5em !important;
+    margin-bottom: 2rem !important;
+    max-width: 600px !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info h2 {
+    max-width: 600px !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info .channel-avatar {
+    width: 40px !important;
+  }
+
+  body.cinematic-home .netflix-hero-buttons button {
+    font-size: 1.4em !important;
+    padding: 0.7em 1.6em !important;
+  }
+}
+
+/* Medium (md) - 768px and down */
+@media (max-width: 768px) {
+  /* md breakpoint styles */
+  body.cinematic-home .netflix-hero-content h1 {
+    font-size: 3em !important;
+    margin-bottom: 2rem !important;
+    max-width: 98% !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info h2 {
+    max-width: 98% !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info .channel-avatar {
+    width: 40px !important;
+  }
+
+  body.cinematic-home .netflix-hero-buttons button {
+    font-size: 1.3em !important;
+    padding: 0.8em 1.6em !important;
+  }
+}
+
+/* Small (sm) - 640px and down */
+@media (max-width: 640px) {
+  body.cinematic-home .netflix-hero-content h1 {
+    font-size: 2.5em !important;
+    margin-bottom: 2rem !important;
+    max-width: 98% !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info h2 {
+    max-width: 98% !important;
+  }
+
+  body.cinematic-home .netflix-hero-content .channel-info .channel-avatar {
+    width: 30px !important;
+  }
+
+  body.cinematic-home .netflix-hero-buttons button {
+    font-size: 1.3em !important;
+    padding: 0.6em 1.5em !important;
+  }
+}
+
+/* ============================================================================
+** Conflict Resolution: Override YPP theme styles that break cinematic layout
+** These !important overrides from body.yt-premium-plus-theme in styles.css
+** conflict with cinematic mode's horizontal flex layout. We win them back here
+** by adding body.cinematic-home to the specificity chain.
+============================================================================ */
+
+/* Restore ytd-rich-item-renderer to cinematic dimensions —
+   the YPP theme forces flex-direction:column + overflow:hidden + height:100%
+   which collapses cards into thin strips when cinematic's flex row takes over. */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer,
+body.cinematic-home ytd-rich-item-renderer {
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  height: 260px !important;
+  aspect-ratio: unset !important;
+  margin: 0 !important;
+  flex: 0 0 280px !important;
+  align-self: auto !important;
+  display: block !important;
+  flex-direction: unset !important;
+  justify-content: unset !important;
+  overflow: visible !important;
+  isolation: auto !important;
+  contain: none !important;
+  transform: none !important;
+  position: relative !important;
+}
+
+/* Restore thumbnail so it renders as a full square, not a collapsed strip */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer ytd-thumbnail,
+body.cinematic-home ytd-rich-item-renderer ytd-thumbnail {
+  width: 100% !important;
+  aspect-ratio: unset !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  background-color: transparent !important;
+}
+
+/* Restore rich-grid-media child container */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer ytd-rich-grid-media,
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer ytd-video-renderer {
+  height: auto !important;
+  flex: none !important;
+  flex-direction: unset !important;
+}
+
+/* Kill the YPP grid variables that fight cinematic's flex row */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer {
+  --ytd-rich-grid-items-per-row: unset !important;
+  --ytd-rich-grid-posts-per-row: unset !important;
+}
+
+/* Suppress the YPP hover lift on cinematic cards — cinematic has its own hover */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer:hover {
+  transform: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Prevent the YPP grid container from fighting cinematic's flex row */
+body.cinematic-home #contents.ypp-grid-container,
+body.cinematic-home #contents[data-ypp-cols] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  grid-template-columns: unset !important;
+  grid-auto-flow: unset !important;
+}
+
+/* Prevent ytd-rich-section-renderer from spanning the whole "grid" in cinematic */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-section-renderer {
+  grid-column: unset !important;
+  width: auto !important;
+}

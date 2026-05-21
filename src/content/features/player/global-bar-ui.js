@@ -2,6 +2,7 @@
  * Global Bar UI
  * Owns: Generating the custom player bar DOM, injecting it over arbitrary <video>
  * tags on external sites, and handling local playback/speed/filter state.
+ * Refactored to 1:N architecture (one bar controls ALL tracked videos on the page).
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
@@ -9,19 +10,83 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.GlobalBarUI = class GlobalBarUI {
 
     constructor(filters) {
-        this.activeBars = new Map(); // videoElement -> barElement
+        this.trackedVideos = new Set();
         this.filters = filters || window.YPP.features.FilterPresets?.PRESETS || [];
         this.settings = {};
+        
+        this.barElement = null;
+        this._abortController = null;
+        this._boundUpdateUIState = this.updateUIState.bind(this);
     }
 
     updateSettings(settings) {
         this.settings = settings;
-        this.repositionAll();
+        this.updatePosition();
     }
 
-    /** Attach a global player bar to a specific video element. */
-    attachBar(video) {
-        window.YPP.Utils?.log('Attaching global bar to video', 'GlobalBarUI', 'debug');
+    /** Add a video to the tracked set and create the bar if needed. */
+    trackVideo(video) {
+        if (this.trackedVideos.has(video)) return;
+        
+        window.YPP.Utils?.log('Tracking new video for global bar', 'GlobalBarUI', 'debug');
+        
+        this.trackedVideos.add(video);
+
+        // Auto-remove when video disconnects
+        const disconnectObserver = new MutationObserver(() => {
+            if (!video.isConnected) {
+                disconnectObserver.disconnect();
+                this._untrackVideo(video);
+            }
+        });
+        const observeTarget = video.parentElement || document.body;
+        disconnectObserver.observe(observeTarget, { childList: true, subtree: true });
+        video._yppDisconnectObserver = disconnectObserver;
+
+        // Bind events
+        video.addEventListener('play', this._boundUpdateUIState);
+        video.addEventListener('pause', this._boundUpdateUIState);
+        video.addEventListener('volumechange', this._boundUpdateUIState);
+        video.addEventListener('ratechange', this._boundUpdateUIState);
+        video.addEventListener('timeupdate', this._boundUpdateUIState);
+
+        if (!this.barElement) {
+            this.createBar();
+        } else {
+            this.updateUIState();
+        }
+    }
+
+    _untrackVideo(video) {
+        this.trackedVideos.delete(video);
+        
+        if (video._yppDisconnectObserver) {
+            video._yppDisconnectObserver.disconnect();
+            delete video._yppDisconnectObserver;
+        }
+
+        video.removeEventListener('play', this._boundUpdateUIState);
+        video.removeEventListener('pause', this._boundUpdateUIState);
+        video.removeEventListener('volumechange', this._boundUpdateUIState);
+        video.removeEventListener('ratechange', this._boundUpdateUIState);
+        video.removeEventListener('timeupdate', this._boundUpdateUIState);
+
+        if (this.trackedVideos.size === 0) {
+            this.removeBar();
+        } else {
+            this.updateUIState();
+        }
+    }
+
+    hasVideo(video) {
+        return this.trackedVideos.has(video);
+    }
+
+    /** Create the singular global player bar DOM */
+    createBar() {
+        if (this.barElement) return;
+
+        window.YPP.Utils?.log('Creating singular global player bar', 'GlobalBarUI', 'debug');
 
         const bar = document.createElement('div');
         bar.className = 'ypp-global-player-bar ypp-glass-panel';
@@ -43,13 +108,13 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
 
         bar.innerHTML = `
             <div class="ypp-gpb-controls">
-                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-play" title="Play / Pause">
+                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-play" title="Play / Pause All">
                     ${ICONS.play}
                 </button>
                 <div class="ypp-gpb-divider"></div>
                 <div id="ypp-gpb-time" class="ypp-gpb-time" title="Current Time">0:00</div>
                 <div class="ypp-gpb-divider"></div>
-                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-mute" title="Mute / Unmute">
+                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-mute" title="Mute / Unmute All">
                     ${ICONS.volumeHigh}
                 </button>
                 <div id="ypp-gpb-vol-wrap" class="ypp-gpb-vol-wrap" title="Volume">
@@ -60,7 +125,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 <div class="ypp-gpb-divider"></div>
                 <div id="ypp-gpb-features-container"></div>
                 <div class="ypp-gpb-divider"></div>
-                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-loop" title="Toggle Loop">
+                <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-loop" title="Toggle Loop All">
                     ${ICONS.loop}
                 </button>
                 <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-pip" title="Picture-in-Picture">
@@ -76,7 +141,9 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             </div>
         `;
 
-        this.updateBarPosition(video, bar);
+        this.barElement = bar;
+        this.ICONS = ICONS;
+        this.updatePosition();
         
         let targetContainer = document.body;
         try {
@@ -97,40 +164,37 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         if ('popover' in bar) {
             try { bar.showPopover(); } catch (e) {}
         }
-        this.activeBars.set(video, bar);
 
-        // AbortController lets us cancel ALL event listeners in one call on cleanup
-        const ac = new AbortController();
-        bar._abortController = ac;
-        this._bindEvents(video, bar, ICONS, ac.signal);
+        this._abortController = new AbortController();
+        this._bindEvents(this._abortController.signal);
+        
+        // Initial state sync
+        this.updateUIState();
     }
 
-    /** Remove all injected bars and clear the map. */
+    /** Remove the global bar and clear tracked videos. */
     removeAll() {
-        this.activeBars.forEach((bar) => {
-            bar._disconnectObserver?.disconnect();
-            bar._abortController?.abort(); // cancels all video + document listeners
-            bar.remove();
-        });
-        this.activeBars.clear();
+        this.trackedVideos.forEach(v => this._untrackVideo(v));
+        this.removeBar();
+    }
+    
+    removeBar() {
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
+        if (this.barElement) {
+            this.barElement.remove();
+            this.barElement = null;
+        }
     }
 
-    /** Given a video element, returns true if it currently has a bar attached. */
-    hasBar(video) {
-        return this.activeBars.has(video);
-    }
-
-    /** Re-calculates and applies absolute positioning for all active bars. */
-    repositionAll() {
-        this.activeBars.forEach((bar, video) => this.updateBarPosition(video, bar));
-    }
-
-    /** Position a single bar on the right edge of the screen. */
-    updateBarPosition(video, bar) {
-        let activeIndex = Array.from(this.activeBars.keys()).indexOf(video);
-        if (activeIndex === -1) activeIndex = this.activeBars.size;
+    /** Position the singular bar. */
+    updatePosition() {
+        if (!this.barElement) return;
 
         const pos = this.settings.globalPlayerBarPosition || 'right';
+        const bar = this.barElement;
         
         bar.classList.remove('ypp-bar-pos-right', 'ypp-bar-pos-left', 'ypp-bar-pos-top');
         bar.classList.add(`ypp-bar-pos-${pos}`);
@@ -138,20 +202,19 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         if (pos === 'top') {
             Object.assign(bar.style, {
                 position: 'fixed',
-                top: `${16 + (activeIndex * 60)}px`,
+                top: '16px',
                 bottom: 'auto',
                 left: '50%',
                 right: 'auto',
                 zIndex: '2147483647',
                 display: 'flex',
                 visibility: 'visible',
-                // transform is handled by CSS for animation/hover
                 transform: ''
             });
         } else if (pos === 'left') {
             Object.assign(bar.style, {
                 position: 'fixed',
-                left: `${16 + (activeIndex * 60)}px`,
+                left: '16px',
                 right: 'auto',
                 top: '50%',
                 bottom: 'auto',
@@ -163,7 +226,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         } else {
             Object.assign(bar.style, {
                 position: 'fixed',
-                right: `${16 + (activeIndex * 60)}px`,
+                right: '16px',
                 left: 'auto',
                 top: '50%',
                 bottom: 'auto',
@@ -176,16 +239,118 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     }
 
     // =========================================================================
+    // UI SYNC
+    // =========================================================================
+
+    /** 
+     * Get the "primary" video to reflect in the UI and apply targeted actions (Play/PiP).
+     * Prefers the video taking up the most vertical space in the viewport.
+     * If none are visible, returns the first tracked video.
+     */
+    _getPrimaryVideo() {
+        if (this.trackedVideos.size === 0) return null;
+        
+        let bestVideo = null;
+        let maxVisibleHeight = 0;
+        
+        for (const v of this.trackedVideos) {
+            const rect = v.getBoundingClientRect();
+            // Visible height logic:
+            const visibleTop = Math.max(0, rect.top);
+            const visibleBottom = Math.min(window.innerHeight || document.documentElement.clientHeight, rect.bottom);
+            const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+            
+            if (visibleHeight > maxVisibleHeight) {
+                maxVisibleHeight = visibleHeight;
+                bestVideo = v;
+            }
+        }
+        
+        return bestVideo || this.trackedVideos.values().next().value;
+    }
+
+    /** Updates the bar's UI to reflect the primary video's state. */
+    updateUIState() {
+        if (!this.barElement) return;
+        
+        const primary = this._getPrimaryVideo();
+        if (!primary) return;
+
+        // Volume is synced across all, but we check if all are muted
+        let isAllMuted = true;
+        for (const v of this.trackedVideos) {
+            if (!v.muted && v.volume > 0) isAllMuted = false;
+        }
+
+        // Play/Pause reflects primary video
+        const playBtn = this.barElement.querySelector('#ypp-gpb-play');
+        if (playBtn) {
+            playBtn.innerHTML = !primary.paused ? this.ICONS.pause : this.ICONS.play;
+        }
+
+        // Mute & Volume
+        const muteBtn = this.barElement.querySelector('#ypp-gpb-mute');
+        const volSlider = this.barElement.querySelector('#ypp-gpb-vol');
+        if (muteBtn && volSlider) {
+            muteBtn.innerHTML = isAllMuted ? this.ICONS.mute : this.ICONS.volumeHigh;
+            muteBtn.classList.toggle('active', isAllMuted);
+            // Use primary video's volume for the slider
+            volSlider.value = primary.muted ? 0 : primary.volume;
+        }
+
+        // Time
+        const timeEl = this.barElement.querySelector('#ypp-gpb-time');
+        if (timeEl) {
+            const formatTime = (s) => {
+                const m = Math.floor(s / 60);
+                const sec = Math.floor(s % 60).toString().padStart(2, '0');
+                return `${m}:${sec}`;
+            };
+            timeEl.textContent = primary.duration
+                ? `${formatTime(primary.currentTime)} / ${formatTime(primary.duration)}`
+                : formatTime(primary.currentTime);
+        }
+
+        // Loop reflects primary video
+        const loopBtn = this.barElement.querySelector('#ypp-gpb-loop');
+        if (loopBtn) {
+            loopBtn.classList.toggle('active', primary.loop);
+            loopBtn.style.opacity = primary.loop ? '1' : '0.5';
+        }
+
+        // Speed
+        const speedInput = this.barElement.querySelector('.ypp-gpb-speed-input');
+        if (speedInput && document.activeElement !== speedInput) {
+            speedInput.value = primary.playbackRate.toFixed(1);
+        }
+
+        // Fullscreen
+        const fullscreenBtn = this.barElement.querySelector('#ypp-gpb-fullscreen');
+        if (fullscreenBtn) {
+            let isFs = false;
+            for (const v of this.trackedVideos) {
+                if (document.fullscreenElement === v) {
+                    isFs = true;
+                    break;
+                }
+            }
+            fullscreenBtn.innerHTML = isFs
+                ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`
+                : this.ICONS.fullscreen;
+        }
+    }
+
+    // =========================================================================
     // EVENT BINDINGS
     // =========================================================================
 
-    _bindEvents(video, bar, ICONS, signal) {
-        const opts = { signal }; // all listeners share the same abort signal
+    _bindEvents(signal) {
+        const opts = { signal };
+        const bar = this.barElement;
 
         const playBtn       = bar.querySelector('#ypp-gpb-play');
         const muteBtn       = bar.querySelector('#ypp-gpb-mute');
         const volSlider     = bar.querySelector('#ypp-gpb-vol');
-        const timeEl        = bar.querySelector('#ypp-gpb-time');
         const loopBtn       = bar.querySelector('#ypp-gpb-loop');
         const pipBtn        = bar.querySelector('#ypp-gpb-pip');
         const fullscreenBtn = bar.querySelector('#ypp-gpb-fullscreen');
@@ -194,62 +359,61 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         const featsCont     = bar.querySelector('#ypp-gpb-features-container');
 
         // ── Play/Pause ──
-        const updatePlayIcon = () => {
-            playBtn.innerHTML = video.paused ? ICONS.play : ICONS.pause;
+        playBtn.onclick = (e) => { 
+            e.stopPropagation(); 
+            const primary = this._getPrimaryVideo();
+            if (!primary) return;
+            
+            if (primary.paused) {
+                primary.play().catch(err => window.YPP.Utils?.log('Play prevented: ' + err.message, 'GlobalBarUI', 'debug'));
+            } else {
+                primary.pause();
+            }
+            this.updateUIState();
         };
-        playBtn.onclick = (e) => { e.stopPropagation(); video.paused ? video.play() : video.pause(); };
-        video.addEventListener('play',  updatePlayIcon, opts);
-        video.addEventListener('pause', updatePlayIcon, opts);
-        updatePlayIcon();
 
         // ── Mute ──
-        const updateMuteIcon = () => {
-            muteBtn.innerHTML = video.muted ? ICONS.mute : ICONS.volumeHigh;
-            muteBtn.classList.toggle('active', video.muted);
-            volSlider.value = video.muted ? 0 : video.volume;
+        muteBtn.onclick = (e) => { 
+            e.stopPropagation();
+            let isAllMuted = true;
+            for (const v of this.trackedVideos) {
+                if (!v.muted && v.volume > 0) isAllMuted = false;
+            }
+            // Toggle state for all
+            for (const v of this.trackedVideos) {
+                v.muted = !isAllMuted;
+            }
+            this.updateUIState();
         };
-        muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; updateMuteIcon(); };
-        video.addEventListener('volumechange', updateMuteIcon, opts);
-        updateMuteIcon();
 
         // ── Volume Slider ──
         volSlider.oninput = (e) => {
             e.stopPropagation();
-            video.volume = parseFloat(e.target.value);
-            video.muted = video.volume === 0;
-            updateMuteIcon();
+            const val = parseFloat(e.target.value);
+            for (const v of this.trackedVideos) {
+                v.volume = val;
+                v.muted = val === 0;
+            }
+            this.updateUIState();
         };
-
-        // ── Time Display ──
-        const formatTime = (s) => {
-            const m = Math.floor(s / 60);
-            const sec = Math.floor(s % 60).toString().padStart(2, '0');
-            return `${m}:${sec}`;
-        };
-        const updateTime = () => {
-            timeEl.textContent = video.duration
-                ? `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`
-                : formatTime(video.currentTime);
-        };
-        video.addEventListener('timeupdate', updateTime, opts);
-        updateTime();
 
         // ── Loop ──
-        const updateLoopIcon = () => {
-            loopBtn.classList.toggle('active', video.loop);
-            loopBtn.style.opacity = video.loop ? '1' : '0.5';
+        loopBtn.onclick = (e) => { 
+            e.stopPropagation(); 
+            const primary = this._getPrimaryVideo();
+            if (!primary) return;
+            
+            primary.loop = !primary.loop;
+            this.updateUIState();
         };
-        loopBtn.onclick = (e) => { e.stopPropagation(); video.loop = !video.loop; updateLoopIcon(); };
-        updateLoopIcon();
 
         // ── Speed ──
         const speedInput = document.createElement('input');
         speedInput.type = 'number';
         speedInput.className = 'ypp-gpb-speed-input';
         speedInput.min = '0.1';
-        speedInput.max = '16.0'; // matches input validation below
+        speedInput.max = '16.0';
         speedInput.step = '0.1';
-        speedInput.value = video.playbackRate.toFixed(1);
         speedInput.title = 'Playback Speed';
         speedInput.style.cssText = `
             width: 44px;
@@ -264,34 +428,48 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             outline: none;
         `;
         
-        const updateSpeedValue = () => { speedInput.value = video.playbackRate.toFixed(1); };
-        video.addEventListener('ratechange', updateSpeedValue, opts);
-        
         speedInput.oninput = (e) => {
             e.stopPropagation();
             let val = parseFloat(e.target.value);
             if (!isNaN(val) && val >= 0.1 && val <= 16.0) {
-                video.playbackRate = val;
+                for (const v of this.trackedVideos) {
+                    v.playbackRate = val;
+                }
             }
         };
         speedInput.onkeydown = (e) => e.stopPropagation();
-        
         speedCont.appendChild(speedInput);
 
         // ── Feature Buttons (Volume / Filters) ──
         if (window.YPP.featureManager) {
+            // In 1:N mode, the volume booster and filter UI should probably be adapted,
+            // but we'll try to let them attach to the primary video or we attach them to the bar itself.
+            // For now, pass a dummy object or the first video.
+            // A proper fix requires updating the sub-modules to also support 1:N.
+            // Here we just pass the primary video so at least ONE video gets boosted/filtered.
+            const primary = this._getPrimaryVideo();
+            
             const volFeature = window.YPP.featureManager.getFeature('volumeBoost');
-            if (volFeature?.createButton) featsCont.appendChild(volFeature.createButton(video));
+            if (volFeature?.createButton && primary) {
+                featsCont.appendChild(volFeature.createButton(primary));
+            }
+            
             const filterFeature = window.YPP.featureManager.getFeature('videoFilters');
-            if (filterFeature?.createButton) featsCont.appendChild(filterFeature.createButton(video));
+            if (filterFeature?.createButton && primary) {
+                featsCont.appendChild(filterFeature.createButton(primary));
+            }
         }
 
         // ── PiP ──
         pipBtn.onclick = async (e) => {
             e.stopPropagation();
             try {
-                if (document.pictureInPictureElement) await document.exitPictureInPicture();
-                else await video.requestPictureInPicture();
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    const primary = this._getPrimaryVideo();
+                    if (primary) await primary.requestPictureInPicture();
+                }
             } catch (_) {}
         };
 
@@ -299,44 +477,22 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         fullscreenBtn.onclick = (e) => {
             e.stopPropagation();
             try {
-                if (document.fullscreenElement) document.exitFullscreen();
-                else video.requestFullscreen();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    const primary = this._getPrimaryVideo();
+                    if (primary) primary.requestFullscreen();
+                }
             } catch (_) {}
         };
-        const updateFsIcon = () => {
-            const isFs = document.fullscreenElement === video;
-            fullscreenBtn.innerHTML = isFs
-                ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`
-                : ICONS.fullscreen;
-        };
-        // Use the shared AbortSignal so this listener is also removed on cleanup
-        document.addEventListener('fullscreenchange', updateFsIcon, { signal });
+        document.addEventListener('fullscreenchange', () => this.updateUIState(), { signal });
 
         // ── Close ──
         closeBtn.onclick = (e) => {
             e.stopPropagation();
-            bar._abortController?.abort(); // cancels all listeners including fullscreenchange
-            clearInterval(bar._cleanupInterval);
-            bar.remove();
-            this.activeBars.delete(video);
-            this.repositionAll();
+            // Disconnect all tracked videos so they don't recreate the bar
+            this.trackedVideos.forEach(v => this._untrackVideo(v));
+            this.removeBar();
         };
-
-        // ── Auto-remove when video disconnects ──
-        // MutationObserver fires immediately on DOM removal — no polling lag or overhead.
-        const disconnectObserver = new MutationObserver(() => {
-            if (!video.isConnected) {
-                disconnectObserver.disconnect();
-                bar._abortController?.abort();
-                bar.remove();
-                this.activeBars.delete(video);
-                this.repositionAll();
-            }
-        });
-        // Observe the video's parent; if the parent itself is removed we won't catch it,
-        // so also observe document.body as a fallback root.
-        const observeTarget = video.parentElement || document.body;
-        disconnectObserver.observe(observeTarget, { childList: true, subtree: true });
-        bar._disconnectObserver = disconnectObserver;
     }
 };
