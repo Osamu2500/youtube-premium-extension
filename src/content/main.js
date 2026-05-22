@@ -468,23 +468,26 @@
                 this._lastContextId = contextId;
                 this.context = newContext;
 
-                // Apply context classes to body
-                body.classList.toggle('ypp-watch-page', this.context.isWatch);
-                body.classList.toggle('ypp-shorts-page', this.context.isShortsPage);
-                body.classList.toggle('ypp-home-page', this.context.isHome);
-                body.classList.toggle('ypp-search-page', this.context.isSearch);
-                body.classList.toggle('ypp-channel-page', this.context.isChannel);
-                body.classList.toggle('ypp-playlist-page', this.context.isPlaylist);
-                body.classList.toggle('ypp-library-page', this.context.isLibrary);
-                body.classList.toggle('ypp-history-page', this.context.isHistory);
-                body.classList.toggle('ypp-subscriptions-page', this.context.isSubscriptions);
+                // Apply context classes to body in a single paint frame
+                requestAnimationFrame(() => {
+                    if (!document.body) return;
+                    document.body.classList.toggle('ypp-watch-page', this.context.isWatch);
+                    document.body.classList.toggle('ypp-shorts-page', this.context.isShortsPage);
+                    document.body.classList.toggle('ypp-home-page', this.context.isHome);
+                    document.body.classList.toggle('ypp-search-page', this.context.isSearch);
+                    document.body.classList.toggle('ypp-channel-page', this.context.isChannel);
+                    document.body.classList.toggle('ypp-playlist-page', this.context.isPlaylist);
+                    document.body.classList.toggle('ypp-library-page', this.context.isLibrary);
+                    document.body.classList.toggle('ypp-history-page', this.context.isHistory);
+                    document.body.classList.toggle('ypp-subscriptions-page', this.context.isSubscriptions);
 
-                // Re-apply premium theme class (critical for layout)
-                if (this.settings?.premiumTheme) {
-                    body.classList.add('yt-premium-plus-theme');
-                } else {
-                    body.classList.remove('yt-premium-plus-theme');
-                }
+                    // Re-apply premium theme class (critical for layout)
+                    if (this.settings?.premiumTheme) {
+                        document.body.classList.add('yt-premium-plus-theme');
+                    } else {
+                        document.body.classList.remove('yt-premium-plus-theme');
+                    }
+                });
 
                 this.Utils?.log('Context updated', 'MAIN', 'debug', this.context);
 

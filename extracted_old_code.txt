@@ -1,0 +1,117 @@
+<USER_REQUEST>
+this is old code analyse it and if something is missing which is not letting the hero video work and one more thing also write code in styles file as well for the cinematic mode feature as well and this is the old code anaalyse it 
+
+/* ============================================================================
+** Core Variables and Root Settings
+============================================================================ */
+:root {
+  --netflix-red: #e50914;
+  --netflix-black: #141414;
+  --netflix-dark-gray: #181818;
+  --netflix-light-gray: #e5e5e5;
+}
+
+/* ============================================================================
+** Base Layout and Global Styles
+============================================================================ */
+
+body {
+  overflow: scroll !important;
+  opacity: 0;
+  -moz-animation: fadeIn 1s ease-in-out;
+  -webkit-animation: fadeIn 1s ease-in-out;
+  animation: fadeIn 1s ease-in-out;
+  -moz-animation-delay: 1s;
+  -webkit-animation-delay: 1s;
+  animation-delay: 1s;
+  -moz-animation-fill-mode: forwards;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+}
+
+body.cinematic-home {
+  overflow: hidden !important;
+  background: var(--netflix-black) !important;
+}
+
+body.cinematic-home ytd-page-manager.ytd-app {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 90vw !important;
+}
+
+/* Ensure header icons and text maintain dark mode appearance regardless of system theme */
+body.cinematic ytd-masthead #start *,
+body.cinematic ytd-masthead #center *,
+body.cinematic ytd-masthead #end *,
+body.cinematic ytd-masthead #end yt-icon,
+body.cinematic ytd-masthead #end .yt-spec-icon-shape,
+body.cinematic ytd-masthead #end svg,
+body.cinematic ytd-masthead #start svg,
+body.cinematic ytd-masthead #start yt-icon,
+body.cinematic ytd-masthead yt-icon,
+body.cinematic ytd-masthead .yt-spec-icon-shape svg,
+body.cinematic ytd-masthead ytd-button-renderer,
+body.cinematic ytd-masthead yt-icon-button {
+  fill: #fff !important;
+  color: #fff !important;
+}
+
+/* Ma
+<truncated 26936 bytes>
+;
+  aspect-ratio: unset !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  background-color: transparent !important;
+}
+
+/* Restore rich-grid-media child container */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer ytd-rich-grid-media,
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer ytd-video-renderer {
+  height: auto !important;
+  flex: none !important;
+  flex-direction: unset !important;
+}
+
+/* Kill the YPP grid variables that fight cinematic's flex row */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer {
+  --ytd-rich-grid-items-per-row: unset !important;
+  --ytd-rich-grid-posts-per-row: unset !important;
+}
+
+/* Suppress the YPP hover lift on cinematic cards — cinematic has its own hover */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-item-renderer:hover {
+  transform: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Prevent the YPP grid container from fighting cinematic's flex row */
+body.cinematic-home #contents.ypp-grid-container,
+body.cinematic-home #contents[data-ypp-cols] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  grid-template-columns: unset !important;
+  grid-auto-flow: unset !important;
+}
+
+/* Prevent ytd-rich-section-renderer from spanning the whole "grid" in cinematic */
+body.cinematic-home.yt-premium-plus-theme ytd-rich-section-renderer {
+  grid-column: unset !important;
+  width: auto !important;
+}
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-21T21:19:19+05:30.
+
+The user's current state is as follows:
+Active Document: f:\Youtube 2.0\src\content\features\pages\home\cinematic-theme.css (LANGUAGE_CSS)
+Cursor is on line: 9
+Other open documents:
+- f:\Youtube 2.0\src\content\features\pages\home\cinematic-theme.css (LANGUAGE_CSS)
+- f:\Youtube 2.0\src\content\features\pages\home\cinematic-mode.js (LANGUAGE_JAVASCRIPT)
+</ADDITIONAL_METADATA>

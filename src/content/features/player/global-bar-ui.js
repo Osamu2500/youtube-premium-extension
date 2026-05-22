@@ -31,16 +31,15 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         
         this.trackedVideos.add(video);
 
-        // Auto-remove when video disconnects
-        const disconnectObserver = new MutationObserver(() => {
+        // Auto-remove when video disconnects. Use polling instead of MutationObserver 
+        // to avoid expensive subtree tracking on the parent element.
+        const disconnectPoll = setInterval(() => {
             if (!video.isConnected) {
-                disconnectObserver.disconnect();
+                clearInterval(disconnectPoll);
                 this._untrackVideo(video);
             }
-        });
-        const observeTarget = video.parentElement || document.body;
-        disconnectObserver.observe(observeTarget, { childList: true, subtree: true });
-        video._yppDisconnectObserver = disconnectObserver;
+        }, 1000);
+        video._yppDisconnectPoll = disconnectPoll;
 
         if (!this.barElement) {
             this.createBar();
@@ -52,9 +51,9 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     _untrackVideo(video) {
         this.trackedVideos.delete(video);
         
-        if (video._yppDisconnectObserver) {
-            video._yppDisconnectObserver.disconnect();
-            delete video._yppDisconnectObserver;
+        if (video._yppDisconnectPoll) {
+            clearInterval(video._yppDisconnectPoll);
+            delete video._yppDisconnectPoll;
         }
 
         if (this.trackedVideos.size === 0) {

@@ -69,24 +69,21 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
     // =========================================================================
 
     startObserver() {
-        if (this.observer) return;
-        this.observer = new MutationObserver((mutations) => {
-            let shouldScan = false;
-            for (let i = 0; i < mutations.length; i++) {
-                if (mutations[i].addedNodes.length > 0) {
-                    shouldScan = true;
-                    break;
-                }
-            }
-            if (shouldScan) this.scanForVideos();
-        });
-        this.observer.observe(document.body, { childList: true, subtree: true });
+        if (this._isObserving) return;
+        this._isObserving = true;
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.register('global-bar-scanner', 'video', () => {
+                this.scanForVideos();
+            });
+        }
     }
 
     stopObserver() {
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+        if (this._isObserving) {
+            this._isObserving = false;
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.unregister('global-bar-scanner');
+            }
         }
     }
 

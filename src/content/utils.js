@@ -178,23 +178,23 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         return new Promise((resolve) => {
             let resolved = false;
             let timeoutId = null;
-            let observer = null;
             const startUrl = location.href; // Capture URL for early abort
-
-            let rafId = null;
+            
+            // Generate unique ID for the shared observer registry
+            const observerId = 'wait-' + Math.random().toString(36).substr(2, 9);
+            let fallbackObserver = null;
 
             const cleanup = () => {
-                if (observer) {
-                    observer.disconnect();
-                    observer = null;
+                if (window.YPP?.sharedObserver) {
+                    window.YPP.sharedObserver.unregister(observerId);
+                }
+                if (fallbackObserver) {
+                    fallbackObserver.disconnect();
+                    fallbackObserver = null;
                 }
                 if (timeoutId) {
                     clearTimeout(timeoutId);
                     timeoutId = null;
-                }
-                if (rafId) {
-                    cancelAnimationFrame(rafId);
-                    rafId = null;
                 }
                 if (signal) {
                     signal.removeEventListener('abort', handleAbort);
@@ -213,8 +213,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 signal.addEventListener('abort', handleAbort);
             }
 
-            const check = () => {
-                rafId = null;
+            const checkMatches = (matches) => {
                 if (resolved) return;
 
                 // Abort if the user navigates away before element is found
@@ -225,26 +224,42 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                     return;
                 }
 
+                // If elements are passed from sharedObserver, use the first one
+                if (matches && matches.length > 0) {
+                    resolved = true;
+                    cleanup();
+                    resolve(matches[0]);
+                    return;
+                }
+                
+                // Fallback check just in case
                 try {
                     const el = document.querySelector(selector);
                     if (el) {
                         resolved = true;
                         cleanup();
                         resolve(el);
-                        return;
                     }
-                } catch (e) {
-                    // Ignore selector errors during wait
-                }
+                } catch (e) {}
             };
 
-            const scheduleCheck = () => {
-                if (rafId) return;
-                rafId = requestAnimationFrame(check);
-            };
-
-            observer = new MutationObserver(scheduleCheck);
-            observer.observe(document.documentElement, { childList: true, subtree: true });
+            // Use the centralized coalescing observer if available (massive performance gain)
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.register(observerId, selector, checkMatches, true);
+            } else {
+                // Fallback for very early initialization before sharedObserver is ready
+                let rafId = null;
+                const scheduleCheck = () => {
+                    if (rafId) return;
+                    rafId = requestAnimationFrame(() => {
+                        rafId = null;
+                        checkMatches();
+                    });
+                };
+                fallbackObserver = new MutationObserver(scheduleCheck);
+                fallbackObserver.observe(document.documentElement, { childList: true, subtree: true });
+                checkMatches();
+            }
 
             if (timeout > 0) {
                 timeoutId = setTimeout(() => {
@@ -274,49 +289,70 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
 
         return new Promise((resolve) => {
             const startUrl = location.href;
-            let observer = null;
+            const observerId = 'waits-' + Math.random().toString(36).substr(2, 9);
+            let fallbackObserver = null;
             let rafId = null;
+
+            const cleanup = () => {
+                if (window.YPP?.sharedObserver) {
+                    window.YPP.sharedObserver.unregister(observerId);
+                }
+                if (fallbackObserver) {
+                    fallbackObserver.disconnect();
+                    fallbackObserver = null;
+                }
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            };
 
             const checkElements = () => {
                 // Abort if the user navigates away before elements are found
                 if (location.href !== startUrl) {
-                    if (observer) observer.disconnect();
+                    cleanup();
                     resolve(results); // Return what we found so far
                     return;
                 }
                 selectors.forEach(sel => {
                     if (!results.has(sel)) {
-                        const el = document.querySelector(sel);
-                        if (el) {
-                            results.set(sel, el);
-                            remaining--;
-                        }
+                        try {
+                            const el = document.querySelector(sel);
+                            if (el) {
+                                results.set(sel, el);
+                                remaining--;
+                            }
+                        } catch (e) {}
                     }
                 });
 
                 if (remaining === 0) {
-                    if (observer) observer.disconnect();
+                    cleanup();
                     resolve(results);
                 }
             };
 
-            // Coalesce rapid mutations into one check per animation frame
-            // to avoid iterating all selectors on every single DOM mutation.
-            const scheduleCheck = () => {
-                if (rafId) return;
-                rafId = requestAnimationFrame(() => {
-                    rafId = null;
-                    checkElements();
-                });
-            };
+            // Use the centralized coalescing observer if available
+            if (window.YPP?.sharedObserver) {
+                // Register for any of the selectors. The DOMObserver will batch evaluate.
+                window.YPP.sharedObserver.register(observerId, selectors.join(','), checkElements, true);
+            } else {
+                // Coalesce rapid mutations into one check per animation frame
+                const scheduleCheck = () => {
+                    if (rafId) return;
+                    rafId = requestAnimationFrame(() => {
+                        rafId = null;
+                        checkElements();
+                    });
+                };
 
-            observer = new MutationObserver(scheduleCheck);
-            observer.observe(document.documentElement, { childList: true, subtree: true });
-
-            checkElements();
+                fallbackObserver = new MutationObserver(scheduleCheck);
+                fallbackObserver.observe(document.documentElement, { childList: true, subtree: true });
+                checkElements();
+            }
 
             setTimeout(() => {
-                if (observer) observer.disconnect();
+                cleanup();
                 resolve(results);
             }, timeout);
         });
