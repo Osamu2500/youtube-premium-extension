@@ -6,8 +6,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.ReturnDislike = class ReturnDislike {
+window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.features.BaseFeature {
     constructor() {
+        super('ReturnDislike');
         this.isActive = false;
         this.videoId = null;
         this.abortController = null;
@@ -108,7 +109,9 @@ window.YPP.features.ReturnDislike = class ReturnDislike {
             return el ? el : null;
         }, 10000, 500);
         
-        if (!buttons) return;
+        // Ensure feature is still active and on the same video after async wait
+        const currentVideoId = new URLSearchParams(window.location.search).get('v');
+        if (!buttons || !this.isActive || this.videoId !== currentVideoId) return;
 
         // Find the dislike button
         // 1. Try finding by specific icon path or aria-label if possible, but structure varies.

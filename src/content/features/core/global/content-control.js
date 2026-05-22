@@ -96,6 +96,7 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             'ypp-hide-merch',
             'ypp-hide-shorts'
         );
+        document.querySelectorAll('[data-ypp-is-short]').forEach(el => el.removeAttribute('data-ypp-is-short'));
     }
 
     /**
@@ -163,13 +164,10 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             elements.forEach(el => {
                 // Double-check it's actually a Shorts element before removing
                 if (this._isShortsElement(el)) {
-                    // Use parentNode.removeChild for better compatibility
-                    if (el.parentNode) {
-                        el.parentNode.removeChild(el);
-                    } else {
-                        el.remove();
+                    if (!el.hasAttribute('data-ypp-is-short')) {
+                        el.setAttribute('data-ypp-is-short', 'true');
+                        removed++;
                     }
-                    removed++;
                 }
             });
         } catch (err) {
@@ -229,10 +227,8 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         chips.forEach(chip => {
             const textElement = chip.querySelector("#text");
             if (textElement && textElement.innerText.trim() === "Shorts") {
-                if (chip.parentNode) {
-                    chip.parentNode.removeChild(chip);
-                } else {
-                    chip.remove();
+                if (!chip.hasAttribute('data-ypp-is-short')) {
+                    chip.setAttribute('data-ypp-is-short', 'true');
                 }
             }
         });
@@ -252,7 +248,9 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         const shelves = document.querySelectorAll('ytd-shelf-renderer, ytd-rich-shelf-renderer');
         shelves.forEach(shelf => {
             if (this._isShortsElement(shelf)) {
-                shelf.remove();
+                if (!shelf.hasAttribute('data-ypp-is-short')) {
+                    shelf.setAttribute('data-ypp-is-short', 'true');
+                }
             }
         });
 
@@ -265,7 +263,9 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             // Be strict: only remove if aria-label is explicitly "Shorts" (not just contains "shorts")
             if (badge?.getAttribute('aria-label') === 'Shorts' ||
                 badge?.textContent?.trim() === 'Shorts') {
-                video.remove();
+                if (!video.hasAttribute('data-ypp-is-short')) {
+                    video.setAttribute('data-ypp-is-short', 'true');
+                }
             }
         });
     }
@@ -354,8 +354,10 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             
             // First check if the element itself is a short/shorts chip
             if (this._isShortsElement(el)) {
-                if (el.parentNode) el.parentNode.removeChild(el); else el.remove();
-                removed++;
+                if (!el.hasAttribute('data-ypp-is-short')) {
+                    el.setAttribute('data-ypp-is-short', 'true');
+                    removed++;
+                }
                 return;
             }
             
@@ -363,8 +365,10 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             if (el.tagName && el.tagName.toLowerCase() === 'yt-chip-cloud-chip-renderer') {
                 const textElement = el.querySelector("#text");
                 if (textElement && textElement.innerText.trim() === "Shorts") {
-                    if (el.parentNode) el.parentNode.removeChild(el); else el.remove();
-                    removed++;
+                    if (!el.hasAttribute('data-ypp-is-short')) {
+                        el.setAttribute('data-ypp-is-short', 'true');
+                        removed++;
+                    }
                 }
                 return;
             }
@@ -373,8 +377,10 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             try {
                 const nestedShorts = el.querySelectorAll('ytd-reel-shelf-renderer, a[href*="/shorts/"]');
                 if (nestedShorts.length > 0 && this._isShortsElement(el)) {
-                     if (el.parentNode) el.parentNode.removeChild(el); else el.remove();
-                     removed++;
+                     if (!el.hasAttribute('data-ypp-is-short')) {
+                         el.setAttribute('data-ypp-is-short', 'true');
+                         removed++;
+                     }
                 }
             } catch(e) {}
         });

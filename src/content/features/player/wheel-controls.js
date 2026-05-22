@@ -18,22 +18,29 @@ window.YPP.features.WheelControls = class WheelControls extends window.YPP.featu
     }
 
     async enable() {
+        this.isActive = true;
         await super.enable();
         
-        // Wait for player container to attach listener
-        this.playerContainer = await this.waitForElement('#movie_player', 10000);
-        if (this.playerContainer) {
+        try {
+            // Wait for player container to establish bounds
+            this.playerContainer = await this.waitForElement('#movie_player', 10000);
+            
+            // If disabled while waiting, abort
+            if (!this.isActive) return;
+            
+            // Attach listener globally to ensure we catch edge-cases
             // Need `{ passive: false }` to prevent default scroll
-            this.playerContainer.addEventListener('wheel', this.handleWheel, { passive: false });
+            window.addEventListener('wheel', this.handleWheel, { passive: false });
+        } catch (e) {
+            this.utils?.log('Error enabling WheelControls', 'WHEEL', 'error', e);
         }
     }
 
     async disable() {
+        this.isActive = false;
         await super.disable();
-        if (this.playerContainer) {
-            this.playerContainer.removeEventListener('wheel', this.handleWheel);
-            this.playerContainer = null;
-        }
+        window.removeEventListener('wheel', this.handleWheel);
+        this.playerContainer = null;
     }
 
     getVideoElement() {
@@ -50,7 +57,16 @@ window.YPP.features.WheelControls = class WheelControls extends window.YPP.featu
         if (!isSpeed && !isVolume) return; // Do nothing normally
         
         const video = this.getVideoElement();
-        if (!video) return;
+        if (!video || !this.playerContainer) return;
+
+        // Ensure cursor is physically over the player
+        const rect = this.playerContainer.getBoundingClientRect();
+        const isOverPlayer = (
+            e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top && e.clientY <= rect.bottom
+        );
+        
+        if (!isOverPlayer) return;
 
         // Prevent page scroll when executing our shortcuts
         e.preventDefault();

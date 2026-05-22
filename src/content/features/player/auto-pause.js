@@ -14,7 +14,7 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
         this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
         
         // State tracking
-        this.wasPlaying = false;
+        this.wasMutedByUs = false;
         this.video = null;
     }
 
@@ -48,7 +48,7 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
     async disable() {
         await super.disable();
         this.video = null;
-        this.wasPlaying = false;
+        this.wasMutedByUs = false;
     }
 
     /**
@@ -59,7 +59,7 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
         if (!this.isEnabled) return;
         
         // Reset state for the new video
-        this.wasPlaying = false;
+        this.wasMutedByUs = false;
         this._cacheVideoElement();
     }
 
@@ -100,39 +100,33 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
         // If the user has explicitly triggered PiP, they want the video to play while hidden.
         // We MUST NOT pause the video in this scenario.
         if (document.pictureInPictureElement) {
-            this.wasPlaying = false; // Reset state so it doesn't auto-play unexpectedly later
+            this.wasMutedByUs = false; // Reset state so it doesn't auto-mute unexpectedly later
             return;
         }
 
         if (document.hidden) {
             // Tab is hidden
             if (!this.video.paused && !this.video.ended) {
-                this.wasPlaying = true;
+                // Check if it's already muted by the user
+                this.wasMutedByUs = !this.video.muted;
                 
-                // Pause the video and explicitly catch any Promise rejections (in case of fast UI interactions)
-                const pausePromise = this.video.pause();
-                if (pausePromise !== undefined) {
-                    pausePromise.catch(err => this.utils.log?.(`Pause prevented: ${err}`, 'AutoPause', 'warn'));
+                if (this.wasMutedByUs) {
+                    this.video.muted = true;
+                    this.utils.log?.('Auto muted video (tab hidden)', 'AutoPause');
                 }
-                
-                this.utils.log?.('Auto paused video (tab hidden)', 'AutoPause');
             } else {
-                this.wasPlaying = false;
+                this.wasMutedByUs = false;
             }
         } else {
             // Tab is visible again
-            if (this.wasPlaying && this.video.paused) {
-                // Resume the video
-                const playPromise = this.video.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(err => this.utils.log?.(`Play prevented by browser: ${err}`, 'AutoPause', 'warn'));
-                }
-                
-                this.utils.log?.('Auto resumed video (tab visible)', 'AutoPause');
+            if (this.wasMutedByUs) {
+                // Restore volume
+                this.video.muted = false;
+                this.utils.log?.('Auto unmuted video (tab visible)', 'AutoPause');
             }
             
             // Always reset state after becoming visible
-            this.wasPlaying = false;
+            this.wasMutedByUs = false;
         }
     }
 };

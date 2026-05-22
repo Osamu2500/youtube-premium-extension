@@ -31,17 +31,22 @@ window.YPP.features = window.YPP.features || {};
 
 const _STYLE_ID = 'ypp-sidebar-layout-expanded';
 
-window.YPP.features.SidebarLayout = class SidebarLayout {
+window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.features.BaseFeature {
 
   constructor() {
+    super('SidebarLayout');
     this._currentLayout = null;
   }
 
   enable(settings)  { this.update(settings); }
 
   disable() {
-    this._removeStyle();
-    this._currentLayout = null;
+    try {
+      this._removeStyle();
+      this._currentLayout = null;
+    } catch (err) {
+      console.error('[YPP] SidebarLayout disable error:', err);
+    }
   }
 
   update(settings) {

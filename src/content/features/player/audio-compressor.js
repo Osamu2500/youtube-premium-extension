@@ -115,7 +115,7 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
             if (!this.compressorNode) {
                 this.compressorNode = this.audioContext.createDynamicsCompressor();
                 this.compressorNode.threshold.value = -35; 
-                this.compressorNode.knee.value = 30;
+                this.compressorNode.knee.value = 30; // Soft knee
                 this.compressorNode.ratio.value = 10;
                 this.compressorNode.attack.value = 0.005;
                 this.compressorNode.release.value = 0.050;
@@ -127,13 +127,47 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
                 this.gainNode.gain.value = 2.5; // Boost the overall normalized signal
             }
 
-            // Route audio: Source -> Compressor -> Gain -> Speakers
+            // Dynamic clipping prevention
+            // A limiter node (another compressor) just before destination
+            if (!this.limiterNode) {
+                this.limiterNode = this.audioContext.createDynamicsCompressor();
+                this.limiterNode.threshold.value = -1.0; 
+                this.limiterNode.knee.value = 0.0; // Hard knee for absolute limiting
+                this.limiterNode.ratio.value = 20.0;
+                this.limiterNode.attack.value = 0.001;
+                this.limiterNode.release.value = 0.050;
+            }
+
+            // Route audio: Source -> Compressor -> Gain -> Limiter -> Speakers
             this.sourceNode.connect(this.compressorNode);
             this.compressorNode.connect(this.gainNode);
-            this.gainNode.connect(this.audioContext.destination);
+            this.gainNode.connect(this.limiterNode);
+            this.limiterNode.connect(this.audioContext.destination);
 
             if (this.audioContext.state === 'suspended') {
                 this.audioContext.resume();
+            }
+
+            // Health Checks & Device Changes
+            this.audioContext.onstatechange = () => {
+                if (this.audioContext.state === 'suspended' && this.isEnabled && this.isProcessing) {
+                    this.utils.log?.('AudioContext suspended unexpectedly. Resuming...', 'AUDIO', 'warn');
+                    this.audioContext.resume();
+                } else if (this.audioContext.state === 'closed') {
+                    this.isProcessing = false;
+                    this.audioContext = null;
+                }
+            };
+
+            if (navigator.mediaDevices && !this._deviceChangeListenerBound) {
+                this._deviceChangeListenerBound = true;
+                navigator.mediaDevices.addEventListener('devicechange', () => {
+                    this.utils.log?.('Audio output device changed. Re-initializing compressor graph...', 'AUDIO', 'warn');
+                    if (this.isEnabled && this.isProcessing) {
+                        this.disconnectAudio();
+                        setTimeout(() => this.setupAudioNodes(), 500);
+                    }
+                });
             }
 
             this.isProcessing = true;

@@ -42,13 +42,17 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
     async enable() {
         if (this.isYouTube) return; // Skip YouTube (handled by native integration)
 
-        this.utils?.log('Enabling Global Player Bar', 'GlobalPlayerBar');
-        
-        this.scanForVideos();
-        this.startObserver();
+        try {
+            this.utils?.log('Enabling Global Player Bar', 'GlobalPlayerBar');
+            
+            this.scanForVideos();
+            this.startObserver();
 
-        window.addEventListener('resize', this._repositionListener);
-        window.addEventListener('scroll', this._repositionListener);
+            window.addEventListener('resize', this._repositionListener);
+            window.addEventListener('scroll', this._repositionListener);
+        } catch (e) {
+            this.utils?.log('Error enabling GlobalPlayerBar', 'GLOBAL', 'error', e);
+        }
     }
 
     async disable() {

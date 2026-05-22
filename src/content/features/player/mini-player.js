@@ -9,156 +9,155 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
     constructor() {
         super('MiniPlayer');
         
-        this.observer = null; // IntersectionObserver
-        this.videoElement = null;
-        this.playerContainer = null;
-        this.isPipActive = false;
-        this.userManuallyExited = false; // improved logic: if user closes pip manually, don't reopen until scroll up reset
+        this.miniplayer = null;
+        this.resizeHandle = null;
+        this.isDragging = false;
+        
+        // Default miniplayer dimensions
+        this.startWidth = 0;
+        this.startHeight = 0;
+        this.startX = 0;
+        this.startY = 0;
+        
+        this.observer = null;
 
-        this.handleIntersection = this.handleIntersection.bind(this);
-        this.handlePipLeave = this.handlePipLeave.bind(this);
+        this.onDragStart = this.onDragStart.bind(this);
+        this.onDrag = this.onDrag.bind(this);
+        this.onDragEnd = this.onDragEnd.bind(this);
+        this.checkMiniplayerState = this.checkMiniplayerState.bind(this);
     }
 
     getConfigKey() {
-        return 'enablePiP';
+        return 'enableMiniPlayer'; // Update config key to match if needed, or keep 'enablePiP' if you want backward compat
     }
 
     async enable() {
-        if (!this.utils.isWatchPage()) return;
         await super.enable();
-
-        this.init();
         
-        // Handle SPA Navigation
-        this.addListener(window, 'yt-navigate-finish', () => {
-             this.cleanup();
-             if (this.utils.isWatchPage() && this.isEnabled) {
-                 setTimeout(() => this.init(), 1000);
-             }
-        });
+        try {
+            // Listen to SPA navigations and DOM mutations to catch miniplayer activation
+            this.addListener(window, 'yt-navigate-finish', this.checkMiniplayerState);
+            this.addListener(document, 'click', () => setTimeout(this.checkMiniplayerState, 500));
+            
+            // Also poll every few seconds just in case
+            this.pollInterval = setInterval(this.checkMiniplayerState, 2000);
+            this.checkMiniplayerState();
+        } catch (e) {
+            this.utils?.log('Error enabling MiniPlayer', 'MINIPLAYER', 'error', e);
+        }
     }
 
     async disable() {
         await super.disable();
-        this.cleanup();
-    }
-
-    async onUpdate() {
-        if (this.utils.isWatchPage() && !this.observer) {
-            this.init();
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        
+        if (this.resizeHandle) {
+            this.resizeHandle.remove();
+            this.resizeHandle = null;
+        }
+        
+        if (this.miniplayer) {
+            this.miniplayer.style.width = '';
+            this.miniplayer.style.height = '';
+            this.miniplayer = null;
         }
     }
 
-    cleanup() {
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
-        }
-        if (this.videoElement) {
-            try {
-                this.videoElement.removeEventListener('leavepictureinpicture', this.handlePipLeave);
-            } catch(e) {}
-            
-            if (document.pictureInPictureElement === this.videoElement) {
-                document.exitPictureInPicture().catch(() => {});
-            }
-        }
-        this.videoElement = null;
-        this.playerContainer = null;
-        this.isPipActive = false;
-        this.userManuallyExited = false;
-    }
-
-    async init() {
-        try {
-            const elements = await this.utils.pollFor(() => {
-                // Find primary video container that scrolls out of view
-                const container = document.getElementById('player-container') || document.getElementById('movie_player');
-                const video = document.querySelector('video');
-                
-                if (container && video && video.readyState >= 1) {
-                    return { container, video };
-                }
-                return null;
-            }, 5000, 500);
-
-            if (elements) {
-                this.playerContainer = elements.container;
-                this.videoElement = elements.video;
-                this.startObserving();
-            }
-        } catch (error) {
-            this.utils.log('MiniPlayer initialization timed out waiting for player elements', 'MINIPLAYER', 'warn');
+    checkMiniplayerState() {
+        if (!this.isEnabled) return;
+        
+        // Find the native youtube miniplayer
+        const player = document.querySelector('ytd-miniplayer[active]');
+        
+        if (player && !this.resizeHandle) {
+            this.miniplayer = player;
+            this.injectResizeHandle();
+        } else if (!player && this.resizeHandle) {
+            this.resizeHandle.remove();
+            this.resizeHandle = null;
+            this.miniplayer = null;
         }
     }
 
-    startObserving() {
-        if (!window.IntersectionObserver || !this.playerContainer || !this.videoElement) return;
-
-        // Use custom listener for manual PiP exit detection
-        this.videoElement.addEventListener('leavepictureinpicture', this.handlePipLeave);
-
-        const options = {
-            root: null, // viewport
-            threshold: 0.1 // 10% visibility (triggers when almost completely scrolled past)
-        };
-
-        this.observer = new IntersectionObserver(this.handleIntersection, options);
-        this.observer.observe(this.playerContainer);
+    injectResizeHandle() {
+        if (!this.miniplayer || this.resizeHandle) return;
+        
+        // Ensure container is relative so absolute handle works
+        this.miniplayer.style.position = 'fixed'; // It's usually fixed or absolute anyway
+        
+        this.resizeHandle = document.createElement('div');
+        this.resizeHandle.className = 'ypp-miniplayer-resizer';
+        this.resizeHandle.title = 'Drag to resize';
+        this.resizeHandle.style.cssText = `
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 24px;
+            height: 24px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, rgba(255,0,0,0.8) 0%, rgba(255,0,0,0) 50%);
+            border-top-left-radius: 4px;
+            z-index: 9999;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        `;
+        
+        this.resizeHandle.addEventListener('mouseenter', () => this.resizeHandle.style.opacity = '1');
+        this.resizeHandle.addEventListener('mouseleave', () => this.resizeHandle.style.opacity = '0.5');
+        
+        this.addListener(this.resizeHandle, 'mousedown', this.onDragStart);
+        
+        this.miniplayer.appendChild(this.resizeHandle);
     }
 
-    handleIntersection(entries) {
-        if (!this.isEnabled || !this.videoElement) return;
-
-        entries.forEach(entry => {
-            // Check if scrolling down past video
-            if (!entry.isIntersecting && !this.isPipActive && !this.userManuallyExited) {
-                // Only activate if playing
-                if (!this.videoElement.paused && !this.videoElement.ended) {
-                    this.requestPip();
-                }
-            }
-            // Scrolling back up to video
-            else if (entry.isIntersecting) {
-                this.userManuallyExited = false; // Reset manual exit flag
-                if (this.isPipActive) {
-                    this.exitPip();
-                }
-            }
-        });
+    onDragStart(e) {
+        if (!this.miniplayer) return;
+        e.preventDefault();
+        
+        this.isDragging = true;
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+        
+        const rect = this.miniplayer.getBoundingClientRect();
+        this.startWidth = rect.width;
+        this.startHeight = rect.height;
+        
+        document.addEventListener('mousemove', this.onDrag);
+        document.addEventListener('mouseup', this.onDragEnd);
+        
+        // Add a class to prevent pointer events on iframe/video while dragging
+        this.miniplayer.style.pointerEvents = 'none';
     }
 
-    async requestPip() {
-        try {
-            if (document.pictureInPictureElement) return; // Already in Pip
-            
-            if (document.pictureInPictureEnabled) {
-                await this.videoElement.requestPictureInPicture();
-                this.isPipActive = true;
-                if (this.utils.createToast) this.utils.createToast('Mini Player Active', 'info');
-            }
-        } catch (e) {
-            this.utils.log?.('Failed to enter PiP: ' + e.message, 'MINIPLAYER', 'debug');
+    onDrag(e) {
+        if (!this.isDragging || !this.miniplayer) return;
+        
+        // Calculate new dimensions (dragging from top-left expands up and left)
+        const dx = this.startX - e.clientX;
+        const dy = this.startY - e.clientY;
+        
+        // Maintain 16:9 aspect ratio roughly
+        const newWidth = Math.max(300, Math.min(1200, this.startWidth + dx));
+        const newHeight = newWidth * (9/16);
+        
+        this.miniplayer.style.width = `${newWidth}px`;
+        this.miniplayer.style.height = `${newHeight}px`;
+        
+        // We also need to force the internal video container to match
+        const container = this.miniplayer.querySelector('#player-container');
+        if (container) {
+            container.style.width = '100%';
+            container.style.height = '100%';
         }
     }
 
-    async exitPip() {
-        try {
-            if (document.pictureInPictureElement === this.videoElement) {
-                await document.exitPictureInPicture();
-                this.isPipActive = false;
-            }
-        } catch (e) {
-            // Ignore (maybe already exited)
-        }
-    }
-
-    handlePipLeave(event) {
-        this.isPipActive = false;
-        // If the player is still out of view intersection-wise, 
-        // the user likely closed the PiP window manually
-        if (this.isEnabled && this.observer) {
-            this.userManuallyExited = true;
+    onDragEnd() {
+        this.isDragging = false;
+        document.removeEventListener('mousemove', this.onDrag);
+        document.removeEventListener('mouseup', this.onDragEnd);
+        
+        if (this.miniplayer) {
+            this.miniplayer.style.pointerEvents = '';
         }
     }
 };

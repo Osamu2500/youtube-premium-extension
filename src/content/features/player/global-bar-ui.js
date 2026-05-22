@@ -24,7 +24,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         this.updatePosition();
     }
 
-    /** Add a video to the tracked set and create the bar if needed. */
     trackVideo(video) {
         if (this.trackedVideos.has(video)) return;
         
@@ -43,13 +42,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         disconnectObserver.observe(observeTarget, { childList: true, subtree: true });
         video._yppDisconnectObserver = disconnectObserver;
 
-        // Bind events
-        video.addEventListener('play', this._boundUpdateUIState);
-        video.addEventListener('pause', this._boundUpdateUIState);
-        video.addEventListener('volumechange', this._boundUpdateUIState);
-        video.addEventListener('ratechange', this._boundUpdateUIState);
-        video.addEventListener('timeupdate', this._boundUpdateUIState);
-
         if (!this.barElement) {
             this.createBar();
         } else {
@@ -64,12 +56,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             video._yppDisconnectObserver.disconnect();
             delete video._yppDisconnectObserver;
         }
-
-        video.removeEventListener('play', this._boundUpdateUIState);
-        video.removeEventListener('pause', this._boundUpdateUIState);
-        video.removeEventListener('volumechange', this._boundUpdateUIState);
-        video.removeEventListener('ratechange', this._boundUpdateUIState);
-        video.removeEventListener('timeupdate', this._boundUpdateUIState);
 
         if (this.trackedVideos.size === 0) {
             this.removeBar();
@@ -166,7 +152,16 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         }
 
         this._abortController = new AbortController();
-        this._bindEvents(this._abortController.signal);
+        const signal = this._abortController.signal;
+        
+        // Bind video events globally to capture them before YouTube swallows them
+        document.addEventListener('play', this._boundUpdateUIState, { capture: true, signal });
+        document.addEventListener('pause', this._boundUpdateUIState, { capture: true, signal });
+        document.addEventListener('volumechange', this._boundUpdateUIState, { capture: true, signal });
+        document.addEventListener('ratechange', this._boundUpdateUIState, { capture: true, signal });
+        document.addEventListener('timeupdate', this._boundUpdateUIState, { capture: true, signal });
+
+        this._bindEvents(signal);
         
         // Initial state sync
         this.updateUIState();

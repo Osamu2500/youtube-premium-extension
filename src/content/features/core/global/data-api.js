@@ -6,13 +6,18 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.DataAPI = class DataAPI {
+window.YPP.features.DataAPI = class DataAPI extends window.YPP.features.BaseFeature {
     constructor() {
+        super('DataAPI');
         this.apiKey = null;
         this.clientName = null;
         this.clientVersion = null;
         this.context = null;
         this.loggedOnly = false;
+    }
+
+    disable() {
+        // Nothing to disable for data API since it just holds static scraped data
     }
 
     init() {

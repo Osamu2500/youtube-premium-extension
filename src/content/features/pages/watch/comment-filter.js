@@ -33,13 +33,17 @@ window.YPP.features.CommentFilter = class CommentFilter extends window.YPP.featu
         if (!this.utils.isWatchPage()) return;
         await super.enable();
 
-        // Use our robust observer
-        this.observer.register('spam_comments', 'ytd-comment-thread-renderer:not(.ypp-comment-checked)', this.handleComments, true);
-        
-        // Wait for comments section to exist
-        const comments = await this.waitForElement('#comments', 10000);
-        if (comments && this.isEnabled) {
-            this.observer.start(comments);
+        try {
+            // Use our robust observer
+            this.observer.register('spam_comments', 'ytd-comment-thread-renderer:not(.ypp-comment-checked)', this.handleComments, true);
+            
+            // Wait for comments section to exist
+            const comments = await this.waitForElement('#comments', 10000);
+            if (comments && this.isEnabled) {
+                this.observer.start(comments);
+            }
+        } catch (e) {
+            this.utils?.log('Error enabling CommentFilter', 'COMMENT', 'error', e);
         }
     }
 

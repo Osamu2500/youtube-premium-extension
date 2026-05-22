@@ -33,10 +33,14 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
     async enable() {
         await super.enable();
         
-        // Listen to SPA navigation
-        // Note: The actual check if we're on /feed/history happens inside onPageChange
-        if (location.pathname === '/feed/history') {
-            this._mountAndStart();
+        try {
+            // Listen to SPA navigation
+            // Note: The actual check if we're on /feed/history happens inside onPageChange
+            if (location.pathname === '/feed/history') {
+                this._mountAndStart();
+            }
+        } catch (e) {
+            this.utils?.log('Error enabling HistoryTracker', 'HISTORY', 'error', e);
         }
     }
     
@@ -106,13 +110,16 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
 
     async loadStats() {
         const today = new Date();
-        const keysToCheck = [];
         
         const getKey = (d) => {
-            return this.STORAGE_PREFIX + d.toISOString().split('T')[0];
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return this.STORAGE_PREFIX + `${y}-${m}-${day}`;
         };
 
-        // Last 30 days
+        const keysToCheck = [];
+        // Last 31 days for main stats
         for (let i = 0; i < 31; i++) {
             const d = new Date();
             d.setDate(today.getDate() - i);
@@ -148,29 +155,9 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         });
 
         // -------------------------------------------------------------
-        // Calculate Streak (Bugfix applied)
+        // Async Calculate Streak (Fetch up to 365 days separately to avoid UI lock)
         // -------------------------------------------------------------
-        let streak = 0;
-        const checkDayHasData = (daysAgo) => {
-            const d = new Date();
-            d.setDate(today.getDate() - daysAgo);
-            return data[getKey(d)]?.totalSeconds > 0;
-        };
-
-        if (checkDayHasData(0)) {
-            streak = 1;
-            for (let i = 1; i < 365; i++) { // Check up to a year backwards
-                if (checkDayHasData(i)) streak++;
-                else break;
-            }
-        } else if (checkDayHasData(1)) {
-            streak = 0; // The streak hasn't carried over to today yet, but we can show it as pending
-            // For motivation, we could say "0 (Yesterday: X)", but let's just count from yesterday
-            for (let i = 1; i < 365; i++) {
-                if (checkDayHasData(i)) streak++;
-                else break;
-            }
-        }
+        this._calculateStreak(today, getKey);
 
         // -------------------------------------------------------------
         // Top Channel (Today)
@@ -198,11 +185,59 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             today: { count: tCount, seconds: tSec },
             week: { count: wCount, seconds: wSec },
             month: { count: mCount, seconds: mSec },
-            streak: streak,
+            streak: this.stats.streak,
             topChannel: topChannelName
         };
 
         this.updateWidgetValues();
+    }
+
+    async _calculateStreak(today, getKey) {
+        // We only fetch keys sequentially backwards until we hit a day with no data, 
+        // to avoid fetching all 365 days if the streak is only 5 days long.
+        let streak = 0;
+        let isFirstDay = true;
+        let daysAgo = 0;
+
+        while (daysAgo < 365) {
+            const d = new Date();
+            d.setDate(today.getDate() - daysAgo);
+            const key = getKey(d);
+
+            const result = await chrome.storage.local.get([key]);
+            const dayData = result[key];
+            const hasData = dayData?.totalSeconds > 0;
+
+            if (isFirstDay) {
+                if (hasData) {
+                    streak = 1;
+                    daysAgo++;
+                } else {
+                    // Check yesterday. If yesterday has data, streak is pending today
+                    const yesterday = new Date();
+                    yesterday.setDate(today.getDate() - 1);
+                    const yResult = await chrome.storage.local.get([getKey(yesterday)]);
+                    if (yResult[getKey(yesterday)]?.totalSeconds > 0) {
+                        streak = 0;
+                        daysAgo = 1; // start counting from yesterday
+                    } else {
+                        break; // No data today or yesterday, streak is 0
+                    }
+                }
+                isFirstDay = false;
+            } else {
+                if (hasData) {
+                    streak++;
+                    daysAgo++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        this.stats.streak = streak;
+        const streakEl = document.getElementById('ypp-stats-streak');
+        if (streakEl) streakEl.textContent = streak;
     }
 
     createWidget() {

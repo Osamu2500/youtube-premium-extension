@@ -36,8 +36,34 @@ window.YPP.features.AutoLike = class AutoLike
         // Don't attempt twice for same video
         if (this._attempted.has(videoId)) return;
 
-        // Wait for player and like button to render
-        this._waitAndLike(videoId);
+        this._waitForPercentage(videoId);
+    }
+
+    _waitForPercentage(videoId) {
+        const video = document.querySelector('video.html5-main-video');
+        if (!video) {
+            setTimeout(() => this._waitForPercentage(videoId), 1000);
+            return;
+        }
+
+        const checkProgress = () => {
+            const currentUrl = window.location.href;
+            const currentVideoId = currentUrl.match(/[?&]v=([^&]+)/)?.[1];
+            
+            // Abort if user navigated away
+            if (currentVideoId !== videoId) {
+                video.removeEventListener('timeupdate', checkProgress);
+                return;
+            }
+
+            const percentage = (video.currentTime / video.duration) * 100;
+            if (percentage >= 50 || video.ended) {
+                video.removeEventListener('timeupdate', checkProgress);
+                this._waitAndLike(videoId);
+            }
+        };
+
+        video.addEventListener('timeupdate', checkProgress);
     }
 
     _waitAndLike(videoId, attempts = 0) {

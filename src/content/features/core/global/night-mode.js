@@ -14,9 +14,33 @@
             };
         }
 
-        run(settings) {
-            this._applyBlueLight(settings.blueLight || 0);
-            this._applyDim(settings.dim || 0);
+        enable(settings) {
+            try {
+                this.update(settings);
+            } catch (err) {
+                console.error('[YPP] NightMode enable error:', err);
+            }
+        }
+        
+        disable() {
+            try {
+                this._removeBlueLight();
+                if (this._elements.dim) {
+                    this._elements.dim.remove();
+                    this._elements.dim = null;
+                }
+            } catch (err) {
+                console.error('[YPP] NightMode disable error:', err);
+            }
+        }
+
+        update(settings) {
+            try {
+                this._applyBlueLight(settings?.blueLight || 0);
+                this._applyDim(settings?.dim || 0);
+            } catch (err) {
+                console.error('[YPP] NightMode update error:', err);
+            }
         }
 
         _applyBlueLight(value) {
@@ -103,6 +127,15 @@
             }
 
             this._elements.dim.style.opacity = (value / 100).toString();
+        }
+
+        async disable() {
+            super.disable();
+            this._removeBlueLight();
+            if (this._elements.dim) {
+                this._elements.dim.remove();
+                this._elements.dim = null;
+            }
         }
     }
 

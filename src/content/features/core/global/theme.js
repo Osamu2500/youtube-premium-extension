@@ -9,12 +9,13 @@ window.YPP.features = window.YPP.features || {};
  * Theme Manager
  * @class ThemeManager
  */
-window.YPP.features.Theme = class ThemeManager {
+window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseFeature {
     /**
      * Initialize Theme Manager
      * @constructor
      */
     constructor() {
+        super('ThemeManager');
         this._initConstants();
         this._initState();
     }
@@ -269,7 +270,34 @@ window.YPP.features.Theme = class ThemeManager {
      * @param {boolean} enable
      */
     _applyHideScrollbar(enable) {
+        document.documentElement.classList.toggle('ypp-hide-scrollbar', enable);
         document.body.classList.toggle('ypp-hide-scrollbar', enable);
+
+        // Natively hide the viewport scrollbar by injecting a naked ::-webkit-scrollbar rule
+        let styleNode = document.getElementById('ypp-hide-scrollbar-style');
+        if (enable) {
+            if (!styleNode) {
+                styleNode = document.createElement('style');
+                styleNode.id = 'ypp-hide-scrollbar-style';
+                styleNode.textContent = `
+                    ::-webkit-scrollbar {
+                        display: none !important;
+                        width: 0px !important;
+                        height: 0px !important;
+                        background: transparent !important;
+                        -webkit-appearance: none !important;
+                    }
+                    * {
+                        scrollbar-width: none !important;
+                    }
+                `;
+                document.documentElement.appendChild(styleNode);
+            }
+        } else {
+            if (styleNode) {
+                styleNode.remove();
+            }
+        }
     }
 
     /**
@@ -292,7 +320,7 @@ window.YPP.features.Theme = class ThemeManager {
         toggle(this._CSS_CLASSES.HIDE_FUNDRAISER, this._settings.hideFundraiser);
         toggle(this._CSS_CLASSES.DISPLAY_FULL_TITLE, this._settings.displayFullTitle);
         toggle(this._CSS_CLASSES.HOOK_FREE, this._settings.hookFreeHome);
-        toggle(this._CSS_CLASSES.CUSTOM_SCROLLBAR, this._settings.customScrollbar);
+        toggle(this._CSS_CLASSES.CUSTOM_SCROLLBAR, this._settings.customScrollbar && !this._settings.hideScrollbar);
         toggle(this._CSS_CLASSES.GRAYSCALE_THUMBNAILS, this._settings.grayscaleThumbnails);
 
         // Search specific

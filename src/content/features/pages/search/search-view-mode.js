@@ -80,6 +80,13 @@ window.YPP.features.SearchViewMode = class SearchViewMode {
         const body = document.body;
         if (!this._classes.GRID_MODE || !this._classes.LIST_MODE) return;
 
+        const isSearch = window.location.pathname === '/results';
+
+        if (!isSearch) {
+            body.classList.remove(this._classes.GRID_MODE, this._classes.LIST_MODE);
+            return;
+        }
+
         if (this._viewMode === SearchViewMode.MODES.GRID) {
             body.classList.add(this._classes.GRID_MODE);
             body.classList.remove(this._classes.LIST_MODE);

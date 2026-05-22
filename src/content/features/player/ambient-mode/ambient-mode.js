@@ -58,7 +58,11 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             const blurAmount = this.settings?.ambientBlur ?? 120;
             
             this.container.style.opacity = intensity;
-            this.canvas.style.filter = `blur(${blurAmount}px) saturate(2.0) brightness(0.85)`;
+            
+            const scaledBlur = Math.max(1, Math.round(blurAmount / 20));
+            if (this.ctx) {
+                this.ctx.filter = `blur(${scaledBlur}px) saturate(2.0) brightness(0.85)`;
+            }
         }
     }
 
@@ -149,7 +153,7 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             transform: translateX(-50%) scale(1.2);
             width: 100vw;
             height: 100vh;
-            filter: blur(${blurAmount}px) saturate(2.0) brightness(0.85);
+            image-rendering: auto; /* Allow native bilinear stretching */
             mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
         `;
@@ -163,6 +167,12 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         watchContainer.insertBefore(this.container, watchContainer.firstChild);
 
         this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
+        // Set the internal context blur based on settings, scaled for a 100x100 canvas.
+        // A blur of 120px on a 1920px screen is ~6% of the width. 
+        // 6% of our 100px canvas is 6px.
+        const originalBlur = this.settings?.ambientBlur || 120;
+        const scaledBlur = Math.max(1, Math.round(originalBlur / 20));
+        this.ctx.filter = `blur(${scaledBlur}px) saturate(2.0) brightness(0.85)`;
     }
 
     startLoop() {

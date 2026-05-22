@@ -203,7 +203,8 @@ window.YPP.CONSTANTS = {
         grayscaleThumbnails: false,
 
         // Layout
-        grid4x4: true, // Legacy (can be kept for migration or removed)
+        grid4x4: false, // Legacy (can be kept for migration or removed)
+        autoScaleLayout: true,
         homeColumns: 4,
         searchColumns: 4,
         channelColumns: 4,

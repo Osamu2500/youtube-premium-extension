@@ -42,8 +42,12 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
         if (!shouldRun) return; // No nav items configured — nothing to do
 
-        this._applySidebarState();
-        this._observeHeader();
+        try {
+            this._applySidebarState();
+            this._observeHeader();
+        } catch (e) {
+            this.utils?.log('Error enabling HeaderNav', 'HEADERNAV', 'error', e);
+        }
     }
 
     async disable() {

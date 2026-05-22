@@ -78,16 +78,20 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
     async enable() {
         await super.enable();
         
-        if (this.settings) {
-            this.updateSettings(this.settings);
-        }
-        
-        this._retryCount = 0;
-        this.utils.log?.('Initializing 4x4 grid...', 'LAYOUT');
+        try {
+            if (this.settings) {
+                this.updateSettings(this.settings);
+            }
+            
+            this._retryCount = 0;
+            this.utils.log?.('Initializing 4x4 grid...', 'LAYOUT');
 
-        this._applyWithRetry();
-        this.startObserver();
-        this.addResizeListener();
+            this._applyWithRetry();
+            this.startObserver();
+            this.addResizeListener();
+        } catch (e) {
+            this.utils.log?.('Error enabling grid layout', 'LAYOUT', 'error', e);
+        }
     }
 
     /**
@@ -244,6 +248,9 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             cols = Math.min(8, cols);
         }
 
+        // Fix YouTube's row wrappers (use display: contents to flatten)
+        // Moved to styles.css for massive performance boost.
+
         // Performance: Skip if already processed and unchanged
         if (this._processedContainers.has(contents)) {
             const lastCols = parseInt(contents.getAttribute('data-ypp-cols'), 10);
@@ -285,13 +292,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             }
         });
 
-        // Fix YouTube's row wrappers (use display: contents to flatten)
-        const rows = gridRenderer.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ROWS);
-        rows.forEach(row => {
-            if (row.style.display !== 'contents') {
-                row.style.display = 'contents';
-            }
-        });
+        // (Row wrappers flattening is now handled earlier in the function)
 
         // Mark as processed
         this._processedContainers.add(contents);

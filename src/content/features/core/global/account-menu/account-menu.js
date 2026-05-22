@@ -35,12 +35,15 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
     async enable() {
         await super.enable();
+        try {
+            this._observer = new MutationObserver(() => this._onMutation());
+            this._observer.observe(document.body, { childList: true, subtree: true });
 
-        this._observer = new MutationObserver(() => this._onMutation());
-        this._observer.observe(document.body, { childList: true, subtree: true });
-
-        this._pageChangedHandler = () => this._cleanup();
-        window.YPP.events?.on('page:changed', this._pageChangedHandler);
+            this._pageChangedHandler = () => this._cleanup();
+            window.YPP.events?.on('page:changed', this._pageChangedHandler);
+        } catch (e) {
+            this.utils?.log('Error enabling AccountMenu', 'ACCOUNT', 'error', e);
+        }
     }
 
     async disable() {

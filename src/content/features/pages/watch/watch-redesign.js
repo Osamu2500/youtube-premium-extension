@@ -13,17 +13,15 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         
         // Settings state
         this.glassPlayerEnabled = false;
+        this.glassPlayerEnabled = false;
         this.sidebarCommentsEnabled = false;
-
-        this._onPageChange = this._onPageChange.bind(this);
+        this._mountInterval = null; // Track interval
     }
 
     /**
      * Initializes the feature (called by FeatureManager)
      */
     init() {
-        if (!window.YPP.EventBus) return;
-        window.YPP.EventBus.on('page:change', this._onPageChange);
         this._injectCSS();
         this._checkRoute();
     }
@@ -34,10 +32,14 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
     enable(settings) {
         if (!settings) return;
         
-        this.glassPlayerEnabled = !!settings.glassPlayerUI;
-        this.sidebarCommentsEnabled = !!settings.sidebarComments;
-        
-        this._applyFeatures();
+        try {
+            this.glassPlayerEnabled = !!settings.glassPlayerUI;
+            this.sidebarCommentsEnabled = !!settings.sidebarComments;
+            
+            this._applyFeatures();
+        } catch (e) {
+            console.error('Error enabling WatchRedesign', e);
+        }
     }
 
     /**
@@ -46,6 +48,10 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
     disable() {
         this.glassPlayerEnabled = false;
         this.sidebarCommentsEnabled = false;
+        if (this._mountInterval) {
+            clearInterval(this._mountInterval);
+            this._mountInterval = null;
+        }
         this._applyFeatures();
     }
 
@@ -178,9 +184,9 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
     }
 
     /**
-     * Handles SPA navigation
+     * Handles SPA navigation (called by BaseFeature)
      */
-    _onPageChange(data) {
+    onPageChange(data) {
         this._checkRoute();
     }
 
@@ -230,15 +236,31 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         
         // Use an interval to wait for both the comments and the sidebar to render
         let attempts = 0;
-        const interval = setInterval(() => {
+        
+        if (this._mountInterval) clearInterval(this._mountInterval);
+        
+        this._mountInterval = setInterval(() => {
             attempts++;
-            if (attempts > 50) { clearInterval(interval); return; } // Give up after 10s
+            
+            // Abort if feature disabled or page changed during wait
+            if (!this.sidebarCommentsEnabled || !this.isWatchPage) {
+                clearInterval(this._mountInterval);
+                this._mountInterval = null;
+                return;
+            }
+            
+            if (attempts > 50) { 
+                clearInterval(this._mountInterval); 
+                this._mountInterval = null;
+                return; 
+            } // Give up after 10s
             
             const originalComments = document.querySelector('ytd-watch-flexy #primary-inner > #comments');
             const secondaryInner = document.querySelector('ytd-watch-flexy #secondary-inner');
             
             if (originalComments && secondaryInner) {
-                clearInterval(interval);
+                clearInterval(this._mountInterval);
+                this._mountInterval = null;
                 
                 // Check if already mounted
                 if (document.getElementById('ypp-sidebar-comments-container')) return;

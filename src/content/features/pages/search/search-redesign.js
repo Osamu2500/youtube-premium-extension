@@ -122,14 +122,19 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
             this._handleNavigation();
             return;
         }
-        this._isEnabled = true;
+        
+        try {
+            this._isEnabled = true;
 
-        window.addEventListener('yt-navigate-finish', this._handleNavigation);
+            window.addEventListener('yt-navigate-finish', this._handleNavigation);
 
-        this._searchViewMode.enable();
+            this._searchViewMode.enable();
 
-        this._handleNavigation();
-        this._log('SearchRedesign enabled', 'info');
+            this._handleNavigation();
+            this._log('SearchRedesign enabled', 'info');
+        } catch (e) {
+            this._log('Error enabling SearchRedesign: ' + e.message, 'error');
+        }
     }
 
     /** Disable the feature and clean up. */
@@ -189,6 +194,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         } else {
             this._searchObserver.stop();
             document.body.classList.remove('ypp-search-clean-grid');
+            this._removeClasses();
             this._lastQuery = null;
         }
     }

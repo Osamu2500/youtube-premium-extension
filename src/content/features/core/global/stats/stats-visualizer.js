@@ -13,13 +13,18 @@ window.YPP.features = window.YPP.features || {};
  *  - Speed-adjusted time saved (today)
  *  - Watch-streak and aggregate counts
  */
-window.YPP.features.StatsVisualizer = class StatsVisualizer {
+window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.features.BaseFeature {
     constructor() {
+        super('StatsVisualizer');
         this.enabled = false;
         this.overlay = null;
         this.isInitialized = false;
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
+
+        // Binds
+        this._onMouseMove = this._onMouseMove.bind(this);
+        this._onMouseUp = this._onMouseUp.bind(this);
 
         // Storage helpers (mirrors HistoryTracker schema)
         this.STORAGE_PREFIX = 'ypp_analytics_';
@@ -52,8 +57,12 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer {
 
     _disable() {
         this.enabled = false;
-        this.overlay?.remove();
-        this.overlay = null;
+        if (this.overlay) {
+            this.overlay.remove();
+            this.overlay = null;
+        }
+        window.removeEventListener('mousemove', this._onMouseMove);
+        window.removeEventListener('mouseup', this._onMouseUp);
     }
 
     // ── Data Loading ──────────────────────────────────────────────────────────
@@ -198,18 +207,24 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer {
             this.dragOffset.x = e.clientX - el.getBoundingClientRect().left;
             this.dragOffset.y = e.clientY - el.getBoundingClientRect().top;
         });
-        window.addEventListener('mousemove', e => {
-            if (!this.isDragging || !this.overlay) return;
-            this.overlay.style.left = `${e.clientX - this.dragOffset.x}px`;
-            this.overlay.style.top  = `${e.clientY - this.dragOffset.y}px`;
-        });
-        window.addEventListener('mouseup', () => {
-            this.isDragging = false;
-            if (this.overlay) this.overlay.style.cursor = '';
-        });
+        
+        // Attach to window (will be cleaned up in _disable)
+        window.addEventListener('mousemove', this._onMouseMove);
+        window.addEventListener('mouseup', this._onMouseUp);
 
         document.body.appendChild(el);
         this.overlay = el;
+    }
+
+    _onMouseMove(e) {
+        if (!this.isDragging || !this.overlay) return;
+        this.overlay.style.left = `${e.clientX - this.dragOffset.x}px`;
+        this.overlay.style.top  = `${e.clientY - this.dragOffset.y}px`;
+    }
+
+    _onMouseUp() {
+        this.isDragging = false;
+        if (this.overlay) this.overlay.style.cursor = '';
     }
 
     // ── Render ────────────────────────────────────────────────────────────────

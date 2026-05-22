@@ -33,7 +33,8 @@ const DEFAULT_SETTINGS = {
     hideScrollbar: false,
 
     // Layout
-    grid4x4: true,
+    grid4x4: false,
+    autoScaleLayout: true,
     displayFullTitle: false,
 
     // Visibility

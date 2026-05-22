@@ -1,110 +1,112 @@
 /**
  * Reverse Playlist Feature
- * Adds a button to reverse the order of videos in the playlist panel.
+ * Adds an elegant SVG button to reverse the order of videos in the playlist panel.
  */
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.ReversePlaylist = class ReversePlaylist {
+window.YPP.features.ReversePlaylist = class ReversePlaylist extends window.YPP.features.BaseFeature {
     constructor() {
-        this.isActive = false;
-        this.observer = null;
+        super('ReversePlaylist');
         this.isReversed = false;
-        
-        this.handleNavigation = this.handleNavigation.bind(this);
+        this.btn = null;
+        this.checkInterval = null;
     }
 
     getConfigKey() { return 'reversePlaylist'; }
 
-    enable(settings) {
-        if (this.isActive) return;
-        this.isActive = true;
-        this.settings = settings;
-
-        this.init();
-        window.addEventListener('yt-navigate-finish', this.handleNavigation);
+    async enable() {
+        await super.enable();
+        
+        try {
+            // Reset state on navigation
+            this.addListener(window, 'yt-navigate-finish', () => {
+                this.isReversed = false;
+                if (this.isEnabled) {
+                    this.initUI();
+                }
+            });
+            
+            this.initUI();
+        } catch (e) {
+            this.utils?.log('Error enabling ReversePlaylist', 'PLAYLIST', 'error', e);
+        }
     }
 
-    disable() {
-        if (!this.isActive) return;
-        this.isActive = false;
+    async disable() {
+        await super.disable();
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+        }
         this.removeUI();
-        window.removeEventListener('yt-navigate-finish', this.handleNavigation);
+        this.isReversed = false;
     }
 
-    run(settings) {
-        this.settings = settings;
-        if (settings.reversePlaylist) {
-            this.enable(settings);
-        }
-    }
-
-    update(settings) {
-        this.settings = settings;
-        if (settings.reversePlaylist) {
-            this.enable(settings);
-        } else {
-            this.disable();
-        }
-    }
-
-    handleNavigation() {
-        if (this.isActive) {
-            this.isReversed = false; // Reset state on nav
-            setTimeout(() => this.init(), 1000);
-        }
-    }
-
-    init() {
-        // Check if we are in a playlist context
-        // Try #playlist-actions or #header on ytd-playlist-panel-renderer
-        const playlistFunctions = setInterval(() => {
-            if (!this.isActive) { clearInterval(playlistFunctions); return; }
+    initUI() {
+        if (this.checkInterval) clearInterval(this.checkInterval);
+        
+        let attempts = 0;
+        this.checkInterval = setInterval(() => {
+            if (!this.isEnabled) {
+                clearInterval(this.checkInterval);
+                return;
+            }
 
             const header = document.querySelector('ytd-playlist-panel-renderer #header-contents #playlist-action-menu .ytd-playlist-panel-renderer') 
-                        || document.querySelector('ytd-playlist-panel-renderer #header-contents'); // fallback
+                        || document.querySelector('ytd-playlist-panel-renderer #header-contents');
             
             if (header) {
-                clearInterval(playlistFunctions);
+                clearInterval(this.checkInterval);
                 this.injectButton(header);
             }
+            
+            attempts++;
+            if (attempts > 10) clearInterval(this.checkInterval); // Give up after 10 seconds
         }, 1000);
-
-        // Timeout 10s
-        setTimeout(() => clearInterval(playlistFunctions), 10000);
     }
 
     injectButton(header) {
-        if (header.querySelector('#ypp-reverse-btn')) return;
+        if (document.getElementById('ypp-reverse-btn')) return;
 
         const btn = document.createElement('button');
         btn.id = 'ypp-reverse-btn';
-        btn.textContent = 'Reverse';
-        // Style to look somewhat native (text button)
+        btn.title = 'Reverse Playlist Order';
+        
+        // Beautiful SVG icon matching YouTube's material design
+        btn.innerHTML = `<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 24px; height: 24px; fill: currentColor;"><g><path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"></path></g></svg>`;
+        
         Object.assign(btn.style, {
             background: 'transparent',
             border: 'none',
             color: 'var(--yt-spec-text-secondary)',
             cursor: 'pointer',
-            fontWeight: '500',
-            fontSize: '14px',
-            marginLeft: '10px',
-            padding: '5px'
+            padding: '8px',
+            marginLeft: '8px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background-color 0.2s'
         });
+        
+        btn.onmouseover = () => btn.style.backgroundColor = 'var(--yt-spec-badge-chip-background)';
+        btn.onmouseleave = () => btn.style.backgroundColor = 'transparent';
 
-        btn.onclick = (e) => {
+        this.addListener(btn, 'click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             this.toggleReverse(btn);
-        };
+        });
 
         header.appendChild(btn);
+        this.btn = btn;
     }
 
     toggleReverse(btn) {
         const itemsContainer = document.querySelector('ytd-playlist-panel-renderer #items');
         if (!itemsContainer) return;
 
-        // Get all item elements
         const items = Array.from(itemsContainer.children);
         if (items.length < 2) return;
 
@@ -115,12 +117,20 @@ window.YPP.features.ReversePlaylist = class ReversePlaylist {
         items.forEach(item => itemsContainer.appendChild(item));
 
         this.isReversed = !this.isReversed;
-        btn.textContent = this.isReversed ? 'Original' : 'Reverse';
         btn.style.color = this.isReversed ? 'var(--yt-spec-text-primary)' : 'var(--yt-spec-text-secondary)';
+        
+        if (this.utils.createToast) {
+            this.utils.createToast(this.isReversed ? 'Playlist reversed' : 'Playlist restored', 'info', 2000);
+        }
     }
 
     removeUI() {
-        const btn = document.getElementById('ypp-reverse-btn');
-        if (btn) btn.remove();
+        if (this.btn) {
+            this.btn.remove();
+            this.btn = null;
+        }
+        
+        const oldBtn = document.getElementById('ypp-reverse-btn');
+        if (oldBtn) oldBtn.remove();
     }
 };

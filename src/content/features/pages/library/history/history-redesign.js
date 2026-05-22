@@ -19,10 +19,14 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
         if (location.pathname !== '/feed/history') return;
         await super.enable();
 
-        this.apply();
+        try {
+            this.apply();
 
-        this.observer.start();
-        this.observer.register('history-redesign', 'ytd-app', this._boundHandleMutations, false);
+            this.observer.start();
+            this.observer.register('history-redesign', 'ytd-app', this._boundHandleMutations, false);
+        } catch (e) {
+            this.utils?.log('Error enabling HistoryRedesign', 'HISTORY', 'error', e);
+        }
     }
     
     async disable() {

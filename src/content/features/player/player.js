@@ -6,8 +6,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.Player = class Player {
+window.YPP.features.Player = class Player extends window.YPP.features.BaseFeature {
     constructor() {
+        super('Player');
         this.settings = null;
         this.isLooping = false;
         this.injectedButtons = false;

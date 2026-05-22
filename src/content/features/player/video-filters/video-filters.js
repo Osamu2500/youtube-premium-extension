@@ -4,8 +4,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.VideoFilters = class VideoFilters {
+window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.features.BaseFeature {
     constructor() {
+        super('VideoFilters');
         this.name = 'VideoFilters';
         // ---- Cinema Filters State ----
         this.currentFilterIndex = 0;
@@ -46,11 +47,15 @@ window.YPP.features.VideoFilters = class VideoFilters {
     }
 
     disable() {
-        window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
-        this._removeFilterPanel();
-        if (this._filterBtn) {
-            this._filterBtn.remove();
-            this._filterBtn = null;
+        try {
+            window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
+            this._removeFilterPanel();
+            if (this._filterBtn) {
+                this._filterBtn.remove();
+                this._filterBtn = null;
+            }
+        } catch (err) {
+            console.error('[YPP] VideoFilters disable error:', err);
         }
     }
 

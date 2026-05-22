@@ -5,8 +5,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.VolumeBooster = class VolumeBooster {
+window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.features.BaseFeature {
     constructor() {
+        super('VolumeBooster');
         this.name = 'VolumeBooster';
         this.settings = null;
 

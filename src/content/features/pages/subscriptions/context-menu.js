@@ -15,7 +15,11 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
     enable(settings) {
         if (this.isActive) return;
         this.isActive = true;
-        this.init();
+        try {
+            this.init();
+        } catch (e) {
+            this.utils?.log('Error enabling ContextMenu', 'CONTEXTMENU', 'error', e);
+        }
     }
 
     disable() {

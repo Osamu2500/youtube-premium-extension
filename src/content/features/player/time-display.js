@@ -5,8 +5,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.TimeDisplay = class TimeDisplay {
+window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.BaseFeature {
     constructor() {
+        super('TimeDisplay');
         this.name = 'TimeDisplay';
         this.settings = null;
         this._boundTimeUpdate = null;
@@ -22,23 +23,27 @@ window.YPP.features.TimeDisplay = class TimeDisplay {
     }
 
     disable() {
-        if (this._pollInterval) {
-            clearInterval(this._pollInterval);
-            this._pollInterval = null;
+        try {
+            if (this._pollInterval) {
+                clearInterval(this._pollInterval);
+                this._pollInterval = null;
+            }
+
+            if (this._videoElement && this._boundTimeUpdate) {
+                this._videoElement.removeEventListener('timeupdate', this._boundTimeUpdate);
+                this._videoElement.removeEventListener('ratechange', this._boundTimeUpdate);
+                this._boundTimeUpdate = null;
+            }
+
+            const timeRemainingNode = document.querySelector('.ypp-time-remaining');
+            const sepNode = document.querySelector('.ypp-time-separator-appended');
+            if (timeRemainingNode) timeRemainingNode.remove();
+            if (sepNode) sepNode.remove();
+
+            this._videoElement = null;
+        } catch (err) {
+            console.error('[YPP] TimeDisplay disable error:', err);
         }
-
-        if (this._videoElement && this._boundTimeUpdate) {
-            this._videoElement.removeEventListener('timeupdate', this._boundTimeUpdate);
-            this._videoElement.removeEventListener('ratechange', this._boundTimeUpdate);
-            this._boundTimeUpdate = null;
-        }
-
-        const timeRemainingNode = document.querySelector('.ypp-time-remaining');
-        const sepNode = document.querySelector('.ypp-time-separator-appended');
-        if (timeRemainingNode) timeRemainingNode.remove();
-        if (sepNode) sepNode.remove();
-
-        this._videoElement = null;
     }
 
     update(settings) {

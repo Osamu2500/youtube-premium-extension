@@ -10,10 +10,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         this._videoQueue = [];
         this._currentVideoIndex = 0;
         this._videoTimer = null;
+        this._checkInterval = null;
         this._isUserHovering = false;
         this._mo = null;
-        this._scrollHandler = null;
-        this._keyboardHandler = null;
+        this._abortController = null;
         this._isMuted = true;
         this._isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
         this._navObserver = null;
@@ -46,9 +46,27 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         return 'cinematicMode';
     }
 
+    _extractVideoId(url) {
+        if (!url) return '';
+        try {
+            const u = new URL(url, window.location.origin);
+            let videoId = u.searchParams.get('v');
+            if (!videoId && u.pathname.startsWith('/shorts/')) {
+                videoId = u.pathname.split('/shorts/')[1].split('?')[0];
+            }
+            return videoId || '';
+        } catch(e) {
+            return '';
+        }
+    }
+
     enable() {
         super.enable();
-        this._isMuted = this.settings.cinematicMuted !== undefined ? this.settings.cinematicMuted : this._isFirefox;
+        // Restore user's saved mute preference; fall back to true (muted) on Firefox
+        // since Firefox blocks autoplay more aggressively than Chrome.
+        this._isMuted = this.settings?.cinematicMuted !== undefined
+            ? this.settings.cinematicMuted
+            : this._isFirefox;
         
         this._injectStyles();
         
@@ -111,6 +129,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     async _activate() {
         if (this._cinematicActive) return;
         this._cinematicActive = true;
+        this._abortController = new AbortController();
 
         document.documentElement.setAttribute('dark', ''); 
         document.body.classList.add('cinematic');
@@ -138,14 +157,32 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             // Wait for grid to settle after YPP layout manager runs
             await new Promise(r => setTimeout(r, 500));
 
-            const firstVideo = await this.waitForElement('ytd-rich-item-renderer', 10000);
-            if (!firstVideo) return;
-            
-            await this._makeHeroPreview(firstVideo);
+            // Wait for ANY ytd-rich-item-renderer to appear first
+            const anyItem = await this.waitForElement('ytd-rich-item-renderer', 10000);
+            if (!anyItem) return;
+
+            // Build the filtered queue to get the first VALID playable video.
+            // We cannot use the raw first DOM element — it may be a Shorts shelf,
+            // a promoted card, or an ad that has no ?v= URL, which would abort the hero.
             this._updateVideoQueue();
+
+            // If the queue came back empty on first build, wait a bit more for
+            // YouTube to finish hydrating the video cards, then retry once.
+            if (this._videoQueue.length === 0) {
+                await new Promise(r => setTimeout(r, 1500));
+                this._updateVideoQueue();
+            }
+
+            const firstValid = this._videoQueue[0];
+            if (!firstValid) {
+                window.YPP.utils.log("No valid video found for cinematic hero", "CINEMATIC", "warn");
+                return;
+            }
+
+            await this._makeHeroPreview(firstValid);
             this._setupContentObserver();
 
-            firstVideo.classList.add('netflix-active-preview');
+            firstValid.classList.add('netflix-active-preview');
 
             this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
             
@@ -160,11 +197,12 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
     _periodicCheck() {
         if (!this._isUserHovering) {
-            const currentVideo = this._videoQueue[this._currentVideoIndex];
-            if (currentVideo && this._heroState.status === 'ready') {
-                const iframe = this._heroState.heroElement?.querySelector('iframe');
-                if (!iframe) {
+            const activePreview = document.querySelector('ytd-video-preview[active][playing]:not([hidden])');
+            if (!activePreview) {
+                const currentVideo = this._videoQueue[this._currentVideoIndex];
+                if (currentVideo && this._heroState.status === 'ready') {
                     this._updateHeroContent(currentVideo);
+                    this._simulateHover(currentVideo);
                 }
             }
         }
@@ -176,6 +214,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         if (this._heroState.status !== 'inactive') return;
         this._heroState.status = 'creating';
         this._heroState.currentVideo = videoElement;
+
+        // Wait for preview to be created by hover simulation
+        const preview = await this._waitForPreview(videoElement);
+        if (!preview) {
+            this._heroState.status = 'inactive';
+            return;
+        }
 
         const heroWrapper = document.createElement('div');
         heroWrapper.className = 'netflix-hero';
@@ -193,23 +238,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         `;
         heroWrapper.insertAdjacentHTML('afterbegin', navHTML);
 
-        const url = videoElement.querySelector('a#video-title-link')?.href || '';
-        let videoId = '';
-        try { videoId = new URL(url).searchParams.get('v'); } catch(e) {}
-        
-        if (!videoId) {
-            this._heroState.status = 'inactive';
-            return;
-        }
-
-        const iframe = document.createElement('iframe');
-        iframe.className = 'netflix-hero-iframe';
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this._isMuted ? 1 : 0}&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${videoId}&enablejsapi=1`;
-        iframe.frameBorder = '0';
-        iframe.allow = 'autoplay; encrypted-media';
-        iframe.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; object-fit: cover; border: none;';
-        
-        heroWrapper.appendChild(iframe);
+        // Append hero to body so it isn't trapped by thumbnail overflow: hidden
+        document.body.appendChild(heroWrapper);
+        heroWrapper.appendChild(preview);
+        this._forceVideoSize(preview);
 
         const gradient = document.createElement('div');
         gradient.className = 'netflix-hero-gradient';
@@ -219,37 +251,111 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         contentOverlay.className = 'netflix-hero-content';
         heroWrapper.appendChild(contentOverlay);
 
-        // Append directly to the body, ensuring it's a fixed background element!
-        document.body.appendChild(heroWrapper);
-
         this._setupPreviewChangeObserver();
         this._heroState.status = 'ready';
         this._updateHeroContent(videoElement);
+    }
+
+    _waitForPreview(videoElement) {
+        return new Promise(resolve => {
+            let resolved = false;
+            const done = (preview) => {
+                if (resolved) return;
+                resolved = true;
+                resolve(preview || null);
+            };
+
+            // Only look for the preview INSIDE the target video element.
+            // YouTube is a SPA and reuses a single <ytd-video-preview> node,
+            // moving it to whichever video is currently being hovered.
+            const existing = videoElement.querySelector('ytd-video-preview');
+            if (existing) return done(existing);
+
+            const observer = new MutationObserver(() => {
+                const preview = videoElement.querySelector('ytd-video-preview');
+                if (preview) {
+                    observer.disconnect();
+                    done(preview);
+                }
+            });
+            observer.observe(videoElement, { childList: true, subtree: true });
+            
+            // Link to controller so it gets cleaned up if cinematic mode is destroyed early
+            if (this._abortController) {
+                this._abortController.signal.addEventListener('abort', () => {
+                    observer.disconnect();
+                    done(null);
+                });
+            }
+            
+            let attempts = 0;
+            const maxAttempts = 10;
+            const tryHover = async () => {
+                if (resolved) return;
+                
+                await this._simulateHover(videoElement);
+                
+                if (resolved) return;
+                attempts++;
+                if (attempts < maxAttempts) {
+                    setTimeout(tryHover, 400);
+                } else {
+                    observer.disconnect();
+                    // Fallback: If it never appeared inside videoElement, try globally just in case
+                    done(videoElement.querySelector('ytd-video-preview') || document.querySelector('ytd-video-preview'));
+                }
+            };
+            tryHover();
+        });
+    }
+
+    _simulateHover(element) {
+        if (!element) return Promise.resolve();
+        return new Promise(resolve => {
+            const fire = (el) => {
+                const rect = el.getBoundingClientRect();
+                this.CONFIG.HOVER_EVENTS.forEach(eventType => {
+                    el.dispatchEvent(new MouseEvent(eventType, {
+                        bubbles: true, cancelable: true, view: window,
+                        clientX: rect.left + 10,
+                        clientY: rect.top + 10,
+                    }));
+                });
+            };
+            const attempt = (retries) => {
+                const thumbnailContainer = element.querySelector('#thumbnail, a#thumbnail, ytd-thumbnail a');
+                if (thumbnailContainer) {
+                    fire(element);
+                    fire(thumbnailContainer);
+                    setTimeout(() => {
+                        if (!this._isMuted) this._syncMuteState();
+                        this._updateMuteButtonVisibility();
+                        resolve();
+                    }, 800);
+                } else if (retries > 0) {
+                    setTimeout(() => attempt(retries - 1), 300);
+                } else {
+                    fire(element);
+                    resolve();
+                }
+            };
+            setTimeout(() => attempt(5), 100);
+        });
     }
 
     _updateHeroContent(videoElement) {
         if (this._heroState.status !== 'ready' || !this._heroState.heroElement) return;
         
         const existingContent = this._heroState.heroElement.querySelector('.netflix-hero-content');
-        const iframe = this._heroState.heroElement.querySelector('iframe');
         if (!existingContent) return;
 
         const title = videoElement.querySelector('#video-title')?.textContent?.trim() || 'Video Title';
         const avatar = videoElement.querySelector('yt-avatar-shape img, #avatar-link img, #avatar img')?.src || null;
         const channelName = videoElement.querySelector('ytd-channel-name a, ytd-channel-name yt-formatted-string')?.textContent?.trim() || 'Channel Name';
-        const url = videoElement.querySelector('a#video-title-link')?.href || '#';
+        const titleLink = videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail');
+        const url = titleLink?.href || '#';
         const isRecent = this._isRecentlyAdded(videoElement);
         
-        let videoId = '';
-        try { videoId = new URL(url).searchParams.get('v'); } catch(e) {}
-
-        if (videoId && iframe) {
-            const currentSrc = iframe.src;
-            if (!currentSrc.includes(videoId)) {
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this._isMuted ? 1 : 0}&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${videoId}&enablejsapi=1`;
-            }
-        }
-
         if (!title || !channelName) return;
 
         const rawHtml = `
@@ -257,7 +363,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 ${avatar ? `<img src="${avatar}" class="channel-avatar" style="border-radius: 100%; border: 1px solid rgba(255,255,255,0.7); width: 40px;" onerror="this.style.display='none'">` : ''}
                 <h2 class="channel-name" style="font-size: 1.5em; font-weight: normal;">${window.YPP.utils.escapeHTML(channelName)}</h2>
             </div>   
-            ${isRecent ? '<span class="recently-badge" style="background-color: #e50914; color: white; padding: 6px 8px; border-radius: 4px; font-size: 15px; font-weight: 500; margin-bottom: 14px; display: inline-block;">Recently Added</span>' : ''}
+            ${isRecent ? `<span class="recently-badge" style="background-color: #e50914; color: white; padding: 6px 8px; border-radius: 4px; font-size: 15px; font-weight: 500; margin-bottom: 14px; display: inline-block;">Recently Added</span>` : ''}
             <h1 style="font-size: 4em; margin-bottom: 2rem; max-width: 780px;">${window.YPP.utils.escapeHTML(title)}</h1>
             <div class="netflix-hero-buttons" style="display: flex; gap: 1rem;">
                 <a class="netflix-play-button" href="${url}" style="background: white; color: black; display: flex; align-items: center; gap: 0.5rem; padding: 0.8em 2em; border-radius: 4px; font-size: 1.5em; text-decoration: none; font-weight: bold; cursor: pointer;">
@@ -329,10 +435,14 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     _syncMuteState() {
-        const iframe = this._heroState.heroElement?.querySelector('iframe');
-        if (iframe && iframe.contentWindow) {
-            const func = this._isMuted ? 'mute' : 'unMute';
-            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: [] }), '*');
+        if (this._isFirefox) return;
+        const preview = document.querySelector('ytd-video-preview');
+        const muteButton = preview?.querySelector('yt-mute-toggle-button button');
+        if (muteButton) {
+            const isMutedNow = muteButton.getAttribute('aria-label')?.toLowerCase().includes('unmute');
+            if (isMutedNow !== this._isMuted) {
+                muteButton.click();
+            }
         }
     }
 
@@ -342,43 +452,136 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     _setupPreviewChangeObserver() {
-        // Now just observes user hover state on videos
-        const observer = new MutationObserver(() => {
-            const hoveredVideo = document.querySelector('ytd-rich-item-renderer:hover');
+        // Use real mouse events — CSS :hover is NOT a DOM attribute mutation,
+        // so MutationObserver cannot detect it. mouseover/mouseout are the correct APIs.
+        const contents = document.querySelector('#contents');
+        if (!contents) return;
 
-            if (hoveredVideo) {
-                if (!this._isUserHovering || this._heroState.currentVideo !== hoveredVideo) {
-                    this._isUserHovering = true;
-                    this._heroState.currentVideo = hoveredVideo;
-                    clearTimeout(this._videoTimer);
-                    this._updateHeroContent(hoveredVideo);
-                }
-            } else {
-                if (this._isUserHovering) {
-                    this._isUserHovering = false;
-                    const currentVideo = this._videoQueue[this._currentVideoIndex];
-                    if (currentVideo) {
-                        this._updateHeroContent(currentVideo);
+        contents.addEventListener('mouseover', (e) => {
+            const card = e.target.closest('ytd-rich-item-renderer');
+            if (!card) return;
+            if (!this._isUserHovering || this._heroState.currentVideo !== card) {
+                this._isUserHovering = true;
+                this._heroState.currentVideo = card;
+                clearTimeout(this._videoTimer);
+                this._updateHeroContent(card);
+                setTimeout(() => this._simulateHover(card), 50);
+            }
+        }, { signal: this._abortController?.signal });
+
+        contents.addEventListener('mouseout', (e) => {
+            // Only fire when leaving the #contents container entirely
+            if (contents.contains(e.relatedTarget)) return;
+            if (this._isUserHovering) {
+                this._isUserHovering = false;
+                const currentVideo = this._videoQueue[this._currentVideoIndex];
+                if (currentVideo) {
+                    this._updateHeroContent(currentVideo);
+                    setTimeout(() => {
+                        this._simulateHover(currentVideo);
                         this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-                    }
+                    }, 50);
                 }
             }
-        });
+        }, { signal: this._abortController?.signal });
 
+        const observer = new MutationObserver((mutations) => {
+            const preview = document.querySelector('ytd-video-preview');
+            if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
+                // Steal the preview back into our hero container on the body
+                this._heroState.heroElement.appendChild(preview);
+                
+                // Re-append gradients and content to keep them above the video
+                const gradient = this._heroState.heroElement.querySelector('.netflix-hero-gradient');
+                const content = this._heroState.heroElement.querySelector('.netflix-hero-content');
+                if (gradient) this._heroState.heroElement.appendChild(gradient);
+                if (content) this._heroState.heroElement.appendChild(content);
+                
+                this._forceVideoSize(preview);
+            }
+        });
         observer.observe(document.body, { attributes: true, attributeFilter: ['active', 'playing', 'hidden'], subtree: true });
         this._heroState.observers.add(observer);
+    }
+
+    _forceVideoSize(preview) {
+        if (!preview) return;
+        
+        const setSize = (node) => {
+            if (!node) return;
+            node.style.setProperty('width', '100%', 'important');
+            node.style.setProperty('height', '100%', 'important');
+            node.style.setProperty('max-width', 'none', 'important');
+            node.style.setProperty('max-height', 'none', 'important');
+            node.style.setProperty('min-width', '100%', 'important');
+            node.style.setProperty('min-height', '100%', 'important');
+            node.style.setProperty('transform', 'none', 'important');
+            node.style.setProperty('border-radius', '0', 'important');
+            node.style.setProperty('margin', '0', 'important');
+            node.style.setProperty('padding', '0', 'important');
+        };
+
+        const stretchContainers = () => {
+            setSize(preview);
+            preview.style.setProperty('position', 'absolute', 'important');
+            preview.style.setProperty('top', '0', 'important');
+            preview.style.setProperty('left', '0', 'important');
+            preview.style.setProperty('pointer-events', 'none', 'important');
+
+            const videoPreviewContainer = preview.querySelector('#video-preview-container') || preview.querySelector('#inline-preview-player');
+            setSize(videoPreviewContainer);
+
+            const ytdPlayer = preview.querySelector('ytd-player');
+            setSize(ytdPlayer);
+
+            let playerContainer = ytdPlayer ? ytdPlayer.querySelector('#container') : null;
+            if (!playerContainer && ytdPlayer && ytdPlayer.shadowRoot) {
+                playerContainer = ytdPlayer.shadowRoot.querySelector('#container');
+            }
+            setSize(playerContainer);
+
+            const html5Player = preview.querySelector('.html5-video-player') || (playerContainer ? playerContainer.querySelector('.html5-video-player') : null);
+            setSize(html5Player);
+
+            const html5VideoContainer = preview.querySelector('.html5-video-container') || (html5Player ? html5Player.querySelector('.html5-video-container') : null);
+            setSize(html5VideoContainer);
+
+            const video = preview.querySelector('video') || (html5VideoContainer ? html5VideoContainer.querySelector('video') : null);
+            setSize(video);
+            if (video) {
+                video.style.setProperty('object-fit', 'cover', 'important');
+                video.style.setProperty('z-index', '0', 'important');
+            }
+        };
+
+        stretchContainers();
+
+        if (!preview._sizeForcerAttached) {
+            preview._sizeForcerAttached = true;
+            const mo = new MutationObserver(() => {
+                stretchContainers();
+            });
+            mo.observe(preview, { childList: true, subtree: true });
+            this._heroState.observers.add(mo);
+        }
     }
 
     // ─── Queue Management & Scroll ────────────────────────────────────────────
 
     _updateVideoQueue() {
         const allVideos = document.querySelectorAll('#contents > ytd-rich-item-renderer, #contents > ytd-rich-section-renderer ytd-rich-item-renderer');
-        const newQueue = Array.from(allVideos).filter(item => item.querySelector('#video-title-link'));
+        const newQueue = Array.from(allVideos).filter(item => {
+            const titleLink = item.querySelector('a#video-title-link, a#video-title, a#thumbnail');
+            return titleLink && this._extractVideoId(titleLink.href);
+        });
 
         let queueUpdated = false;
         if (newQueue.length !== this._videoQueue.length) {
+            // Only reset index to 0 if the queue shrank (e.g. page changed).
+            // If it grew (YouTube lazy-loaded more), preserve the current position.
+            const grew = newQueue.length > this._videoQueue.length;
             this._videoQueue = newQueue;
-            this._currentVideoIndex = 0;
+            if (!grew) this._currentVideoIndex = 0;
             queueUpdated = true;
 
             newQueue.forEach(video => {
@@ -445,13 +648,14 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             setTimeout(() => this._updateVideoQueue(), this.CONFIG.CONTENT_UPDATE_DELAY);
         });
         
-        this._mo.observe(contents, { childList: true, subtree: true, attributes: true, characterData: true });
+        // childList + subtree only — no attributes/characterData to avoid firing
+        // on every text node update during page hydration (was triggering hundreds of times/sec).
+        this._mo.observe(contents, { childList: true, subtree: true });
     }
 
     _setupScrollHandler() {
-        const originalOverflow = document.body.style.overflow;
 
-        this._scrollHandler = (e) => {
+        document.body.addEventListener('wheel', (e) => {
             const contents = document.querySelector('#contents');
             if (contents) {
                 e.preventDefault();
@@ -461,9 +665,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     contents.scrollLeft += e.deltaY;
                 }
             }
-        };
+        }, { passive: false, signal: this._abortController.signal });
 
-        this._keyboardHandler = (e) => {
+        document.addEventListener('keydown', (e) => {
             const contents = document.querySelector('#contents');
             if (!contents) return;
 
@@ -492,11 +696,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     }
                     break;
             }
-        };
-
-        document.body.style.overflow = 'hidden';
-        document.body.addEventListener('wheel', this._scrollHandler, { passive: false });
-        document.addEventListener('keydown', this._keyboardHandler);
+        }, { signal: this._abortController.signal });
     }
 
     _setupNavigationListeners() {
@@ -507,7 +707,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             this._handleNavigation(currentPathname, lastPathname);
             lastPathname = currentPathname;
         });
-        this._navObserver.observe(document, { subtree: true, childList: true });
+        // Watch only the page manager, not the entire document — watching document
+        // with subtree:true fires thousands of times on YouTube's home feed.
+        const target = document.querySelector('ytd-page-manager') || document.body;
+        this._navObserver.observe(target, { childList: true });
     }
 
     _handleNavigation(newPathname, lastPathname) {
@@ -559,12 +762,17 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         heroWrapper.classList.add('fading'); 
 
         setTimeout(() => {
+            if (!this._cinematicActive || this._heroState.status !== 'ready') return;
+            
             const nextVideo = this._videoQueue[targetIndex];
             if (!nextVideo) return;
 
             nextVideo.classList.add('netflix-active-preview');
             this._updateHeroContent(nextVideo);
-            this._syncMuteState();
+            
+            this._simulateHover(nextVideo).then(() => {
+                this._syncMuteState();
+            });
 
             heroWrapper.classList.remove('fading');
             this._updateMuteButtonVisibility();
@@ -586,7 +794,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const hero = this._heroState.heroElement;
         if (hero) {
             const preview = hero.querySelector('ytd-video-preview');
-            if (preview) document.body.appendChild(preview); 
+            if (preview) document.body.appendChild(preview); // Safely return preview to DOM
             hero.remove();
         }
 
@@ -607,6 +815,8 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         clearTimeout(this._videoTimer);
         clearInterval(this._checkInterval);
+        this._videoTimer = null;
+        this._checkInterval = null;
         
         if (this._mo) {
             this._mo.disconnect();
@@ -623,17 +833,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             this._darkModeObserver = null;
         }
 
-        if (this._scrollHandler) {
-            document.body.removeEventListener('wheel', this._scrollHandler);
-            this._scrollHandler = null;
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
         }
-
-        if (this._keyboardHandler) {
-            document.removeEventListener('keydown', this._keyboardHandler);
-            this._keyboardHandler = null;
-        }
-
-        document.body.style.overflow = '';
         
         this._teardownHero();
 

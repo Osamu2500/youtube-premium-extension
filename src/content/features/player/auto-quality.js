@@ -38,7 +38,11 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
     }
 
     async enable() {
-        this.runAutoTasks();
+        try {
+            this.runAutoTasks();
+        } catch (e) {
+            this.utils?.log('Error enabling AutoQuality', 'QUALITY', 'error', e);
+        }
     }
 
     async disable() {

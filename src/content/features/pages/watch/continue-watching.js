@@ -1,73 +1,103 @@
 /**
- * Feature: Continue Watching Label
- * Ports the 'YouTube Refined' logic to tag previously watched videos in the related sidebar.
+ * Feature: Continue Watching Label & Prompt
+ * Tags previously watched videos in the related sidebar and prompts the user.
  */
 window.YPP = window.YPP || {};
-window.YPP.Features = window.YPP.Features || {};
+window.YPP.features = window.YPP.features || {};
 
-window.YPP.Features.ContinueWatching = class ContinueWatching {
+window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP.features.BaseFeature {
     constructor() {
-        this.name = 'continue_watching';
+        super('ContinueWatching');
         this.observer = null;
-        this.Utils = window.YPP.Utils;
+        this.notifiedVideos = new Set();
     }
 
     getConfigKey() { return 'continueWatching'; }
 
-    /**
-     * Initialize the feature
-     * @param {Object} settings - User settings
-     */
-    init(settings) {
-        if (!settings?.premiumTheme) {
-            this.cleanup();
-            return;
+    async enable() {
+        await super.enable();
+        
+        try {
+            // Reset notified set on new pages
+            this.addListener(window, 'yt-navigate-finish', () => {
+                this.notifiedVideos.clear();
+                if (this.isEnabled) this.startObserver();
+            });
+            
+            this.startObserver();
+        } catch (e) {
+            this.utils?.log('Error enabling ContinueWatching', 'CONTINUE', 'error', e);
         }
-
-        this.startObserver();
     }
 
-    /**
-     * Start observing for related videos that might be unfinished
-     */
+    async disable() {
+        await super.disable();
+        if (this.observer) {
+            this.observer.stop();
+            this.observer = null;
+        }
+    }
+
     startObserver() {
         if (this.observer) return;
 
         // Use our robust DOMObserver
-        this.observer = window.YPP.sharedObserver || new this.Utils.DOMObserver();
+        this.observer = window.YPP.sharedObserver || new this.utils.DOMObserver();
         
-        // Register the selector to watch for new related videos
+        // Watch for videos anywhere on the home page or related sidebar
         this.observer.register('related_videos_continue', 
-            'ytd-watch-next-secondary-results-renderer #items ytd-compact-video-renderer:not(.previously-watched-video)',
+            'ytd-rich-item-renderer, ytd-compact-video-renderer',
             this.handleNewVideo.bind(this)
         );
 
-        // Start observing the target container 
-        // Note: The container might not exist immediately, DOMObserver handles this safely if passed `document.body`
-        const target = document.querySelector('ytd-watch-next-secondary-results-renderer') || document.body;
+        const target = document.querySelector('ytd-watch-next-secondary-results-renderer, ytd-rich-grid-renderer') || document.body;
         this.observer.start(target);
     }
 
-    /**
-     * Callback when a new video card is found
-     * @param {Element} video - The video card element
-     */
     handleNewVideo(video) {
-        if (!video) return;
+        if (!this.isEnabled) return;
+        
+        // Check if we've already processed this video DOM element
+        if (video.classList.contains('previously-watched-video')) return;
 
-        // Check if it has the red resume playback bar
-        if (video.querySelector("ytd-thumbnail-overlay-resume-playback-renderer")) {
-            video.classList.add("previously-watched-video");
-        }
-    }
-
-    /**
-     * Clean up the feature
-     */
-    cleanup() {
-        if (this.observer) {
-            this.observer.stop();
-            this.observer = null;
+        // Check if it has the red resume playback bar and it is partially filled
+        const resumeBar = video.querySelector("ytd-thumbnail-overlay-resume-playback-renderer #progress");
+        if (resumeBar) {
+            const width = resumeBar.style.width;
+            // Only care if it's partially watched (e.g., between 5% and 95%)
+            if (width && width !== '100%') {
+                video.classList.add("previously-watched-video");
+                
+                const titleEl = video.querySelector('#video-title');
+                const title = titleEl ? titleEl.textContent.trim() : 'a video';
+                const linkEl = video.querySelector('a#thumbnail');
+                const url = linkEl ? linkEl.href : null;
+                
+                // Only notify once per video URL to avoid spam
+                if (url && !this.notifiedVideos.has(url) && window.location.pathname === '/') {
+                    this.notifiedVideos.add(url);
+                    
+                    // Show a toast prompt on the home page
+                    if (this.utils.createToast) {
+                        const toastBtn = document.createElement('button');
+                        toastBtn.textContent = 'Resume';
+                        toastBtn.className = 'ypp-toast-action-btn';
+                        toastBtn.style.cssText = 'margin-left: 15px; background: var(--ypp-accent); border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: bold; color: white;';
+                        
+                        toastBtn.onclick = () => {
+                            window.location.href = url;
+                        };
+                        
+                        const toast = this.utils.createToast(`Resume unfinished video? "${title.substring(0, 30)}..."`, 'info', 10000);
+                        
+                        // Wait a tick for toast to be in DOM
+                        setTimeout(() => {
+                            const toastEl = document.querySelector('.ypp-toast:last-child');
+                            if (toastEl) toastEl.appendChild(toastBtn);
+                        }, 50);
+                    }
+                }
+            }
         }
     }
 };

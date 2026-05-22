@@ -7,8 +7,9 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
+window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP.features.BaseFeature {
     constructor() {
+        super('PlaylistRedesign');
         this.isActive        = false;
         this.container       = null;   // Our custom #ypp-pl root
         this.navHandler      = null;
@@ -20,6 +21,20 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
         this._menuCloseFn    = null;   // Track global click listener for memory safety
         this.MAX_RETRIES     = 12;
         this.RETRY_DELAY     = 800;
+        
+        this.SELECTORS = {
+            TITLE: 'h1, yt-formatted-string[id="title"], .title',
+            OWNER: 'ytd-channel-name a, #owner-text a, a.yt-simple-endpoint[href*="/@"]',
+            STATS: 'yt-formatted-string#stats, .metadata-stats',
+            BANNER_IMG: 'yt-image img, #thumbnail img, img.yt-img-shadow',
+            VIDEO_TITLE: 'a#video-title, yt-formatted-string#video-title, h3 a',
+            VIDEO_URL: 'a#video-title, a.yt-simple-endpoint[href*="watch"]',
+            VIDEO_CHANNEL: 'ytd-channel-name a, #channel-name a, .ytd-channel-name a',
+            TIME_OVERLAY: 'ytd-thumbnail-overlay-time-status-renderer',
+            BADGE_SPAN: '.badge-shape-wiz__text, span[class*="time-status"], span',
+            THUMB_IMG: 'ytd-thumbnail img, img#img',
+            INDEX: '#index-container, .index-message-wrapper, yt-formatted-string#index'
+        };
     }
 
     getConfigKey() { return 'playlistRedesign'; }
@@ -141,22 +156,18 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
 
     _extractPlaylistData(header, videoEls) {
         // ── Playlist meta ──
-        const title = header.querySelector(
-            'h1, yt-formatted-string[id="title"], .title'
-        )?.textContent?.trim() || 'Playlist';
+        const title = header.querySelector(this.SELECTORS.TITLE)?.textContent?.trim() || 'Playlist';
 
-        const ownerEl = header.querySelector(
-            'ytd-channel-name a, #owner-text a, a.yt-simple-endpoint[href*="/@"]'
-        );
+        const ownerEl = header.querySelector(this.SELECTORS.OWNER);
         const owner     = ownerEl?.textContent?.trim() || '';
         const ownerHref = ownerEl?.href || '';
 
-        const statsEl  = header.querySelector('yt-formatted-string#stats, .metadata-stats');
+        const statsEl  = header.querySelector(this.SELECTORS.STATS);
         const stats    = statsEl?.textContent?.trim() || '';
 
         // Playlist thumbnail — try immersive banner first, then first video thumb
         let coverUrl = '';
-        const bannerImg = header.querySelector('yt-image img, #thumbnail img, img.yt-img-shadow');
+        const bannerImg = header.querySelector(this.SELECTORS.BANNER_IMG);
         if (bannerImg?.src && !bannerImg.src.includes('data:')) {
             coverUrl = bannerImg.src;
         }
@@ -165,29 +176,21 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
         const videos = [];
         videoEls.forEach((videoElement, idx) => {
             // Title
-            const videoTitle = videoElement.querySelector(
-                'a#video-title, yt-formatted-string#video-title, h3 a'
-            )?.textContent?.trim() || `Video ${idx + 1}`;
+            const videoTitle = videoElement.querySelector(this.SELECTORS.VIDEO_TITLE)?.textContent?.trim() || `Video ${idx + 1}`;
 
             // Watch URL
-            const videoUrl  = videoElement.querySelector(
-                'a#video-title, a.yt-simple-endpoint[href*="watch"]'
-            )?.href || '';
+            const videoUrl  = videoElement.querySelector(this.SELECTORS.VIDEO_URL)?.href || '';
 
             // Channel
-            const videoChannel  = videoElement.querySelector(
-                'ytd-channel-name a, #channel-name a, .ytd-channel-name a'
-            )?.textContent?.trim() || '';
+            const videoChannel  = videoElement.querySelector(this.SELECTORS.VIDEO_CHANNEL)?.textContent?.trim() || '';
 
             // Duration — layer 1: find the badge span and read ONLY its own text
             // avoiding concatenated child markup that produces "0:320:32"
             let videoDuration = '';
-            const timeOverlay = videoElement.querySelector('ytd-thumbnail-overlay-time-status-renderer');
+            const timeOverlay = videoElement.querySelector(this.SELECTORS.TIME_OVERLAY);
             if (timeOverlay) {
                 // Try the innermost badge text span first
-                const badgeSpan = timeOverlay.querySelector(
-                    '.badge-shape-wiz__text, span[class*="time-status"], span'
-                );
+                const badgeSpan = timeOverlay.querySelector(this.SELECTORS.BADGE_SPAN);
                 if (badgeSpan) {
                     // Collapse whitespace from innerText (avoids hidden \n nodes)
                     const collapsed = (badgeSpan.innerText || badgeSpan.textContent || '')
@@ -205,7 +208,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
 
             // Thumbnail
             let videoThumb = '';
-            const thumbImg = videoElement.querySelector('ytd-thumbnail img, img#img');
+            const thumbImg = videoElement.querySelector(this.SELECTORS.THUMB_IMG);
             if (thumbImg?.src && !thumbImg.src.includes('data:')) {
                 videoThumb = thumbImg.src;
             }
@@ -218,9 +221,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign {
             }
 
             // Index number
-            const videoIndex = videoElement.querySelector(
-                '#index-container, .index-message-wrapper, yt-formatted-string#index'
-            )?.textContent?.trim() || String(idx + 1);
+            const videoIndex = videoElement.querySelector(this.SELECTORS.INDEX)?.textContent?.trim() || String(idx + 1);
 
             // Watched progress
             const prog = videoElement.querySelector(

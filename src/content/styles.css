@@ -1018,13 +1018,23 @@ body.ypp-display-full-title ytd-video-renderer #video-title {
 }
 
 /* Hide Scrollbar */
-body.ypp-hide-scrollbar::-webkit-scrollbar {
-  display: none;
+body.ypp-hide-scrollbar::-webkit-scrollbar,
+body.ypp-hide-scrollbar *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
 }
 
-body.ypp-hide-scrollbar {
-  scrollbar-width: none;
+body.ypp-hide-scrollbar,
+body.ypp-hide-scrollbar * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
+
+/* Also target html and ytd-app which YouTube uses as the actual scroll container */
+body.ypp-hide-scrollbar ~ * ::-webkit-scrollbar { display: none !important; }
+html:has(body.ypp-hide-scrollbar)::-webkit-scrollbar { display: none !important; }
+html:has(body.ypp-hide-scrollbar) { scrollbar-width: none !important; }
+html:has(body.ypp-hide-scrollbar) ytd-app::-webkit-scrollbar { display: none !important; }
 
 /* ===================================================================================
    SHORTS & MIXES HIDING (Global Coverage)
@@ -1088,7 +1098,13 @@ body.ypp-hide-shorts ytd-watch-next-secondary-results-renderer ytd-reel-shelf-re
 body.ypp-hide-shorts ytd-rich-section-renderer:has([is-shorts]),
 body.ypp-hide-shorts #grid-container ytd-rich-item-renderer:has(a[href*="/shorts/"]),
 
+/* --- Stamped Heuristic Shorts --- */
+body.ypp-hide-shorts [data-ypp-is-short="true"] {
+  display: none !important;
+}
+
 /* Mixes (Mix Playlists) */
+body.ypp-hide-mixes [data-ypp-is-mix="true"],
 body.ypp-hide-mixes:not(.ypp-channel-page) ytd-rich-item-renderer:has(a[href*='start_radio']) {
   display: none !important;
 }
@@ -1202,21 +1218,21 @@ ytd-thumbnail:hover .ypp-watched-icon {
    =================================================================================== */
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
+body.ypp-custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   background: transparent;
 }
 
-::-webkit-scrollbar-track {
+body.ypp-custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
@@ -2810,6 +2826,7 @@ body.ypp-search-grid-mode ytd-channel-renderer ytd-channel-name * {
   white-space: normal !important;
   line-height: 1.2 !important;
   -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
   -webkit-box-orient: unset !important;
 }
 
@@ -2826,6 +2843,7 @@ body.ypp-search-grid-mode ytd-channel-renderer #subscribers * {
   visibility: visible !important;
   white-space: normal !important;
   -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
   -webkit-box-orient: unset !important;
   overflow: visible !important;
 }
@@ -4093,6 +4111,11 @@ body.ypp-search-grid-mode
   margin: 0 !important;
   flex-wrap: nowrap !important;
   box-sizing: border-box !important;
+}
+
+/* Flatten Row Wrappers globally (Massive performance boost vs JS mutation) */
+.ypp-grid-container > ytd-rich-grid-row {
+  display: contents !important;
 }
 
 /* Grid Item Reset */
@@ -6630,6 +6653,7 @@ ytd-popup-container ytd-multi-page-menu-renderer {
 /* CONTENT FILTERS */
 
 /* ── Hide Playlists ── */
+body.ypp-hide-playlists [data-ypp-is-playlist="true"],
 body.ypp-hide-playlists 
 ytd-rich-item-renderer:has(ytd-playlist-thumbnail),
 body.ypp-hide-playlists 
@@ -6654,6 +6678,7 @@ ytd-shelf-renderer:has(ytd-playlist-renderer) {
 }
 
 /* ── Hide Podcasts ── */
+body.ypp-hide-podcasts [data-ypp-is-podcast="true"],
 body.ypp-hide-podcasts
 ytd-rich-section-renderer:has([href*="podcast"]),
 body.ypp-hide-podcasts
@@ -7253,4 +7278,99 @@ body.ypp-grayscale-thumbnails ytd-thumbnail:hover img {
     0% { opacity: 0.6; }
     50% { opacity: 0.8; }
     100% { opacity: 0.6; }
+}
+
+/* ===========================================================================
+   CINEMATIC MODE — CONFLICT RESOLUTION OVERRIDES
+   Overrides the extension's own YPP theme variables that fight cinematic mode.
+   Must live in styles.css so they load AFTER the main theme and win specificity.
+   =========================================================================== */
+
+/* Reset chip CSS variables that the YPP theme sets with !important on .yt-premium-plus-theme.
+   Our cinematic selectors are more specific (element + attribute selector) so they win. */
+body.cinematic-home yt-chip-cloud-chip-renderer {
+  --yt-spec-badge-chip-background: transparent !important;
+  --yt-spec-icon-inactive-color: rgba(255,255,255,0.7) !important;
+}
+body.cinematic-home yt-chip-cloud-chip-renderer[selected],
+body.cinematic-home yt-chip-cloud-chip-renderer.iron-selected {
+  --yt-spec-badge-chip-background: rgba(255,255,255,0.15) !important;
+  --yt-spec-button-chip-background-hover: rgba(255,255,255,0.2) !important;
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+}
+
+/* Clear button-shape backgrounds — YPP theme adds a subtle fill to .yt-spec-button-shape-next
+   which creates the white circle effect on masthead icon buttons in cinematic mode. */
+body.cinematic-home ytd-masthead .yt-spec-button-shape-next--filled {
+  --yt-spec-button-shape-button-filled-background: transparent !important;
+  background: transparent !important;
+}
+body.cinematic-home ytd-masthead .yt-spec-button-shape-next--mono {
+  background: transparent !important;
+  --yt-spec-static-overlay-background-medium: transparent !important;
+}
+body.cinematic-home ytd-masthead .yt-spec-button-shape-next:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+/* Reset all masthead button visual layers so no white blobs appear */
+body.cinematic-home ytd-masthead yt-button-shape,
+body.cinematic-home ytd-masthead button.yt-icon-button {
+  background: transparent !important;
+}
+
+/* Ensure the YPP pill header does not render on cinematic home */
+body.cinematic-home ytd-masthead #container {
+  --yt-spec-raised-background: transparent !important;
+  --yt-spec-base-background: transparent !important;
+}
+
+/* ===========================================================================
+   GLOBAL UI FIXES (All Pages)
+   Fixes white glowing backgrounds on masthead icons, logos, and chips,
+   and prevents horizontal scrollbar on the body.
+   =========================================================================== */
+
+/* Global overflow fix to prevent bottom slidebar */
+html.yt-premium-plus-theme body {
+  overflow-x: hidden !important;
+}
+
+/* Fix white backgrounds on masthead buttons and chips globally */
+html.yt-premium-plus-theme ytd-masthead yt-icon-button,
+html.yt-premium-plus-theme ytd-masthead #buttons yt-icon-button,
+html.yt-premium-plus-theme ytd-masthead #guide-button,
+html.yt-premium-plus-theme ytd-masthead #logo-container,
+html.yt-premium-plus-theme ytd-masthead #logo,
+html.yt-premium-plus-theme ytd-masthead ytd-topbar-logo-renderer,
+html.yt-premium-plus-theme ytd-masthead .yt-spec-button-shape-next,
+html.yt-premium-plus-theme ytd-masthead .yt-spec-button-shape-with-label__button,
+html.yt-premium-plus-theme ytd-masthead yt-button-shape,
+html.yt-premium-plus-theme ytd-masthead button.yt-icon-button {
+  background: transparent !important;
+  background-color: transparent !important;
+  --yt-spec-button-shape-button-filled-background: transparent !important;
+  --yt-spec-static-overlay-background-medium: transparent !important;
+}
+
+html.yt-premium-plus-theme ytd-masthead .yt-spec-button-shape-next:hover,
+html.yt-premium-plus-theme ytd-masthead yt-icon-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix the filter chips globally */
+html.yt-premium-plus-theme yt-chip-cloud-chip-renderer {
+  --yt-spec-badge-chip-background: transparent !important;
+  --yt-spec-icon-inactive-color: rgba(255,255,255,0.7) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+html.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected],
+html.yt-premium-plus-theme yt-chip-cloud-chip-renderer.iron-selected {
+  --yt-spec-badge-chip-background: rgba(255, 255, 255, 0.15) !important;
+  --yt-spec-button-chip-background-hover: rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
 }

@@ -41,7 +41,116 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
         }
     }
 
-    calculateDuration() {
+    async calculateDuration() {
+        if (this.isCalculating) return;
+        this.isCalculating = true;
+
+        try {
+            let totalSeconds = 0;
+            let videoCount = 0;
+            let totalPlaylistVideos = 0;
+
+            const scripts = Array.from(document.querySelectorAll('script'));
+            const ytInitialDataScript = scripts.find(s => s.textContent.includes('var ytInitialData ='));
+            
+            if (!ytInitialDataScript) {
+                return this.fallbackCalculate();
+            }
+
+            const match = ytInitialDataScript.textContent.match(/var ytInitialData = ({.*?});/s);
+            if (!match) return this.fallbackCalculate();
+
+            let initialData;
+            try {
+                initialData = JSON.parse(match[1]);
+            } catch (e) {
+                return this.fallbackCalculate();
+            }
+            
+            const stats = initialData?.header?.playlistHeaderRenderer?.numVideosText?.runs?.[0]?.text;
+            if (stats) {
+                totalPlaylistVideos = parseInt(stats.replace(/[^0-9]/g, ''), 10);
+            }
+
+            const tab = initialData?.contents?.twoColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer?.content?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.playlistVideoListRenderer;
+            
+            if (!tab) return this.fallbackCalculate();
+
+            let contents = tab.contents || [];
+            
+            const processContents = (items) => {
+                for (const item of items) {
+                    const renderer = item.playlistVideoRenderer;
+                    if (renderer && renderer.lengthSeconds) {
+                        totalSeconds += parseInt(renderer.lengthSeconds, 10);
+                        videoCount++;
+                    }
+                }
+            };
+
+            processContents(contents);
+            this.renderCard(totalSeconds, videoCount, totalPlaylistVideos - videoCount, totalPlaylistVideos);
+
+            // Fetch continuations recursively in background
+            if (window.YPP.dataApi && window.YPP.dataApi.apiKey && contents.length > 0) {
+                let lastItem = contents[contents.length - 1];
+                let continuationToken = lastItem?.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token;
+
+                while (continuationToken && videoCount < totalPlaylistVideos) {
+                    try {
+                        const response = await fetch(`https://www.youtube.com/youtubei/v1/browse?key=${window.YPP.dataApi.apiKey}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...(window.YPP.dataApi.getHeaders() || {})
+                            },
+                            body: JSON.stringify({
+                                context: {
+                                    client: {
+                                        clientName: "WEB",
+                                        clientVersion: window.YPP.dataApi.clientVersion || "2.20230101.00.00"
+                                    }
+                                },
+                                continuation: continuationToken
+                            })
+                        });
+
+                        if (!response.ok) break;
+
+                        const data = await response.json();
+                        const actions = data?.onResponseReceivedActions;
+                        if (!actions || actions.length === 0) break;
+
+                        const appendAction = actions.find(a => a.appendContinuationItemsAction);
+                        if (!appendAction) break;
+
+                        const newItems = appendAction.appendContinuationItemsAction.continuationItems;
+                        if (!newItems) break;
+
+                        processContents(newItems);
+                        this.renderCard(totalSeconds, videoCount, totalPlaylistVideos - videoCount, totalPlaylistVideos);
+                        
+                        lastItem = newItems[newItems.length - 1];
+                        continuationToken = lastItem?.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token;
+
+                        // Give CPU time to breath
+                        await new Promise(r => setTimeout(r, 250));
+                    } catch (fetchErr) {
+                        break;
+                    }
+                }
+            }
+
+            this.renderCard(totalSeconds, videoCount, totalPlaylistVideos - videoCount, totalPlaylistVideos);
+
+        } catch (error) {
+            this.fallbackCalculate();
+        } finally {
+            this.isCalculating = false;
+        }
+    }
+
+    fallbackCalculate() {
         const timeElements = document.querySelectorAll('ytd-playlist-video-renderer ytd-thumbnail-overlay-time-status-renderer, ytd-playlist-video-renderer badge-shape[class*="time-status"]');
         const allItems = document.querySelectorAll('ytd-playlist-video-renderer');
         
@@ -49,10 +158,8 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
         let validCount = 0;
 
         timeElements.forEach(el => {
-            // Traverse down to get accurate text, sometimes badge-shape has inner divs
             const timeText = el.textContent.trim();
             if (timeText && timeText.includes(':')) {
-                // Remove any non-time characters (like "LIVE", hidden spans, etc.)
                 const cleanTime = timeText.replace(/[^0-9:]/g, '');
                 const s = this.parseTime(cleanTime);
                 if (s > 0) {
@@ -62,7 +169,6 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
             }
         });
 
-        // Extract total videos from playlist stats if possible
         let totalPlaylistVideos = allItems.length;
         const statsEl = document.querySelector('.metadata-stats, ytd-playlist-byline-renderer');
         if (statsEl) {
