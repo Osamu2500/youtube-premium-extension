@@ -75,6 +75,19 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             window.YPP.sharedObserver.register('global-bar-scanner', 'video', () => {
                 this.scanForVideos();
             });
+        } else {
+            // Fallback for external sites where sharedObserver is not loaded
+            this.observer = new MutationObserver((mutations) => {
+                let shouldScan = false;
+                for (let i = 0; i < mutations.length; i++) {
+                    if (mutations[i].addedNodes.length > 0) {
+                        shouldScan = true;
+                        break;
+                    }
+                }
+                if (shouldScan) this.scanForVideos();
+            });
+            this.observer.observe(document.body, { childList: true, subtree: true });
         }
     }
 
@@ -83,6 +96,10 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             this._isObserving = false;
             if (window.YPP?.sharedObserver) {
                 window.YPP.sharedObserver.unregister('global-bar-scanner');
+            }
+            if (this.observer) {
+                this.observer.disconnect();
+                this.observer = null;
             }
         }
     }
