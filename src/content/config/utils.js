@@ -560,7 +560,8 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
-     * Create a throttled version of a function
+     * Create a robust throttled version of a function that ensures both leading
+     * and trailing execution (guarantees the last event is always processed).
      * @param {Function} func - Function to throttle
      * @param {number} limit - Time limit in ms
      * @returns {Function}
@@ -578,39 +579,23 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
             limit = 100;
         }
         
-        let inThrottle = false;
-        return function (...args) {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => {
-                    inThrottle = false;
-                }, limit);
-            }
-        };
-    },
-
-    /**
-     * Create a throttled version with leading and trailing options
-     * @param {Function} func - Function to throttle
-     * @param {number} limit - Time limit in ms
-     * @returns {Function}
-     */
-    throttleLeadingTrailing: (func, limit = 100) => {
         let lastFunc = null;
         let lastRan = 0;
+        
         return function (...args) {
-            if (!lastRan) {
+            const now = Date.now();
+            
+            if (!lastRan || now - lastRan >= limit) {
+                // Execute immediately if we haven't run recently
                 func.apply(this, args);
-                lastRan = Date.now();
+                lastRan = now;
             } else {
-                clearTimeout(lastFunc);
+                // Schedule a trailing execution
+                if (lastFunc) clearTimeout(lastFunc);
                 lastFunc = setTimeout(() => {
-                    if (Date.now() - lastRan >= limit) {
-                        func.apply(this, args);
-                        lastRan = Date.now();
-                    }
-                }, limit - (Date.now() - lastRan));
+                    func.apply(this, args);
+                    lastRan = Date.now();
+                }, limit - (now - lastRan));
             }
         };
     },

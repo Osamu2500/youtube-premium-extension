@@ -26,6 +26,8 @@ window.YPP.core.DOMObserver = class DOMObserver {
         this._rafPending = false;
         /** @type {boolean} Whether dom:mutated has any subscribers (lazy-checked) */
         this._hasMutatedListeners = false;
+        /** @type {string|null} Cached combined selector to avoid string building on every frame */
+        this._cachedSelector = null;
     }
 
     /**
@@ -64,6 +66,7 @@ window.YPP.core.DOMObserver = class DOMObserver {
         if (!id || !selector) return;
 
         this.registry.set(id, { selector, callback });
+        this._cachedSelector = null; // Invalidate cache
 
         if (immediate) {
             let existingElements = [];
@@ -94,7 +97,10 @@ window.YPP.core.DOMObserver = class DOMObserver {
      * @param {string} id
      */
     unregister(id) {
-        this.registry.delete(id);
+        if (this.registry.has(id)) {
+            this.registry.delete(id);
+            this._cachedSelector = null; // Invalidate cache
+        }
     }
 
     // =========================================================================
@@ -148,10 +154,13 @@ window.YPP.core.DOMObserver = class DOMObserver {
 
         if (nodesToProcess.length === 0 || this.registry.size === 0) return;
 
-        // 1. Combine all registered selectors into one massive query
-        const allSelectorsArray = Array.from(this.registry.values()).map(d => d.selector);
-        const uniqueSelectors = Array.from(new Set(allSelectorsArray));
-        const combinedSelector = uniqueSelectors.join(',');
+        // 1. Combine all registered selectors into one massive query (cached)
+        let combinedSelector = this._cachedSelector;
+        if (!combinedSelector) {
+            const uniqueSelectors = Array.from(new Set(Array.from(this.registry.values()).map(d => d.selector)));
+            combinedSelector = uniqueSelectors.join(',');
+            this._cachedSelector = combinedSelector;
+        }
 
         // 2. Filter nodesToProcess to ONLY top-level nodes within this batch.
         // If a node is a descendant of another node in this batch, we skip it
@@ -202,18 +211,20 @@ window.YPP.core.DOMObserver = class DOMObserver {
             }
         }
 
-        // 3. Distribute matched elements to their respective listeners
+        // 4. Distribute matched elements to their respective listeners
         const matchedBuckets = new Map();
         if (matchedElements.size > 0) {
-            for (const [id, { selector }] of this.registry.entries()) {
-                const matches = [];
-                for (const el of matchedElements) {
-                    if (el.matches && el.matches(selector)) {
+            for (const el of matchedElements) {
+                if (!el.matches) continue;
+                for (const [id, { selector }] of this.registry.entries()) {
+                    if (el.matches(selector)) {
+                        let matches = matchedBuckets.get(id);
+                        if (!matches) {
+                            matches = [];
+                            matchedBuckets.set(id, matches);
+                        }
                         matches.push(el);
                     }
-                }
-                if (matches.length > 0) {
-                    matchedBuckets.set(id, matches);
                 }
             }
         }

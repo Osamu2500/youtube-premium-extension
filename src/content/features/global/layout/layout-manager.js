@@ -31,15 +31,6 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         GRID_ROWS: 'ytd-rich-grid-row'
     };
 
-    /**
-     * Target node types to watch for in MutationObserver
-     * @readonly
-     */
-    static WATCHED_TAGS = new Set([
-        'YTD-RICH-GRID-RENDERER',
-        'YTD-RICH-ITEM-RENDERER',
-        'YTD-CONTINUATION-ITEM-RENDERER'
-    ]);
 
     constructor() {
         super('GridLayoutManager');
@@ -142,10 +133,10 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * Start central DOMObserver to watch for grid changes
      */
     startObserver() {
-        // Register observer for main app container changes
+        // Register observer for targeted grid container changes to avoid high-frequency callbacks
         this.observer.register(
             'layout-manager',
-            GridLayoutManager.SELECTORS.APP_CONTAINER,
+            'ytd-rich-grid-renderer, ytd-rich-item-renderer, ytd-continuation-item-renderer',
             () => this._debouncedApply(),
             false // Process handled by init()'s applyWithRetry
         );

@@ -77,8 +77,14 @@ window.YPP.features.SearchObserver = class SearchObserver {
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.register(
                 'search-results-scanner',
-                'ytd-item-section-renderer, ytd-video-renderer',
-                () => this._queueProcessAll()
+                'ytd-item-section-renderer, ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer',
+                (matches) => {
+                    if (this._debounceTimer) clearTimeout(this._debounceTimer);
+                    this._debounceTimer = setTimeout(() => {
+                        requestAnimationFrame(() => this._processMatches(matches));
+                        this._debounceTimer = null;
+                    }, 150);
+                }
             );
             this.processAll();
         } else {
@@ -123,14 +129,67 @@ window.YPP.features.SearchObserver = class SearchObserver {
     }
 
     _processMutations(mutations) {
-        let shouldProcess = false;
+        let sectionsToProcess = new Set();
         for (let i = 0; i < mutations.length; i++) {
             if (mutations[i].addedNodes.length > 0) {
-                shouldProcess = true;
-                break;
+                for (let j = 0; j < mutations[i].addedNodes.length; j++) {
+                    const node = mutations[i].addedNodes[j];
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.tagName === 'YTD-ITEM-SECTION-RENDERER') {
+                            sectionsToProcess.add(node);
+                        } else if (node.closest) {
+                            const section = node.closest('ytd-item-section-renderer');
+                            if (section) sectionsToProcess.add(section);
+                        }
+                    }
+                }
             }
         }
-        if (shouldProcess) this._queueProcessAll();
+        
+        if (sectionsToProcess.size > 0) {
+            if (this._debounceTimer) clearTimeout(this._debounceTimer);
+            this._debounceTimer = setTimeout(() => {
+                requestAnimationFrame(() => { 
+                    if (!this._isEnabled()) return;
+                    sectionsToProcess.forEach(section => {
+                        try {
+                            if (document.body.contains(section)) {
+                                this._processSection(section);
+                            }
+                        } catch (e) {
+                            console.warn('[SearchObserver] processSection error:', e.message);
+                        }
+                    });
+                });
+                this._debounceTimer = null;
+            }, 150);
+        }
+    }
+
+    _processMatches(matches) {
+        if (!this._isEnabled()) return;
+        
+        const sectionsToProcess = new Set();
+        
+        for (let i = 0; i < matches.length; i++) {
+            const node = matches[i];
+            if (node.tagName === 'YTD-ITEM-SECTION-RENDERER') {
+                sectionsToProcess.add(node);
+            } else if (node.closest) {
+                const section = node.closest('ytd-item-section-renderer');
+                if (section) sectionsToProcess.add(section);
+            }
+        }
+        
+        sectionsToProcess.forEach(section => {
+            try {
+                if (document.body.contains(section)) {
+                    this._processSection(section);
+                }
+            } catch (error) {
+                console.warn('[SearchObserver] _processSection error:', error.message);
+            }
+        });
     }
 
     // -------------------------------------------------------------------------
