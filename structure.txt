@@ -1,0 +1,185 @@
+Folder PATH listing
+Volume serial number is 32FD-87A4
+F:\YOUTUBE 2.0\SRC
++---assets
+|       icon.png
+|       icon.svg
+|       
++---background
+|       service-worker.js
+|       
++---content
+|   |   constants.js
+|   |   element-cache.js
+|   |   error-handler.js
+|   |   feature-manager.js
+|   |   global-bar-external.js
+|   |   index.js
+|   |   main.js
+|   |   settings-schema.js
+|   |   styles.css
+|   |   utils.js
+|   |   
+|   +---core
+|   |       dom-api.js
+|   |       dom-observer.js
+|   |       event-bus.js
+|   |       lifecycle-manager.js
+|   |       storage-manager.js
+|   |       
+|   +---features
+|   |   |   base-feature.js
+|   |   |   
+|   |   +---core
+|   |   |   +---global
+|   |   |   |   |   content-control.js
+|   |   |   |   |   data-api.js
+|   |   |   |   |   hide-metrics.js
+|   |   |   |   |   hide-playlists-podcasts.js
+|   |   |   |   |   hide-thumbnails.js
+|   |   |   |   |   hide-watched.js
+|   |   |   |   |   keyboard-shortcuts.js
+|   |   |   |   |   mark-watched.js
+|   |   |   |   |   multi-select.js
+|   |   |   |   |   night-mode.js
+|   |   |   |   |   redirect-home.js
+|   |   |   |   |   theme.js
+|   |   |   |   |   
+|   |   |   |   +---account-menu
+|   |   |   |   |       account-menu-data.js
+|   |   |   |   |       account-menu-ui.js
+|   |   |   |   |       account-menu.js
+|   |   |   |   |       index.js
+|   |   |   |   |       
+|   |   |   |   \---stats
+|   |   |   |           stats-visualizer.js
+|   |   |   |           
+|   |   |   \---layout
+|   |   |           header-nav.js
+|   |   |           layout-manager.js
+|   |   |           sidebar.js
+|   |   |           
+|   |   +---pages
+|   |   |   +---home
+|   |   |   |       cinematic-mode.css
+|   |   |   |       cinematic-mode.js
+|   |   |   |       cinematic-theme.css
+|   |   |   |       home-organizer.js
+|   |   |   |       redirect-shorts.js
+|   |   |   |       shorts-tools.js
+|   |   |   |       
+|   |   |   +---library
+|   |   |   |   +---history
+|   |   |   |   |       history-redesign.js
+|   |   |   |   |       history-tracker.js
+|   |   |   |   |       
+|   |   |   |   \---playlist
+|   |   |   |           duration-calculator.js
+|   |   |   |           playlist-redesign.js
+|   |   |   |           reverse-playlist.js
+|   |   |   |           
+|   |   |   +---search
+|   |   |   |       advanced-filter.js
+|   |   |   |       search-filter.js
+|   |   |   |       search-observer.js
+|   |   |   |       search-redesign.js
+|   |   |   |       search-view-mode.js
+|   |   |   |       
+|   |   |   +---subscriptions
+|   |   |   |   |   context-menu.js
+|   |   |   |   |   deck-mode.css
+|   |   |   |   |   deck-mode.js
+|   |   |   |   |   folder-storage.js
+|   |   |   |   |   folder-ui.js
+|   |   |   |   |   index.js
+|   |   |   |   |   subscription-folders.js
+|   |   |   |   |   subscription-manager.js
+|   |   |   |   |   subscriptions.css
+|   |   |   |   |   
+|   |   |   |   \---subscriptions-ui
+|   |   |   |           subs-ui-filter.js
+|   |   |   |           subs-ui-modal.js
+|   |   |   |           subs-ui-sidebar.js
+|   |   |   |           subscriptions-ui.js
+|   |   |   |           
+|   |   |   \---watch
+|   |   |           comment-filter.js
+|   |   |           continue-watching.js
+|   |   |           focus-mode.js
+|   |   |           modes-manager.js
+|   |   |           study-mode.js
+|   |   |           watch-history.js
+|   |   |           watch-redesign.js
+|   |   |           zen-mode.js
+|   |   |           
+|   |   \---player
+|   |       |   audio-compressor.js
+|   |       |   auto-like.js
+|   |       |   auto-pause.js
+|   |       |   auto-quality.js
+|   |       |   bookmarks.js
+|   |       |   filter-presets.js
+|   |       |   global-bar-ui.js
+|   |       |   global-bar.css
+|   |       |   global-bar.js
+|   |       |   intentional-delay.js
+|   |       |   mini-player.js
+|   |       |   player-tools.js
+|   |       |   player.js
+|   |       |   return-dislike.js
+|   |       |   sidebar-layout.js
+|   |       |   sponsor-block.js
+|   |       |   time-display.js
+|   |       |   video-resumer.js
+|   |       |   wheel-controls.js
+|   |       |   
+|   |       +---ambient-mode
+|   |       |       ambient-mode.js
+|   |       |       audio-mode.js
+|   |       |       
+|   |       +---video-controls
+|   |       |       video-controls.css
+|   |       |       video-controls.js
+|   |       |       
+|   |       +---video-filters
+|   |       |       index.js
+|   |       |       video-filters-overlay.js
+|   |       |       video-filters-presets.js
+|   |       |       video-filters-ui.js
+|   |       |       video-filters.js
+|   |       |       
+|   |       \---volume-booster
+|   |               index.js
+|   |               volume-booster-ui.js
+|   |               volume-booster.js
+|   |               
+|   +---themes
+|   |       cherry.css
+|   |       coffee.css
+|   |       cyberpunk.css
+|   |       default.css
+|   |       dracula.css
+|   |       forest.css
+|   |       midnight.css
+|   |       nord.css
+|   |       ocean.css
+|   |       sunset.css
+|   |       
+|   \---ui
+|       |   ui-manager.js
+|       |   
+|       \---components
+|               button.js
+|               panel.js
+|               
++---inject
+|       stats-bridge.js
+|       
+\---popup
+        bookmarks.css
+        history.css
+        popup.css
+        popup.html
+        popup.js
+        theme-vars.css
+        
