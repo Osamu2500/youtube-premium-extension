@@ -481,7 +481,7 @@ window.YPP.CONSTANTS = {
         layout: 'Layout',
         homeOrganizer: 'HomeOrganizer',
         subsOrganizer: 'SubscriptionsOrganizer',
-        advancedFilter: 'AdvancedFilter',
+        // advancedFilter: 'AdvancedFilter', // Ghost/Incomplete
         zenMode: 'ZenMode',
         studyMode: 'StudyMode',
         focusMode: 'FocusMode',
@@ -517,8 +517,8 @@ window.YPP.CONSTANTS = {
         miniPlayer: 'MiniPlayer',
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
-        dataAPI: 'DataAPI',
-        nightMode: 'NightModeManager',
+        // dataAPI: 'DataAPI', // Ghost/Incomplete
+        // nightMode: 'NightModeManager', // Missing global assignment
         continueWatching: 'ContinueWatching',
         subscriptionFolders: 'SubscriptionFolders',
         contextMenu: 'ContextMenu',

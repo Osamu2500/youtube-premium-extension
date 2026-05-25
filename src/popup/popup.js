@@ -43,18 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Save last active tab for persistence
             localStorage.setItem('ypp-last-tab', tabId);
-
-            // Animate new tab content with anime.js
-            if (typeof anime !== 'undefined') {
-                anime({
-                    targets: `#tab-${tabId} .toggle-card, #tab-${tabId} .preset-card, #tab-${tabId} .section-header`,
-                    translateY: [15, 0],
-                    opacity: [0, 1],
-                    delay: anime.stagger(40, {start: 50}),
-                    easing: 'easeOutQuint',
-                    duration: 600
-                });
-            }
         });
     }
 
@@ -93,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideScrollbar',
 
         // Navigation
-        'navTrending',
         'navShorts',
         'navSubscriptions',
         'navWatchLater',
@@ -111,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideWatchedMode',
         'hideWatchedThreshold',
         'grid4x4',
+        'autoScaleLayout', // Added to fix slider override
         'homeColumns', // New
         'displayFullTitle', // New
         'hidePlaylists',
@@ -128,6 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Search
         'searchGrid',
         'searchColumns', // New
+        'channelColumns', // New
+        'subscriptionsColumns', // New
         'cleanSearch',
         'hideSearchShelves',
         'hideChannelCards',
@@ -236,12 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'grayscaleThumbnails',
 
         // Sidebar Layout
-        'sidebarLayout',
-
-        // UI Redesigns
-        'playlistRedesign',
-        'glassPlayerUI',
-        'sidebarComments'
+        'sidebarLayout'
     ];
 
     // --- STORAGE HANDLING ---
@@ -480,6 +465,13 @@ document.addEventListener('DOMContentLoaded', () => {
                          display.textContent = slider.value + '%';
                      }
                 }
+                
+                // UX FIX: If user manually adjusts any column slider, turn OFF autoScaleLayout
+                if (key.includes('Columns') && elements['autoScaleLayout'] && elements['autoScaleLayout'].checked) {
+                    elements['autoScaleLayout'].checked = false;
+                    // We don't need to dispatchEvent here since saveSettings() will capture the new checked state
+                }
+
                 // Trigger save for live preview
                 saveSettings();
             });
@@ -756,17 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateCustomizationPreview();
                     saveSettings(); // Debounce handles the spam
                 });
-            } else if (el.type === 'range') {
-                el.addEventListener('input', () => {
-                    const display = document.getElementById(key + 'Value');
-                    if (display) {
-                        const isCount = key.toLowerCase().includes('columns');
-                        const isHour  = key === 'watchTimeAlertHours';
-                        display.textContent = isCount ? el.value
-                                           : isHour  ? el.value + 'h'
-                                           : el.value + '%';
-                    }
-                });
             }
         }
     });
@@ -916,19 +897,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentCalDate = new Date();
     let selectedCalDateString = null;
-    let historyWidgetInitialized = false;
 
     function initHistoryWidget() {
-        if (historyWidgetInitialized) return;
         renderHeatmap();
         setupCalendarListeners();
-        historyWidgetInitialized = true;
     }
-
-    // Lazy load on tab switch
-    document.querySelectorAll('.nav-item[data-tab="history"]').forEach(tab => {
-        tab.addEventListener('click', () => initHistoryWidget());
-    });
 
     function setupCalendarListeners() {
         const btn = document.getElementById('history-calendar-btn');
@@ -1449,12 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     // Sync cards after a short microtask delay to allow storage callback to fill values
     setTimeout(syncModeCards, 120);
-    
-    // Initialize history widget if we start on the history tab
-    if (document.getElementById('tab-history')?.classList.contains('active')) {
-        initHistoryWidget();
-    }
-    
+    initHistoryWidget(); // Initialize history widget on load
     initBackupTools();
     initBookmarksManager();
 });
