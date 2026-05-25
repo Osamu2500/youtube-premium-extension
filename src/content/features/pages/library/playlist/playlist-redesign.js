@@ -786,33 +786,37 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             // Close any open popup first
             document.body.click();
 
-            setTimeout(() => {
-                menuBtn.click();
-
-                // Wait for the popup to render, then click Remove
-                const tryClick = (attempts) => {
-                    if (attempts <= 0) return resolve(false);
-                    const popup = document.querySelector('ytd-menu-popup-renderer');
-                    if (!popup) {
-                        setTimeout(() => tryClick(attempts - 1), 150);
-                        return;
-                    }
+            // Setup a MutationObserver to wait for the popup to render in the DOM
+            const popupObserver = new MutationObserver((mutations, obs) => {
+                const popup = document.querySelector('ytd-menu-popup-renderer');
+                if (popup) {
                     const items = popup.querySelectorAll('ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer');
                     for (const item of items) {
                         const text = (item.textContent || '').toLowerCase();
                         if (text.includes('remove from')) {
+                            obs.disconnect();
+                            clearTimeout(failsafeTimer);
                             item.click();
-                            // Dismiss any lingering popup
-                            setTimeout(() => document.body.click(), 100);
+                            // Dismiss lingering popup after click
+                            setTimeout(() => document.body.click(), 50);
                             return resolve(true);
                         }
                     }
-                    // Popup rendered but button not found yet
-                    setTimeout(() => tryClick(attempts - 1), 150);
-                };
+                }
+            });
 
-                tryClick(10); // up to 10 × 150ms = 1.5s wait
-            }, 80);
+            // Start observing the body for the injected popup
+            popupObserver.observe(document.body, { childList: true, subtree: true });
+
+            // Failsafe timer (2 seconds) to prevent permanent hang
+            const failsafeTimer = setTimeout(() => {
+                popupObserver.disconnect();
+                resolve(false);
+            }, 2000);
+
+            // Trigger the menu open (must be done after observer starts)
+            // Wait one event loop tick for the close action to finish
+            setTimeout(() => menuBtn.click(), 50);
         });
     }
 };

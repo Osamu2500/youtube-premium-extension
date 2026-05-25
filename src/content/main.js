@@ -237,7 +237,7 @@
                 }
 
                 // Use centralized settings loader from Utils
-                this.settings = await this.Utils.loadSettings();
+                this.settings = { ...this.settings, ...(await this.Utils.loadSettings()) };
                 this.Utils?.log(`Settings Loaded (attempt ${attempt})`, 'MAIN', 'debug');
 
             } catch (error) {
@@ -256,7 +256,7 @@
 
                 // Fallback to defaults
                 this.Utils?.log('Using default settings after retry failure', 'MAIN', 'warn');
-                this.settings = window.YPP.getDefaultSettings();
+                this.settings = { ...this.settings, ...window.YPP.getDefaultSettings() };
             }
         },
 
@@ -350,7 +350,7 @@
                         if (area === 'local' && changes.settings) {
                             const newSettings = changes.settings.newValue;
                             if (newSettings) {
-                                this.settings = newSettings;
+                                this.settings = { ...this.settings, ...newSettings };
                                 this.Utils?.log('Settings updated from popup', 'MAIN', 'debug');
 
                                 if (this.featureManager) {

@@ -6,6 +6,7 @@
     class NightModeManager extends window.YPP.features.BaseFeature {
     getConfigKey() { return null; }
         constructor() {
+            super('nightMode');
             this._Utils = window.YPP.Utils;
             this._elements = {
                 blueLight: null,

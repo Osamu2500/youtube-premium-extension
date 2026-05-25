@@ -144,6 +144,21 @@ disable() {
 
 ---
 
+## Centralized Observer Batching (Performance Traps)
+
+When building a centralized `DOMObserver` or event bus that batches mutations for multiple features via `requestAnimationFrame`:
+
+1. **NEVER use `node.querySelectorAll` inside a loop of `nodesToProcess`** for every registered selector. If 1,000 nodes are added and you have 50 selectors, you will trigger 50,000 queries per frame (O(N × M) explosion). This will completely freeze the browser (layout thrashing / CPU burn).
+2. **NEVER fall back to `document.querySelectorAll`** inside the flush loop. Querying the entire document will return all *existing* elements on the page, not just the newly added ones. Emitting existing elements repeatedly will cause features to double-process the same elements hundreds of times, slowing down video load times and scrolling.
+3. **The CORRECT Pattern**:
+   - Create a combined comma-separated selector: `const combined = selectors.join(',');`
+   - Iterate only over the `addedNodes`.
+   - Run `node.querySelectorAll(combined)` exactly ONCE per added node.
+   - Distribute the matching elements to the correct feature using `el.matches(selector)`.
+   - **Always** ensure features use the DOM Stamping Pattern (`data-ypp-processed`) just in case an element is emitted twice.
+
+---
+
 ## DOM Stamping Pattern (Idempotent Processing)
 
 Prevent double-processing recycled DOM nodes:

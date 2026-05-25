@@ -25,8 +25,8 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
             this.injectDeckToggle();
         });
         
-        this.observer.register('deck-mode-feed', 'ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer', (feed) => {
-            if (this.isActive) this.observeFeedMutations(feed);
+        this.observer.register('deck-mode-items', 'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer', (items) => {
+            if (this.isActive) this.distributeItems(items);
         });
 
         this.observer.start();
@@ -104,8 +104,7 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
         const existingItems = mainFeed.querySelectorAll('ytd-rich-item-renderer');
         this.distributeItems(Array.from(existingItems));
 
-        const contents = mainFeed.querySelector('#contents');
-        if (contents) this.observeFeedMutations(contents);
+        // Items will be handled via the sharedObserver registered in enable()
     }
 
     createColumn(container, title, color) {
@@ -141,31 +140,11 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
             mainFeed.style.overflow = 'visible';
         }
         
-        if (this.feedObserver) {
-            this.feedObserver.disconnect();
-            this.feedObserver = null;
-        }
+        const deckedItems = document.querySelectorAll('ytd-rich-item-renderer[data-decked]');
+        deckedItems.forEach(item => delete item.dataset.decked);
     }
 
-    observeFeedMutations(feedContents) {
-        if (this.feedObserver) this.feedObserver.disconnect();
-        
-        this.feedObserver = new MutationObserver(mutations => {
-            const newItems = [];
-            mutations.forEach(m => {
-                m.addedNodes.forEach(node => {
-                    if (node.tagName === 'YTD-RICH-ITEM-RENDERER') newItems.push(node);
-                    else if (node.querySelectorAll) {
-                        const items = node.querySelectorAll('ytd-rich-item-renderer');
-                        items.forEach(i => newItems.push(i));
-                    }
-                });
-            });
-            if (newItems.length > 0) this.distributeItems(newItems);
-        });
-
-        this.feedObserver.observe(feedContents, { childList: true, subtree: true });
-    }
+    // feedObserver removed; handled by sharedObserver
 
     distributeItems(items) {
         if (!this.isActive || !this.columns) return;

@@ -52,6 +52,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
     // =========================================================================
 
     constructor() {
+        super('searchGrid');
         /** @type {boolean} Feature enabled state */
         this._isEnabled  = false;
 

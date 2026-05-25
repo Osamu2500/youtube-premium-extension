@@ -21,6 +21,7 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
     };
 
     constructor() {
+        super('advancedFilter');
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
         this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();

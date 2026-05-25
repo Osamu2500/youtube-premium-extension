@@ -146,41 +146,53 @@ window.YPP.core.DOMObserver = class DOMObserver {
         const nodesToProcess = this._pendingNodes;
         this._pendingNodes = []; // Reset before processing to capture new mutations
 
-        if (nodesToProcess.length === 0) return;
+        if (nodesToProcess.length === 0 || this.registry.size === 0) return;
 
-        // Build match buckets: Map<id, Element[]>
-        const matchedBuckets = new Map();
+        // 1. Combine all registered selectors into one massive query
+        const allSelectorsArray = Array.from(this.registry.values()).map(d => d.selector);
+        const uniqueSelectors = Array.from(new Set(allSelectorsArray));
+        const combinedSelector = uniqueSelectors.join(',');
 
-        for (const [id, { selector }] of this.registry.entries()) {
-            const matches = new Set(); // Use Set to inherently deduplicate overlapping nodes
-
-            for (let k = 0; k < nodesToProcess.length; k++) {
-                const node = nodesToProcess[k];
-
-                // Check if node ITSELF matches
-                if (node.matches && node.matches(selector)) {
-                    matches.add(node);
-                }
-
-                // Check if node CONTAINS matches (critical for large rendered blocks)
-                if (node.querySelectorAll) {
-                    try {
-                        const children = node.querySelectorAll(selector);
-                        for (let c = 0; c < children.length; c++) {
-                            matches.add(children[c]);
-                        }
-                    } catch(e) {
-                        // ignore bad queries
-                    }
-                }
+        // 2. Find all matching elements across all newly added nodes in a single pass
+        const matchedElements = new Set();
+        for (let i = 0; i < nodesToProcess.length; i++) {
+            const node = nodesToProcess[i];
+            
+            // Check node itself
+            if (node.matches && node.matches(combinedSelector)) {
+                matchedElements.add(node);
             }
-
-            if (matches.size > 0) {
-                matchedBuckets.set(id, Array.from(matches));
+            
+            // Check descendants
+            if (node.querySelectorAll) {
+                try {
+                    const children = node.querySelectorAll(combinedSelector);
+                    for (let c = 0; c < children.length; c++) {
+                        matchedElements.add(children[c]);
+                    }
+                } catch(e) {
+                    // Ignore bad queries
+                }
             }
         }
 
-        // Dispatch results
+        // 3. Distribute matched elements to their respective listeners
+        const matchedBuckets = new Map();
+        if (matchedElements.size > 0) {
+            for (const [id, { selector }] of this.registry.entries()) {
+                const matches = [];
+                for (const el of matchedElements) {
+                    if (el.matches && el.matches(selector)) {
+                        matches.push(el);
+                    }
+                }
+                if (matches.length > 0) {
+                    matchedBuckets.set(id, matches);
+                }
+            }
+        }
+
+        // 4. Dispatch results
         for (const [id, matches] of matchedBuckets.entries()) {
             const data = this.registry.get(id);
             if (!data) continue; // Guard against concurrent unregister

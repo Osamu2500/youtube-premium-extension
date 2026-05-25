@@ -36,8 +36,16 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     async enable() {
         await super.enable();
         try {
-            this._observer = new MutationObserver(() => this._onMutation());
-            this._observer.observe(document.body, { childList: true, subtree: true });
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.register(
+                    'account-menu-scanner',
+                    'ytd-multi-page-menu-renderer[slot="menu"], tp-yt-iron-dropdown ytd-multi-page-menu-renderer',
+                    () => this._onMutation()
+                );
+            } else {
+                this._observer = new MutationObserver(() => this._onMutation());
+                this._observer.observe(document.body, { childList: true, subtree: true });
+            }
 
             this._pageChangedHandler = () => this._cleanup();
             window.YPP.events?.on('page:changed', this._pageChangedHandler);
@@ -48,6 +56,9 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
     async disable() {
         await super.disable();
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('account-menu-scanner');
+        }
         this._observer?.disconnect();
         this._observer = null;
         if (this._pageChangedHandler) {

@@ -641,16 +641,21 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     _setupContentObserver() {
-        const contents = document.querySelector('#contents');
-        if (!contents) return;
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.register('cinematic-content-scanner', 'ytd-rich-item-renderer', () => {
+                clearTimeout(this._contentUpdateTimer);
+                this._contentUpdateTimer = setTimeout(() => this._updateVideoQueue(), this.CONFIG.CONTENT_UPDATE_DELAY);
+            });
+        } else {
+            const contents = document.querySelector('#contents');
+            if (!contents) return;
 
-        this._mo = new MutationObserver(() => {
-            setTimeout(() => this._updateVideoQueue(), this.CONFIG.CONTENT_UPDATE_DELAY);
-        });
-        
-        // childList + subtree only — no attributes/characterData to avoid firing
-        // on every text node update during page hydration (was triggering hundreds of times/sec).
-        this._mo.observe(contents, { childList: true, subtree: true });
+            this._mo = new MutationObserver(() => {
+                clearTimeout(this._contentUpdateTimer);
+                this._contentUpdateTimer = setTimeout(() => this._updateVideoQueue(), this.CONFIG.CONTENT_UPDATE_DELAY);
+            });
+            this._mo.observe(contents, { childList: true, subtree: true });
+        }
     }
 
     _setupScrollHandler() {
@@ -790,6 +795,20 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         this._heroState.observers.forEach(obs => obs.disconnect());
         this._heroState.observers.clear();
+
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('cinematic-content-scanner');
+        }
+        if (this._contentUpdateTimer) {
+            clearTimeout(this._contentUpdateTimer);
+            this._contentUpdateTimer = null;
+        }
+
+        // Cleanup any processed stamps
+        document.querySelectorAll('[data-ypp-processed="true"]').forEach(el => {
+            el.removeAttribute('data-ypp-processed');
+            el.querySelectorAll('.recently-badge-container').forEach(badge => badge.remove());
+        });
 
         const hero = this._heroState.heroElement;
         if (hero) {

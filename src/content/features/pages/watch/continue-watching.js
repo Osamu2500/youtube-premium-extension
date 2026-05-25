@@ -54,47 +54,52 @@ window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP
         this.observer.start(target);
     }
 
-    handleNewVideo(video) {
+    handleNewVideo(videos) {
         if (!this.isEnabled) return;
         
-        // Check if we've already processed this video DOM element
-        if (video.classList.contains('previously-watched-video')) return;
+        // Ensure videos is an array (fallback for direct calls)
+        const videoArray = Array.isArray(videos) ? videos : [videos];
+        
+        for (const video of videoArray) {
+            // Check if we've already processed this video DOM element
+            if (video.classList.contains('previously-watched-video')) continue;
 
-        // Check if it has the red resume playback bar and it is partially filled
-        const resumeBar = video.querySelector("ytd-thumbnail-overlay-resume-playback-renderer #progress");
-        if (resumeBar) {
-            const width = resumeBar.style.width;
-            // Only care if it's partially watched (e.g., between 5% and 95%)
-            if (width && width !== '100%') {
-                video.classList.add("previously-watched-video");
-                
-                const titleEl = video.querySelector('#video-title');
-                const title = titleEl ? titleEl.textContent.trim() : 'a video';
-                const linkEl = video.querySelector('a#thumbnail');
-                const url = linkEl ? linkEl.href : null;
-                
-                // Only notify once per video URL to avoid spam
-                if (url && !this.notifiedVideos.has(url) && window.location.pathname === '/') {
-                    this.notifiedVideos.add(url);
+            // Check if it has the red resume playback bar and it is partially filled
+            const resumeBar = video.querySelector("ytd-thumbnail-overlay-resume-playback-renderer #progress");
+            if (resumeBar) {
+                const width = resumeBar.style.width;
+                // Only care if it's partially watched (e.g., between 5% and 95%)
+                if (width && width !== '100%') {
+                    video.classList.add("previously-watched-video");
                     
-                    // Show a toast prompt on the home page
-                    if (this.utils.createToast) {
-                        const toastBtn = document.createElement('button');
-                        toastBtn.textContent = 'Resume';
-                        toastBtn.className = 'ypp-toast-action-btn';
-                        toastBtn.style.cssText = 'margin-left: 15px; background: var(--ypp-accent); border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: bold; color: white;';
+                    const titleEl = video.querySelector('#video-title');
+                    const title = titleEl ? titleEl.textContent.trim() : 'a video';
+                    const linkEl = video.querySelector('a#thumbnail');
+                    const url = linkEl ? linkEl.href : null;
+                    
+                    // Only notify once per video URL to avoid spam
+                    if (url && !this.notifiedVideos.has(url) && window.location.pathname === '/') {
+                        this.notifiedVideos.add(url);
                         
-                        toastBtn.onclick = () => {
-                            window.location.href = url;
-                        };
-                        
-                        const toast = this.utils.createToast(`Resume unfinished video? "${title.substring(0, 30)}..."`, 'info', 10000);
-                        
-                        // Wait a tick for toast to be in DOM
-                        setTimeout(() => {
-                            const toastEl = document.querySelector('.ypp-toast:last-child');
-                            if (toastEl) toastEl.appendChild(toastBtn);
-                        }, 50);
+                        // Show a toast prompt on the home page
+                        if (this.utils.createToast) {
+                            const toastBtn = document.createElement('button');
+                            toastBtn.textContent = 'Resume';
+                            toastBtn.className = 'ypp-toast-action-btn';
+                            toastBtn.style.cssText = 'margin-left: 15px; background: var(--ypp-accent); border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: bold; color: white;';
+                            
+                            toastBtn.onclick = () => {
+                                window.location.href = url;
+                            };
+                            
+                            const toast = this.utils.createToast(`Resume unfinished video? "${title.substring(0, 30)}..."`, 'info', 10000);
+                            
+                            // Wait a tick for toast to be in DOM
+                            setTimeout(() => {
+                                const toastEl = document.querySelector('.ypp-toast:last-child');
+                                if (toastEl) toastEl.appendChild(toastBtn);
+                            }, 50);
+                        }
                     }
                 }
             }

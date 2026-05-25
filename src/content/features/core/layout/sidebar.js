@@ -10,6 +10,7 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.features.BaseFeature {
     getConfigKey() { return 'forceHideSidebar'; }
     constructor() {
+    super('sidebarLayout');
         this.CONSTANTS = window.YPP.CONSTANTS;
         this.Utils = window.YPP.Utils;
         /** @type {boolean} Internal state tracking if the manager is active */

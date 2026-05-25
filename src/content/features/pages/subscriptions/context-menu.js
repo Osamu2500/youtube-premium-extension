@@ -8,6 +8,7 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.BaseFeature {
     getConfigKey() { return 'contextMenu'; }
     constructor() {
+        super('contextMenu');
         this.isActive = false;
         this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
     }

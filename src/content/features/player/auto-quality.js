@@ -61,7 +61,22 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
         if (!this.settings) return;
 
         if (this.settings.autoQuality) {
-            // Player might not have quality levels ready immediately
+            // 1. Native Integration: Inject directly into YouTube's localStorage.
+            // This forces YouTube to natively boot the player in the highest quality,
+            // bypassing the need for a mid-stream quality change and avoiding a buffer flush.
+            try {
+                const qualityPayload = JSON.stringify({
+                    data: "highres", 
+                    expiration: Date.now() + 31536000000, 
+                    creation: Date.now()
+                });
+                window.localStorage.setItem('yt-player-quality', qualityPayload);
+                this.utils?.log('Injected yt-player-quality into localStorage', this.name, 'debug');
+            } catch (e) {
+                this.utils?.log('Failed to write localStorage', this.name, 'warn', e);
+            }
+
+            // 2. Fallback: Player might not have quality levels ready immediately
             this.pollFor(() => {
                 const player = document.getElementById('movie_player');
                 if (player && typeof player.getAvailableQualityLevels === 'function') {
@@ -94,8 +109,10 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
         const best = preferred.find(q => available.includes(q));
         
         if (best) {
+            // CRITICAL FIX: setPlaybackQualityRange requires (minQuality, maxQuality).
+            // Passing only one argument causes modern YouTube to default the max to the lowest available.
             if (typeof player.setPlaybackQualityRange === 'function') {
-                player.setPlaybackQualityRange(best);
+                player.setPlaybackQualityRange(best, best);
             }
             if (typeof player.setPlaybackQuality === 'function') {
                 player.setPlaybackQuality(best);

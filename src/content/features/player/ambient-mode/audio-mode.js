@@ -5,6 +5,7 @@
 window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.BaseFeature {
     getConfigKey() { return 'audioModeEnabled'; }
     constructor() {
+        super('audioMode');
         this.Utils = window.YPP?.Utils || {};
         this.isActive = false;
         this.styleId = 'ypp-audio-mode-style';

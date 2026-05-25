@@ -69,37 +69,40 @@ window.YPP.features.SearchObserver = class SearchObserver {
         this._processedNodes = new WeakSet();
     }
 
-    /**
-     * Begin observing the search container for new results.
-     * @param {string} containerSelector - CSS selector for ytd-search
-     */
     start(containerSelector) {
-        if (this._observer) return;
+        if (this._isObserving) return;
+        this._isObserving = true;
+        this._containerSelector = containerSelector;
 
-        this._pollForElement(containerSelector, (target) => {
-            if (this._observer) return;
-
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.register(
+                'search-results-scanner',
+                'ytd-item-section-renderer, ytd-video-renderer',
+                () => this._queueProcessAll()
+            );
             this.processAll();
-            this._startMonitor(containerSelector);
+        } else {
+            this._pollForElement(containerSelector, (target) => {
+                if (!this._isObserving) return;
+                this.processAll();
 
-            this._observer = new MutationObserver(this._processMutations);
-            this._observer.observe(target, {
-                childList: true,
-                subtree:   true,
-                attributes: false,
+                this._observer = new MutationObserver(this._processMutations);
+                this._observer.observe(target, { childList: true, subtree: true, attributes: false });
             });
-        });
+        }
     }
 
     /** Stop observing and clear all timers. */
     stop() {
+        this._isObserving = false;
+        
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('search-results-scanner');
+        }
+
         if (this._observer) {
             this._observer.disconnect();
             this._observer = null;
-        }
-        if (this._monitorInterval) {
-            clearInterval(this._monitorInterval);
-            this._monitorInterval = null;
         }
         if (this._debounceTimer) {
             clearTimeout(this._debounceTimer);
@@ -111,31 +114,12 @@ window.YPP.features.SearchObserver = class SearchObserver {
     // Observer internals
     // -------------------------------------------------------------------------
 
-    _startMonitor(containerSelector) {
-        if (this._monitorInterval) clearInterval(this._monitorInterval);
-
-        let containerCache = null;
-
-        this._monitorInterval = setInterval(() => {
-            if (document.hidden)       return;
-            if (!this._isEnabled())    return;
-
-            if (!containerCache || !containerCache.isConnected) {
-                containerCache = document.querySelector(containerSelector);
-            }
-            if (!containerCache) return;
-
-            const unprocessed = containerCache.querySelectorAll(
-                'ytd-video-renderer:not(.ypp-grid-item),' +
-                'ytd-playlist-renderer:not(.ypp-grid-item),' +
-                'ytd-radio-renderer:not(.ypp-grid-item),' +
-                'ytd-channel-renderer:not(.ypp-grid-item)'
-            );
-
-            if (unprocessed.length > 0) {
-                this.processAll();
-            }
-        }, 1500);
+    _queueProcessAll() {
+        if (this._debounceTimer) clearTimeout(this._debounceTimer);
+        this._debounceTimer = setTimeout(() => {
+            requestAnimationFrame(() => { this.processAll(); });
+            this._debounceTimer = null;
+        }, 150);
     }
 
     _processMutations(mutations) {
@@ -146,14 +130,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
                 break;
             }
         }
-        if (!shouldProcess) return;
-
-        if (this._debounceTimer) clearTimeout(this._debounceTimer);
-
-        this._debounceTimer = setTimeout(() => {
-            requestAnimationFrame(() => { this.processAll(); });
-            this._debounceTimer = null;
-        }, 150);
+        if (shouldProcess) this._queueProcessAll();
     }
 
     // -------------------------------------------------------------------------
@@ -165,63 +142,79 @@ window.YPP.features.SearchObserver = class SearchObserver {
         if (!this._isEnabled()) return;
 
         try {
-            const itemSections              = document.querySelectorAll('ytd-item-section-renderer');
-            const { NOISE_TAGS, VIDEO_TAGS } = SearchObserver;
-            const CLASSES                   = this._classes;
-
-            for (const section of itemSections) {
-                const contents = section.querySelector('#contents');
-                if (!contents) continue;
-
-                const children = contents.children;
-                if (children.length === 0) continue;
-
-                let hasVideos     = false;
-                let allNoise      = true;
-                let hasTransients = false;
-
-                for (let i = 0; i < children.length; i++) {
-                    const tag = children[i].tagName.toLowerCase();
-
-                    if (tag === 'ytd-continuation-item-renderer') {
-                        hasTransients = true;
-                        continue;
-                    }
-                    if (VIDEO_TAGS.has(tag)) {
-                        hasVideos = true;
-                        allNoise  = false;
-                    } else if (!NOISE_TAGS.has(tag)) {
-                        allNoise = false;
-                    }
-                }
-
-                // Hide pure-noise sections
-                if (allNoise && !hasTransients && children.length > 0) {
-                    if (this._settings.hideSearchShelves) {
-                        section.classList.add('ypp-noise-section');
-                        section.style.setProperty('display', 'none', 'important');
-                    }
-                    continue;
-                }
-
-                // Restore previously-hidden sections that now have videos
-                if (section.classList.contains('ypp-noise-section') && hasVideos) {
-                    section.classList.remove('ypp-noise-section');
-                    section.style.removeProperty('display');
-                }
-
-                // Wire up CSS grid
-                if (hasVideos) {
-                    if (!contents.classList.contains(CLASSES.GRID_CONTAINER)) {
-                        contents.classList.add(CLASSES.GRID_CONTAINER);
-                    }
-                    for (let i = 0; i < children.length; i++) {
-                        this.processNode(children[i], contents);
-                    }
-                }
+            const itemSections = document.querySelectorAll('ytd-item-section-renderer');
+            for (let i = 0; i < itemSections.length; i++) {
+                this._processSection(itemSections[i]);
             }
         } catch (error) {
             console.warn('[SearchObserver] processAll error:', error.message);
+        }
+    }
+
+    _processSection(section) {
+        const contents = section.querySelector('#contents');
+        if (!contents) return;
+
+        const children = contents.children;
+        if (children.length === 0) return;
+
+        const stats = this._analyzeSectionChildren(children);
+
+        if (this._handleNoiseSection(section, stats, children.length)) {
+            return;
+        }
+
+        if (stats.hasVideos) {
+            this._applyGridSystem(contents, children);
+        }
+    }
+
+    _analyzeSectionChildren(children) {
+        let hasVideos = false;
+        let allNoise = true;
+        let hasTransients = false;
+        const { NOISE_TAGS, VIDEO_TAGS } = SearchObserver;
+
+        for (let i = 0; i < children.length; i++) {
+            const tag = children[i].tagName.toLowerCase();
+
+            if (tag === 'ytd-continuation-item-renderer') {
+                hasTransients = true;
+                continue;
+            }
+            if (VIDEO_TAGS.has(tag)) {
+                hasVideos = true;
+                allNoise = false;
+            } else if (!NOISE_TAGS.has(tag)) {
+                allNoise = false;
+            }
+        }
+        return { hasVideos, allNoise, hasTransients };
+    }
+
+    _handleNoiseSection(section, stats, childCount) {
+        if (stats.allNoise && !stats.hasTransients && childCount > 0) {
+            if (this._settings.hideSearchShelves) {
+                section.classList.add('ypp-noise-section');
+                section.style.setProperty('display', 'none', 'important');
+            }
+            return true;
+        }
+
+        if (section.classList.contains('ypp-noise-section') && stats.hasVideos) {
+            section.classList.remove('ypp-noise-section');
+            section.style.removeProperty('display');
+        }
+        return false;
+    }
+
+    _applyGridSystem(contents, children) {
+        const CLASSES = this._classes;
+        if (!contents.classList.contains(CLASSES.GRID_CONTAINER)) {
+            contents.classList.add(CLASSES.GRID_CONTAINER);
+        }
+        for (let i = 0; i < children.length; i++) {
+            this.processNode(children[i], contents);
         }
     }
 
