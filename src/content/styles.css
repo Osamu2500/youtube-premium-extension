@@ -2505,6 +2505,7 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail yt-image {
 
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail img,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
