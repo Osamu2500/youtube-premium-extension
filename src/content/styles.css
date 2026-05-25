@@ -2335,8 +2335,10 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
    method clears the inline values; these rules cover any stragglers).
    ===================================================================== */
 
-/* ── 1. #dismissible: primary inner wrapper → column stack ────────── */
-body.ypp-search-grid-mode ytd-video-renderer #dismissible {
+/* ── 1. #dismissible or #content: primary inner wrapper → column stack ────────── */
+body.ypp-search-grid-mode ytd-video-renderer #dismissible,
+body.ypp-search-grid-mode ytd-playlist-renderer #content,
+body.ypp-search-grid-mode ytd-radio-renderer #content {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
