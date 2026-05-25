@@ -153,10 +153,36 @@ window.YPP.core.DOMObserver = class DOMObserver {
         const uniqueSelectors = Array.from(new Set(allSelectorsArray));
         const combinedSelector = uniqueSelectors.join(',');
 
-        // 2. Find all matching elements across all newly added nodes in a single pass
-        const matchedElements = new Set();
+        // 2. Filter nodesToProcess to ONLY top-level nodes within this batch.
+        // If a node is a descendant of another node in this batch, we skip it
+        // because querySelectorAll on the parent will naturally find everything inside it.
+        // This reduces the number of querySelectorAll calls from O(N) to O(Roots),
+        // preventing massive slowdowns during heavy DOM inserts (like page loads).
+        const nodeSet = new Set(nodesToProcess);
+        const rootNodes = new Set();
+        
         for (let i = 0; i < nodesToProcess.length; i++) {
             const node = nodesToProcess[i];
+            if (!node.isConnected) continue; // Fast escape for detached nodes
+            
+            let isChild = false;
+            let parent = node.parentElement;
+            while (parent) {
+                if (nodeSet.has(parent)) {
+                    isChild = true;
+                    break;
+                }
+                parent = parent.parentElement;
+            }
+            
+            if (!isChild) {
+                rootNodes.add(node);
+            }
+        }
+
+        // 3. Find all matching elements across all root newly added nodes in a single pass
+        const matchedElements = new Set();
+        for (const node of rootNodes) {
             
             // Check node itself
             if (node.matches && node.matches(combinedSelector)) {

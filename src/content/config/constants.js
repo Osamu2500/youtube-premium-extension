@@ -266,6 +266,7 @@ window.YPP.CONSTANTS = {
         continueWatching: true,
         reversePlaylist: false,
         historyRedesign: true,
+        playlistRedesign: true,
 
         // Shorts Tools
         shortsAutoScroll: false,

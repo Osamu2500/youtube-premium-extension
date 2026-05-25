@@ -184,7 +184,44 @@ window.YPP.SettingsSchema = {
         shortcut_speedDown:     { type: 'string', default: 'Shift+,' },
         shortcut_speedUp:       { type: 'string', default: 'Shift+.' },
         shortcut_speedReset:    { type: 'string', default: 'Shift+R' },
-        shortcut_ambientMode:   { type: 'string', default: 'Shift+M' }
+        shortcut_ambientMode:   { type: 'string', default: 'Shift+M' },
+
+        // --- Content Visibility (missing from original schema) ---
+        hidePlaylists:       { type: 'boolean', default: false },
+        hidePodcasts:        { type: 'boolean', default: false },
+        hideThumbnails:      { type: 'boolean', default: false },
+        hideCards:           { type: 'boolean', default: false },
+        hideMetrics:         { type: 'boolean', default: false },
+        redirectHome:        { type: 'boolean', default: false },
+        redirectShorts:      { type: 'boolean', default: false },
+        multiSelect:         { type: 'boolean', default: true  },
+        autoLike:            { type: 'boolean', default: false },
+        autoQuality:         { type: 'boolean', default: false },
+        intentionalDelay:    { type: 'boolean', default: false },
+        markWatched:         { type: 'boolean', default: true  },
+
+        // --- Playlist & History (missing from original schema) ---
+        reversePlaylist:     { type: 'boolean', default: false },
+        playlistDuration:    { type: 'boolean', default: true  },
+        continueWatching:    { type: 'boolean', default: true  },
+        historyRedesign:     { type: 'boolean', default: true  },
+
+        // --- Global Player Bar ---
+        globalPlayerBarPosition: { type: 'string', default: 'right', values: ['right', 'left', 'top'] },
+
+        // --- Sidebar Layout ---
+        sidebarLayout:       { type: 'string',  default: 'compact', values: ['compact', 'expanded'] },
+
+        // --- Navigation (missing navTrending) ---
+        navTrending:         { type: 'boolean', default: true },
+
+        // --- Subscription Manager extras ---
+        enableFilterBar:     { type: 'boolean', default: false },
+        enableChannelHealth: { type: 'boolean', default: false },
+
+        // --- UI Redesigns (popup Customization tab) ---
+        glassPlayerUI:       { type: 'boolean', default: false },
+        sidebarComments:     { type: 'boolean', default: false }
     }),
 
     // =========================================================================

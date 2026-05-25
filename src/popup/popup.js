@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'hideScrollbar',
 
         // Navigation
+        'navTrending',
         'navShorts',
         'navSubscriptions',
         'navWatchLater',
@@ -223,7 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'grayscaleThumbnails',
 
         // Sidebar Layout
-        'sidebarLayout'
+        'sidebarLayout',
+
+        // UI Redesigns
+        'playlistRedesign',
+        'glassPlayerUI',
+        'sidebarComments'
     ];
 
     // --- STORAGE HANDLING ---
