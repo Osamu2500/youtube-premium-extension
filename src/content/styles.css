@@ -2663,9 +2663,9 @@ body.ypp-search-grid-mode ytd-rich-section-renderer {
   max-width: 100%;
 }
 
-/* Channel banner: full-width row but does NOT stretch to fill row height */
+/* Channel card: spans 2 columns, not full row */
 body.ypp-search-grid-mode ytd-channel-renderer {
-  grid-column: 1 / -1;
+  grid-column: span 2;
   width: 100%;
   max-width: 100%;
   align-self: start !important;  /* Prevents vertical stretch that causes card overlap */
@@ -7362,4 +7362,90 @@ html.yt-premium-plus-theme yt-chip-cloud-chip-renderer.iron-selected {
   --yt-spec-button-chip-background-hover: rgba(255, 255, 255, 0.2) !important;
   background: rgba(255, 255, 255, 0.15) !important;
   color: #fff !important;
+}
+
+/* ============================================================
+   SEARCH GRID — TARGETED BUG FIXES
+   ============================================================ */
+
+/* FIX 1: Circular avatar in search results — match homepage style */
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element yt-img-shadow,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element yt-img-shadow img,
+body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element #img,
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail yt-img-shadow,
+body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  display: block !important;
+}
+
+/* FIX 2: Duration badge visible in search grid */
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail-overlay-time-status-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail-overlay-time-status-renderer {
+  position: absolute !important;
+  bottom: 8px !important;
+  right: 8px !important;
+  z-index: 10 !important;
+  background: rgba(0, 0, 0, 0.85) !important;
+  border-radius: 4px !important;
+  padding: 2px 4px !important;
+}
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail-overlay-time-status-renderer span,
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail-overlay-time-status-renderer .ytd-thumbnail-overlay-time-status-renderer {
+  color: #fff !important;
+  font-size: 1.2rem !important;
+  font-weight: 500 !important;
+}
+
+/* FIX 3: Remove gap caused by continuation loader spanning a full tall row */
+body.ypp-search-grid-mode ytd-continuation-item-renderer {
+  grid-column: 1 / -1 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* FIX 4: Playlist cards in grid — treat same as video cards, not full-width */
+body.ypp-search-grid-mode ytd-playlist-renderer {
+  grid-column: span 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* FIX 4b: Playlist thumbnail overlay — video count badge */
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail-overlay-side-panel-renderer {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  background: rgba(0,0,0,0.85) !important;
+  border-radius: 4px 0 12px 0 !important;
+  padding: 4px 8px !important;
+}
+
+/* FIX 5: Mix/radio cards — same grid treatment as videos */
+body.ypp-search-grid-mode ytd-radio-renderer {
+  grid-column: span 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* FIX 6: Remove the large left gap on first load (image 2) —
+   caused by YouTube injecting a wide promo in column 1-2 before results load */
+body.ypp-search-grid-mode ytd-background-promo-renderer,
+body.ypp-search-grid-mode ytd-search-pyv-renderer {
+  display: none !important;
+}
+
+/* FIX 7: Bracket/bracket artifacts (image 3 purple markers) —
+   these are ytd-search-refinement-card-renderer elements leaking into grid */
+body.ypp-search-grid-mode ytd-search-refinement-card-renderer {
+  display: none !important;
 }
