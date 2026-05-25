@@ -2318,13 +2318,134 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
   line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
+}
+
+/* ── 2. MASTER GRID — lives on the section-list, not the item section ─── */
+/* Architecture:
+     ytd-section-list-renderer > #contents   ← CSS GRID (this rule)
+       ytd-item-section-renderer             ← display:contents (transparent)
+         ytd-item-section-renderer > #contents ← display:contents (transparent)
+           ytd-video-renderer                ← GRID CELL
+*/
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+  display: grid !important;
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+  grid-auto-flow: dense !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 1800px !important;
+  padding: 0 24px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  align-items: start !important;
+}
+
+/* Flatten item-section wrappers so video cards land directly in master grid */
+body.ypp-search-grid-mode ytd-item-section-renderer {
+  display: contents !important;
+}
+
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
+  display: contents !important;
+}
+
+/* BUG 3: Staggered/misaligned middle cards (Image 3) */
+.ypp-search-page.ypp-search-grid-mode #contents.ytd-two-column-search-results-renderer {
+    display: grid !important;
+    grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    align-items: start !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* BUG 4 & OPTION B: Force full width for shelf renderers */
+.ypp-search-page.ypp-search-grid-mode ytd-shelf-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-rich-shelf-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-reel-shelf-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
+.ypp-search-page.ypp-search-grid-mode ytd-background-promo-renderer {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+/* OPTION A: Hide completely if clean search is on */
+body.ypp-clean-search.ypp-search-page ytd-shelf-renderer,
+body.ypp-clean-search.ypp-search-page ytd-rich-shelf-renderer,
+body.ypp-clean-search.ypp-search-page ytd-reel-shelf-renderer,
+body.ypp-clean-search.ypp-search-page ytd-horizontal-card-list-renderer {
+    display: none !important;
+}
+
+/* ── 4. FULL-WIDTH ITEMS (ads, continuation, non-card types) ─────── */
+body.ypp-search-grid-mode .ypp-full-width-item,
+body.ypp-search-grid-mode ytd-continuation-item-renderer,
+body.ypp-search-grid-mode ytd-search-sub-menu-renderer {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+
+/* ============================================================
+   VIDEO CARDS IN GRID — Mirrored from homepage ytd-rich-item-renderer
+   ============================================================ */
+
+/* Card shell: identical glassmorphic style to homepage cards */
+body.ypp-search-grid-mode ytd-video-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer {
+  /* Size */
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  flex: none !important;
+  align-self: stretch !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  overflow: hidden !important;
+  position: relative !important;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.3s ease,
+    background 0.3s ease !important;
+  transform: translateZ(0); /* Hardware Acceleration */
+  will-change: transform, box-shadow, border-color, background;
+  isolation: isolate !important;
+  background-clip: border-box !important;
+}
+
+/* Video Title - identical to homepage card title */
+body.ypp-search-grid-mode ytd-video-renderer #video-title,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title,
+body.ypp-search-grid-mode ytd-video-renderer #video-title yt-formatted-string,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
+  font-family: "Inter", "Roboto", sans-serif !important;
+  font-size: 1.6rem !important;
+  line-height: 2.4rem !important;
+  font-weight: 500 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
   max-height: 4.8rem !important;
   color: #ffffff !important;
   letter-spacing: -0.1px !important;
   margin: 0 !important;
 }
-
-
 /* =====================================================================
    SEARCH GRID: INTERNAL CARD LAYOUT — VERTICAL STACK (matches homepage)
    =====================================================================
@@ -2353,7 +2474,9 @@ body.ypp-search-grid-mode ytd-radio-renderer #content {
 }
 
 /* ── 2. Thumbnail: override the inline width YouTube's Polymer injects ─ */
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   display: block !important;
   width: 100% !important;
   min-width: 0 !important;       /* beats YouTube's min-width: 246px */
@@ -2370,13 +2493,18 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
 
 /* ── 3. Thumbnail inner elements ─────────────────────────────────── */
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail a,
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail yt-image {
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail yt-image,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail a,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail yt-image,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail a,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail yt-image {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
 }
 
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img {
+body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail img,
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
