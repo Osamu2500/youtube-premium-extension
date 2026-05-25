@@ -485,23 +485,39 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             }
         }, { signal: this._abortController?.signal });
 
-        const observer = new MutationObserver((mutations) => {
-            const preview = document.querySelector('ytd-video-preview');
-            if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
-                // Steal the preview back into our hero container on the body
-                this._heroState.heroElement.appendChild(preview);
-                
-                // Re-append gradients and content to keep them above the video
-                const gradient = this._heroState.heroElement.querySelector('.netflix-hero-gradient');
-                const content = this._heroState.heroElement.querySelector('.netflix-hero-content');
-                if (gradient) this._heroState.heroElement.appendChild(gradient);
-                if (content) this._heroState.heroElement.appendChild(content);
-                
-                this._forceVideoSize(preview);
-            }
-        });
-        observer.observe(document.body, { attributes: true, attributeFilter: ['active', 'playing', 'hidden'], subtree: true });
-        this._heroState.observers.add(observer);
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.register('cinematic-preview-stealer', 'ytd-video-preview', (elements) => {
+                const preview = elements[0] || document.querySelector('ytd-video-preview');
+                if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
+                    // Steal the preview back into our hero container on the body
+                    this._heroState.heroElement.appendChild(preview);
+                    
+                    // Re-append gradients and content to keep them above the video
+                    const gradient = this._heroState.heroElement.querySelector('.netflix-hero-gradient');
+                    const content = this._heroState.heroElement.querySelector('.netflix-hero-content');
+                    if (gradient) this._heroState.heroElement.appendChild(gradient);
+                    if (content) this._heroState.heroElement.appendChild(content);
+                    
+                    this._forceVideoSize(preview);
+                }
+            });
+        } else {
+            const observer = new MutationObserver((mutations) => {
+                const preview = document.querySelector('ytd-video-preview');
+                if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
+                    this._heroState.heroElement.appendChild(preview);
+                    
+                    const gradient = this._heroState.heroElement.querySelector('.netflix-hero-gradient');
+                    const content = this._heroState.heroElement.querySelector('.netflix-hero-content');
+                    if (gradient) this._heroState.heroElement.appendChild(gradient);
+                    if (content) this._heroState.heroElement.appendChild(content);
+                    
+                    this._forceVideoSize(preview);
+                }
+            });
+            observer.observe(document.body, { attributes: true, attributeFilter: ['active', 'playing', 'hidden'], subtree: true });
+            this._heroState.observers.add(observer);
+        }
     }
 
     _forceVideoSize(preview) {
@@ -798,6 +814,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('cinematic-content-scanner');
+            window.YPP.sharedObserver.unregister('cinematic-preview-stealer');
         }
         if (this._contentUpdateTimer) {
             clearTimeout(this._contentUpdateTimer);

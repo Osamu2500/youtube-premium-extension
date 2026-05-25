@@ -88,8 +88,8 @@ window.YPP.features.SearchObserver = class SearchObserver {
             );
             this.processAll();
         } else {
-            this._pollForElement(containerSelector, (target) => {
-                if (!this._isObserving) return;
+            window.YPP.Utils.waitForElement(containerSelector, 4000).then((target) => {
+                if (!target || !this._isObserving) return;
                 this.processAll();
 
                 this._observer = new MutationObserver(this._processMutations);
@@ -466,20 +466,5 @@ window.YPP.features.SearchObserver = class SearchObserver {
     // Utility
     // -------------------------------------------------------------------------
 
-    _pollForElement(selector, callback, maxWaitMs = 4000, startInterval = 100) {
-        const startTime = Date.now();
-        let interval = startInterval;
 
-        const check = () => {
-            const el = document.querySelector(selector);
-            if (el) { callback(el); return; }
-
-            const elapsed = Date.now() - startTime;
-            if (elapsed < maxWaitMs) {
-                interval = Math.min(interval * 2, 1000);
-                setTimeout(check, interval);
-            }
-        };
-        check();
-    }
 };

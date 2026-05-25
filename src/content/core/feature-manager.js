@@ -296,5 +296,31 @@ window.YPP.FeatureManager = class FeatureManager {
                 }
             }
         });
+
+        // Global Sanitize: Remove orphaned injected classes, variables, and attributes
+        ['body', 'documentElement'].forEach(elName => {
+            const el = document[elName];
+            if (!el) return;
+            
+            // Remove classes
+            const yppClasses = Array.from(el.classList).filter(c => c.startsWith('ypp-') || c === 'yt-premium-plus-theme');
+            yppClasses.forEach(c => el.classList.remove(c));
+            
+            // Remove inline variables
+            for (let i = el.style.length - 1; i >= 0; i--) {
+                const prop = el.style[i];
+                if (prop && prop.startsWith('--ypp-')) {
+                    el.style.removeProperty(prop);
+                }
+            }
+            
+            // Remove data attributes
+            const attrs = Array.from(el.attributes);
+            attrs.forEach(attr => {
+                if (attr.name.startsWith('data-ypp-')) {
+                    el.removeAttribute(attr.name);
+                }
+            });
+        });
     }
 };

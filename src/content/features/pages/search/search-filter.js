@@ -55,7 +55,7 @@ window.YPP.features.SearchFilter = class SearchFilter {
         document.body.classList.add('ypp-filter-pending');
 
         // Poll for the chip bar with up to 10 s timeout
-        this._pollForElement('ytd-feed-filter-chip-bar-renderer', (bar) => {
+        window.YPP.Utils.waitForElement('ytd-feed-filter-chip-bar-renderer', 10000).then((bar) => {
             // Abort if the user or YouTube already applied a filter
             const currentParams = new URLSearchParams(window.location.search);
             if (currentParams.has('sp')) {
@@ -86,39 +86,12 @@ window.YPP.features.SearchFilter = class SearchFilter {
                     document.body.classList.remove('ypp-filter-pending');
                 }, 500);
             }
-            // If chip not found yet the poll will fire again via its retry logic
-        }, 10000, 200);
+        });
 
         // Safety net — always clear the pending class
         setTimeout(() => {
             document.body.classList.remove('ypp-filter-pending');
         }, 4000);
-    }
-
-    /**
-     * Poll for a DOM element with exponential back-off.
-     * @param {string}   selector     - CSS selector to find
-     * @param {Function} callback     - Invoked with the found element
-     * @param {number}   maxWaitMs    - Total timeout (default 4 s)
-     * @param {number}   startInterval - First retry delay (default 100 ms)
-     */
-    _pollForElement(selector, callback, maxWaitMs = 4000, startInterval = 100) {
-        const startTime = Date.now();
-        let interval = startInterval;
-
-        const check = () => {
-            const el = document.querySelector(selector);
-            if (el) { callback(el); return; }
-
-            const elapsed = Date.now() - startTime;
-            if (elapsed < maxWaitMs) {
-                interval = Math.min(interval * 2, 1000);
-                setTimeout(check, interval);
-            } else {
-                this._log(`Element "${selector}" not found after ${maxWaitMs} ms`, 'warn');
-            }
-        };
-        check();
     }
 
     _log(msg, level = 'info') {
