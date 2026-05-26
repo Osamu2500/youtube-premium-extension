@@ -37,63 +37,39 @@ window.YPP.features.SplitScrolling = class SplitScrolling extends window.YPP.fea
         if (document.getElementById(this.styleId)) return;
 
         const css = `
-            /* ONLY apply when on the watch page (ytd-watch-flexy is not hidden) */
-            body.ypp-split-scrolling-enabled:has(ytd-watch-flexy:not([hidden])) {
-                overflow: hidden !important; /* Hide main body scroll */
-            }
-
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) {
-                height: calc(100vh - var(--ytd-masthead-height, 56px)) !important;
-                overflow: hidden !important;
-            }
-
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #columns {
-                height: 100% !important;
-                max-height: 100% !important;
-                overflow: hidden !important;
-                display: flex !important;
-                align-items: stretch !important;
-            }
-
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #primary {
-                flex: 1 !important;
-                height: 100% !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
-                scrollbar-width: thin;
-                scrollbar-color: rgba(255,255,255,0.2) transparent;
-                padding-right: 12px !important;
-                margin-right: 12px !important;
-            }
-
+            /* Independent Scrollable Sidebar */
+            /* We make the sidebar sticky and scrollable, leaving the main body scroll intact for the left side. */
             body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary {
-                height: 100% !important;
+                position: sticky !important;
+                top: var(--ytd-masthead-height, 56px) !important;
+                height: calc(100vh - var(--ytd-masthead-height, 56px)) !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
-                scrollbar-width: thin;
-                scrollbar-color: rgba(255,255,255,0.2) transparent;
-                padding-right: 8px !important;
+                /* Remove default margins that might push it down */
+                margin-top: 0 !important;
+                padding-top: var(--ytd-margin-6x, 24px) !important;
             }
 
-            /* Custom scrollbars for webkit */
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #primary::-webkit-scrollbar,
+            /* Custom scrollbars for the sidebar */
             body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar {
-                width: 6px;
+                width: 8px;
             }
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #primary::-webkit-scrollbar-thumb,
             body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar-thumb {
                 background: rgba(255, 255, 255, 0.2);
                 border-radius: 4px;
             }
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #primary::-webkit-scrollbar-track,
             body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar-track {
                 background: transparent;
             }
             
             /* Add some padding bottom so the last item isn't flush */
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #primary-inner,
             body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary-inner {
-                padding-bottom: 80px !important;
+                padding-bottom: 40px !important;
+            }
+            
+            /* Ensure the columns container allows the sticky behavior */
+            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #columns {
+                overflow: visible !important;
             }
         `;
 
