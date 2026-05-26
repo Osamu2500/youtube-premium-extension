@@ -32,10 +32,17 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
     _showOverlay() {
         this._removeOverlay();
         
-        const videoElement = document.querySelector('video');
-        if (videoElement) {
-            videoElement.pause();
-        }
+        // Safely pause using YouTube's native API via inline script injection
+        // Calling .pause() directly on the <video> element during SPA navigation crashes the player (Playback ID error)
+        const pauseScript = document.createElement('script');
+        pauseScript.textContent = `
+            try {
+                const player = document.getElementById('movie_player');
+                if (player && player.pauseVideo) player.pauseVideo();
+            } catch(e) {}
+        `;
+        document.body.appendChild(pauseScript);
+        pauseScript.remove();
 
         this._overlay = document.createElement('div');
         this._overlay.className = 'ypp-intentional-delay-overlay';
@@ -66,8 +73,16 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
 
         btn.addEventListener('click', () => {
             this._removeOverlay();
-            const v = document.querySelector('video');
-            if (v) v.play();
+            // Safely play using YouTube's native API
+            const playScript = document.createElement('script');
+            playScript.textContent = `
+                try {
+                    const player = document.getElementById('movie_player');
+                    if (player && player.playVideo) player.playVideo();
+                } catch(e) {}
+            `;
+            document.body.appendChild(playScript);
+            playScript.remove();
         });
     }
     _removeOverlay() {
