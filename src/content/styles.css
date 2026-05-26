@@ -7602,3 +7602,132 @@ body.ypp-search-grid-mode ytd-search-pyv-renderer {
 body.ypp-search-grid-mode ytd-search-refinement-card-renderer {
   display: none !important;
 }
+
+/* ============================================================
+   PLAYLIST & RADIO CARDS - UNIFIED SQUARE GRID DESIGN
+   ============================================================ */
+/* Ensure the outer wrapper acts as a flex column card */
+body.ypp-search-grid-mode ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-radio-renderer {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  justify-content: flex-start !important;
+}
+
+/* Thumbnail wrapper must maintain 16:9 and span full width */
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+/* Hide native stacked background graphics for playlists to match flat video cards */
+body.ypp-search-grid-mode ytd-playlist-renderer yt-collections-stack,
+body.ypp-search-grid-mode ytd-playlist-renderer .yt-collections-stack,
+body.ypp-search-grid-mode ytd-playlist-renderer [class*="stack-"],
+body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer::before,
+body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer::after {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Structure the text-wrapper into a grid layout (without avatar column) */
+body.ypp-search-grid-mode ytd-playlist-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-playlist-renderer #meta,
+body.ypp-search-grid-mode ytd-radio-renderer #meta {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-areas:
+    "title"
+    "channel"
+    "metadata" !important;
+  row-gap: 4px !important;
+  margin: 12px 0 0 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Title */
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string,
+body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
+  grid-area: title !important;
+  font-family: "Inter", "Roboto", sans-serif !important;
+  font-size: 1.6rem !important;
+  line-height: 2.4rem !important;
+  font-weight: 500 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-height: 4.8rem !important;
+  color: #ffffff !important;
+  letter-spacing: -0.1px !important;
+  margin: 0 !important;
+}
+
+/* Channel Name */
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-channel-name,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-channel-name {
+  grid-area: channel !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-channel-name yt-formatted-string,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-channel-name yt-formatted-string,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-channel-name a,
+body.ypp-search-grid-mode ytd-radio-renderer ytd-channel-name a {
+  font-size: 1.3rem !important;
+  font-weight: 400 !important;
+  color: var(--ypp-text-secondary) !important;
+  line-height: 1.5 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-channel-name a,
+body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-channel-name a {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Metadata / Video Count */
+body.ypp-search-grid-mode ytd-playlist-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-radio-renderer #metadata-line,
+body.ypp-search-grid-mode ytd-playlist-renderer yt-formatted-string.ytd-playlist-renderer,
+body.ypp-search-grid-mode ytd-playlist-renderer #video-count {
+  grid-area: metadata !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 0 4px !important;
+  font-size: 1.3rem !important;
+  font-weight: 400 !important;
+  color: var(--ypp-text-secondary) !important;
+  line-height: 1.5 !important;
+  width: auto !important;
+  margin-top: 0 !important;
+}
+
+/* Hide clutter */
+body.ypp-search-grid-mode ytd-playlist-renderer #view-more,
+body.ypp-search-grid-mode ytd-radio-renderer #view-more,
+body.ypp-search-grid-mode ytd-playlist-renderer yt-icon,
+body.ypp-search-grid-mode ytd-radio-renderer yt-icon,
+body.ypp-search-grid-mode ytd-playlist-renderer yt-formatted-string#description-text,
+body.ypp-search-grid-mode ytd-radio-renderer yt-formatted-string#description-text {
+  display: none !important;
+}

@@ -35,17 +35,12 @@ window.YPP.features.SearchObserver = class SearchObserver {
     // -------------------------------------------------------------------------
 
     constructor() {
-        this._observer        = null;
-        this._monitorInterval = null;
-        this._debounceTimer   = null;
         this._processedNodes  = new WeakSet();
 
         /** Injected by SearchRedesign via sync() */
         this._settings  = {};
         this._isEnabled = () => false;
         this._classes   = {};
-
-        this._processMutations = this._processMutations.bind(this);
     }
 
     // -------------------------------------------------------------------------
@@ -78,23 +73,9 @@ window.YPP.features.SearchObserver = class SearchObserver {
             window.YPP.sharedObserver.register(
                 'search-results-scanner',
                 'ytd-item-section-renderer, ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer',
-                (matches) => {
-                    if (this._debounceTimer) clearTimeout(this._debounceTimer);
-                    this._debounceTimer = setTimeout(() => {
-                        requestAnimationFrame(() => this._processMatches(matches));
-                        this._debounceTimer = null;
-                    }, 150);
-                }
+                (matches) => this._processMatches(matches)
             );
             this.processAll();
-        } else {
-            window.YPP.Utils.waitForElement(containerSelector, 4000).then((target) => {
-                if (!target || !this._isObserving) return;
-                this.processAll();
-
-                this._observer = new MutationObserver(this._processMutations);
-                this._observer.observe(target, { childList: true, subtree: true, attributes: false });
-            });
         }
     }
 
@@ -105,66 +86,11 @@ window.YPP.features.SearchObserver = class SearchObserver {
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('search-results-scanner');
         }
-
-        if (this._observer) {
-            this._observer.disconnect();
-            this._observer = null;
-        }
-        if (this._debounceTimer) {
-            clearTimeout(this._debounceTimer);
-            this._debounceTimer = null;
-        }
     }
 
     // -------------------------------------------------------------------------
     // Observer internals
     // -------------------------------------------------------------------------
-
-    _queueProcessAll() {
-        if (this._debounceTimer) clearTimeout(this._debounceTimer);
-        this._debounceTimer = setTimeout(() => {
-            requestAnimationFrame(() => { this.processAll(); });
-            this._debounceTimer = null;
-        }, 150);
-    }
-
-    _processMutations(mutations) {
-        let sectionsToProcess = new Set();
-        for (let i = 0; i < mutations.length; i++) {
-            if (mutations[i].addedNodes.length > 0) {
-                for (let j = 0; j < mutations[i].addedNodes.length; j++) {
-                    const node = mutations[i].addedNodes[j];
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        if (node.tagName === 'YTD-ITEM-SECTION-RENDERER') {
-                            sectionsToProcess.add(node);
-                        } else if (node.closest) {
-                            const section = node.closest('ytd-item-section-renderer');
-                            if (section) sectionsToProcess.add(section);
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (sectionsToProcess.size > 0) {
-            if (this._debounceTimer) clearTimeout(this._debounceTimer);
-            this._debounceTimer = setTimeout(() => {
-                requestAnimationFrame(() => { 
-                    if (!this._isEnabled()) return;
-                    sectionsToProcess.forEach(section => {
-                        try {
-                            if (document.body.contains(section)) {
-                                this._processSection(section);
-                            }
-                        } catch (e) {
-                            console.warn('[SearchObserver] processSection error:', e.message);
-                        }
-                    });
-                });
-                this._debounceTimer = null;
-            }, 150);
-        }
-    }
 
     _processMatches(matches) {
         if (!this._isEnabled()) return;
@@ -211,21 +137,25 @@ window.YPP.features.SearchObserver = class SearchObserver {
     }
 
     _processSection(section) {
-        const contents = section.querySelector('#contents');
-        if (!contents) return;
+        window.YPP.Utils.batch.read(() => {
+            const contents = section.querySelector('#contents');
+            if (!contents) return;
 
-        const children = contents.children;
-        if (children.length === 0) return;
+            const children = Array.from(contents.children);
+            if (children.length === 0) return;
 
-        const stats = this._analyzeSectionChildren(children);
+            const stats = this._analyzeSectionChildren(children);
 
-        if (this._handleNoiseSection(section, stats, children.length)) {
-            return;
-        }
+            window.YPP.Utils.batch.write(() => {
+                if (this._handleNoiseSection(section, stats, children.length)) {
+                    return;
+                }
 
-        if (stats.hasVideos) {
-            this._applyGridSystem(contents, children);
-        }
+                if (stats.hasVideos) {
+                    this._applyGridSystem(contents, children);
+                }
+            });
+        });
     }
 
     _analyzeSectionChildren(children) {
@@ -280,56 +210,64 @@ window.YPP.features.SearchObserver = class SearchObserver {
     processNode(node, gridContainer) {
         if (node.nodeType !== Node.ELEMENT_NODE)  return;
         if (this._processedNodes.has(node))        return;
-        this._processedNodes.add(node);
 
-        const tag    = node.tagName.toLowerCase();
-        const CLASSES = this._classes;
-        const { NOISE_TAGS } = SearchObserver;
+        window.YPP.Utils.batch.read(() => {
+            const tag = node.tagName.toLowerCase();
+            const isFlattenable = this._isFlattenableShelf(node);
+            const isShorts = this._isShorts(node);
+            const container = gridContainer || node.parentElement;
+            const isGridContainer = container?.classList.contains(this._classes.GRID_CONTAINER);
 
-        // ── A. Noise node ─────────────────────────────────────────────────────
-        if (NOISE_TAGS.has(tag)) {
-            if (this._isFlattenableShelf(node)) {
-                this._flattenShelf(node);
-                return;
-            }
-            if (this._settings.hideSearchShelves) {
-                node.style.setProperty('display', 'none', 'important');
-            }
-            return;
-        }
+            window.YPP.Utils.batch.write(() => {
+                this._processedNodes.add(node);
+                const CLASSES = this._classes;
+                const { NOISE_TAGS } = SearchObserver;
 
-        // ── A1. Hide channel cards ─────────────────────────────────────────────
-        if (tag === 'ytd-channel-renderer' && this._settings.hideChannelCards) {
-            node.style.setProperty('display', 'none', 'important');
-            return;
-        }
+                // ── A. Noise node ─────────────────────────────────────────────────────
+                if (NOISE_TAGS.has(tag)) {
+                    if (isFlattenable) {
+                        this._flattenShelf(node);
+                        return;
+                    }
+                    if (this._settings.hideSearchShelves) {
+                        node.style.setProperty('display', 'none', 'important');
+                    }
+                    return;
+                }
 
-        // ── B. Shorts ─────────────────────────────────────────────────────────
-        if (this._isShorts(node)) {
-            node.style.setProperty('display', 'none', 'important');
-            return;
-        }
+                // ── A1. Hide channel cards ─────────────────────────────────────────────
+                if (tag === 'ytd-channel-renderer' && this._settings.hideChannelCards) {
+                    node.style.setProperty('display', 'none', 'important');
+                    return;
+                }
 
-        // ── C. Grid layout ────────────────────────────────────────────────────
-        const container = gridContainer || node.parentElement;
-        if (container?.classList.contains(CLASSES.GRID_CONTAINER)) {
-            if (
-                tag === 'ytd-video-renderer'    ||
-                tag === 'ytd-radio-renderer'    ||
-                tag === 'ytd-playlist-renderer' ||
-                tag === 'ytd-channel-renderer'
-            ) {
-                node.classList.add(CLASSES.GRID_ITEM);
-                this._cleanInlineStyles(node);
-            } else if (
-                tag === 'ytd-ad-slot-renderer' ||
-                tag === 'ytd-promoted-sparkles-web-renderer'
-            ) {
-                node.style.setProperty('display', 'none', 'important');
-            } else if (!node.classList.contains('ypp-flattened-container')) {
-                node.classList.add(CLASSES.FULL_WIDTH);
-            }
-        }
+                // ── B. Shorts ─────────────────────────────────────────────────────────
+                if (isShorts) {
+                    node.style.setProperty('display', 'none', 'important');
+                    return;
+                }
+
+                // ── C. Grid layout ────────────────────────────────────────────────────
+                if (isGridContainer) {
+                    if (
+                        tag === 'ytd-video-renderer'    ||
+                        tag === 'ytd-radio-renderer'    ||
+                        tag === 'ytd-playlist-renderer' ||
+                        tag === 'ytd-channel-renderer'
+                    ) {
+                        node.classList.add(CLASSES.GRID_ITEM);
+                        this._cleanInlineStyles(node);
+                    } else if (
+                        tag === 'ytd-ad-slot-renderer' ||
+                        tag === 'ytd-promoted-sparkles-web-renderer'
+                    ) {
+                        node.style.setProperty('display', 'none', 'important');
+                    } else if (!node.classList.contains('ypp-flattened-container')) {
+                        node.classList.add(CLASSES.FULL_WIDTH);
+                    }
+                }
+            });
+        });
     }
 
     // -------------------------------------------------------------------------

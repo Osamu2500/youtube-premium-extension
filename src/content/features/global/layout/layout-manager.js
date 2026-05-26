@@ -230,14 +230,9 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             cols = this.settings?.subscriptionsColumns || 4;
         }
 
-        // Auto-scale grid items based on window width (zoom/resize)
-        if (this.settings?.autoScaleLayout) {
-            const minCardWidth = path.startsWith('/results') ? 280 : 320;
-            const availableWidth = window.innerWidth;
-            const padding = 100; // Account for sidebar and margins
-            cols = Math.max(1, Math.floor((availableWidth - padding) / minCardWidth));
-            cols = Math.min(8, cols);
-        }
+        // Auto-scale layout scale factor is already set via --ypp-auto-scale above.
+        // We removed the logic that overrides the column count here, so the user's
+        // manual slider selection (e.g. 5 columns) is always respected.
 
         // Fix YouTube's row wrappers (use display: contents to flatten)
         // Moved to styles.css for massive performance boost.

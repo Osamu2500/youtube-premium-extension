@@ -113,6 +113,48 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     // =====================================================================
 
     /**
+     * DOM read/write batching utility (similar to fastdom)
+     * Prevents layout thrashing by grouping reads and writes in requestAnimationFrame
+     */
+    batch: (() => {
+        let reads = [];
+        let writes = [];
+        let scheduled = false;
+
+        function flush() {
+            const r = reads;
+            const w = writes;
+            reads = [];
+            writes = [];
+            scheduled = false;
+
+            try {
+                for (let i = 0; i < r.length; i++) r[i]();
+                for (let i = 0; i < w.length; i++) w[i]();
+            } catch (e) {
+                window.YPP.Utils?.log('Batch execution error: ' + e.message, 'UTILS', 'error');
+            }
+        }
+
+        return {
+            read(task) {
+                reads.push(task);
+                if (!scheduled) {
+                    scheduled = true;
+                    requestAnimationFrame(flush);
+                }
+            },
+            write(task) {
+                writes.push(task);
+                if (!scheduled) {
+                    scheduled = true;
+                    requestAnimationFrame(flush);
+                }
+            }
+        };
+    })(),
+
+    /**
      * Safely query a single element
      * @param {string} selector 
      * @param {Element} [parent=document] 

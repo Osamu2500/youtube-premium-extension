@@ -501,22 +501,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     this._forceVideoSize(preview);
                 }
             });
-        } else {
-            const observer = new MutationObserver((mutations) => {
-                const preview = document.querySelector('ytd-video-preview');
-                if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
-                    this._heroState.heroElement.appendChild(preview);
-                    
-                    const gradient = this._heroState.heroElement.querySelector('.netflix-hero-gradient');
-                    const content = this._heroState.heroElement.querySelector('.netflix-hero-content');
-                    if (gradient) this._heroState.heroElement.appendChild(gradient);
-                    if (content) this._heroState.heroElement.appendChild(content);
-                    
-                    this._forceVideoSize(preview);
-                }
-            });
-            observer.observe(document.body, { attributes: true, attributeFilter: ['active', 'playing', 'hidden'], subtree: true });
-            this._heroState.observers.add(observer);
         }
     }
 
@@ -538,36 +522,36 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         };
 
         const stretchContainers = () => {
-            setSize(preview);
-            preview.style.setProperty('position', 'absolute', 'important');
-            preview.style.setProperty('top', '0', 'important');
-            preview.style.setProperty('left', '0', 'important');
-            preview.style.setProperty('pointer-events', 'none', 'important');
+            window.YPP.Utils.batch.read(() => {
+                const videoPreviewContainer = preview.querySelector('#video-preview-container') || preview.querySelector('#inline-preview-player');
+                const ytdPlayer = preview.querySelector('ytd-player');
+                let playerContainer = ytdPlayer ? ytdPlayer.querySelector('#container') : null;
+                if (!playerContainer && ytdPlayer && ytdPlayer.shadowRoot) {
+                    playerContainer = ytdPlayer.shadowRoot.querySelector('#container');
+                }
+                const html5Player = preview.querySelector('.html5-video-player') || (playerContainer ? playerContainer.querySelector('.html5-video-player') : null);
+                const html5VideoContainer = preview.querySelector('.html5-video-container') || (html5Player ? html5Player.querySelector('.html5-video-container') : null);
+                const video = preview.querySelector('video') || (html5VideoContainer ? html5VideoContainer.querySelector('video') : null);
 
-            const videoPreviewContainer = preview.querySelector('#video-preview-container') || preview.querySelector('#inline-preview-player');
-            setSize(videoPreviewContainer);
+                window.YPP.Utils.batch.write(() => {
+                    setSize(preview);
+                    preview.style.setProperty('position', 'absolute', 'important');
+                    preview.style.setProperty('top', '0', 'important');
+                    preview.style.setProperty('left', '0', 'important');
+                    preview.style.setProperty('pointer-events', 'none', 'important');
 
-            const ytdPlayer = preview.querySelector('ytd-player');
-            setSize(ytdPlayer);
-
-            let playerContainer = ytdPlayer ? ytdPlayer.querySelector('#container') : null;
-            if (!playerContainer && ytdPlayer && ytdPlayer.shadowRoot) {
-                playerContainer = ytdPlayer.shadowRoot.querySelector('#container');
-            }
-            setSize(playerContainer);
-
-            const html5Player = preview.querySelector('.html5-video-player') || (playerContainer ? playerContainer.querySelector('.html5-video-player') : null);
-            setSize(html5Player);
-
-            const html5VideoContainer = preview.querySelector('.html5-video-container') || (html5Player ? html5Player.querySelector('.html5-video-container') : null);
-            setSize(html5VideoContainer);
-
-            const video = preview.querySelector('video') || (html5VideoContainer ? html5VideoContainer.querySelector('video') : null);
-            setSize(video);
-            if (video) {
-                video.style.setProperty('object-fit', 'cover', 'important');
-                video.style.setProperty('z-index', '0', 'important');
-            }
+                    setSize(videoPreviewContainer);
+                    setSize(ytdPlayer);
+                    setSize(playerContainer);
+                    setSize(html5Player);
+                    setSize(html5VideoContainer);
+                    setSize(video);
+                    if (video) {
+                        video.style.setProperty('object-fit', 'cover', 'important');
+                        video.style.setProperty('z-index', '0', 'important');
+                    }
+                });
+            });
         };
 
         stretchContainers();
@@ -585,61 +569,67 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     // ─── Queue Management & Scroll ────────────────────────────────────────────
 
     _updateVideoQueue() {
-        const allVideos = document.querySelectorAll('#contents > ytd-rich-item-renderer, #contents > ytd-rich-section-renderer ytd-rich-item-renderer');
-        const newQueue = Array.from(allVideos).filter(item => {
-            const titleLink = item.querySelector('a#video-title-link, a#video-title, a#thumbnail');
-            return titleLink && this._extractVideoId(titleLink.href);
-        });
-
-        let queueUpdated = false;
-        if (newQueue.length !== this._videoQueue.length) {
-            // Only reset index to 0 if the queue shrank (e.g. page changed).
-            // If it grew (YouTube lazy-loaded more), preserve the current position.
-            const grew = newQueue.length > this._videoQueue.length;
-            this._videoQueue = newQueue;
-            if (!grew) this._currentVideoIndex = 0;
-            queueUpdated = true;
-
-            newQueue.forEach(video => {
-                // Skip processing if already stamped
-                if (video.hasAttribute('data-ypp-processed')) return;
-                
-                video.querySelectorAll('.recently-badge-container').forEach(badge => badge.remove());
-                if (this._isRecentlyAdded(video)) {
-                    const badgeContainer = document.createElement('div');
-                    badgeContainer.className = 'recently-badge-container';
-                    badgeContainer.style = 'position: absolute; top: -17px; left: 50%; transform: translateX(-50%); z-index: 2; padding: 8px;';
-                    const badgeHtml = '<span class="recently-badge" style="background-color: #e50914; color: white; padding: 6px 8px; border-radius: 4px; font-size: 15px; font-weight: 500;">Recently Added</span>';
-                    badgeContainer.innerHTML = window.YPP.utils.sanitizeHTML ? window.YPP.utils.sanitizeHTML(badgeHtml) : badgeHtml;
-                    const thumbnail = video.querySelector('ytd-thumbnail');
-                    if (thumbnail) thumbnail.appendChild(badgeContainer);
-                }
-                
-                // Stamp processed node
-                video.setAttribute('data-ypp-processed', 'true');
+        window.YPP.Utils.batch.read(() => {
+            const allVideos = document.querySelectorAll('#contents > ytd-rich-item-renderer, #contents > ytd-rich-section-renderer ytd-rich-item-renderer');
+            const newQueue = Array.from(allVideos).filter(item => {
+                const titleLink = item.querySelector('a#video-title-link, a#video-title, a#thumbnail');
+                return titleLink && this._extractVideoId(titleLink.href);
             });
-        }
 
-        const firstVideo = this._videoQueue[0];
-        
-        if (firstVideo) {
-            if (this._heroState.status === 'inactive') {
-                // Retry making hero preview if it failed initially due to skeleton loaders
-                this._makeHeroPreview(firstVideo).then(() => {
-                    if (this._heroState.status === 'ready') {
+            const itemsToProcess = [];
+            newQueue.forEach(video => {
+                if (video.hasAttribute('data-ypp-processed')) return;
+                itemsToProcess.push({
+                    video,
+                    isRecent: this._isRecentlyAdded(video),
+                    thumbnail: video.querySelector('ytd-thumbnail'),
+                    badges: video.querySelectorAll('.recently-badge-container')
+                });
+            });
+
+            window.YPP.Utils.batch.write(() => {
+                let queueUpdated = false;
+                if (newQueue.length !== this._videoQueue.length) {
+                    const grew = newQueue.length > this._videoQueue.length;
+                    this._videoQueue = newQueue;
+                    if (!grew) this._currentVideoIndex = 0;
+                    queueUpdated = true;
+
+                    itemsToProcess.forEach(item => {
+                        item.badges.forEach(badge => badge.remove());
+                        if (item.isRecent) {
+                            const badgeContainer = document.createElement('div');
+                            badgeContainer.className = 'recently-badge-container';
+                            badgeContainer.style = 'position: absolute; top: -17px; left: 50%; transform: translateX(-50%); z-index: 2; padding: 8px;';
+                            const badgeHtml = '<span class="recently-badge" style="background-color: #e50914; color: white; padding: 6px 8px; border-radius: 4px; font-size: 15px; font-weight: 500;">Recently Added</span>';
+                            badgeContainer.innerHTML = window.YPP.utils.sanitizeHTML ? window.YPP.utils.sanitizeHTML(badgeHtml) : badgeHtml;
+                            if (item.thumbnail) item.thumbnail.appendChild(badgeContainer);
+                        }
+                        item.video.setAttribute('data-ypp-processed', 'true');
+                    });
+                }
+
+                const firstVideo = this._videoQueue[0];
+                
+                if (firstVideo) {
+                    if (this._heroState.status === 'inactive') {
+                        this._makeHeroPreview(firstVideo).then(() => {
+                            if (this._heroState.status === 'ready') {
+                                firstVideo.classList.add('netflix-active-preview');
+                                this._updateHeroContent(firstVideo);
+                                clearTimeout(this._videoTimer);
+                                this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
+                            }
+                        });
+                    } else if (this._heroState.status === 'ready' && queueUpdated) {
                         firstVideo.classList.add('netflix-active-preview');
                         this._updateHeroContent(firstVideo);
                         clearTimeout(this._videoTimer);
                         this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
                     }
-                });
-            } else if (this._heroState.status === 'ready' && queueUpdated) {
-                firstVideo.classList.add('netflix-active-preview');
-                this._updateHeroContent(firstVideo);
-                clearTimeout(this._videoTimer);
-                this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-            }
-        }
+                }
+            });
+        });
     }
 
     _isRecentlyAdded(element) {
@@ -662,15 +652,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 clearTimeout(this._contentUpdateTimer);
                 this._contentUpdateTimer = setTimeout(() => this._updateVideoQueue(), this.CONFIG.CONTENT_UPDATE_DELAY);
             });
-        } else {
-            const contents = document.querySelector('#contents');
-            if (!contents) return;
-
-            this._mo = new MutationObserver(() => {
-                clearTimeout(this._contentUpdateTimer);
-                this._contentUpdateTimer = setTimeout(() => this._updateVideoQueue(), this.CONFIG.CONTENT_UPDATE_DELAY);
-            });
-            this._mo.observe(contents, { childList: true, subtree: true });
         }
     }
 

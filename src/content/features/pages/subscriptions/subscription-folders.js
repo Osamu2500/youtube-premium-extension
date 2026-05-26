@@ -96,7 +96,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             /* Take over the main contents container and make it a fluid CSS Grid */
             ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer > #contents {
                 display: grid !important;
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+                grid-template-columns: repeat(var(--ypp-subscriptions-columns, 4), minmax(0, 1fr)) !important;
                 grid-gap: 16px !important;
                 width: 100% !important;
             }
