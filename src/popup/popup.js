@@ -226,7 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'grayscaleThumbnails',
 
         // Sidebar Layout
-        'sidebarLayout'
+        'sidebarLayout',
+        
+        // Scrolling
+        'splitScrolling'
     ];
 
     // --- STORAGE HANDLING ---
