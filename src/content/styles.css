@@ -7785,6 +7785,7 @@ body.ypp-search-grid-mode ytd-lockup-view-model {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
+  height: 100% !important;
 }
 
 /* Force inner wrappers to be vertical columns */
@@ -7802,12 +7803,71 @@ body.ypp-search-grid-mode ytd-lockup-view-model *:has(> .yt-lockup-view-model-wi
   box-sizing: border-box !important;
 }
 
-/* Ensure the image container takes exactly 16:9 like a normal thumbnail */
+/* Ensure the image container takes exactly 16:9 and doesn't squish */
 body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container,
 body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container {
   width: 100% !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
   border-radius: 12px !important;
-  margin-bottom: 8px !important;
+  margin: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Fix distorted images inside the lockup container */
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container img,
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container img,
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container yt-image,
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container yt-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Fix spacing for the metadata block */
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
+  margin-top: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  padding: 0 !important;
+}
+
+/* Format the title properly */
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz__title,
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz__title {
+  font-size: 1.4rem !important;
+  font-weight: 500 !important;
+  line-height: 2rem !important;
+  color: var(--yt-spec-text-primary) !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+/* Format the channel/metadata text */
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz__text-wrapper,
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz__text-wrapper {
+  font-size: 1.2rem !important;
+  color: var(--yt-spec-text-secondary) !important;
+  line-height: 1.8rem !important;
+  margin: 0 !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+}
+
+/* Hide the giant description lists of songs that bloat the playlist card vertically */
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz__text-wrapper:nth-of-type(n+3),
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz__text-wrapper:nth-of-type(n+3) {
+  display: none !important;
 }
