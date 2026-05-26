@@ -7788,31 +7788,35 @@ body.ypp-search-grid-mode ytd-lockup-view-model {
   height: 100% !important;
 }
 
-/* Force inner wrappers to be vertical columns */
-body.ypp-search-grid-mode yt-lockup-view-model > div,
-body.ypp-search-grid-mode ytd-lockup-view-model > div,
-body.ypp-search-grid-mode yt-lockup-view-model *:has(> .yt-lockup-metadata-view-model-wiz),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(> .yt-lockup-metadata-view-model-wiz),
-body.ypp-search-grid-mode yt-lockup-view-model *:has(> .yt-lockup-view-model-wiz__image-container),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(> .yt-lockup-view-model-wiz__image-container) {
+/* Force all inner wrappers in the tree to be full-width columns */
+body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-view-model-wiz__image-container),
+body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-view-model-wiz__image-container),
+body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-metadata-view-model-wiz),
+body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-metadata-view-model-wiz) {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
+  max-width: none !important;
+  min-width: 100% !important;
   height: auto !important;
   align-items: stretch !important;
   box-sizing: border-box !important;
+  flex: none !important;
 }
 
-/* Ensure the image container takes exactly 16:9 and doesn't squish */
+/* Ensure the image container spans full width, ignoring card padding via negative margins (like video cards) */
 body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container,
 body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container {
-  width: 100% !important;
+  margin: calc(var(--ypp-density-pad, 12px) * -1) calc(var(--ypp-density-pad, 12px) * -1) 12px calc(var(--ypp-density-pad, 12px) * -1) !important;
+  width: calc(100% + calc(var(--ypp-density-pad, 12px) * 2)) !important;
+  max-width: none !important;
+  min-width: calc(100% + calc(var(--ypp-density-pad, 12px) * 2)) !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
-  border-radius: 12px !important;
-  margin: 0 !important;
+  border-radius: var(--ypp-radius-md) var(--ypp-radius-md) 0 0 !important;
   position: relative !important;
   overflow: hidden !important;
+  flex: none !important;
 }
 
 /* Fix distorted images inside the lockup container */
@@ -7823,16 +7827,16 @@ body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  border-radius: 12px !important;
+  border-radius: var(--ypp-radius-md) var(--ypp-radius-md) 0 0 !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
 }
 
-/* Fix spacing for the metadata block */
+/* Fix spacing for the metadata block - let card padding handle the edges */
 body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
 body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
-  margin-top: 12px !important;
+  margin-top: 0 !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 4px !important;
