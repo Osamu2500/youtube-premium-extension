@@ -651,99 +651,7 @@ body.ypp-hide-explore-topics #chips-wrapper {
   display: none !important;
 }
 
-/* Hover Sidebar (Top-Collapse Drawer) */
-body.ypp-hover-sidebar ytd-watch-flexy #secondary,
-body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer {
-  position: absolute !important;
-  top: 12px !important;
-  right: 24px !important;
-  width: 402px !important;
-  min-width: 0 !important;
-  max-width: 90vw !important;
-  height: auto !important;
-  max-height: 48px !important;
-  flex: none !important;
-  background: rgba(15, 15, 15, 0.95) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
-  z-index: 9999 !important;
-  transition:
-    max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.3s ease,
-    border-color 0.3s ease !important;
-  padding: 0 16px 16px 16px !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
 
-body.ypp-hover-sidebar ytd-watch-flexy #secondary:hover,
-body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer:hover {
-  max-height: calc(100vh - var(--ytd-masthead-height, 56px) - 24px) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8) !important;
-  border-color: rgba(62, 166, 255, 0.5) !important;
-  overflow-y: auto !important;
-  border-bottom: 1px solid rgba(62, 166, 255, 0.5) !important;
-}
-
-/* Invisible extended hover trigger zone for the collapsed bar */
-body.ypp-hover-sidebar ytd-watch-flexy #secondary::before,
-body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
-  background: transparent;
-  z-index: 9999;
-}
-
-/* Hover Handle indicator (Horizontal Drawer Pill) */
-body.ypp-hover-sidebar ytd-watch-flexy #secondary::after,
-body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer::after {
-  content: "";
-  position: absolute;
-  top: 22px;
-  right: 50%;
-  transform: translateX(50%);
-  width: 60px;
-  height: 6px;
-  background: #ffffff;
-  border-radius: 4px;
-  transition:
-    opacity 0.3s ease,
-    transform 0.2s ease;
-  z-index: 10000;
-  pointer-events: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-body.ypp-hover-sidebar ytd-watch-flexy #secondary:hover::after,
-body.ypp-hover-sidebar ytd-watch-next-secondary-results-renderer:hover::after {
-  opacity: 0.2;
-}
-
-/* Expand Primary Column to fill the freed space */
-body.ypp-hover-sidebar #primary.ytd-watch-flexy,
-body.ypp-hover-sidebar ytd-watch-flexy[flexy] #primary.ytd-watch-flexy {
-  max-width: 100% !important;
-  min-width: 0 !important;
-  padding-right: 24px !important;
-}
-
-/* Hide scrollbar of the sidebar */
-body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar {
-  width: 8px;
-}
 
 /* ==========================================================================
    FLOATING GLASSMORPHIC GUIDE DOCK
@@ -972,13 +880,7 @@ body.ypp-floating-guide ytd-page-manager {
   -webkit-appearance: none;
   margin: 0;
 }
-body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar-track {
-  background: transparent;
-}
-body.ypp-hover-sidebar ytd-watch-flexy #secondary::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
+
 
 /* Hide End Screens */
 .ypp-hide-endscreens .ytp-ce-element,

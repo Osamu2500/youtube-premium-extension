@@ -97,7 +97,6 @@ window.YPP.SettingsSchema = {
         navPlaylists:        { type: 'boolean', default: true },
         navHistory:          { type: 'boolean', default: true },
         forceHideSidebar:    { type: 'boolean', default: false },
-        hoverSidebar:        { type: 'boolean', default: true },
         floatingGuide:       { type: 'boolean', default: false },
         logoRedirectSub:     { type: 'boolean', default: false },
 

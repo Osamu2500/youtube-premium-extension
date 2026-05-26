@@ -150,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'zenMode',
         'autoCinema',
         'autoPiP',
-        'hoverSidebar',
         'floatingGuide',
         'studyMode',
         'cinemaMode', // Missing

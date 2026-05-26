@@ -258,7 +258,6 @@ window.YPP.CONSTANTS = {
         navPlaylists: true,
         navHistory: true,
         forceHideSidebar: false,
-        hoverSidebar: true,
         logoRedirectSub: false,
         sidebarLayout: 'expanded', // 'compact' | 'expanded'
         

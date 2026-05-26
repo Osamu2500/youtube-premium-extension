@@ -28,8 +28,8 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
      */
     update(settings) {
         this.settings = settings;
-        // Logic: if forceHideSidebar, hoverSidebar, or floatingGuide is enabled, enable manager
-        if (settings.forceHideSidebar || settings.hoverSidebar || settings.floatingGuide) {
+        // Logic: if forceHideSidebar or floatingGuide is enabled, enable manager
+        if (settings.forceHideSidebar || settings.floatingGuide) {
             this.enable(); 
         } else {
             this.disable(); 
@@ -56,7 +56,7 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
         if (!this.isEnabled) return;
 
         this.isEnabled = false;
-        document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar', 'ypp-floating-guide');
+        document.body.classList.remove('ypp-hide-sidebar', 'ypp-floating-guide');
 
         window.removeEventListener('yt-page-data-updated', this.handleNavigation);
         window.removeEventListener('yt-navigate-finish', this.handleNavigation);
@@ -72,7 +72,7 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
 
     /**
      * Ensures the correct CSS class is applied to the body based on settings.
-     * Note: `forceHideSidebar` (Zen Mode) takes strict precedence over `hoverSidebar` (Top Drawer).
+     * Note: `forceHideSidebar` (Zen Mode) takes strict precedence.
      * Uses `requestAnimationFrame` to ensure the DOM is ready and avoid layout thrashing.
      */
     ensureSidebarState() {
@@ -84,12 +84,8 @@ window.YPP.features.SidebarManager = class SidebarManager extends window.YPP.fea
 
             if (this.settings.forceHideSidebar) {
                 document.body.classList.add('ypp-hide-sidebar');
-                document.body.classList.remove('ypp-hover-sidebar');
-            } else if (this.settings.hoverSidebar) {
-                document.body.classList.add('ypp-hover-sidebar');
-                document.body.classList.remove('ypp-hide-sidebar');
             } else {
-                document.body.classList.remove('ypp-hide-sidebar', 'ypp-hover-sidebar');
+                document.body.classList.remove('ypp-hide-sidebar');
             }
 
             // Floating guide dock — independent of sidebar hiding
