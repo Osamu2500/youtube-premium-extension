@@ -695,39 +695,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (presetResearchBtn) presetResearchBtn.addEventListener('click', () => applyPreset('research'));
     if (presetMinimalBtn) presetMinimalBtn.addEventListener('click', () => applyPreset('minimal'));
 
-    // --- FEATURE SEARCH ---
+    // --- FEATURE SEARCH (GLOBAL) ---
     const featureSearchInput = document.getElementById('featureSearch');
     if (featureSearchInput) {
         featureSearchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             const allCards = document.querySelectorAll('.toggle-card, .setting-item');
             const allSections = document.querySelectorAll('.settings-section');
+            const allTabs = document.querySelectorAll('.tab-content');
             
             if (!query) {
+                // Reset to default view
                 allCards.forEach(card => card.style.display = '');
                 allSections.forEach(sec => sec.style.display = '');
-                
-                // If query is cleared, ensure we are only showing the active tab's content
-                // because all tabs might have their cards restored.
-                // Wait, display='' just inherited styles. We don't change .tab-content
+                allTabs.forEach(tab => tab.style.display = ''); 
                 return;
             }
 
-            // Force show all tabs temporarily so we can see search results from everywhere?
-            // Optional: The user might want global search.
-            // For now, let's keep search restricted to the active tab otherwise layout breaks.
-            const activeTab = document.querySelector('.tab-content.active');
-            if (activeTab) {
-                const activeCards = activeTab.querySelectorAll('.toggle-card, .setting-item');
-                activeCards.forEach(card => {
+            // Global search logic
+            allTabs.forEach(tab => {
+                const cards = tab.querySelectorAll('.toggle-card, .setting-item, .mode-card');
+                let tabHasMatches = false;
+
+                cards.forEach(card => {
+                    // Collect text content of the card to search
                     const text = card.textContent.toLowerCase();
                     if (text.includes(query)) {
-                        card.style.display = ''; 
+                        card.style.display = '';
+                        tabHasMatches = true;
                     } else {
                         card.style.display = 'none';
                     }
                 });
-            }
+
+                // Hide sections within the tab if they have no visible cards
+                const sections = tab.querySelectorAll('.settings-section');
+                sections.forEach(sec => {
+                    // Check if any card inside this section is visible
+                    const visibleCards = Array.from(sec.querySelectorAll('.toggle-card, .setting-item, .mode-card')).filter(c => c.style.display !== 'none');
+                    if (visibleCards.length === 0) {
+                        sec.style.display = 'none';
+                    } else {
+                        sec.style.display = '';
+                    }
+                });
+
+                // Temporarily override tab display to show search results from any tab
+                if (tabHasMatches) {
+                    tab.style.display = 'block'; 
+                } else {
+                    tab.style.display = 'none';  
+                }
+            });
         });
     }
 
