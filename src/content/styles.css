@@ -2179,6 +2179,15 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
     box-sizing: border-box;
 }
 
+/* FIX 4c: Convert shelf inner lists to grids so items inside them (like playlists) form grid cards! */
+.ypp-search-page.ypp-search-grid-mode ytd-shelf-renderer ytd-vertical-list-renderer > #items {
+    display: grid !important;
+    grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+    grid-auto-flow: dense !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
 /* OPTION A: Hide completely if clean search is on */
 body.ypp-clean-search.ypp-search-page ytd-shelf-renderer,
 body.ypp-clean-search.ypp-search-page ytd-rich-shelf-renderer,
@@ -2471,6 +2480,19 @@ body.ypp-search-grid-mode ytd-radio-renderer #content {
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+}
+
+/* ── 1b. Brute-force any inner links to column stack (sometimes YouTube wraps the whole thing in <a>) ────────── */
+body.ypp-search-grid-mode ytd-playlist-renderer a.yt-simple-endpoint,
+body.ypp-search-grid-mode ytd-radio-renderer a.yt-simple-endpoint,
+body.ypp-search-grid-mode ytd-playlist-renderer #content > a,
+body.ypp-search-grid-mode ytd-playlist-renderer > div,
+body.ypp-search-grid-mode ytd-radio-renderer > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* ── 2. Thumbnail: override the inline width YouTube's Polymer injects ─ */
