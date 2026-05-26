@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Integrations & Filters
         'sponsorBlock',
+        'hideSponsorBlockIcons',
         'returnYouTubeDislike',
         'adSkipper',
         'enableMarkWatched',

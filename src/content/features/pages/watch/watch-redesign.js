@@ -68,6 +68,14 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         style.id = 'ypp-watch-redesign-style';
         style.textContent = `
             /* ========================================================
+               GLOBAL: DYNAMIC PROGRESS BAR ALIGNMENT
+               ======================================================== */
+            .html5-video-player .ytp-chrome-bottom {
+                bottom: var(--ypp-letterbox-bottom, 0px) !important;
+                transition: bottom 0.2s ease-out !important;
+            }
+
+            /* ========================================================
                PHASE 1: GLASS PLAYER UI
                ======================================================== */
             html.ypp-glass-player-active ytd-watch-flexy .html5-video-player {
@@ -111,7 +119,6 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             
             html.ypp-glass-player-active .ytp-play-progress {
                 background: linear-gradient(90deg, var(--ypp-accent-color, #ff4e45), #ff8a84) !important;
-                box-shadow: 0 0 10px var(--ypp-accent-color, rgba(255, 78, 69, 0.5)) !important;
             }
 
             /* Glassmorphic Menus (Settings, Tooltips) */
@@ -259,6 +266,9 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         } else {
             document.documentElement.classList.remove('ypp-glass-player-active');
         }
+        
+        // Track video ratio for progress bar alignment (Unconditional on watch page)
+        this._startTrackingVideoRatio();
 
         // Phase 2: Sidebar Comments
         if (this.sidebarCommentsEnabled) {
@@ -274,5 +284,83 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
     _cleanup() {
         document.documentElement.classList.remove('ypp-glass-player-active');
         document.documentElement.classList.remove('ypp-sidebar-comments-active');
+        this._stopTrackingVideoRatio();
+    }
+
+    /**
+     * Tracks the video aspect ratio and calculates letterboxing height.
+     * Uses ResizeObserver to dynamically update `--ypp-letterbox-bottom`.
+     */
+    _startTrackingVideoRatio() {
+        this._stopTrackingVideoRatio(); // Ensure clean slate
+
+        const updateRatio = () => {
+            if (!this.isWatchPage) return;
+            
+            const video = document.querySelector('video.video-stream');
+            const container = document.querySelector('.html5-video-player');
+            
+            if (!video || !container) return;
+            if (!video.videoWidth || !video.videoHeight || !container.clientHeight || !container.clientWidth) {
+                container.style.removeProperty('--ypp-letterbox-bottom');
+                return;
+            }
+            
+            const videoRatio = video.videoWidth / video.videoHeight;
+            const containerRatio = container.clientWidth / container.clientHeight;
+            
+            let letterboxBottom = 0;
+            if (videoRatio > containerRatio) {
+                // Video is wider than container, meaning black bars are on top and bottom
+                const videoHeightInContainer = container.clientWidth / videoRatio;
+                letterboxBottom = (container.clientHeight - videoHeightInContainer) / 2;
+            }
+            
+            // Set css variable dynamically for the progress bar
+            container.style.setProperty('--ypp-letterbox-bottom', `${Math.max(0, letterboxBottom)}px`);
+        };
+
+        this._resizeObserver = new ResizeObserver(() => updateRatio());
+        
+        // We need to wait for the player container to exist
+        const observerTarget = setInterval(() => {
+            const container = document.querySelector('.html5-video-player');
+            const video = document.querySelector('video.video-stream');
+            if (container && video) {
+                clearInterval(observerTarget);
+                this._ratioInterval = null;
+                
+                this._resizeObserver.observe(container);
+                video.addEventListener('loadedmetadata', updateRatio);
+                
+                // Store reference for cleanup
+                this._trackedVideo = video;
+                this._updateRatioFn = updateRatio;
+                
+                updateRatio();
+            }
+        }, 500);
+        this._ratioInterval = observerTarget;
+    }
+
+    _stopTrackingVideoRatio() {
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (this._ratioInterval) {
+            clearInterval(this._ratioInterval);
+            this._ratioInterval = null;
+        }
+        if (this._trackedVideo && this._updateRatioFn) {
+            this._trackedVideo.removeEventListener('loadedmetadata', this._updateRatioFn);
+            this._trackedVideo = null;
+            this._updateRatioFn = null;
+        }
+        
+        const container = document.querySelector('.html5-video-player');
+        if (container) {
+            container.style.removeProperty('--ypp-letterbox-bottom');
+        }
     }
 }

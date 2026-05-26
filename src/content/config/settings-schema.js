@@ -89,12 +89,13 @@ window.YPP.SettingsSchema = {
         searchGrid:          { type: 'boolean', default: true },
         cleanSearch:         { type: 'boolean', default: true },
 
-        // --- Navigation ---
-        navTrending:         { type: 'boolean', default: true },
-        navShorts:           { type: 'boolean', default: true },
-        navSubscriptions:    { type: 'boolean', default: true },
-        navWatchLater:       { type: 'boolean', default: true },
-        navPlaylists:        { type: 'boolean', default: true },
+        // --- Player Automation ---
+        autoSkipAds:         { type: 'boolean', default: true },
+        autoSkipPromos:      { type: 'boolean', default: false },
+        autoSkipSponsors:    { type: 'boolean', default: false },
+        sponsorBlock:        { type: 'boolean', default: true },
+        hideSponsorBlockIcons: { type: 'boolean', default: false },
+        autoPlayNext:        { type: 'boolean', default: false },
         navHistory:          { type: 'boolean', default: true },
         forceHideSidebar:    { type: 'boolean', default: false },
         floatingGuide:       { type: 'boolean', default: false },

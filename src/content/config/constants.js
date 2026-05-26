@@ -306,6 +306,14 @@ window.YPP.CONSTANTS = {
         // Auto Actions
         autoPiP: false,
         
+        // Player Automation
+        autoSkipAds: true,
+        autoSkipPromos: false,
+        autoSkipSponsors: false,
+        sponsorBlock: true,
+        hideSponsorBlockIcons: false,
+        autoPlayNext: false,
+        
         // New Features
         autoLike: false,
         hidePlaylists: false,

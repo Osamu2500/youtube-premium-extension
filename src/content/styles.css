@@ -5363,7 +5363,6 @@ body.yt-premium-plus-theme .ytp-load-progress {
 
 body.yt-premium-plus-theme .ytp-play-progress {
   background: var(--ypp-accent-color, #ff0000) !important;
-  box-shadow: 0 0 14px var(--ypp-accent-color, #ff0000), 0 0 6px var(--ypp-accent-color, #ff0000) !important;
   border-radius: 6px !important;
   position: relative;
 }
@@ -5372,20 +5371,17 @@ body.yt-premium-plus-theme .ytp-play-progress {
 body.yt-premium-plus-theme .ytp-play-progress::after {
   content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
   background: #fff; border-radius: 2px;
-  box-shadow: 0 0 10px #fff;
 }
 
 body.yt-premium-plus-theme .ytp-scrubber-button {
   background: #ffffff !important;
-  box-shadow: 0 0 16px var(--ypp-accent-color, #ff0000), 0 2px 6px rgba(0,0,0,0.4) !important;
   border: 1px solid rgba(255,255,255,0.8) !important;
-  transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.2s ease !important;
+  transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1) !important;
 }
 /* Scrubber Hover Ring */
 body.yt-premium-plus-theme .ytp-progress-bar-container:hover .ytp-scrubber-button,
 body.yt-premium-plus-theme .ytp-scrubber-button:hover {
   transform: scale(1.35) !important;
-  box-shadow: 0 0 0 6px rgba(255,255,255,0.25), 0 0 24px var(--ypp-accent-color, #ff0000) !important;
 }
 
 /* ── Player Control Buttons ── */
