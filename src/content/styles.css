@@ -7855,6 +7855,7 @@ body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-w
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
   overflow: hidden !important;
   margin: 0 0 4px 0 !important;
 }
