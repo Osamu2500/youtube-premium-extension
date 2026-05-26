@@ -289,6 +289,8 @@ window.YPP.CONSTANTS = {
         sponsorBlock: true,
         returnYouTubeDislike: true,
 
+        splitScrolling: false,
+
         // Night Mode
         blueLight: 0,
         dim: 0,
@@ -537,7 +539,8 @@ window.YPP.CONSTANTS = {
         sidebarLayout: 'SidebarLayout',
         watchRedesign: 'WatchRedesign',
         bookmarksManager: 'BookmarksManager',
-        cinematicMode: 'CinematicMode'
+        cinematicMode: 'CinematicMode',
+        splitScrolling: 'SplitScrolling'
     }
 };
 

@@ -17,6 +17,8 @@ import './ui/components/panel.js';
 // Base feature class
 import './features/base-feature.js';
 
+import './features/player/enhancements/split-scrolling.js';
+
 // Global features
 import './features/global/modifiers/theme.js';
 import './features/global/modifiers/account-menu/index.js';
