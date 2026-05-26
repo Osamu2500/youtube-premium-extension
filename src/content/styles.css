@@ -2146,6 +2146,19 @@ body.ypp-search-grid-mode .ypp-flattened-grid {
   align-items: start !important;
 }
 
+/* Bulletproof shelf grids in case JS fallback misses the container */
+body.ypp-search-grid-mode ytd-shelf-renderer #items,
+body.ypp-search-grid-mode ytd-shelf-renderer #contents,
+body.ypp-search-grid-mode ytd-vertical-list-renderer #items {
+  display: grid !important;
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+  grid-auto-flow: dense !important;
+  gap: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  align-items: start !important;
+}
+
 /* Flatten item-section wrappers so video cards land directly in master grid */
 body.ypp-search-grid-mode ytd-item-section-renderer {
   display: contents !important;
@@ -7622,13 +7635,13 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   margin: 0 !important;
 }
 
-/* Force internal structural wrappers to also be column flex containers */
-body.ypp-search-grid-mode ytd-playlist-renderer > *,
-body.ypp-search-grid-mode ytd-radio-renderer > *,
+/* Force internal structural wrappers to also be column flex containers using bulletproof :has selector */
+body.ypp-search-grid-mode ytd-playlist-renderer *:has(> ytd-playlist-thumbnail),
+body.ypp-search-grid-mode ytd-playlist-renderer *:has(> ytd-thumbnail),
+body.ypp-search-grid-mode ytd-radio-renderer *:has(> ytd-playlist-thumbnail),
+body.ypp-search-grid-mode ytd-radio-renderer *:has(> ytd-thumbnail),
 body.ypp-search-grid-mode ytd-playlist-renderer #content,
 body.ypp-search-grid-mode ytd-radio-renderer #content,
-body.ypp-search-grid-mode ytd-playlist-renderer #container,
-body.ypp-search-grid-mode ytd-radio-renderer #container,
 body.ypp-search-grid-mode ytd-playlist-renderer a.yt-simple-endpoint,
 body.ypp-search-grid-mode ytd-radio-renderer a.yt-simple-endpoint {
   display: flex !important;
