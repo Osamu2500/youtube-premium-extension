@@ -28,6 +28,8 @@ window.YPP.features.SearchObserver = class SearchObserver {
         'ytd-playlist-renderer',
         'ytd-radio-renderer',
         'ytd-channel-renderer',
+        'yt-lockup-view-model',
+        'ytd-lockup-view-model'
     ]);
 
     // -------------------------------------------------------------------------
@@ -253,7 +255,9 @@ window.YPP.features.SearchObserver = class SearchObserver {
                         tag === 'ytd-video-renderer'    ||
                         tag === 'ytd-radio-renderer'    ||
                         tag === 'ytd-playlist-renderer' ||
-                        tag === 'ytd-channel-renderer'
+                        tag === 'ytd-channel-renderer'  ||
+                        tag === 'yt-lockup-view-model'  ||
+                        tag === 'ytd-lockup-view-model'
                     ) {
                         node.classList.add(CLASSES.GRID_ITEM);
                         this._cleanInlineStyles(node);
