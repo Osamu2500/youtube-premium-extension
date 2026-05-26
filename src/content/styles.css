@@ -2132,7 +2132,8 @@ body.ypp-search-grid-mode ytd-two-column-search-results-renderer #primary {
          ytd-item-section-renderer > #contents ← display:contents (transparent)
            ytd-video-renderer                ← GRID CELL
 */
-body.ypp-search-grid-mode ytd-section-list-renderer > #contents {
+body.ypp-search-grid-mode ytd-section-list-renderer > #contents,
+body.ypp-search-grid-mode .ypp-flattened-grid {
   display: grid !important;
   grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
   grid-auto-flow: dense !important;
@@ -7613,12 +7614,42 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   flex-direction: column !important;
   height: 100% !important;
   justify-content: flex-start !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+/* Force internal structural wrappers to also be column flex containers */
+body.ypp-search-grid-mode ytd-playlist-renderer > *,
+body.ypp-search-grid-mode ytd-radio-renderer > *,
+body.ypp-search-grid-mode ytd-playlist-renderer #content,
+body.ypp-search-grid-mode ytd-radio-renderer #content,
+body.ypp-search-grid-mode ytd-playlist-renderer #container,
+body.ypp-search-grid-mode ytd-radio-renderer #container,
+body.ypp-search-grid-mode ytd-playlist-renderer a.yt-simple-endpoint,
+body.ypp-search-grid-mode ytd-radio-renderer a.yt-simple-endpoint {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
 }
 
 /* Thumbnail wrapper must maintain 16:9 and span full width */
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
-body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
+body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer {
   width: 100% !important;
+  max-width: 100% !important;
   aspect-ratio: 16 / 9 !important;
   margin: 0 !important;
   display: block !important;
