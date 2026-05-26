@@ -260,7 +260,7 @@ window.YPP.CONSTANTS = {
         forceHideSidebar: false,
         hoverSidebar: true,
         logoRedirectSub: false,
-        sidebarLayout: 'compact', // 'compact' | 'expanded'
+        sidebarLayout: 'expanded', // 'compact' | 'expanded'
         
         // Playlist & History
         continueWatching: true,
