@@ -63,10 +63,18 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         this.mountUI();
         this.loadStats();
 
-        if (!this.updateInterval) {
-            this.updateInterval = setInterval(() => {
-                if (!document.hidden) this.loadStats();
-            }, 5000);
+        if (!this._boundStorageChange) {
+            this._boundStorageChange = (changes, namespace) => {
+                if (namespace === 'local') {
+                    for (let key in changes) {
+                        if (key.startsWith(this.STORAGE_PREFIX)) {
+                            if (!document.hidden) this.loadStats();
+                            break;
+                        }
+                    }
+                }
+            };
+            chrome.storage.onChanged.addListener(this._boundStorageChange);
         }
 
         this.addListener(window, 'focus', this._boundLoadStats);
@@ -74,9 +82,9 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
     }
 
     _stopAndUnmount() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
+        if (this._boundStorageChange) {
+            chrome.storage.onChanged.removeListener(this._boundStorageChange);
+            this._boundStorageChange = null;
         }
         
         const widget = document.getElementById('ypp-history-tracker-widget');

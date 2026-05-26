@@ -48,8 +48,8 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             this.scanForVideos();
             this.startObserver();
 
-            window.addEventListener('resize', this._repositionListener);
-            window.addEventListener('scroll', this._repositionListener);
+            window.addEventListener('resize', this._repositionListener, { passive: true });
+            window.addEventListener('scroll', this._repositionListener, { passive: true });
         } catch (e) {
             this.utils?.log('Error enabling GlobalPlayerBar', 'GLOBAL', 'error', e);
         }

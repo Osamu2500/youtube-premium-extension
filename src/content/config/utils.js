@@ -1179,7 +1179,7 @@ window.YPP.Utils.VideoSizeTracker = {
         }
         
         // Also listen to window resize
-        window.addEventListener('resize', this._boundScheduleUpdate = this._scheduleUpdate.bind(this));
+        window.addEventListener('resize', this._boundScheduleUpdate = this._scheduleUpdate.bind(this), { passive: true });
     },
 
     _scheduleUpdate() {
@@ -1366,11 +1366,10 @@ window.YPP.Utils.positionPopupBesideVideo = (panel, triggerBtn, video, panelW) =
             this._observer.observe(this._videoEl, { attributes: true, attributeFilter: ['style', 'class'] });
         }
         
-        // Polling fallback to catch inline style jumps
-        this._pollInterval = setInterval(() => this._scheduleUpdate(), 2000);
+
         
         // Also listen to window resize
-        window.addEventListener('resize', this._boundScheduleUpdate = this._scheduleUpdate.bind(this));
+        window.addEventListener('resize', this._boundScheduleUpdate = this._scheduleUpdate.bind(this), { passive: true });
     },
 
     _scheduleUpdate() {
@@ -1406,10 +1405,7 @@ window.YPP.Utils.positionPopupBesideVideo = (panel, triggerBtn, video, panelW) =
             this._observer.disconnect();
             this._observer = null;
         }
-        if (this._pollInterval) {
-            clearInterval(this._pollInterval);
-            this._pollInterval = null; // Prevent double-clear on repeated stop() calls
-        }
+
         if (this._boundScheduleUpdate) {
             window.removeEventListener('resize', this._boundScheduleUpdate);
             this._boundScheduleUpdate = null;

@@ -398,7 +398,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 if (ctx._volumePopup) { reposition(); }
                 else { window.removeEventListener('resize', onResize); }
             };
-            window.addEventListener('resize', onResize);
+            window.addEventListener('resize', onResize, { passive: true });
         } else {
             document.body.appendChild(panel);
         }

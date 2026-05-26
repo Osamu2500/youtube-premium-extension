@@ -57,9 +57,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         await super.enable();
         
         // Safeguard against duplicate interval timers
-        if (this._pollingInterval) {
-            clearInterval(this._pollingInterval);
-        }
+
 
         this._injectStyle();
         this._processCards();
@@ -73,13 +71,13 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         // React to user manually marking/unmarking from MarkWatched
         this.onBusEvent('watched:updated', this._boundSchedule);
         
-        // Polling interval to catch dynamically added or updated progress bars
-        this._pollingInterval = setInterval(() => {
-            // Save CPU cycles when tab is backgrounded
-            if (this.isEnabled && document.visibilityState === 'visible') {
-                this._processCards();
-            }
-        }, 1500);
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer', () => {
+                if (this.isEnabled && document.visibilityState === 'visible') {
+                    this._scheduleProcess();
+                }
+            }, false);
+        }
     }
 
     async disable() {
@@ -90,9 +88,8 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             this._debounceTimer = null;
         }
         
-        if (this._pollingInterval) {
-            clearInterval(this._pollingInterval);
-            this._pollingInterval = null;
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('hide-watched-progress');
         }
 
         // Remove injected style so CSS rules disappear instantly

@@ -28,6 +28,9 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
                 clearInterval(this._pollInterval);
                 this._pollInterval = null;
             }
+            if (window.YPP.sharedObserver) {
+                window.YPP.sharedObserver.unregister('time-display-video');
+            }
 
             if (this._videoElement && this._boundTimeUpdate) {
                 this._videoElement.removeEventListener('timeupdate', this._boundTimeUpdate);
@@ -61,27 +64,24 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         const Utils = window.YPP.Utils;
         if (!Utils) return;
 
-        this._pollInterval = setInterval(() => {
-            const video = document.querySelector('video');
-            if (!video) return;
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('time-display-video', 'video', (elements) => {
+                const video = elements[0];
+                if (!video) return;
 
-            const timeDisplay = document.querySelector('.ytp-time-display') ||
-                                Array.from(document.querySelectorAll('.ytp-left-controls span')).find(el => el.textContent.includes('/'))?.parentElement;
-            
-            if (timeDisplay) {
-                this.showRemainingTime(video, timeDisplay);
-                clearInterval(this._pollInterval);
-                this._pollInterval = null;
-            } else {
-                 // Try injection into left-controls as safe fallback
-                 const leftControls = document.querySelector('.ytp-left-controls');
-                 if (leftControls) {
-                     this.showRemainingTime(video, leftControls);
-                     clearInterval(this._pollInterval);
-                     this._pollInterval = null;
-                 }
-            }
-        }, 1000);
+                const timeDisplay = document.querySelector('.ytp-time-display') ||
+                                    Array.from(document.querySelectorAll('.ytp-left-controls span')).find(el => el.textContent.includes('/'))?.parentElement;
+                
+                if (timeDisplay) {
+                    this.showRemainingTime(video, timeDisplay);
+                } else {
+                     const leftControls = document.querySelector('.ytp-left-controls');
+                     if (leftControls) {
+                         this.showRemainingTime(video, leftControls);
+                     }
+                }
+            }, true);
+        }
     }
 
     showRemainingTime(video, container) {

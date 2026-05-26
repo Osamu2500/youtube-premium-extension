@@ -39,31 +39,41 @@ window.YPP.features.ReversePlaylist = class ReversePlaylist extends window.YPP.f
             clearInterval(this.checkInterval);
             this.checkInterval = null;
         }
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('reverse-playlist-header');
+        }
         this.removeUI();
         this.isReversed = false;
     }
 
     initUI() {
-        if (this.checkInterval) clearInterval(this.checkInterval);
-        
-        let attempts = 0;
-        this.checkInterval = setInterval(() => {
-            if (!this.isEnabled) {
-                clearInterval(this.checkInterval);
-                return;
-            }
-
-            const header = document.querySelector('ytd-playlist-panel-renderer #header-contents #playlist-action-menu .ytd-playlist-panel-renderer') 
-                        || document.querySelector('ytd-playlist-panel-renderer #header-contents');
-            
-            if (header) {
-                clearInterval(this.checkInterval);
-                this.injectButton(header);
-            }
-            
-            attempts++;
-            if (attempts > 10) clearInterval(this.checkInterval); // Give up after 10 seconds
-        }, 1000);
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('reverse-playlist-header', 'ytd-playlist-panel-renderer #header-contents', (elements) => {
+                if (!this.isEnabled) return;
+                const header = elements[0];
+                if (header) {
+                    this.injectButton(header);
+                }
+            }, false);
+        } else {
+            // Fallback
+            if (this.checkInterval) clearInterval(this.checkInterval);
+            let attempts = 0;
+            this.checkInterval = setInterval(() => {
+                if (!this.isEnabled) {
+                    clearInterval(this.checkInterval);
+                    return;
+                }
+                const header = document.querySelector('ytd-playlist-panel-renderer #header-contents #playlist-action-menu .ytd-playlist-panel-renderer') 
+                            || document.querySelector('ytd-playlist-panel-renderer #header-contents');
+                if (header) {
+                    clearInterval(this.checkInterval);
+                    this.injectButton(header);
+                }
+                attempts++;
+                if (attempts > 10) clearInterval(this.checkInterval); // Give up after 10 seconds
+            }, 1000);
+        }
     }
 
     injectButton(header) {

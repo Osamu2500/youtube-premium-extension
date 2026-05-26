@@ -123,7 +123,7 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
             if (col.scrollTop + col.clientHeight >= col.scrollHeight - 200) {
                 window.scrollBy(0, 100); 
             }
-        });
+        }, { passive: true });
 
         return contentDiv;
     }

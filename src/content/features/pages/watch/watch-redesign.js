@@ -52,6 +52,9 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             clearInterval(this._mountInterval);
             this._mountInterval = null;
         }
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('watch-redesign-comments');
+        }
         this._applyFeatures();
     }
 
@@ -145,39 +148,81 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
                PHASE 2: SIDEBAR COMMENTS
                ======================================================== */
             
-            /* Hide the original comments section in the main column */
-            html.ypp-sidebar-comments-active ytd-watch-flexy #primary-inner > #comments {
-                display: none !important;
+            /* CSS-only Sidebar Comments via CSS Grid and display: contents */
+            
+            /* Convert the main wrapper into a Grid layout */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #columns {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) var(--ytd-watch-flexy-sidebar-width, 402px) !important;
+                grid-template-rows: auto auto auto !important;
+                column-gap: 24px !important;
+                align-items: start !important;
             }
 
-            /* Style the cloned comments in the sidebar */
-            html.ypp-sidebar-comments-active #secondary-inner #ypp-sidebar-comments-container {
-                display: flex;
-                flex-direction: column;
-                background: var(--ypp-card-bg, rgba(20, 19, 24, 0.6));
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 16px;
-                padding: 16px;
-                margin-top: 16px;
-                margin-bottom: 24px;
-                max-height: 800px; /* Make it scrollable independently */
-                overflow-y: auto;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            /* Flatten the hierarchy so children can participate in the Grid */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #primary,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #primary-inner,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #secondary,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #secondary-inner {
+                display: contents !important;
+            }
+
+            /* Place the elements into their grid cells */
+            
+            /* Left column: Video player and description */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #player-container-outer,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #player,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #player-wide {
+                grid-column: 1 !important;
+                grid-row: 1 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #below {
+                grid-column: 1 !important;
+                grid-row: 2 / span 2 !important;
+            }
+
+            /* Right column: Comments */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #comments {
+                grid-column: 2 !important;
+                grid-row: 1 !important;
+                
+                /* Glassmorphic styling for comments */
+                background: var(--ypp-card-bg, rgba(20, 19, 24, 0.6)) !important;
+                backdrop-filter: blur(12px) !important;
+                -webkit-backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 16px !important;
+                padding: 16px !important;
+                margin-top: 16px !important;
+                margin-bottom: 24px !important;
+                max-height: calc(100vh - 120px) !important;
+                overflow-y: auto !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+            }
+
+            /* Right column: Related Videos (moved below comments) */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #related {
+                grid-column: 2 !important;
+                grid-row: 2 !important;
+                margin-top: 24px !important;
             }
             
             /* Custom scrollbar for sidebar comments */
-            html.ypp-sidebar-comments-active #secondary-inner #ypp-sidebar-comments-container::-webkit-scrollbar {
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #comments::-webkit-scrollbar {
                 width: 6px;
             }
-            html.ypp-sidebar-comments-active #secondary-inner #ypp-sidebar-comments-container::-webkit-scrollbar-thumb {
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #comments::-webkit-scrollbar-thumb {
                 background: rgba(255,255,255,0.2);
                 border-radius: 3px;
             }
             
-            html.ypp-sidebar-comments-active #secondary-inner #ypp-sidebar-comments-container > ytd-item-section-renderer {
-                margin-top: 0 !important;
+            /* Chat integration (if active) */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #chat {
+                grid-column: 2 !important;
+                grid-row: 1 !important;
             }
         `;
         document.head.appendChild(style);
@@ -197,9 +242,6 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         this.isWatchPage = window.location.pathname === '/watch';
         if (this.isWatchPage) {
             this._applyFeatures();
-            if (this.sidebarCommentsEnabled) {
-                this._mountSidebarComments();
-            }
         } else {
             this._cleanup();
         }
@@ -221,76 +263,8 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         // Phase 2: Sidebar Comments
         if (this.sidebarCommentsEnabled) {
             document.documentElement.classList.add('ypp-sidebar-comments-active');
-            this._mountSidebarComments();
         } else {
             document.documentElement.classList.remove('ypp-sidebar-comments-active');
-            this._unmountSidebarComments();
-        }
-    }
-
-    /**
-     * Logic to move the comments element into the sidebar
-     */
-    _mountSidebarComments() {
-        if (!this.isWatchPage || !this.sidebarCommentsEnabled) return;
-        
-        // Use an interval to wait for both the comments and the sidebar to render
-        let attempts = 0;
-        
-        if (this._mountInterval) clearInterval(this._mountInterval);
-        
-        this._mountInterval = setInterval(() => {
-            attempts++;
-            
-            // Abort if feature disabled or page changed during wait
-            if (!this.sidebarCommentsEnabled || !this.isWatchPage) {
-                clearInterval(this._mountInterval);
-                this._mountInterval = null;
-                return;
-            }
-            
-            if (attempts > 50) { 
-                clearInterval(this._mountInterval); 
-                this._mountInterval = null;
-                return; 
-            } // Give up after 10s
-            
-            const originalComments = document.querySelector('ytd-watch-flexy #primary-inner > #comments');
-            const secondaryInner = document.querySelector('ytd-watch-flexy #secondary-inner');
-            
-            if (originalComments && secondaryInner) {
-                clearInterval(this._mountInterval);
-                this._mountInterval = null;
-                
-                // Check if already mounted
-                if (document.getElementById('ypp-sidebar-comments-container')) return;
-                
-                const container = document.createElement('div');
-                container.id = 'ypp-sidebar-comments-container';
-                
-                // Move the actual comments node!
-                // We move the original instead of cloning it so YouTube's internal event listeners keep working
-                container.appendChild(originalComments);
-                
-                // Insert it at the top of the sidebar, above recommendations
-                secondaryInner.insertBefore(container, secondaryInner.firstChild);
-            }
-        }, 200);
-    }
-
-    /**
-     * Restores comments to their original position
-     */
-    _unmountSidebarComments() {
-        const container = document.getElementById('ypp-sidebar-comments-container');
-        const primaryInner = document.querySelector('ytd-watch-flexy #primary-inner');
-        
-        if (container && primaryInner) {
-            const comments = container.querySelector('#comments');
-            if (comments) {
-                primaryInner.appendChild(comments);
-            }
-            container.remove();
         }
     }
 

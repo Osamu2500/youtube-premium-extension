@@ -294,7 +294,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 }
             };
             ctx._filterPanelResizeHandler = onResize;
-            window.addEventListener('resize', onResize);
+            window.addEventListener('resize', onResize, { passive: true });
         } else {
             document.body.appendChild(panel);
         }
