@@ -23,14 +23,15 @@ window.YPP.features.SplitScrolling = class SplitScrolling extends window.YPP.fea
     }
 
     enable() {
-        document.body.classList.add('ypp-split-scrolling-enabled');
+        // Ensure styles are injected before toggling the class
         this.injectStyles();
+        document.body.classList.add('ypp-split-scrolling-enabled');
     }
 
     disable() {
         document.body.classList.remove('ypp-split-scrolling-enabled');
-        const style = document.getElementById(this.styleId);
-        if (style) style.remove();
+        // We keep the <style> injected and just rely on the body class for toggling
+        // This is more performant than adding/removing DOM nodes.
     }
 
     injectStyles() {
@@ -45,23 +46,36 @@ window.YPP.features.SplitScrolling = class SplitScrolling extends window.YPP.fea
                 height: calc(100vh - var(--ytd-masthead-height, 56px)) !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
-                /* Remove default margins that might push it down */
                 margin-top: 0 !important;
                 padding-top: var(--ytd-margin-6x, 24px) !important;
+                /* Firefox scrollbar styling */
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
             }
 
-            /* Custom scrollbars for the sidebar */
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar {
-                width: 8px;
+            /* Custom scrollbars for the sidebar (Webkit) - Only apply if hide scrollbar is not active */
+            body.ypp-split-scrolling-enabled:not(.ypp-hide-scrollbar) ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar {
+                width: 8px !important;
+                display: block !important;
             }
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 4px;
+            body.ypp-split-scrolling-enabled:not(.ypp-hide-scrollbar) ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2) !important;
+                border-radius: 4px !important;
             }
-            body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar-track {
-                background: transparent;
+            body.ypp-split-scrolling-enabled:not(.ypp-hide-scrollbar) ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar-track {
+                background: transparent !important;
             }
             
+            /* Explicitly hide sidebar scrollbar when hideScrollbar feature is enabled */
+            body.ypp-hide-scrollbar.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary {
+                scrollbar-width: none !important;
+            }
+            body.ypp-hide-scrollbar.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary::-webkit-scrollbar {
+                width: 0px !important;
+                display: none !important;
+                background: transparent !important;
+            }
+
             /* Add some padding bottom so the last item isn't flush */
             body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden]) #secondary-inner {
                 padding-bottom: 40px !important;
