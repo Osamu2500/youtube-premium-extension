@@ -7779,37 +7779,23 @@ body.ypp-search-grid-mode ytd-radio-renderer yt-formatted-string#description-tex
 /* ============================================================
    LOCKUP VIEW MODEL (NEW YOUTUBE PLAYLIST/MIX ARCHITECTURE)
    ============================================================ */
+/* 1. Force the main card and its direct child (the internal wrapper) to be a vertical column */
 body.ypp-search-grid-mode yt-lockup-view-model,
-body.ypp-search-grid-mode ytd-lockup-view-model {
-  grid-column: span 1 !important;
+body.ypp-search-grid-mode ytd-lockup-view-model,
+body.ypp-search-grid-mode yt-lockup-view-model > *,
+body.ypp-search-grid-mode ytd-lockup-view-model > * {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
-  height: 100% !important;
-}
-
-/* Force ALL ancestors of the image container to be full width so it can stretch */
-body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-view-model-wiz__image-container),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-view-model-wiz__image-container),
-body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-view-model-wiz__content-image),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-view-model-wiz__content-image),
-body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-metadata-view-model-wiz),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-metadata-view-model-wiz) {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 100% !important;
-  align-items: stretch !important;
   box-sizing: border-box !important;
-  flex: none !important;
+  grid-column: span 1 !important;
 }
 
-/* The actual link/wrapper around the image container MUST have the negative margins to break out of the card padding */
-body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__content-image,
-body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__content-image,
-body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container,
-body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container {
+/* 2. Target the clickable thumbnail (anchor containing yt-image or img) perfectly, ignoring all class names */
+body.ypp-search-grid-mode yt-lockup-view-model a:has(yt-image),
+body.ypp-search-grid-mode yt-lockup-view-model a:has(img),
+body.ypp-search-grid-mode ytd-lockup-view-model a:has(yt-image),
+body.ypp-search-grid-mode ytd-lockup-view-model a:has(img) {
   margin: calc(var(--ypp-density-pad, 12px) * -1) calc(var(--ypp-density-pad, 12px) * -1) 12px calc(var(--ypp-density-pad, 12px) * -1) !important;
   width: calc(100% + calc(var(--ypp-density-pad, 12px) * 2)) !important;
   max-width: none !important;
@@ -7819,24 +7805,19 @@ body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image
   border-radius: var(--ypp-radius-md) var(--ypp-radius-md) 0 0 !important;
   position: relative !important;
   overflow: hidden !important;
-  flex: none !important;
   display: block !important;
+  flex: none !important;
 }
 
-/* Prevent double negative margins if both exist in the hierarchy */
-body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__content-image .yt-lockup-view-model-wiz__image-container,
-body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__content-image .yt-lockup-view-model-wiz__image-container {
-  margin: 0 !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  border-radius: 0 !important;
-}
-
-/* Ensure the image inside perfectly fills the 16:9 block without distortion */
-body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container yt-image,
-body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image-container img,
-body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container yt-image,
-body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image-container img {
+/* 3. Ensure the image inside stretches to fill the 16:9 box completely */
+body.ypp-search-grid-mode yt-lockup-view-model a:has(yt-image) yt-image,
+body.ypp-search-grid-mode yt-lockup-view-model a:has(yt-image) img,
+body.ypp-search-grid-mode yt-lockup-view-model a:has(img) yt-image,
+body.ypp-search-grid-mode yt-lockup-view-model a:has(img) img,
+body.ypp-search-grid-mode ytd-lockup-view-model a:has(yt-image) yt-image,
+body.ypp-search-grid-mode ytd-lockup-view-model a:has(yt-image) img,
+body.ypp-search-grid-mode ytd-lockup-view-model a:has(img) yt-image,
+body.ypp-search-grid-mode ytd-lockup-view-model a:has(img) img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -7850,7 +7831,7 @@ body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image
   padding: 0 !important;
 }
 
-/* 2. METADATA BLOCK */
+/* 4. METADATA BLOCK */
 body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
 body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
   margin-top: 0 !important;
@@ -7863,6 +7844,8 @@ body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-w
 }
 
 /* Format the title properly */
+body.ypp-search-grid-mode yt-lockup-view-model h3,
+body.ypp-search-grid-mode ytd-lockup-view-model h3,
 body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz__title,
 body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz__title {
   font-size: 1.4rem !important;
