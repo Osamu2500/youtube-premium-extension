@@ -7789,10 +7789,12 @@ body.ypp-search-grid-mode ytd-lockup-view-model {
 }
 
 /* Force ALL ancestors of the image container to be full width so it can stretch */
-body.ypp-search-grid-mode yt-lockup-view-model *:has(> .yt-lockup-view-model-wiz__image-container),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(> .yt-lockup-view-model-wiz__image-container),
-body.ypp-search-grid-mode yt-lockup-view-model *:has(> .yt-lockup-view-model-wiz__content-image),
-body.ypp-search-grid-mode ytd-lockup-view-model *:has(> .yt-lockup-view-model-wiz__content-image) {
+body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-view-model-wiz__image-container),
+body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-view-model-wiz__image-container),
+body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-view-model-wiz__content-image),
+body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-view-model-wiz__content-image),
+body.ypp-search-grid-mode yt-lockup-view-model *:has(.yt-lockup-metadata-view-model-wiz),
+body.ypp-search-grid-mode ytd-lockup-view-model *:has(.yt-lockup-metadata-view-model-wiz) {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
