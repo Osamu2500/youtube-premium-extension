@@ -516,7 +516,7 @@ window.YPP.CONSTANTS = {
         videoControls: 'VideoControls',
         returnYouTubeDislike: 'ReturnDislike',
         sponsorBlock: 'SponsorBlock',
-        miniPlayer: 'MiniPlayer',
+        // miniPlayer: 'MiniPlayer', // Ghost/Incomplete
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
         // dataAPI: 'DataAPI', // Ghost/Incomplete

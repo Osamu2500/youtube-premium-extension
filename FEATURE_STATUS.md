@@ -320,8 +320,14 @@ These features perfectly adhere to the extension's architecture, including exten
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
 ### Sidebar Layout
-*   **File:** `content/features/player/sidebar-layout.js`
+*   **File:** `content/features/player/controls/sidebar-layout.js`
 *   **What it does:** SidebarLayout Feature
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes
+
+### Split Scrolling
+*   **File:** `content/features/player/enhancements/split-scrolling.js`
+*   **What it does:** Allows the sidebar to scroll independently of the main video, using native CSS position sticky and custom scrollbars.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes
 
