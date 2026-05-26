@@ -311,7 +311,6 @@ window.YPP.CONSTANTS = {
         autoSkipPromos: false,
         autoSkipSponsors: false,
         sponsorBlock: true,
-        hideSponsorBlockIcons: false,
         autoPlayNext: false,
         
         // New Features

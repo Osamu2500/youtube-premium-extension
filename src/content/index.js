@@ -94,7 +94,6 @@ import './features/player/volume-booster/index.js';
 import './features/player/automation/auto-quality.js';
 import './features/player/enhancements/time-display.js';
 import './features/player/automation/sponsor-block.js';
-import './features/player/automation/hide-sponsorblock-icons.js';
 import './features/player/ambient-mode/ambient-mode.js';
 import './features/player/ambient-mode/audio-mode.js';
 import './features/player/video-controls/video-controls.js';

@@ -94,7 +94,6 @@ window.YPP.SettingsSchema = {
         autoSkipPromos:      { type: 'boolean', default: false },
         autoSkipSponsors:    { type: 'boolean', default: false },
         sponsorBlock:        { type: 'boolean', default: true },
-        hideSponsorBlockIcons: { type: 'boolean', default: false },
         autoPlayNext:        { type: 'boolean', default: false },
         navHistory:          { type: 'boolean', default: true },
         forceHideSidebar:    { type: 'boolean', default: false },
