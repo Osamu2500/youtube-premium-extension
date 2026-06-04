@@ -105,7 +105,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         // Wait up to 10 seconds for the native playlist DOM to load
         // Do NOT add body class yet — only apply it once we have confirmed data,
         // preventing the native layout from being hidden on a page where we can't render.
-        const isReady = await window.YPP.Utils.waitFor(() => {
+        const isReady = await window.YPP.Utils.pollFor(() => {
             return document.querySelector('ytd-playlist-header-renderer') &&
                    document.querySelectorAll('ytd-playlist-video-renderer').length > 0;
         }, 10000);
