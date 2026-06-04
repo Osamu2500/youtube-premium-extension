@@ -1553,8 +1553,8 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 let currentIndex = 0;
                 
                 // Load Cache
-                const cacheData = await chrome.storage.local.get(['ypp_channel_health_cache']);
-                const healthCache = cacheData.ypp_channel_health_cache || {};
+                const cacheData = await chrome.storage.local.get(['ypp_channel_health_cache_v2']);
+                const healthCache = cacheData.ypp_channel_health_cache_v2 || {};
                 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
                 let cacheUpdated = false;
 
@@ -1580,23 +1580,30 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         const rssText = await rssRes.text();
 
                         // Regex parsing (drastically faster than DOMParser for hundreds of chunks)
-                        const pubMatch = rssText.match(/<published>([^<]+)<\/published>/);
-                        if (pubMatch && pubMatch[1]) {
-                            const pubTime = new Date(pubMatch[1]).getTime();
-                            const diff = now - pubTime;
-                            c.lastUpload = diff;
-                            c.lastUploadText = new Date(pubTime).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
-                            
-                            // Update Cache
-                            healthCache[c.id] = { pubTime: pubTime, lastUploadText: c.lastUploadText, timestamp: now };
-                            cacheUpdated = true;
+                        // Note: The RSS feed contains a <published> tag for the channel creation date before the first <entry>.
+                        // We must find the first <entry> and then extract its <published> date.
+                        const entryIdx = rssText.indexOf('<entry>');
+                        if (entryIdx !== -1) {
+                            const entryText = rssText.substring(entryIdx);
+                            const pubMatch = entryText.match(/<published>([^<]+)<\/published>/);
+                            if (pubMatch && pubMatch[1]) {
+                                const pubTime = new Date(pubMatch[1]).getTime();
+                                const diff = now - pubTime;
+                                c.lastUpload = diff;
+                                c.lastUploadText = new Date(pubTime).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                                
+                                // Update Cache
+                                healthCache[c.id] = { pubTime: pubTime, lastUploadText: c.lastUploadText, timestamp: now };
+                                cacheUpdated = true;
 
-                            if      (diff < MONTH_MS)     { c.status = 'active';  activeCount++;  }
-                            else if (diff < 3 * MONTH_MS) { c.status = 'warning'; warningCount++; }
-                            else                           { c.status = 'dead';    deadCount++;    }
+                                if      (diff < MONTH_MS)     { c.status = 'active';  activeCount++;  }
+                                else if (diff < 3 * MONTH_MS) { c.status = 'warning'; warningCount++; }
+                                else                           { c.status = 'dead';    deadCount++;    }
+                            } else {
+                                c.status = 'dead'; c.lastUploadText = 'No date'; c.lastUpload = Infinity; deadCount++;
+                            }
                         } else {
-                            const entryMatch = rssText.match(/<entry>/);
-                            c.status = 'dead'; c.lastUploadText = entryMatch ? 'No date' : 'No videos'; c.lastUpload = Infinity; deadCount++;
+                            c.status = 'dead'; c.lastUploadText = 'No videos'; c.lastUpload = Infinity; deadCount++;
                         }
                     } catch (e) {
                         c.status = e.name === 'AbortError' ? 'warning' : 'dead';
@@ -1618,7 +1625,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 await Promise.all(workers);
                 
                 if (cacheUpdated) {
-                    chrome.storage.local.set({ ypp_channel_health_cache: healthCache });
+                    chrome.storage.local.set({ ypp_channel_health_cache_v2: healthCache });
                 }
                 
                 ChannelHealthUI._lastScanChannels = channels;
