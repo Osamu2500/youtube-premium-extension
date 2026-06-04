@@ -552,28 +552,53 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             window.location.href = pick.href;
         });
 
-        // ── Secondary Actions ──────────────────────────────────────────────
-        root.querySelector('#ypp-pl-save')?.addEventListener('click', () => {
-            const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer ytd-toggle-button-renderer button, ytd-playlist-header-renderer ytd-button-renderer button'));
-            const saveBtn = btns.find(b => {
-                const label = (b.getAttribute('aria-label') || b.title || '').toLowerCase();
-                return label.includes('save');
+        // ── Secondary Actions (Save, Share, Menu) ─────────────────────────
+        
+        const _clickNativeButtonAt = (customBtn, nativeBtn) => {
+            if (!nativeBtn || !customBtn) return;
+            // Move native button to custom button's position temporarily so YouTube's popup anchors correctly
+            const rect = customBtn.getBoundingClientRect();
+            const originalCss = nativeBtn.style.cssText;
+            nativeBtn.style.position = 'fixed';
+            nativeBtn.style.left = rect.left + 'px';
+            nativeBtn.style.top = rect.top + 'px';
+            nativeBtn.style.width = rect.width + 'px';
+            nativeBtn.style.height = rect.height + 'px';
+            nativeBtn.style.zIndex = '999999';
+            nativeBtn.style.opacity = '0';
+            
+            nativeBtn.click();
+            
+            setTimeout(() => {
+                nativeBtn.style.cssText = originalCss;
+            }, 300);
+        };
+
+        const saveBtn = root.querySelector('#ypp-pl-save');
+        saveBtn?.addEventListener('click', () => {
+            const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer button'));
+            const nativeSave = btns.find(b => {
+                const label = (b.getAttribute('aria-label') || b.title || b.textContent || '').toLowerCase();
+                return label.includes('save') && !label.includes('watch later');
             });
-            if (saveBtn) saveBtn.click();
+            _clickNativeButtonAt(saveBtn, nativeSave);
         });
 
-        root.querySelector('#ypp-pl-share')?.addEventListener('click', () => {
-            const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer ytd-button-renderer button'));
-            const shareBtn = btns.find(b => {
-                const label = (b.getAttribute('aria-label') || b.title || '').toLowerCase();
-                return label.includes('share');
+        const shareBtn = root.querySelector('#ypp-pl-share');
+        shareBtn?.addEventListener('click', () => {
+            const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer button'));
+            const nativeShare = btns.find(b => {
+                const label = (b.getAttribute('aria-label') || b.title || b.textContent || '').toLowerCase();
+                return label.includes('share') || label.includes('partager');
             });
-            if (shareBtn) shareBtn.click();
+            _clickNativeButtonAt(shareBtn, nativeShare);
         });
 
-        root.querySelector('#ypp-pl-menu')?.addEventListener('click', () => {
-            const menuBtn = document.querySelector('ytd-playlist-header-renderer ytd-menu-renderer button');
-            if (menuBtn) menuBtn.click();
+        const menuBtn = root.querySelector('#ypp-pl-menu');
+        menuBtn?.addEventListener('click', () => {
+            // Find the 3-dots menu which is usually inside a ytd-menu-renderer
+            const nativeMenuBtn = document.querySelector('ytd-playlist-header-renderer ytd-menu-renderer button');
+            _clickNativeButtonAt(menuBtn, nativeMenuBtn);
         });
 
         // ── Remove Watched Videos ──────────────────────────────────────────
