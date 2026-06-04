@@ -6101,8 +6101,8 @@ body.ypp-playlist-redesign ytd-masthead {
 /* ── Toolbar ──────────────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-toolbar {
     position: fixed;
-    top: 56px;
-    left: 384px;
+    top: 80px;
+    left: 408px;
     right: 24px;
     z-index: 100;
     background: rgba(10,10,12,0.95);
