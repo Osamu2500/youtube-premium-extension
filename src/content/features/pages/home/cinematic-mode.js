@@ -660,11 +660,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         document.body.addEventListener('wheel', (e) => {
             const contents = document.querySelector('#contents');
-            if (contents) {
-                e.preventDefault();
-                if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-                    contents.scrollLeft += e.deltaX;
-                } else {
+            if (contents && contents.contains(e.target)) {
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    e.preventDefault();
                     contents.scrollLeft += e.deltaY;
                 }
             }
@@ -673,6 +671,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         document.addEventListener('keydown', (e) => {
             const contents = document.querySelector('#contents');
             if (!contents) return;
+
+            const active = document.activeElement;
+            const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+            if (isTyping) return; // Don't intercept keyboard events when typing
 
             switch (e.key) {
                 case 'ArrowLeft':
@@ -686,17 +688,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 case 'ArrowDown':
                 case 'PageDown':
                 case 'Space':
-                    if (document.activeElement.tagName !== 'INPUT') {
-                        e.preventDefault();
-                        contents.scrollLeft += this.CONFIG.SCROLL_AMOUNT;
-                    }
+                    e.preventDefault();
+                    contents.scrollLeft += this.CONFIG.SCROLL_AMOUNT;
                     break;
                 case 'ArrowUp':
                 case 'PageUp':
-                    if (document.activeElement.tagName !== 'INPUT') {
-                        e.preventDefault();
-                        contents.scrollLeft -= this.CONFIG.SCROLL_AMOUNT;
-                    }
+                    e.preventDefault();
+                    contents.scrollLeft -= this.CONFIG.SCROLL_AMOUNT;
                     break;
             }
         }, { signal: this._abortController.signal });

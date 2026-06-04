@@ -27,19 +27,19 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Hide Metrics
 *   **File:** `content/features/core/global/hide-metrics.js`
-*   **What it does:** Unknown
+*   **What it does:** Hides view counts and likes globally by applying a CSS class to the body.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
 ### Hide Playlists Podcasts
 *   **File:** `content/features/core/global/hide-playlists-podcasts.js`
-*   **What it does:** Unknown
+*   **What it does:** Hides Playlists, Podcasts, and Mixes from video feeds (Home, Search, Subs) to clean up recommendations.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes
 
 ### Hide Thumbnails
 *   **File:** `content/features/core/global/hide-thumbnails.js`
-*   **What it does:** Unknown
+*   **What it does:** Hides video thumbnails globally by applying a CSS class, reducing visual clutter.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -57,13 +57,13 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Mark Watched
 *   **File:** `content/features/core/global/mark-watched.js`
-*   **What it does:** Unknown
+*   **What it does:** Visually badges watched videos, auto-marks videos as watched when they end, and adds a right-click context menu toggle.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Uses `this.addListener`: Yes | Stamps DOM: Yes
 
 ### Multi Select
 *   **File:** `content/features/core/global/multi-select.js`
-*   **What it does:** Unknown
+*   **What it does:** Injects checkboxes on thumbnails for multi-selecting videos to perform batch actions (Add to Queue/Watch Later/Playlist).
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -75,7 +75,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Redirect Home
 *   **File:** `content/features/core/global/redirect-home.js`
-*   **What it does:** Unknown
+*   **What it does:** Redirects the main YouTube homepage directly to the Subscriptions feed.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -123,7 +123,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Redirect Shorts
 *   **File:** `content/features/pages/home/redirect-shorts.js`
-*   **What it does:** Unknown
+*   **What it does:** Automatically redirects Shorts URLs (`/shorts/`) to the regular YouTube video player.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -147,7 +147,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Duration Calculator
 *   **File:** `content/features/pages/library/playlist/duration-calculator.js`
-*   **What it does:** Unknown
+*   **What it does:** Calculates total playlist duration and displays it in a premium UI card, including adjusted times for higher playback speeds.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -165,7 +165,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Advanced Filter
 *   **File:** `content/features/pages/search/advanced-filter.js`
-*   **What it does:** Unknown
+*   **What it does:** Advanced filtering system for the home page (sub/unsub, time, duration) with a visual chips bar UI.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -183,7 +183,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Deck Mode
 *   **File:** `content/features/pages/subscriptions/deck-mode.js`
-*   **What it does:** Unknown
+*   **What it does:** Provides a TweetDeck-style multi-column layout for the subscriptions feed based on user-defined folders.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -243,7 +243,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Ambient Mode
 *   **File:** `content/features/player/ambient-mode/ambient-mode.js`
-*   **What it does:** Unknown
+*   **What it does:** Adds a custom massive blurred ambient lighting effect around the video player by rendering the video frame at 5fps to a canvas behind the player.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Uses `this.addListener`: Yes
 
@@ -261,7 +261,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Auto Like
 *   **File:** `content/features/player/auto-like.js`
-*   **What it does:** Unknown
+*   **What it does:** Automatically likes a video once you have watched at least 50% or reached the end.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -291,7 +291,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Intentional Delay
 *   **File:** `content/features/player/intentional-delay.js`
-*   **What it does:** Unknown
+*   **What it does:** Adds a 3-second mandatory "Take a breath" overlay before playing any video to prevent impulsive watching.
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes
 
@@ -345,7 +345,7 @@ These features perfectly adhere to the extension's architecture, including exten
 
 ### Video Controls
 *   **File:** `content/features/player/video-controls/video-controls.js`
-*   **What it does:** Unknown
+*   **What it does:** Comprehensive draggable control panel for adjusting playback speed, cinematic CSS filters (brightness, etc.), and advanced audio processing (volume boost, EQ).
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Uses `this.addListener`: Yes
 

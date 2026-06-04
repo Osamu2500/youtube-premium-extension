@@ -80,6 +80,7 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         toggle('ypp-hide-endscreens', settings.hideEndScreens);
         toggle('ypp-hide-cards', settings.hideCards);
         toggle('ypp-hide-merch', settings.hideMerch);
+        toggle('ypp-hide-promo-shelves', settings.hidePromoShelves);
     }
 
     /**

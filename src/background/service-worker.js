@@ -3,17 +3,7 @@
  * Handles background tasks including timer logic and initial setup
  */
 
-// Ported from temp2.0/background/background.js
-chrome.runtime.onInstalled.addListener(details => {
-  if (details.reason === 'install') {
-    chrome.storage.sync.set({
-      cinematicEnabled: true,
-      cinematicMuted: false, 
-    }).then(() => {
-      chrome.tabs.create({ url: 'https://www.youtube.com/', active: true }).catch(err => console.error(err));
-    }).catch(err => console.error(err));
-  }
-});
+// Legacy onInstalled listener removed to prevent unwanted tab opening and sync storage abuse.
 
 const ALARM_NAME = 'ypp-focus-timer';
 
@@ -237,10 +227,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ error: `Disallowed URL scheme: ${fetchUrl.protocol}` });
                 return false;
             }
-            fetch(request.url, request.options)
+            
+            // Apply a 15-second timeout to prevent hanging promises
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            
+            const fetchOptions = { ...request.options, signal: controller.signal };
+            
+            fetch(request.url, fetchOptions)
                 .then((response) => response.json().then(data => ({ status: response.status, data })))
                 .then((result) => sendResponse(result))
-                .catch((error) => sendResponse({ error: error.message }));
+                .catch((error) => {
+                    if (error.name === 'AbortError') {
+                        sendResponse({ error: 'Request timed out after 15 seconds' });
+                    } else {
+                        sendResponse({ error: error.message });
+                    }
+                })
+                .finally(() => clearTimeout(timeoutId));
+                
             return true; // Indicate async response
         }
 

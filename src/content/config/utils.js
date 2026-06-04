@@ -424,14 +424,13 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
 
             const startTime = Date.now();
             const startUrl = location.href; // Capture URL for early abort
-            let lastCheckTime = startTime;
-            let rafId = null;
+            let intervalId = null;
             let resolved = false;
 
             const cleanup = () => {
-                if (rafId) {
-                    cancelAnimationFrame(rafId);
-                    rafId = null;
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
                 }
                 if (signal) {
                     signal.removeEventListener('abort', handleAbort);
@@ -455,42 +454,35 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 
                 const now = Date.now();
 
-                // Check for timeout independent of the polling interval
+                // Check for timeout
                 if (now - startTime >= timeout) {
                     resolved = true;
                     cleanup();
                     return resolve(null); // Timeout reached cleanly
                 }
 
-                // Throttle the checks to match the requested interval
-                if (now - lastCheckTime >= intervalMs) {
-                    lastCheckTime = now;
-                    try {
-                        // Abort if the user navigates away early
-                        if (location.href !== startUrl) {
-                            resolved = true;
-                            cleanup();
-                            return resolve(null);
-                        }
-
-                        const result = conditionFn();
-                        if (result) {
-                            resolved = true;
-                            cleanup();
-                            return resolve(result); // Success
-                        } 
-                    } catch (error) {
-                        // IMPORTANT FIX: Swallow transient errors (like null references during DOM load) 
-                        // and allow the loop to try again on the next interval until timeout.
-                        window.YPP.Utils?.log('Transient error in pollFor, retrying...', 'UTILS', 'debug');
+                try {
+                    // Abort if the user navigates away early
+                    if (location.href !== startUrl) {
+                        resolved = true;
+                        cleanup();
+                        return resolve(null);
                     }
+
+                    const result = conditionFn();
+                    if (result) {
+                        resolved = true;
+                        cleanup();
+                        return resolve(result); // Success
+                    } 
+                } catch (error) {
+                    // IMPORTANT FIX: Swallow transient errors (like null references during DOM load) 
+                    // and allow the loop to try again on the next interval until timeout.
+                    window.YPP.Utils?.log('Transient error in pollFor, retrying...', 'UTILS', 'debug');
                 }
-                
-                // Continue polling aligned with browser frame rate
-                rafId = requestAnimationFrame(check);
             };
 
-            rafId = requestAnimationFrame(check);
+            intervalId = setInterval(check, intervalMs);
         });
     },
 

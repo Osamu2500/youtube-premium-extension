@@ -162,29 +162,14 @@ window.YPP.core.DOMObserver = class DOMObserver {
             this._cachedSelector = combinedSelector;
         }
 
-        // 2. Filter nodesToProcess to ONLY top-level nodes within this batch.
-        // If a node is a descendant of another node in this batch, we skip it
-        // because querySelectorAll on the parent will naturally find everything inside it.
-        // This reduces the number of querySelectorAll calls from O(N) to O(Roots),
-        // preventing massive slowdowns during heavy DOM inserts (like page loads).
-        const nodeSet = new Set(nodesToProcess);
+        // 2. Extract valid nodes to process.
+        // MutationObserver.addedNodes already yields root elements of an inserted subtree,
+        // so we don't need expensive manual filtering for descendants.
         const rootNodes = new Set();
         
         for (let i = 0; i < nodesToProcess.length; i++) {
             const node = nodesToProcess[i];
-            if (!node.isConnected) continue; // Fast escape for detached nodes
-            
-            let isChild = false;
-            let parent = node.parentElement;
-            while (parent) {
-                if (nodeSet.has(parent)) {
-                    isChild = true;
-                    break;
-                }
-                parent = parent.parentElement;
-            }
-            
-            if (!isChild) {
+            if (node.isConnected) {
                 rootNodes.add(node);
             }
         }
