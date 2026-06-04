@@ -119,9 +119,16 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
         container.appendChild(col);
 
         const contentDiv = col.querySelector('.ypp-deck-col-content');
+        let ticking = false;
         col.addEventListener('scroll', () => {
-            if (col.scrollTop + col.clientHeight >= col.scrollHeight - 200) {
-                window.scrollBy(0, 100); 
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (col.scrollTop + col.clientHeight >= col.scrollHeight - 200) {
+                        window.scrollBy(0, 100); 
+                    }
+                    ticking = false;
+                });
+                ticking = true;
             }
         }, { passive: true });
 

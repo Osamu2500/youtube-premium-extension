@@ -13,7 +13,6 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         this.isActive        = false;
         this.container       = null;   // Our custom #ypp-pl root
         this.navHandler      = null;
-        this.mutObs          = null;   // MutationObserver watching native data
         this._buildTimer     = null;
         this._retryTimer     = null;
         this._retryCount     = 0;
@@ -79,9 +78,8 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         clearTimeout(this._retryTimer);
         this._retryCount = 0;
         
-        if (this.mutObs) { 
-            this.mutObs.disconnect(); 
-            this.mutObs = null; 
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('playlist-redesign-scanner');
         }
         
         if (this._menuCloseFn) {
@@ -130,25 +128,20 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         );
         if (!listContainer) return;
 
-        // Prevent attaching multiple observers if _attemptBuild succeeds multiple times
-        if (this.mutObs) {
-            this.mutObs.disconnect();
+        if (window.YPP?.sharedObserver) {
+            let debounce = null;
+            window.YPP.sharedObserver.register('playlist-redesign-scanner', 'ytd-playlist-video-renderer', () => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {
+                    const header = document.querySelector('ytd-playlist-header-renderer');
+                    const videos = document.querySelectorAll('ytd-playlist-video-renderer');
+                    // Only rebuild if we still have valid data
+                    if (header && videos.length > 0 && this.isEnabled) {
+                        this._build(header, videos);
+                    }
+                }, 600);
+            }, false); // don't fire immediately
         }
-
-        let debounce = null;
-        this.mutObs = new MutationObserver(() => {
-            clearTimeout(debounce);
-            debounce = setTimeout(() => {
-                const header = document.querySelector('ytd-playlist-header-renderer');
-                const videos = document.querySelectorAll('ytd-playlist-video-renderer');
-                // Only rebuild if we still have valid data
-                if (header && videos.length > 0 && this.isEnabled) {
-                    this._build(header, videos);
-                }
-            }, 600);
-        });
-
-        this.mutObs.observe(listContainer, { childList: true, subtree: false });
     }
 
     // ─── Data extraction from native YouTube DOM ─────────────────────────────
@@ -782,40 +775,34 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             const menuBtn = nativeVideo.querySelector('ytd-menu-renderer button');
             if (!menuBtn) return resolve(false);
 
-            // Close any open popup first
-            document.body.click();
-
-            // Setup a MutationObserver to wait for the popup to render in the DOM
-            const popupObserver = new MutationObserver((mutations, obs) => {
-                const popup = document.querySelector('ytd-menu-popup-renderer');
-                if (popup) {
-                    const items = popup.querySelectorAll('ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer');
-                    for (const item of items) {
-                        const text = (item.textContent || '').toLowerCase();
-                        if (text.includes('remove from')) {
-                            obs.disconnect();
-                            clearTimeout(failsafeTimer);
-                            item.click();
-                            // Dismiss lingering popup after click
-                            setTimeout(() => document.body.click(), 50);
-                            return resolve(true);
+            // Trigger the menu open
+            document.body.click(); // Close any open popup first
+            setTimeout(() => {
+                menuBtn.click();
+                
+                // Poll for the popup
+                this.utils.pollFor(() => {
+                    const popup = document.querySelector('ytd-menu-popup-renderer');
+                    if (popup) {
+                        const items = popup.querySelectorAll('ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer');
+                        for (const item of items) {
+                            const text = (item.textContent || '').toLowerCase();
+                            if (text.includes('remove from')) {
+                                return item;
+                            }
                         }
                     }
-                }
-            });
-
-            // Start observing the body for the injected popup
-            popupObserver.observe(document.body, { childList: true, subtree: true });
-
-            // Failsafe timer (2 seconds) to prevent permanent hang
-            const failsafeTimer = setTimeout(() => {
-                popupObserver.disconnect();
-                resolve(false);
-            }, 2000);
-
-            // Trigger the menu open (must be done after observer starts)
-            // Wait one event loop tick for the close action to finish
-            setTimeout(() => menuBtn.click(), 50);
+                    return null;
+                }, 2000, 100).then(item => {
+                    if (item) {
+                        item.click();
+                        setTimeout(() => document.body.click(), 50);
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                }).catch(() => resolve(false));
+            }, 50);
         });
     }
 };

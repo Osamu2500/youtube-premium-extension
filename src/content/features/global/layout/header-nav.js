@@ -26,7 +26,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
     getConfigKey() {
         // Feature is enabled if ANY nav button is on, or sidebar/logo settings are active
-        return 'navTrending';
+        return null;
     }
 
     // =========================================================================
@@ -63,6 +63,23 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
         // Call super to clean up any tracked listeners
         await super.disable();
+    }
+
+    async onUpdate() {
+        // Feature manager called this because it's enabled and settings updated
+        const s = this.settings || {};
+        const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
+            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+
+        this._applySidebarState();
+
+        if (window.YPP.ui?.manager) {
+            window.YPP.ui.manager.remove('header-nav-group');
+        }
+
+        if (shouldRun) {
+            this._scheduleInjection();
+        }
     }
 
     // =========================================================================

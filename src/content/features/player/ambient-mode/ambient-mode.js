@@ -177,7 +177,7 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
 
     startLoop() {
         let lastTime = 0;
-        const fpsInterval = 1000 / 30; // 30 FPS
+        const fpsInterval = 1000 / 5; // 5 FPS (Reduced from 30 to eliminate GPU sync lag)
 
         const loop = (timestamp) => {
             if (!this.isEnabled) return;
@@ -188,9 +188,9 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
                 lastTime = timestamp - (elapsed % fpsInterval);
 
                 if (this.video && !this.video.paused && !this.video.ended && this.video.readyState >= 2 && !document.hidden) {
-                    // Draw video to canvas
+                    // Draw video to canvas (tiny size to minimize readback bandwidth)
                     if (this.ctx) {
-                        this.ctx.drawImage(this.video, 0, 0, 100, 100);
+                        this.ctx.drawImage(this.video, 0, 0, 16, 16);
                     }
                 }
             }
@@ -198,10 +198,10 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             this.animationFrame = requestAnimationFrame(loop);
         };
         
-        // Set canvas internal resolution low for performance
+        // Set canvas internal resolution extremely low for performance
         if (this.canvas) {
-            this.canvas.width = 100;
-            this.canvas.height = 100;
+            this.canvas.width = 16;
+            this.canvas.height = 16;
         }
 
         this.animationFrame = requestAnimationFrame(loop);

@@ -37,9 +37,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         this.onPageChange = this.onPageChange.bind(this);
         this._onNavigateStart = this._onNavigateStart.bind(this);
+        this._onNavigateFinish = this._onNavigateFinish.bind(this);
         this._playNextVideo = this._playNextVideo.bind(this);
         this._periodicCheck = this._periodicCheck.bind(this);
-        this._handleNavigation = this._handleNavigation.bind(this);
     }
 
     getConfigKey() {
@@ -70,8 +70,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         this._injectStyles();
         
-        // Use BaseFeature's tracked listener for navigate start
+        // Use BaseFeature's tracked listener for navigate start & finish
         this.addListener(document, 'yt-navigate-start', this._onNavigateStart);
+        this.addListener(window, 'yt-navigate-finish', this._onNavigateFinish);
         
         this.onPageChange();
     }
@@ -143,7 +144,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         [0, 100, 500, 1000, 2000, 3000].forEach(delay => setTimeout(hideDrawer, delay));
 
         this._setupScrollHandler();
-        this._setupNavigationListeners();
+        this._lastPathname = window.location.pathname;
 
         // Enforce darkmode
         this._darkModeObserver = new MutationObserver(() => {
@@ -556,13 +557,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         stretchContainers();
 
+        // Instead of a MutationObserver that fires thousands of times,
+        // just rely on the shared observer that triggers when the active preview changes.
+        // We also attach the size stretching to the preview playing event to cover late-loaded video elements.
         if (!preview._sizeForcerAttached) {
             preview._sizeForcerAttached = true;
-            const mo = new MutationObserver(() => {
-                stretchContainers();
-            });
-            mo.observe(preview, { childList: true, subtree: true });
-            this._heroState.observers.add(mo);
+            this.addListener(preview, 'playing', () => stretchContainers(), { capture: true });
+            this.addListener(preview, 'loadeddata', () => stretchContainers(), { capture: true });
         }
     }
 
@@ -701,22 +702,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         }, { signal: this._abortController.signal });
     }
 
-    _setupNavigationListeners() {
-        let lastPathname = window.location.pathname;
-
-        this._navObserver = new MutationObserver(() => {
-            const currentPathname = window.location.pathname;
-            this._handleNavigation(currentPathname, lastPathname);
-            lastPathname = currentPathname;
-        });
-        // Watch only the page manager, not the entire document — watching document
-        // with subtree:true fires thousands of times on YouTube's home feed.
-        const target = document.querySelector('ytd-page-manager') || document.body;
-        this._navObserver.observe(target, { childList: true });
-    }
-
-    _handleNavigation(newPathname, lastPathname) {
-        if (newPathname === lastPathname) return;
+    _onNavigateFinish() {
+        const newPathname = window.location.pathname;
+        if (newPathname === this._lastPathname) return;
         
         const isHome = newPathname === '/' || newPathname === '';
         const isFeed = newPathname.includes('/feed/subscriptions');
@@ -733,6 +721,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 document.body.classList.toggle('cinematic-home', isHomePage);
             }, 500);
         }
+        this._lastPathname = newPathname;
     }
 
     _navigateVideo(direction) {

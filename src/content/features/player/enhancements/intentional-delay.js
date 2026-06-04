@@ -7,6 +7,7 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
         this._boundCheck = this._onPageChange.bind(this);
         this._overlay = null;
         this._activeVideoId = null;
+        this._countdownInterval = null;
     }
     getConfigKey() { return 'intentionalDelay'; }
     async enable() {
@@ -60,10 +61,11 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
         const timerEl = this._overlay.querySelector('.ypp-id-timer');
         const btn = this._overlay.querySelector('.ypp-id-skip');
         
-        const interval = setInterval(() => {
+        this._countdownInterval = setInterval(() => {
             count--;
             if (count <= 0) {
-                clearInterval(interval);
+                clearInterval(this._countdownInterval);
+                this._countdownInterval = null;
                 timerEl.style.display = 'none';
                 btn.style.display = 'block';
             } else {
@@ -86,6 +88,10 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
         });
     }
     _removeOverlay() {
+        if (this._countdownInterval) {
+            clearInterval(this._countdownInterval);
+            this._countdownInterval = null;
+        }
         if (this._overlay) {
             this._overlay.remove();
             this._overlay = null;

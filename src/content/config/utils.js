@@ -1333,93 +1333,43 @@ window.YPP.Utils.positionPopupBesideVideo = (panel, triggerBtn, video, panelW) =
     panel.style.top  = top  + 'px';
 };
 
-// =====================================================================
-// POPUP PORTAL — shared CSS top-layer dialog host
-// =====================================================================
-
 /**
  * Returns (creating if necessary) a shared <dialog> element in the CSS top
  * layer.  Elements appended here escape ALL site overflow/clip/transform
  * containment — including overflow:clip and clip-path on the body/html.
  *
-        this._isActive = true;
-        this._videoEl = document.querySelector('video.video-stream.html5-main-video');
-        this._playerNode = document.getElementById('movie_player') || document.querySelector('.html5-video-player');
-        
-        if (!this._videoEl || !this._playerNode) {
-            // Wait for it if it isn't ready
-            setTimeout(() => { if (this._isActive) this.startTracking(); }, 500);
-            return;
-        }
+ * Usage:
+ *   const dlg = window.YPP.Utils.getPopupPortal();
+ *   dlg.appendChild(myPanel);
+ *
+ * The dialog covers the full viewport with pointer-events:none so the portal
+ * itself is invisible; individual panels must set pointer-events:auto.
+ */
+window.YPP.Utils.getPopupPortal = () => {
+    let dlg = document.getElementById('ypp-popup-portal');
+    if (dlg) return dlg;
 
-        // Apply immediately
-        this._updateVars();
-        
-        // Track resize via ResizeObserver and attribute MutationObserver 
-        // to catch style injections by YouTube
-        if (window.ResizeObserver) {
-            this._observer = new ResizeObserver(() => this._scheduleUpdate());
-            this._observer.observe(this._videoEl);
-            this._observer.observe(this._playerNode);
-        } else {
-            this._observer = new MutationObserver(() => this._scheduleUpdate());
-            this._observer.observe(this._videoEl, { attributes: true, attributeFilter: ['style', 'class'] });
-        }
-        
+    dlg = document.createElement('div');
+    dlg.id = 'ypp-popup-portal';
+    dlg.style.cssText =
+        'position:fixed;inset:0;width:100%;height:100%;' +
+        'max-width:100%;max-height:100%;' +
+        'border:0;outline:0;padding:0;margin:0;' +
+        'background:transparent;overflow:visible;' +
+        'pointer-events:none;z-index:2147483647;';
 
-        
-        // Also listen to window resize
-        window.addEventListener('resize', this._boundScheduleUpdate = this._scheduleUpdate.bind(this), { passive: true });
-    },
-
-    _scheduleUpdate() {
-        if (this._rafId) return;
-        this._rafId = requestAnimationFrame(() => {
-            this._updateVars();
-            this._rafId = null;
-        });
-    },
-
-    _updateVars() {
-        if (!this._videoEl || !this._playerNode) return;
-        
-        // Read actual dimensions & offsets
-        const videoRect = this._videoEl.getBoundingClientRect();
-        const playerRect = this._playerNode.getBoundingClientRect();
-        
-        // Calculate the relative left offset inside the player container
-        const relativeLeft = Math.max(0, videoRect.left - playerRect.left);
-        const width = videoRect.width;
-        
-        // Don't apply if values are 0 (e.g. video hidden)
-        if (width <= 0) return;
-        
-        // Set variables on player node to be consumed by styles.css
-        this._playerNode.style.setProperty('--ypp-video-width', `${width}px`);
-        this._playerNode.style.setProperty('--ypp-video-left', `${relativeLeft}px`);
-    },
-
-    stop() {
-        this._isActive = false;
-        if (this._observer) {
-            this._observer.disconnect();
-            this._observer = null;
-        }
-
-        if (this._boundScheduleUpdate) {
-            window.removeEventListener('resize', this._boundScheduleUpdate);
-            this._boundScheduleUpdate = null;
-        }
-        if (this._rafId) {
-            cancelAnimationFrame(this._rafId);
-            this._rafId = null;
-        }
-        // Release element references to aid garbage collection
-        this._videoEl = null;
-        this._playerNode = null;
+    if ('popover' in dlg) {
+        dlg.popover = "manual";
     }
-};
 
+    document.documentElement.appendChild(dlg);
+
+    if ('popover' in dlg) {
+        try { dlg.showPopover(); } catch(e) {}
+    }
+
+    return dlg;
+};
 // =====================================================================
 // POPUP POSITIONING — beside-video helper
 // =====================================================================
@@ -1524,44 +1474,3 @@ window.YPP.Utils.positionPopupBesideVideo = (panel, triggerBtn, video, panelW) =
     panel.style.top  = top  + 'px';
 };
 
-// =====================================================================
-// POPUP PORTAL — shared CSS top-layer dialog host
-// =====================================================================
-
-/**
- * Returns (creating if necessary) a shared <dialog> element in the CSS top
- * layer.  Elements appended here escape ALL site overflow/clip/transform
- * containment — including overflow:clip and clip-path on the body/html.
- *
- * Usage:
- *   const dlg = window.YPP.Utils.getPopupPortal();
- *   dlg.appendChild(myPanel);
- *
- * The dialog covers the full viewport with pointer-events:none so the portal
- * itself is invisible; individual panels must set pointer-events:auto.
- */
-window.YPP.Utils.getPopupPortal = () => {
-    let dlg = document.getElementById('ypp-popup-portal');
-    if (dlg) return dlg;
-
-    dlg = document.createElement('div');
-    dlg.id = 'ypp-popup-portal';
-    dlg.style.cssText =
-        'position:fixed;inset:0;width:100%;height:100%;' +
-        'max-width:100%;max-height:100%;' +
-        'border:0;outline:0;padding:0;margin:0;' +
-        'background:transparent;overflow:visible;' +
-        'pointer-events:none;z-index:2147483647;';
-
-    if ('popover' in dlg) {
-        dlg.popover = "manual";
-    }
-
-    document.documentElement.appendChild(dlg);
-
-    if ('popover' in dlg) {
-        try { dlg.showPopover(); } catch(e) {}
-    }
-
-    return dlg;
-};

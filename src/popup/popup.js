@@ -142,6 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'enableStatsForNerds',
         'enableTranscript', // Missing
 
+        // Top Bar Nav Buttons
+        'navShorts',
+        'navSubscriptions',
+        'navPlaylists',
+        'navHistory',
+        'navWatchLater',
+
         // Visuals
         'enableCinemaFilters', // Unified: presets + sliders
 
@@ -228,7 +235,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'sidebarLayout',
         
         // Scrolling
-        'splitScrolling'
+        'splitScrolling',
+
+        // Missing Keys added during audit
+        'enableBookmarks',
+        'playlistRedesign',
+        'glassPlayerUI',
+        'sidebarComments'
     ];
 
     // --- STORAGE HANDLING ---

@@ -71,8 +71,8 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
                GLOBAL: DYNAMIC PROGRESS BAR ALIGNMENT
                ======================================================== */
             .html5-video-player .ytp-chrome-bottom {
-                bottom: var(--ypp-letterbox-bottom, 0px) !important;
-                transition: bottom 0.2s ease-out !important;
+                transform: translateY(calc(var(--ypp-letterbox-bottom, 0px) * -1)) !important;
+                transition: transform 0.2s ease-out !important;
             }
 
             /* ========================================================
@@ -323,11 +323,15 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         this._resizeObserver = new ResizeObserver(() => updateRatio());
         
         // We need to wait for the player container to exist
-        const observerTarget = setInterval(() => {
-            const container = document.querySelector('.html5-video-player');
-            const video = document.querySelector('video.video-stream');
-            if (container && video) {
-                clearInterval(observerTarget);
+        if (window.YPP.Utils && window.YPP.Utils.pollFor) {
+            window.YPP.Utils.pollFor(() => {
+                const container = document.querySelector('.html5-video-player');
+                const video = document.querySelector('video.video-stream');
+                if (container && video) return { container, video };
+                return null;
+            }, 10000, 500).then((elements) => {
+                if (!elements) return;
+                const { container, video } = elements;
                 this._ratioInterval = null;
                 
                 this._resizeObserver.observe(container);
@@ -338,9 +342,8 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
                 this._updateRatioFn = updateRatio;
                 
                 updateRatio();
-            }
-        }, 500);
-        this._ratioInterval = observerTarget;
+            });
+        }
     }
 
     _stopTrackingVideoRatio() {

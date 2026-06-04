@@ -10,7 +10,6 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
     getConfigKey() { return 'studyMode'; }
     constructor() {
         super('StudyMode');
-        this.studyInterval = null;
         this.speedPanel = null;
         this.controlBtn = null;
         
@@ -69,8 +68,6 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
                         this._enforceState();
                     }
                 }, true);
-            } else {
-                this.studyInterval = setInterval(() => this._enforceState(), this.config.enforceInterval);
             }
 
             // Add UI controls
@@ -88,11 +85,6 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         this._isEnabled = false;
 
         try {
-            if (this.studyInterval) {
-                clearInterval(this.studyInterval);
-                this.studyInterval = null;
-            }
-
             if (window.YPP && window.YPP.sharedObserver) {
                 window.YPP.sharedObserver.unregister('study-mode-video');
             }

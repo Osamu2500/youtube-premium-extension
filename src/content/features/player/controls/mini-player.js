@@ -38,10 +38,14 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
             // Listen to SPA navigations and DOM mutations to catch miniplayer activation
             this.addListener(window, 'yt-navigate-finish', this.checkMiniplayerState);
             this.addListener(document, 'click', () => setTimeout(this.checkMiniplayerState, 500));
-            
-            // Also poll every few seconds just in case
-            this.pollInterval = setInterval(this.checkMiniplayerState, 2000);
-            this.checkMiniplayerState();
+            // Find miniplayer once and observe its active attribute
+            this.utils.pollFor(() => document.querySelector('ytd-miniplayer'), 10000, 500)
+                .then(player => {
+                    if (!player || !this.isEnabled) return;
+                    this.observer = new MutationObserver(() => this.checkMiniplayerState());
+                    this.observer.observe(player, { attributes: true, attributeFilter: ['active'] });
+                    this.checkMiniplayerState();
+                }).catch(() => {});
         } catch (e) {
             this.utils?.log('Error enabling MiniPlayer', 'MINIPLAYER', 'error', e);
         }
@@ -49,7 +53,10 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
 
     async disable() {
         await super.disable();
-        if (this.pollInterval) clearInterval(this.pollInterval);
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
         
         if (this.resizeHandle) {
             this.resizeHandle.remove();

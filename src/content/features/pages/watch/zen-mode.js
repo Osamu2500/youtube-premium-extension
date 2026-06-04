@@ -26,7 +26,7 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         this.playerElement = null;
 
         // Configuration
-        this.FPS = 15; // Smooth ambilight
+        this.FPS = 2; // Reduced from 15 to 2 to prevent extreme CPU readback lag and paint thrashing
         this.FRAME_INTERVAL = 1000 / this.FPS;
         this.CANVAS_SIZE = 10; // Low res is sufficient for ambient light
 
@@ -121,9 +121,16 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
                 }
             };
 
-            // Attempt immediately and verify after brief delay
+            // Attempt immediately
             checkAndEnableTheater();
-            setTimeout(checkAndEnableTheater, 1000);
+            
+            // Re-verify after DOM settles without using setTimeout
+            if (window.YPP.sharedObserver) {
+                window.YPP.sharedObserver.register('zen-cinema-check', 'ytd-watch-flexy', () => {
+                    checkAndEnableTheater();
+                    window.YPP.sharedObserver.unregister('zen-cinema-check');
+                });
+            }
         } catch (e) {
             // Silent fail if button not found or page not ready
         }

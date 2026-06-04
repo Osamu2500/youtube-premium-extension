@@ -47,9 +47,6 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             
             this.scanForVideos();
             this.startObserver();
-
-            window.addEventListener('resize', this._repositionListener, { passive: true });
-            window.addEventListener('scroll', this._repositionListener, { passive: true });
         } catch (e) {
             this.utils?.log('Error enabling GlobalPlayerBar', 'GLOBAL', 'error', e);
         }
@@ -59,9 +56,6 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
         this.stopObserver();
         this.ui.removeAll();
         this.utils?.removeStyle('ypp-global-bar-css');
-
-        window.removeEventListener('resize', this._repositionListener);
-        window.removeEventListener('scroll', this._repositionListener);
     }
 
     // =========================================================================
@@ -77,17 +71,13 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             });
         } else {
             // Fallback for external sites where sharedObserver is not loaded
-            this.observer = new MutationObserver((mutations) => {
-                let shouldScan = false;
-                for (let i = 0; i < mutations.length; i++) {
-                    if (mutations[i].addedNodes.length > 0) {
-                        shouldScan = true;
-                        break;
-                    }
+            this._fallbackVideoScanner = (e) => {
+                if (e.target && e.target.tagName === 'VIDEO') {
+                    this.scanForVideos();
                 }
-                if (shouldScan) this.scanForVideos();
-            });
-            this.observer.observe(document.body, { childList: true, subtree: true });
+            };
+            document.addEventListener('play', this._fallbackVideoScanner, true);
+            document.addEventListener('loadeddata', this._fallbackVideoScanner, true);
         }
     }
 
@@ -97,9 +87,10 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             if (window.YPP?.sharedObserver) {
                 window.YPP.sharedObserver.unregister('global-bar-scanner');
             }
-            if (this.observer) {
-                this.observer.disconnect();
-                this.observer = null;
+            if (this._fallbackVideoScanner) {
+                document.removeEventListener('play', this._fallbackVideoScanner, true);
+                document.removeEventListener('loadeddata', this._fallbackVideoScanner, true);
+                this._fallbackVideoScanner = null;
             }
         }
     }

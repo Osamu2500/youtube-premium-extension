@@ -72,12 +72,17 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
             const video = await this.waitForElement('video.video-stream.html5-main-video', 10000);
             if (video) {
                 this.videoElement = video;
-                this.addListener(this.videoElement, 'loadeddata', this.handleVideoLoaded);
-                
-                // If it already has data, init audio context right away
-                // Wait for an actual user interaction to start context (browser policies)
-                if (this.videoElement.readyState >= 2) {
+                // Wait for an actual user interaction / play event to start context (browser policies)
+                // Doing this on loadeddata or readyState blocks the video pipeline and causes massive load delays.
+                const tryStart = () => {
                     this.setupAudioNodes();
+                    this.videoElement.removeEventListener('play', tryStart);
+                };
+                
+                if (!this.videoElement.paused) {
+                    tryStart();
+                } else {
+                    this.videoElement.addEventListener('play', tryStart);
                 }
             }
         } catch (error) {

@@ -210,9 +210,14 @@ window.YPP.SettingsSchema = {
 
         // --- Sidebar Layout ---
         sidebarLayout:       { type: 'string',  default: 'compact', values: ['compact', 'expanded'] },
+        splitScrolling:      { type: 'boolean', default: false },
 
-        // --- Navigation (missing navTrending) ---
+        // --- Navigation ---
         navTrending:         { type: 'boolean', default: true },
+        navShorts:           { type: 'boolean', default: true },
+        navSubscriptions:    { type: 'boolean', default: true },
+        navWatchLater:       { type: 'boolean', default: true },
+        navPlaylists:        { type: 'boolean', default: true },
 
         // --- Subscription Manager extras ---
         enableFilterBar:     { type: 'boolean', default: false },

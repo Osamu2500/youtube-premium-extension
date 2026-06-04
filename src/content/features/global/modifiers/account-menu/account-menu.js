@@ -42,9 +42,6 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                     'ytd-multi-page-menu-renderer[slot="menu"], tp-yt-iron-dropdown ytd-multi-page-menu-renderer',
                     () => this._onMutation()
                 );
-            } else {
-                this._observer = new MutationObserver(() => this._onMutation());
-                this._observer.observe(document.body, { childList: true, subtree: true });
             }
 
             this._pageChangedHandler = () => this._cleanup();
@@ -59,8 +56,6 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('account-menu-scanner');
         }
-        this._observer?.disconnect();
-        this._observer = null;
         if (this._pageChangedHandler) {
             window.YPP.events?.off('page:changed', this._pageChangedHandler);
             this._pageChangedHandler = null;
