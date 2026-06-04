@@ -1713,7 +1713,7 @@ body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp
   margin: 0 !important;
   box-sizing: border-box !important;
   justify-items: stretch !important;
-  align-items: stretch !important;
+  align-items: start !important;
 }
 
 /* Grid Rows - display:contents flattens ALL row wrappers so items participate directly in parent grid.
@@ -1758,7 +1758,7 @@ body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
   margin: 0 !important;
   flex: none !important;
   align-self: stretch !important;
