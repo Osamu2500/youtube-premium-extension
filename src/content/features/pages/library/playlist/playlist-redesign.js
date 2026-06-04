@@ -618,6 +618,11 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
 
             let removed = 0;
             for (const card of watchedCards) {
+                // Abort if user navigated away or feature was disabled during async loop
+                if (!this.isActive || !document.body.classList.contains('ypp-playlist-redesign')) {
+                    break;
+                }
+
                 const idx = parseInt(card.dataset.index, 10);
                 const success = await this._removeNativeVideo(idx);
                 if (success) {
@@ -857,5 +862,91 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                 }).catch(() => resolve(false));
             }, 50);
         });
+    }
+
+    // ── Playlist Data Updates ──────────────────────────────────────────────
+    _updateStatsAfterRemoval() {
+        const root = this.container;
+        if (!root) return;
+        
+        const cards = root.querySelectorAll('.ypp-pl-card');
+        
+        // 1. Update total videos count text safely across languages
+        const statsEl = root.querySelector('.ypp-pl-stats');
+        if (statsEl) {
+            statsEl.textContent = statsEl.textContent.replace(/\d+/, cards.length);
+        }
+        
+        // 2. Update duration card's video count
+        const durRows = root.querySelectorAll('.ypp-pl-duration-row');
+        for (const row of durRows) {
+            const label = row.querySelector('.ypp-pl-duration-speed');
+            if (label && label.textContent === 'Videos') {
+                const val = row.querySelector('.ypp-pl-duration-val');
+                if (val) val.textContent = cards.length;
+            }
+        }
+        
+        // 3. Re-calculate indices & duration safely
+        let i = 1;
+        let totalSecs = 0;
+        
+        cards.forEach(card => {
+            // Update UI Index
+            const indexEl = card.querySelector('.ypp-pl-card-index');
+            if (indexEl) indexEl.textContent = i;
+            
+            // Re-assign dataset index so future removes map correctly to remaining native elements
+            card.dataset.index = (i - 1);
+            
+            // Calculate total time
+            const durEl = card.querySelector('.ypp-pl-card-duration');
+            if (durEl) {
+                const cleanStr = durEl.textContent.replace(/[^0-9:]/g, '');
+                const parts = cleanStr.split(':').map(n => parseInt(n, 10));
+                if (parts.length === 3) {
+                    totalSecs += parts[0] * 3600 + parts[1] * 60 + parts[2];
+                } else if (parts.length === 2) {
+                    totalSecs += parts[0] * 60 + parts[1];
+                } else if (parts.length === 1 && !isNaN(parts[0])) {
+                    totalSecs += parts[0];
+                }
+            }
+            
+            i++;
+        });
+        
+        // 4. Update duration card's time and speeds
+        if (totalSecs >= 0) {
+            const fmt = (s) => {
+                const h = Math.floor(s / 3600);
+                const m = Math.floor((s % 3600) / 60);
+                const sec = s % 60;
+                return h > 0
+                    ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+                    : `${m}:${String(sec).padStart(2,'0')}`;
+            };
+            
+            const timeEl = root.querySelector('.ypp-pl-duration-time');
+            if (timeEl) timeEl.textContent = fmt(totalSecs);
+            
+            const speedUpdates = [
+                { label: '1.25×', s: Math.floor(totalSecs / 1.25) },
+                { label: '1.5×',  s: Math.floor(totalSecs / 1.5)  },
+                { label: '1.75×', s: Math.floor(totalSecs / 1.75) },
+                { label: '2×',    s: Math.floor(totalSecs / 2)    },
+            ];
+            
+            for (const row of durRows) {
+                const labelEl = row.querySelector('.ypp-pl-duration-speed');
+                if (!labelEl) continue;
+                const label = labelEl.textContent;
+                const update = speedUpdates.find(u => u.label === label);
+                if (update) {
+                    const val = row.querySelector('.ypp-pl-duration-val');
+                    if (val) val.textContent = fmt(update.s);
+                }
+            }
+        }
     }
 };
