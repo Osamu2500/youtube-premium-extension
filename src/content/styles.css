@@ -6086,8 +6086,8 @@ body.ypp-playlist-redesign ytd-masthead {
 #ypp-pl-root .ypp-pl-main {
     flex: 1;
     margin-left: 384px; /* 360px sidebar + 24px gap */
-    /* padding-top 0 since layout handles the 24px gap */
-    padding: 0 24px 48px 0;
+    padding: 64px 24px 48px 0;
+
     box-sizing: border-box;
     min-height: 100vh;
     min-width: 0;
@@ -6098,9 +6098,11 @@ body.ypp-playlist-redesign ytd-masthead {
 
 /* ── Toolbar ──────────────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-toolbar {
-    position: sticky;
-    top: 56px; /* clears YouTube masthead */
-    z-index: 10;
+    position: fixed;
+    top: 50px;
+    left: 384px;
+    right: 24px;
+    z-index: 100;
     background: rgba(10,10,12,0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -6108,7 +6110,7 @@ body.ypp-playlist-redesign ytd-masthead {
     align-items: center;
     gap: 12px;
     padding: 10px 2px;
-    margin-bottom: 14px;
+    margin-bottom: 0;
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 #ypp-pl-root .ypp-pl-count-label {
@@ -6177,6 +6179,8 @@ body.ypp-playlist-redesign ytd-masthead {
 #ypp-pl-root .ypp-pl-cols-1 { grid-template-columns: 1fr !important; }
 #ypp-pl-root .ypp-pl-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
 #ypp-pl-root .ypp-pl-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+#ypp-pl-root .ypp-pl-cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+#ypp-pl-root .ypp-pl-cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
 
 /* ── Video card ───────────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-card {

@@ -16,7 +16,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         this._buildTimer     = null;
         this._retryTimer     = null;
         this._retryCount     = 0;
-        this._currentCols    = '2';    // Cache column preference to prevent async thrashing
+        this._currentCols    = '3';    // Cache column preference to prevent async thrashing
         this._menuCloseFn    = null;   // Track global click listener for memory safety
         this.MAX_RETRIES     = 12;
         this.RETRY_DELAY     = 800;
@@ -396,22 +396,14 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
               </span>
 
               <div class="ypp-pl-col-switcher">
-                <button class="ypp-col-btn" data-cols="1" title="List view">
+                <button class="ypp-col-btn ${this._currentCols === 1 ? 'active' : ''}" data-cols="1" title="List view">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="3" y1="6" x2="21" y2="6"/>
                     <line x1="3" y1="12" x2="21" y2="12"/>
                     <line x1="3" y1="18" x2="21" y2="18"/>
                   </svg>
                 </button>
-                <button class="ypp-col-btn active" data-cols="2" title="Grid view">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                  </svg>
-                </button>
-                <button class="ypp-col-btn" data-cols="3" title="Wide grid">
+                <button class="ypp-col-btn ${this._currentCols === 3 ? 'active' : ''}" data-cols="3" title="3 Column grid">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="3" width="5" height="7"/>
                     <rect x="9.5" y="3" width="5" height="7"/>
@@ -421,6 +413,32 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                     <rect x="17" y="14" width="5" height="7"/>
                   </svg>
                 </button>
+                <button class="ypp-col-btn ${this._currentCols === 4 ? 'active' : ''}" data-cols="4" title="4 Column grid">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="3.5" height="7"/>
+                    <rect x="7.5" y="3" width="3.5" height="7"/>
+                    <rect x="13" y="3" width="3.5" height="7"/>
+                    <rect x="18.5" y="3" width="3.5" height="7"/>
+                    <rect x="2" y="14" width="3.5" height="7"/>
+                    <rect x="7.5" y="14" width="3.5" height="7"/>
+                    <rect x="13" y="14" width="3.5" height="7"/>
+                    <rect x="18.5" y="14" width="3.5" height="7"/>
+                  </svg>
+                </button>
+                <button class="ypp-col-btn ${this._currentCols === 5 ? 'active' : ''}" data-cols="5" title="5 Column grid">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="3" height="7"/>
+                    <rect x="5.5" y="3" width="3" height="7"/>
+                    <rect x="10" y="3" width="3" height="7"/>
+                    <rect x="14.5" y="3" width="3" height="7"/>
+                    <rect x="19" y="3" width="3" height="7"/>
+                    <rect x="1" y="14" width="3" height="7"/>
+                    <rect x="5.5" y="14" width="3" height="7"/>
+                    <rect x="10" y="14" width="3" height="7"/>
+                    <rect x="14.5" y="14" width="3" height="7"/>
+                    <rect x="19" y="14" width="3" height="7"/>
+                  </svg>
+                </button>
               </div>
 
               <div class="ypp-pl-filter-wrap">
@@ -428,7 +446,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
               </div>
             </div>
 
-            <div class="ypp-pl-grid ypp-pl-cols-2" id="ypp-pl-grid">
+            <div class="ypp-pl-grid ypp-pl-cols-${this._currentCols}" id="ypp-pl-grid">
               ${videoCards}
             </div>
           </main>`;
