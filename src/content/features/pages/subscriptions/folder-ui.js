@@ -91,7 +91,7 @@ window.YPP.features.CustomDialog = class CustomDialog {
                 <div style="font-size:18px;font-weight:600;color:#fff;">${_escHtml(title)}</div>
                 <div style="font-size:14px;color:#aaa;line-height:1.5;">${_escHtml(message)}</div>
                 <div style="display:flex;justify-content:flex-end;">
-                    <button id="ypp-alert-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">OK</button>
+                    <button id="ypp-alert-ok" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">OK</button>
                 </div>
             `);
             overlay.querySelector('#ypp-alert-ok').addEventListener('click', () =>
@@ -111,7 +111,7 @@ window.YPP.features.CustomDialog = class CustomDialog {
     static confirm(title, message, confirmText = 'Confirm', danger = false) {
         return new Promise(resolve => {
             const overlay = this._createOverlay();
-            const btnColor = danger ? '#ff4e45' : '#6c63ff';
+            const btnColor = danger ? 'rgba(255,78,69,0.4)' : 'rgba(255,255,255,0.15)';
             this._buildCard(overlay, `
                 <div style="font-size:18px;font-weight:600;color:#fff;">${_escHtml(title)}</div>
                 <div style="font-size:14px;color:#aaa;line-height:1.5;">${_escHtml(message)}</div>
@@ -148,7 +148,7 @@ window.YPP.features.CustomDialog = class CustomDialog {
                 <input type="text" id="ypp-prompt-input" placeholder="${safePlaceholder}" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:12px;border-radius:8px;font-size:14px;outline:none;width:100%;box-sizing:border-box;">
                 <div style="display:flex;justify-content:flex-end;gap:12px;">
                     <button id="ypp-prompt-cancel" style="background:rgba(255,255,255,0.05);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Cancel</button>
-                    <button id="ypp-prompt-ok" style="background:#6c63ff;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Submit</button>
+                    <button id="ypp-prompt-ok" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:10px 20px;border-radius:8px;font-weight:500;cursor:pointer;">Submit</button>
                 </div>
             `);
 
@@ -258,6 +258,8 @@ window.YPP.features.FolderUI = class FolderUI {
             const config = this.storage.folderConfig[folderName] || {};
             const el = document.createElement('div');
             el.className = 'ypp-folder-item';
+            el.draggable = true;
+            el.dataset.folder = folderName;
             if (activeFolder === folderName) el.classList.add('active');
 
             // Use _escHtml for dynamic values going into innerHTML to prevent XSS
@@ -295,6 +297,58 @@ window.YPP.features.FolderUI = class FolderUI {
                     tempLink.remove();
                 } else {
                     this.orchestrator.setActiveFolder(folderName);
+                }
+            });
+
+            // --- Drag & Drop Reordering ---
+            el.addEventListener('dragstart', (e) => {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', folderName);
+                el.classList.add('ypp-dragging');
+            });
+            el.addEventListener('dragend', () => {
+                el.classList.remove('ypp-dragging');
+                document.querySelectorAll('.ypp-folder-item').forEach(item => {
+                    item.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
+                });
+            });
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const rect = el.getBoundingClientRect();
+                const mid = rect.top + rect.height / 2;
+                if (e.clientY < mid) {
+                    el.classList.add('ypp-drag-over-top');
+                    el.classList.remove('ypp-drag-over-bottom');
+                } else {
+                    el.classList.add('ypp-drag-over-bottom');
+                    el.classList.remove('ypp-drag-over-top');
+                }
+            });
+            el.addEventListener('dragleave', () => {
+                el.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
+            });
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                el.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
+                const draggedFolder = e.dataTransfer.getData('text/plain');
+                if (draggedFolder && draggedFolder !== folderName) {
+                    const keys = Object.keys(this.storage.folders);
+                    let dropIndex = keys.indexOf(folderName);
+                    
+                    const rect = el.getBoundingClientRect();
+                    const mid = rect.top + rect.height / 2;
+                    if (e.clientY >= mid) {
+                        dropIndex += 1;
+                    }
+                    
+                    const oldIndex = keys.indexOf(draggedFolder);
+                    if (oldIndex < dropIndex) dropIndex -= 1;
+
+                    if (this.storage.reorderFolder(draggedFolder, dropIndex)) {
+                        this._guideRenderKey = null;
+                        this.renderGuideFolders();
+                        this.renderFilterChips();
+                    }
                 }
             });
 
@@ -443,7 +497,7 @@ window.YPP.features.FolderUI = class FolderUI {
                 const playBtn = document.createElement('button');
                 playBtn.className = 'ypp-filter-chip ypp-play-action-chip';
                 playBtn.innerHTML = String.raw`<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M8 5v14l11-7z"/></svg> Play All`;
-                playBtn.style.cssText = 'background: var(--ypp-accent, #6c63ff); color: #fff; border: none; cursor: pointer;';
+                playBtn.style.cssText = 'background: rgba(255, 255, 255, 0.15); color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;';
                 playBtn.addEventListener('click', () => this.orchestrator.playAll(activeFolder));
                 folderSelectContainer.appendChild(playBtn);
             }
@@ -552,7 +606,7 @@ window.YPP.features.FolderUI = class FolderUI {
         if (showHealth) {
             innerHTML += `
                 <div class="ypp-sub-filter-group">
-                    <button id="ypp-health-btn" class="ypp-btn-primary" style="background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.3); color: #a8a4ff; display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; border-radius: 8px; transition: 0.2s;">
+                    <button id="ypp-health-btn" class="ypp-btn-primary" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: #fff; display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; border-radius: 8px; transition: 0.2s;">
                         <svg height="18" width="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
                         Channel Health
                     </button>
@@ -790,7 +844,7 @@ window.YPP.features.FolderUI = class FolderUI {
                 // dataset assignment is safe — bypasses HTML attribute parsing.
                 checkbox.dataset.folder = folderName;
                 checkbox.checked = isChecked;
-                checkbox.style.cssText = 'margin-right: 14px; accent-color: #D0BCFF; width: 18px; height: 18px; cursor: pointer; border-radius: 4px;';
+                checkbox.style.cssText = 'margin-right: 14px; accent-color: #fff; width: 18px; height: 18px; cursor: pointer; border-radius: 4px;';
 
                 // Wire up change handler with a closure over the typed `folderName`.
                 checkbox.addEventListener('change', () => {
@@ -869,67 +923,80 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             <div class="ypp-modal-content ypp-organizer-modal" style="font-family: 'Roboto', 'Google Sans', sans-serif; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: rgba(20, 19, 24, 0.95); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); overflow: hidden; animation: ypp-scale-in 0.3s cubic-bezier(0.2, 0, 0, 1);">
                 <div class="ypp-modal-header" style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
                     <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="background: rgba(208, 188, 255, 0.15); border-radius: 50%; padding: 8px;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D0BCFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 50%; padding: 8px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                         </div>
-                        <span class="ypp-modal-title" style="font-size: 22px; font-weight: 500; color: #E6E1E5; letter-spacing: 0;">Channel Organizer</span>
+                        <span class="ypp-modal-title" style="font-size: 22px; font-weight: 500; color: #fff; letter-spacing: 0;">Channel Organizer</span>
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <button id="ypp-health-create-folder-btn" class="ypp-btn-primary" style="background: transparent; color: #D0BCFF; border: 1px solid rgba(208, 188, 255, 0.3); padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(208, 188, 255, 0.08)'" onmouseout="this.style.background='transparent'">Create Folder</button>
-                        <button id="ypp-health-delete-folder-btn" class="ypp-btn-primary" style="background: transparent; color: #F2B8B5; border: 1px solid rgba(242, 184, 181, 0.3); padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(242, 184, 181, 0.08)'" onmouseout="this.style.background='transparent'">Delete Folder</button>
-                        <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: #D0BCFF; color: #381E72; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#E8DEF8'" onmouseout="this.style.background='#D0BCFF'">Start Scan</button>
-                        <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: #F2B8B5; color: #601410; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='#F9DEDC'" onmouseout="this.style.background='#F2B8B5'">Unsubscribe Selected</button>
-                        <button id="ypp-health-add-folder-btn" class="ypp-btn-primary" style="background: rgba(208, 188, 255, 0.12); color: #D0BCFF; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(208, 188, 255, 0.2)'" onmouseout="this.style.background='rgba(208, 188, 255, 0.12)'">Add to Folder</button>
+                        <button id="ypp-health-create-folder-btn" class="ypp-btn-primary" style="background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='transparent'">Create Folder</button>
+                        <button id="ypp-health-delete-folder-btn" class="ypp-btn-primary" style="background: transparent; color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='transparent'">Delete Folder</button>
+                        <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Start Scan</button>
+                        <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255,78,69,0.3); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255,78,69,0.4)'" onmouseout="this.style.background='rgba(255,78,69,0.3)'">Unsubscribe Selected</button>
+                        <button id="ypp-health-add-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">Add to Folder</button>
                         <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
                         <button class="ypp-modal-close" style="background: transparent; border: none; color: #CAC4D0; font-size: 28px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; line-height: 1;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">&times;</button>
                     </div>
                 </div>
-                <div class="ypp-organizer-body" style="flex-direction: column; padding: 32px; overflow: hidden; display: flex; flex: 1; background: transparent;">
-                    <div style="display: flex; gap: 24px; margin-bottom: 24px;">
-                        <div class="ypp-health-stat" data-filter="active" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
-                            <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Active (< 30 days)</div>
-                            <div style="color: #81C995; font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-active">0</div>
-                        </div>
-                        <div class="ypp-health-stat" data-filter="warning" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
-                            <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Inactive (> 1 month)</div>
-                            <div style="color: #FDD663; font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-warning">0</div>
-                        </div>
-                        <div class="ypp-health-stat" data-filter="dead" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
-                            <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Dead (> 3 months)</div>
-                            <div style="color: #F2B8B5; font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-dead">0</div>
+                <div class="ypp-organizer-body" style="flex-direction: row; padding: 32px; overflow: hidden; display: flex; flex: 1; background: transparent; gap: 32px;">
+                    <!-- LEFT PANE: Folders -->
+                    <div style="width: 280px; display: flex; flex-direction: column; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 24px; flex-shrink: 0;">
+                        <h3 style="color: #E6E1E5; font-size: 16px; font-weight: 500; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center;">
+                            Your Folders
+                            <span style="font-size:12px; color:rgba(255,255,255,0.4); font-weight:normal;">Drag to Add</span>
+                        </h3>
+                        <div id="ypp-organizer-folders-list" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Populated dynamically -->
                         </div>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 16px; align-items: center;">
-                        <div style="display: flex; gap: 8px; margin-right: auto;">
-                            <button id="ypp-health-select-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Select All Visible</button>
-                            <button id="ypp-health-unselect-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Unselect All</button>
+                    <!-- RIGHT PANE: Channels -->
+                    <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                        <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                            <div class="ypp-health-stat" data-filter="active" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
+                                <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Active (< 30 days)</div>
+                                <div style="color: rgba(255,255,255,0.9); font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-active">0</div>
+                            </div>
+                            <div class="ypp-health-stat" data-filter="warning" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
+                                <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Inactive (> 1 month)</div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-warning">0</div>
+                            </div>
+                            <div class="ypp-health-stat" data-filter="dead" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
+                                <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Dead (> 3 months)</div>
+                                <div style="color: rgba(255,255,255,0.4); font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-dead">0</div>
+                            </div>
                         </div>
-                        <div style="position: relative; flex: 1; max-width: 320px; display: flex; align-items: center;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CAC4D0" stroke-width="2" style="position: absolute; left: 16px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            <input type="text" id="ypp-health-search-input" placeholder="Search channels..." style="width: 100%; background: rgba(255,255,255,0.05); color: #E6E1E5; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 42px; border-radius: 100px; outline: none; font-size: 14px; transition: background 0.2s;" />
+                        <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 16px; align-items: center;">
+                            <div style="display: flex; gap: 8px; margin-right: auto;">
+                                <button id="ypp-health-select-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Select All Visible</button>
+                                <button id="ypp-health-unselect-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Unselect All</button>
+                            </div>
+                            <div style="position: relative; flex: 1; max-width: 320px; display: flex; align-items: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CAC4D0" stroke-width="2" style="position: absolute; left: 16px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="ypp-health-search-input" placeholder="Search channels..." style="width: 100%; background: rgba(255,255,255,0.05); color: #E6E1E5; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 42px; border-radius: 100px; outline: none; font-size: 14px; transition: background 0.2s;" />
+                            </div>
+                            <span style="color: #CAC4D0; font-size: 14px; font-weight: 500;">Filters & Sort:</span>
+                            <select id="ypp-health-folder-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                                <option value="all" style="background:#1D1B20">All Folders</option>
+                                <option value="__no_folder__" style="background:#1D1B20">Uncategorized (No Folder)</option>
+                                ${folderUI ? Object.keys(folderUI.storage.folders).map(f => '<option value="' + f + '" style="background:#1D1B20">' + f + '</option>').join('') : ''}
+                            </select>
+                            <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                                <option value="all" style="background:#1D1B20">All Statuses</option>
+                                <option value="active" style="background:#1D1B20">Active (< 30 days)</option>
+                                <option value="warning" style="background:#1D1B20">Inactive (> 1 month)</option>
+                                <option value="dead" style="background:#1D1B20">Dead (> 3 months)</option>
+                            </select>
+                            <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                                <option value="latest" style="background:#1D1B20">Latest Upload First</option>
+                                <option value="oldest" style="background:#1D1B20">Oldest Upload First</option>
+                                <option value="az" style="background:#1D1B20">Alphabetical (A-Z)</option>
+                            </select>
                         </div>
-                        <span style="color: #CAC4D0; font-size: 14px; font-weight: 500;">Filters & Sort:</span>
-                        <select id="ypp-health-folder-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                            <option value="all" style="background:#1D1B20">All Folders</option>
-                            <option value="__no_folder__" style="background:#1D1B20">Uncategorized (No Folder)</option>
-                            ${folderUI ? Object.keys(folderUI.storage.folders).map(f => '<option value="' + f + '" style="background:#1D1B20">' + f + '</option>').join('') : ''}
-                        </select>
-                        <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                            <option value="all" style="background:#1D1B20">All Statuses</option>
-                            <option value="active" style="background:#1D1B20">Active (< 30 days)</option>
-                            <option value="warning" style="background:#1D1B20">Inactive (> 1 month)</option>
-                            <option value="dead" style="background:#1D1B20">Dead (> 3 months)</option>
-                        </select>
-                        <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                            <option value="latest" style="background:#1D1B20">Latest Upload First</option>
-                            <option value="oldest" style="background:#1D1B20">Oldest Upload First</option>
-                            <option value="az" style="background:#1D1B20">Alphabetical (A-Z)</option>
-                        </select>
-                    </div>
-                    <div id="ypp-health-results" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 8px;">
-                        <div style="text-align: center; color: #666; margin-top: 60px; font-size: 16px; font-weight: 500;">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px; display:block; margin-left:auto; margin-right:auto;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            Click "Start Scan" to fetch channel data.
+                        <div id="ypp-health-results" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 8px;">
+                            <div style="text-align: center; color: #666; margin-top: 60px; font-size: 16px; font-weight: 500;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px; display:block; margin-left:auto; margin-right:auto;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                Click "Start Scan" to fetch channel data.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -958,8 +1025,8 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         scanBtn.addEventListener('mouseout',   () => { scanBtn.style.filter       = 'brightness(1)'; });
         unsubBtn.addEventListener('mouseover', () => { unsubBtn.style.background  = 'rgba(255, 78, 69, 0.25)'; });
         unsubBtn.addEventListener('mouseout',  () => { unsubBtn.style.background  = 'rgba(255, 78, 69, 0.15)'; });
-        addFolderBtn.addEventListener('mouseover', () => { addFolderBtn.style.background = 'rgba(108, 99, 255, 0.25)'; });
-        addFolderBtn.addEventListener('mouseout',  () => { addFolderBtn.style.background = 'rgba(108, 99, 255, 0.15)'; });
+        addFolderBtn.addEventListener('mouseover', () => { addFolderBtn.style.background = 'rgba(255, 255, 255, 0.2)'; });
+        addFolderBtn.addEventListener('mouseout',  () => { addFolderBtn.style.background = 'rgba(255, 255, 255, 0.1)'; });
         createBtn.addEventListener('mouseover', () => { createBtn.style.background = 'rgba(255,255,255,0.1)'; });
         createBtn.addEventListener('mouseout',  () => { createBtn.style.background = 'rgba(255,255,255,0.05)'; });
         deleteBtn.addEventListener('mouseover', () => { deleteBtn.style.background = 'rgba(255, 78, 69, 0.15)'; deleteBtn.style.color = '#ff4e45'; deleteBtn.style.borderColor = 'rgba(255, 78, 69, 0.3)'; });
@@ -1131,9 +1198,72 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             searchInput.addEventListener('input', updateView);
         }
         sortSel.addEventListener('change', updateView);
+
+        // --- Render Organizer Folders ---
+        const renderFoldersList = () => {
+            const listEl = overlay.querySelector('#ypp-organizer-folders-list');
+            if (!listEl || !folderUI) return;
+            listEl.innerHTML = '';
+            
+            const folders = Object.keys(folderUI.storage.folders);
+            if (folders.length === 0) {
+                listEl.innerHTML = '<div style="color:rgba(255,255,255,0.4); font-size:12px; text-align:center; margin-top:20px;">No folders yet.</div>';
+                return;
+            }
+
+            folders.forEach(fName => {
+                const fDiv = document.createElement('div');
+                fDiv.dataset.folder = fName;
+                fDiv.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; cursor:pointer; transition:all 0.2s ease;';
+                fDiv.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        <span style="color:#E6E1E5; font-size:14px; font-weight:500;">${fName}</span>
+                    </div>
+                    <span class="ypp-folder-count-badge" style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; color:#fff;">${folderUI.storage.folders[fName].length}</span>
+                `;
+                
+                // Drag & Drop events
+                fDiv.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fDiv.style.background = 'rgba(99,102,241,0.2)';
+                    fDiv.style.borderColor = 'rgba(99,102,241,0.5)';
+                });
+                fDiv.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    fDiv.style.background = 'rgba(255,255,255,0.03)';
+                    fDiv.style.borderColor = 'rgba(255,255,255,0.05)';
+                });
+                fDiv.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fDiv.style.background = 'rgba(255,255,255,0.03)';
+                    fDiv.style.borderColor = 'rgba(255,255,255,0.05)';
+                    
+                    const channelName = e.dataTransfer.getData('text/plain');
+                    if (channelName) {
+                        if (!folderUI.storage.folders[fName].includes(channelName)) {
+                            folderUI.storage.folders[fName].push(channelName);
+                            folderUI.storage.save();
+                            renderFoldersList();
+                            
+                            // Visual feedback
+                            const badge = fDiv.querySelector('.ypp-folder-count-badge');
+                            badge.style.background = '#22c55e';
+                            setTimeout(() => badge.style.background = 'rgba(255,255,255,0.1)', 1000);
+                            
+                            // Trigger re-render of channels to show new badge
+                            this.runScan(overlay, folderUI, true);
+                        }
+                    }
+                });
+                
+                listEl.appendChild(fDiv);
+            });
+        };
+        renderFoldersList();
     }
 
-    static async runScan(overlay, folderUI) {
+    static async runScan(overlay, folderUI, skipFetch = false) {
         const btn = overlay.querySelector('#ypp-health-scan-btn');
         const resultsEl = overlay.querySelector('#ypp-health-results');
         
@@ -1150,12 +1280,19 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         const statusEl   = overlay.querySelector('#ypp-scan-status div');
 
         try {
-            // Get API config for potential continuation fetches
-            const ytConfig = await this._getYoutubeConfig();
+            let channels = [];
+            const skipFullScan = skipFetch && ChannelHealthUI._lastScanChannels;
             
-            // ── Step 1 & 2: Fetch /feed/channels and follow continuations ──
-            const channels = [];
-            const seenIds  = new Set();
+            if (skipFullScan) {
+                channels = ChannelHealthUI._lastScanChannels;
+                if (statusEl) statusEl.remove();
+                btn.textContent = 'Updating UI...';
+            } else {
+                // Get API config for potential continuation fetches
+                const ytConfig = await this._getYoutubeConfig();
+                
+                // ── Step 1 & 2: Fetch /feed/channels and follow continuations ──
+                const seenIds  = new Set();
 
             const extractChannelsFromData = (data) => {
                 let token = null;
@@ -1230,9 +1367,10 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     break;
                 }
             }
+            } // end of else (!skipFullScan)
 
             if (channels.length === 0) {
-                resultsEl.innerHTML = '<div style="text-align:center;color:#ff4e45;margin-top:40px;">No subscriptions found.</div>';
+                resultsEl.innerHTML = '<div style="text-align:center;color:rgba(255, 78, 69, 0.8);margin-top:40px;">No subscriptions found.</div>';
                 btn.textContent = 'Scan Complete';
                 btn.disabled = false;
                 btn.style.opacity = '1';
@@ -1266,7 +1404,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     }
                 }
 
-                const colorMap = { active: '#81C995', warning: '#FDD663', dead: '#F2B8B5' };
+                const colorMap = { active: 'rgba(255,255,255,0.8)', warning: 'rgba(255,255,255,0.5)', dead: 'rgba(255,255,255,0.2)' };
                 const color = colorMap[c.status] || '#888';
 
                 const row = document.createElement('div');
@@ -1275,10 +1413,19 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 row.dataset.name       = c.name;
                 row.dataset.uploadTime = c.lastUpload != null ? c.lastUpload : Infinity;
                 row.dataset.folders    = channelFolders.join(',');
-                row.style.cssText = 'display:flex;align-items:center;padding:14px 18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;border-left:3px solid ' + color + ';transition:background 0.15s,transform 0.15s;animation:ypp-fade-in 0.2s ease;';
+                row.setAttribute('draggable', 'true');
+                row.style.cssText = 'display:flex;align-items:center;padding:14px 18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;border-left:3px solid ' + color + ';transition:background 0.15s,transform 0.15s;animation:ypp-fade-in 0.2s ease;cursor:grab;';
 
                 row.addEventListener('mouseover', () => { row.style.background = 'rgba(255,255,255,0.045)'; row.style.transform = 'translateY(-1px)'; });
                 row.addEventListener('mouseout',  () => { row.style.background = 'rgba(255,255,255,0.02)';  row.style.transform = 'translateY(0)'; });
+                row.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', c.name);
+                    e.dataTransfer.effectAllowed = 'copyMove';
+                    row.style.opacity = '0.5';
+                });
+                row.addEventListener('dragend', () => {
+                    row.style.opacity = '1';
+                });
 
                 // Build inner DOM safely without template literals (avoids Vite JSX parse errors)
                 const img = document.createElement('img');
@@ -1309,7 +1456,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     badgesDiv.style.marginTop = '4px';
                     channelFolders.forEach(f => {
                         const badge = document.createElement('span');
-                        badge.style.cssText = 'background:rgba(208,188,255,0.12);padding:2px 7px;border-radius:20px;font-size:10px;margin-right:4px;color:#D0BCFF;display:inline-block;margin-bottom:2px;';
+                        badge.style.cssText = 'background:rgba(255,255,255,0.12);padding:2px 7px;border-radius:20px;font-size:10px;margin-right:4px;color:#fff;display:inline-block;margin-bottom:2px;';
                         badge.textContent = f;
                         badgesDiv.appendChild(badge);
                     });
@@ -1323,7 +1470,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 const visitLink = document.createElement('a');
                 visitLink.href = '/channel/' + c.id;
                 visitLink.target = '_blank';
-                visitLink.style.cssText = 'color:#D0BCFF;text-decoration:none;font-size:12px;font-weight:500;opacity:0.8;transition:opacity 0.2s;';
+                visitLink.style.cssText = 'color:#fff;text-decoration:none;font-size:12px;font-weight:500;opacity:0.8;transition:opacity 0.2s;';
                 visitLink.textContent = 'Visit';
                 visitLink.addEventListener('mouseover', () => { visitLink.style.opacity = '1'; });
                 visitLink.addEventListener('mouseout',  () => { visitLink.style.opacity = '0.8'; });
@@ -1336,7 +1483,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 cb.className = 'ypp-unsub-checkbox';
                 cb.value = c.id;
                 cb.dataset.params = c.unsubParams || '';
-                cb.style.cssText = 'width:15px;height:15px;cursor:pointer;accent-color:#D0BCFF;';
+                cb.style.cssText = 'width:15px;height:15px;cursor:pointer;accent-color:#fff;';
                 if (c.status === 'dead') cb.checked = true;
                 label.appendChild(cb);
                 label.appendChild(document.createTextNode('Select'));
@@ -1344,7 +1491,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
 
                 const folderBtn = document.createElement('button');
                 folderBtn.className = 'ypp-indiv-folder-btn';
-                folderBtn.style.cssText = 'background:rgba(208,188,255,0.08);color:#D0BCFF;border:1px solid rgba(208,188,255,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+                folderBtn.style.cssText = 'background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
                 folderBtn.textContent = 'Folders';
                 folderBtn.addEventListener('mouseover', () => { folderBtn.style.background = 'rgba(208,188,255,0.18)'; });
                 folderBtn.addEventListener('mouseout',  () => { folderBtn.style.background = 'rgba(208,188,255,0.08)'; });
@@ -1353,7 +1500,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
 
                 const indivBtn = document.createElement('button');
                 indivBtn.className = 'ypp-indiv-unsub-btn';
-                indivBtn.style.cssText = 'background:rgba(242,184,181,0.08);color:#F2B8B5;border:1px solid rgba(242,184,181,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+                indivBtn.style.cssText = 'background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
                 indivBtn.textContent = 'Unsub';
                 indivBtn.addEventListener('mouseover', () => { indivBtn.style.background = 'rgba(242,184,181,0.18)'; });
                 indivBtn.addEventListener('mouseout',  () => { indivBtn.style.background = 'rgba(242,184,181,0.08)'; });
@@ -1365,40 +1512,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             };
 
             // ── Step 4: Fire RSS fetches with concurrency limit ────────────
-            const RSS_TIMEOUT_MS = 5000;
-            const CONCURRENCY_LIMIT = 15;
-            let currentIndex = 0;
-
-            const fetchChannel = async (c) => {
-                try {
-                    const controller = new AbortController();
-                    const tid = setTimeout(() => controller.abort(), RSS_TIMEOUT_MS);
-
-                    const rssRes  = await fetch(`/feeds/videos.xml?channel_id=${c.id}`, { signal: controller.signal });
-                    clearTimeout(tid);
-                    const rssText = await rssRes.text();
-
-                    const xml   = new DOMParser().parseFromString(rssText, 'text/xml');
-                    const first = xml.querySelector('entry');
-                    const pub   = first?.querySelector('published')?.textContent;
-
-                    if (pub) {
-                        const diff = now - new Date(pub).getTime();
-                        c.lastUpload = diff;
-                        c.lastUploadText = new Date(pub).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
-                        if      (diff < MONTH_MS)     { c.status = 'active';  activeCount++;  }
-                        else if (diff < 3 * MONTH_MS) { c.status = 'warning'; warningCount++; }
-                        else                           { c.status = 'dead';    deadCount++;    }
-                    } else {
-                        c.status = 'dead'; c.lastUploadText = first ? 'No date' : 'No videos'; c.lastUpload = Infinity; deadCount++;
-                    }
-                } catch (e) {
-                    c.status = e.name === 'AbortError' ? 'warning' : 'dead';
-                    c.lastUploadText = e.name === 'AbortError' ? 'Timeout' : 'Error';
-                    c.lastUpload = Infinity;
-                    if (c.status === 'warning') warningCount++; else deadCount++;
-                }
-
+            const processChannelUI = (c) => {
                 doneCount++;
                 const row = buildRow(c);
                 
@@ -1426,15 +1540,89 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 updateCounters();
             };
 
-            const worker = async () => {
-                while (currentIndex < channels.length) {
-                    const c = channels[currentIndex++];
-                    await fetchChannel(c);
-                }
-            };
+            if (skipFullScan) {
+                channels.forEach(c => {
+                    if (c.status === 'active') activeCount++;
+                    else if (c.status === 'warning') warningCount++;
+                    else deadCount++;
+                    processChannelUI(c);
+                });
+            } else {
+                const RSS_TIMEOUT_MS = 5000;
+                const CONCURRENCY_LIMIT = 25;
+                let currentIndex = 0;
+                
+                // Load Cache
+                const cacheData = await chrome.storage.local.get(['ypp_channel_health_cache']);
+                const healthCache = cacheData.ypp_channel_health_cache || {};
+                const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+                let cacheUpdated = false;
 
-            const workers = Array.from({ length: Math.min(CONCURRENCY_LIMIT, channels.length) }, () => worker());
-            await Promise.all(workers);
+                const fetchChannel = async (c) => {
+                    // Check Cache
+                    const cached = healthCache[c.id];
+                    if (cached && (now - cached.timestamp < CACHE_TTL)) {
+                        c.lastUpload = now - cached.pubTime;
+                        c.lastUploadText = cached.lastUploadText;
+                        if      (c.lastUpload < MONTH_MS)     { c.status = 'active';  activeCount++;  }
+                        else if (c.lastUpload < 3 * MONTH_MS) { c.status = 'warning'; warningCount++; }
+                        else                                  { c.status = 'dead';    deadCount++;    }
+                        processChannelUI(c);
+                        return;
+                    }
+
+                    try {
+                        const controller = new AbortController();
+                        const tid = setTimeout(() => controller.abort(), RSS_TIMEOUT_MS);
+
+                        const rssRes  = await fetch(`/feeds/videos.xml?channel_id=${c.id}`, { signal: controller.signal });
+                        clearTimeout(tid);
+                        const rssText = await rssRes.text();
+
+                        // Regex parsing (drastically faster than DOMParser for hundreds of chunks)
+                        const pubMatch = rssText.match(/<published>([^<]+)<\/published>/);
+                        if (pubMatch && pubMatch[1]) {
+                            const pubTime = new Date(pubMatch[1]).getTime();
+                            const diff = now - pubTime;
+                            c.lastUpload = diff;
+                            c.lastUploadText = new Date(pubTime).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                            
+                            // Update Cache
+                            healthCache[c.id] = { pubTime: pubTime, lastUploadText: c.lastUploadText, timestamp: now };
+                            cacheUpdated = true;
+
+                            if      (diff < MONTH_MS)     { c.status = 'active';  activeCount++;  }
+                            else if (diff < 3 * MONTH_MS) { c.status = 'warning'; warningCount++; }
+                            else                           { c.status = 'dead';    deadCount++;    }
+                        } else {
+                            const entryMatch = rssText.match(/<entry>/);
+                            c.status = 'dead'; c.lastUploadText = entryMatch ? 'No date' : 'No videos'; c.lastUpload = Infinity; deadCount++;
+                        }
+                    } catch (e) {
+                        c.status = e.name === 'AbortError' ? 'warning' : 'dead';
+                        c.lastUploadText = e.name === 'AbortError' ? 'Timeout' : 'Error';
+                        c.lastUpload = Infinity;
+                        if (c.status === 'warning') warningCount++; else deadCount++;
+                    }
+                    processChannelUI(c);
+                };
+
+                const worker = async () => {
+                    while (currentIndex < channels.length) {
+                        const c = channels[currentIndex++];
+                        await fetchChannel(c);
+                    }
+                };
+
+                const workers = Array.from({ length: Math.min(CONCURRENCY_LIMIT, channels.length) }, () => worker());
+                await Promise.all(workers);
+                
+                if (cacheUpdated) {
+                    chrome.storage.local.set({ ypp_channel_health_cache: healthCache });
+                }
+                
+                ChannelHealthUI._lastScanChannels = channels;
+            } // end of else (!skipFullScan)
 
             // ── Step 5: Finalise ───────────────────────────────────────────
             btn.textContent = `Scan Complete (${channels.length})`;
@@ -1462,7 +1650,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
 
         } catch (e) {
             console.error('[YPP] Scan error:', e);
-            resultsEl.innerHTML = '<div style="text-align:center;color:#F2B8B5;margin-top:40px;font-size:14px;">Scan failed: ' + (e.message || 'Unknown error') + '</div>';
+            resultsEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.8);margin-top:40px;font-size:14px;">Scan failed: ' + (e.message || 'Unknown error') + '</div>';
             btn.textContent = 'Retry Scan';
             btn.disabled = false;
             btn.style.opacity = '1';
@@ -1734,8 +1922,8 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 rowEl.style.transition = 'opacity 0.4s ease';
                 rowEl.style.opacity = '0.35';
                 btnEl.textContent = '✓ Unsubscribed';
-                btnEl.style.color = '#81C995';
-                btnEl.style.borderColor = '#81C995';
+                btnEl.style.color = 'rgba(255, 255, 255, 0.8)';
+                btnEl.style.borderColor = 'rgba(255, 255, 255, 0.8)';
                 btnEl.disabled = true;
                 // Disable checkbox too
                 const cb = rowEl.querySelector('.ypp-unsub-checkbox');
@@ -1754,7 +1942,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 }, 1200);
             } else {
                 // Reset button and show error
-                resetBtn(originalText, '#F2B8B5');
+                resetBtn(originalText, 'rgba(255, 255, 255, 0.8)');
                 setTimeout(() => resetBtn(originalText, null), 3000);
                 await window.YPP.features.CustomDialog.alert(
                     'Unsubscribe Failed',
@@ -1900,9 +2088,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 
                 setTimeout(() => {
                     btn.textContent = oldText;
-                    btn.style.background = 'rgba(108, 99, 255, 0.15)';
-                    btn.style.color = '#a8a4ff';
-                    btn.style.borderColor = 'rgba(108, 99, 255, 0.3)';
+                    btn.style.background = 'rgba(255, 255, 255, 0.1)';
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                 }, 3000);
             });
             popup.appendChild(item);

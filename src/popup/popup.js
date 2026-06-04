@@ -1217,6 +1217,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // --- Cloud Backup UI ---
+        const btnBackupUp = document.getElementById('btnBackupUp');
+        const btnBackupDown = document.getElementById('btnBackupDown');
+        const lastSyncTimeLabel = document.getElementById('lastSyncTimeLabel');
+
+        const updateLastSyncLabel = (timeStr) => {
+            if (!lastSyncTimeLabel) return;
+            if (!timeStr) {
+                lastSyncTimeLabel.textContent = "Last sync: Never";
+                return;
+            }
+            const date = new Date(timeStr);
+            const formatted = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            lastSyncTimeLabel.textContent = `Last sync: ${formatted}`;
+        };
+
+        chrome.storage.local.get('ypp_last_sync_time', (data) => {
+            if (data.ypp_last_sync_time) updateLastSyncLabel(data.ypp_last_sync_time);
+        });
+
+        if (btnBackupUp) {
+            btnBackupUp.addEventListener('click', () => {
+                const originalText = btnBackupUp.innerHTML;
+                btnBackupUp.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"></path></svg> Backing up...';
+                btnBackupUp.style.pointerEvents = 'none';
+                
+                chrome.runtime.sendMessage({ action: 'SYNC_BACKUP_UP' }, (response) => {
+                    btnBackupUp.style.pointerEvents = 'auto';
+                    if (response && response.success) {
+                        btnBackupUp.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Success!';
+                        updateLastSyncLabel(response.timestamp);
+                        setTimeout(() => btnBackupUp.innerHTML = originalText, 2000);
+                    } else {
+                        btnBackupUp.innerHTML = 'Error!';
+                        setTimeout(() => btnBackupUp.innerHTML = originalText, 2000);
+                        alert("Backup failed. Please ensure you are signed into Chrome.");
+                    }
+                });
+            });
+        }
+
+        if (btnBackupDown) {
+            btnBackupDown.addEventListener('click', () => {
+                const originalText = btnBackupDown.innerHTML;
+                btnBackupDown.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"></path></svg> Restoring...';
+                btnBackupDown.style.pointerEvents = 'none';
+
+                chrome.runtime.sendMessage({ action: 'SYNC_BACKUP_DOWN' }, (response) => {
+                    btnBackupDown.style.pointerEvents = 'auto';
+                    if (response && response.success) {
+                        btnBackupDown.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Restored!';
+                        if (response.timestamp) updateLastSyncLabel(response.timestamp);
+                        setTimeout(() => btnBackupDown.innerHTML = originalText, 2000);
+                        // Optional: trigger settings reload so popup updates
+                        setTimeout(() => loadSettings(), 500);
+                    } else {
+                        btnBackupDown.innerHTML = 'Error!';
+                        setTimeout(() => btnBackupDown.innerHTML = originalText, 2000);
+                        alert("Restore failed. No backup found or authentication error.");
+                    }
+                });
+            });
+        }
     }
 
     // --- CUSTOMIZATION POPUP PREVIEW ---
@@ -1355,6 +1419,59 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         applyPresetFromUI({ minimalMode: true, enableFocusMode: false, cinemaMode: false, zenMode: false });
     });
+
+    // --- BACKUP TOOLS ---
+    function initBackupTools() {
+        const btnUp = document.getElementById('btnBackupUp');
+        const btnDown = document.getElementById('btnBackupDown');
+        const label = document.getElementById('lastSyncTimeLabel');
+        
+        if (!btnUp || !btnDown || !label) return;
+
+        const updateLabel = () => {
+            chrome.storage.local.get(['ypp_last_sync'], (result) => {
+                if (result.ypp_last_sync) {
+                    const d = new Date(result.ypp_last_sync);
+                    label.textContent = 'Last sync: ' + d.toLocaleString();
+                } else {
+                    label.textContent = 'Last sync: Never';
+                }
+            });
+        };
+        updateLabel();
+
+        btnUp.addEventListener('click', () => {
+            btnUp.disabled = true;
+            btnUp.textContent = 'Backing up...';
+            chrome.runtime.sendMessage({ action: 'SYNC_BACKUP_UP' }, (response) => {
+                btnUp.disabled = false;
+                btnUp.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Backup';
+                if (response && response.success) {
+                    chrome.storage.local.set({ ypp_last_sync: Date.now() }, updateLabel);
+                    alert('Backup successful!');
+                } else {
+                    alert('Backup failed: ' + (response?.error || 'Unknown error. Check Google Drive setup.'));
+                }
+            });
+        });
+
+        btnDown.addEventListener('click', () => {
+            if (!confirm('This will OVERWRITE your current local data with the Google Drive backup. Proceed?')) return;
+            
+            btnDown.disabled = true;
+            btnDown.textContent = 'Restoring...';
+            chrome.runtime.sendMessage({ action: 'SYNC_BACKUP_DOWN' }, (response) => {
+                btnDown.disabled = false;
+                btnDown.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Restore';
+                if (response && response.success) {
+                    chrome.storage.local.set({ ypp_last_sync: Date.now() }, updateLabel);
+                    alert('Restore successful! Please refresh YouTube tabs.');
+                } else {
+                    alert('Restore failed: ' + (response?.error || 'Unknown error. Check Google Drive setup.'));
+                }
+            });
+        });
+    }
 
     // --- BOOKMARKS MANAGER ---
     function initBookmarksManager() {

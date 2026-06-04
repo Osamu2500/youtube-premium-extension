@@ -69,7 +69,7 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 .ypp-filter-chip {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa;
+  color: var(--yt-spec-text-secondary, #aaa);
   padding: 8px 16px;
   border-radius: 20px;
   cursor: pointer;
@@ -80,25 +80,25 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 
 .ypp-filter-chip:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  color: var(--yt-spec-text-primary, #fff);
   transform: translateY(-1px);
 }
 
 .ypp-filter-chip.active {
-  background: #3ea6ff;
-  border-color: #3ea6ff;
-  color: #000;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--yt-spec-text-primary, #fff);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(62, 166, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Buttons */
 .ypp-btn-primary {
   margin-left: 16px;
   padding: 8px 16px;
-  background: rgba(62, 166, 255, 0.1);
-  border: 1px solid rgba(62, 166, 255, 0.3);
-  color: #3ea6ff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--yt-spec-text-primary, #fff);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
@@ -106,8 +106,8 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 }
 
 .ypp-btn-primary:hover {
-  background: rgba(62, 166, 255, 0.2);
-  box-shadow: 0 0 15px rgba(62, 166, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* --- Organizer Modal --- */
@@ -164,14 +164,14 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 .ypp-modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: var(--yt-spec-text-primary, #fff);
   letter-spacing: 0.5px;
 }
 
 .ypp-modal-close {
   background: none;
   border: none;
-  color: #aaa;
+  color: var(--yt-spec-text-secondary, #aaa);
   font-size: 24px;
   cursor: pointer;
 }
@@ -230,9 +230,9 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 
 .ypp-search-input:focus {
   outline: none;
-  border-color: var(--ypp-accent-blue);
-  background: rgba(62, 166, 255, 0.05);
-  box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .ypp-scroll-list {
@@ -273,8 +273,8 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 
 .ypp-channel-item.dragging {
   opacity: 0.6;
-  background: rgba(62, 166, 255, 0.08);
-  border-color: var(--ypp-accent-blue);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
   box-shadow: var(--ypp-shadow-float);
 }
 
@@ -302,10 +302,10 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 }
 
 .ypp-category-item.drag-over {
-  background: rgba(62, 166, 255, 0.05);
-  border-color: var(--ypp-accent-blue);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: scale(1.02);
-  box-shadow: 0 4px 16px rgba(62, 166, 255, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .ypp-cat-header {
@@ -363,7 +363,7 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 
 .ypp-del-cat-btn {
   background: transparent;
-  color: #ff4e45;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .ypp-icon-btn:hover {
@@ -398,9 +398,9 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
     border-style: dashed;
 }
 .ypp-toggle-chip.active {
-    background: #ff4e45; /* Red for 'Blocking/Hiding' action? Or generic active color */
-    border-color: #ff4e45;
-    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--yt-spec-text-primary, #fff);
     border-style: solid;
 }
 
@@ -459,7 +459,24 @@ ytd-browse[page-subtype="channels"] #contents.ypp-grid-layout ytd-channel-render
 }
 
 .ypp-filter-pill.active {
-    background: rgba(108,99,255,0.2);
-    border-color: rgba(108,99,255,0.5);
-    color: #a8a4ff;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--yt-spec-text-primary, #fff);
+}
+
+/* ============================================
+   DRAG AND DROP FOLDERS
+   ============================================ */
+
+.ypp-dragging {
+    opacity: 0.5;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ypp-drag-over-top {
+    border-top: 2px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.ypp-drag-over-bottom {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4) !important;
 }

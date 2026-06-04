@@ -11,6 +11,7 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         super('contextMenu');
         this.isActive = false;
         this.observer = window.YPP.sharedObserver || new window.YPP.Utils.DOMObserver();
+        this._messageListener = this._handleMessage.bind(this);
     }
 
     enable(settings) {
@@ -26,6 +27,7 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
     disable() {
         if (!this.isActive) return;
         this.isActive = false;
+        chrome.runtime.onMessage.removeListener(this._messageListener);
         this.observer.unregister('context-menu-cards');
         this.observer.unregister('context-menu-header');
         this.observer.stop();
@@ -37,6 +39,7 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
 
     init() {
         this.observer.start();
+        chrome.runtime.onMessage.addListener(this._messageListener);
 
         // Register observer for video cards
         this.observer.register(
@@ -58,6 +61,17 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
                 }
             }
         );
+    }
+
+    _handleMessage(request, sender, sendResponse) {
+        if (request.action === 'SHOW_GROUP_SELECTOR' && request.channelIdentifier && this.isActive) {
+            // Since we don't know the exact mouse coordinates from background script,
+            // we center it on the screen.
+            const x = window.innerWidth / 2 - 75;
+            const y = window.innerHeight / 2 - 50;
+            this.showGroupSelector(request.channelIdentifier, x, y);
+            sendResponse({ success: true });
+        }
     }
 
     injectButton(card) {
@@ -151,24 +165,27 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
             position: fixed;
             top: ${y}px;
             left: ${x}px;
-            background: #282828;
-            border: 1px solid #444;
-            border-radius: 8px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 12px;
             padding: 8px;
             z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
             min-width: 150px;
         `;
 
         popup.innerHTML = `<div style="padding:4px 8px; font-weight:bold; font-size:12px; opacity:0.7">Add ${channelName} to...</div>`;
 
         // Load groups
-        chrome.storage.local.get('yt_subscription_groups').then(res => {
-            const groups = res['yt_subscription_groups'] || {};
+        chrome.storage.local.get('ypp_subscription_folders').then(res => {
+            const groups = res['ypp_subscription_folders'] || {};
             const list = Object.keys(groups);
 
             if (list.length === 0) {
-                 popup.innerHTML += `<div style="padding:8px; font-size:12px">No groups created. Go to Subscriptions to manage groups.</div>`;
+                 popup.innerHTML += `<div style="padding:8px; font-size:12px">No folders created. Go to Subscriptions to manage folders.</div>`;
             } else {
                 list.forEach(group => {
                     const item = document.createElement('div');
@@ -188,14 +205,14 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
                         // Let's do that if shared bus exists.
                         
                         // Fallback: Read-Modify-Write
-                        const latest = await chrome.storage.local.get('yt_subscription_groups');
-                        const g = latest['yt_subscription_groups'] || {};
+                        const latest = await chrome.storage.local.get('ypp_subscription_folders');
+                        const g = latest['ypp_subscription_folders'] || {};
                         if (!g[group]) g[group] = [];
                         
-                        const alreadyExists = g[group].some(c => c.id === channelName); // Using name as ID
+                        const alreadyExists = g[group].includes(channelName);
                         if (!alreadyExists) {
-                            g[group].push({ id: channelName, name: channelName });
-                            await chrome.storage.local.set({ 'yt_subscription_groups': g });
+                            g[group].push(channelName);
+                            await chrome.storage.local.set({ 'ypp_subscription_folders': g });
                             window.YPP.Utils.createToast(`Added to ${group}`, 'success');
                             // Trigger refresh if needed
                         } else {

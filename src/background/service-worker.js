@@ -2,6 +2,8 @@
  * Service Worker for YouTube Premium Plus
  * Handles background tasks including timer logic and initial setup
  */
+import { initContextMenu } from './context-menu.js';
+import { syncUp, syncDown } from './drive-sync.js';
 
 // Legacy onInstalled listener removed to prevent unwanted tab opening and sync storage abuse.
 
@@ -249,6 +251,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return true; // Indicate async response
         }
 
+        case 'SYNC_BACKUP_UP': {
+            syncUp().then(sendResponse);
+            return true;
+        }
+
+        case 'SYNC_BACKUP_DOWN': {
+            syncDown().then(sendResponse);
+            return true;
+        }
+
         default:
             // Unhandled actions can be ignored or logged
             return false;
@@ -276,6 +288,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         // Persist the consolidated settings
         await chrome.storage.local.set({ settings: newSettings });
         console.log('[YPP] Settings initialized and merged successfully');
+        
+        // Initialize Context Menu
+        initContextMenu();
     } catch (error) {
         // IMPORTANT FIX: Never overwrite with defaults blindly if 'get' fails. 
         // A transient I/O error here would permanently delete the user's custom layout config.

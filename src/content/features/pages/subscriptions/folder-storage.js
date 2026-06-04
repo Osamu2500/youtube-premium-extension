@@ -85,6 +85,30 @@ window.YPP.features.FolderStorage = class FolderStorage {
         return true;
     }
 
+    /**
+     * Reorder a folder to a new index in the list.
+     * @param {string} folderName 
+     * @param {number} newIndex 
+     */
+    reorderFolder(folderName, newIndex) {
+        if (!this.folders[folderName]) return false;
+        const keys = Object.keys(this.folders);
+        const oldIndex = keys.indexOf(folderName);
+        if (oldIndex === -1 || oldIndex === newIndex) return false;
+
+        keys.splice(oldIndex, 1);
+        keys.splice(newIndex, 0, folderName);
+
+        const newFolders = {};
+        for (const key of keys) {
+            newFolders[key] = this.folders[key];
+        }
+        
+        this.folders = newFolders;
+        this.save();
+        return true;
+    }
+
     // =========================================================================
     // CHANNEL CRUD
     // =========================================================================

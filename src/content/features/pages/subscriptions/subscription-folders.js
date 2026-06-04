@@ -158,10 +158,19 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
      */
     async init(signal) {
         if (signal?.aborted) return;
+        this._injectNetworkInterceptor();
         await this.update(this.settings);
         if (signal?.aborted) {
             this._teardown();
         }
+    }
+
+    _injectNetworkInterceptor() {
+        if (document.getElementById('ypp-network-interceptor')) return;
+        const script = document.createElement('script');
+        script.id = 'ypp-network-interceptor';
+        script.src = chrome.runtime.getURL('src/inject/networkInterceptor.js');
+        (document.head || document.documentElement).appendChild(script);
     }
 
     /**
@@ -376,6 +385,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     updateFilterState() {
         if (!this._isFeedPage) return;
+
+        // Sync state to localStorage for the network interceptor
+        localStorage.setItem('ypp_active_folder', this.activeFolder || '');
+        localStorage.setItem('ypp_folder_data', JSON.stringify(this.storage.folders || {}));
 
         if (this.activeFolder) {
             document.body.classList.add('ypp-sub-folders-active');
@@ -788,7 +801,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 'background:rgba(20,19,24,0.85)',
                 'backdrop-filter:blur(8px)',
                 '-webkit-backdrop-filter:blur(8px)',
-                'color:#D0BCFF',
+                'color:#fff',
                 'font-size:11px', 'padding:4px 8px', 'border-radius:6px',
                 'font-weight:500',
                 'font-family:"Roboto","Google Sans",sans-serif',
