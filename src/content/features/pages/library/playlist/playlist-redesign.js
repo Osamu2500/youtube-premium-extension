@@ -609,8 +609,13 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
 
             btn.disabled = false;
             btn.textContent = removed > 0 ? `✓ Removed ${removed} video${removed !== 1 ? 's' : ''}` : 'None removed';
+            
+            if (removed > 0) {
+                this._updateStatsAfterRemoval();
+            }
+
             setTimeout(() => {
-                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Remove Watched Videos';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg><span>Clean</span>';
             }, 3000);
         });
 
@@ -739,7 +744,10 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                             card.style.transition = 'opacity 0.3s, transform 0.3s';
                             card.style.opacity = '0';
                             card.style.transform = 'scale(0.95)';
-                            setTimeout(() => card.remove(), 320);
+                            setTimeout(() => {
+                                card.remove();
+                                this._updateStatsAfterRemoval();
+                            }, 320);
                         } else {
                             card.style.opacity = '';
                             card.style.pointerEvents = '';
