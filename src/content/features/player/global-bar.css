@@ -81,7 +81,7 @@
 .ypp-bar-pos-top .ypp-gpb-divider {
     width: 1.5px;
     height: 28px;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
 }
 
 .ypp-bar-pos-top .ypp-gpb-vol-wrap {
@@ -156,7 +156,7 @@
 .ypp-gpb-divider {
     width: 28px;
     height: 1.5px;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
     flex-shrink: 0;
 }
 

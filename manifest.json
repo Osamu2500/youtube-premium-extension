@@ -15,16 +15,16 @@
         "<all_urls>"
     ],
     "icons": {
-        "16": "src/assets/icon.png",
-        "48": "src/assets/icon.png",
-        "128": "src/assets/icon.png"
+        "16": "src/assets/icon-v2.png",
+        "48": "src/assets/icon-v2.png",
+        "128": "src/assets/icon-v2.png"
     },
     "action": {
         "default_popup": "src/popup/popup.html",
         "default_icon": {
-            "16": "src/assets/icon.png",
-            "48": "src/assets/icon.png",
-            "128": "src/assets/icon.png"
+            "16": "src/assets/icon-v2.png",
+            "48": "src/assets/icon-v2.png",
+            "128": "src/assets/icon-v2.png"
         }
     },
     "background": {
