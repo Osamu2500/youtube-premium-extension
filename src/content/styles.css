@@ -5941,80 +5941,70 @@ body.ypp-playlist-redesign ytd-masthead {
     margin: 2px 0 0;
 }
 
-/* Action buttons */
-#ypp-pl-root .ypp-pl-actions {
+/* ── Buttons ─────────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-actions-main {
     display: flex;
+    gap: 12px;
+}
+#ypp-pl-root .ypp-pl-btn-play,
+#ypp-pl-root .ypp-pl-btn-shuffle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#ypp-pl-root .ypp-pl-btn-play {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
+}
+#ypp-pl-root .ypp-pl-btn-play:hover { 
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+}
+#ypp-pl-root .ypp-pl-btn-shuffle {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+#ypp-pl-root .ypp-pl-btn-shuffle:hover { 
+    background: rgba(255,255,255,0.14); 
+    transform: translateY(-2px);
+}
+
+/* Tools Grid */
+#ypp-pl-root .ypp-pl-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
 }
-#ypp-pl-root .ypp-pl-btn-primary,
-#ypp-pl-root .ypp-pl-btn-secondary {
-    flex: 1;
+#ypp-pl-root .ypp-pl-btn-tool {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 9px 12px;
-    border-radius: 10px;
-    border: none;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-#ypp-pl-root .ypp-pl-btn-primary {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-#ypp-pl-root .ypp-pl-btn-primary:hover { 
-    background: rgba(255, 255, 255, 0.18);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-}
-#ypp-pl-root .ypp-pl-btn-secondary {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.85);
-    border: 1px solid rgba(255,255,255,0.15);
-}
-#ypp-pl-root .ypp-pl-btn-secondary:hover { 
-    background: rgba(255,255,255,0.14); 
-    transform: translateY(-1px);
-}
-#ypp-pl-root .ypp-pl-btn-primary svg,
-#ypp-pl-root .ypp-pl-btn-secondary svg { width: 14px; height: 14px; }
-
-#ypp-pl-root .ypp-pl-actions-secondary {
-    display: flex;
-    gap: 8px;
-}
-#ypp-pl-root .ypp-pl-btn-icon {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 8px;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.08);
     background: rgba(255,255,255,0.04);
     color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-#ypp-pl-root .ypp-pl-btn-icon:hover {
+#ypp-pl-root .ypp-pl-btn-tool:hover {
     background: rgba(255,255,255,0.1);
     color: #fff;
-    transform: translateY(-1px);
-}
-#ypp-pl-root .ypp-pl-btn-icon svg { width: 16px; height: 16px; }
-
-/* ── Duration card ────────────────────────────────────────────────── */
-#ypp-pl-root .ypp-pl-duration-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     padding: 14px;
     /* Push to bottom of sidebar */
@@ -6050,38 +6040,69 @@ body.ypp-playlist-redesign ytd-masthead {
     opacity: 0.7;
     cursor: wait;
 }
+/* ── Duration card ────────────────────────────────────────────────── */
+#ypp-pl-root .ypp-pl-duration-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+}
+#ypp-pl-root .ypp-pl-duration-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+}
+#ypp-pl-root .ypp-pl-duration-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
 #ypp-pl-root .ypp-pl-duration-label {
-    font-size: 10px;
-    color: rgba(255,255,255,0.35);
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
     text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-bottom: 5px;
+    letter-spacing: 1px;
+    font-weight: 600;
 }
 #ypp-pl-root .ypp-pl-duration-time {
-    font-size: 28px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.95);
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
     letter-spacing: -0.5px;
-    margin-bottom: 10px;
+    line-height: 1;
 }
 #ypp-pl-root .ypp-pl-duration-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 10px;
 }
 #ypp-pl-root .ypp-pl-duration-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
+    gap: 6px;
 }
 #ypp-pl-root .ypp-pl-duration-speed {
     font-size: 11px;
-    color: rgba(255,255,255,0.38);
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    width: 32px;
 }
 #ypp-pl-root .ypp-pl-duration-val {
-    font-size: 11px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    font-variant-numeric: tabular-nums;
 }
 
 /* ── Main content area ────────────────────────────────────────────── */
