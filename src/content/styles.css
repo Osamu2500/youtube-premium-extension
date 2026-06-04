@@ -5782,8 +5782,10 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-expandable-metadata-renderer {
 
 /* Hide native playlist elements dynamically without removing them from DOM */
 .ypp-pl-hidden {
-    display: none !important;
-    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
     pointer-events: none !important;
 }
 
@@ -6086,7 +6088,7 @@ body.ypp-playlist-redesign ytd-masthead {
 #ypp-pl-root .ypp-pl-main {
     flex: 1;
     margin-left: 384px; /* 360px sidebar + 24px gap */
-    padding: 64px 24px 48px 0;
+    padding: 72px 24px 48px 0;
 
     box-sizing: border-box;
     min-height: 100vh;
@@ -6099,7 +6101,7 @@ body.ypp-playlist-redesign ytd-masthead {
 /* ── Toolbar ──────────────────────────────────────────────────────── */
 #ypp-pl-root .ypp-pl-toolbar {
     position: fixed;
-    top: 50px;
+    top: 56px;
     left: 384px;
     right: 24px;
     z-index: 100;
