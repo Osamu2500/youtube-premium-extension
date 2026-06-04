@@ -166,13 +166,21 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
     run() {
         if (!this.settings || !this.settings.enableVolumeBoost) return;
         const video = document.querySelector('.html5-main-video') || document.querySelector('video');
-        if (video) this.initAudioContext(video);
+        if (video && this._needsAudioGraph()) this.initAudioContext(video);
     }
 
     onPageChange() {
         if (!this.settings || !this.settings.enableVolumeBoost) return;
         const video = document.querySelector('.html5-main-video') || document.querySelector('video');
-        if (video) this.initAudioContext(video);
+        if (video && this._needsAudioGraph()) this.initAudioContext(video);
+    }
+
+    _needsAudioGraph() {
+        if (this._volumeGain !== 1.0) return true;
+        if (this._balance !== 0.0) return true;
+        if (this._monoEnabled) return true;
+        if (this._eqGains && this._eqGains.some(g => g !== 0)) return true;
+        return false;
     }
 
     /**
@@ -306,6 +314,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
     setVolume(multiplier) {
         this._volumeGain = multiplier;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
         if (this.gainNode && this.ctx) {
             // Ramp gracefully to avoid audio clipping/clicks
             this.gainNode.gain.setTargetAtTime(multiplier, this.ctx.currentTime, 0.05);
@@ -314,6 +326,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
     setBalance(value) {
         this._balance = value;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
         if (this.pannerNode && this.ctx) {
             this.pannerNode.pan.setTargetAtTime(value, this.ctx.currentTime, 0.05);
         }
@@ -321,6 +337,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
     setMono(enabled) {
         this._monoEnabled = enabled;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
         if (this.ctx && this.source) {
             // Guard: channelCount setter may throw in some browsers on MediaElementAudioSourceNode
             try {
@@ -335,6 +355,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
     _setEQBand(index, db) {
         this._eqGains[index] = db;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
         if (this._eqNodes[index] && this.ctx) {
             this._eqNodes[index].gain.setTargetAtTime(db, this.ctx.currentTime, 0.05);
         }
