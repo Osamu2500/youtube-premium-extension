@@ -64,7 +64,11 @@ window.YPP.core.EventBus = class EventBus {
             try {
                 handler(data);
             } catch (error) {
-                console.error(`[YPP:EventBus] Error in handler for event '${event}':`, error);
+                if (window.YPP?.errorHandler) {
+                    window.YPP.errorHandler.handleError(error, `[YPP:EventBus] Error in handler for event '${event}'`);
+                } else {
+                    console.error(`[YPP:EventBus] Error in handler for event '${event}':`, error);
+                }
             }
         }
     }

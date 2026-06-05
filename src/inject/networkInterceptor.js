@@ -9,7 +9,9 @@
     if (window.__YPP_INTERCEPTOR_INJECTED) return;
     window.__YPP_INTERCEPTOR_INJECTED = true;
 
-    console.log('[YPP] Network Interceptor initialized');
+    if (window.__YPP_FILTER_DEBUG) {
+        console.log('[YPP] Network Interceptor initialized');
+    }
 
     /**
      * Normalize a channel name for comparison.

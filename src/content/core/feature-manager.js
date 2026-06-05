@@ -30,7 +30,7 @@ window.YPP.FeatureManager = class FeatureManager {
      */
     init(settings) {
         // Defensive: Ensure settings exist, fallback to defaults
-        this.settings = settings || window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {};
+        this.settings = { ...this.settings, ...(settings || window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {}) };
 
         // Self-Healing: Reset error counts on re-initialization ONLY if enough time has passed
         // This prevents infinite retry loops if a feature crashes immediately upon load

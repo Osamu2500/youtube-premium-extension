@@ -26,7 +26,7 @@ window.YPP.features.BaseFeature = class BaseFeature {
      * @param {Object} settings Current extension settings
      */
     async update(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
 
         // Fallback for features that extend BaseFeature but implement run() instead of update()/enable()
         if (typeof this.run === 'function' && this.run !== window.YPP.features.BaseFeature.prototype.run) {

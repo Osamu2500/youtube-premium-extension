@@ -27,7 +27,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
      * @param {Object} settings - User settings
      */
     async run(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         // Logic: Enable unless "hookFreeHome" is ON (which implies a minimal home)
         // Or maybe hookFreeHome means "clean home". 
         // Assuming original logic: if !hookFreeHome, enable organizer.

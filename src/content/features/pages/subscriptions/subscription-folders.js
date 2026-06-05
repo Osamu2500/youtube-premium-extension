@@ -35,7 +35,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
         // Bound nav handler stored for later removal in disable()
         this._boundHandleNav = () => this.handleNavigation();
-        this._boundHandlePopstate = () => setTimeout(() => this.handleNavigation(), 100);
+        this._boundHandlePopstate = () => window.YPP.events?.on('app:pageChange', this._boundHandleNav);
 
         // Debounced filter — coalesces rapid observer callbacks (e.g. 30 cards loading at once)
         // into a single applyFeedFilters pass per 50ms window.
@@ -60,7 +60,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     // =========================================================================
 
     async update(settings) {
-        this.settings = settings || {};
+        this.settings = { ...this.settings, ...(settings || {}) };
         this.enabled = this.settings.subscriptionFolders !== false || 
                        this.settings.enableFilterBar !== false || 
                        this.settings.enableChannelHealth !== false;
@@ -180,10 +180,6 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     async disable() {
         await super.disable();
-
-        clearTimeout(this._filterRetry500);
-        clearTimeout(this._filterRetry1200);
-        clearTimeout(this._unresolvedRetryTimer);
 
         // Cancel debounced filters
         if (this._debouncedApplyFilters?.cancel) {
@@ -340,7 +336,9 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         if (pendingPlayAll) {
             this.activeFolder = pendingPlayAll;
             sessionStorage.removeItem('ypp_pending_play_all');
-            setTimeout(() => this.playAll(pendingPlayAll), 1000);
+            window.YPP.Utils.pollFor(() => document.querySelector('ytd-rich-grid-renderer'), 10000, 200)
+                .then(() => this.playAll(pendingPlayAll))
+                .catch(() => this.playAll(pendingPlayAll));
         } else if (pendingFolder) {
             this.activeFolder = pendingFolder;
             sessionStorage.removeItem('ypp_pending_folder');
@@ -373,14 +371,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         if (this.activeFolder) {
             document.body.classList.add('ypp-sub-folders-active');
             this.activeChannelSet = new Set(this.storage.folders[this.activeFolder] || []);
-            // Run immediately, then retry at 500ms and 1200ms.
-            // YouTube's SPA renders card content asynchronously — the first pass may
-            // see cards before their channel-name text nodes are painted.
             this.applyFeedFilters();
-            clearTimeout(this._filterRetry500);
-            clearTimeout(this._filterRetry1200);
-            this._filterRetry500  = setTimeout(() => this.applyFeedFilters(), 500);
-            this._filterRetry1200 = setTimeout(() => this.applyFeedFilters(), 1200);
         } else {
             document.body.classList.remove('ypp-sub-folders-active');
             this.activeChannelSet = new Set();
@@ -647,9 +638,21 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             if (this.activeFolder) {
                 if (!channelName) {
                     // Polymer data not yet bound (card shell inserted before data arrives).
-                    // Keep card visible and retry — never hide a card for a missing name.
-                    anyUnresolved = true;
-                    if (DEBUG) debugRows.push({ source: '(unresolved)', norm: '', match: '⏳ retry', visible: '✅ kept' });
+                    // Keep card visible and attach a MutationObserver to retry specifically when data arrives.
+                    if (DEBUG) debugRows.push({ source: '(unresolved)', norm: '', match: '⏳ observing', visible: '✅ kept' });
+                    
+                    if (!card.dataset.yppObserving) {
+                        card.dataset.yppObserving = 'true';
+                        const mo = new MutationObserver(() => {
+                            const chEl = card.querySelector('#channel-name a, .ytd-channel-name a');
+                            if (chEl && chEl.textContent.trim()) {
+                                mo.disconnect();
+                                delete card.dataset.yppObserving;
+                                this._debouncedApplyFilters();
+                            }
+                        });
+                        mo.observe(card, { childList: true, subtree: true, characterData: true });
+                    }
                     return;
                 }
 
@@ -697,14 +700,6 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 card.classList.remove('ypp-filtered-in');
             }
         });
-
-        // Self-limiting retry: only fires when at least one card had no resolved name.
-        // Prevents infinite loops — retry fires exactly once; the next pass will either
-        // resolve the name (and cache it) or find the card removed from the DOM.
-        if (anyUnresolved && this.activeFolder) {
-            clearTimeout(this._unresolvedRetryTimer);
-            this._unresolvedRetryTimer = setTimeout(() => this._applyFeedFiltersNow(), 350);
-        }
 
         // Close debug group and print table
         if (DEBUG && this.activeFolder) {
@@ -837,13 +832,20 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 window.location.href = `/watch_videos?video_ids=${videoIds.join(',')}`;
             } else if (scrolls < maxScrolls) {
                 scrolls++;
+                const oldCardCount = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer').length;
                 window.scrollBy(0, window.innerHeight * 2);
-                setTimeout(extractAndPlay, 800);
+                window.YPP.Utils.pollFor(() => {
+                    const newCount = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer').length;
+                    return newCount > oldCardCount ? true : null;
+                }, 2000, 200).then(() => extractAndPlay()).catch(() => extractAndPlay());
             } else {
                 window.YPP.Utils.createToast?.('No videos found in this folder.', 'error');
             }
         };
         
-        setTimeout(extractAndPlay, 500);
+        window.YPP.Utils.pollFor(() => {
+            const cards = document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer.ypp-filtered-in');
+            return cards.length > 0 ? true : null;
+        }, 5000, 500).then(() => extractAndPlay()).catch(() => extractAndPlay());
     }
 };

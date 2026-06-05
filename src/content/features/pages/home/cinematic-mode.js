@@ -714,10 +714,8 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             }
             window.location.reload();
         } else {
-            setTimeout(() => {
-                const isHomePage = (newPathname === '/' || newPathname.includes('/feed/subscriptions'));
-                document.body.classList.toggle('cinematic-home', isHomePage);
-            }, 500);
+            const isHomePage = (newPathname === '/' || newPathname.includes('/feed/subscriptions'));
+            document.body.classList.toggle('cinematic-home', isHomePage);
         }
         this._lastPathname = newPathname;
     }

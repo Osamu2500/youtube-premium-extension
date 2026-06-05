@@ -149,51 +149,8 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
      * @private
      */
     _injectControls() {
-        // We only need the speed input for now
-        if (this._settings?.enableCustomSpeed) {
-            const input = document.createElement('input');
-            input.className = 'ypp-speed-input';
-            input.type = 'number';
-            input.step = this._PLAYER.SPEED_STEP || 0.1;
-            input.min = this._PLAYER.SPEED_MIN || 0.1;
-            input.max = this._PLAYER.SPEED_MAX || 5.0;
-            input.value = this.utils.getVideo()?.playbackRate?.toFixed(1) || '1.0';
-            input.title = 'Custom Speed (e.g. 2.5)';
-
-            input.addEventListener('change', (e) => {
-                let speed = parseFloat(e.target.value);
-                const { SPEED_MIN = 0.1, SPEED_MAX = 5.0 } = this._PLAYER;
-
-                // Validate and clamp
-                if (isNaN(speed) || speed < SPEED_MIN) {
-                    speed = SPEED_MIN;
-                } else if (speed > SPEED_MAX) {
-                    speed = SPEED_MAX;
-                }
-
-                e.target.value = speed.toFixed(1);
-                this._setSpeed(speed);
-            });
-            
-            // Prevent key propagation (so typing 2 doesn't skip video)
-            input.addEventListener('keydown', (e) => e.stopPropagation());
-
-            // Listen for rate changes from other sources
-            const video = window.YPP.DomAPI?.getVideoElement();
-            if (video) {
-                video.addEventListener('ratechange', this._boundHandleRateChange);
-            }
-
-            this._speedInput = input;
-            
-            // Use UIManager to mount the component
-            const component = {
-                 id: 'custom-speed-input',
-                 el: input
-            };
-            
-            window.YPP.ui.manager.mount('playerControls', component, 'prepend');
-        }
+        // Feature disabled per user request: removed the custom speed input box from the player bar
+        return;
     }
 
 

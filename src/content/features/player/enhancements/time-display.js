@@ -18,7 +18,7 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
     getConfigKey() { return 'enableRemainingTime'; }
 
     enable(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         this.run();
     }
 
@@ -50,7 +50,7 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
     }
 
     update(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         if (this.settings.enableRemainingTime) {
             this.run();
         } else {

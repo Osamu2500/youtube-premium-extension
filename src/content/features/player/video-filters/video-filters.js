@@ -42,7 +42,7 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
     getConfigKey() { return 'enableCinemaFilters'; }
 
     enable(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         this.run();
     }
 
@@ -60,7 +60,7 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
     }
 
     update(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         if (!settings.enableCinemaFilters) {
             this.disable();
         } else {

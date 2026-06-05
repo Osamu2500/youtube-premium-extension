@@ -28,7 +28,7 @@ window.YPP.StorageManager = class StorageManager {
                     
                     if (usage + bytes > this._MAX_BYTES * 0.9) {
                         this._notifyQuotaWarning();
-                        console.warn(`[YPP Storage] Quota almost exceeded! Skipping write for ${key}.`);
+                        window.YPP.Utils?.log(`[YPP Storage] Quota almost exceeded! Skipping write for ${key}.`, 'STORAGE', 'warn');
                         return resolve(false);
                     }
 
@@ -74,7 +74,7 @@ window.YPP.StorageManager = class StorageManager {
         
         if (keysToRemove.length > 0) {
             await chrome.storage.local.remove(keysToRemove);
-            console.log(`[YPP Storage] Purged ${keysToRemove.length} expired keys. Freed ~${(bytesFreed/1024).toFixed(2)} KB.`);
+            window.YPP.Utils?.log(`[YPP Storage] Purged ${keysToRemove.length} expired keys. Freed ~${(bytesFreed/1024).toFixed(2)} KB.`, 'STORAGE', 'info');
         }
     }
 

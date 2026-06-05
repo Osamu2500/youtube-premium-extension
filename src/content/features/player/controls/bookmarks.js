@@ -46,6 +46,35 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
             
             // Re-check on navigation
             this.addListener(window, 'yt-navigate-finish', () => this._checkForPlayer());
+
+            // Use MutationObserver to ensure it stays in DOM after SPA updates
+            this._observer = new MutationObserver(() => {
+                if (!this._isActive) return;
+                
+                const btn = document.querySelector('.ypp-capture-btn');
+                const hasCustomControls = !!document.querySelector('.ypp-player-controls');
+                const isUnderCustomControls = btn && btn.closest('.ypp-player-controls');
+                
+                if (!btn) {
+                    if (window.YPP.DomAPI?.getVideoControls() || document.querySelector(this._SELECTORS.VIDEO_CONTROLS)) {
+                        this._injectControls();
+                    }
+                } else if (hasCustomControls && !isUnderCustomControls) {
+                    // The button was injected into the fallback location because player.js was too slow.
+                    // Now that custom controls exist, move the button inside them.
+                    if (window.YPP.ui && window.YPP.ui.manager) {
+                        window.YPP.ui.manager.remove('bookmark-capture-btn');
+                    }
+                    if (btn.parentNode) btn.parentNode.removeChild(btn);
+                    
+                    this._captureBtn = null;
+                    this._injectControls();
+                }
+            });
+            
+            // Observe the player container or body to catch when controls are rebuilt
+            const playerContainer = document.querySelector('#movie_player') || document.querySelector('ytd-player') || document.body;
+            this._observer.observe(playerContainer, { childList: true, subtree: true });
         } catch (error) {
             this.utils.log('BookmarksManager timeout waiting for controls', 'BOOKMARKS', 'debug');
         }
@@ -53,7 +82,7 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
 
     _checkForPlayer() {
         if (!this._isActive) return;
-        if (window.YPP.DomAPI?.getVideoControls()) {
+        if (window.YPP.DomAPI?.getVideoControls() || document.querySelector(this._SELECTORS.VIDEO_CONTROLS)) {
             this._injectControls();
         }
     }
@@ -83,7 +112,12 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
 
         // Try to use UIManager for robust mounting
         if (window.YPP.ui && window.YPP.ui.manager) {
-            window.YPP.ui.manager.mount('playerControls', component, 'prepend');
+            const hasCustomControls = !!document.querySelector('.ypp-player-controls');
+            if (hasCustomControls) {
+                window.YPP.ui.manager.mount('customPlayerControls', component, 'append');
+            } else {
+                window.YPP.ui.manager.mount('playerControls', component, 'prepend');
+            }
         } else {
             // Try to place it with the other custom buttons first
             const customControls = document.querySelector('.ypp-player-controls');
@@ -107,6 +141,11 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
     }
 
     _removeControls() {
+        if (this._observer) {
+            this._observer.disconnect();
+            this._observer = null;
+        }
+
         if (window.YPP.ui && window.YPP.ui.manager) {
             window.YPP.ui.manager.remove('bookmark-capture-btn');
         } else if (this._captureBtn && this._captureBtn.parentNode) {

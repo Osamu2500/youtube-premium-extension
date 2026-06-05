@@ -15,7 +15,7 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
 
     // Override update to handle both autoQuality and autoCinema settings
     async update(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         
         const shouldBeEnabled = !!(settings.autoQuality || settings.autoCinema);
         

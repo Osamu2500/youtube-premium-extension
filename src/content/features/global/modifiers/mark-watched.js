@@ -285,11 +285,12 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
             this._onTimeUpdateBinded = null;
         }
 
-        // Wait briefly for the <video> element to be inserted (SPA nav)
-        const attach = () => {
-            const video = document.querySelector(
-                window.YPP.CONSTANTS.SELECTORS.VIDEO?.[0] || 'video.html5-main-video, video'
+        // Wait for the <video> element to be inserted (SPA nav)
+        window.YPP.Utils.pollFor(() => {
+            return document.querySelector(
+                window.YPP.CONSTANTS?.SELECTORS?.VIDEO?.[0] || 'video.html5-main-video, video'
             );
+        }, 10000, 500).then(video => {
             if (!video) return;
 
             this._activeVideoEl = video;
@@ -308,9 +309,8 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
 
             this._onTimeUpdateBinded = checkProgress;
             video.addEventListener('timeupdate', checkProgress);
-        };
-
-        // Give YouTube 500 ms to render the player after SPA navigation
-        setTimeout(attach, 500);
+        }).catch(() => {
+            if (window.YPP.Utils.log) window.YPP.Utils.log('Video element not found for tracking watch progress', 'MarkWatched');
+        });
     }
 };

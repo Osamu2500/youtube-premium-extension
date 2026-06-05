@@ -17,7 +17,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
     }
 
     enable(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         this.run();
     }
 
@@ -36,11 +36,18 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             this._boundPiP = null;
         }
 
+        if (this._observer) {
+            this._observer.disconnect();
+            this._observer = null;
+        }
+
         this._videoElement = null;
     }
 
     update(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
+
+
 
         const controls = document.querySelector('.ypp-player-controls');
         if (controls) controls.remove();
@@ -80,6 +87,8 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
                 if (this.settings.autoPiP) {
                     this.handleAutoPiP(video);
                 }
+                
+                this._startMonitoring();
 
             } else {
                 if (Utils.log) {
@@ -91,6 +100,42 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             if (Utils.log) {
                 Utils.log(`Error: ${error.message}`, 'PLAYER', 'debug');
             }
+        }
+    }
+
+    _startMonitoring() {
+        if (!this._observer) {
+            this._observer = new MutationObserver(() => {
+                if (!this.isEnabled) return;
+                if (!document.querySelector('.ypp-player-controls') && document.querySelector('.ytp-right-controls')) {
+                    const video = document.querySelector('video');
+                    const controls = document.querySelector('.ytp-right-controls');
+                    if (video && controls) {
+                        this.injectControls(video, controls);
+                    }
+                }
+            });
+            const playerContainer = document.querySelector('#movie_player') || document.querySelector('ytd-player') || document.body;
+            this._observer.observe(playerContainer, { childList: true, subtree: true });
+        }
+    }
+
+    onPageChange(url) {
+        if (!this.isEnabled) return;
+        if (!url.includes('/watch')) {
+            const controls = document.querySelector('.ypp-player-controls');
+            if (controls) controls.remove();
+            this.injectedButtons = false;
+            return;
+        }
+        
+        // Re-inject on navigation if missing
+        const video = document.querySelector('video');
+        const controls = document.querySelector('.ytp-right-controls');
+        if (video && controls && !document.querySelector('.ypp-player-controls')) {
+            this.injectControls(video, controls);
+        } else if (!document.querySelector('.ypp-player-controls')) {
+            this.run();
         }
     }
 
@@ -138,20 +183,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             }
         }
 
-        // Adopt the bookmark button if it was injected early by bookmarks.js
-        const adoptBookmark = () => {
-            const btn = document.querySelector('.ypp-capture-btn');
-            if (btn && btn.parentElement !== container) {
-                btn.className = 'ypp-action-btn ypp-capture-btn';
-                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`;
-                container.appendChild(btn);
-            }
-        };
-        adoptBookmark();
-        
-        // Also watch for it in case bookmarks.js injects late
-        const observer = new MutationObserver(adoptBookmark);
-        observer.observe(controls, { childList: true, subtree: true });
+
 
         controls.insertBefore(container, controls.firstChild);
         this.injectedButtons = true;

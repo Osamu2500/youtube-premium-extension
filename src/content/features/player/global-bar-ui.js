@@ -77,7 +77,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     }
 
     updateSettings(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         this.updatePosition();
     }
 
