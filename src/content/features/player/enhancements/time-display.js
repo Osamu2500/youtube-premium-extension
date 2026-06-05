@@ -113,33 +113,18 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         if (oldSepNode) oldSepNode.remove();
 
         if (!timeRemainingNode) {
-            timeRemainingNode = document.createElement('div');
-            timeRemainingNode.className = 'ypp-time-remaining';
+            timeRemainingNode = document.createElement('span');
+            timeRemainingNode.className = 'ypp-time-remaining ytp-time-duration';
             
-            // Floating badge to prevent flexbox layout breakage (fixes progress bar overlap)
             timeRemainingNode.style.cssText = `
-                position: absolute;
-                bottom: 54px;
-                left: 12px;
-                background: rgba(28, 28, 28, 0.75);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                color: #fff;
-                padding: 4px 8px;
-                border-radius: 6px;
-                font-size: 12px;
-                font-weight: 500;
-                line-height: 1;
-                pointer-events: none;
-                z-index: 1000;
-                white-space: nowrap;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                margin-left: 4px;
+                opacity: 0.85;
             `;
 
-            const chromeBottom = document.querySelector('.ytp-chrome-bottom');
-            if (chromeBottom) {
-                chromeBottom.appendChild(timeRemainingNode);
+            if (durationNode && durationNode.parentNode) {
+                durationNode.parentNode.insertBefore(timeRemainingNode, durationNode.nextSibling);
+            } else if (timeDisplay) {
+                timeDisplay.appendChild(timeRemainingNode);
             } else {
                 return;
             }
@@ -163,9 +148,8 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
 
             // Guard against the node being detached
             if (!document.contains(timeRemainingNode)) {
-                const chromeBottom = document.querySelector('.ytp-chrome-bottom');
-                if (chromeBottom) {
-                    chromeBottom.appendChild(timeRemainingNode);
+                if (timeDisplay) {
+                    timeDisplay.appendChild(timeRemainingNode);
                 } else {
                     return; // Container is truly gone
                 }
@@ -184,19 +168,19 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
                 return;
             }
 
-            timeRemainingNode.style.display = 'block';
+            timeRemainingNode.style.display = 'inline';
 
             if (Math.abs(speed - 1) <= 0.01) {
                 // 1x speed - Native remaining time
-                timeRemainingNode.textContent = `-${format(rawLeft)}`;
+                timeRemainingNode.textContent = ` ( -${format(rawLeft)} )`;
             } else {
                 // Speed changed - Show adjusted time + saved/extra
                 if (speed > 1) {
                     const totalSaved = duration - (duration / speed);
-                    timeRemainingNode.textContent = `-${format(adjustedLeft)} · ${format(totalSaved)} saved`;
+                    timeRemainingNode.textContent = ` ( -${format(adjustedLeft)} · ${format(totalSaved)} saved )`;
                 } else {
                     const totalExtra = (duration / speed) - duration;
-                    timeRemainingNode.textContent = `-${format(adjustedLeft)} · ${format(totalExtra)} extra`;
+                    timeRemainingNode.textContent = ` ( -${format(adjustedLeft)} · ${format(totalExtra)} extra )`;
                 }
             }
         };

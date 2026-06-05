@@ -62,18 +62,13 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
         if (document.querySelector('.ypp-capture-btn')) return;
 
         const btn = document.createElement('button');
-        btn.className = 'ytp-button ypp-capture-btn';
+        btn.className = 'ypp-action-btn ypp-capture-btn';
         btn.title = 'Capture Highlight (Bookmark)';
         btn.setAttribute('aria-label', 'Capture Highlight');
-        // A simple bookmark/highlight icon SVG
-        btn.innerHTML = `<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><path d="M12 8v20l6-4 6 4V8z" fill="#fff"></path></svg>`;
         
-        btn.style.opacity = '0.9';
-        btn.style.transition = 'opacity 0.2s';
+        // Standard Material Bookmark SVG (24x24)
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`;
         
-        btn.addEventListener('mouseenter', () => btn.style.opacity = '1');
-        btn.addEventListener('mouseleave', () => btn.style.opacity = '0.9');
-
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             this._captureHighlight();
@@ -86,13 +81,26 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
             el: btn
         };
 
-        // Prepend to controls
         if (window.YPP.ui && window.YPP.ui.mount) {
             window.YPP.ui.mount('playerControls', component, 'prepend');
         } else {
-            const controls = document.querySelector(this._SELECTORS.VIDEO_CONTROLS);
-            if (controls) {
-                controls.prepend(btn);
+            // Try to place it with the other custom buttons first
+            const customControls = document.querySelector('.ypp-player-controls');
+            if (customControls) {
+                customControls.appendChild(btn);
+            } else {
+                // Fallback to native placement
+                btn.className = 'ytp-button ypp-capture-btn';
+                btn.innerHTML = `<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><path class="ytp-svg-fill" d="M 12,8 L 12,28 L 18,24 L 24,28 L 24,8 Z" /></svg>`;
+                const rightControls = document.querySelector('.ytp-right-controls');
+                if (rightControls) {
+                    rightControls.prepend(btn);
+                } else {
+                    const controls = document.querySelector(this._SELECTORS.VIDEO_CONTROLS);
+                    if (controls) {
+                        controls.prepend(btn);
+                    }
+                }
             }
         }
     }

@@ -421,6 +421,7 @@
                   <div class="info"><span class="name">Auto-Scroll</span><span class="desc">Skip when ended</span></div>
                   <label class="toggle"><input type="checkbox" id="shortsAutoScroll" /><span class="slider"></span></label>
                 </div>
+
               </div>
             </div>
           </div>
@@ -472,11 +473,6 @@
                   <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
                   <div class="info"><span class="name">Intentional Delay</span><span class="desc">3s pause before video</span></div>
                   <label class="toggle"><input type="checkbox" id="intentionalDelay" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
-                  <div class="info"><span class="name">Bookmarks Highlighter</span><span class="desc">Capture clips & text</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableBookmarks" /><span class="slider"></span></label>
                 </div>
               </div>
             </div>
@@ -560,6 +556,11 @@
                   <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
                   <div class="info"><span class="name">Transcript</span><span class="desc">Auto open/enhance</span></div>
                   <label class="toggle"><input type="checkbox" id="enableTranscript" /><span class="slider"></span></label>
+                </div>
+                <div class="toggle-card">
+                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
+                  <div class="info"><span class="name">Bookmarks Highlighter</span><span class="desc">Capture clips & text</span></div>
+                  <label class="toggle"><input type="checkbox" id="enableBookmarks" /><span class="slider"></span></label>
                 </div>
               </div>
             </div>
@@ -1006,6 +1007,17 @@
               <div class="inline-setting-row" style="flex-wrap:wrap; gap:10px;">
                 <div class="info"><span class="name">Accent Color</span></div>
                 <div class="color-swatches" id="accentSwatches">
+                  <div class="color-swatch" data-color="#ff4e45" style="background: #ff4e45;"></div>
+                  <div class="color-swatch" data-color="#3ea6ff" style="background: #3ea6ff;"></div>
+                  <div class="color-swatch" data-color="#2ba640" style="background: #2ba640;"></div>
+                  <div class="color-swatch" data-color="#ffb340" style="background: #ffb340;"></div>
+                  <div class="color-swatch" data-color="#b62bcf" style="background: #b62bcf;"></div>
+                  <div class="color-swatch" data-color="#ff6b6b" style="background: #ff6b6b;"></div>
+                  <div class="color-swatch custom-color-picker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    <input type="color" id="accentColor" value="#ff4e45" />
+                  </div>
+                </div>
               </div>
               <div class="inline-setting-row">
                 <div class="slider-row">
@@ -1211,111 +1223,6 @@
                 </div>
                 <div class="toggle-card">
                   <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></div>
-                  <div class="info"><span class="name">Redirect Home</span><span class="desc">Home → Subscriptions</span></div>
-                  <label class="toggle"><input type="checkbox" id="redirectHome" /><span class="slider"></span></label>
-                </div>
-                
-              </div>
-              
-              <div class="settings-section" style="margin-top: 16px;">
-                <div class="section-header">
-                   <div class="section-title-wrap">
-                      <div class="section-text-wrap">
-                         <div class="section-title">Memory & Cloud Backup</div>
-                         <div class="section-subtitle">Sync your folders, bookmarks, and settings to Google Drive</div>
-                      </div>
-                   </div>
-                </div>
-                <div class="card-group" style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                    <div>
-                      <div style="font-size: 13px; font-weight: 500; color: #fff;">Backup Extension Data</div>
-                      <div style="font-size: 11px; color: rgba(255,255,255,0.5);" id="lastSyncTimeLabel">Last sync: Never</div>
-                    </div>
-                  </div>
-                  <div style="display:flex; gap: 8px;">
-                    <button id="btnBackupUp" style="flex: 1; padding: 8px; background: var(--accent-primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; display:flex; align-items:center; justify-content:center; gap: 6px;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                      Backup
-                    </button>
-                    <button id="btnBackupDown" style="flex: 1; padding: 8px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; display:flex; align-items:center; justify-content:center; gap: 6px;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                      Restore
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="section-title" style="margin: 10px 0 4px 6px;">Top Bar Nav Buttons</div>
-              <div class="feature-grid">
-                <div class="setting-item">
-                  <div class="info"><span class="name">Shorts</span></div>
-                  <label class="toggle"><input type="checkbox" id="navShorts" /><span class="slider"></span></label>
-                </div>
-                <div class="setting-item">
-                  <div class="info"><span class="name">Subs</span></div>
-                  <label class="toggle"><input type="checkbox" id="navSubscriptions" /><span class="slider"></span></label>
-                </div>
-                <div class="setting-item">
-                  <div class="info"><span class="name">Library</span></div>
-                  <label class="toggle"><input type="checkbox" id="navPlaylists" /><span class="slider"></span></label>
-                </div>
-                <div class="setting-item">
-                  <div class="info"><span class="name">History</span></div>
-                  <label class="toggle"><input type="checkbox" id="navHistory" /><span class="slider"></span></label>
-                </div>
-                <div class="setting-item">
-                  <div class="info"><span class="name">Later</span></div>
-                  <label class="toggle"><input type="checkbox" id="navWatchLater" /><span class="slider"></span></label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">System Data</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <button id="resetBtn" class="action-btn danger">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                Reset Extension to Defaults
-              </button>
-              <div class="version-info">v4.0.0 • Premium Edition</div>
-            </div>
-          </div>
-
-        </section>
-
-        <!-- BOOKMARKS -->
-        <section id="tab-bookmarks" class="tab-content">
-          <div class="settings-section" style="display:flex; flex-direction:column; height: 100%;">
-            <div class="section-header" style="margin-bottom: 10px;">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Your Bookmarks</div>
-                     <div class="section-subtitle">Captured highlights across all videos</div>
-                  </div>
-               </div>
-            </div>
-            
-            <div class="search-container" style="margin-bottom: 15px; width: 100%; position: relative;">
-              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 10px; top: 10px; width: 16px; height: 16px; color: #aaa;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="bookmarkSearchInput" placeholder="Search highlights or videos..." class="feature-search-input" style="width: 100%; box-sizing: border-box; padding-left: 32px;" />
-            </div>
-
-            <div id="bookmarksList" class="bookmarks-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px;">
-               <!-- Bookmarks injected here via JS -->
-               <div class="empty-state" style="text-align:center; padding: 40px 20px; color:rgba(255,255,255,0.5);">
-                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px; height:48px; margin-bottom:10px; opacity:0.5; display: block; margin: 0 auto 10px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                   <div style="font-size:14px; font-weight:500;">No bookmarks yet</div>
-                   <div style="font-size:12px; margin-top:4px;">Capture highlights directly from the video player.</div>
                   <div class="info"><span class="name">Redirect Home</span><span class="desc">Home → Subscriptions</span></div>
                   <label class="toggle"><input type="checkbox" id="redirectHome" /><span class="slider"></span></label>
                 </div>
