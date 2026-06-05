@@ -68,6 +68,8 @@ window.YPP.SettingsSchema = {
         sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 },
         customScrollbar:     { type: 'boolean', default: false },
         grayscaleThumbnails: { type: 'boolean', default: false },
+        homeColumns:         { type: 'number',  default: 0, min: 0, max: 10 }, // 0 = Auto
+        channelColumns:      { type: 'number',  default: 0, min: 0, max: 10 }, // 0 = Auto
 
         // --- Player ---
         autoCinema:          { type: 'boolean', default: false },
@@ -136,6 +138,7 @@ window.YPP.SettingsSchema = {
 
         // --- Auto Actions ---
         autoPiP:             { type: 'boolean', default: false },
+        floatingPlayer:      { type: 'boolean', default: false },
 
         // --- New Features ---
         cinematicMode:       { type: 'boolean', default: false },
@@ -188,6 +191,7 @@ window.YPP.SettingsSchema = {
         // --- Content Visibility (missing from original schema) ---
         hidePlaylists:       { type: 'boolean', default: false },
         hidePodcasts:        { type: 'boolean', default: false },
+        hidePosts:           { type: 'boolean', default: false },
         hideThumbnails:      { type: 'boolean', default: false },
         hideCards:           { type: 'boolean', default: false },
         hideMetrics:         { type: 'boolean', default: false },

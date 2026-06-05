@@ -368,7 +368,13 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
 
         // Accent Color
         if (this._settings.accentColor) {
-            const hex = this._settings.accentColor;
+            let hex = this._settings.accentColor;
+            
+            // Check if it's one of the 56 predefined premium colors from tempo
+            if (this._CONSTANTS.PREMIUM_COLORS && this._CONSTANTS.PREMIUM_COLORS[hex]) {
+                hex = this._CONSTANTS.PREMIUM_COLORS[hex];
+            }
+            
             root.style.setProperty('--ypp-accent-primary', hex);
             root.style.setProperty('--ypp-accent-glow', hex + '66');
             root.style.setProperty('--ypp-accent-gradient', `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`);

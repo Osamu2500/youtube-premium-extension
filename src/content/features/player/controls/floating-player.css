@@ -1,0 +1,71 @@
+/**
+ * Floating Player Styles
+ * Applied when the user scrolls past the video player and the `floatingPlayer` setting is active.
+ */
+
+body.ypp-floating-player-active #ytd-player,
+body.ypp-floating-player-active ytd-player[id="ytd-player"] {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 400px !important;
+    height: 225px !important; /* 16:9 ratio */
+    z-index: 2147483647 !important; /* Highest possible */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ypp-thumb-radius, 12px) !important;
+    overflow: hidden !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transform: translateZ(0) !important; /* Force hardware acceleration */
+}
+
+/* Ensure the video itself fills the new container */
+body.ypp-floating-player-active video.html5-main-video {
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* Ensure the controls adapt to the small size */
+body.ypp-floating-player-active .ytp-chrome-bottom {
+    width: 100% !important;
+    left: 0 !important;
+    padding: 0 10px !important;
+    box-sizing: border-box !important;
+}
+
+body.ypp-floating-player-active .ytp-progress-bar-container {
+    width: 100% !important;
+    bottom: 35px !important;
+}
+
+/* Hide some unnecessary controls in mini mode */
+body.ypp-floating-player-active .ytp-size-button,
+body.ypp-floating-player-active .ytp-miniplayer-button,
+body.ypp-floating-player-active .ytp-chapter-title {
+    display: none !important;
+}
+
+/* Ensure background of player is dark */
+body.ypp-floating-player-active .html5-video-player {
+    background-color: #000 !important;
+}
+
+/* Show a small placeholder where the video used to be so layout doesn't jump */
+/* ytd-watch-flexy handles the placeholder space automatically in most cases, 
+   but we can ensure #player-container-outer maintains aspect ratio */
+body.ypp-floating-player-active #player-container-outer {
+    /* The outer container stays in the DOM, so it acts as a placeholder */
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--ypp-thumb-radius, 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.ypp-floating-player-active #player-container-outer::after {
+    content: "Video is floating";
+    color: var(--yt-spec-text-secondary, #aaa);
+    font-size: 1.2rem;
+    font-family: var(--ypp-font-family, inherit);
+}

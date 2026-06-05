@@ -107,20 +107,42 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
 
         // Ensure single injection
         let timeRemainingNode = document.querySelector('.ypp-time-remaining');
-        let sepNode = document.querySelector('.ypp-time-separator-appended');
+        
+        // Remove legacy separator if it exists
+        const oldSepNode = document.querySelector('.ypp-time-separator-appended');
+        if (oldSepNode) oldSepNode.remove();
 
         if (!timeRemainingNode) {
-            sepNode = document.createElement('span');
-            sepNode.className = 'ytp-time-separator ypp-time-separator-appended';
-            sepNode.textContent = ' · ';
-            
-            timeRemainingNode = document.createElement('span');
+            timeRemainingNode = document.createElement('div');
             timeRemainingNode.className = 'ypp-time-remaining';
-            timeRemainingNode.style.cssText = 'font-size:inherit;font-family:inherit;color:inherit;opacity:inherit;letter-spacing:inherit;';
+            
+            // Floating badge to prevent flexbox layout breakage (fixes progress bar overlap)
+            timeRemainingNode.style.cssText = `
+                position: absolute;
+                bottom: 54px;
+                left: 12px;
+                background: rgba(28, 28, 28, 0.75);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #fff;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 500;
+                line-height: 1;
+                pointer-events: none;
+                z-index: 1000;
+                white-space: nowrap;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
 
-            // Insert AFTER duration, before anything else
-            durationNode.insertAdjacentElement('afterend', sepNode);
-            sepNode.insertAdjacentElement('afterend', timeRemainingNode);
+            const chromeBottom = document.querySelector('.ytp-chrome-bottom');
+            if (chromeBottom) {
+                chromeBottom.appendChild(timeRemainingNode);
+            } else {
+                return;
+            }
         }
 
         const format = (s) => {
@@ -139,11 +161,11 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
                 return;
             }
 
-            // Guard against the node being detached (e.g. on yt-navigate-finish)
+            // Guard against the node being detached
             if (!document.contains(timeRemainingNode)) {
-                if (document.contains(timeDisplay) && document.contains(durationNode)) {
-                    durationNode.insertAdjacentElement('afterend', sepNode);
-                    sepNode.insertAdjacentElement('afterend', timeRemainingNode);
+                const chromeBottom = document.querySelector('.ytp-chrome-bottom');
+                if (chromeBottom) {
+                    chromeBottom.appendChild(timeRemainingNode);
                 } else {
                     return; // Container is truly gone
                 }
@@ -159,12 +181,10 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
             // Hide if no time remaining
             if (rawLeft <= 0) {
                 timeRemainingNode.style.display = 'none';
-                sepNode.style.display = 'none';
                 return;
             }
 
-            timeRemainingNode.style.display = '';
-            sepNode.style.display = '';
+            timeRemainingNode.style.display = 'block';
 
             if (Math.abs(speed - 1) <= 0.01) {
                 // 1x speed - Native remaining time

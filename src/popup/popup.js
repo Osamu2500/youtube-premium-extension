@@ -33,7 +33,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update Content
             tabs.forEach(tab => {
-                tab.classList.toggle('active', tab.id === `tab-${tabId}`);
+                const isActive = tab.id === `tab-${tabId}`;
+                tab.classList.toggle('active', isActive);
+                
+                // Animate elements inside the active tab
+                if (isActive && window.anime) {
+                    const animatableItems = tab.querySelectorAll('.toggle-card, .setting-item, .mode-card');
+                    if (animatableItems.length > 0) {
+                        try {
+                            // Reset properties natively (anime.set missing in v2)
+                            animatableItems.forEach(el => {
+                                el.style.transform = 'translateX(-12px)';
+                                el.style.opacity = '0';
+                            });
+                            
+                            window.anime({
+                                targets: animatableItems,
+                                translateX: [ -12, 0 ],
+                                opacity: [ 0, 1 ],
+                                delay: function(el, i) { return 50 + (i * 30); },
+                                easing: 'easeOutElastic(1, .6)',
+                                duration: 500,
+                            });
+                        } catch (e) {
+                            console.error('Animation error:', e);
+                            animatableItems.forEach(el => {
+                                el.style.transform = '';
+                                el.style.opacity = '1';
+                            });
+                        }
+                    }
+                }
             });
 
             // Update Title
@@ -103,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'displayFullTitle', // New
         'hidePlaylists',
         'hidePodcasts',
+        'hidePosts',
         'hideThumbnails',
         'redirectHome',
         'contextMenu', // Subscription Groups Context Menu
@@ -464,6 +495,46 @@ document.addEventListener('DOMContentLoaded', () => {
         applyThemeToPopup(currentTheme);
     };
 
+    // --- PREMIUM ACCENT COLOR DROPDOWN ---
+    const initPremiumAccentDropdown = () => {
+        const select = document.getElementById('premiumAccentSelect');
+        const colorPicker = document.getElementById('accentColor');
+        if (!select || !colorPicker) return;
+
+        // Load 56 options from CONSTANTS
+        if (window.YPP && window.YPP.CONSTANTS && window.YPP.CONSTANTS.PREMIUM_COLORS) {
+            const colors = window.YPP.CONSTANTS.PREMIUM_COLORS;
+            for (const [key, hex] of Object.entries(colors)) {
+                // Format label: 'dark-aqua' -> 'Dark Aqua'
+                const label = key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                const opt = document.createElement('option');
+                opt.value = hex;
+                opt.textContent = label;
+                select.appendChild(opt);
+            }
+        }
+
+        // When dropdown changes, update the color picker and save
+        select.addEventListener('change', () => {
+            if (select.value) {
+                colorPicker.value = select.value;
+                // Dispatch event so the regular listener handles saveSettings
+                colorPicker.dispatchEvent(new Event('input'));
+            }
+        });
+
+        // When color picker changes manually, reset dropdown to 'Custom...' unless it matches perfectly
+        colorPicker.addEventListener('input', () => {
+            select.value = colorPicker.value || '';
+            // If the user's custom color doesn't match an option, select.value becomes '' (Custom)
+        });
+
+        // Initial sync from colorPicker value to dropdown
+        setTimeout(() => {
+            select.value = colorPicker.value || '';
+        }, 100);
+    };
+
     // --- RANGE SLIDER LISTENERS (Live Preview) ---
     ['ambientIntensity', 'ambientBlur', 'blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold'].forEach(key => {
         const slider = elements[key];
@@ -572,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initSearchViewMode();
     initSidebarLayoutToggle();
+    initPremiumAccentDropdown();
 
     // --- CONCURRENT STORAGE MANAGER ---
     let _settingsWriteQueue = [];
@@ -1310,11 +1382,18 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Apply accent color to popup */
     function applyAccentColor(hex) {
         if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
-        document.documentElement.style.setProperty('--accent-primary', hex);
-        document.documentElement.style.setProperty('--accent-glow', hex + '66');
-        document.documentElement.style.setProperty('--accent-gradient',
-            `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`
-        );
+        const root = document.documentElement.style;
+        const sec = `color-mix(in srgb, ${hex} 55%, #a855f7)`;
+        root.setProperty('--accent-primary', hex);
+        root.setProperty('--accent-secondary', sec);
+        root.setProperty('--red', hex);
+        root.setProperty('--accent-glow', hex + '66');
+        root.setProperty('--accent-glow-sm', hex + '38');
+        root.setProperty('--red-dim', hex + '24');
+        root.setProperty('--red-glow', hex + '66');
+        const grad = `linear-gradient(135deg, ${hex} 0%, ${sec} 100%)`;
+        root.setProperty('--accent-gradient', grad);
+        root.setProperty('--accent-grad', grad);
     }
 
     // Load & apply saved customization values on startup

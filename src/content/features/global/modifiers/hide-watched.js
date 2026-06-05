@@ -45,6 +45,9 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
 
         // The injected <style> element (created once on enable, destroyed on disable)
         this._styleEl = null;
+        
+        this._boundProcessCards = this._processCards.bind(this);
+        this._boundProcessProgress = this._processProgressBatch.bind(this);
     }
 
     getConfigKey() { return 'hideWatched'; }
@@ -56,27 +59,26 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     async enable() {
         await super.enable();
         
-        // Safeguard against duplicate interval timers
-
-
         this._injectStyle();
+        
+        // Initial full page scan
         this._processCards();
 
-        // React to new cards appearing (infinite scroll, page load)
-        this.onBusEvent('dom:nodes-added', this._boundSchedule);
-        // React to SPA navigation (clear cache + re-process)
+        // React to SPA navigation (clear cache + re-process whole page)
         this.onBusEvent('page:changed', () => {
-            this._scheduleProcess();
+            this._processCards();
         });
+        
         // React to user manually marking/unmarking from MarkWatched
-        this.onBusEvent('watched:updated', this._boundSchedule);
+        this.onBusEvent('watched:updated', () => {
+            this._processCards();
+        });
         
         if (window.YPP && window.YPP.sharedObserver) {
-            window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer', () => {
-                if (this.isEnabled && document.visibilityState === 'visible') {
-                    this._scheduleProcess();
-                }
-            }, false);
+            // We use dom:mutated to handle Virtual DOM recycling where cards are not "added" but just mutated.
+            // We still use sharedObserver for progress bars to catch them instantly.
+            this.onBusEvent('dom:mutated', this._boundSchedule);
+            window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer', this._boundProcessProgress, false);
         }
     }
 
@@ -89,6 +91,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         }
         
         if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('hide-watched-cards');
             window.YPP.sharedObserver.unregister('hide-watched-progress');
         }
 
@@ -104,17 +107,13 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         });
     }
 
-    /**
-     * Called by BaseFeature when settings change while already enabled.
-     * Re-injects the style (mode/threshold may have changed) and re-processes.
-     */
     async onUpdate() {
         this._injectStyle();
         // Re-evaluate every card (mode may have switched dim ↔ hide)
         document.querySelectorAll('[data-ypp-watched]').forEach(card => {
             card.removeAttribute('data-ypp-watched');
         });
-        this._scheduleProcess();
+        this._processCards();
     }
 
     // =========================================================================
@@ -144,10 +143,12 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     // =========================================================================
 
     _scheduleProcess() {
-        if (this._debounceTimer) {
-            clearTimeout(this._debounceTimer);
-        }
-        this._debounceTimer = setTimeout(() => this._processCards(), 100);
+        if (!this.isEnabled) return;
+        if (this._debounceTimer) clearTimeout(this._debounceTimer);
+        this._debounceTimer = setTimeout(() => {
+            this._debounceTimer = null;
+            this._processCards();
+        }, 150);
     }
 
     // =========================================================================
@@ -243,31 +244,51 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     // Main processing loop
     // =========================================================================
 
-    _processCards() {
+    _processProgressBatch(progressBars) {
+        if (!this.isEnabled) return;
+        
+        const watchedIds = this._getWatchedIds();
+        const threshold = this.settings?.hideWatchedThreshold ?? 80;
+        
+        progressBars.forEach(bar => {
+            const card = bar.closest(HideWatched.CARD_SELECTORS);
+            if (card) {
+                this._evaluateCard(card, watchedIds, threshold);
+            }
+        });
+    }
+
+    _processCards(elements = null) {
         if (!this.isEnabled) return;
 
         const watchedIds = this._getWatchedIds();
         const threshold = this.settings?.hideWatchedThreshold ?? 80;
 
-        document.querySelectorAll(HideWatched.CARD_SELECTORS).forEach(card => {
-            try {
-                // Ignore fully hidden cards to skip wasteful processing
-                if (card.hasAttribute('hidden') || card.style.display === 'none') return;
+        const cardsToProcess = elements || document.querySelectorAll(HideWatched.CARD_SELECTORS);
 
-                const videoId = this._getVideoId(card);
-                const watched = this._isWatched(card, videoId, watchedIds, threshold);
-
-                const currentlyMarked = card.getAttribute('data-ypp-watched') === '1';
-
-                if (watched && !currentlyMarked) {
-                    card.setAttribute('data-ypp-watched', '1');
-                } else if (!watched && currentlyMarked) {
-                    card.removeAttribute('data-ypp-watched');
-                }
-            } catch (err) {
-                // Silently trap and ignore individual card processing errors
-                // This ensures a single malformed DOM node doesn't break the entire sweep
-            }
+        cardsToProcess.forEach(card => {
+            this._evaluateCard(card, watchedIds, threshold);
         });
+    }
+    
+    _evaluateCard(card, watchedIds, threshold) {
+        try {
+            // Ignore fully hidden cards to skip wasteful processing
+            if (card.hasAttribute('hidden') || card.style.display === 'none') return;
+
+            const videoId = this._getVideoId(card);
+            const watched = this._isWatched(card, videoId, watchedIds, threshold);
+
+            const currentlyMarked = card.getAttribute('data-ypp-watched') === '1';
+
+            if (watched && !currentlyMarked) {
+                card.setAttribute('data-ypp-watched', '1');
+            } else if (!watched && currentlyMarked) {
+                card.removeAttribute('data-ypp-watched');
+            }
+        } catch (err) {
+            // Silently trap and ignore individual card processing errors
+            // This ensures a single malformed DOM node doesn't break the entire sweep
+        }
     }
 };

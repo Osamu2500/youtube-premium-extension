@@ -89,6 +89,7 @@ import './features/player/automation/auto-like.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
 import './features/player/controls/mini-player.js';
+import './features/player/controls/floating-player.js';
 import './features/player/video-filters/index.js';
 import './features/player/volume-booster/index.js';
 import './features/player/automation/auto-quality.js';

@@ -117,15 +117,26 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         
         if (settings.homeColumns) {
             root.style.setProperty('--ypp-home-columns', settings.homeColumns);
+        } else {
+            root.style.removeProperty('--ypp-home-columns');
         }
+        
         if (settings.searchColumns) {
             root.style.setProperty('--ypp-search-columns', settings.searchColumns);
+        } else {
+            root.style.removeProperty('--ypp-search-columns');
         }
+        
         if (settings.channelColumns) {
             root.style.setProperty('--ypp-channel-columns', settings.channelColumns);
+        } else {
+            root.style.removeProperty('--ypp-channel-columns');
         }
+        
         if (settings.subscriptionsColumns) {
             root.style.setProperty('--ypp-subscriptions-columns', settings.subscriptionsColumns);
+        } else {
+            root.style.removeProperty('--ypp-subscriptions-columns');
         }
     }
 
@@ -220,19 +231,25 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         if (!contents) return false;
 
         // Determine column count from user settings per page type
-        let cols = this.settings?.homeColumns || 4;
+        let cols = this.settings?.homeColumns ?? 4;
         const path = window.location.pathname;
         if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
-            cols = this.settings?.channelColumns || 4;
+            cols = this.settings?.channelColumns ?? 4;
         } else if (path.startsWith('/results')) {
-            cols = this.settings?.searchColumns || 4;
+            cols = this.settings?.searchColumns ?? 4;
         } else if (path === '/feed/subscriptions') {
-            cols = this.settings?.subscriptionsColumns || 4;
+            cols = this.settings?.subscriptionsColumns ?? 4;
         }
 
-        // Auto-scale layout scale factor is already set via --ypp-auto-scale above.
-        // We removed the logic that overrides the column count here, so the user's
-        // manual slider selection (e.g. 5 columns) is always respected.
+        // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
+        if (cols === 0) {
+            contents.classList.remove('ypp-grid-container');
+            contents.style.removeProperty('grid-template-columns');
+            contents.style.removeProperty('grid-auto-flow');
+            contents.removeAttribute('data-ypp-cols');
+            this._processedContainers.delete(contents);
+            return true;
+        }
 
         // Fix YouTube's row wrappers (use display: contents to flatten)
         // Moved to styles.css for massive performance boost.

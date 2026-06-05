@@ -6,6 +6,67 @@ window.YPP = window.YPP || {};
 
 window.YPP.CONSTANTS = {
     // =========================================================================
+    // PREMIUM COLORS (56 Themes from Tempo)
+    // =========================================================================
+    PREMIUM_COLORS: {
+        'dark-aqua': '#00ffff',
+        'dark-blue-violet': '#8a2be2',
+        'dark-brown': '#a52a2a',
+        'dark-burly-wood': '#deb887',
+        'dark-chartreuse': '#7fff00',
+        'dark-chocolate': '#d2691e',
+        'dark-coral': '#ff7f50',
+        'dark-cornflower-blue': '#6495ed',
+        'dark-crimson': '#dc143c',
+        'dark-dark-orange': '#ff8c00',
+        'dark-dark-orchid': '#9932cc',
+        'dark-dark-violet': '#9400d3',
+        'dark-deep-pink': '#ff1493',
+        'dark-deep-sky-blue': '#00bfff',
+        'dark-dodger-blue': '#1e90ff',
+        'dark-fire-brick': '#b22222',
+        'dark-forest-green': '#228b22',
+        'dark-fuchsia': '#ff00ff',
+        'dark-gold': '#ffd700',
+        'dark-goldenrod': '#daa520',
+        'dark-green-yellow': '#adff2f',
+        'dark-green': '#008000',
+        'dark-hot-pink': '#ff69b4',
+        'dark-indian-red': '#cd5c5c',
+        'dark-khaki': '#f0e68c',
+        'dark-lawn-green': '#7cfc00',
+        'dark-lime-green': '#32cd32',
+        'dark-lime': '#00ff00',
+        'dark-olive': '#808000',
+        'dark-orange-red': '#ff4500',
+        'dark-orange': '#ffa500',
+        'dark-orchid': '#da70d6',
+        'dark-peru': '#cd853f',
+        'dark-purple': '#800080',
+        'dark-rebecca-purple': '#663399',
+        'dark-red': '#ff0000',
+        'dark-royal-blue': '#4169e1',
+        'dark-saddle-brown': '#8b4513',
+        'dark-salmon': '#fa8072',
+        'dark-sandy-brown': '#f4a460',
+        'dark-sea-green': '#2e8b57',
+        'dark-sienna': '#a0522d',
+        'dark-silver': '#c0c0c0',
+        'dark-sky-blue': '#87ceeb',
+        'dark-slate-blue': '#6a5acd',
+        'dark-slate-grey': '#708090',
+        'dark-spring-green': '#00ff7f',
+        'dark-steel-blue': '#4682b4',
+        'dark-tan': '#d2b48c',
+        'dark-teal': '#008080',
+        'dark-tomato': '#ff6347',
+        'dark-turquoise': '#40e0d0',
+        'dark-violet': '#ee82ee',
+        'dark-wheat': '#f5deb3',
+        'dark-yellow-green': '#9acd32',
+        'dark-yellow': '#ffff00'
+    },
+    // =========================================================================
     // DOM SELECTORS
     // =========================================================================
     SELECTORS: {
@@ -306,6 +367,7 @@ window.YPP.CONSTANTS = {
         
         // Auto Actions
         autoPiP: false,
+        floatingPlayer: false,
         
         // Player Automation
         autoSkipAds: true,
@@ -524,6 +586,7 @@ window.YPP.CONSTANTS = {
         returnYouTubeDislike: 'ReturnDislike',
         sponsorBlock: 'SponsorBlock',
         // miniPlayer: 'MiniPlayer', // Ghost/Incomplete
+        floatingPlayer: 'FloatingPlayer',
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
         // dataAPI: 'DataAPI', // Ghost/Incomplete
