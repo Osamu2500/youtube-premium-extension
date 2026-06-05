@@ -81,8 +81,9 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
             el: btn
         };
 
-        if (window.YPP.ui && window.YPP.ui.mount) {
-            window.YPP.ui.mount('playerControls', component, 'prepend');
+        // Try to use UIManager for robust mounting
+        if (window.YPP.ui && window.YPP.ui.manager) {
+            window.YPP.ui.manager.mount('playerControls', component, 'prepend');
         } else {
             // Try to place it with the other custom buttons first
             const customControls = document.querySelector('.ypp-player-controls');

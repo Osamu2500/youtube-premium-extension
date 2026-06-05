@@ -1237,6 +1237,7 @@ body.ypp-hide-sidebar #content {
   margin-left: 16px;
   margin-right: 16px;
   height: 40px;
+  order: -1;
 }
 .ypp-nav-btn {
   width: 40px;
@@ -1617,6 +1618,7 @@ ytd-app[mini-guide-visible] #content {
   position: relative;
   visibility: visible !important; /* Force visibility */
   opacity: 1 !important; /* Force opacity */
+  order: -1; /* Visually prepend without DOM shifting */
 }
 
 /* Extra specificity for individual buttons */

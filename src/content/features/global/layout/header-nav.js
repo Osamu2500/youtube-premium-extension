@@ -153,14 +153,18 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
             return;
         }
 
-        const navGroup = document.createElement('div');
-        navGroup.className = 'ypp-nav-group';
+        if (!this.navGroup) {
+            this.navGroup = document.createElement('div');
+            this.navGroup.className = 'ypp-nav-group';
+        } else {
+            this.navGroup.innerHTML = '';
+        }
 
         activeButtons.forEach(cfg => {
-            this._createButton(navGroup, cfg.label, cfg.url, cfg.icon, cfg.setting);
+            this._createButton(this.navGroup, cfg.label, cfg.url, cfg.icon, cfg.setting);
         });
 
-        window.YPP.ui.manager.mount('headerRight', { id: 'header-nav-group', el: navGroup }, 'prepend');
+        window.YPP.ui.manager.mount('headerRight', { id: 'header-nav-group', el: this.navGroup });
 
         this._updateActiveStates();
     }

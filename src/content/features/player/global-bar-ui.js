@@ -158,13 +158,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         this.updatePosition();
         
         let targetContainer = document.body;
-        try {
-            if (window.top && window.top.document && window.top.document.body) {
-                targetContainer = window.top.document.body;
-            }
-        } catch (e) {
-            window.YPP.Utils?.log('Cross-origin iframe detected, anchoring to local body.', 'GlobalBarUI', 'debug');
-        }
         
         // Use Popover API to escape ALL CSS containment (transforms, overflow: hidden)
         if ('popover' in bar) {

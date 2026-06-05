@@ -138,6 +138,21 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             }
         }
 
+        // Adopt the bookmark button if it was injected early by bookmarks.js
+        const adoptBookmark = () => {
+            const btn = document.querySelector('.ypp-capture-btn');
+            if (btn && btn.parentElement !== container) {
+                btn.className = 'ypp-action-btn ypp-capture-btn';
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`;
+                container.appendChild(btn);
+            }
+        };
+        adoptBookmark();
+        
+        // Also watch for it in case bookmarks.js injects late
+        const observer = new MutationObserver(adoptBookmark);
+        observer.observe(controls, { childList: true, subtree: true });
+
         controls.insertBefore(container, controls.firstChild);
         this.injectedButtons = true;
     }

@@ -55,7 +55,7 @@
                 "*://www.youtube.com/*"
             ],
             "run_at": "document_idle",
-            "all_frames": true,
+            "all_frames": false,
             "js": [
                 "dist/global-bar-external.js"
             ]

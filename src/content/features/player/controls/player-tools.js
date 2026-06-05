@@ -192,7 +192,7 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
                  el: input
             };
             
-            window.YPP.ui.mount('playerControls', component, 'prepend');
+            window.YPP.ui.manager.mount('playerControls', component, 'prepend');
         }
     }
 
