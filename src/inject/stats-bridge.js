@@ -23,9 +23,10 @@
     window.addEventListener('ypp-cmd-toggle-stats', (e) => {
         if (e.detail && e.detail.enabled) {
             if (!statsInterval) {
-                statsInterval = setInterval(broadcastStats, 1000);
+                statsInterval = setInterval(() => {
+                    if (!document.hidden) broadcastStats();
+                }, 1000);
                 broadcastStats(); // Immediate update
-                // console.log(TAG, 'Stats broadcasting started');
             }
         } else {
             if (statsInterval) {

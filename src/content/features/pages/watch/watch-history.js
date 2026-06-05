@@ -20,8 +20,8 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
         this.lastTickTime = 0;
         this.isTracking = false;
         
-        this.flushTimer = null;
         this.videoElement = null;
+        this.lastFlushTime = 0;
         this.lastAlertTime = 0; // Timestamp of last alert shown (prevents spam)
 
         // Binds
@@ -36,8 +36,10 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
     async enable() {
         await super.enable();
         
-        this.flushTimer = setInterval(this.saveData, this.FLUSH_INTERVAL);
         this.addListener(window, 'beforeunload', this.saveData);
+        this.addListener(document, 'visibilitychange', () => {
+            if (document.hidden) this.saveData();
+        });
         
         this._injectAlertStyles();
 
@@ -49,10 +51,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
     async disable() {
         await super.disable();
         
-        if (this.flushTimer) {
-            clearInterval(this.flushTimer);
-            this.flushTimer = null;
-        }
+        this.saveData();
         
         this.stopTracking();
         document.querySelector('.ypp-watch-alert')?.remove();
@@ -100,7 +99,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
         this.isTracking = true;
         this.lastTickTime = Date.now();
 
-        setTimeout(() => this.extractMetadata(), 1000);
+        this.extractMetadata();
 
         this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
         this.videoElement.addEventListener('play', this.handlePlay);
@@ -124,10 +123,14 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
         this.sessionSeconds = 0;
     }
 
-    extractMetadata() {
+    async extractMetadata() {
         try {
-             const SELECTORS = window.YPP.CONSTANTS?.SELECTORS?.METADATA_SELECTORS || { TITLE: [], CHANNEL: [] };
+             const SELECTORS = window.YPP.CONSTANTS?.SELECTORS?.METADATA_SELECTORS || { TITLE: ['h1.ytd-watch-metadata'], CHANNEL: ['ytd-video-owner-renderer #channel-name a'] };
              
+             // Wait for primary title selector to ensure DOM is ready
+             const primaryTitleSelector = SELECTORS.TITLE[0] || 'h1.ytd-watch-metadata';
+             await this.waitForElement(primaryTitleSelector, 5000);
+
              const titleEl = SELECTORS.TITLE.map(s => document.querySelector(s)).find(el => el) 
                              || document.querySelector('h1.ytd-watch-metadata');
 
@@ -159,6 +162,12 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
              this.sessionSeconds += (delta / 1000);
         }
         this.lastTickTime = now;
+
+        if (!this.lastFlushTime) this.lastFlushTime = now;
+        if (now - this.lastFlushTime >= this.FLUSH_INTERVAL) {
+            this.saveData();
+            this.lastFlushTime = now;
+        }
     }
 
     async saveData() {

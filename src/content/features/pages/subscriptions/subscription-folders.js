@@ -111,27 +111,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         document.head.appendChild(style);
     }
 
-    disable() {
-        this.enabled = false;
-        // Cancel any pending retry timers so they don't fire against a torn-down DOM.
-        clearTimeout(this._filterRetry500);
-        clearTimeout(this._filterRetry1200);
-        clearTimeout(this._unresolvedRetryTimer);
-        // Unregister only OUR observer slots — do NOT call observer.stop() as it
-        // is the shared observer used by all features.
-        this.observer.unregister('fallback-navigation');
-        this.observer.unregister('feed-filter-loop');
-        // Remove navigation listeners added in setupNavigationListener()
-        document.removeEventListener('yt-navigate-finish', this._boundHandleNav);
-        window.removeEventListener('popstate', this._boundHandlePopstate);
-        document.body.classList.remove('ypp-sub-folders-active');
 
-        const style = document.getElementById('ypp-sub-grid-override');
-        if (style) style.remove();
-
-        this.ui.removeFilterChips();
-        this.ui.removeGuideFolders();
-    }
 
     // =========================================================================
     // LIFECYCLE MANAGER CONTRACT
@@ -201,6 +181,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     async disable() {
         await super.disable();
 
+        clearTimeout(this._filterRetry500);
+        clearTimeout(this._filterRetry1200);
+        clearTimeout(this._unresolvedRetryTimer);
+
         // Cancel debounced filters
         if (this._debouncedApplyFilters?.cancel) {
             this._debouncedApplyFilters.cancel();
@@ -218,10 +202,6 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this.ui._popoverClickOutsideHandler = null;
             this.ui._popoverListenerAttached = false;
         }
-
-        // Remove Navigation listeners
-        document.removeEventListener('yt-navigate-finish', this._boundHandleNav);
-        window.removeEventListener('popstate', this._boundHandlePopstate);
 
         // Remove DOM nodes
         this.ui?.removeGuideFolders?.();
@@ -243,6 +223,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.observer?.unregister?.('feed-card-badges');
         this.observer?.unregister?.('channel-badge');
         this.observer?.unregister?.('fallback-navigation');
+        this.observer?.unregister?.('feed-filter-loop');
 
         // Reset feed cards to visible
         document.querySelectorAll('ytd-rich-item-renderer.ypp-filtered-out').forEach(card => {
@@ -255,9 +236,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     setupNavigationListener() {
         this.handleNavigation();
-        // Use stored bound references so they can be removed in disable()
-        document.addEventListener('yt-navigate-finish', this._boundHandleNav);
-        window.addEventListener('popstate', this._boundHandlePopstate);
+        this.addListener(window, 'yt-navigate-finish', this._boundHandleNav);
+        this.addListener(window, 'popstate', this._boundHandlePopstate);
 
         this.observer.register('fallback-navigation', 'ytd-app', () => {
             if (this.settings?.enableSubsManager !== false && !document.getElementById('ypp-sub-folders-container')) {

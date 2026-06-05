@@ -37,7 +37,7 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
 
     run(settings) {
         // Listen for navigations to refresh cached elements
-        window.addEventListener('yt-navigate-finish', this._handleNavigation);
+        this.addListener(window, 'yt-navigate-finish', this._handleNavigation);
         this.update(settings);
     }
 
@@ -57,6 +57,7 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
     disable() {
         this.isEnabled = false;
         this.toggleZen(false);
+        super.disable();
     }
 
     _handleNavigation() {

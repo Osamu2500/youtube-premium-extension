@@ -31,7 +31,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         this.isActive = true;
         
         // Listen for navigation
-        window.addEventListener('yt-navigate-finish', this.handleNavigation);
+        this.addListener(window, 'yt-navigate-finish', this.handleNavigation);
         
         // Initial check
         if (this.isWatchPage()) {
@@ -42,7 +42,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
     disable() {
         if (!this.isActive) return;
         this.isActive = false;
-        window.removeEventListener('yt-navigate-finish', this.handleNavigation);
+        super.disable();
     }
 
     isWatchPage() {

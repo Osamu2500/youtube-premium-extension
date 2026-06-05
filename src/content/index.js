@@ -86,6 +86,7 @@ import './features/player/global-bar-ui.js';
 import './features/player/global-bar.js';
 import './features/player/controls/player-tools.js';
 import './features/player/automation/auto-like.js';
+import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
 import './features/player/controls/mini-player.js';

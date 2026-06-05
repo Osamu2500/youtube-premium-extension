@@ -111,7 +111,7 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
         if (!video) return;
 
         const currentTime = video.currentTime;
-        const videoId = this.utils.getVideoId();
+        const videoId = new URLSearchParams(window.location.search).get('v') || '';
         const title = this._getVideoTitle();
         
         // Extract caption text

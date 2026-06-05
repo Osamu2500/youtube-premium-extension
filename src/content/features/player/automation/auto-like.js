@@ -39,58 +39,66 @@ window.YPP.features.AutoLike = class AutoLike
         this._waitForPercentage(videoId);
     }
 
-    _waitForPercentage(videoId) {
-        const video = document.querySelector('video.html5-main-video');
-        if (!video) {
-            setTimeout(() => this._waitForPercentage(videoId), 1000);
-            return;
-        }
+    async _waitForPercentage(videoId) {
+        try {
+            const video = await this.waitForElement('video.html5-main-video', 15000);
+            if (!video) return;
 
-        const checkProgress = () => {
-            const currentUrl = window.location.href;
-            const currentVideoId = currentUrl.match(/[?&]v=([^&]+)/)?.[1];
-            
-            // Abort if user navigated away
-            if (currentVideoId !== videoId) {
-                video.removeEventListener('timeupdate', checkProgress);
+            const checkProgress = () => {
+                const currentUrl = window.location.href;
+                const currentVideoId = currentUrl.match(/[?&]v=([^&]+)/)?.[1];
+                
+                // Abort if user navigated away
+                if (currentVideoId !== videoId) {
+                    video.removeEventListener('timeupdate', checkProgress);
+                    return;
+                }
+
+                const percentage = (video.currentTime / video.duration) * 100;
+                if (percentage >= 50 || video.ended) {
+                    video.removeEventListener('timeupdate', checkProgress);
+                    this._waitAndLike(videoId);
+                }
+            };
+
+            video.addEventListener('timeupdate', checkProgress);
+        } catch (e) {
+            // Timeout or abort
+        }
+    }
+
+    async _waitAndLike(videoId) {
+        try {
+            let likeBtn = this._getLikeButton();
+            if (!likeBtn) {
+                // Wait up to 10 seconds for the button to appear
+                likeBtn = await this.waitForElement(
+                    'ytd-watch-metadata ytd-toggle-button-renderer:first-child button, segmented-like-dislike-button-view-model button:first-child, like-button-view-model button, [aria-label*="like this video"], [aria-label*="I like this"]',
+                    10000
+                );
+            }
+            if (!likeBtn) likeBtn = this._getLikeButton();
+            if (!likeBtn) return;
+
+            // Check if already liked — do NOT interfere
+            const isLiked = this._isAlreadyLiked(likeBtn);
+            if (isLiked) {
+                this._attempted.add(videoId);
                 return;
             }
 
-            const percentage = (video.currentTime / video.duration) * 100;
-            if (percentage >= 50 || video.ended) {
-                video.removeEventListener('timeupdate', checkProgress);
-                this._waitAndLike(videoId);
-            }
-        };
-
-        video.addEventListener('timeupdate', checkProgress);
-    }
-
-    _waitAndLike(videoId, attempts = 0) {
-        if (attempts > 20) return; // Give up after 10 seconds
-
-        const likeBtn = this._getLikeButton();
-        if (!likeBtn) {
-            setTimeout(() => this._waitAndLike(videoId, attempts + 1), 500);
-            return;
-        }
-
-        // Check if already liked — do NOT interfere
-        const isLiked = this._isAlreadyLiked(likeBtn);
-        if (isLiked) {
+            // Mark as attempted before clicking to prevent double-click
             this._attempted.add(videoId);
-            return;
+
+            // Click the like button
+            likeBtn.click();
+
+            window.YPP.Utils?.log(
+                `Auto-liked video: ${videoId}`, 'AUTO-LIKE', 'info'
+            );
+        } catch (e) {
+            // Timeout or abort
         }
-
-        // Mark as attempted before clicking to prevent double-click
-        this._attempted.add(videoId);
-
-        // Click the like button
-        likeBtn.click();
-
-        window.YPP.Utils?.log(
-            `Auto-liked video: ${videoId}`, 'AUTO-LIKE', 'info'
-        );
     }
 
     _getLikeButton() {

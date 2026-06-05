@@ -127,7 +127,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         try {
             this._isEnabled = true;
 
-            window.addEventListener('yt-navigate-finish', this._handleNavigation);
+            this.addListener(window, 'yt-navigate-finish', this._handleNavigation);
 
             this._searchViewMode.enable();
 
@@ -153,7 +153,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         );
         document.body.classList.remove('ypp-filter-pending');
 
-        window.removeEventListener('yt-navigate-finish', this._handleNavigation);
+        super.disable();
     }
 
     // =========================================================================
