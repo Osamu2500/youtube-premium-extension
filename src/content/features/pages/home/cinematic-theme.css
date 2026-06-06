@@ -453,7 +453,7 @@ body.cinematic-home .netflix-hero-buttons .netflix-unmute-button {
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
   display: flex;
-  opacity: 0;
+  opacity: 1 !important;
 }
 
 body.cinematic-home .netflix-unmute-button:hover {

@@ -242,9 +242,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             const check = setInterval(() => {
                 attempts++;
                 const preview = document.querySelector('ytd-video-preview');
-                if (preview || attempts > 20) {
+                // Increase timeout to 10 seconds (100 attempts) to account for Autoplay policies
+                if (preview || attempts > 100) {
                     clearInterval(check);
-                    resolve(preview);
+                    resolve(preview || null);
                 }
             }, 100);
         });
@@ -261,15 +262,14 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             return;
         }
 
-        const preview = await this._waitForPreview(videoElement);
-        if (!preview) {
-            this._heroState.status = 'inactive';
-            return;
-        }
-
         const heroWrapper = document.createElement('div');
         heroWrapper.className = 'netflix-hero fading';
         this._heroState.heroElement = heroWrapper;
+        
+        // Show thumbnail immediately so the screen is never blank
+        heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
+        heroWrapper.style.backgroundSize = 'cover';
+        heroWrapper.style.backgroundPosition = 'center';
         
         const navHTML = `
           <div class="netflix-hero-nav">
@@ -283,76 +283,12 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         `;
         heroWrapper.insertAdjacentHTML('afterbegin', navHTML);
 
-        // Insert hero at document.body level so position:fixed is always
-        // anchored to the true viewport. Inserting it inside YouTube's
-        // component tree risks landing inside a transformed/filtered ancestor
-        // which silently converts fixed → absolute in CSS.
         document.body.appendChild(heroWrapper);
-        heroWrapper.appendChild(preview);
 
-        // ── Override ytd-video-preview inline styles ──────────────────────────
-        // YouTube sets dimension/position via JS using setProperty('...', '...', 'important')
-        // which produces inline !important styles that CSS rules CANNOT beat.
-        // We fight back with the same technique, and watch for changes across the subtree.
-        let previewStyleObserver;
-        
-        const applyFullscreen = (el) => {
-            if (!el) return;
-            // Only set if not already set to avoid unnecessary reflows/loops
-            if (el.style.getPropertyValue('width') !== '100%') {
-                el.style.setProperty('position', 'absolute', 'important');
-                el.style.setProperty('top', '0', 'important');
-                el.style.setProperty('left', '0', 'important');
-                el.style.setProperty('width', '100%', 'important');
-                el.style.setProperty('height', '100%', 'important');
-                el.style.setProperty('max-width', 'none', 'important');
-                el.style.setProperty('max-height', 'none', 'important');
-                el.style.setProperty('transform', 'none', 'important');
-                el.style.setProperty('border-radius', '0', 'important');
-                el.style.setProperty('margin', '0', 'important');
-                el.style.setProperty('padding', '0', 'important');
-            }
-        };
-
-        const forcePreviewFullscreen = () => {
-            if (previewStyleObserver) previewStyleObserver.disconnect();
-            
-            applyFullscreen(preview);
-            
-            // Apply to all intermediate containers that might restrict sizing
-            const containers = preview.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container');
-            containers.forEach(applyFullscreen);
-
-            // Force the actual video element to break out and be fixed 100vw/100vh
-            const videoEl = preview.querySelector('video');
-            if (videoEl && videoEl.style.getPropertyValue('width') !== '100vw') {
-                videoEl.style.setProperty('position', 'fixed', 'important');
-                videoEl.style.setProperty('top', '0', 'important');
-                videoEl.style.setProperty('left', '0', 'important');
-                videoEl.style.setProperty('width', '100vw', 'important');
-                videoEl.style.setProperty('height', '100vh', 'important');
-                videoEl.style.setProperty('min-width', '100vw', 'important');
-                videoEl.style.setProperty('min-height', '100vh', 'important');
-                videoEl.style.setProperty('max-width', 'none', 'important');
-                videoEl.style.setProperty('max-height', 'none', 'important');
-                videoEl.style.setProperty('object-fit', 'cover', 'important');
-                // We do NOT override transform here, because our CSS needs to apply the KenBurns animation (transform: scale).
-            }
-            
-            if (previewStyleObserver) {
-                previewStyleObserver.observe(preview, { 
-                    attributes: true, 
-                    attributeFilter: ['style'], 
-                    subtree: true,
-                    childList: true 
-                });
-            }
-        };
-
-        previewStyleObserver = new MutationObserver(forcePreviewFullscreen);
-        this._heroState.previewStyleObserver = previewStyleObserver;
-        forcePreviewFullscreen(); // Trigger first run and start observing
-        // ─────────────────────────────────────────────────────────────────────
+        // Hide native YouTube volume buttons in the top right
+        const hideNativeVolume = document.createElement('style');
+        hideNativeVolume.textContent = '.ytp-mute-button, .ytp-volume-area { display: none !important; }';
+        heroWrapper.appendChild(hideNativeVolume);
 
         const gradient = document.createElement('div');
         gradient.className = 'netflix-hero-gradient';
@@ -366,9 +302,71 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         this._heroState.status = 'ready';
         this._updateHeroContent(videoElement);
 
-        // Trigger fade in animation
         heroWrapper.offsetHeight;
         heroWrapper.classList.remove('fading');
+
+        // Wait for preview asynchronously so UI loads immediately
+        this._waitForPreview(videoElement).then(preview => {
+            if (!preview || this._heroState.heroElement !== heroWrapper) return;
+
+            // Insert preview behind the gradient
+            heroWrapper.insertBefore(preview, gradient);
+
+            let previewStyleObserver;
+            
+            const applyFullscreen = (el) => {
+                if (!el) return;
+                if (el.style.getPropertyValue('width') !== '100%') {
+                    el.style.setProperty('position', 'absolute', 'important');
+                    el.style.setProperty('top', '0', 'important');
+                    el.style.setProperty('left', '0', 'important');
+                    el.style.setProperty('width', '100%', 'important');
+                    el.style.setProperty('height', '100%', 'important');
+                    el.style.setProperty('max-width', 'none', 'important');
+                    el.style.setProperty('max-height', 'none', 'important');
+                    el.style.setProperty('transform', 'none', 'important');
+                    el.style.setProperty('border-radius', '0', 'important');
+                    el.style.setProperty('margin', '0', 'important');
+                    el.style.setProperty('padding', '0', 'important');
+                }
+            };
+
+            const forcePreviewFullscreen = () => {
+                if (previewStyleObserver) previewStyleObserver.disconnect();
+                
+                applyFullscreen(preview);
+                
+                const containers = preview.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container');
+                containers.forEach(applyFullscreen);
+
+                const videoEl = preview.querySelector('video');
+                if (videoEl && videoEl.style.getPropertyValue('width') !== '100vw') {
+                    videoEl.style.setProperty('position', 'fixed', 'important');
+                    videoEl.style.setProperty('top', '0', 'important');
+                    videoEl.style.setProperty('left', '0', 'important');
+                    videoEl.style.setProperty('width', '100vw', 'important');
+                    videoEl.style.setProperty('height', '100vh', 'important');
+                    videoEl.style.setProperty('min-width', '100vw', 'important');
+                    videoEl.style.setProperty('min-height', '100vh', 'important');
+                    videoEl.style.setProperty('max-width', 'none', 'important');
+                    videoEl.style.setProperty('max-height', 'none', 'important');
+                    videoEl.style.setProperty('object-fit', 'cover', 'important');
+                }
+                
+                if (previewStyleObserver) {
+                    previewStyleObserver.observe(preview, { 
+                        attributes: true, 
+                        attributeFilter: ['style'], 
+                        subtree: true,
+                        childList: true 
+                    });
+                }
+            };
+
+            previewStyleObserver = new MutationObserver(forcePreviewFullscreen);
+            if (this._heroState) this._heroState.previewStyleObserver = previewStyleObserver;
+            forcePreviewFullscreen();
+        });
     }
 
     _escapeHTML(str) {
