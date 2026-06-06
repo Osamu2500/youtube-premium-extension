@@ -386,14 +386,33 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const existingContent = this._heroState.heroElement.querySelector('.netflix-hero-content');
         if (!existingContent) return;
 
+        const getText = (el) => {
+            if (!el) return null;
+            let t = el.getAttribute('title') || el.getAttribute('aria-label') || el.innerText || el.textContent;
+            return t ? t.trim() : null;
+        };
+
         const titleEl = videoElement.querySelector('#video-title, #video-title-link, yt-formatted-string.ytd-rich-grid-media');
-        const title = titleEl ? (titleEl.title || titleEl.textContent?.trim() || 'Featured Video') : 'Featured Video';
+        let title = getText(titleEl);
         
         const avatarEl = videoElement.querySelector('yt-avatar-shape img, #avatar-link img, #avatar img');
         const avatar = avatarEl ? avatarEl.src : null;
         
         const channelEl = videoElement.querySelector('ytd-channel-name a, ytd-channel-name yt-formatted-string, #channel-name a, yt-formatted-string[id="text"].ytd-channel-name');
-        const channelName = channelEl ? (channelEl.textContent?.trim() || 'YouTube Creator') : 'YouTube Creator';
+        let channelName = getText(channelEl);
+        
+        // If data is still loading from Polymer data binding, wait and retry!
+        if (!title || !channelName || title === '' || channelName === '') {
+            if (!videoElement._heroRetryCount) videoElement._heroRetryCount = 0;
+            if (videoElement._heroRetryCount < 15) {
+                videoElement._heroRetryCount++;
+                setTimeout(() => this._updateHeroContent(videoElement), 200);
+                return;
+            }
+        }
+        
+        title = title || 'Featured Video';
+        channelName = channelName || 'YouTube Creator';
         
         const titleLink = videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail');
         const url = titleLink?.href || '#';
