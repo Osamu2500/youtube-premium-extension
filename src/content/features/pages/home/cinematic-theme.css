@@ -208,8 +208,8 @@ body.cinematic-home .netflix-hero {
   /* True fullscreen — escape the page-manager box */
   width: 100vw !important;
   height: 100vh;
-  /* Behind cards (z-index 9) but above page background */
-  z-index: 1 !important;
+  /* Auto z-index prevents establishing a stacking context so the native preview can interleave */
+  z-index: auto !important;
   pointer-events: none !important;
   background: #0f0f0f;
   overflow: hidden;
