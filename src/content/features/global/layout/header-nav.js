@@ -121,8 +121,14 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         this._scheduleInjection();
     }
 
-    _scheduleInjection() {
-        requestAnimationFrame(() => this._injectButtons());
+    _scheduleInjection(retryCount = 0) {
+        requestAnimationFrame(() => {
+            const injected = this._injectButtons();
+            // If injection was skipped because UIManager wasn't ready yet, retry
+            if (!injected && retryCount < 10) {
+                setTimeout(() => this._scheduleInjection(retryCount + 1), 200);
+            }
+        });
     }
 
     _injectButtons() {
@@ -139,18 +145,18 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
         const activeButtons = allButtons.filter(btn => s[btn.setting]);
 
-        if (activeButtons.length === 0) return;
+        if (activeButtons.length === 0) return true; // nothing to inject — not an error
 
         // If already mounted and still in DOM, just update active states
         const existing = document.querySelector('[data-ypp-id="header-nav-group"]');
         if (existing) {
             this._updateActiveStates();
-            return;
+            return true; // already injected
         }
 
         if (!window.YPP.ui?.manager || !window.YPP.ui?.components?.createButton) {
             this.utils?.log('UIManager or button factory not ready yet', 'HEADERNAV', 'warn');
-            return;
+            return false; // signal to caller: retry needed
         }
 
         if (!this.navGroup) {
@@ -167,6 +173,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         window.YPP.ui.manager.mount('headerRight', { id: 'header-nav-group', el: this.navGroup });
 
         this._updateActiveStates();
+        return true; // injection succeeded
     }
 
     _createButton(container, label, url, svgContent, idSuffix) {

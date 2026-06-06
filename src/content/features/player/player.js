@@ -70,7 +70,9 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             const elements = await Utils.pollFor(() => {
                 const video = document.querySelector('video');
                 const controls = document.querySelector('.ytp-right-controls');
-                if (video && controls && video.readyState >= 1) {
+                // readyState >= 0 means the element exists — we don't need media
+                // data loaded yet; we just need the DOM nodes for injection.
+                if (video && controls) {
                     return { video, controls };
                 }
                 return null;
@@ -122,21 +124,22 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
 
     onPageChange(url) {
         if (!this.isEnabled) return;
+
+        // Always remove stale controls when navigating — even on watch pages
+        // a previous video's .ypp-player-controls may still be in the DOM
+        // if YouTube did a partial rerender, blocking re-injection.
+        const stale = document.querySelector('.ypp-player-controls');
+        if (stale) {
+            stale.remove();
+        }
+        this.injectedButtons = false;
+
         if (!url.includes('/watch')) {
-            const controls = document.querySelector('.ypp-player-controls');
-            if (controls) controls.remove();
-            this.injectedButtons = false;
             return;
         }
         
-        // Re-inject on navigation if missing
-        const video = document.querySelector('video');
-        const controls = document.querySelector('.ytp-right-controls');
-        if (video && controls && !document.querySelector('.ypp-player-controls')) {
-            this.injectControls(video, controls);
-        } else if (!document.querySelector('.ypp-player-controls')) {
-            this.run();
-        }
+        // Re-inject on navigation
+        this.run();
     }
 
     handleAutoPiP(video) {

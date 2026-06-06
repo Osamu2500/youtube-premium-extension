@@ -477,7 +477,6 @@ html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) #metadata-line 
 }
 
 /* YouTube Dropdowns & Custom Popups */
-html.yt-premium-plus-theme tp-yt-iron-dropdown,
 html.yt-premium-plus-theme ytd-menu-popup-renderer,
 html.yt-premium-plus-theme ytd-multi-page-menu-renderer,
 html.yt-premium-plus-theme .ytp-popup {
@@ -485,6 +484,17 @@ html.yt-premium-plus-theme .ytp-popup {
   overflow: hidden !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   background: rgba(20, 20, 20, 0.65) !important;
+  backdrop-filter: blur(32px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0,0,0,0.6) !important;
+}
+
+/* tp-yt-iron-dropdown: must NOT have overflow:hidden — YouTube positions it via JS
+   in the next tick; overflow:hidden before positioning causes content clipping.
+   Also needs border-radius applied to inner content, not the wrapper. */
+html.yt-premium-plus-theme tp-yt-iron-dropdown {
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(32px) saturate(1.5) !important;
   -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0,0,0,0.6) !important;
@@ -583,11 +593,21 @@ html.yt-premium-plus-theme ytd-active-account-header-renderer #channel-handle {
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-html.yt-premium-plus-theme tp-yt-iron-dropdown,
+/* Non-iron-dropdown popups animate immediately — their position is already known */
 html.yt-premium-plus-theme ytd-menu-popup-renderer,
 html.yt-premium-plus-theme ytd-multi-page-menu-renderer,
 html.yt-premium-plus-theme .ytp-popup {
   animation: ypp-popup-enter 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  transform-origin: top right !important;
+}
+
+/* tp-yt-iron-dropdown: YouTube positions it via JS (iron-overlay) AFTER the element
+   is added to DOM. Without a delay, the animation starts at left:0/top:0 causing
+   the visible 'jump from left' bug. The 80ms delay lets YouTube place it first. */
+html.yt-premium-plus-theme tp-yt-iron-dropdown {
+  animation: ypp-popup-enter 0.22s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  animation-delay: 80ms !important;
+  animation-fill-mode: both !important; /* stays opacity:0 during the delay */
   transform-origin: top right !important;
 }
 

@@ -1,0 +1,152 @@
+/* ============================================================================
+** Core Variables and Root Settings
+============================================================================ */
+:root {
+  --netflix-red: #e50914;
+  --netflix-black: #141414;
+  --netflix-dark-gray: #181818;
+  --netflix-light-gray: #e5e5e5;
+}
+
+/* ============================================================================
+** Base Layout and Global Styles
+============================================================================ */
+body {
+  width: 200px;
+  padding: 16px;
+  font-family: Arial, sans-serif;
+  background: var(--netflix-black);
+  color: var(--netflix-light-gray);
+  animation: fadeIn 0.3s ease-in-out;
+  font-size: 16px; 
+
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+** Toggle Container Styles
+============================================================================ */
+.controls-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.toggle-label {
+  font-size: 1em;
+  font-weight: 400;
+  user-select: none;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #373737;
+}
+
+/* Hide toggle containers when Cinematic is disabled, except for the main toggle */
+.cinematic-disabled .toggle-container:not(:first-child) {
+  display: none;
+}
+
+/* ============================================================================
+** YouTube Button (Primary CTA)
+============================================================================ */
+.youtube-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--netflix-red);
+  color: white;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1em;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.youtube-button:hover {
+  background: #f40612;
+  transform: scale(1.02);
+}
+
+.youtube-button:active {
+  transform: scale(0.98);
+}
+
+/* ============================================================================
+** Switch Component Styling
+============================================================================ */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--netflix-dark-gray);
+  transition: background-color 0.4s ease-in-out;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--netflix-light-gray);
+  transition: transform 0.4s ease-in-out;
+  border-radius: 50%;
+}
+
+/* ============================================================================
+** Toggle States
+============================================================================ */
+input:checked + .slider {
+  background-color: var(--netflix-red);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Optional hover effects */
+.slider:hover {
+  box-shadow: 0 0 1px var(--netflix-red);
+}
+
+input:checked + .slider:hover:before {
+  box-shadow: 0 0 2px var(--netflix-light-gray);
+}

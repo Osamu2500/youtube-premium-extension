@@ -37,12 +37,22 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         await super.enable();
         try {
             if (window.YPP?.sharedObserver) {
+                // Broaden selector to catch all known YouTube account menu variants
                 window.YPP.sharedObserver.register(
                     'account-menu-scanner',
-                    'ytd-multi-page-menu-renderer[slot="menu"], tp-yt-iron-dropdown ytd-multi-page-menu-renderer',
+                    'ytd-multi-page-menu-renderer[slot="menu"], tp-yt-iron-dropdown ytd-multi-page-menu-renderer, ytd-multi-page-menu-renderer',
                     () => this._onMutation()
                 );
             }
+
+            // Also watch for the iron-dropdown itself becoming visible (opened)
+            this._dropdownObserver = new MutationObserver(() => {
+                if (!this._injected) this._onMutation();
+            });
+            const watchTarget = document.querySelector('#masthead tp-yt-iron-dropdown') ||
+                                document.querySelector('ytd-popup-container') ||
+                                document.body;
+            this._dropdownObserver.observe(watchTarget, { childList: true, subtree: true, attributes: true, attributeFilter: ['opened', 'aria-hidden'] });
 
             this._pageChangedHandler = () => this._cleanup();
             window.YPP.events?.on('page:changed', this._pageChangedHandler);
@@ -55,6 +65,10 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         await super.disable();
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('account-menu-scanner');
+        }
+        if (this._dropdownObserver) {
+            this._dropdownObserver.disconnect();
+            this._dropdownObserver = null;
         }
         if (this._pageChangedHandler) {
             window.YPP.events?.off('page:changed', this._pageChangedHandler);

@@ -39,7 +39,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         this._onNavigateStart = this._onNavigateStart.bind(this);
         this._onNavigateFinish = this._onNavigateFinish.bind(this);
         this._playNextVideo = this._playNextVideo.bind(this);
-        this._periodicCheck = this._periodicCheck.bind(this);
     }
 
     getConfigKey() {
@@ -56,6 +55,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             }
             return videoId || '';
         } catch(e) {
+            if (window.YPP?.errorHandler) window.YPP.errorHandler.handleError(e, 'CinematicMode');
             return '';
         }
     }
@@ -96,7 +96,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 if (heroButton) {
                     heroButton.classList.toggle('muted', this._isMuted);
                     const html = this._generateMuteButtonHTML(this._isMuted);
-                    heroButton.innerHTML = window.YPP.utils.sanitizeHTML ? window.YPP.utils.sanitizeHTML(html) : html;
+                    heroButton.innerHTML = html;
                 }
                 this._syncMuteState();
             }
@@ -119,7 +119,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     async onPageChange() {
         const isHome = window.location.pathname === '/' || window.location.pathname.includes('/feed/subscriptions');
         
-        if (!isHome || !this.settings.cinematicMode) {
+        if (!isHome || !this.settings?.cinematicMode) {
             this._teardown();
             return;
         }
@@ -137,22 +137,15 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         document.body.classList.add('cinematic-home');
 
         // Drawer hide retries
-        const hideDrawer = () => {
-            const appDrawer = document.querySelector('tp-yt-app-drawer');
+        this.waitForElement('tp-yt-app-drawer', 5000).then(appDrawer => {
             if (appDrawer) appDrawer.removeAttribute('opened');
-        };
-        [0, 100, 500, 1000, 2000, 3000].forEach(delay => setTimeout(hideDrawer, delay));
+        });
 
         this._setupScrollHandler();
         this._lastPathname = window.location.pathname;
 
         // Enforce darkmode
-        this._darkModeObserver = new MutationObserver(() => {
-            if (!document.documentElement.hasAttribute('dark')) {
-                document.documentElement.setAttribute('dark', '');
-            }
-        });
-        this._darkModeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['dark'] });
+        // Removed raw MutationObserver per architecture rules
 
         try {
             // Wait for grid to settle after YPP layout manager runs
@@ -163,15 +156,25 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             if (!anyItem) return;
 
             // Build the filtered queue to get the first VALID playable video.
+            this._cachedContents = document.querySelector('#contents');
+
             // We cannot use the raw first DOM element — it may be a Shorts shelf,
             // a promoted card, or an ad that has no ?v= URL, which would abort the hero.
-            this._updateVideoQueue();
+            
+            // Wait for at least one valid video title link to be stamped in the DOM
+            await this.pollFor(() => {
+                const grid = document.querySelector('ytd-rich-grid-renderer') || document.querySelector('#contents');
+                if (!grid) return false;
+                const link = grid.querySelector('a[href*="/watch?v="]');
+                return !!link && !!link.href;
+            }, 10000, 250);
 
-            // If the queue came back empty on first build, wait a bit more for
-            // YouTube to finish hydrating the video cards, then retry once.
+            await this._updateVideoQueue();
+
+            // If still empty, YouTube might be unusually slow, retry once after 1s
             if (this._videoQueue.length === 0) {
-                await new Promise(r => setTimeout(r, 1500));
-                this._updateVideoQueue();
+                await new Promise(r => setTimeout(r, 1000));
+                await this._updateVideoQueue();
             }
 
             const firstValid = this._videoQueue[0];
@@ -187,36 +190,77 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
             this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
             
-            // Set up periodic check
-            this._checkInterval = setInterval(this._periodicCheck, this.CONFIG.CHECK_INTERVAL);
+            // Periodic check removed for performance
         } catch(e) {
             window.YPP.utils.log("Cinematic Initialization Error", "CINEMATIC", "error", e);
         }
     }
 
-    // ─── Periodic Checker ─────────────────────────────────────────────────────
+    // ─── Hero Manager ─────────────────────────────────────────────────────────
 
-    _periodicCheck() {
-        if (!this._isUserHovering) {
-            const activePreview = document.querySelector('ytd-video-preview[active][playing]:not([hidden])');
-            if (!activePreview) {
-                const currentVideo = this._videoQueue[this._currentVideoIndex];
-                if (currentVideo && this._heroState.status === 'ready') {
-                    this._updateHeroContent(currentVideo);
-                    this._simulateHover(currentVideo);
-                }
+    _simulateHover(element) {
+        if (!element) return;
+        
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = 250;
+        const HOVER_EVENTS = ['mouseenter', 'mouseover', 'pointerenter'];
+
+        const attemptHover = (retryCount = 0) => {
+            const thumbnailContainer = element.querySelector('#thumbnail');
+            
+            if (!thumbnailContainer && retryCount < MAX_RETRIES) {
+                setTimeout(() => attemptHover(retryCount + 1), RETRY_DELAY);
+                return;
             }
-        }
+            if (!thumbnailContainer) return;
+
+            HOVER_EVENTS.forEach(eventType => {
+                [element, thumbnailContainer].forEach(target => {
+                    target.dispatchEvent(new MouseEvent(eventType, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    }));
+                });
+            });
+            
+            // Wait for YouTube to load and mute
+            setTimeout(() => {
+                if (!this._isMuted) this._syncMuteState();
+                this._updateMuteButtonVisibility();
+            }, 500);
+        };
+        
+        attemptHover();
     }
 
-    // ─── Hero Manager ─────────────────────────────────────────────────────────
+    async _waitForPreview(videoElement) {
+        return new Promise((resolve) => {
+            let attempts = 0;
+            this._simulateHover(videoElement);
+
+            const check = setInterval(() => {
+                attempts++;
+                const preview = document.querySelector('ytd-video-preview');
+                if (preview || attempts > 20) {
+                    clearInterval(check);
+                    resolve(preview);
+                }
+            }, 100);
+        });
+    }
 
     async _makeHeroPreview(videoElement) {
         if (this._heroState.status !== 'inactive') return;
         this._heroState.status = 'creating';
         this._heroState.currentVideo = videoElement;
 
-        // Wait for preview to be created by hover simulation
+        const videoId = this._extractVideoId(videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail, a[href*="/watch?v="]')?.href);
+        if (!videoId) {
+            this._heroState.status = 'inactive';
+            return;
+        }
+
         const preview = await this._waitForPreview(videoElement);
         if (!preview) {
             this._heroState.status = 'inactive';
@@ -224,7 +268,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         }
 
         const heroWrapper = document.createElement('div');
-        heroWrapper.className = 'netflix-hero';
+        heroWrapper.className = 'netflix-hero fading';
         this._heroState.heroElement = heroWrapper;
         
         const navHTML = `
@@ -239,10 +283,71 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         `;
         heroWrapper.insertAdjacentHTML('afterbegin', navHTML);
 
-        // Append hero to body so it isn't trapped by thumbnail overflow: hidden
+        // Insert hero at document.body level so position:fixed is always
+        // anchored to the true viewport. Inserting it inside YouTube's
+        // component tree risks landing inside a transformed/filtered ancestor
+        // which silently converts fixed → absolute in CSS.
         document.body.appendChild(heroWrapper);
         heroWrapper.appendChild(preview);
-        this._forceVideoSize(preview);
+
+        // ── Override ytd-video-preview inline styles ──────────────────────────
+        // YouTube sets dimension/position via JS using setProperty('...', '...', 'important')
+        // which produces inline !important styles that CSS rules CANNOT beat.
+        // We fight back with the same technique, and watch for changes across the subtree.
+        let previewStyleObserver;
+        
+        const applyFullscreen = (el) => {
+            if (!el) return;
+            // Only set if not already set to avoid unnecessary reflows/loops
+            if (el.style.getPropertyValue('width') !== '100%') {
+                el.style.setProperty('position', 'absolute', 'important');
+                el.style.setProperty('top', '0', 'important');
+                el.style.setProperty('left', '0', 'important');
+                el.style.setProperty('width', '100%', 'important');
+                el.style.setProperty('height', '100%', 'important');
+                el.style.setProperty('max-width', 'none', 'important');
+                el.style.setProperty('max-height', 'none', 'important');
+                el.style.setProperty('transform', 'none', 'important');
+                el.style.setProperty('border-radius', '0', 'important');
+                el.style.setProperty('margin', '0', 'important');
+                el.style.setProperty('padding', '0', 'important');
+            }
+        };
+
+        const forcePreviewFullscreen = () => {
+            if (previewStyleObserver) previewStyleObserver.disconnect();
+            
+            applyFullscreen(preview);
+            
+            // Apply to all intermediate containers that might restrict sizing
+            const containers = preview.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container');
+            containers.forEach(applyFullscreen);
+
+            // Force the actual video element to break out and be fixed 100vw/100vh
+            const videoEl = preview.querySelector('video');
+            if (videoEl && videoEl.style.getPropertyValue('width') !== '100vw') {
+                videoEl.style.setProperty('position', 'fixed', 'important');
+                videoEl.style.setProperty('top', '0', 'important');
+                videoEl.style.setProperty('left', '0', 'important');
+                videoEl.style.setProperty('width', '100vw', 'important');
+                videoEl.style.setProperty('height', '100vh', 'important');
+                videoEl.style.setProperty('min-width', '100vw', 'important');
+                videoEl.style.setProperty('min-height', '100vh', 'important');
+                videoEl.style.setProperty('max-width', 'none', 'important');
+                videoEl.style.setProperty('max-height', 'none', 'important');
+                videoEl.style.setProperty('object-fit', 'cover', 'important');
+                videoEl.style.setProperty('transform', 'none', 'important');
+            }
+            
+            if (previewStyleObserver) {
+                previewStyleObserver.observe(preview, { attributes: true, attributeFilter: ['style'], subtree: true });
+            }
+        };
+
+        previewStyleObserver = new MutationObserver(forcePreviewFullscreen);
+        this._heroState.previewStyleObserver = previewStyleObserver;
+        forcePreviewFullscreen(); // Trigger first run and start observing
+        // ─────────────────────────────────────────────────────────────────────
 
         const gradient = document.createElement('div');
         gradient.className = 'netflix-hero-gradient';
@@ -255,93 +360,21 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         this._setupPreviewChangeObserver();
         this._heroState.status = 'ready';
         this._updateHeroContent(videoElement);
+
+        // Trigger fade in animation
+        heroWrapper.offsetHeight;
+        heroWrapper.classList.remove('fading');
     }
 
-    _waitForPreview(videoElement) {
-        return new Promise(resolve => {
-            let resolved = false;
-            const done = (preview) => {
-                if (resolved) return;
-                resolved = true;
-                resolve(preview || null);
-            };
-
-            // Only look for the preview INSIDE the target video element.
-            // YouTube is a SPA and reuses a single <ytd-video-preview> node,
-            // moving it to whichever video is currently being hovered.
-            const existing = videoElement.querySelector('ytd-video-preview');
-            if (existing) return done(existing);
-
-            const observer = new MutationObserver(() => {
-                const preview = videoElement.querySelector('ytd-video-preview');
-                if (preview) {
-                    observer.disconnect();
-                    done(preview);
-                }
-            });
-            observer.observe(videoElement, { childList: true, subtree: true });
-            
-            // Link to controller so it gets cleaned up if cinematic mode is destroyed early
-            if (this._abortController) {
-                this._abortController.signal.addEventListener('abort', () => {
-                    observer.disconnect();
-                    done(null);
-                });
-            }
-            
-            let attempts = 0;
-            const maxAttempts = 10;
-            const tryHover = async () => {
-                if (resolved) return;
-                
-                await this._simulateHover(videoElement);
-                
-                if (resolved) return;
-                attempts++;
-                if (attempts < maxAttempts) {
-                    setTimeout(tryHover, 400);
-                } else {
-                    observer.disconnect();
-                    // Fallback: If it never appeared inside videoElement, try globally just in case
-                    done(videoElement.querySelector('ytd-video-preview') || document.querySelector('ytd-video-preview'));
-                }
-            };
-            tryHover();
-        });
-    }
-
-    _simulateHover(element) {
-        if (!element) return Promise.resolve();
-        return new Promise(resolve => {
-            const fire = (el) => {
-                const rect = el.getBoundingClientRect();
-                this.CONFIG.HOVER_EVENTS.forEach(eventType => {
-                    el.dispatchEvent(new MouseEvent(eventType, {
-                        bubbles: true, cancelable: true, view: window,
-                        clientX: rect.left + 10,
-                        clientY: rect.top + 10,
-                    }));
-                });
-            };
-            const attempt = (retries) => {
-                const thumbnailContainer = element.querySelector('#thumbnail, a#thumbnail, ytd-thumbnail a');
-                if (thumbnailContainer) {
-                    fire(element);
-                    fire(thumbnailContainer);
-                    setTimeout(() => {
-                        if (!this._isMuted) this._syncMuteState();
-                        this._updateMuteButtonVisibility();
-                        resolve();
-                    }, 800);
-                } else if (retries > 0) {
-                    setTimeout(() => attempt(retries - 1), 300);
-                } else {
-                    fire(element);
-                    resolve();
-                }
-            };
-            setTimeout(() => attempt(5), 100);
-        });
+    _escapeHTML(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag]));
     }
 
     _updateHeroContent(videoElement) {
@@ -350,34 +383,32 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const existingContent = this._heroState.heroElement.querySelector('.netflix-hero-content');
         if (!existingContent) return;
 
-        const title = videoElement.querySelector('#video-title')?.textContent?.trim() || 'Video Title';
+        const title = videoElement.querySelector('#video-title')?.textContent?.trim() || 'Featured Video';
         const avatar = videoElement.querySelector('yt-avatar-shape img, #avatar-link img, #avatar img')?.src || null;
-        const channelName = videoElement.querySelector('ytd-channel-name a, ytd-channel-name yt-formatted-string')?.textContent?.trim() || 'Channel Name';
+        const channelName = videoElement.querySelector('ytd-channel-name a, ytd-channel-name yt-formatted-string, #channel-name a')?.textContent?.trim() || 'YouTube Creator';
         const titleLink = videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail');
         const url = titleLink?.href || '#';
         const isRecent = this._isRecentlyAdded(videoElement);
-        
-        if (!title || !channelName) return;
 
         const rawHtml = `
-            <div class="channel-info" style="display: flex; align-items: center; gap: 15px; margin-bottom: 1.5rem;">
-                ${avatar ? `<img src="${avatar}" class="channel-avatar" style="border-radius: 100%; border: 1px solid rgba(255,255,255,0.7); width: 40px;" onerror="this.style.display='none'">` : ''}
-                <h2 class="channel-name" style="font-size: 1.5em; font-weight: normal;">${window.YPP.utils.escapeHTML(channelName)}</h2>
+            <div class="channel-info">
+                ${avatar ? `<img src="${avatar}" class="channel-avatar" onerror="this.style.display='none'">` : ''}
+                <h2 class="channel-name">${this._escapeHTML(channelName)}</h2>
             </div>   
-            ${isRecent ? `<span class="recently-badge" style="background-color: #e50914; color: white; padding: 6px 8px; border-radius: 4px; font-size: 15px; font-weight: 500; margin-bottom: 14px; display: inline-block;">Recently Added</span>` : ''}
-            <h1 style="font-size: 4em; margin-bottom: 2rem; max-width: 780px;">${window.YPP.utils.escapeHTML(title)}</h1>
-            <div class="netflix-hero-buttons" style="display: flex; gap: 1rem;">
-                <a class="netflix-play-button" href="${url}" style="background: white; color: black; display: flex; align-items: center; gap: 0.5rem; padding: 0.8em 2em; border-radius: 4px; font-size: 1.5em; text-decoration: none; font-weight: bold; cursor: pointer;">
-                    <svg viewBox="0 0 24 24" style="width: 24px; height: 24px;"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            ${isRecent ? `<span class="recently-badge">Recently Added</span>` : ''}
+            <h1>${this._escapeHTML(title)}</h1>
+            <div class="netflix-hero-buttons">
+                <button class="netflix-play-button">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
                     Play
-                </a>
-                <button class="netflix-unmute-button secondary" style="background-color: rgba(109, 109, 110, 0.7); color: white; display: flex; align-items: center; gap: 0.5rem; padding: 0.8em 2em; border: none; border-radius: 4px; font-size: 1.5em; cursor: pointer; transition: all 0.2s;">
+                </button>
+                <button class="netflix-unmute-button secondary">
                     ${this._generateMuteButtonHTML(this._isMuted)}
                 </button>
             </div>
         `;
 
-        existingContent.innerHTML = window.YPP.utils.sanitizeHTML ? window.YPP.utils.sanitizeHTML(rawHtml) : rawHtml;
+        existingContent.innerHTML = rawHtml;
         
         const unmuteBtn = existingContent.querySelector('.netflix-unmute-button');
         if (unmuteBtn) {
@@ -385,6 +416,16 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             unmuteBtn.addEventListener('click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 this._handleMuteToggle(unmuteBtn);
+            });
+        }
+        
+        const playBtn = existingContent.querySelector('.netflix-play-button');
+        if (playBtn) {
+            playBtn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                if (url && url !== '#') {
+                    window.location.href = url;
+                }
             });
         }
         
@@ -429,16 +470,21 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             
             button.classList.toggle('muted', this._isMuted);
             const html = this._generateMuteButtonHTML(this._isMuted);
-            button.innerHTML = window.YPP.utils.sanitizeHTML ? window.YPP.utils.sanitizeHTML(html) : html;
+            button.innerHTML = html;
             
-            window.YPP.utils.saveSettings({ cinematicMuted: this._isMuted });
-        } catch(e) {}
+            if (window.YPP?.StorageManager) window.YPP.StorageManager.set('cinematicMuted', this._isMuted);
+        } catch(e) {
+            if (window.YPP?.errorHandler) window.YPP.errorHandler.handleError(e, 'CinematicMode');
+        }
     }
 
+
+
     _syncMuteState() {
-        if (this._isFirefox) return;
+        // Native YouTube preview handles mute toggle via DOM
         const preview = document.querySelector('ytd-video-preview');
         const muteButton = preview?.querySelector('yt-mute-toggle-button button');
+        
         if (muteButton) {
             const isMutedNow = muteButton.getAttribute('aria-label')?.toLowerCase().includes('unmute');
             if (isMutedNow !== this._isMuted) {
@@ -453,198 +499,151 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     _setupPreviewChangeObserver() {
-        // Use real mouse events — CSS :hover is NOT a DOM attribute mutation,
-        // so MutationObserver cannot detect it. mouseover/mouseout are the correct APIs.
-        const contents = document.querySelector('#contents');
-        if (!contents) return;
+        if (this._heroState.observer) this._heroState.observer.disconnect();
 
-        contents.addEventListener('mouseover', (e) => {
-            const card = e.target.closest('ytd-rich-item-renderer');
-            if (!card) return;
-            if (!this._isUserHovering || this._heroState.currentVideo !== card) {
-                this._isUserHovering = true;
-                this._heroState.currentVideo = card;
-                clearTimeout(this._videoTimer);
-                this._updateHeroContent(card);
-                setTimeout(() => this._simulateHover(card), 50);
+        this._heroState.observer = new MutationObserver(() => {
+            const preview = document.querySelector('ytd-video-preview');
+            if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
+               // YouTube tried to take it back; steal it again!
+               this._heroState.heroElement.insertBefore(preview, this._heroState.heroElement.firstChild);
             }
-        }, { signal: this._abortController?.signal });
+        });
 
-        contents.addEventListener('mouseout', (e) => {
-            // Only fire when leaving the #contents container entirely
-            if (contents.contains(e.relatedTarget)) return;
-            if (this._isUserHovering) {
+        this._heroState.observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    _handleVideoEnter(card) {
+        if (!this._isUserHovering || this._heroState.currentVideo !== card) {
+            this._isUserHovering = true;
+            this._heroState.currentVideo = card;
+            clearTimeout(this._videoTimer);
+            this._updateHeroContent(card);
+            
+            this._simulateHover(card);
+        }
+    }
+
+    _handleVideoLeave(card) {
+        // Debounce to allow the next card's mouseenter to fire before reverting
+        setTimeout(() => {
+            if (this._heroState.currentVideo === card && this._isUserHovering) {
                 this._isUserHovering = false;
                 const currentVideo = this._videoQueue[this._currentVideoIndex];
                 if (currentVideo) {
                     this._updateHeroContent(currentVideo);
-                    setTimeout(() => {
-                        this._simulateHover(currentVideo);
-                        this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-                    }, 50);
+                    this._simulateHover(currentVideo);
+                    
+                    clearTimeout(this._videoTimer);
+                    this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
                 }
             }
-        }, { signal: this._abortController?.signal });
-
-        if (window.YPP?.sharedObserver) {
-            window.YPP.sharedObserver.register('cinematic-preview-stealer', 'ytd-video-preview', (elements) => {
-                const preview = elements[0] || document.querySelector('ytd-video-preview');
-                if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
-                    // Steal the preview back into our hero container on the body
-                    this._heroState.heroElement.appendChild(preview);
-                    
-                    // Re-append gradients and content to keep them above the video
-                    const gradient = this._heroState.heroElement.querySelector('.netflix-hero-gradient');
-                    const content = this._heroState.heroElement.querySelector('.netflix-hero-content');
-                    if (gradient) this._heroState.heroElement.appendChild(gradient);
-                    if (content) this._heroState.heroElement.appendChild(content);
-                    
-                    this._forceVideoSize(preview);
-                }
-            });
-        }
-    }
-
-    _forceVideoSize(preview) {
-        if (!preview) return;
-        
-        const setSize = (node) => {
-            if (!node) return;
-            node.style.setProperty('width', '100%', 'important');
-            node.style.setProperty('height', '100%', 'important');
-            node.style.setProperty('max-width', 'none', 'important');
-            node.style.setProperty('max-height', 'none', 'important');
-            node.style.setProperty('min-width', '100%', 'important');
-            node.style.setProperty('min-height', '100%', 'important');
-            node.style.setProperty('transform', 'none', 'important');
-            node.style.setProperty('border-radius', '0', 'important');
-            node.style.setProperty('margin', '0', 'important');
-            node.style.setProperty('padding', '0', 'important');
-        };
-
-        const stretchContainers = () => {
-            window.YPP.Utils.batch.read(() => {
-                const videoPreviewContainer = preview.querySelector('#video-preview-container') || preview.querySelector('#inline-preview-player');
-                const ytdPlayer = preview.querySelector('ytd-player');
-                let playerContainer = ytdPlayer ? ytdPlayer.querySelector('#container') : null;
-                if (!playerContainer && ytdPlayer && ytdPlayer.shadowRoot) {
-                    playerContainer = ytdPlayer.shadowRoot.querySelector('#container');
-                }
-                const html5Player = preview.querySelector('.html5-video-player') || (playerContainer ? playerContainer.querySelector('.html5-video-player') : null);
-                const html5VideoContainer = preview.querySelector('.html5-video-container') || (html5Player ? html5Player.querySelector('.html5-video-container') : null);
-                const video = preview.querySelector('video') || (html5VideoContainer ? html5VideoContainer.querySelector('video') : null);
-
-                window.YPP.Utils.batch.write(() => {
-                    setSize(preview);
-                    preview.style.setProperty('position', 'absolute', 'important');
-                    preview.style.setProperty('top', '0', 'important');
-                    preview.style.setProperty('left', '0', 'important');
-                    preview.style.setProperty('pointer-events', 'none', 'important');
-
-                    setSize(videoPreviewContainer);
-                    setSize(ytdPlayer);
-                    setSize(playerContainer);
-                    setSize(html5Player);
-                    setSize(html5VideoContainer);
-                    setSize(video);
-                    if (video) {
-                        video.style.setProperty('object-fit', 'cover', 'important');
-                        video.style.setProperty('z-index', '0', 'important');
-                    }
-                });
-            });
-        };
-
-        stretchContainers();
-
-        // Instead of a MutationObserver that fires thousands of times,
-        // just rely on the shared observer that triggers when the active preview changes.
-        // We also attach the size stretching to the preview playing event to cover late-loaded video elements.
-        if (!preview._sizeForcerAttached) {
-            preview._sizeForcerAttached = true;
-            this.addListener(preview, 'playing', () => stretchContainers(), { capture: true });
-            this.addListener(preview, 'loadeddata', () => stretchContainers(), { capture: true });
-        }
+        }, 50);
     }
 
     // ─── Queue Management & Scroll ────────────────────────────────────────────
 
     _updateVideoQueue() {
-        window.YPP.Utils.batch.read(() => {
-            const allVideos = document.querySelectorAll('#contents > ytd-rich-item-renderer, #contents > ytd-rich-section-renderer ytd-rich-item-renderer');
-            const newQueue = Array.from(allVideos).filter(item => {
-                const titleLink = item.querySelector('a#video-title-link, a#video-title, a#thumbnail');
-                return titleLink && this._extractVideoId(titleLink.href);
-            });
+        return new Promise(resolve => {
+            window.YPP.Utils.batch.read(() => {
+                try {
+                    const grid = document.querySelector('ytd-rich-grid-renderer');
+                    if (!grid) return resolve();
 
-            const itemsToProcess = [];
-            newQueue.forEach(video => {
-                if (video.hasAttribute('data-ypp-processed')) return;
-                itemsToProcess.push({
-                    video,
-                    isRecent: this._isRecentlyAdded(video),
-                    thumbnail: video.querySelector('ytd-thumbnail'),
-                    badges: video.querySelectorAll('.recently-badge-container')
-                });
-            });
-
-            window.YPP.Utils.batch.write(() => {
-                let queueUpdated = false;
-                if (newQueue.length !== this._videoQueue.length) {
-                    const grew = newQueue.length > this._videoQueue.length;
-                    this._videoQueue = newQueue;
-                    if (!grew) this._currentVideoIndex = 0;
-                    queueUpdated = true;
-
-                    itemsToProcess.forEach(item => {
-                        item.badges.forEach(badge => badge.remove());
-                        if (item.isRecent) {
-                            const badgeContainer = document.createElement('div');
-                            badgeContainer.className = 'recently-badge-container';
-                            badgeContainer.style = 'position: absolute; top: -17px; left: 50%; transform: translateX(-50%); z-index: 2; padding: 8px;';
-                            const badgeHtml = '<span class="recently-badge" style="background-color: #e50914; color: white; padding: 6px 8px; border-radius: 4px; font-size: 15px; font-weight: 500;">Recently Added</span>';
-                            badgeContainer.innerHTML = window.YPP.utils.sanitizeHTML ? window.YPP.utils.sanitizeHTML(badgeHtml) : badgeHtml;
-                            if (item.thumbnail) item.thumbnail.appendChild(badgeContainer);
+                    const newNodes = Array.from(grid.querySelectorAll('ytd-rich-item-renderer:not([data-ypp-scanned="true"])'));
+                    newNodes.forEach(item => {
+                        item.setAttribute('data-ypp-scanned', 'true');
+                        if (item.closest('ytd-rich-section-renderer[is-shorts]')) {
+                            item.setAttribute('data-ypp-is-shorts', 'true');
                         }
-                        item.video.setAttribute('data-ypp-processed', 'true');
                     });
-                }
+                    
+                    let allVideos = Array.from(grid.querySelectorAll('ytd-rich-item-renderer[data-ypp-scanned="true"]:not([data-ypp-is-shorts="true"])'));
+                    const newQueue = allVideos.filter(item => {
+                        const titleLink = item.querySelector('a#video-title-link, a#video-title, a#thumbnail, a[href*="/watch?v="]');
+                        return titleLink && this._extractVideoId(titleLink.href);
+                    });
 
-                const firstVideo = this._videoQueue[0];
-                
-                if (firstVideo) {
-                    if (this._heroState.status === 'inactive') {
-                        this._makeHeroPreview(firstVideo).then(() => {
-                            if (this._heroState.status === 'ready') {
+                    const itemsToProcess = [];
+                    newQueue.forEach(video => {
+                        if (video.hasAttribute('data-ypp-processed')) return;
+                        itemsToProcess.push({
+                            video,
+                            isRecent: this._isRecentlyAdded(video),
+                            thumbnail: video.querySelector('ytd-thumbnail'),
+                            badges: video.querySelectorAll('.recently-badge-container')
+                        });
+                    });
+
+                    let queueUpdated = false;
+                    if (newQueue.length !== this._videoQueue.length) {
+                        const grew = newQueue.length > this._videoQueue.length;
+                        this._videoQueue = newQueue;
+                        if (!grew) this._currentVideoIndex = 0;
+                        queueUpdated = true;
+                    }
+
+                    window.YPP.Utils.batch.write(() => {
+                        try {
+                            itemsToProcess.forEach(item => {
+                                item.video.setAttribute('data-ypp-processed', 'true');
+                                
+                                if (!item.video.dataset.yppHoverBound) {
+                                    item.video.dataset.yppHoverBound = 'true';
+                                    this.addListener(item.video, 'mouseenter', () => this._handleVideoEnter(item.video));
+                                    this.addListener(item.video, 'mouseleave', () => this._handleVideoLeave(item.video));
+                                }
+
+                                item.badges.forEach(badge => badge.remove());
+                                if (item.isRecent) {
+                                    const badgeContainer = document.createElement('div');
+                                    badgeContainer.className = 'recently-badge-container';
+                                    badgeContainer.style.cssText = 'position: absolute; top: 8px; right: 8px; background: #e50914; color: white; padding: 4px 8px; border-radius: 4px; font-size: 1.2rem; font-weight: bold; z-index: 10; pointer-events: none;';
+                                    badgeContainer.textContent = 'Recently Added';
+                                    if (item.thumbnail) item.thumbnail.appendChild(badgeContainer);
+                                }
+                            });
+
+                            const firstVideo = this._videoQueue[0];
+                            if (firstVideo && this._heroState.status === 'ready' && queueUpdated) {
                                 firstVideo.classList.add('netflix-active-preview');
                                 this._updateHeroContent(firstVideo);
                                 clearTimeout(this._videoTimer);
                                 this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
                             }
-                        });
-                    } else if (this._heroState.status === 'ready' && queueUpdated) {
-                        firstVideo.classList.add('netflix-active-preview');
-                        this._updateHeroContent(firstVideo);
-                        clearTimeout(this._videoTimer);
-                        this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-                    }
+                        } finally {
+                            resolve();
+                        }
+                    });
+                } catch(e) {
+                    window.YPP.utils?.log("Queue update error: " + e.message, "CINEMATIC", "error");
+                    resolve();
                 }
             });
         });
     }
 
     _isRecentlyAdded(element) {
-        const metadataItems = element.querySelectorAll('#metadata-line .inline-metadata-item, #metadata-line span.ytd-video-meta-block');
-        const timeElement = Array.from(metadataItems).find(item => item.textContent.toLowerCase().includes('ago'));
-        const timeText = timeElement?.textContent?.toLowerCase() || '';
-        const timeMatch = timeText.match(/(\d+)\s+(hour|day|minute)s?\s+ago/);
-        
-        if (!timeMatch) return false;
-        
-        const count = parseInt(timeMatch[1], 10);
-        const unit = timeMatch[2];
-        
-        return unit === 'minute' || unit === 'hour' || (unit === 'day' && count <= 2);
+        try {
+            const metadataItems = element.querySelectorAll('#metadata-line .inline-metadata-item, #metadata-line span.ytd-video-meta-block');
+            const timeElement = Array.from(metadataItems).find(item => item.textContent.toLowerCase().includes('ago'));
+            const timeText = timeElement?.textContent?.toLowerCase() || '';
+            const timeMatch = timeText.match(/(\d+)\s+(hour|day|minute)s?\s+ago/);
+            
+            if (!timeMatch) return false;
+            
+            const amount = parseInt(timeMatch[1], 10);
+            const unit = timeMatch[2];
+            
+            if (unit === 'minute' || unit === 'hour') return true;
+            if (unit === 'day' && amount <= 3) return true;
+            
+            return false;
+        } catch(e) {
+            return false;
+        }
     }
 
     _setupContentObserver() {
@@ -658,19 +657,18 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
     _setupScrollHandler() {
 
-        document.body.addEventListener('wheel', (e) => {
-            const contents = document.querySelector('#contents');
-            if (contents && contents.contains(e.target)) {
+        this.addListener(document.body, 'wheel', (e) => {
+            if (this._cachedContents && this._cachedContents.contains(e.target)) {
                 if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
                     e.preventDefault();
-                    contents.scrollLeft += e.deltaY;
+                    this._cachedContents.scrollLeft += e.deltaY;
                 }
             }
         }, { passive: false, signal: this._abortController.signal });
 
-        document.addEventListener('keydown', (e) => {
-            const contents = document.querySelector('#contents');
-            if (!contents) return;
+        this.addListener(document, 'keydown', (e) => {
+            if (!this._cachedContents) return;
+            const contents = this._cachedContents;
 
             const active = document.activeElement;
             const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
@@ -712,7 +710,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 const c = document.querySelector('#content');
                 if (c) c.style.visibility = 'hidden';
             }
-            window.location.reload();
+            this.onPageChange();
         } else {
             const isHomePage = (newPathname === '/' || newPathname.includes('/feed/subscriptions'));
             document.body.classList.toggle('cinematic-home', isHomePage);
@@ -757,9 +755,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             nextVideo.classList.add('netflix-active-preview');
             this._updateHeroContent(nextVideo);
             
-            this._simulateHover(nextVideo).then(() => {
-                this._syncMuteState();
-            });
+            const videoId = this._extractVideoId(nextVideo.querySelector('a#video-title-link, a#video-title, a#thumbnail')?.href);
+            const iframe = heroWrapper.querySelector('iframe');
+            if (iframe && videoId && !iframe.src.includes(videoId)) {
+                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this._isMuted ? 1 : 0}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&loop=1&playlist=${videoId}&enablejsapi=1`;
+            }
 
             heroWrapper.classList.remove('fading');
             this._updateMuteButtonVisibility();
@@ -780,7 +780,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('cinematic-content-scanner');
-            window.YPP.sharedObserver.unregister('cinematic-preview-stealer');
         }
         if (this._contentUpdateTimer) {
             clearTimeout(this._contentUpdateTimer);
@@ -793,10 +792,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             el.querySelectorAll('.recently-badge-container').forEach(badge => badge.remove());
         });
 
+        if (this._heroState.previewStyleObserver) {
+            this._heroState.previewStyleObserver.disconnect();
+            this._heroState.previewStyleObserver = null;
+        }
+
         const hero = this._heroState.heroElement;
         if (hero) {
-            const preview = hero.querySelector('ytd-video-preview');
-            if (preview) document.body.appendChild(preview); // Safely return preview to DOM
             hero.remove();
         }
 
@@ -805,6 +807,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             heroElement: null,
             observers: new Set(),
             currentVideo: null,
+            previewStyleObserver: null,
         };
     }
 
@@ -814,6 +817,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         document.body.classList.remove('cinematic-home');
         document.body.classList.remove('cinematic');
         document.documentElement.removeAttribute('dark');
+        
+        const style = document.getElementById('ypp-cinematic-style');
+        if (style) style.remove();
         
         clearTimeout(this._videoTimer);
         clearInterval(this._checkInterval);
@@ -830,10 +836,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             this._navObserver = null;
         }
 
-        if (this._darkModeObserver) {
-            this._darkModeObserver.disconnect();
-            this._darkModeObserver = null;
-        }
+
 
         if (this._abortController) {
             this._abortController.abort();
