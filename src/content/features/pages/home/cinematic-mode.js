@@ -336,11 +336,16 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 videoEl.style.setProperty('max-width', 'none', 'important');
                 videoEl.style.setProperty('max-height', 'none', 'important');
                 videoEl.style.setProperty('object-fit', 'cover', 'important');
-                videoEl.style.setProperty('transform', 'none', 'important');
+                // We do NOT override transform here, because our CSS needs to apply the KenBurns animation (transform: scale).
             }
             
             if (previewStyleObserver) {
-                previewStyleObserver.observe(preview, { attributes: true, attributeFilter: ['style'], subtree: true });
+                previewStyleObserver.observe(preview, { 
+                    attributes: true, 
+                    attributeFilter: ['style'], 
+                    subtree: true,
+                    childList: true 
+                });
             }
         };
 
