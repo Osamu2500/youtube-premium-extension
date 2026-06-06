@@ -93,11 +93,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
      */
     enable() {
         super.enable();
-        // Restore user's saved mute preference; fall back to true (muted) on Firefox
-        // since Firefox blocks autoplay more aggressively than Chrome.
+        // Restore user's saved mute preference; fall back to true (muted)
+        // since browsers block autoplay of unmuted videos without interaction.
         this._isMuted = this.settings?.cinematicMuted !== undefined
             ? this.settings.cinematicMuted
-            : this._isFirefox;
+            : true;
         
         this._injectStyles();
         
@@ -294,7 +294,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             
             // Wait for YouTube to load and mute
             setTimeout(() => {
-                if (!this._isMuted) this._syncMuteState();
+                this._syncMuteState();
                 this._updateMuteButtonVisibility();
             }, 500);
         };
@@ -372,14 +372,17 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 videoElement.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
                 this._updateHeroContent(videoElement);
 
-                const preview = await this._waitForPreview(videoElement);
-                if (!preview || this._heroState.currentVideo !== videoElement) return;
-                
-                document.querySelectorAll(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`)
-                    .forEach(p => p.classList.remove(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE));
-                
-                preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
-                this._forcePreviewFullscreen();
+                this._waitForPreview(videoElement).then(preview => {
+                    if (!preview || this._heroState.currentVideo !== videoElement) return;
+                    
+                    document.querySelectorAll(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`)
+                        .forEach(p => p.classList.remove(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE));
+                    
+                    preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
+                    this._forcePreviewFullscreen();
+                }).catch(e => {
+                    this.utils.log(e.message, "CINEMATIC", "error");
+                });
                 return;
             }
 
@@ -433,17 +436,20 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         });
 
         // Wait for preview asynchronously so UI loads immediately
-        const preview = await this._waitForPreview(videoElement);
-        if (!preview || this._heroState.heroElement !== heroWrapper || this._heroState.currentVideo !== videoElement) return;
+        this._waitForPreview(videoElement).then(preview => {
+            if (!preview || this._heroState.heroElement !== heroWrapper || this._heroState.currentVideo !== videoElement) return;
 
-        // Instead of moving the preview out of the YouTube DOM (which breaks YouTube's recycling), 
-        // we leave it where YouTube put it, and just force its CSS to cover the hero area.
-        preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
+            // Instead of moving the preview out of the YouTube DOM (which breaks YouTube's recycling), 
+            // we leave it where YouTube put it, and just force its CSS to cover the hero area.
+            preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
 
-        if (window.YPP?.sharedObserver) {
-            window.YPP.sharedObserver.register('cinematic-preview-styler', CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW, this._forcePreviewFullscreen.bind(this));
-        }
-        this._forcePreviewFullscreen();
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.register('cinematic-preview-styler', CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW, this._forcePreviewFullscreen.bind(this));
+            }
+            this._forcePreviewFullscreen();
+        }).catch(e => {
+            this.utils.log(e.message, "CINEMATIC", "error");
+        });
 
         } catch (e) {
             this.utils.log(e.message, "CINEMATIC", "error");
