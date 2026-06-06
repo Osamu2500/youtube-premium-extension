@@ -17,23 +17,43 @@
      * Normalize a channel name for comparison.
      * Must match the implementation in subscription-folders.js.
      */
+    const _normChannelCache = new Map();
     function normChannel(name) {
         if (!name) return '';
-        return name
+        if (_normChannelCache.has(name)) return _normChannelCache.get(name);
+        const result = name
             .replace(/[\u200B-\u200D\uFEFF]/g, '')  // zero-width chars
             .replace(/[\u2713\u2714\u2705\u2022]/g, '') // verified checkmarks
             .replace(/\s+/g, ' ')
             .trim()
             .toLowerCase();
+        _normChannelCache.set(name, result);
+        return result;
     }
 
     /**
      * Safely reads and parses local storage state
      */
+    let _cachedFilterState = undefined;
+    
+    // Invalidate cache on storage change
+    if (!window.__YPP_STORAGE_LISTENER_ADDED) {
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'ypp_active_folder' || e.key === 'ypp_folder_data') {
+                _cachedFilterState = undefined;
+            }
+        });
+        window.__YPP_STORAGE_LISTENER_ADDED = true;
+    }
+
     function getFilterState() {
+        if (_cachedFilterState !== undefined) return _cachedFilterState;
         try {
             const activeFolder = localStorage.getItem('ypp_active_folder');
-            if (!activeFolder) return null;
+            if (!activeFolder) {
+                _cachedFilterState = null;
+                return null;
+            }
 
             const folderDataStr = localStorage.getItem('ypp_folder_data');
             const folders = folderDataStr ? JSON.parse(folderDataStr) : {};
@@ -41,15 +61,18 @@
             let activeChannelSet = new Set();
             if (activeFolder === '__no_folder__') {
                 // Return a special flag for "No Folder" logic
-                return { type: 'no_folder', allFolders: folders };
+                _cachedFilterState = { type: 'no_folder', allFolders: folders };
+                return _cachedFilterState;
             } else if (folders[activeFolder]) {
                 const arr = folders[activeFolder];
                 activeChannelSet = new Set(arr.map(n => normChannel(n)));
-                return { type: 'folder', channels: activeChannelSet };
+                _cachedFilterState = { type: 'folder', channels: activeChannelSet };
+                return _cachedFilterState;
             }
         } catch (e) {
             console.error('[YPP] Failed to read filter state:', e);
         }
+        _cachedFilterState = null;
         return null;
     }
 
@@ -172,6 +195,7 @@
         this.addEventListener('readystatechange', function() {
             if (this.readyState === 4 && this.status === 200 && this.responseType === '' || this.responseType === 'text') {
                 if (this._ypp_url && this._ypp_url.includes('/youtubei/v1/browse')) {
+                    if (!getFilterState()) return; // Early return, skip heavy parsing
                     try {
                         const newResponseText = processBrowseResponse(this.responseText, this._ypp_url);
                         if (newResponseText !== this.responseText) {
@@ -185,7 +209,7 @@
                             });
                         }
                     } catch (e) {
-                        // ignore
+                        console.error('[YPP] Error in XHR response intercept:', e);
                     }
                 }
             }
@@ -203,6 +227,7 @@
         const response = await originalFetch.call(this, resource, init);
 
         if (url.includes('/youtubei/v1/browse') && response.ok) {
+            if (!getFilterState()) return response; // Early return, skip clone and parse
             try {
                 // Clone the response because reading .text() locks the body
                 const clone = response.clone();

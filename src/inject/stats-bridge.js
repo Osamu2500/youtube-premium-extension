@@ -3,6 +3,9 @@
  * Injected by the content script to run in the page context.
  */
 (function() {
+    if (window.__YPP_STATS_BRIDGE_INJECTED) return;
+    window.__YPP_STATS_BRIDGE_INJECTED = true;
+
     const TAG = '[YPP-Bridge]';
     let statsInterval = null;
 
@@ -24,7 +27,13 @@
         if (e.detail && e.detail.enabled) {
             if (!statsInterval) {
                 statsInterval = setInterval(() => {
-                    if (!document.hidden) broadcastStats();
+                    if (document.hidden) return;
+                    if (!document.getElementById('movie_player')) {
+                        clearInterval(statsInterval);
+                        statsInterval = null;
+                        return;
+                    }
+                    broadcastStats();
                 }, 1000);
                 broadcastStats(); // Immediate update
             }
