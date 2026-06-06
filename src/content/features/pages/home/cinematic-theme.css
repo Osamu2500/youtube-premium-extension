@@ -110,12 +110,15 @@ html.yt-premium-plus-theme body.cinematic-home #masthead-container.ytd-app,
 body.cinematic-home #masthead-container.ytd-app,
 html.yt-premium-plus-theme body.cinematic-home ytd-masthead,
 body.cinematic-home ytd-masthead,
+body.cinematic-home #masthead,
 html.yt-premium-plus-theme body.cinematic-home ytd-masthead::after,
 body.cinematic-home ytd-masthead::after,
 html.yt-premium-plus-theme body.cinematic-home #background.ytd-masthead,
-body.cinematic-home #background.ytd-masthead {
+body.cinematic-home #background.ytd-masthead,
+body.cinematic-home #masthead-container *#background {
   background: transparent !important;
   background-color: transparent !important;
+  background-image: none !important;
   --yt-spec-base-background: transparent !important;
   --yt-spec-raised-background: transparent !important;
   --yt-spec-menu-background: transparent !important;
@@ -328,18 +331,16 @@ body.cinematic-home .netflix-hero-gradient {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
   background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.3) 0%,
-    transparent 15%,
-    transparent 55%,
-    rgba(15, 15, 15, 0.7) 75%,
-    rgb(15, 15, 15) 90%
+    to bottom,
+    transparent 0%,
+    transparent 60%,
+    #0f0f0f 100%
   );
   pointer-events: none;
-  z-index: 2;
 }
 
 /* ============================================================================
