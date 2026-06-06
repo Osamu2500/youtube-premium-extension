@@ -179,7 +179,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
             const firstValid = this._videoQueue[0];
             if (!firstValid) {
-                window.YPP.utils.log("No valid video found for cinematic hero", "CINEMATIC", "warn");
+                window.YPP.utils?.log("No valid video found for cinematic hero", "CINEMATIC", "warn");
                 return;
             }
 
@@ -192,7 +192,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             
             // Periodic check removed for performance
         } catch(e) {
-            window.YPP.utils.log("Cinematic Initialization Error", "CINEMATIC", "error", e);
+            window.YPP.utils?.log("Cinematic Initialization Error", "CINEMATIC", "error", e);
         }
     }
 
@@ -209,6 +209,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             const thumbnailContainer = element.querySelector('#thumbnail');
             
             if (!thumbnailContainer && retryCount < MAX_RETRIES) {
+                if (!this._cinematicActive) return;
                 setTimeout(() => attemptHover(retryCount + 1), RETRY_DELAY);
                 return;
             }
@@ -222,10 +223,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                         e.stopImmediatePropagation();
                     }
                 };
-                element.addEventListener('mouseleave', blockLeave, true);
-                element.addEventListener('mouseout', blockLeave, true);
-                thumbnailContainer.addEventListener('mouseleave', blockLeave, true);
-                thumbnailContainer.addEventListener('mouseout', blockLeave, true);
+                this.addListener(element, 'mouseleave', blockLeave, true);
+                this.addListener(element, 'mouseout', blockLeave, true);
+                this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
+                this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
                 element._hoverLock = true;
             }
             element._isNetflixHeroPreview = true;
@@ -252,20 +253,8 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     async _waitForPreview(videoElement) {
-        return new Promise((resolve) => {
-            let attempts = 0;
-            this._simulateHover(videoElement);
-
-            const check = setInterval(() => {
-                attempts++;
-                const preview = document.querySelector('ytd-video-preview');
-                // Increase timeout to 10 seconds (100 attempts) to account for Autoplay policies
-                if (preview || attempts > 100) {
-                    clearInterval(check);
-                    resolve(preview || null);
-                }
-            }, 100);
-        });
+        this._simulateHover(videoElement);
+        return await this.pollFor(() => document.querySelector('ytd-video-preview'), 10000, 100);
     }
 
     async _makeHeroPreview(videoElement) {
@@ -315,7 +304,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         contentOverlay.className = 'netflix-hero-content';
         heroWrapper.appendChild(contentOverlay);
 
-        this._setupPreviewChangeObserver();
         this._heroState.status = 'ready';
         this._updateHeroContent(videoElement);
 
@@ -329,8 +317,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             // Instead of moving the preview out of the YouTube DOM (which breaks YouTube's recycling), 
             // we leave it where YouTube put it, and just force its CSS to cover the hero area.
             preview.classList.add('netflix-hero-preview-active');
-
-            let previewStyleObserver;
             
             const applyFullscreen = (el) => {
                 if (!el) return;
@@ -350,14 +336,15 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             };
 
             const forcePreviewFullscreen = () => {
-                if (previewStyleObserver) previewStyleObserver.disconnect();
+                const p = document.querySelector('ytd-video-preview.netflix-hero-preview-active');
+                if (!p) return;
                 
-                applyFullscreen(preview);
+                applyFullscreen(p);
                 
-                const containers = preview.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container');
+                const containers = p.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container');
                 containers.forEach(applyFullscreen);
 
-                const videoEl = preview.querySelector('video');
+                const videoEl = p.querySelector('video');
                 if (videoEl && videoEl.style.getPropertyValue('width') !== '100vw') {
                     videoEl.style.setProperty('position', 'absolute', 'important');
                     videoEl.style.setProperty('top', '0', 'important');
@@ -370,19 +357,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     videoEl.style.setProperty('max-height', 'none', 'important');
                     videoEl.style.setProperty('object-fit', 'cover', 'important');
                 }
-                
-                if (previewStyleObserver) {
-                    previewStyleObserver.observe(preview, { 
-                        attributes: true, 
-                        attributeFilter: ['style'], 
-                        subtree: true,
-                        childList: true 
-                    });
-                }
             };
 
-            previewStyleObserver = new MutationObserver(forcePreviewFullscreen);
-            if (this._heroState) this._heroState.previewStyleObserver = previewStyleObserver;
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.register('cinematic-preview-styler', 'ytd-video-preview', forcePreviewFullscreen);
+            }
             forcePreviewFullscreen();
         });
     }
@@ -424,6 +403,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             if (!videoElement._heroRetryCount) videoElement._heroRetryCount = 0;
             if (videoElement._heroRetryCount < 15) {
                 videoElement._heroRetryCount++;
+                if (!this._cinematicActive) return;
                 setTimeout(() => this._updateHeroContent(videoElement), 200);
                 return;
             }
@@ -459,7 +439,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const unmuteBtn = existingContent.querySelector('.netflix-unmute-button');
         if (unmuteBtn) {
             unmuteBtn.classList.toggle('muted', this._isMuted);
-            unmuteBtn.addEventListener('click', (e) => {
+            this.addListener(unmuteBtn, 'click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 this._handleMuteToggle(unmuteBtn);
             });
@@ -467,7 +447,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         const playBtn = existingContent.querySelector('.netflix-play-button');
         if (playBtn) {
-            playBtn.addEventListener('click', (e) => {
+            this.addListener(playBtn, 'click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 if (url && url !== '#') {
                     window.location.href = url;
@@ -481,14 +461,14 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         if (prevButton && !prevButton.dataset.bound) {
             prevButton.dataset.bound = "true";
-            prevButton.addEventListener('click', (e) => {
+            this.addListener(prevButton, 'click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 this._navigateVideo('prev');
             });
         }
         if (nextButton && !nextButton.dataset.bound) {
             nextButton.dataset.bound = "true";
-            nextButton.addEventListener('click', (e) => {
+            this.addListener(nextButton, 'click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 this._navigateVideo('next');
             });
@@ -542,23 +522,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     _updateMuteButtonVisibility() {
         const heroButton = document.querySelector('.netflix-unmute-button');
         if (heroButton) heroButton.style.opacity = '1';
-    }
-
-    _setupPreviewChangeObserver() {
-        if (this._heroState.observer) this._heroState.observer.disconnect();
-
-        this._heroState.observer = new MutationObserver(() => {
-            const preview = document.querySelector('ytd-video-preview');
-            if (preview && this._heroState.heroElement && preview.parentNode !== this._heroState.heroElement) {
-               // YouTube tried to take it back; steal it again!
-               this._heroState.heroElement.insertBefore(preview, this._heroState.heroElement.firstChild);
-            }
-        });
-
-        this._heroState.observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
     }
 
     _handleVideoEnter(card) {
@@ -688,6 +651,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             
             return false;
         } catch(e) {
+            window.YPP.utils?.log("Recently added parsing error", "CINEMATIC", "error", e);
             return false;
         }
     }
@@ -836,6 +800,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('cinematic-content-scanner');
+            window.YPP.sharedObserver.unregister('cinematic-preview-styler');
         }
         if (this._contentUpdateTimer) {
             clearTimeout(this._contentUpdateTimer);
@@ -847,11 +812,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             el.removeAttribute('data-ypp-processed');
             el.querySelectorAll('.recently-badge-container').forEach(badge => badge.remove());
         });
-
-        if (this._heroState.previewStyleObserver) {
-            this._heroState.previewStyleObserver.disconnect();
-            this._heroState.previewStyleObserver = null;
-        }
 
         const hero = this._heroState.heroElement;
         if (hero) {
