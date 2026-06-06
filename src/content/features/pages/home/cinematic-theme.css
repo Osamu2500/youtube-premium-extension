@@ -421,7 +421,7 @@ body.cinematic-home .netflix-hero-buttons button {
   border-radius: 4px;
   font-size: 1.5em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, background 0.2s, color 0.2s;
 }
 
 body.cinematic-home .netflix-hero-buttons button svg {
@@ -492,7 +492,7 @@ body.cinematic-home .netflix-nav-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, background 0.3s ease-in-out, opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   pointer-events: auto;
   opacity: 0.15;
 }
@@ -838,7 +838,7 @@ body.cinematic-home ytd-rich-grid-media #details {
   background: var(--netflix-dark-gray) !important;
   border-radius: 4px !important;
   margin-top: -4px !important;
-  transition: all 0.2s ease-in-out !important;
+  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
   opacity: 0 !important;
   top: -50px !important;
 }
