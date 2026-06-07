@@ -10,7 +10,7 @@
     window.__YPP_INTERCEPTOR_INJECTED = true;
 
     if (window.__YPP_FILTER_DEBUG) {
-        console.log('[YPP] Network Interceptor initialized');
+        window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Network Interceptor initialized', level: 'debug', source: 'NETWORK_INTERCEPTOR' } }));
     }
 
     /**
@@ -70,7 +70,7 @@
                 return _cachedFilterState;
             }
         } catch (e) {
-            console.error('[YPP] Failed to read filter state:', e);
+            window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Failed to read filter state: ' + e.message, level: 'error', source: 'NETWORK_INTERCEPTOR' } }));
         }
         _cachedFilterState = null;
         return null;
@@ -168,13 +168,13 @@
 
             if (modified) {
                 if (window.__YPP_FILTER_DEBUG) {
-                    console.log(`[YPP] Interceptor filtered /browse request.`);
+                    window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Interceptor filtered /browse request.', level: 'debug', source: 'NETWORK_INTERCEPTOR' } }));
                 }
                 return JSON.stringify(data);
             }
 
         } catch (e) {
-            console.error('[YPP] Failed to process /browse response:', e);
+            window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Failed to process /browse response: ' + e.message, level: 'error', source: 'NETWORK_INTERCEPTOR' } }));
         }
 
         return jsonText;
@@ -209,7 +209,7 @@
                             });
                         }
                     } catch (e) {
-                        console.error('[YPP] Error in XHR response intercept:', e);
+                        window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Error in XHR response intercept: ' + e.message, level: 'error', source: 'NETWORK_INTERCEPTOR' } }));
                     }
                 }
             }
@@ -243,7 +243,7 @@
                     });
                 }
             } catch (e) {
-                console.error('[YPP] Fetch intercept error:', e);
+                window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Fetch intercept error: ' + e.message, level: 'error', source: 'NETWORK_INTERCEPTOR' } }));
             }
         }
 

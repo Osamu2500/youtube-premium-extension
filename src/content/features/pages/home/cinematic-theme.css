@@ -940,6 +940,7 @@ body.cinematic-home .netflix-hero #media-container video {
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
+  pointer-events: none !important;
 }
 
 /* Fade States */

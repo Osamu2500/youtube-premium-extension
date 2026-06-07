@@ -46,5 +46,5 @@
         }
     });
 
-    console.log(TAG, 'Loaded');
+    window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Stats bridge loaded', level: 'debug', source: 'STATS_BRIDGE' } }));
 })();

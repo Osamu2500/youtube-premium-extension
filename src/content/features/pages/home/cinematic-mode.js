@@ -326,37 +326,28 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const containers = Array.from(p.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'));
         const videoEl = p.querySelector('video');
         
-        // Batch reads
-        const toApply100 = [p, ...containers].filter(el => el && el.style.getPropertyValue('width') !== '100%');
-        const toApplyVW = videoEl && videoEl.style.getPropertyValue('width') !== '100vw' ? [videoEl] : [];
-        
         // Batch writes
+        const toApply100 = [p, ...containers].filter(el => el);
         toApply100.forEach(el => {
-            el.style.setProperty('position', 'absolute', 'important');
-            el.style.setProperty('top', '0', 'important');
-            el.style.setProperty('left', '0', 'important');
-            el.style.setProperty('width', '100%', 'important');
-            el.style.setProperty('height', '100%', 'important');
-            el.style.setProperty('max-width', 'none', 'important');
-            el.style.setProperty('max-height', 'none', 'important');
-            el.style.setProperty('transform', 'none', 'important');
-            el.style.setProperty('border-radius', '0', 'important');
-            el.style.setProperty('margin', '0', 'important');
-            el.style.setProperty('padding', '0', 'important');
-        });
-
-        toApplyVW.forEach(el => {
-            el.style.setProperty('position', 'absolute', 'important');
+            el.style.setProperty('position', 'fixed', 'important');
             el.style.setProperty('top', '0', 'important');
             el.style.setProperty('left', '0', 'important');
             el.style.setProperty('width', '100vw', 'important');
             el.style.setProperty('height', '100%', 'important');
-            el.style.setProperty('min-width', '100vw', 'important');
-            el.style.setProperty('min-height', '100%', 'important');
             el.style.setProperty('max-width', 'none', 'important');
-            el.style.setProperty('max-height', 'none', 'important');
-            el.style.setProperty('object-fit', 'cover', 'important');
+            el.style.setProperty('z-index', '1', 'important');
         });
+
+        if (videoEl) {
+            videoEl.style.setProperty('position', 'fixed', 'important');
+            videoEl.style.setProperty('top', '0', 'important');
+            videoEl.style.setProperty('left', '0', 'important');
+            videoEl.style.setProperty('width', '100vw', 'important');
+            videoEl.style.setProperty('height', '100%', 'important');
+            videoEl.style.setProperty('max-width', 'none', 'important');
+            videoEl.style.setProperty('z-index', '1', 'important');
+            videoEl.style.setProperty('object-fit', 'cover', 'important');
+        }
     }
 
     async _makeHeroPreview(videoElement) {
