@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -104,17 +104,9 @@
                </div>
             </div>
             <div class="card-group">
-              <div class="feature-grid">
-
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-                  <div class="info"><span class="name">SponsorBlock</span><span class="desc">Skip sponsored segments</span></div>
-                  <label class="toggle"><input type="checkbox" id="sponsorBlock" /><span class="slider"></span></label>
-                </div>
-               </div>
 
                <!-- SponsorBlock per-category (4.2) -->
-               <div id="sponsorBlockCategories" class="sb-categories" style="display:none; padding:0 2px 10px;">
+               <div id="sponsorBlockCategories" data-preserve="true" class="sb-categories" style="display:none; padding:0 2px 10px;">
                  <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Skip Categories</div>
                  <div class="sb-category-grid">
                    <label class="sb-cat-item" title="Paid promotion / sponsored content">
@@ -309,38 +301,8 @@
         <!-- PLAYER — rendered by popup-renderer.js -->
         <section id="tab-player" class="tab-content">
           <!-- schema-driven: populated at runtime -->
-          <!-- SponsorBlock categories panel (visible when sponsorBlock toggle is ON) -->
-          <div id="sponsorBlockCategories" class="sb-categories" style="display:none;">
-            <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Skip Categories</div>
-            <div class="sb-category-grid">
-              <label class="sb-cat-item" title="Paid promotion / sponsored content">
-                <input type="checkbox" id="sb_sponsor" checked />
-                <span class="sb-dot" style="background:#00d400;"></span><span>Sponsor</span>
-              </label>
-              <label class="sb-cat-item" title="Filler intro / recap">
-                <input type="checkbox" id="sb_intro" checked />
-                <span class="sb-dot" style="background:#00ffff;"></span><span>Intro</span>
-              </label>
-              <label class="sb-cat-item" title="Creator self-promotion">
-                <input type="checkbox" id="sb_selfpromo" checked />
-                <span class="sb-dot" style="background:#ffff00;"></span><span>Self-promo</span>
-              </label>
-              <label class="sb-cat-item" title="Likes / subscribe / comment beg">
-                <input type="checkbox" id="sb_interaction" />
-                <span class="sb-dot" style="background:#cc0000;"></span><span>Interaction</span>
-              </label>
-              <label class="sb-cat-item" title="Non-music parts in music videos">
-                <input type="checkbox" id="sb_music_offtopic" />
-                <span class="sb-dot" style="background:#ff9900;"></span><span>Off-topic</span>
-              </label>
-              <label class="sb-cat-item" title="Preview / highlight reel">
-                <input type="checkbox" id="sb_preview" />
-                <span class="sb-dot" style="background:#008fd6;"></span><span>Preview</span>
-              </label>
-            </div>
-          </div>
           <!-- Hide Watched sub-options (visible when hideWatched is ON) -->
-          <div id="hideWatchedOptions" class="sub-options" style="display:none; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <div id="hideWatchedOptions" data-preserve="true" class="sub-options" style="display:none; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.1);">
             <div class="setting-item" style="margin-bottom: 12px; flex-wrap: wrap; gap: 6px; padding: 0;">
               <div class="info"><span class="name" style="font-size:12px;">Mode</span></div>
               <div style="display:flex; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
@@ -358,131 +320,6 @@
             </div>
           </div>
         </section>
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Feed Layout</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card" style="border: 1px solid var(--accent-primary);">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="15" rx="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg></div>
-                  <div class="info"><span class="name">Cinematic Mode</span><span class="desc">Netflix-style immersive UI</span></div>
-                  <label class="toggle"><input type="checkbox" id="cinematicMode" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></div>
-                  <div class="info"><span class="name">Hook-Free Home</span><span class="desc">Hide the feed entirely</span></div>
-                  <label class="toggle"><input type="checkbox" id="hookFreeHome" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></div>
-                  <div class="info"><span class="name">Full Video Titles</span><span class="desc">Prevent truncation</span></div>
-                  <label class="toggle"><input type="checkbox" id="displayFullTitle" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg></div>
-                  <div class="info"><span class="name">Auto-Scale Grid</span><span class="desc">Adapt to zoom/window size</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoScaleLayout" /><span class="slider"></span></label>
-                </div>
-              </div>
-              <div class="setting-item" style="margin-top: 6px;">
-                <div class="info">
-                  <span class="name">Grid Columns</span>
-                  <span class="desc">Videos per row: <span id="homeColumnsValue">4</span></span>
-                </div>
-                <div class="range-container">
-                  <input type="range" id="homeColumns" min="1" max="8" step="1" value="4" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Content Filters</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"></path><path d="M3.6 9h16.8"></path><path d="M3.6 15h16.8"></path></svg></div>
-                  <div class="info"><span class="name">Hide Explore Topics</span><span class="desc">Remove category chip bar</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideExploreTopics" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.3 5.8 21 7 14 2 9.3 9 8.5 12 2"></polygon></svg></div>
-                  <div class="info"><span class="name">Hide Promos/Games</span><span class="desc">Remove shelves & games</span></div>
-                  <label class="toggle"><input type="checkbox" id="hidePromoShelves" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></div>
-                  <div class="info"><span class="name">Hide Playlists</span><span class="desc">Remove playlist cards</span></div>
-                  <label class="toggle"><input type="checkbox" id="hidePlaylists" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3v4z"></path><path d="M3 19a2 2 0 0 0 2 2h1v-6H3v4z"></path></svg></div>
-                  <div class="info"><span class="name">Hide Podcasts</span><span class="desc">Remove podcast cards</span></div>
-                  <label class="toggle"><input type="checkbox" id="hidePodcasts" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-                  <div class="info"><span class="name">Hide Posts</span><span class="desc">Remove community posts</span></div>
-                  <label class="toggle"><input type="checkbox" id="hidePosts" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card" style="flex-direction: column; align-items: stretch; gap: 0;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
-                    <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
-                    <div class="info"><span class="name">Hide Watched</span><span class="desc">Dim or remove watched videos</span></div>
-                    <label class="toggle"><input type="checkbox" id="hideWatched" /><span class="slider"></span></label>
-                  </div>
-                  <!-- Hide Watched sub-options (visible when hideWatched is on) -->
-                  <div id="hideWatchedOptions" class="sub-options" style="display:none; padding-top: 12px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <div class="setting-item" style="margin-bottom: 12px; flex-wrap: wrap; gap: 6px; padding: 0;">
-                      <div class="info"><span class="name" style="font-size:12px;">Mode</span></div>
-                      <div style="display:flex; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
-                        <button type="button" id="hwMode-dim"  class="view-mode-btn hw-mode-btn active" data-mode="dim"  style="font-size:11px; padding:4px 12px;">Dim</button>
-                        <button type="button" id="hwMode-hide" class="view-mode-btn hw-mode-btn"        data-mode="hide" style="font-size:11px; padding:4px 12px;">Hide</button>
-                      </div>
-                      <input type="hidden" id="hideWatchedMode" value="dim" />
-                    </div>
-                    <div class="setting-item" style="flex-direction: column; align-items: flex-start; margin-bottom: 4px; padding: 0;">
-                      <div class="info" style="width:100%; display:flex; justify-content:space-between; flex-direction:row; margin-bottom:4px;">
-                        <span class="name" style="font-size:12px;">Progress Threshold</span>
-                        <span class="desc" id="hideWatchedThresholdValue" style="font-size:12px; font-weight:bold; color:var(--red);">80%</span>
-                      </div>
-                      <input type="range" id="hideWatchedThreshold" min="0" max="100" step="5" value="80" style="width:100%;" />
-                    </div>
-                  </div>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>
-                  <div class="info"><span class="name">Hide Thumbnails</span><span class="desc">Blur on hover to reveal</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideThumbnails" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
-                  <div class="info"><span class="name">Mark as Watched</span><span class="desc">Hover icon to mark</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableMarkWatched" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div>
-                  <div class="info"><span class="name">Hide Mixes</span><span class="desc">Remove infinite mixes</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideMixes" /><span class="slider"></span></label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
 
 
         <!-- WELLNESS — rendered by popup-renderer.js -->
@@ -504,66 +341,6 @@
             <button id="exportFoldersBtn" class="action-btn" style="background:var(--bg-card);">Export</button>
             <button id="importFoldersBtn" class="action-btn" style="background:var(--bg-card);">Import</button>
             <input type="file" id="importFoldersFile" accept=".json" style="display:none;" />
-          </div>
-        </section>
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Focus & Distractions</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card" style="display: none;">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-                  <div class="info"><span class="name">Dopamine Detox</span><span class="desc">Aggressive hide feeds</span></div>
-                  <label class="toggle"><input type="checkbox" id="dopamineDetox" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-                  <div class="info"><span class="name">Hide Comments</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideComments" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></div>
-                  <div class="info"><span class="name">Comment Filter</span><span class="desc">Hide suspected bots</span></div>
-                  <label class="toggle"><input type="checkbox" id="commentFilter" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></div>
-                  <div class="info"><span class="name">Hide End Screens</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideEndScreens" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="3" y1="3" x2="21" y2="21"></line></svg></div>
-                  <div class="info"><span class="name">Hide Views & Subs</span><span class="desc">Hide views, likes, sub counts</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideMetrics" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="12" cy="12" r="3"></circle></svg></div>
-                  <div class="info"><span class="name">Hide Video Cards</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideCards" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
-                  <div class="info"><span class="name">Hide Merch/Offers</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideMerch" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-                  <div class="info"><span class="name">Hide Live Chat</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideLiveChat" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
-                  <div class="info"><span class="name">Hide Donations</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideFundraiser" /><span class="slider"></span></label>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 

@@ -212,13 +212,13 @@ function buildSection(section, state) {
         // Emit slot divs as direct siblings of the grid (NOT inside the grid)
         gridItems.forEach(item => {
             if (item.slot) {
-                const existing = document.getElementById(item.slot);
-                if (!existing) {
-                    const slot = document.createElement('div');
+                let slot = document.getElementById(item.slot);
+                if (!slot) {
+                    slot = document.createElement('div');
                     slot.id = item.slot;
-                    slot.style.display = 'none';
-                    grp.appendChild(slot);
                 }
+                slot.style.display = 'none';
+                grp.appendChild(slot); // Appends new or moves existing
             }
         });
     }

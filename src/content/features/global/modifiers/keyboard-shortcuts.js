@@ -23,7 +23,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts extends window.YPP.features.BaseFeature {
+class KeyboardShortcuts extends window.YPP.features.BaseFeature {
     constructor() {
         super('KeyboardShortcuts');
         this._boundHandler = this._handleKey.bind(this);
@@ -270,3 +270,5 @@ KeyboardShortcuts.ACTION_LABELS = {
     speedReset:  'Reset Speed to 1x',
     ambientMode: 'Toggle Ambient Mode',
 };
+
+window.YPP.features.KeyboardShortcuts = KeyboardShortcuts;
