@@ -319,11 +319,70 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         }
     }
 
+    _forcePreviewFullscreen() {
+        const p = document.querySelector(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`);
+        if (!p) return;
+        
+        const containers = Array.from(p.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'));
+        const videoEl = p.querySelector('video');
+        
+        // Batch writes
+        const toApply100 = [p, ...containers].filter(el => el);
+        toApply100.forEach(el => {
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('top', '0', 'important');
+            el.style.setProperty('left', '0', 'important');
+            el.style.setProperty('width', '100vw', 'important');
+            el.style.setProperty('height', '100%', 'important');
+            el.style.setProperty('max-width', 'none', 'important');
+            el.style.setProperty('z-index', '1', 'important');
+        });
+
+        if (videoEl) {
+            videoEl.style.setProperty('position', 'fixed', 'important');
+            videoEl.style.setProperty('top', '0', 'important');
+            videoEl.style.setProperty('left', '0', 'important');
+            videoEl.style.setProperty('width', '100vw', 'important');
+            videoEl.style.setProperty('height', '100%', 'important');
+            videoEl.style.setProperty('max-width', 'none', 'important');
+            videoEl.style.setProperty('z-index', '1', 'important');
+            videoEl.style.setProperty('object-fit', 'cover', 'important');
+        }
+    }
 
     async _makeHeroPreview(videoElement) {
         try {
-            const videoId = this._extractVideoId(videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail')?.href);
+            if (this._heroState.status === 'creating') return;
+
+            const videoId = this._extractVideoId(videoElement.querySelector(CinematicMode.SELECTORS.VIDEO_LINK)?.href);
             if (!videoId) return;
+
+            // Handle hot-swapping the hero video if one already exists
+            if (this._heroState.status === 'ready') {
+                if (this._heroState.currentVideo === videoElement) return;
+
+                if (this._heroState.currentVideo) {
+                    this._heroState.currentVideo.classList.remove(CinematicMode.CLASSES.ACTIVE_PREVIEW);
+                    this._heroState.currentVideo._isNetflixHeroPreview = false;
+                }
+
+                this._heroState.currentVideo = videoElement;
+                videoElement.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
+                this._updateHeroContent(videoElement);
+
+                this._waitForPreview(videoElement).then(preview => {
+                    if (!preview || this._heroState.currentVideo !== videoElement) return;
+                    
+                    document.querySelectorAll(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`)
+                        .forEach(p => p.classList.remove(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE));
+                    
+                    preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
+                    this._forcePreviewFullscreen();
+                }).catch(e => {
+                    this.utils.log(e.message, "CINEMATIC", "error");
+                });
+                return;
+            }
 
             this._heroState.status = 'creating';
             this._heroState.currentVideo = videoElement;
@@ -337,13 +396,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
         heroWrapper.style.backgroundSize = 'cover';
         heroWrapper.style.backgroundPosition = 'center';
-
-        const iframe = document.createElement('iframe');
-        iframe.className = 'netflix-hero-iframe';
-        iframe.allow = 'autoplay; encrypted-media';
-        iframe.allowFullscreen = true;
-        heroWrapper.appendChild(iframe);
-
+        
         const navHTML = `
           <div class="netflix-hero-nav">
             <button class="netflix-nav-button prev" aria-label="Previous video" style="pointer-events: auto;">
@@ -357,6 +410,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         heroWrapper.insertAdjacentHTML('afterbegin', navHTML);
 
         document.body.appendChild(heroWrapper);
+
+        // Hide native YouTube volume buttons in the top right
+        const hideNativeVolume = document.createElement('style');
+        hideNativeVolume.textContent = '.ytp-mute-button, .ytp-volume-area { display: none !important; }';
+        heroWrapper.appendChild(hideNativeVolume);
 
         const gradient = document.createElement('div');
         gradient.className = 'netflix-hero-gradient';
@@ -374,6 +432,22 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             if (this._heroState.heroElement === heroWrapper) {
                 heroWrapper.classList.remove('fading');
             }
+        });
+
+        // Wait for preview asynchronously so UI loads immediately
+        this._waitForPreview(videoElement).then(preview => {
+            if (!preview || this._heroState.heroElement !== heroWrapper || this._heroState.currentVideo !== videoElement) return;
+
+            // Instead of moving the preview out of the YouTube DOM (which breaks YouTube's recycling), 
+            // we leave it where YouTube put it, and just force its CSS to cover the hero area.
+            preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
+
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.register('cinematic-preview-styler', CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW, this._forcePreviewFullscreen.bind(this));
+            }
+            this._forcePreviewFullscreen();
+        }).catch(e => {
+            this.utils.log(e.message, "CINEMATIC", "error");
         });
 
         } catch (e) {
@@ -440,14 +514,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         const titleLink = videoElement._yppData.titleLink;
         const url = titleLink?.href || '#';
-
-        const iframe = this._heroState.heroElement.querySelector('.netflix-hero-iframe');
-        if (iframe && url !== '#') {
-            const videoId = this._extractVideoId(url);
-            if (videoId) {
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this._isMuted ? 1 : 0}&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${videoId}&enablejsapi=1`;
-            }
-        }
         const isRecent = this._isRecentlyAdded(videoElement);
 
         const rawHtml = `
@@ -541,14 +607,15 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
 
     _syncMuteState() {
-        if (!this._heroState.heroElement) return;
-        const iframe = this._heroState.heroElement.querySelector('.netflix-hero-iframe');
-        if (iframe && iframe.src) {
-            try {
-                const currentSrc = new URL(iframe.src);
-                currentSrc.searchParams.set('mute', this._isMuted ? '1' : '0');
-                iframe.src = currentSrc.toString();
-            } catch(e) {}
+        // Native YouTube preview handles mute toggle via DOM
+        const preview = document.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW);
+        const muteButton = preview?.querySelector('yt-mute-toggle-button button');
+        
+        if (muteButton) {
+            const isMutedNow = muteButton.getAttribute('aria-label')?.toLowerCase().includes('unmute');
+            if (isMutedNow !== this._isMuted) {
+                muteButton.click();
+            }
         }
     }
 
