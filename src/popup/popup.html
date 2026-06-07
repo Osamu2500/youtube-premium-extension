@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -111,6 +111,39 @@
                   <div class="info"><span class="name">SponsorBlock</span><span class="desc">Skip sponsored segments</span></div>
                   <label class="toggle"><input type="checkbox" id="sponsorBlock" /><span class="slider"></span></label>
                 </div>
+               </div>
+
+               <!-- SponsorBlock per-category (4.2) -->
+               <div id="sponsorBlockCategories" class="sb-categories" style="display:none; padding:0 2px 10px;">
+                 <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Skip Categories</div>
+                 <div class="sb-category-grid">
+                   <label class="sb-cat-item" title="Paid promotion / sponsored content">
+                     <input type="checkbox" id="sb_sponsor" checked />
+                     <span class="sb-dot" style="background:#00d400;"></span><span>Sponsor</span>
+                   </label>
+                   <label class="sb-cat-item" title="Filler intro / recap">
+                     <input type="checkbox" id="sb_intro" checked />
+                     <span class="sb-dot" style="background:#00ffff;"></span><span>Intro</span>
+                   </label>
+                   <label class="sb-cat-item" title="Creator self-promotion">
+                     <input type="checkbox" id="sb_selfpromo" checked />
+                     <span class="sb-dot" style="background:#ffff00;"></span><span>Self-promo</span>
+                   </label>
+                   <label class="sb-cat-item" title="Likes / subscribe / comment beg">
+                     <input type="checkbox" id="sb_interaction" />
+                     <span class="sb-dot" style="background:#cc0000;"></span><span>Interaction</span>
+                   </label>
+                   <label class="sb-cat-item" title="Non-music parts in music videos">
+                     <input type="checkbox" id="sb_music_offtopic" />
+                     <span class="sb-dot" style="background:#ff9900;"></span><span>Off-topic</span>
+                   </label>
+                   <label class="sb-cat-item" title="Preview / highlight reel">
+                     <input type="checkbox" id="sb_preview" />
+                     <span class="sb-dot" style="background:#008fd6;"></span><span>Preview</span>
+                   </label>
+                 </div>
+               </div>
+               <div class="feature-grid">
                 <div class="toggle-card">
                   <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M9 12l2 2 4-4"></path></svg></div>
                   <div class="info"><span class="name">Multi-Select Videos</span><span class="desc">Hold Shift + click to select multiple videos</span></div>
@@ -263,8 +296,69 @@
           </div>
         </section>
 
-        <!-- HOME -->
+        <!-- HOME — rendered by popup-renderer.js from popup-schema.js -->
         <section id="tab-home" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+        </section>
+
+        <!-- SHORTS — rendered by popup-renderer.js -->
+        <section id="tab-shorts" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+        </section>
+
+        <!-- PLAYER — rendered by popup-renderer.js -->
+        <section id="tab-player" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+          <!-- SponsorBlock categories panel (visible when sponsorBlock toggle is ON) -->
+          <div id="sponsorBlockCategories" class="sb-categories" style="display:none;">
+            <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Skip Categories</div>
+            <div class="sb-category-grid">
+              <label class="sb-cat-item" title="Paid promotion / sponsored content">
+                <input type="checkbox" id="sb_sponsor" checked />
+                <span class="sb-dot" style="background:#00d400;"></span><span>Sponsor</span>
+              </label>
+              <label class="sb-cat-item" title="Filler intro / recap">
+                <input type="checkbox" id="sb_intro" checked />
+                <span class="sb-dot" style="background:#00ffff;"></span><span>Intro</span>
+              </label>
+              <label class="sb-cat-item" title="Creator self-promotion">
+                <input type="checkbox" id="sb_selfpromo" checked />
+                <span class="sb-dot" style="background:#ffff00;"></span><span>Self-promo</span>
+              </label>
+              <label class="sb-cat-item" title="Likes / subscribe / comment beg">
+                <input type="checkbox" id="sb_interaction" />
+                <span class="sb-dot" style="background:#cc0000;"></span><span>Interaction</span>
+              </label>
+              <label class="sb-cat-item" title="Non-music parts in music videos">
+                <input type="checkbox" id="sb_music_offtopic" />
+                <span class="sb-dot" style="background:#ff9900;"></span><span>Off-topic</span>
+              </label>
+              <label class="sb-cat-item" title="Preview / highlight reel">
+                <input type="checkbox" id="sb_preview" />
+                <span class="sb-dot" style="background:#008fd6;"></span><span>Preview</span>
+              </label>
+            </div>
+          </div>
+          <!-- Hide Watched sub-options (visible when hideWatched is ON) -->
+          <div id="hideWatchedOptions" class="sub-options" style="display:none; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div class="setting-item" style="margin-bottom: 12px; flex-wrap: wrap; gap: 6px; padding: 0;">
+              <div class="info"><span class="name" style="font-size:12px;">Mode</span></div>
+              <div style="display:flex; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
+                <button type="button" id="hwMode-dim"  class="view-mode-btn hw-mode-btn active" data-mode="dim"  style="font-size:11px; padding:4px 12px;">Dim</button>
+                <button type="button" id="hwMode-hide" class="view-mode-btn hw-mode-btn"        data-mode="hide" style="font-size:11px; padding:4px 12px;">Hide</button>
+              </div>
+              <input type="hidden" id="hideWatchedMode" value="dim" />
+            </div>
+            <div class="setting-item" style="flex-direction:column; align-items:flex-start; padding:0;">
+              <div class="info" style="width:100%; display:flex; justify-content:space-between; flex-direction:row; margin-bottom:4px;">
+                <span class="name" style="font-size:12px;">Progress Threshold</span>
+                <span class="desc" id="hideWatchedThresholdValue" style="font-size:12px; font-weight:bold; color:var(--red);">80%</span>
+              </div>
+              <input type="range" id="hideWatchedThreshold" min="0" max="100" step="5" value="80" style="width:100%;" />
+            </div>
+          </div>
+        </section>
+
           <div class="settings-section">
             <div class="section-header">
                <div class="section-title-wrap">
@@ -389,239 +483,30 @@
           </div>
         </section>
 
-        <!-- SHORTS -->
-        <section id="tab-shorts" class="tab-content">
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Shorts Preferences</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg></div>
-                  <div class="info"><span class="name">Hide Shorts</span><span class="desc">Remove from Home feed</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideShorts" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
-                  <div class="info"><span class="name">Hide Search Shorts</span><span class="desc">Remove from search results</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideSearchShorts" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></div>
-                  <div class="info"><span class="name">Redirect Shorts</span><span class="desc">Play in normal UI</span></div>
-                  <label class="toggle"><input type="checkbox" id="redirectShorts" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
-                  <div class="info"><span class="name">Auto-Scroll</span><span class="desc">Skip when ended</span></div>
-                  <label class="toggle"><input type="checkbox" id="shortsAutoScroll" /><span class="slider"></span></label>
-                </div>
 
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <!-- PLAYER -->
-        <section id="tab-player" class="tab-content">
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Playback Automation</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></div>
-                  <div class="info"><span class="name">Auto-Quality</span><span class="desc">Force max resolution</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoQuality" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg></div>
-                  <div class="info"><span class="name">Video Resumer</span><span class="desc">Save playback position</span></div>
-                  <label class="toggle"><input type="checkbox" id="videoResumer" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg></div>
-                  <div class="info"><span class="name">Auto Pause</span><span class="desc">Pause when backgrounded</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoPause" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
-                  <div class="info"><span class="name">Auto Cinema</span><span class="desc">Expand player on load</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoCinema" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="12" y="14" width="7" height="5" rx="1" ry="1"></rect></svg></div>
-                  <div class="info"><span class="name">Auto PiP</span><span class="desc">PiP when switching tabs</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoPiP" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
-                  <div class="info"><span class="name">Auto Like</span><span class="desc">Automatically like video</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoLike" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-                  <div class="info"><span class="name">Intentional Delay</span><span class="desc">3s pause before video</span></div>
-                  <label class="toggle"><input type="checkbox" id="intentionalDelay" /><span class="slider"></span></label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Audio & Interactions</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></div>
-                  <div class="info"><span class="name">Volume Booster</span><span class="desc">Increase past 100%</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableVolumeBoost" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
-                  <div class="info"><span class="name">Audio Compressor</span><span class="desc">Compress loud sounds</span></div>
-                  <label class="toggle"><input type="checkbox" id="audioCompressor" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></div>
-                  <div class="info"><span class="name">Wheel Controls</span><span class="desc">Shift/Alt + Scroll to control</span></div>
-                  <label class="toggle"><input type="checkbox" id="wheelControls" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg></div>
-                  <div class="info"><span class="name">Playback Speed</span><span class="desc">Custom speed steps</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableCustomSpeed" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card" style="display: none;">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
-                  <div class="info"><span class="name">Mini Player</span><span class="desc">PiP integration</span></div>
-                  <label class="toggle"><input type="checkbox" id="enablePiP" /><span class="slider"></span></label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Player UI Components</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
-                  <div class="info"><span class="name">Video Controls UI</span><span class="desc">Custom floating panel</span></div>
-                  <label class="toggle"><input type="checkbox" id="videoControlsEnabled" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></div>
-                  <div class="info"><span class="name">Filters</span><span class="desc">Visual effects panel</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableCinemaFilters" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="14" x2="10" y2="14"></line><path d="M21 3l-6 6"></path><path d="M3 21l6-6"></path><polyline points="8 21 3 21 3 16"></polyline></svg></div>
-                  <div class="info"><span class="name">Loop Button</span><span class="desc">Add loop toggle</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableLoop" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
-                  <div class="info"><span class="name">Snapshot Button</span><span class="desc">Save frame as image</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableSnapshot" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-                  <div class="info"><span class="name">Time Remaining</span><span class="desc">Next to duration</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableRemainingTime" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card" style="display: none;">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
-                  <div class="info"><span class="name">Transcript</span><span class="desc">Auto open/enhance</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableTranscript" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
-                  <div class="info"><span class="name">Bookmarks Highlighter</span><span class="desc">Capture clips & text</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableBookmarks" /><span class="slider"></span></label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Up Next Sidebar</div>
-                     <div class="section-subtitle">Switch between thumbnail styles on the watch page</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="setting-item">
-                <div class="info">
-                  <span class="name">Thumbnail Size</span>
-                  <span class="desc">Choose how related videos appear on the right</span>
-                </div>
-                <div id="sidebarLayoutToggle" style="display:flex; background:rgba(255,255,255,0.06); border-radius:8px; overflow:hidden; flex-shrink:0;">
-                  <button type="button" data-layout="compact" class="sidebar-layout-btn active" style="display:flex; align-items:center; gap:5px; font-size:11px; padding:5px 14px; border:none; cursor:pointer; transition:all 0.2s; font-weight:500;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="6" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><rect x="3" y="13" width="6" height="4" rx="1"/><line x1="11" y1="15" x2="21" y2="15"/></svg>
-                    Compact
-                  </button>
-                  <button type="button" data-layout="expanded" class="sidebar-layout-btn" style="display:flex; align-items:center; gap:5px; font-size:11px; padding:5px 14px; border:none; cursor:pointer; transition:all 0.2s; font-weight:500;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="11" rx="2"/><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="21" x2="15" y2="21"/></svg>
-                    Expanded
-                  </button>
-                </div>
-                <input type="hidden" id="sidebarLayout" value="expanded" />
-              </div>
-              <div style="display:flex; gap:8px; margin-top:4px; padding:0 2px;">
-                <div style="flex:1; border-radius:8px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);">
-                  <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:3px;">Compact</div>
-                  <div style="font-size:10px; color:rgba(255,255,255,0.4); line-height:1.4;">Small thumbnail · text on right · more videos visible</div>
-                </div>
-                <div style="flex:1; border-radius:8px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);">
-                  <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:3px;">Expanded</div>
-                  <div style="font-size:10px; color:rgba(255,255,255,0.4); line-height:1.4;">Large thumbnail · stacked card · richer preview</div>
-                </div>
-              </div>
-              
-              <div class="setting-item" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
-                 <div class="info">
-                    <span class="name">Independent Sidebar Scroll</span>
-                    <span class="desc">Scroll the sidebar while keeping the video perfectly still</span>
-                 </div>
-                 <label class="toggle">
-                    <input type="checkbox" id="splitScrolling" />
-                    <span class="slider"></span>
-                 </label>
-              </div>
-
-            </div>
-          </div>
-
-        </section>
-
-        <!-- WELLNESS -->
+        <!-- WELLNESS — rendered by popup-renderer.js -->
         <section id="tab-wellness" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+        </section>
+
+        <!-- SEARCH — rendered by popup-renderer.js -->
+        <section id="tab-search" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+        </section>
+
+        <!-- SUBSCRIPTIONS — rendered by popup-renderer.js -->
+        <section id="tab-subscriptions" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+          <!-- Sub-management action buttons — preserved, not replaced by renderer -->
+          <div data-preserve="true" style="display:flex; gap:8px; margin:8px 14px 14px;">
+            <button id="manageSubsBtn" class="action-btn">Manage Groups</button>
+            <button id="exportFoldersBtn" class="action-btn" style="background:var(--bg-card);">Export</button>
+            <button id="importFoldersBtn" class="action-btn" style="background:var(--bg-card);">Import</button>
+            <input type="file" id="importFoldersFile" accept=".json" style="display:none;" />
+          </div>
+        </section>
+
           <div class="settings-section">
             <div class="section-header">
                <div class="section-title-wrap">
@@ -683,131 +568,7 @@
         </section>
 
 
-        <!-- SEARCH -->
-        <section id="tab-search" class="tab-content">
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Layout & Filters</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
-                  <div class="info"><span class="name">Grid View</span><span class="desc">Card layout for search</span></div>
-                  <label class="toggle"><input type="checkbox" id="searchGrid" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg></div>
-                  <div class="info"><span class="name">Clean Search</span><span class="desc">Remove junk/ads</span></div>
-                  <label class="toggle"><input type="checkbox" id="cleanSearch" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card" style="display: none;">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-                  <div class="info"><span class="name">Auto Video Filter</span><span class="desc">Default to Videos</span></div>
-                  <label class="toggle"><input type="checkbox" id="autoVideoFilter" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg></div>
-                  <div class="info"><span class="name">Hide Shelf Sections</span><span class="desc">Remove "For You"</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideSearchShelves" /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-                  <div class="info"><span class="name">Hide Channel Cards</span><span class="desc">Show videos only</span></div>
-                  <label class="toggle"><input type="checkbox" id="hideChannelCards" /><span class="slider"></span></label>
-                </div>
-              </div>
-              <div class="setting-item" style="margin-top: 6px;">
-                <div class="info">
-                  <span class="name">Grid Columns</span>
-                  <span class="desc">Results per row: <span id="searchColumnsValue">4</span></span>
-                </div>
-                <div class="range-container">
-                  <input type="range" id="searchColumns" min="1" max="8" step="1" value="4" />
-                </div>
-              </div>
-              <div class="setting-item">
-                <div class="info">
-                  <span class="name">View Mode</span>
-                </div>
-                <div id="searchViewModeToggle" style="display:flex; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
-                  <button type="button" data-mode="grid" class="view-mode-btn active">Grid</button>
-                  <button type="button" data-mode="list" class="view-mode-btn">List</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <!-- SUBSCRIPTIONS -->
-        <section id="tab-subscriptions" class="tab-content">
-          <div class="settings-section">
-            <div class="section-header">
-               <div class="section-title-wrap">
-                  <div class="section-text-wrap">
-                     <div class="section-title">Subscription Management</div>
-                  </div>
-               </div>
-            </div>
-            <div class="card-group">
-              <div class="feature-grid">
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
-                  <div class="info"><span class="name">Sub Folders</span><span class="desc">Create groups</span></div>
-                  <label class="toggle"><input type="checkbox" id="subscriptionFolders" checked /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg></div>
-                  <div class="info"><span class="name">Group Sidebar</span><span class="desc">Show UI sidebar</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableSubsManager" checked /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></div>
-                  <div class="info"><span class="name">Context Menu</span><span class="desc">Card context menu</span></div>
-                  <label class="toggle"><input type="checkbox" id="contextMenu" checked /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></div>
-                  <div class="info"><span class="name">Filter Bar</span><span class="desc">Show duration/date filters</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableFilterBar" checked /><span class="slider"></span></label>
-                </div>
-                <div class="toggle-card">
-                  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-                  <div class="info"><span class="name">Channel Health</span><span class="desc">Show health scanner</span></div>
-                  <label class="toggle"><input type="checkbox" id="enableChannelHealth" checked /><span class="slider"></span></label>
-                </div>
-              </div>
-              <div class="setting-item" style="margin-top: 6px;">
-                <div class="info">
-                  <span class="name">Channel Columns</span>
-                  <span class="desc">Grid width: <span id="channelColumnsValue">4</span></span>
-                </div>
-                <div class="range-container">
-                  <input type="range" id="channelColumns" min="2" max="10" step="1" value="4" />
-                </div>
-              </div>
-              <div class="setting-item">
-                <div class="info">
-                  <span class="name">Feed Grid Columns</span>
-                  <span class="desc">Videos per row: <span id="subscriptionsColumnsValue">4</span></span>
-                </div>
-                <div class="range-container">
-                  <input type="range" id="subscriptionsColumns" min="1" max="8" step="1" value="4" />
-                </div>
-              </div>
-              <div style="display:flex; gap:8px; margin-top:8px;">
-                <button id="manageSubsBtn" class="action-btn">Manage Groups</button>
-                <button id="exportFoldersBtn" class="action-btn" style="background:var(--bg-card);">Export</button>
-                <button id="importFoldersBtn" class="action-btn" style="background:var(--bg-card);">Import</button>
-                <input type="file" id="importFoldersFile" accept=".json" style="display:none;" />
-              </div>
-            </div>
-          </div>
-        </section>
 
         <!-- HISTORY -->
         <section id="tab-history" class="tab-content">
@@ -1173,6 +934,22 @@
                 <div class="shortcut-row"><span>Speed +0.25x</span><input type="text" id="shortcut_speedUp" class="shortcut-input" /></div>
                 <div class="shortcut-row"><span>Reset Speed</span><input type="text" id="shortcut_speedReset" class="shortcut-input" /></div>
                 <div class="shortcut-row"><span>Ambient Mode</span><input type="text" id="shortcut_ambientMode" class="shortcut-input" /></div>
+              </div>
+              <!-- Shortcut quick-reference card (4.1) -->
+              <div class="shortcut-ref-card" style="margin-top:12px; padding:10px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
+                <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Quick Reference</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; font-size:11px; color:rgba(255,255,255,0.75);">
+                  <div class="ref-row"><kbd>Z</kbd><span>Zen Mode</span></div>
+                  <div class="ref-row"><kbd>C</kbd><span>Cinema Mode</span></div>
+                  <div class="ref-row"><kbd>F</kbd><span>Focus Mode</span></div>
+                  <div class="ref-row"><kbd>S</kbd><span>Snapshot</span></div>
+                  <div class="ref-row"><kbd>L</kbd><span>Loop</span></div>
+                  <div class="ref-row"><kbd>P</kbd><span>PiP</span></div>
+                  <div class="ref-row"><kbd>[</kbd><span>Speed −0.25×</span></div>
+                  <div class="ref-row"><kbd>]</kbd><span>Speed +0.25×</span></div>
+                  <div class="ref-row"><kbd>\</kbd><span>Reset Speed</span></div>
+                  <div class="ref-row"><kbd>A</kbd><span>Ambient Mode</span></div>
+                </div>
               </div>
             </div>
           </div>

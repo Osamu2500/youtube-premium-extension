@@ -91,6 +91,13 @@ export const DEFAULT_SETTINGS = {
     // Ad Skipper
     adSkipper: true,
     sponsorBlock: true,
+    // SponsorBlock per-category toggles
+    sb_sponsor:          true,
+    sb_intro:            true,
+    sb_selfpromo:        true,
+    sb_interaction:      false,
+    sb_music_offtopic:   false,
+    sb_preview:          false,
     returnYouTubeDislike: true,
 
     splitScrolling: false,
@@ -167,5 +174,8 @@ export const DEFAULT_SETTINGS = {
     shortcut_speedDown:   'Shift+,',
     shortcut_speedUp:     'Shift+.',
     shortcut_speedReset:  'Shift+R',
-    shortcut_ambientMode: 'Shift+A'
+    shortcut_ambientMode: 'Shift+A',
+
+    // Onboarding
+    hasSeenOnboarding: false,
 };

@@ -644,32 +644,67 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @param {string} [type] - 'info', 'success', 'error', or 'warning'
      * @returns {void}
      */
-    createToast: (msg, type = 'info') => {
-        if (!msg || typeof msg !== 'string') return;
+    createToast: (() => {
+        const MAX_VISIBLE = 2;
+        const STAGGER_PX  = 60;      // vertical offset per toast
+        const queue = [];            // pending messages
+        const active = [];           // currently shown toast elements
 
-        try {
-            const toast = document.createElement('div');
-            toast.className = `ypp-toast ypp-toast-${type}`;
-            toast.textContent = msg;
-            document.body.appendChild(toast);
+        function _place() {
+            // Reposition all active toasts so they stack cleanly
+            active.forEach((el, i) => {
+                el.style.bottom = `${24 + i * STAGGER_PX}px`;
+            });
+        }
 
-            // Force reflow
-            void toast.offsetWidth;
+        function _show(msg, type, duration) {
+            const displayTime = duration || CONSTANTS.TIMINGS?.TOAST_DISPLAY || 3000;
+            const fadeTime    = CONSTANTS.TIMINGS?.TOAST_FADE || 300;
 
-            const displayTime = CONSTANTS.TIMINGS?.TOAST_DISPLAY || 3000;
-            const fadeTime = CONSTANTS.TIMINGS?.TOAST_FADE || 300;
+            try {
+                const toast = document.createElement('div');
+                toast.className = `ypp-toast ypp-toast-${type}`;
+                toast.textContent = msg;
+                // Start off-screen, placed by _place()
+                toast.style.bottom = '24px';
+                document.body.appendChild(toast);
 
-            requestAnimationFrame(() => {
-                toast.classList.add('show');
+                active.push(toast);
+                _place();
+
+                // Trigger entrance
+                void toast.offsetWidth;
+                requestAnimationFrame(() => toast.classList.add('show'));
+
                 setTimeout(() => {
                     toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), fadeTime);
+                    setTimeout(() => {
+                        toast.remove();
+                        const idx = active.indexOf(toast);
+                        if (idx !== -1) active.splice(idx, 1);
+                        _place();
+                        // Drain queue
+                        if (queue.length > 0) {
+                            const next = queue.shift();
+                            _show(next.msg, next.type, next.duration);
+                        }
+                    }, fadeTime);
                 }, displayTime);
-            });
-        } catch (error) {
-            console.error('[YPP:Utils] Error creating toast:', error);
+            } catch (error) {
+                console.error('[YPP:Utils] Error creating toast:', error);
+            }
         }
-    },
+
+        return (msg, type = 'info', duration) => {
+            if (!msg || typeof msg !== 'string') return;
+            if (active.length < MAX_VISIBLE) {
+                _show(msg, type, duration);
+            } else {
+                // Enqueue — FIFO, cap queue at 4 to prevent storm
+                if (queue.length < 4) queue.push({ msg, type, duration });
+            }
+        };
+    })(),
 
     // =====================================================================
     // STORAGE UTILITIES

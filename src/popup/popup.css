@@ -827,3 +827,177 @@ input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,.
   font-size: 12px; width: 100%; outline: none;
 }
 .feature-search-input::placeholder { color: var(--text-dim); font-size: 12px; }
+
+/* ─────────────────────────────────────────────────────────────────
+   4.2 — SponsorBlock per-category grid
+───────────────────────────────────────────────────────────────── */
+.sb-categories {
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 10px 14px 12px;
+  background: rgba(0,0,0,.15);
+}
+.sb-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.sb-cat-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 9px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 8px;
+  font-size: 10.5px; font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all .18s var(--ease-smooth);
+  user-select: none;
+}
+.sb-cat-item:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.14); }
+.sb-cat-item input[type="checkbox"] { display: none; }
+.sb-cat-item:has(input:checked) { background: rgba(255,255,255,.08); color: #fff; }
+.sb-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 5px currentColor;
+  opacity: .45;
+  transition: opacity .18s;
+}
+.sb-cat-item:has(input:checked) .sb-dot { opacity: 1; }
+
+/* ─────────────────────────────────────────────────────────────────
+   4.1 — Keyboard shortcut quick-reference card
+───────────────────────────────────────────────────────────────── */
+.ref-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 3px 0;
+}
+.ref-row span { color: rgba(255,255,255,.65); font-size: 10.5px; }
+kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 18px;
+  padding: 0 5px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-family: 'Inter', monospace;
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,.85);
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   5.2 — Popup skeleton / loading shimmer
+───────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  from { background-position: -600px 0; }
+  to   { background-position:  600px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.04) 25%,
+    rgba(255,255,255,.10) 50%,
+    rgba(255,255,255,.04) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 8px;
+}
+/* Skeleton placeholders shown during initial load */
+.popup-loading .tab-content.active > .settings-section {
+  visibility: hidden;
+}
+.popup-loading .tab-content.active::before {
+  content: '';
+  display: block;
+  height: 56px; border-radius: 14px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.04) 25%,
+    rgba(255,255,255,.10) 50%,
+    rgba(255,255,255,.04) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+.popup-loading .tab-content.active::after {
+  content: '';
+  display: block;
+  height: 120px; border-radius: 14px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.04) 25%,
+    rgba(255,255,255,.10) 50%,
+    rgba(255,255,255,.04) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s 0.2s infinite linear;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   5.4 — First-run onboarding banner
+───────────────────────────────────────────────────────────────── */
+.ypp-onboarding-banner {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: 9999;
+  width: min(540px, 90vw);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, #6366f1 80%, #0d0d10),
+    color-mix(in srgb, #a855f7 70%, #0d0d10));
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex; align-items: flex-start; gap: 14px;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.7),
+    0 0 0 1px rgba(255,255,255,.08),
+    inset 0 1px 0 rgba(255,255,255,.2);
+  transition: transform .5s cubic-bezier(0.34,1.56,0.64,1), opacity .35s ease;
+  opacity: 0;
+}
+.ypp-onboarding-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.ypp-onboarding-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(255,255,255,.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.ypp-onboarding-body { flex: 1; min-width: 0; }
+.ypp-onboarding-title {
+  font-size: 13px; font-weight: 800; color: #fff;
+  margin: 0 0 3px; letter-spacing: -.02em;
+}
+.ypp-onboarding-desc {
+  font-size: 11px; color: rgba(255,255,255,.75);
+  line-height: 1.5; margin: 0;
+}
+.ypp-onboarding-actions {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.ypp-onboarding-btn {
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 11px; font-weight: 700; font-family: inherit;
+  cursor: pointer; border: none;
+  transition: all .2s ease;
+}
+.ypp-onboarding-btn-primary {
+  background: rgba(255,255,255,.9); color: #3730a3;
+}
+.ypp-onboarding-btn-primary:hover { background: #fff; transform: scale(1.04); }
+.ypp-onboarding-btn-dismiss {
+  background: rgba(255,255,255,.1); color: rgba(255,255,255,.7);
+  border: 1px solid rgba(255,255,255,.15);
+}
+.ypp-onboarding-btn-dismiss:hover { background: rgba(255,255,255,.15); color: #fff; }
+.ypp-onboarding-close {
+  background: rgba(255,255,255,.08); border: none;
+  color: rgba(255,255,255,.5); width: 24px; height: 24px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; font-size: 14px;
+  transition: all .2s;
+}
+.ypp-onboarding-close:hover { background: rgba(255,255,255,.18); color: #fff; }
+

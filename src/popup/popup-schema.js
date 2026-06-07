@@ -1,0 +1,275 @@
+/**
+ * popup-schema.js  — v3.1 Architecture
+ * ─────────────────────────────────────────────────────────────────────
+ * Declarative definition of every popup tab, section, and setting.
+ * The popup-renderer.js consumes this and generates live DOM from it.
+ *
+ * Structure:
+ *   POPUP_SCHEMA = Tab[]
+ *   Tab          = { id, label, icon, sections: Section[] }
+ *   Section      = { title, subtitle?, items: Item[] }
+ *   Item         = { type, id, label, desc?, icon?, ...typeProps }
+ *
+ * Item types:
+ *   'toggle'   → checkbox toggle card
+ *   'range'    → range slider  (needs: min, max, step, unit)
+ *   'select'   → <select>      (needs: options: [{value, label}])
+ *   'pill'     → segmented pill (needs: options, storageKey)
+ *   'custom'   → slot rendered by renderer via customRenderers map
+ *   'heading'  → non-interactive label/divider row
+ *
+ * Sections support `hidden: true` for legacy/unused items kept for
+ * settings-compatibility but not displayed.
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
+// Tiny SVG path helper — returns just the <path d="…"> inner string
+// Full <svg> wrapper is added by the renderer
+const P = (d) => d;
+
+export const POPUP_SCHEMA = [
+
+    // ──────────────────────────────────────────────────────────────────
+    // DASHBOARD (rendered by popup-components.js, schema provides meta)
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'dashboard', label: 'Dash',
+        icon: P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'),
+        custom: true,   // entirely custom-rendered, no sections here
+        sections: []
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // HOME FEED
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'home', label: 'Home',
+        icon: P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'),
+        sections: [
+            {
+                title: 'Feed Layout',
+                items: [
+                    { type:'toggle', id:'cinematicMode',    label:'Cinematic Mode',   desc:'Netflix-style immersive UI', icon:P('M2 7h20v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z M17 2l5 5M7 2L2 7'), style:'border:1px solid var(--accent-primary)' },
+                    { type:'toggle', id:'hookFreeHome',     label:'Hook-Free Home',   desc:'Hide the feed entirely',   icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
+                    { type:'toggle', id:'displayFullTitle', label:'Full Video Titles', desc:'Prevent truncation',        icon:P('M4 6h16M4 12h16M4 18h16') },
+                    { type:'toggle', id:'autoScaleLayout',  label:'Auto-Scale Grid',  desc:'Adapt to zoom/window size', icon:P('M15 3l6 6M15 3h6v6M9 21l-6-6M9 21H3v-6') },
+                    { type:'range', id:'homeColumns', label:'Grid Columns', unit:'', min:1, max:8, step:1 },
+                ]
+            },
+            {
+                title: 'Content Filters',
+                items: [
+                    { type:'toggle', id:'hideExploreTopics', label:'Hide Topics Bar',   desc:'Remove category chips',    icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M3.6 9h16.8 M3.6 15h16.8') },
+                    { type:'toggle', id:'hidePromoShelves',  label:'Hide Promos',       desc:'Remove shelves & games',   icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
+                    { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },
+                    { type:'toggle', id:'hidePodcasts',      label:'Hide Podcasts',     desc:'Remove podcast cards',     icon:P('M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1v-6h3v4z M3 19a2 2 0 0 0 2 2h1v-6H3v4z') },
+                    { type:'toggle', id:'hidePosts',         label:'Hide Posts',        desc:'Remove community posts',   icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Dim or remove watched',    icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'), slot:'hideWatchedOptions' },
+                    { type:'toggle', id:'hideThumbnails',    label:'Hide Thumbnails',   desc:'Blur on hover to reveal',  icon:P('M3 3h18v18H3z M8.5 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21') },
+                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
+                    { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // SHORTS
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'shorts', label: 'Shorts',
+        icon: P('M12 20V10M18 20V4M6 20v-4'),
+        sections: [
+            {
+                title: 'Shorts Preferences',
+                items: [
+                    { type:'toggle', id:'hideShorts',       label:'Hide Shorts',        desc:'Remove from Home feed',    icon:P('M12 20V10M18 20V4M6 20v-4') },
+                    { type:'toggle', id:'hideSearchShorts', label:'Hide Search Shorts', desc:'Remove from search results', icon:P('M21 21l-4.35-4.35M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z') },
+                    { type:'toggle', id:'redirectShorts',   label:'Redirect Shorts',    desc:'Play in normal UI',        icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
+                    { type:'toggle', id:'shortsAutoScroll', label:'Auto-Scroll',        desc:'Skip when ended',          icon:P('M12 5l0 14M19 12l-7 7-7-7') },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // PLAYER
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'player', label: 'Player',
+        icon: P('M5 3l14 9-14 9V3z'),
+        sections: [
+            {
+                title: 'Playback Automation',
+                items: [
+                    { type:'toggle', id:'autoQuality',      label:'Auto-Quality',       desc:'Force max resolution',       icon:P('M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM10 8l6 4-6 4V8z') },
+                    { type:'toggle', id:'videoResumer',     label:'Video Resumer',      desc:'Save playback position',     icon:P('M12 20V4M20 12H4') },
+                    { type:'toggle', id:'autoPause',        label:'Auto Pause',         desc:'Pause when backgrounded',    icon:P('M6 4h4v16H6zM14 4h4v16h-4z') },
+                    { type:'toggle', id:'autoCinema',       label:'Auto Cinema',        desc:'Expand player on load',      icon:P('M2 3h20v14H2zM8 21h8M12 17v4') },
+                    { type:'toggle', id:'autoPiP',          label:'Auto PiP',           desc:'PiP when switching tabs',    icon:P('M3 3h18v14H3zM12 14h7v5h-7z') },
+                    { type:'toggle', id:'autoLike',         label:'Auto Like',          desc:'Automatically like video',   icon:P('M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z') },
+                    { type:'toggle', id:'intentionalDelay', label:'Intentional Delay',  desc:'3s pause before video',      icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
+                ]
+            },
+            {
+                title: 'Audio & Interactions',
+                items: [
+                    { type:'toggle', id:'enableVolumeBoost',  label:'Volume Booster',    desc:'Increase past 100%',         icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07') },
+                    { type:'toggle', id:'audioCompressor',    label:'Audio Compressor',  desc:'Compress loud sounds',       icon:P('M22 12h-4l-3 9L9 3l-3 9H2') },
+                    { type:'toggle', id:'wheelControls',      label:'Wheel Controls',    desc:'Shift/Alt+Scroll to control', icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
+                    { type:'toggle', id:'enableCustomSpeed',  label:'Playback Speed',    desc:'Custom speed steps',         icon:P('M5 4l15 8-15 8V4z M19 5v14') },
+                ]
+            },
+            {
+                title: 'Player UI Components',
+                items: [
+                    { type:'toggle', id:'videoControlsEnabled', label:'Video Controls UI', desc:'Custom floating panel',     icon:P('M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z') },
+                    { type:'toggle', id:'enableCinemaFilters',  label:'Filters',          desc:'Visual effects panel',       icon:P('M22 3H2l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'toggle', id:'enableLoop',           label:'Loop Button',      desc:'Add loop toggle',            icon:P('M16 3l5 5-5 5M4 14l-1 1a5 5 0 0 0 7.54.54l1.06-1.06M3 21l6-6') },
+                    { type:'toggle', id:'enableSnapshot',       label:'Snapshot Button',  desc:'Save frame as image',        icon:P('M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z') },
+                    { type:'toggle', id:'enableRemainingTime',  label:'Time Remaining',   desc:'Next to duration',           icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
+                    { type:'toggle', id:'enableBookmarks',      label:'Bookmarks',        desc:'Capture clips & text',       icon:P('M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z') },
+                ]
+            },
+            {
+                title: 'Auto-Skip & Integrations',
+                items: [
+                    { type:'toggle', id:'adSkipper',            label:'Ad Skipper',        desc:'Auto-skip video ads',       icon:P('M5 4l15 8-15 8V4z M19 5v14') },
+                    { type:'toggle', id:'sponsorBlock',         label:'SponsorBlock',      desc:'Skip sponsored segments',   icon:P('M13 2L3 14h9l-1 8 10-12h-9l1-8z'), slot:'sponsorBlockCategories' },
+                    { type:'toggle', id:'returnYouTubeDislike', label:'Return Dislikes',   desc:'Restore dislike count',     icon:P('M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z') },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // SEARCH
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'search', label: 'Search',
+        icon: P('M21 21l-4.35-4.35M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z'),
+        sections: [
+            {
+                title: 'Layout & Filters',
+                items: [
+                    { type:'toggle', id:'searchGrid',        label:'Grid View',           desc:'Card layout for search',   icon:P('M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z') },
+                    { type:'toggle', id:'cleanSearch',       label:'Clean Search',         desc:'Remove junk/ads',          icon:P('M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z') },
+                    { type:'toggle', id:'autoVideoFilter',   label:'Auto Video Filter',    desc:'Default to Videos tab',    icon:P('M5 4l15 8-15 8V4z'), style:'display:none' },
+                    { type:'toggle', id:'hideSearchShelves', label:'Hide Shelf Sections',  desc:'Remove "For You"',         icon:P('M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z') },
+                    { type:'toggle', id:'hideChannelCards',  label:'Hide Channel Cards',   desc:'Show videos only',         icon:P('M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z') },
+                    { type:'range',  id:'searchColumns',     label:'Grid Columns', unit:'', min:1, max:8, step:1 },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // SUBSCRIPTIONS
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'subscriptions', label: 'Subs',
+        icon: P('M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'),
+        sections: [
+            {
+                title: 'Subscription Management',
+                items: [
+                    { type:'toggle', id:'subscriptionFolders', label:'Sub Folders',     desc:'Create groups',              icon:P('M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'enableSubsManager',   label:'Group Sidebar',   desc:'Show UI sidebar',            icon:P('M3 3h18v18H3zM9 3v18') },
+                    { type:'toggle', id:'contextMenu',         label:'Context Menu',    desc:'Card context menu',          icon:P('M12 12h.01M12 5h.01M12 19h.01') },
+                    { type:'toggle', id:'enableFilterBar',     label:'Filter Bar',      desc:'Show duration/date filters', icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'toggle', id:'enableChannelHealth', label:'Channel Health',  desc:'Show health scanner',        icon:P('M22 12h-4l-3 9L9 3l-3 9H2') },
+                ]
+            },
+            {
+                title: 'Columns',
+                items: [
+                    { type:'range', id:'channelColumns',       label:'Channel Columns',    unit:'', min:2, max:10, step:1 },
+                    { type:'range', id:'subscriptionsColumns', label:'Feed Grid Columns',  unit:'', min:1, max:8,  step:1 },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // HISTORY (custom — complex widget, keep as custom slot)
+    // ──────────────────────────────────────────────────────────────────
+    { id: 'history', label: 'History', icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2'), custom: true, sections: [] },
+
+    // ──────────────────────────────────────────────────────────────────
+    // BOOKMARKS (custom — list rendered by popup-extras)
+    // ──────────────────────────────────────────────────────────────────
+    { id: 'bookmarks', label: 'Marks', icon: P('M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'), custom: true, sections: [] },
+
+    // ──────────────────────────────────────────────────────────────────
+    // WELLNESS
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'wellness', label: 'Focus',
+        icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 8v4l3 3'),
+        sections: [
+            {
+                title: 'Focus & Distractions',
+                items: [
+                    { type:'toggle', id:'hideComments',   label:'Hide Comments',       icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'commentFilter',  label:'Comment Filter',      desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'toggle', id:'hideEndScreens', label:'Hide End Screens',    icon:P('M3 3h18v18H3zM3 9h18M9 21V9') },
+                    { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
+                    { type:'toggle', id:'hideCards',      label:'Hide Video Cards',    icon:P('M3 3h18v18H3zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0') },
+                    { type:'toggle', id:'hideMerch',      label:'Hide Merch/Offers',   icon:P('M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0') },
+                    { type:'toggle', id:'hideLiveChat',   label:'Hide Live Chat',      icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hideFundraiser', label:'Hide Donations',      icon:P('M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z') },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // CUSTOMIZATION (custom — theme engine requires component hooks)
+    // ──────────────────────────────────────────────────────────────────
+    { id: 'customization', label: 'Style', icon: P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'), custom: true, sections: [] },
+
+    // ──────────────────────────────────────────────────────────────────
+    // ADVANCED
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'advanced', label: 'Pro',
+        icon: P('M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'),
+        sections: [
+            {
+                title: 'External Integrations',
+                items: [
+                    { type:'toggle', id:'enableGlobalPlayerBar', label:'Global Player Bar', desc:'External sites UI', icon:P('M3 3h18v14H3zM3 15h18') },
+                    {
+                        type:'select', id:'globalPlayerBarPosition', label:'Player Bar Position', desc:'Global Player Bar layout',
+                        options: [ {value:'right',label:'Right'}, {value:'left',label:'Left'}, {value:'top',label:'Top'} ]
+                    },
+                ]
+            },
+            {
+                title: 'Stats & Overlays',
+                items: [
+                    { type:'toggle', id:'enableStatsForNerds', label:'Stats Overlay', desc:'View tech details', icon:P('M4 17l6-6 4 4 6-8') },
+                ]
+            },
+            {
+                title: 'Hotkeys (Watch Page)',
+                items: [
+                    { type:'toggle', id:'keyboardShortcuts', label:'Enable Hotkeys', icon:P('M2 4h20v16H2z M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10') },
+                    { type:'custom', id:'shortcutsPanel', slot:'shortcutsPanel' },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // GLOBAL (custom — misc toggles + backup)
+    // ──────────────────────────────────────────────────────────────────
+    { id: 'global', label: 'Global', icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'), custom: true, sections: [] },
+];
+
+/**
+ * Map of custom slot IDs → render functions.
+ * Registered by popup-renderer.js at init-time.
+ * Each fn(container: HTMLElement, state: object) → void
+ */
+export const CUSTOM_SLOT_RENDERERS = new Map();

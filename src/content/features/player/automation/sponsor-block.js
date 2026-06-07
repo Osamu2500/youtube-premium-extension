@@ -21,8 +21,8 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         this.segmentCache = new Map();
         this.CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
         
-        // Categories to skip
-        this.categories = ['sponsor', 'selfpromo', 'interaction', 'intro', 'outro'];
+        // Default categories — overridden at runtime by per-category settings
+        this._defaultCategories = ['sponsor', 'selfpromo', 'intro', 'music_offtopic', 'preview'];
         
         this.COLORS = {
             'sponsor': '#00d400',
@@ -157,6 +157,27 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         return new URLSearchParams(window.location.search).get('v');
     }
 
+    /**
+     * Build the active category list from per-category settings.
+     * Falls back to the default array if settings are unavailable.
+     */
+    _getActiveCategories() {
+        const s = this.settings;
+        if (!s) return this._defaultCategories.slice();
+        const CAT_MAP = {
+            sponsor:        'sb_sponsor',
+            intro:          'sb_intro',
+            selfpromo:      'sb_selfpromo',
+            interaction:    'sb_interaction',
+            music_offtopic: 'sb_music_offtopic',
+            preview:        'sb_preview',
+        };
+        const active = Object.entries(CAT_MAP)
+            .filter(([, key]) => s[key] !== false)
+            .map(([cat]) => cat);
+        return active.length > 0 ? active : this._defaultCategories.slice();
+    }
+
     async fetchSegments() {
         if (this.abortController) this.abortController.abort();
         this.abortController = new AbortController();
@@ -180,7 +201,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             // Use first 4 characters (prefix) for privacy
             const prefix = hashHex.substring(0, 4);
 
-            const categoriesParam = encodeURIComponent(JSON.stringify(this.categories));
+            const categoriesParam = encodeURIComponent(JSON.stringify(this._getActiveCategories()));
             const url = `https://sponsor.ajay.app/api/skipSegments/${prefix}?categories=${categoriesParam}`;
 
             const response = await new Promise(resolve => {
