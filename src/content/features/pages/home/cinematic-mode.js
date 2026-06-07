@@ -333,24 +333,12 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         // Insert hero before the preview's current position, then move preview into it
         if (preview.parentNode && preview.parentNode !== heroWrapper) {
+            // Save the original parent so we can put it back on teardown
+            if (!this._heroState.originalPreviewParent) {
+                this._heroState.originalPreviewParent = preview.parentNode;
+            }
             heroWrapper.insertBefore(preview, heroWrapper.querySelector('.netflix-hero-gradient') || null);
         }
-        
-        // Reset any inline styles the previous approach may have applied
-        const toReset = [preview, ...Array.from(preview.querySelectorAll(
-            '#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'
-        ))];
-        toReset.forEach(el => {
-            if (el && el.style) {
-                el.style.removeProperty('position');
-                el.style.removeProperty('top');
-                el.style.removeProperty('left');
-                el.style.removeProperty('width');
-                el.style.removeProperty('height');
-                el.style.removeProperty('z-index');
-                el.style.removeProperty('max-width');
-            }
-        });
     }
 
     async _makeHeroPreview(videoElement) {
@@ -987,6 +975,18 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
         const hero = this._heroState.heroElement;
         if (hero) {
+            // Eject YouTube's native preview element back to its original parent
+            const preview = hero.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW);
+            if (preview) {
+                // Put it back in the DOM safely
+                if (this._heroState.originalPreviewParent) {
+                    this._heroState.originalPreviewParent.appendChild(preview);
+                } else {
+                    // Fallback if we somehow didn't catch the parent
+                    document.body.appendChild(preview);
+                }
+            }
+            
             hero.remove();
         }
 
@@ -996,6 +996,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             observers: new Set(),
             currentVideo: null,
             previewStyleObserver: null,
+            originalPreviewParent: null
         };
     }
 

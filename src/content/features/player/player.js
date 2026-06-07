@@ -68,23 +68,24 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
 
         try {
             const elements = await Utils.pollFor(() => {
-                const video = document.querySelector('video');
-                const controls = document.querySelector('.ytp-right-controls');
-                // readyState >= 0 means the element exists — we don't need media
-                // data loaded yet; we just need the DOM nodes for injection.
-                if (video && controls) {
-                    return { video, controls };
+                const isShorts = window.location.pathname.startsWith('/shorts');
+                if (isShorts) {
+                    const video = document.querySelector('ytd-reel-video-renderer[is-active] video');
+                    const controls = document.querySelector('ytd-reel-video-renderer[is-active] .overlay.ytd-reel-video-renderer');
+                    if (video && controls) return { video, controls, isShorts };
+                } else {
+                    const video = document.querySelector('video');
+                    const controls = document.querySelector('.ytp-right-controls');
+                    if (video && controls) return { video, controls, isShorts };
                 }
                 return null;
             }, 10000, 500);
 
             if (elements) {
-                const { video, controls } = elements;
+                const { video, controls, isShorts } = elements;
                 this._videoElement = video;
 
-                if (!document.querySelector('.ypp-player-controls')) {
-                    this.injectControls(video, controls);
-                }
+                this.injectControls(video, controls, isShorts);
 
                 if (this.settings.autoPiP) {
                     this.handleAutoPiP(video);
@@ -109,32 +110,43 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         if (!this._observer) {
             this._observer = new MutationObserver(() => {
                 if (!this.isEnabled) return;
-                if (!document.querySelector('.ypp-player-controls') && document.querySelector('.ytp-right-controls')) {
-                    const video = document.querySelector('video');
-                    const controls = document.querySelector('.ytp-right-controls');
-                    if (video && controls) {
-                        this.injectControls(video, controls);
+                const isShorts = window.location.pathname.startsWith('/shorts');
+                
+                if (isShorts) {
+                    const activeShort = document.querySelector('ytd-reel-video-renderer[is-active]');
+                    if (activeShort && !activeShort.querySelector('.ypp-player-controls')) {
+                        // Remove old ones
+                        document.querySelectorAll('.ypp-player-controls').forEach(e => e.remove());
+                        const video = activeShort.querySelector('video');
+                        const controls = activeShort.querySelector('.overlay.ytd-reel-video-renderer');
+                        if (video && controls) {
+                            this.injectControls(video, controls, isShorts);
+                        }
+                    }
+                } else {
+                    if (!document.querySelector('.ypp-player-controls') && document.querySelector('.ytp-right-controls')) {
+                        const video = document.querySelector('video');
+                        const controls = document.querySelector('.ytp-right-controls');
+                        if (video && controls) {
+                            this.injectControls(video, controls, false);
+                        }
                     }
                 }
             });
-            const playerContainer = document.querySelector('#movie_player') || document.querySelector('ytd-player') || document.body;
-            this._observer.observe(playerContainer, { childList: true, subtree: true });
+            const playerContainer = document.querySelector('#page-manager') || document.body;
+            this._observer.observe(playerContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['is-active'] });
         }
     }
 
     onPageChange(url) {
         if (!this.isEnabled) return;
 
-        // Always remove stale controls when navigating — even on watch pages
-        // a previous video's .ypp-player-controls may still be in the DOM
-        // if YouTube did a partial rerender, blocking re-injection.
-        const stale = document.querySelector('.ypp-player-controls');
-        if (stale) {
-            stale.remove();
-        }
+        // Always remove stale controls when navigating
+        const stale = document.querySelectorAll('.ypp-player-controls');
+        stale.forEach(e => e.remove());
         this.injectedButtons = false;
 
-        if (!url.includes('/watch')) {
+        if (!url.includes('/watch') && !url.includes('/shorts')) {
             return;
         }
         
@@ -157,11 +169,16 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         document.addEventListener('visibilitychange', handleVisibility);
     }
 
-    injectControls(video, controls) {
-        if (document.querySelector('.ypp-player-controls')) return;
+    injectControls(video, controls, isShorts) {
+        if (isShorts) {
+            const activeShort = video.closest('ytd-reel-video-renderer');
+            if (activeShort && activeShort.querySelector('.ypp-player-controls')) return;
+        } else {
+            if (document.querySelector('.ypp-player-controls')) return;
+        }
 
         const container = document.createElement('div');
-        container.className = 'ypp-player-controls';
+        container.className = 'ypp-player-controls' + (isShorts ? ' ypp-shorts-controls' : '');
 
         container.appendChild(this._createSpeedControls(video));
         container.appendChild(this._createSnapshotButton(video));
@@ -186,9 +203,12 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             }
         }
 
-
-
-        controls.insertBefore(container, controls.firstChild);
+        if (isShorts) {
+            controls.appendChild(container); // Add to end of overlay
+        } else {
+            controls.insertBefore(container, controls.firstChild); // Add to start of right controls
+        }
+        
         this.injectedButtons = true;
     }
 

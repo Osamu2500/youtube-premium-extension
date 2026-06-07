@@ -74,6 +74,7 @@ export const DEFAULT_SETTINGS = {
 
     // Shorts Tools
     shortsAutoScroll: false,
+    redirectShorts: false,
 
     // Player Tools
     enableCustomSpeed: true,

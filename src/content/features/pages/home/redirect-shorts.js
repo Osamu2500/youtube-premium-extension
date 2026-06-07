@@ -2,6 +2,11 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.RedirectShorts = class RedirectShorts extends window.YPP.features.BaseFeature {
+    static CONFIG = {
+        SHORTS_PATH: '/shorts/',
+        WATCH_PATH: '/watch?v='
+    };
+
     constructor() {
         super('RedirectShorts');
         this.checkUrl = this.checkUrl.bind(this);
@@ -13,7 +18,11 @@ window.YPP.features.RedirectShorts = class RedirectShorts extends window.YPP.fea
 
     async enable() {
         await super.enable();
-        this.checkUrl();
+        try {
+            this.checkUrl();
+        } catch (e) {
+            this.utils.log?.(`Enable error: ${e.message}`, 'RedirectShorts', 'error');
+        }
     }
 
     async disable() {
@@ -25,13 +34,20 @@ window.YPP.features.RedirectShorts = class RedirectShorts extends window.YPP.fea
         this.checkUrl();
     }
 
+    /**
+     * Checks if current URL is a Shorts URL and redirects to standard watch player.
+     */
     checkUrl() {
         if (!this.isEnabled) return;
-        const url = window.location.href;
-        if (url.includes('/shorts/')) {
-            this.utils.log?.('Redirecting Short to regular player', 'RedirectShorts');
-            const newUrl = url.replace('/shorts/', '/watch?v=');
-            window.location.replace(newUrl);
+        try {
+            const url = window.location.href;
+            if (url.includes(RedirectShorts.CONFIG.SHORTS_PATH)) {
+                this.utils.log?.('Redirecting Short to regular player', 'RedirectShorts');
+                const newUrl = url.replace(RedirectShorts.CONFIG.SHORTS_PATH, RedirectShorts.CONFIG.WATCH_PATH);
+                window.location.replace(newUrl);
+            }
+        } catch (e) {
+            this.utils.log?.(`Check URL error: ${e.message}`, 'RedirectShorts', 'error');
         }
     }
 };

@@ -6,29 +6,36 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.BaseFeature {
+    static SELECTORS = {
+        ACTIVE_VIDEO: 'ytd-reel-video-renderer[is-active] video',
+        NEXT_BTN: '#navigation-button-down button',
+        NEXT_BTN_FALLBACK: '#navigation-button-down ytd-button-renderer button'
+    };
+
     constructor() {
         super('ShortsTools');
         
         this._videoRef = null;
         this._isScrolling = false;
 
-        // Bound event handlers for proper cleanup
         this._boundHandleEnded = this._onVideoEnded.bind(this);
         this._boundHandleTimeUpdate = this.utils.throttle(this._onTimeUpdate.bind(this), 200);
     }
 
-    getConfigKey() {
-        return 'shortsAutoScroll';
-    }
+    getConfigKey() { return 'shortsAutoScroll'; }
 
     async enable() {
         await super.enable();
-        this._checkAndAttach();
+        try {
+            this._checkAndAttach();
+        } catch (e) {
+            this.utils.log?.(`Enable error: ${e.message}`, 'ShortsTools', 'error');
+        }
     }
 
     async disable() {
         await super.disable();
-        this._removeVideoListeners();
+        this._videoRef = null;
     }
 
     onPageChange(url) {
@@ -37,65 +44,62 @@ window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.
         if (this._isOnShortsPage()) {
             this._checkAndAttach();
         } else {
-            this._removeVideoListeners();
+            this._videoRef = null; // Let BaseFeature handle global cleanup on disable/teardown if needed
         }
     }
 
-    // Called frequently in SPA navigations and DOM mutations if defined
     update() {
         if (!this.isEnabled || !this._isOnShortsPage()) return;
         this._checkAndAttach();
     }
 
-    // =========================================================================
-    // VIDEO DETECTION
-    // =========================================================================
-
+    /**
+     * @returns {boolean}
+     */
     _isOnShortsPage() {
         const path = window.location.pathname;
         return path.startsWith('/shorts/') || path === '/shorts';
     }
 
+    /**
+     * Polls for the active short video and attaches listeners
+     */
     _checkAndAttach() {
-        // Poll for the active video element
-        this.pollFor('active-short-video', 'ytd-reel-video-renderer[is-active] video', (video) => {
+        this.pollFor('active-short-video', ShortsTools.SELECTORS.ACTIVE_VIDEO, (video) => {
             if (this._videoRef !== video) {
                 this._attachToVideo(video);
             }
         });
     }
 
+    /**
+     * @param {HTMLElement} video 
+     */
     _attachToVideo(video) {
-        this._removeVideoListeners();
+        // If we already had a video, we rely on the node being replaced to drop listeners
+        // or we remove them explicitly if this.removeListener exists.
+        if (this._videoRef && this.removeListener) {
+            try {
+                this.removeListener(this._videoRef, 'ended', this._boundHandleEnded);
+                this.removeListener(this._videoRef, 'timeupdate', this._boundHandleTimeUpdate);
+            } catch (e) {}
+        } else if (this._videoRef) {
+            try {
+                this._videoRef.removeEventListener('ended', this._boundHandleEnded);
+                this._videoRef.removeEventListener('timeupdate', this._boundHandleTimeUpdate);
+            } catch (e) {}
+        }
+
         this._videoRef = video;
 
         try {
-            // We use standard addEventListener here instead of BaseFeature's addListener
-            // because we constantly attach/detach from different video elements as the user scrolls,
-            // and we need precise low-level control of this specific cleanup.
-            video.addEventListener('ended', this._boundHandleEnded);
-            video.addEventListener('timeupdate', this._boundHandleTimeUpdate);
+            this.addListener(video, 'ended', this._boundHandleEnded);
+            this.addListener(video, 'timeupdate', this._boundHandleTimeUpdate);
             this.utils.log?.('Attached auto-scroll listeners to new Short', 'ShortsTools');
         } catch (error) {
             this.utils.log?.(`Error attaching to video: ${error.message}`, 'ShortsTools', 'error');
         }
     }
-
-    _removeVideoListeners() {
-        if (this._videoRef) {
-            try {
-                this._videoRef.removeEventListener('ended', this._boundHandleEnded);
-                this._videoRef.removeEventListener('timeupdate', this._boundHandleTimeUpdate);
-            } catch (error) {
-                // Ignore removal errors
-            }
-            this._videoRef = null;
-        }
-    }
-
-    // =========================================================================
-    // EVENT HANDLERS
-    // =========================================================================
 
     _onVideoEnded() {
         if (!this.isEnabled) return;
@@ -110,17 +114,11 @@ window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.
 
         if (!duration) return;
 
-        // Handle looped videos: Shorts naturally loop.
-        // If we are within the last ~150ms of the video, trigger scroll.
         const timeRemaining = duration - currentTime;
         if (timeRemaining <= 0.15 && !this._isScrolling) {
             this._scrollToNext();
         }
     }
-
-    // =========================================================================
-    // SCROLL LOGIC
-    // =========================================================================
 
     _scrollToNext() {
         if (this._isScrolling) return;
@@ -133,12 +131,10 @@ window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.
         }
 
         try {
-            // Strategy 1: Click next button (Most reliable for SPA state)
-            const nextBtn = document.querySelector('ytd-reel-video-renderer[is-active] #navigation-button-down button');
+            const nextBtn = document.querySelector(ShortsTools.SELECTORS.NEXT_BTN) || document.querySelector(ShortsTools.SELECTORS.NEXT_BTN_FALLBACK);
             if (nextBtn) {
                 nextBtn.click();
             } else {
-                // Strategy 2: Simulate down arrow key (Fallback)
                 const event = new KeyboardEvent('keydown', {
                     key: 'ArrowDown',
                     code: 'ArrowDown',
@@ -157,7 +153,6 @@ window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.
     }
 
     _finishScroll() {
-        // Prevents triggering multiple scrolls for the same end-of-video event
         setTimeout(() => {
             this._isScrolling = false;
         }, 1500);

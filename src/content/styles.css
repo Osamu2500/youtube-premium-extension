@@ -358,7 +358,7 @@ html[data-ypp-card-style="folder"] body:not(.ypp-channel-page):not(.cinematic-ho
 html[data-ypp-card-style="folder"] body:not(.ypp-channel-page):not(.cinematic-home) :is(ytd-rich-item-renderer, ytd-video-renderer):nth-child(6n+6)::before { --ypp-folder-tab: #EC4899; }
 
 /* ── BENTO STYLE ── */
-html[data-ypp-card-style="bento"] body:not(.ypp-channel-page) ytd-rich-grid-renderer > #contents {
+html[data-ypp-card-style="bento"] body:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-grid-renderer > #contents {
     gap: 3px !important;
     background: rgba(255,255,255,0.06) !important;
     padding: 3px !important;
@@ -1042,8 +1042,8 @@ body.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*='list=RD']) {
 }
 
 /* Playlists */
-body.ypp-hide-playlists ytd-rich-item-renderer:has(ytd-playlist-thumbnail),
-body.ypp-hide-playlists ytd-rich-item-renderer:has(a[href*='list=PL']),
+body.ypp-hide-playlists:not(.cinematic-home) ytd-rich-item-renderer:has(ytd-playlist-thumbnail),
+body.ypp-hide-playlists:not(.cinematic-home) ytd-rich-item-renderer:has(a[href*='list=PL']),
 body.ypp-hide-playlists ytd-compact-video-renderer:has(ytd-playlist-thumbnail),
 body.ypp-hide-playlists ytd-compact-video-renderer:has(a[href*='list=PL']) {
   display: none !important;
@@ -1785,7 +1785,7 @@ body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp
 /* Neuter YouTube's own grid variable — only on pages that use our grid */
 body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page):not(.ypp-channel-page) ytd-rich-grid-renderer,
 body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page):not(.ypp-channel-page) ytd-rich-grid-row,
-body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page):not(.ypp-channel-page) ytd-rich-item-renderer {
+body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page):not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer {
   --ytd-rich-grid-items-per-row: auto !important;
   --ytd-rich-grid-posts-per-row: auto !important;
 }
@@ -1808,7 +1808,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-section-renderer:not(
    so YouTube's own calc(100% / var(--ytd-rich-grid-items-per-row)) resolves as invalid. */
 /* Individual Video Items - Premium Glassmorphic Card.
    Guard: skip on playlist / library / history pages */
-body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page):not(.ypp-channel-page) ytd-rich-item-renderer {
+body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp-library-page):not(.ypp-history-page):not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -1820,13 +1820,31 @@ body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp
   flex-direction: column !important;
   justify-content: flex-start !important;
   box-sizing: border-box !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
+  /* Removed isolation:isolate and overflow:hidden — they trapped z-index and clipped .ypp-watched-icon-permanent */
+  position: relative;
+}
+
+/* Permanent eye icon for Mark as Watched feature — always visible on thumbnail */
+.ypp-watched-icon-permanent {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  width: 30px !important;
+  height: 30px !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  transition: background 0.2s, transform 0.2s !important;
+  pointer-events: auto !important;
 }
 
 /* Video Cards - Reset Child Styling (Since parent now has card style) */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-video-renderer,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-rich-grid-media {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer ytd-video-renderer,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer ytd-rich-grid-media {
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
@@ -1842,7 +1860,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-ric
 }
 
 /* Thumbnail */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-thumbnail {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer ytd-thumbnail {
   width: 100% !important;
   aspect-ratio: 16/9 !important;
   border-radius: 12px !important;
@@ -1852,7 +1870,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-thu
   background-color: transparent !important;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-thumbnail img {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer ytd-thumbnail img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -1860,7 +1878,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-thu
 }
 
 /* Video Title */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #video-title {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer #video-title {
   font-size: 1.6rem !important;
   line-height: 2.4rem !important;
   font-weight: 500 !important;
@@ -1875,21 +1893,21 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #video-
 }
 
 /* Metadata */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #metadata-line,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #channel-name {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer #metadata-line,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer #channel-name {
   font-size: 1.3rem !important;
   color: rgba(255, 255, 255, 0.55) !important;
   line-height: 1.5 !important;
   transition: color 0.2s ease !important;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover #metadata-line,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover #channel-name {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover #metadata-line,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover #channel-name {
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Consolidate Duplicate Hover Effects into One Premium Animation */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover {
   /* Use only translateY — scale() can cause sub-pixel rendering gaps on edges causing artifact */
   transform: translateY(-6px) !important;
   background: linear-gradient(
@@ -1906,7 +1924,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover {
   z-index: 10;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover ytd-thumbnail {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover ytd-thumbnail {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -3182,7 +3200,7 @@ body.yt-premium-plus-theme span.ytd-thumbnail-overlay-time-status-renderer {
 body.yt-premium-plus-theme ytd-video-renderer ytd-menu-renderer,
 body.yt-premium-plus-theme ytd-playlist-renderer ytd-menu-renderer,
 body.yt-premium-plus-theme ytd-radio-renderer ytd-menu-renderer,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-menu-renderer,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer ytd-menu-renderer,
 body.yt-premium-plus-theme ytd-compact-video-renderer ytd-menu-renderer {
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -3191,7 +3209,7 @@ body.yt-premium-plus-theme ytd-compact-video-renderer ytd-menu-renderer {
 body.yt-premium-plus-theme ytd-video-renderer:hover ytd-menu-renderer,
 body.yt-premium-plus-theme ytd-playlist-renderer:hover ytd-menu-renderer,
 body.yt-premium-plus-theme ytd-radio-renderer:hover ytd-menu-renderer,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover ytd-menu-renderer,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover ytd-menu-renderer,
 body.yt-premium-plus-theme ytd-compact-video-renderer:hover ytd-menu-renderer {
   opacity: 1;
 }
@@ -3202,8 +3220,7 @@ body.yt-premium-plus-theme
   ytd-menu-renderer
   yt-icon-button,
 body.yt-premium-plus-theme ytd-radio-renderer ytd-menu-renderer yt-icon-button,
-body.yt-premium-plus-theme
-  ytd-rich-item-renderer
+body.yt-premium-plus-theme:not(.cinematic-home) ytd-rich-item-renderer
   ytd-menu-renderer
   yt-icon-button {
   width: 32px !important;
@@ -3588,7 +3605,7 @@ body.ypp-zen-mode #columns {
   }
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer {
   animation: ypp-fade-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 
@@ -3671,7 +3688,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer {
 /* Ad Hiding & Grid Protection */
 body.ypp-search-grid-mode ytd-ad-slot-renderer,
 body.yt-premium-plus-theme ytd-ad-slot-renderer,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
 body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-section-renderer:empty {
   display: none !important;
   margin: 0 !important;
@@ -3692,7 +3709,7 @@ body.ypp-search-grid-mode ytd-continuation-item-renderer {
    =================================================================================== */
 
 /* Unified Card Hover Effect */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer,
 body.yt-premium-plus-theme ytd-video-renderer,
 body.ypp-search-grid-mode ytd-video-renderer,
 body.ypp-search-grid-mode ytd-playlist-renderer,
@@ -3707,7 +3724,7 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   will-change: transform, box-shadow, border-color, background-color;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover,
 body.yt-premium-plus-theme ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-video-renderer:hover,
 body.ypp-search-grid-mode ytd-playlist-renderer:hover,
@@ -3809,12 +3826,12 @@ body.ypp-hide-shorts
 }
 
 /* Ensure video thumbnails scale properly */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer ytd-thumbnail {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer ytd-thumbnail {
   width: 100% !important;
   aspect-ratio: 16 / 9 !important;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer img {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -3822,7 +3839,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer img {
 }
 
 /* Video metadata styling */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #details {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer #details {
   margin-top: 12px;
   display: flex !important;
   flex-direction: row !important;
@@ -3831,7 +3848,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #detail
 }
 
 /* Card hover effects for grid items */
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer {
   transition:
     transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 0.4s ease,
@@ -3840,7 +3857,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer {
   transform: translateZ(0);
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover {
   transform: translateY(-6px) scale(1.02);
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.4),
@@ -3872,7 +3889,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover {
   text-transform: uppercase;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover .ypp-tag-btn {
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover .ypp-tag-btn {
   opacity: 1;
 }
 
@@ -4021,7 +4038,7 @@ body.ypp-search-grid-mode ytd-playlist-renderer:hover #view-more a {
 body.yt-premium-plus-theme ytd-video-renderer #metadata-line,
 body.yt-premium-plus-theme ytd-playlist-renderer #metadata-line,
 body.yt-premium-plus-theme ytd-radio-renderer #metadata-line,
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer #metadata-line,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer #metadata-line,
 body.yt-premium-plus-theme ytd-compact-video-renderer #metadata-line {
   font-size: 12px !important;
   font-weight: 400 !important;
@@ -4516,7 +4533,7 @@ html[data-ypp-card-style="polaroid"] .ypp-grid-item #metadata-line span {
   z-index: 10;
 }
 
-body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-item-renderer:hover .ypp-tag-btn,
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover .ypp-tag-btn,
 .yt-premium-plus-theme ytd-thumbnail:hover .ypp-tag-btn,
 .ypp-tag-btn.tagged {
   opacity: 1;
@@ -5273,10 +5290,7 @@ body.yt-premium-plus-theme .ytp-chrome-bottom {
   border: none !important;
   box-shadow: none !important;
 
-  transition:
-    opacity 0.3s cubic-bezier(0.2,0.8,0.2,1),
-    left 0.15s ease-out,
-    width 0.15s ease-out !important;
+  transition: transform 0.2s ease, opacity 0.2s ease;
   
   padding: 0 !important; /* Remove padding so progress bar aligns with buttons edge-to-edge */
   box-sizing: border-box !important;
@@ -6644,10 +6658,8 @@ ytd-popup-container ytd-multi-page-menu-renderer {
 
 /* ── Hide Playlists ── */
 body.ypp-hide-playlists [data-ypp-is-playlist="true"],
-body.ypp-hide-playlists 
-ytd-rich-item-renderer:has(ytd-playlist-thumbnail),
-body.ypp-hide-playlists 
-ytd-rich-item-renderer:has(a[href*="playlist?list"]),
+body.ypp-hide-playlists:not(.cinematic-home) ytd-rich-item-renderer:has(ytd-playlist-thumbnail),
+body.ypp-hide-playlists:not(.cinematic-home) ytd-rich-item-renderer:has(a[href*="playlist?list"]),
 body.ypp-hide-playlists 
 ytd-playlist-renderer,
 body.ypp-hide-playlists 
@@ -7490,6 +7502,16 @@ body.ypp-search-grid-mode ytd-radio-renderer a.yt-simple-endpoint {
   margin: 0 !important;
 }
 
+/* -------------------------------------------------------------------------
+** GLOBALS FOR VIDEO PREVIEWS
+** Ensures native hover previews always sit on top of custom thumbnail z-indexes
+--------------------------------------------------------------------------- */
+body.yt-premium-plus-theme #video-preview,
+body.yt-premium-plus-theme ytd-video-preview,
+body.yt-premium-plus-theme #inline-preview-player {
+  z-index: 100 !important;
+}
+
 /* Thumbnail wrapper must maintain 16:9 and span full width */
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
 body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail,
@@ -7779,4 +7801,173 @@ body.ypp-floating-player-active #player-container-outer::after {
     color: var(--yt-spec-text-secondary, #aaa);
     font-size: 1.2rem;
     font-family: var(--ypp-font-family, inherit);
+}
+
+/* =========================================================================
+   SHORTS PAGE PREMIUM STYLING (FULL-BLEED EDGE-TO-EDGE)
+   ========================================================================= */
+
+/* Remove the black bar scrim (cinematic scrim) */
+body.ypp-shorts-page #cinematic-shorts-scrim,
+body.yt-premium-plus-theme #cinematic-shorts-scrim {
+    display: none !important;
+}
+
+/* Shorts Container background */
+body.ypp-shorts-page ytd-shorts,
+body.ypp-shorts-page #shorts-container {
+    background: #0f0f0f !important;
+}
+
+/* Make the video player and its thumbnail background look elegant */
+body.ypp-shorts-page ytd-reel-video-renderer,
+body.ypp-shorts-page .reel-video-in-sequence-thumbnail {
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Floating Action Bar (Like/Dislike/Share) */
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 20px !important;
+    padding: 12px 8px !important;
+    margin-right: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Adjust Action Buttons */
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-toggle-button-renderer,
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-button-renderer {
+    margin-bottom: 12px !important;
+    transition: transform 0.2s ease !important;
+}
+
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-toggle-button-renderer:hover,
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-button-renderer:hover {
+    transform: scale(1.1) !important;
+}
+
+/* Video Information Overlay (Title, Channel) */
+body.ypp-shorts-page .overlay.ytd-reel-video-renderer {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%) !important;
+    padding: 24px !important;
+}
+
+/* Channel Avatar */
+body.ypp-shorts-page #channel-info.ytd-reel-player-header-renderer yt-img-shadow {
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    transition: border-color 0.3s ease !important;
+}
+
+body.ypp-shorts-page #channel-info.ytd-reel-player-header-renderer:hover yt-img-shadow {
+    border-color: #fff !important;
+}
+
+/* Subscribe Button */
+body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button-shape button {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    color: #fff !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    transition: background 0.2s ease !important;
+}
+
+body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button-shape button:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Progress bar redesign */
+body.ypp-shorts-page #progress-bar.ytd-reel-video-renderer {
+    height: 4px !important;
+    border-radius: 2px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* =========================================================================
+   SHORTS PLAYER CONTROLS (Floating Bottom Bar)
+   ========================================================================= */
+body.ypp-shorts-page .ypp-shorts-controls {
+    position: absolute;
+    bottom: 80px; /* Above the title/channel overlay */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 20px !important;
+    padding: 8px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    opacity: 0.2;
+    transition: opacity 0.3s ease;
+}
+
+body.ypp-shorts-page ytd-reel-video-renderer[is-active]:hover .ypp-shorts-controls,
+body.ypp-shorts-page .ypp-shorts-controls:hover {
+    opacity: 1;
+}
+
+body.ypp-shorts-page .ypp-shorts-controls .ypp-action-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px !important;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+body.ypp-shorts-page .ypp-shorts-controls .ypp-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1);
+}
+
+body.ypp-shorts-page .ypp-shorts-controls svg {
+    width: 20px !important;
+    height: 20px !important;
+    fill: currentColor;
+}
+
+/* Speed Controls inside Shorts Bar */
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-controls {
+    display: flex;
+    gap: 4px;
+    margin-right: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    padding-right: 8px;
+}
+
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn {
+    background: transparent;
+    color: #ccc;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
 }
