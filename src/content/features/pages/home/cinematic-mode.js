@@ -20,7 +20,8 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         ACTIVE_PREVIEW: 'netflix-active-preview',
         CINEMATIC_HOME: 'cinematic-home',
         CINEMATIC: 'cinematic',
-        FADING: 'fading'
+        FADING: 'fading',
+        FADING_PREVIEW: 'netflix-fading-preview'
     };
 
     static EVENTS = {
@@ -900,8 +901,12 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     _handleVideoTransition(heroWrapper, targetIndex) {
-        document.querySelectorAll(`.${CinematicMode.CLASSES.ACTIVE_PREVIEW}`).forEach(video => {
+        // Find current active preview
+        const activeVideos = document.querySelectorAll(`.${CinematicMode.CLASSES.ACTIVE_PREVIEW}`);
+        activeVideos.forEach(video => {
             video.classList.remove(CinematicMode.CLASSES.ACTIVE_PREVIEW);
+            video.classList.add(CinematicMode.CLASSES.FADING_PREVIEW);
+            
             // Release the simulated hover lock so YouTube can cleanly move the preview
             if (video._isNetflixHeroPreview) {
                 video._isNetflixHeroPreview = false;
@@ -914,6 +919,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         heroWrapper.classList.add(CinematicMode.CLASSES.FADING); 
 
         setTimeout(() => {
+            // Remove fading class from old videos
+            document.querySelectorAll(`.${CinematicMode.CLASSES.FADING_PREVIEW}`).forEach(video => {
+                video.classList.remove(CinematicMode.CLASSES.FADING_PREVIEW);
+            });
+
             if (!this._cinematicActive || this._heroState.status !== 'ready') return;
             
             const nextVideo = this._videoQueue[targetIndex];
