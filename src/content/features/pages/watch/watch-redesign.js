@@ -56,6 +56,8 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             window.YPP.sharedObserver.unregister('watch-redesign-comments');
         }
         this._applyFeatures();
+        this._cleanup();
+        this.cleanupEvents();
     }
 
     /**

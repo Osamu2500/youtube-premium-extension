@@ -79,6 +79,8 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
         this.observer.unregister('filter-apply');
         const bar = document.querySelector(AdvancedFilter.SELECTORS.CHIPS_BAR);
         if (bar) bar.remove();
+        this.cleanupEvents();
+        this._navigationListener = null;
     }
 
     // --- UI Methods ---
@@ -116,7 +118,7 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
                 chip.dataset.val = data.val;
 
                 // Event Delegation would be better, but direct binding is simple for this scale
-                chip.onclick = () => this._handleChipClick(chip, data.type, data.val);
+                this.addListener(chip, 'click', () => this._handleChipClick(chip, data.type, data.val));
                 fragment.appendChild(chip);
             }
         });

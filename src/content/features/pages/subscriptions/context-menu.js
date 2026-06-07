@@ -32,6 +32,7 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         this.observer.unregister('context-menu-header');
         this.observer.stop();
         document.querySelectorAll('.ypp-add-to-group-btn').forEach(btn => btn.remove());
+        this.cleanupEvents();
     }
 
     update(settings) {}

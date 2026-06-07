@@ -51,7 +51,7 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
         this._disableMinimalMode();
         this._disableAutoCinema();
         this._disableAutoPiP();
-        window.removeEventListener('yt-navigate-finish', this._navHandler);
+        this.cleanupEvents();
     }
 
     // =========================================================================

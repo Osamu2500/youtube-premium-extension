@@ -44,8 +44,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     _initState() {
         this._isActive = false;
         this._settings = null;
-        this._shortsObserver = null;
-        this._SHORTS_DEBOUNCE = this._TIMINGS.DEBOUNCE_DEFAULT || 100;
     }
 
     /**
@@ -176,8 +174,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
                 this._applyTheme(e.matches ? 'midnight' : 'default'); 
             };
             
-            // Add listener
-            this._systemMediaQuery.addEventListener('change', this._systemListener);
+            this.addListener(this._systemMediaQuery, 'change', this._systemListener);
         }
 
         // Apply initial
@@ -191,6 +188,8 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
      */
     _stopSystemListener() {
         if (this._systemMediaQuery && this._systemListener) {
+            // Handled by BaseFeature cleanupEvents when feature is disabled,
+            // but we explicitly remove if toggling themes manually.
             this._systemMediaQuery.removeEventListener('change', this._systemListener);
             this._systemMediaQuery = null;
             this._systemListener = null;
@@ -377,9 +376,12 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             
             root.style.setProperty('--ypp-accent-primary', hex);
             root.style.setProperty('--ypp-accent-glow', hex + '66');
+            root.style.setProperty('--ypp-accent-hover', hex + 'cc');
             root.style.setProperty('--ypp-accent-gradient', `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`);
-            // Subtly inject into YouTube's own variable if needed
-            // root.style.setProperty('--yt-spec-static-brand-red', hex); 
+            
+            // Subtly inject into YouTube's own variable to override native buttons
+            root.style.setProperty('--yt-spec-static-brand-red', hex); 
+            root.style.setProperty('--yt-spec-brand-button-background', hex);
         }
 
         // Animations / Reduced Motion
@@ -450,9 +452,12 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         root.style.removeProperty('--ypp-density-gap');
         root.style.removeProperty('--ypp-accent-primary');
         root.style.removeProperty('--ypp-accent-glow');
+        root.style.removeProperty('--ypp-accent-hover');
         root.style.removeProperty('--ypp-accent-gradient');
         root.style.removeProperty('--ypp-thumb-radius');
         root.style.removeProperty('--ypp-sidebar-opacity');
+        root.style.removeProperty('--yt-spec-static-brand-red');
+        root.style.removeProperty('--yt-spec-brand-button-background');
         
         // Remove styling data attributes
         root.removeAttribute('data-ypp-density');
@@ -503,11 +508,4 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     }
 };
 
-// Helper debounce function
-function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
+

@@ -43,6 +43,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         document.querySelectorAll('.ytp-right-controls[data-ypp-processed], ytd-reel-video-renderer[data-ypp-processed]').forEach(el => el.removeAttribute('data-ypp-processed'));
 
         this._videoElement = null;
+        this.cleanupEvents();
     }
 
     update(settings) {
@@ -271,10 +272,10 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         btn.innerHTML = svgContent;
         btn.title = title;
         btn.className = 'ypp-action-btn';
-        btn.onclick = (e) => {
+        this.addListener(btn, 'click', (e) => {
             e.stopPropagation();
             onClick(e);
-        };
+        });
         return btn;
     }
 
