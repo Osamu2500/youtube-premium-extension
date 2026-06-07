@@ -28,33 +28,20 @@ window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts extends window.Y
         super('KeyboardShortcuts');
         this._boundHandler = this._handleKey.bind(this);
 
-        // Action definitions: label shown in UI → what happens when triggered
+        // Default key bindings and labels pulled from static class properties
+        // so getBindings() and the constructor always stay in sync
+        this.defaults = KeyboardShortcuts.DEFAULT_BINDINGS;
         this.actions = {
-            zenMode:     { label: 'Toggle Zen Mode',            fn: () => this._toggleSetting('zenMode') },
-            focusMode:   { label: 'Toggle Focus Mode',          fn: () => this._toggleSetting('enableFocusMode') },
-            cinemaMode:  { label: 'Toggle Cinema / Theater',    fn: () => this._toggleCinema() },
-            snapshot:    { label: 'Take Snapshot',              fn: () => this._triggerSnapshot() },
-            loop:        { label: 'Toggle Loop',                fn: () => this._toggleLoop() },
-            pip:         { label: 'Toggle Picture-in-Picture',  fn: () => this._togglePiP() },
-            speedDown:   { label: 'Speed -0.25x',               fn: () => this._adjustSpeed(-0.25) },
-            speedUp:     { label: 'Speed +0.25x',               fn: () => this._adjustSpeed(0.25) },
-            speedReset:  { label: 'Reset Speed to 1x',          fn: () => this._adjustSpeed(0, true) },
-            ambientMode: { label: 'Toggle Ambient Mode',        fn: () => this._toggleSetting('ambientMode') },
-        };
-
-        // Default key bindings: action key → "Modifier+Key" string
-        // Stored as `shortcut_<action>` in settings
-        this.defaults = {
-            zenMode:     'Shift+Z',
-            focusMode:   'Shift+F',
-            cinemaMode:  'Shift+C',
-            snapshot:    'Shift+S',
-            loop:        'Shift+L',
-            pip:         'Shift+P',
-            speedDown:   'Shift+,',
-            speedUp:     'Shift+.',
-            speedReset:  'Shift+R',
-            ambientMode: 'Shift+M',
+            zenMode:     { label: KeyboardShortcuts.ACTION_LABELS.zenMode,     fn: () => this._toggleSetting('zenMode') },
+            focusMode:   { label: KeyboardShortcuts.ACTION_LABELS.focusMode,   fn: () => this._toggleSetting('enableFocusMode') },
+            cinemaMode:  { label: KeyboardShortcuts.ACTION_LABELS.cinemaMode,  fn: () => this._toggleCinema() },
+            snapshot:    { label: KeyboardShortcuts.ACTION_LABELS.snapshot,    fn: () => this._triggerSnapshot() },
+            loop:        { label: KeyboardShortcuts.ACTION_LABELS.loop,        fn: () => this._toggleLoop() },
+            pip:         { label: KeyboardShortcuts.ACTION_LABELS.pip,         fn: () => this._togglePiP() },
+            speedDown:   { label: KeyboardShortcuts.ACTION_LABELS.speedDown,   fn: () => this._adjustSpeed(-0.25) },
+            speedUp:     { label: KeyboardShortcuts.ACTION_LABELS.speedUp,     fn: () => this._adjustSpeed(0.25) },
+            speedReset:  { label: KeyboardShortcuts.ACTION_LABELS.speedReset,  fn: () => this._adjustSpeed(0, true) },
+            ambientMode: { label: KeyboardShortcuts.ACTION_LABELS.ambientMode, fn: () => this._toggleSetting('ambientMode') },
         };
     }
 
@@ -249,34 +236,37 @@ window.YPP.features.KeyboardShortcuts = class KeyboardShortcuts extends window.Y
      * @returns {Array<{action, label, binding}>}
      */
     static getBindings(settings = {}) {
-        const defaults = {
-            zenMode:     'Shift+Z',
-            focusMode:   'Shift+F',
-            cinemaMode:  'Shift+C',
-            snapshot:    'Shift+S',
-            loop:        'Shift+L',
-            pip:         'Shift+P',
-            speedDown:   'Shift+,',
-            speedUp:     'Shift+.',
-            speedReset:  'Shift+R',
-            ambientMode: 'Shift+M',
-        };
-        const labels = {
-            zenMode:     'Toggle Zen Mode',
-            focusMode:   'Toggle Focus Mode',
-            cinemaMode:  'Toggle Cinema / Theater',
-            snapshot:    'Take Snapshot',
-            loop:        'Toggle Loop',
-            pip:         'Toggle Picture-in-Picture',
-            speedDown:   'Speed -0.25x',
-            speedUp:     'Speed +0.25x',
-            speedReset:  'Reset Speed to 1x',
-            ambientMode: 'Toggle Ambient Mode',
-        };
-        return Object.keys(defaults).map(action => ({
+        return Object.keys(KeyboardShortcuts.DEFAULT_BINDINGS).map(action => ({
             action,
-            label: labels[action],
-            binding: settings[`shortcut_${action}`] ?? defaults[action],
+            label: KeyboardShortcuts.ACTION_LABELS[action],
+            binding: settings[`shortcut_${action}`] ?? KeyboardShortcuts.DEFAULT_BINDINGS[action],
         }));
     }
+};
+
+// ─── Static class properties (single source of truth) ────────────────────────
+KeyboardShortcuts.DEFAULT_BINDINGS = {
+    zenMode:     'Shift+Z',
+    focusMode:   'Shift+F',
+    cinemaMode:  'Shift+C',
+    snapshot:    'Shift+S',
+    loop:        'Shift+L',
+    pip:         'Shift+P',
+    speedDown:   'Shift+,',
+    speedUp:     'Shift+.',
+    speedReset:  'Shift+R',
+    ambientMode: 'Shift+M',
+};
+
+KeyboardShortcuts.ACTION_LABELS = {
+    zenMode:     'Toggle Zen Mode',
+    focusMode:   'Toggle Focus Mode',
+    cinemaMode:  'Toggle Cinema / Theater',
+    snapshot:    'Take Snapshot',
+    loop:        'Toggle Loop',
+    pip:         'Toggle Picture-in-Picture',
+    speedDown:   'Speed -0.25x',
+    speedUp:     'Speed +0.25x',
+    speedReset:  'Reset Speed to 1x',
+    ambientMode: 'Toggle Ambient Mode',
 };

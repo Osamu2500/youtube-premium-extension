@@ -15,6 +15,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         this.segmentElements = [];
         this.videoElement = null;
         this.abortController = null;
+        this._retryTimeout = null; // tracked so stop() can cancel it
         
         // Cache for segments (avoid re-fetching same video)
         this.segmentCache = new Map();
@@ -71,6 +72,15 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
     handleNavigation() {
         if (!this.isEnabled) return;
         this.stop(); // Clean up previous video
+
+        // Prune stale cache entries (older than CACHE_DURATION)
+        const now = Date.now();
+        for (const [id, entry] of this.segmentCache) {
+            if (now - entry.timestamp > this.CACHE_DURATION) {
+                this.segmentCache.delete(id);
+            }
+        }
+
         if (this.utils.isWatchPage()) {
             this.init();
         }
@@ -127,6 +137,11 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             this.abortController.abort();
             this.abortController = null;
         }
+        if (this._retryTimeout) {
+            clearTimeout(this._retryTimeout);
+            this._retryTimeout = null;
+        }
+        this.retryAttempted = false;
         this.segments = [];
         this.clearSegments();
         this.videoElement = null;
@@ -215,7 +230,10 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             
             if (!this.retryAttempted) {
                 this.retryAttempted = true;
-                setTimeout(() => this.fetchSegments(), 2000);
+                this._retryTimeout = setTimeout(() => {
+                    this._retryTimeout = null;
+                    this.fetchSegments();
+                }, 2000);
             }
         }
     }
@@ -270,11 +288,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             if (currentTime >= segment.segment[0] && currentTime < segment.segment[1]) {
                 // Seek to end
                 this.videoElement.currentTime = segment.segment[1];
-                if (this.utils.createToast) {
-                    this.utils.createToast(`Skipped ${segment.category}`, 'info');
-                } else {
-                    console.log(`[SponsorBlock] Skipped ${segment.category}`);
-                }
+                this.utils?.createToast?.(`Skipped ${segment.category}`, 'info');
                 return; // Only skip one at a time
             }
         }

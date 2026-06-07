@@ -375,6 +375,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             }
             
             root.style.setProperty('--ypp-accent-primary', hex);
+            root.style.setProperty('--ypp-accent-color', hex);  // alias for backwards compat
             root.style.setProperty('--ypp-accent-glow', hex + '66');
             root.style.setProperty('--ypp-accent-hover', hex + 'cc');
             root.style.setProperty('--ypp-accent-gradient', `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`);
@@ -451,6 +452,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         root.style.removeProperty('--ypp-density-pad');
         root.style.removeProperty('--ypp-density-gap');
         root.style.removeProperty('--ypp-accent-primary');
+        root.style.removeProperty('--ypp-accent-color');  // alias
         root.style.removeProperty('--ypp-accent-glow');
         root.style.removeProperty('--ypp-accent-hover');
         root.style.removeProperty('--ypp-accent-gradient');

@@ -170,14 +170,15 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
             if (item.hasAttribute('data-ypp-processed')) return;
             item.setAttribute('data-ypp-processed', 'true');
 
-            const card = this.createCard(channelName, title, url, thumb, duration, meta);
-
-            if (this.columns['All']) this.columns['All'].appendChild(card.cloneNode(true));
+            // Create a fresh card per column (not cloneNode — listeners don't clone)
+            if (this.columns['All']) {
+                this.columns['All'].appendChild(this.createCard(channelName, title, url, thumb, duration, meta));
+            }
 
             Object.keys(groups).forEach(groupName => {
                 if (groups[groupName].some(c => c.name === channelName)) {
                     if (this.columns[groupName]) {
-                        this.columns[groupName].appendChild(card.cloneNode(true));
+                        this.columns[groupName].appendChild(this.createCard(channelName, title, url, thumb, duration, meta));
                     }
                 }
             });

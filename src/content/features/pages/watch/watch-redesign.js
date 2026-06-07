@@ -233,6 +233,25 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
                 grid-column: 2 !important;
                 grid-row: 1 !important;
             }
+
+            /* Theater mode override: revert grid layout so comments don't go off-screen.
+               YouTube's theater mode takes the full width — sidebar comments don't fit. */
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy][theater] #columns {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy][theater] #primary,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy][theater] #primary-inner,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy][theater] #secondary,
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy][theater] #secondary-inner {
+                display: block !important;
+            }
+            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy][theater] #comments {
+                grid-column: unset !important;
+                grid-row: unset !important;
+                max-height: unset !important;
+                overflow-y: unset !important;
+            }
         `;
         document.head.appendChild(style);
     }

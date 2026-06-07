@@ -78,6 +78,7 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
 
             // 2. Fallback: Player might not have quality levels ready immediately
             this.pollFor(() => {
+                if (!this.isEnabled) return true; // abort the poll gracefully
                 const player = document.getElementById('movie_player');
                 if (player && typeof player.getAvailableQualityLevels === 'function') {
                     const available = player.getAvailableQualityLevels();
@@ -92,6 +93,7 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
 
         if (this.settings.autoCinema && !this.hasEnforcedTheater) {
             this.pollFor(() => {
+                if (!this.isEnabled) return true; // abort the poll gracefully
                 if (this.hasEnforcedTheater) return true;
                 const controls = document.querySelector('.ytp-right-controls');
                 if (controls) {

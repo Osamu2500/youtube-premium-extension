@@ -38,6 +38,16 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
     update(settings) {}
     run(settings) { this.enable(settings); }
 
+    onPageChange() {
+        // Clear processed stamps so recycled DOM nodes get re-processed after SPA nav
+        document.querySelectorAll('[data-ypp-processed]').forEach(el => {
+            // Only clear stamps we own (cards with our group button or just stamped cards)
+            if (el.matches('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer')) {
+                el.removeAttribute('data-ypp-processed');
+            }
+        });
+    }
+
     init() {
         this.observer.start();
         chrome.runtime.onMessage.addListener(this._messageListener);
@@ -107,8 +117,8 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
             justify-content: center;
         `;
         
-        btn.onmouseenter = () => btn.style.opacity = '1';
-        btn.onmouseleave = () => btn.style.opacity = '0.6';
+        this.addListener(btn, 'mouseenter', () => btn.style.opacity = '1');
+        this.addListener(btn, 'mouseleave', () => btn.style.opacity = '0.6');
 
         this.addListener(btn, 'click', (e) => {
             e.stopPropagation();

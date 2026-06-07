@@ -89,9 +89,9 @@ window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP
                             toastBtn.className = 'ypp-toast-action-btn';
                             toastBtn.style.cssText = 'margin-left: 15px; background: var(--ypp-accent); border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: bold; color: white;';
                             
-                            toastBtn.onclick = () => {
+                            this.addListener(toastBtn, 'click', () => {
                                 window.location.href = url;
-                            };
+                            });
                             
                             const toast = this.utils.createToast(`Resume unfinished video? "${title.substring(0, 30)}..."`, 'info', 10000);
                             
