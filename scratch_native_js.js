@@ -1,4 +1,4 @@
-import cinematicThemeCSS from './cinematic-theme.css?raw';
+﻿import cinematicThemeCSS from './cinematic-theme.css?raw';
 
 /**
  * Cinematic Mode — Netflix-style home feed overlay.
@@ -319,38 +319,35 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         }
     }
 
-    /**
-     * Physically moves ytd-video-preview into the hero wrapper div.
-     * This is the original cinematic temp approach and is more reliable than
-     * remotely forcing CSS overrides from outside the element's stacking context.
-     */
-    _movePreviewIntoHero(preview) {
-        const heroWrapper = this._heroState.heroElement;
-        if (!heroWrapper || !preview) return;
+    _forcePreviewFullscreen() {
+        const p = document.querySelector(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`);
+        if (!p) return;
         
-        // Only move if not already inside the hero
-        if (preview.parentNode === heroWrapper) return;
+        const containers = Array.from(p.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'));
+        const videoEl = p.querySelector('video');
         
-        // Insert hero before the preview's current position, then move preview into it
-        if (preview.parentNode && preview.parentNode !== heroWrapper) {
-            heroWrapper.insertBefore(preview, heroWrapper.querySelector('.netflix-hero-gradient') || null);
-        }
-        
-        // Reset any inline styles the previous approach may have applied
-        const toReset = [preview, ...Array.from(preview.querySelectorAll(
-            '#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'
-        ))];
-        toReset.forEach(el => {
-            if (el && el.style) {
-                el.style.removeProperty('position');
-                el.style.removeProperty('top');
-                el.style.removeProperty('left');
-                el.style.removeProperty('width');
-                el.style.removeProperty('height');
-                el.style.removeProperty('z-index');
-                el.style.removeProperty('max-width');
-            }
+        // Batch writes
+        const toApply100 = [p, ...containers].filter(el => el);
+        toApply100.forEach(el => {
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('top', '0', 'important');
+            el.style.setProperty('left', '0', 'important');
+            el.style.setProperty('width', '100vw', 'important');
+            el.style.setProperty('height', '100%', 'important');
+            el.style.setProperty('max-width', 'none', 'important');
+            el.style.setProperty('z-index', '1', 'important');
         });
+
+        if (videoEl) {
+            videoEl.style.setProperty('position', 'fixed', 'important');
+            videoEl.style.setProperty('top', '0', 'important');
+            videoEl.style.setProperty('left', '0', 'important');
+            videoEl.style.setProperty('width', '100vw', 'important');
+            videoEl.style.setProperty('height', '100%', 'important');
+            videoEl.style.setProperty('max-width', 'none', 'important');
+            videoEl.style.setProperty('z-index', '1', 'important');
+            videoEl.style.setProperty('object-fit', 'cover', 'important');
+        }
     }
 
     async _makeHeroPreview(videoElement) {
@@ -373,14 +370,14 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 videoElement.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
                 this._updateHeroContent(videoElement);
 
-                // Update thumbnail fallback immediately
-                if (this._heroState.heroElement) {
-                    this._heroState.heroElement.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
-                }
-
                 this._waitForPreview(videoElement).then(preview => {
                     if (!preview || this._heroState.currentVideo !== videoElement) return;
-                    this._movePreviewIntoHero(preview);
+                    
+                    document.querySelectorAll(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`)
+                        .forEach(p => p.classList.remove(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE));
+                    
+                    preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
+                    this._forcePreviewFullscreen();
                 }).catch(e => {
                     this.utils.log(e.message, "CINEMATIC", "error");
                 });
@@ -394,67 +391,64 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             const heroWrapper = document.createElement('div');
             heroWrapper.className = `netflix-hero ${CinematicMode.CLASSES.FADING}`;
             this._heroState.heroElement = heroWrapper;
+        
+        // Show thumbnail immediately so the screen is never blank
+        heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
+        heroWrapper.style.backgroundSize = 'cover';
+        heroWrapper.style.backgroundPosition = 'center';
+        
+        const navHTML = `
+          <div class="netflix-hero-nav">
+            <button class="netflix-nav-button prev" aria-label="Previous video" style="pointer-events: auto;">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
+            </button>
+            <button class="netflix-nav-button next" aria-label="Next video" style="pointer-events: auto;">
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+            </button>
+          </div>
+        `;
+        heroWrapper.insertAdjacentHTML('afterbegin', navHTML);
 
-            // Show thumbnail immediately so the screen is never blank
-            heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
-            heroWrapper.style.backgroundSize = 'cover';
-            heroWrapper.style.backgroundPosition = 'center';
+        document.body.appendChild(heroWrapper);
 
-            const navHTML = `
-              <div class="netflix-hero-nav">
-                <button class="netflix-nav-button prev" aria-label="Previous video" style="pointer-events: auto;">
-                  <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
-                </button>
-                <button class="netflix-nav-button next" aria-label="Next video" style="pointer-events: auto;">
-                  <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
-                </button>
-              </div>
-            `;
-            heroWrapper.insertAdjacentHTML('afterbegin', navHTML);
+        // Hide native YouTube volume buttons in the top right
+        const hideNativeVolume = document.createElement('style');
+        hideNativeVolume.textContent = '.ytp-mute-button, .ytp-volume-area { display: none !important; }';
+        heroWrapper.appendChild(hideNativeVolume);
 
-            const gradient = document.createElement('div');
-            gradient.className = 'netflix-hero-gradient';
-            heroWrapper.appendChild(gradient);
+        const gradient = document.createElement('div');
+        gradient.className = 'netflix-hero-gradient';
+        heroWrapper.appendChild(gradient);
 
-            const contentOverlay = document.createElement('div');
-            contentOverlay.className = 'netflix-hero-content';
-            heroWrapper.appendChild(contentOverlay);
+        const contentOverlay = document.createElement('div');
+        contentOverlay.className = 'netflix-hero-content';
+        heroWrapper.appendChild(contentOverlay);
 
-            // Append hero to body BEFORE waiting for preview, so UI shows immediately
-            document.body.appendChild(heroWrapper);
+        this._heroState.status = 'ready';
+        this._updateHeroContent(videoElement);
 
-            // Hide native YouTube volume buttons
-            const hideNativeVolume = document.createElement('style');
-            hideNativeVolume.textContent = '.ytp-mute-button, .ytp-volume-area { display: none !important; }';
-            heroWrapper.appendChild(hideNativeVolume);
+        // Safely remove fading class next frame to avoid forced synchronous reflow (offsetHeight)
+        requestAnimationFrame(() => {
+            if (this._heroState.heroElement === heroWrapper) {
+                heroWrapper.classList.remove('fading');
+            }
+        });
 
-            this._heroState.status = 'ready';
-            this._updateHeroContent(videoElement);
+        // Wait for preview asynchronously so UI loads immediately
+        this._waitForPreview(videoElement).then(preview => {
+            if (!preview || this._heroState.heroElement !== heroWrapper || this._heroState.currentVideo !== videoElement) return;
 
-            // Safely remove fading class next frame
-            requestAnimationFrame(() => {
-                if (this._heroState.heroElement === heroWrapper) {
-                    heroWrapper.classList.remove('fading');
-                }
-            });
+            // Instead of moving the preview out of the YouTube DOM (which breaks YouTube's recycling), 
+            // we leave it where YouTube put it, and just force its CSS to cover the hero area.
+            preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
 
-            // Wait for YouTube to create the preview element, then physically move it into our hero
-            this._waitForPreview(videoElement).then(preview => {
-                if (!preview || this._heroState.heroElement !== heroWrapper || this._heroState.currentVideo !== videoElement) return;
-                
-                // ORIGINAL APPROACH: physically move ytd-video-preview into hero wrapper
-                this._movePreviewIntoHero(preview);
-
-                // Register sharedObserver to re-apply on any future DOM mutations
-                if (window.YPP?.sharedObserver) {
-                    window.YPP.sharedObserver.register('cinematic-preview-styler', CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW, () => {
-                        const p = this._heroState.heroElement?.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW);
-                        if (p) this._movePreviewIntoHero(p);
-                    });
-                }
-            }).catch(e => {
-                this.utils.log(e.message, "CINEMATIC", "error");
-            });
+            if (window.YPP?.sharedObserver) {
+                window.YPP.sharedObserver.register('cinematic-preview-styler', CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW, this._forcePreviewFullscreen.bind(this));
+            }
+            this._forcePreviewFullscreen();
+        }).catch(e => {
+            this.utils.log(e.message, "CINEMATIC", "error");
+        });
 
         } catch (e) {
             this.utils.log(e.message, "CINEMATIC", "error");

@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
 ** Core Variables and Root Settings
 ============================================================================ */
 :root {
@@ -208,7 +208,8 @@ body.cinematic-home .netflix-hero {
   /* True fullscreen — escape the page-manager box */
   width: 100vw !important;
   height: 100vh;
-  z-index: 0;
+  /* Auto z-index prevents establishing a stacking context so the native preview can interleave */
+  z-index: auto !important;
   pointer-events: none !important;
   background: #0f0f0f;
   overflow: hidden;
@@ -226,26 +227,25 @@ body.cinematic-home .netflix-hero-nav * {
   pointer-events: auto !important;
 }
 
-/* Hero Video Container:
-   ytd-video-preview is physically moved INTO the .netflix-hero div.
-   It fills the hero area using position: absolute. */
-body.cinematic-home .netflix-hero ytd-video-preview,
-body.cinematic-home .netflix-hero ytd-video-preview #video-preview-container,
-body.cinematic-home .netflix-hero ytd-video-preview #player-container,
-body.cinematic-home .netflix-hero ytd-video-preview ytd-player,
-body.cinematic-home .netflix-hero ytd-video-preview #container.ytd-player,
-body.cinematic-home .netflix-hero ytd-video-preview .html5-video-player,
-body.cinematic-home .netflix-hero ytd-video-preview #movie_player,
-body.cinematic-home .netflix-hero ytd-video-preview .html5-video-container {
-  position: absolute !important;
+/* Hero Video Container and Inner Elements:
+   Set all containers to fill the hero wrapper (which is 100vw x 100vh fixed to body) */
+body.cinematic-home .netflix-active-preview ytd-video-preview,
+body.cinematic-home .netflix-active-preview ytd-video-preview #video-preview-container,
+body.cinematic-home .netflix-active-preview ytd-video-preview #player-container,
+body.cinematic-home .netflix-active-preview ytd-video-preview ytd-player,
+body.cinematic-home .netflix-active-preview ytd-video-preview #container.ytd-player,
+body.cinematic-home .netflix-active-preview ytd-video-preview .html5-video-player,
+body.cinematic-home .netflix-active-preview ytd-video-preview #movie_player,
+body.cinematic-home .netflix-active-preview ytd-video-preview .html5-video-container {
+  position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  --ytd-video-preview-width: 100% !important;
-  --ytd-video-preview-height: 100% !important;
-  --ytd-inline-preview-player-width: 100% !important;
-  --ytd-inline-preview-player-height: 100% !important;
+  --ytd-video-preview-width: 100vw !important;
+  --ytd-video-preview-height: 100vh !important;
+  --ytd-inline-preview-player-width: 100vw !important;
+  --ytd-inline-preview-player-height: 100vh !important;
   pointer-events: none !important;
   max-width: none !important;
   max-height: none !important;
@@ -255,10 +255,12 @@ body.cinematic-home .netflix-hero ytd-video-preview .html5-video-container {
   border-radius: 0 !important;
 }
 
-/* The actual <video> element fills the hero container — fullscreen */
-body.cinematic-home .netflix-hero ytd-video-preview video,
-body.cinematic-home .netflix-hero #media-container video {
-  position: absolute !important;
+/* The actual <video> element: use position:fixed directly so it escapes any
+   internal YouTube container that might have its own height constraint.
+   This guarantees true 100vw x 100vh coverage regardless of player internals. */
+body.cinematic-home .netflix-active-preview ytd-video-preview video,
+body.cinematic-home .netflix-hero video {
+  position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
@@ -273,22 +275,23 @@ body.cinematic-home .netflix-hero #media-container video {
   border-radius: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+
+body.cinematic-home .netflix-active-preview ytd-video-preview {
   pointer-events: none !important;
 }
 
-body.cinematic-home .netflix-hero ytd-video-preview {
-  pointer-events: none !important;
-}
-
-/* Ensure masthead stays visually on top of the hero */
+/* Ensure masthead stays visually on top of the hero (behind it by z-index).
+   YouTube's masthead default is z-index 2201; this is a safety override. */
 body.cinematic-home #masthead-container {
   z-index: 2201 !important;
 }
 
-/* Hero Content Overlay — sits in the lower third of the fullscreen hero,
-   above the gradient but below the card row */
+/* Hero Content Overlay — sits in the lower third of the full-height hero,
+   above the gradient but below the card row (which starts at bottom ~300px) */
 body.cinematic-home .netflix-hero-content {
   position: absolute;
+  /* Position above the card row: cards are 300px tall at bottom, so place content just above */
   bottom: 320px;
   left: 5%;
   color: white;
@@ -330,16 +333,16 @@ body.cinematic-home .netflix-hero-content {
    so cards appear to emerge from the video rather than sit on top of a hard edge */
 body.cinematic-home .netflix-hero-gradient {
   position: absolute;
-  bottom: -120px;
+  top: 0;
   left: 0;
-  right: 0;
-  height: 85vh;
+  width: 100vw;
+  height: 100vh;
   z-index: 2;
   background: linear-gradient(
-    180deg,
+    to bottom,
     transparent 0%,
-    rgba(15, 15, 15, 0.9) 70%,
-    rgb(15, 15, 15) 100%
+    transparent 60%,
+    #0f0f0f 100%
   );
   pointer-events: none;
 }
@@ -927,10 +930,17 @@ body.cinematic .ad-skipper-spinner {
 
 /* Apply animation to hero video — reinforce fullscreen dimensions here too
    since this rule fires later in the cascade */
-body.cinematic-home .netflix-hero ytd-video-preview video,
+body.cinematic-home .netflix-active-preview ytd-video-preview video,
+body.cinematic-home #video-preview-container.ytd-video-preview video,
 body.cinematic-home .netflix-hero #media-container video {
   animation: heroKenBurns 9s ease-in-out forwards;
   transform-origin: center center;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
 }
 
 /* Fade States */
@@ -940,13 +950,13 @@ body.cinematic-home .netflix-hero.fading .netflix-hero-content {
   transition: opacity 1.5s ease-in-out !important;
 }
 
-/* Force show preview elements inside hero */
-body.cinematic-home .netflix-hero ytd-video-preview * {
+/* Force show preview elements */
+body.cinematic-home .netflix-active-preview ytd-video-preview * {
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-body.cinematic-home .netflix-hero ytd-video-preview {
+body.cinematic-home .netflix-active-preview ytd-video-preview {
   transition: opacity 1.5s ease-in-out !important;
 }
 
