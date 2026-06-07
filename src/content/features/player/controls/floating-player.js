@@ -86,10 +86,11 @@ window.YPP.features.FloatingPlayer = class FloatingPlayer extends window.YPP.fea
     activateFloatingPlayer() {
         if (this.isActive) return;
         this.isActive = true;
-        
-        // Wait a tiny bit to ensure no layout thrashing
+
         requestAnimationFrame(() => {
             document.body.classList.add('ypp-floating-player-active');
+            this._injectCloseButton();
+            this._enableDrag();
             this.utils?.log('Floating Player Activated', 'FLOATING_PLAYER', 'debug');
         });
     }
@@ -97,10 +98,78 @@ window.YPP.features.FloatingPlayer = class FloatingPlayer extends window.YPP.fea
     deactivateFloatingPlayer() {
         if (!this.isActive) return;
         this.isActive = false;
-        
+
         requestAnimationFrame(() => {
             document.body.classList.remove('ypp-floating-player-active');
+            document.querySelector('.ypp-float-close-btn')?.remove();
+            // Reset any drag-repositioned inline styles
+            const player = document.querySelector('#ytd-player, ytd-player[id="ytd-player"]');
+            if (player) {
+                player.style.removeProperty('bottom');
+                player.style.removeProperty('right');
+                player.style.removeProperty('top');
+                player.style.removeProperty('left');
+            }
             this.utils?.log('Floating Player Deactivated', 'FLOATING_PLAYER', 'debug');
         });
+    }
+
+    /** Inject a close/dismiss button into the floating player */
+    _injectCloseButton() {
+        if (document.querySelector('.ypp-float-close-btn')) return;
+        const player = document.querySelector('#ytd-player, ytd-player[id="ytd-player"]');
+        if (!player) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'ypp-float-close-btn';
+        btn.title = 'Dismiss floating player';
+        btn.innerHTML = '✕';
+        // Use addListener so it's cleaned up on disable()
+        this.addListener(btn, 'click', (e) => {
+            e.stopPropagation();
+            this.deactivateFloatingPlayer();
+        });
+        player.appendChild(btn);
+    }
+
+    /** Allow the floating player to be dragged to any corner of the viewport */
+    _enableDrag() {
+        const player = document.querySelector('#ytd-player, ytd-player[id="ytd-player"]');
+        if (!player || player._yppDragEnabled) return;
+        player._yppDragEnabled = true;
+
+        let startX, startY, startRight, startBottom;
+
+        const onMouseDown = (e) => {
+            // Don't drag when clicking close button or video controls
+            if (e.target.closest('.ypp-float-close-btn, .ytp-chrome-bottom')) return;
+            e.preventDefault();
+            const rect = player.getBoundingClientRect();
+            startX = e.clientX;
+            startY = e.clientY;
+            startRight  = window.innerWidth  - rect.right;
+            startBottom = window.innerHeight - rect.bottom;
+
+            const onMouseMove = (ev) => {
+                const dx = startX - ev.clientX;
+                const dy = startY - ev.clientY;
+                const newRight  = Math.max(8, Math.min(window.innerWidth  - 100, startRight  + dx));
+                const newBottom = Math.max(8, Math.min(window.innerHeight - 60,  startBottom + dy));
+                player.style.setProperty('right',  `${newRight}px`,  'important');
+                player.style.setProperty('bottom', `${newBottom}px`, 'important');
+                player.style.removeProperty('top');
+                player.style.removeProperty('left');
+            };
+
+            const onMouseUp = () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+
+        this.addListener(player, 'mousedown', onMouseDown);
     }
 };

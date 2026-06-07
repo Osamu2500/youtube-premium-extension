@@ -73,8 +73,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
                     this._watchedIds = new Set(ids);
                 }
             } else {
-                // Fallback if StorageManager isn't fully ready
-                return new Promise(resolve => {
+                await new Promise(resolve => {
                     chrome.storage.local.get([this._storageKey], (result) => {
                         const ids = result[this._storageKey];
                         if (Array.isArray(ids)) this._watchedIds = new Set(ids);
@@ -82,6 +81,9 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
                     });
                 });
             }
+            // Seed the shared WatchedStore so HideWatched and others
+            // can read watched state without coupling to this class
+            window.YPP.WatchedStore?.seed(this._watchedIds);
         } catch (e) {
             this.utils.log?.(`Storage load error: ${e.message}`, 'MarkWatched', 'error');
         }
@@ -110,8 +112,8 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         if (!videoId) return;
         this._watchedIds.add(videoId);
         this._saveWatchedIds();
+        window.YPP.WatchedStore?.add(videoId); // sync to shared store
         
-        // Update any already-processed cards without a full re-scan
         document.querySelectorAll(`[data-ypp-video-id="${videoId}"]`).forEach(card => {
             this._addWatchedBadge(card, videoId);
             const icon = card.querySelector('.ypp-watched-icon-permanent');
@@ -129,6 +131,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         if (!videoId) return;
         this._watchedIds.delete(videoId);
         this._saveWatchedIds();
+        window.YPP.WatchedStore?.remove(videoId); // sync to shared store
         
         document.querySelectorAll(`[data-ypp-video-id="${videoId}"]`).forEach(card => {
             this._removeWatchedBadge(card);

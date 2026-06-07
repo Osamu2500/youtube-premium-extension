@@ -1,24 +1,93 @@
 /**
  * Floating Player Styles
- * Applied when the user scrolls past the video player and the `floatingPlayer` setting is active.
+ * Applied when the user scrolls past the video player and `floatingPlayer` is active.
+ * Renders the player as a fixed mini-player in the bottom-right corner with
+ * a drag handle, close button, and smooth entry/exit transitions.
  */
 
+/* ── Entry animation ─────────────────────────────────────────────────────── */
+@keyframes ypp-float-in {
+    from { transform: translateY(24px) translateZ(0); opacity: 0; }
+    to   { transform: translateY(0)    translateZ(0); opacity: 1; }
+}
+
+/* ── Main floating player container ─────────────────────────────────────── */
 body.ypp-floating-player-active #ytd-player,
 body.ypp-floating-player-active ytd-player[id="ytd-player"] {
     position: fixed !important;
-    bottom: 20px !important;
-    right: 20px !important;
-    width: 400px !important;
-    height: 225px !important; /* 16:9 ratio */
-    z-index: 2147483647 !important; /* Highest possible */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: 380px !important;
+    height: 214px !important; /* 16:9 exact */
+    z-index: 2147483647 !important;
+    box-shadow:
+        0 4px 6px rgba(0,0,0,0.3),
+        0 12px 40px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,255,255,0.08) !important;
     border-radius: var(--ypp-thumb-radius, 12px) !important;
     overflow: hidden !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-    transform: translateZ(0) !important; /* Force hardware acceleration */
+    animation: ypp-float-in 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) both !important;
+    cursor: grab !important;
+    user-select: none !important;
 }
 
-/* Ensure the video itself fills the new container */
+body.ypp-floating-player-active #ytd-player:active,
+body.ypp-floating-player-active ytd-player[id="ytd-player"]:active {
+    cursor: grabbing !important;
+}
+
+/* ── Drag handle strip at top ────────────────────────────────────────────── */
+body.ypp-floating-player-active #ytd-player::before,
+body.ypp-floating-player-active ytd-player[id="ytd-player"]::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 28px !important;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.65) 0%,
+        transparent 100%
+    ) !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+}
+
+/* ── Close button injected by JS ─────────────────────────────────────────── */
+.ypp-float-close-btn {
+    position: absolute !important;
+    top: 6px !important;
+    right: 8px !important;
+    z-index: 2147483648 !important;
+    width: 22px !important;
+    height: 22px !important;
+    background: rgba(0,0,0,0.7) !important;
+    backdrop-filter: blur(4px) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 50% !important;
+    color: white !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s, background 0.2s !important;
+    pointer-events: all !important;
+}
+
+body.ypp-floating-player-active #ytd-player:hover .ypp-float-close-btn,
+body.ypp-floating-player-active ytd-player[id="ytd-player"]:hover .ypp-float-close-btn {
+    opacity: 1 !important;
+}
+
+.ypp-float-close-btn:hover {
+    background: rgba(200,0,0,0.85) !important;
+}
+
+/* ── Video fills container ───────────────────────────────────────────────── */
 body.ypp-floating-player-active video.html5-main-video {
     width: 100% !important;
     height: 100% !important;
@@ -26,46 +95,48 @@ body.ypp-floating-player-active video.html5-main-video {
     left: 0 !important;
 }
 
-/* Ensure the controls adapt to the small size */
+/* ── Controls adapt to small size ───────────────────────────────────────── */
 body.ypp-floating-player-active .ytp-chrome-bottom {
     width: 100% !important;
     left: 0 !important;
-    padding: 0 10px !important;
+    padding: 0 8px !important;
     box-sizing: border-box !important;
 }
 
 body.ypp-floating-player-active .ytp-progress-bar-container {
     width: 100% !important;
-    bottom: 35px !important;
+    bottom: 32px !important;
 }
 
-/* Hide some unnecessary controls in mini mode */
+/* ── Hide non-essential controls in mini mode ───────────────────────────── */
 body.ypp-floating-player-active .ytp-size-button,
 body.ypp-floating-player-active .ytp-miniplayer-button,
-body.ypp-floating-player-active .ytp-chapter-title {
+body.ypp-floating-player-active .ytp-chapter-title,
+body.ypp-floating-player-active .ytp-title-channel,
+body.ypp-floating-player-active .ytp-cards-button {
     display: none !important;
 }
 
-/* Ensure background of player is dark */
+/* ── Dark background for player ─────────────────────────────────────────── */
 body.ypp-floating-player-active .html5-video-player {
     background-color: #000 !important;
 }
 
-/* Show a small placeholder where the video used to be so layout doesn't jump */
-/* ytd-watch-flexy handles the placeholder space automatically in most cases, 
-   but we can ensure #player-container-outer maintains aspect ratio */
+/* ── Page placeholder where player used to be ──────────────────────────── */
 body.ypp-floating-player-active #player-container-outer {
-    /* The outer container stays in the DOM, so it acts as a placeholder */
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(255,255,255,0.04);
     border-radius: var(--ypp-thumb-radius, 12px);
+    border: 1px dashed rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 200px;
 }
 
 body.ypp-floating-player-active #player-container-outer::after {
-    content: "Video is floating";
+    content: "▶  Video is floating";
     color: var(--yt-spec-text-secondary, #aaa);
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-family: var(--ypp-font-family, inherit);
+    letter-spacing: 0.03em;
 }

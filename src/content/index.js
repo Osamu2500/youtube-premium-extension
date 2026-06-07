@@ -27,6 +27,7 @@ import './features/global/modifiers/hide-playlists-podcasts.js';
 import './features/global/modifiers/hide-metrics.js';
 import './features/global/modifiers/night-mode.js';
 import './features/global/modifiers/data-api.js';
+import './features/global/modifiers/watched-store.js';
 import './features/global/modifiers/mark-watched.js';
 import './features/global/modifiers/multi-select.js';
 import './features/global/modifiers/hide-thumbnails.js';

@@ -136,6 +136,8 @@ export const DEFAULT_SETTINGS = {
     videoResumer: true,
     autoPause: false,
     commentFilter: false,
+    commentFilterAction: 'dim',       // 'dim' | 'hide'
+    commentFilterCustomKeywords: '',  // comma-separated user keywords
     contextMenu: true,
     enableBookmarks: true,
     cinematicMode: false,

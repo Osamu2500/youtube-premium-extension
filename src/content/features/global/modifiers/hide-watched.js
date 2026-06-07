@@ -155,17 +155,9 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     // Detection helpers
     // =========================================================================
 
-    /** Get the MarkWatched feature's in-memory Set of watched IDs. */
+    /** Get watched IDs from the shared WatchedStore singleton. */
     _getWatchedIds() {
-        try {
-            const markWatched = window.YPP?.MainApp?.featureManager?.getFeature('markWatched');
-            if (markWatched?._watchedIds instanceof Set) {
-                return markWatched._watchedIds;
-            }
-        } catch (e) {
-            // Silently fallback if featureManager isn't fully initialized
-        }
-        return new Set();
+        return window.YPP.WatchedStore?.getAll() ?? new Set();
     }
 
     _getVideoId(card) {
