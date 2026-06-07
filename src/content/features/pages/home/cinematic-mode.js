@@ -266,18 +266,15 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     if (element._isNetflixHeroPreview) {
                         e.stopPropagation();
                         e.stopImmediatePropagation();
-                    }
-                };
-                this.addListener(element, 'mouseleave', blockLeave, true);
-                this.addListener(element, 'mouseout', blockLeave, true);
-                this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
-                this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
-                element._hoverLock = true;
-            }
-            element._isNetflixHeroPreview = true;
-
-            // Dispatch hover events to start playback with coordinates
+    _simulateHover(card) {
+        return new Promise(resolve => {
+            const element = card.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW) 
+                || card.querySelector('#content');
+            const thumbnailContainer = card.querySelector(CinematicMode.SELECTORS.THUMBNAIL);
+            
             const FULL_HOVER_EVENTS = ['pointerenter', 'pointerover', 'mouseenter', 'mouseover', 'pointermove', 'mousemove'];
+            
+            // Dispatch initially
             FULL_HOVER_EVENTS.forEach(eventType => {
                 [element, thumbnailContainer].forEach(target => {
                     if (target) {
@@ -292,11 +289,29 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     }
                 });
             });
-            
-            // Wait for YouTube to load and mute
-            setTimeout(() => {
-                this._syncMuteState();
-                this._updateMuteButtonVisibility();
+
+            // Set an interval to continuously spoof hover to prevent YouTube from hiding the preview
+            if (card._hoverInterval) clearInterval(card._hoverInterval);
+            card._isNetflixHeroPreview = true;
+            card._hoverInterval = setInterval(() => {
+                if (card._isNetflixHeroPreview && card.isConnected) {
+                    FULL_HOVER_EVENTS.forEach(eventType => {
+                        [element, thumbnailContainer].forEach(target => {
+                            if (target) {
+                                const rect = target.getBoundingClientRect();
+                                target.dispatchEvent(new MouseEvent(eventType, {
+                                    bubbles: true,
+                                    cancelable: true,
+                                    view: window,
+                                    clientX: rect.left + rect.width / 2,
+                                    clientY: rect.top + rect.height / 2
+                                }));
+                            }
+                        });
+                    });
+                } else {
+                    clearInterval(card._hoverInterval);
+                }
             }, 500);
         };
         
@@ -627,29 +642,37 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     }
 
     _handleVideoEnter(card) {
-        if (!this._isUserHovering || this._heroState.currentVideo !== card) {
+        if (this._heroState.currentVideo !== card) {
             this._isUserHovering = true;
             this._heroState.currentVideo = card;
             clearTimeout(this._videoTimer);
-            this._updateHeroContent(card);
             
-            this._simulateHover(card);
+            const targetIndex = this._videoQueue.indexOf(card);
+            if (targetIndex !== -1 && targetIndex !== this._currentVideoIndex) {
+                this._currentVideoIndex = targetIndex;
+                this._handleVideoTransition(this._heroState.heroElement, targetIndex);
+            } else if (targetIndex === this._currentVideoIndex) {
+                // If it's already the current video, just ensure it has the active class and keep playing
+                if (!card.classList.contains(CinematicMode.CLASSES.ACTIVE_PREVIEW)) {
+                    card.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
+                }
+                this._simulateHover(card);
+            }
+        } else {
+            this._isUserHovering = true;
+            clearTimeout(this._videoTimer);
         }
     }
 
     _handleVideoLeave(card) {
-        // Debounce to allow the next card's mouseenter to fire before reverting
+        // Debounce to allow the next card's mouseenter to fire
         setTimeout(() => {
-            if (this._heroState.currentVideo === card && this._isUserHovering) {
+            if (this._heroState.currentVideo === card) {
                 this._isUserHovering = false;
-                const currentVideo = this._videoQueue[this._currentVideoIndex];
-                if (currentVideo) {
-                    this._updateHeroContent(currentVideo);
-                    this._simulateHover(currentVideo);
-                    
-                    clearTimeout(this._videoTimer);
-                    this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-                }
+                // Do not revert! The video should keep playing in the hero area.
+                // Just start the timer to play the next video in the queue.
+                clearTimeout(this._videoTimer);
+                this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
             }
         }, 50);
     }
