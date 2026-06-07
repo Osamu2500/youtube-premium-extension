@@ -260,20 +260,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             }
             if (!thumbnailContainer) return;
 
-            // Intercept mouseleave events to trick YouTube into keeping the preview playing indefinitely!
-            if (!element._hoverLock) {
-                const blockLeave = (e) => {
-                    if (element._isNetflixHeroPreview) {
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                    }
-                };
-                this.addListener(element, 'mouseleave', blockLeave, true);
-                this.addListener(element, 'mouseout', blockLeave, true);
-                this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
-                this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
-                element._hoverLock = true;
-            }
             element._isNetflixHeroPreview = true;
 
             // Mute before dispatching to satisfy browser autoplay policies
@@ -314,46 +300,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             this.utils.log(e.message, "CINEMATIC", "error");
             return null;
         }
-    }
-
-    _forcePreviewFullscreen() {
-        const p = document.querySelector(`${CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW}.${CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE}`);
-        if (!p) return;
-        
-        const containers = Array.from(p.querySelectorAll('#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'));
-        const videoEl = p.querySelector('video');
-        
-        // Batch reads
-        const toApply100 = [p, ...containers].filter(el => el && el.style.getPropertyValue('width') !== '100%');
-        const toApplyVW = videoEl && videoEl.style.getPropertyValue('width') !== '100vw' ? [videoEl] : [];
-        
-        // Batch writes
-        toApply100.forEach(el => {
-            el.style.setProperty('position', 'absolute', 'important');
-            el.style.setProperty('top', '0', 'important');
-            el.style.setProperty('left', '0', 'important');
-            el.style.setProperty('width', '100%', 'important');
-            el.style.setProperty('height', '100%', 'important');
-            el.style.setProperty('max-width', 'none', 'important');
-            el.style.setProperty('max-height', 'none', 'important');
-            el.style.setProperty('transform', 'none', 'important');
-            el.style.setProperty('border-radius', '0', 'important');
-            el.style.setProperty('margin', '0', 'important');
-            el.style.setProperty('padding', '0', 'important');
-        });
-
-        toApplyVW.forEach(el => {
-            el.style.setProperty('position', 'absolute', 'important');
-            el.style.setProperty('top', '0', 'important');
-            el.style.setProperty('left', '0', 'important');
-            el.style.setProperty('width', '100vw', 'important');
-            el.style.setProperty('height', '100%', 'important');
-            el.style.setProperty('min-width', '100vw', 'important');
-            el.style.setProperty('min-height', '100%', 'important');
-            el.style.setProperty('max-width', 'none', 'important');
-            el.style.setProperty('max-height', 'none', 'important');
-            el.style.setProperty('object-fit', 'cover', 'important');
-        });
     }
 
     async _makeHeroPreview(videoElement) {
@@ -444,14 +390,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         this._waitForPreview(videoElement).then(preview => {
             if (!preview || this._heroState.heroElement !== heroWrapper || this._heroState.currentVideo !== videoElement) return;
 
-            // Instead of moving the preview out of the YouTube DOM (which breaks YouTube's recycling), 
-            // we leave it where YouTube put it, and just force its CSS to cover the hero area.
-            preview.classList.add(CinematicMode.CLASSES.HERO_PREVIEW_ACTIVE);
-
-            if (window.YPP?.sharedObserver) {
-                window.YPP.sharedObserver.register('cinematic-preview-styler', CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW, this._forcePreviewFullscreen.bind(this));
-            }
-            this._forcePreviewFullscreen();
+            // Physically move the preview into the hero wrapper
+            this._savedPreview = preview;
+            this._savedPreviewParent = preview.parentNode;
+            this._savedPreviewNextSibling = preview.nextSibling;
+            heroWrapper.appendChild(preview);
         }).catch(e => {
             this.utils.log(e.message, "CINEMATIC", "error");
         });
@@ -630,42 +573,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         if (heroButton) heroButton.style.opacity = '1';
     }
 
-    _handleVideoEnter(card) {
-        if (this._heroState.currentVideo !== card) {
-            this._isUserHovering = true;
-            this._heroState.currentVideo = card;
-            clearTimeout(this._videoTimer);
-            
-            const targetIndex = this._videoQueue.indexOf(card);
-            if (targetIndex !== -1 && targetIndex !== this._currentVideoIndex) {
-                this._currentVideoIndex = targetIndex;
-                this._handleVideoTransition(this._heroState.heroElement, targetIndex);
-            } else if (targetIndex === this._currentVideoIndex) {
-                // If it's already the current video, just ensure it has the active class and keep playing
-                if (!card.classList.contains(CinematicMode.CLASSES.ACTIVE_PREVIEW)) {
-                    card.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
-                }
-                this._simulateHover(card);
-            }
-        } else {
-            this._isUserHovering = true;
-            clearTimeout(this._videoTimer);
-        }
-    }
-
-    _handleVideoLeave(card) {
-        // Debounce to allow the next card's mouseenter to fire
-        setTimeout(() => {
-            if (this._heroState.currentVideo === card) {
-                this._isUserHovering = false;
-                // Do not revert! The video should keep playing in the hero area.
-                // Just start the timer to play the next video in the queue.
-                clearTimeout(this._videoTimer);
-                this._videoTimer = setTimeout(this._playNextVideo, this.CONFIG.PREVIEW_DELAY);
-            }
-        }, 50);
-    }
-
     // ─── Queue Management & Scroll ────────────────────────────────────────────
 
     _updateVideoQueue() {
@@ -713,8 +620,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                                 
                                 if (!item.video.dataset.yppHoverBound) {
                                     item.video.dataset.yppHoverBound = 'true';
-                                    this.addListener(item.video, 'mouseenter', () => this._handleVideoEnter(item.video));
-                                    this.addListener(item.video, 'mouseleave', () => this._handleVideoLeave(item.video));
                                 }
 
                                 item.badges.forEach(badge => badge.remove());
@@ -1001,6 +906,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
     _teardown() {
         this._cinematicActive = false;
+        
+        if (this._savedPreview && this._savedPreviewParent) {
+            try {
+                this._savedPreviewParent.insertBefore(this._savedPreview, this._savedPreviewNextSibling);
+            } catch(e) {}
+            this._savedPreview = null;
+        }
         
         document.body.classList.remove(CinematicMode.CLASSES.CINEMATIC_HOME);
         document.body.classList.remove(CinematicMode.CLASSES.CINEMATIC);

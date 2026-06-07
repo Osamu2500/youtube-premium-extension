@@ -227,58 +227,25 @@ body.cinematic-home .netflix-hero-nav * {
   pointer-events: auto !important;
 }
 
-/* Hero Video Container and Inner Elements:
-   Set all containers to fill the hero wrapper (which is 100vw x 100vh fixed to body) */
-body.cinematic-home .netflix-active-preview ytd-video-preview,
-body.cinematic-home .netflix-active-preview ytd-video-preview #video-preview-container,
-body.cinematic-home .netflix-active-preview ytd-video-preview #player-container,
-body.cinematic-home .netflix-active-preview ytd-video-preview ytd-player,
-body.cinematic-home .netflix-active-preview ytd-video-preview #container.ytd-player,
-body.cinematic-home .netflix-active-preview ytd-video-preview .html5-video-player,
-body.cinematic-home .netflix-active-preview ytd-video-preview #movie_player,
-body.cinematic-home .netflix-active-preview ytd-video-preview .html5-video-container {
-  position: fixed !important;
+/* Hero Video Container */
+body.cinematic-home .netflix-hero ytd-video-preview,
+body.cinematic-home .netflix-hero ytd-video-preview * {
+  position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  --ytd-video-preview-width: 100vw !important;
-  --ytd-video-preview-height: 100vh !important;
-  --ytd-inline-preview-player-width: 100vw !important;
-  --ytd-inline-preview-player-height: 100vh !important;
-  pointer-events: none !important;
   max-width: none !important;
   max-height: none !important;
   margin: 0 !important;
   padding: 0 !important;
   transform: none !important;
   border-radius: 0 !important;
+  pointer-events: none !important;
 }
 
-/* The actual <video> element: use position:fixed directly so it escapes any
-   internal YouTube container that might have its own height constraint.
-   This guarantees true 100vw x 100vh coverage regardless of player internals. */
-body.cinematic-home .netflix-active-preview ytd-video-preview video,
-body.cinematic-home .netflix-hero video {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  min-width: 100vw !important;
-  min-height: 100vh !important;
-  max-width: none !important;
-  max-height: none !important;
+body.cinematic-home .netflix-hero ytd-video-preview video {
   object-fit: cover !important;
-  z-index: 0 !important;
-  transform: none !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-body.cinematic-home .netflix-active-preview ytd-video-preview {
-  pointer-events: none !important;
 }
 
 /* Ensure masthead stays visually on top of the hero (behind it by z-index).
@@ -802,19 +769,6 @@ body.cinematic-home ytd-rich-item-renderer:hover ytd-thumbnail {
   opacity: 0.6 !important;
 }
 
-body.cinematic-home .netflix-active-preview ytd-thumbnail {
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 8px;
-  transition:
-    box-shadow 0.3s ease-in-out,
-    border-color 0.3s ease-in-out,
-    transform 0.2s ease-in-out,
-    scale 0.2s ease-in-out,
-    opacity 0.2s ease-in-out;
-  animation: glowPulse 3s ease-in-out infinite;
-}
-
 @keyframes glowPulse {
   0% {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
@@ -950,15 +904,6 @@ body.cinematic-home .netflix-hero.fading .netflix-hero-content {
 }
 
 /* Force show preview elements */
-body.cinematic-home .netflix-active-preview ytd-video-preview * {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-body.cinematic-home .netflix-active-preview ytd-video-preview {
-  transition: opacity 1.5s ease-in-out !important;
-}
-
 /* ============================================================================
 ** Media Queries (Reverse Breakpoints)
 ============================================================================ */
@@ -1138,48 +1083,6 @@ html.yt-premium-plus-theme body.cinematic-home ytd-rich-section-renderer {
 
 
 /* Fading preview styles - keeps the old preview fullscreen while it fades out */
-body.cinematic-home .netflix-fading-preview ytd-video-preview,
-body.cinematic-home .netflix-fading-preview ytd-video-preview #video-preview-container,
-body.cinematic-home .netflix-fading-preview ytd-video-preview #player-container,
-body.cinematic-home .netflix-fading-preview ytd-video-preview ytd-player,
-body.cinematic-home .netflix-fading-preview ytd-video-preview #container.ytd-player,
-body.cinematic-home .netflix-fading-preview ytd-video-preview .html5-video-player,
-body.cinematic-home .netflix-fading-preview ytd-video-preview #movie_player,
-body.cinematic-home .netflix-fading-preview ytd-video-preview .html5-video-container {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  --ytd-video-preview-width: 100vw !important;
-  --ytd-video-preview-height: 100vh !important;
-  --ytd-inline-preview-player-width: 100vw !important;
-  --ytd-inline-preview-player-height: 100vh !important;
-  pointer-events: none !important;
-  max-width: none !important;
-  max-height: none !important;
-  min-width: 100vw !important;
-  min-height: 100vh !important;
-  z-index: 1 !important;
-  transform: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  opacity: 0 !important;
-  transition: opacity 1.25s ease-in-out !important;
-}
 
-body.cinematic-home .netflix-fading-preview ytd-video-preview video {
-  animation: heroKenBurns 9s ease-in-out forwards;
-  transform-origin: center center;
-  width: 100vw !important;
-  height: 100vh !important;
-  object-fit: cover !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  margin: auto !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-  transition: opacity 1.25s ease-in-out !important;
-}
+
+
