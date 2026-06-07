@@ -2,7 +2,7 @@
 
 This file documents every single commit and the detailed changes made in each, ensuring a granular history of architectural, visual, and performance modifications.
 
-## [2026-06-07] - Shorts Fixes & Deep Architecture Audit
+## [2026-06-07] [Commit: 7baa0c6] - Shorts Fixes & Deep Architecture Audit
 ### Added
 - **Shorts Player Bar:** Injected the custom player control bar (volume booster, filters, pip, screenshot, speed, loop) directly into the Shorts player.
 - **Shorts Auto-Scroll:** Implemented functionality to auto-scroll to the next short when the current video finishes.
