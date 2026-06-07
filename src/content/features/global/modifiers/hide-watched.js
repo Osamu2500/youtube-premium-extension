@@ -75,9 +75,9 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         });
         
         if (window.YPP && window.YPP.sharedObserver) {
-            // We use dom:mutated to handle Virtual DOM recycling where cards are not "added" but just mutated.
-            // We still use sharedObserver for progress bars to catch them instantly.
-            this.onBusEvent('dom:mutated', this._boundSchedule);
+            // dom:mutated fires with MutationRecord[] — extract added card nodes
+            // directly so we avoid a full querySelectorAll sweep on every mutation.
+            this.onBusEvent('dom:mutated', (mutations) => this._processMutatedNodes(mutations));
             window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer', this._boundProcessProgress, false);
         }
     }
@@ -149,6 +149,37 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             this._debounceTimer = null;
             this._processCards();
         }, 150);
+    }
+
+    /**
+     * Process only the nodes that arrived in a mutation batch — avoids
+     * a full document.querySelectorAll sweep on every DOM change.
+     * @param {MutationRecord[]} mutations
+     */
+    _processMutatedNodes(mutations) {
+        if (!this.isEnabled || !Array.isArray(mutations)) return;
+        const watchedIds = this._getWatchedIds();
+        const threshold  = this.settings?.hideWatchedThreshold ?? 80;
+
+        for (const mutation of mutations) {
+            const added = mutation.addedNodes;
+            for (let i = 0; i < added.length; i++) {
+                const node = added[i];
+                if (node.nodeType !== Node.ELEMENT_NODE || !node.isConnected) continue;
+
+                // Check if the node itself is a card
+                if (node.matches?.(HideWatched.CARD_SELECTORS)) {
+                    this._evaluateCard(node, watchedIds, threshold);
+                }
+
+                // Also check card descendants (e.g. when a shelf is inserted)
+                if (node.querySelectorAll) {
+                    node.querySelectorAll(HideWatched.CARD_SELECTORS).forEach(card => {
+                        this._evaluateCard(card, watchedIds, threshold);
+                    });
+                }
+            }
+        }
     }
 
     // =========================================================================

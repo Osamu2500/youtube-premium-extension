@@ -10,6 +10,9 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         this.video = null;
         this.container = null;
         this.toggleBtn = null;
+        this._playerVisible = true;  // IntersectionObserver sets this
+        this._intersectionObserver = null;
+        this._visibilityHandler = this._onVisibilityChange.bind(this);
     }
 
     getConfigKey() {
@@ -29,11 +32,18 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
 
     async disable() {
         await super.disable();
-        
+
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
+
+        if (this._intersectionObserver) {
+            this._intersectionObserver.disconnect();
+            this._intersectionObserver = null;
+        }
+
+        document.removeEventListener('visibilitychange', this._visibilityHandler);
 
         if (this.canvas) {
             this.canvas.remove();
@@ -177,7 +187,19 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
 
     startLoop() {
         let lastTime = 0;
-        const fpsInterval = 1000 / 5; // 5 FPS (Reduced from 30 to eliminate GPU sync lag)
+        const fpsInterval = 1000 / 5; // 5 FPS — low enough to stay cheap, enough for smooth glow
+
+        // Pause loop when player is off-screen (IntersectionObserver)
+        if (this.video) {
+            this._intersectionObserver = new IntersectionObserver(
+                ([entry]) => { this._playerVisible = entry.isIntersecting; },
+                { threshold: 0.05 }
+            );
+            this._intersectionObserver.observe(this.video);
+        }
+
+        // Pause loop when browser tab is hidden
+        document.addEventListener('visibilitychange', this._visibilityHandler);
 
         const loop = (timestamp) => {
             if (!this.isEnabled) return;
@@ -187,11 +209,16 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             if (elapsed > fpsInterval) {
                 lastTime = timestamp - (elapsed % fpsInterval);
 
-                if (this.video && !this.video.paused && !this.video.ended && this.video.readyState >= 2 && !document.hidden) {
-                    // Draw video to canvas (tiny size to minimize readback bandwidth)
-                    if (this.ctx) {
-                        this.ctx.drawImage(this.video, 0, 0, 16, 16);
-                    }
+                const shouldDraw =
+                    this.video &&
+                    !this.video.paused &&
+                    !this.video.ended &&
+                    this.video.readyState >= 2 &&
+                    !document.hidden &&       // tab-level pause
+                    this._playerVisible;      // viewport-level pause
+
+                if (shouldDraw && this.ctx) {
+                    this.ctx.drawImage(this.video, 0, 0, 16, 16);
                 }
             }
             
@@ -205,5 +232,13 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         }
 
         this.animationFrame = requestAnimationFrame(loop);
+    }
+    /** Called by visibilitychange — no-op if loop isn't running */
+    _onVisibilityChange() {
+        // Loop already guards document.hidden; just log for debug purposes
+        this.utils?.log?.(
+            `Tab visibility: ${document.hidden ? 'hidden (paused)' : 'visible (resumed)'}`,
+            'AMBIENT', 'debug'
+        );
     }
 };
