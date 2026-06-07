@@ -256,7 +256,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
             <button class="ypp-watch-alert-close" aria-label="Dismiss">✕</button>
         `;
 
-        overlay.querySelector('.ypp-watch-alert-close').addEventListener('click', () => {
+        this.addListener(overlay.querySelector('.ypp-watch-alert-close'), 'click', () => {
             overlay.classList.remove('show');
             setTimeout(() => overlay.remove(), 300);
         });

@@ -36,10 +36,11 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             this._boundPiP = null;
         }
 
-        if (this._observer) {
-            this._observer.disconnect();
-            this._observer = null;
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('player_shorts');
+            window.YPP.sharedObserver.unregister('player_watch');
         }
+        document.querySelectorAll('.ytp-right-controls[data-ypp-processed], ytd-reel-video-renderer[data-ypp-processed]').forEach(el => el.removeAttribute('data-ypp-processed'));
 
         this._videoElement = null;
     }
@@ -107,35 +108,29 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
     }
 
     _startMonitoring() {
-        if (!this._observer) {
-            this._observer = new MutationObserver(() => {
-                if (!this.isEnabled) return;
-                const isShorts = window.location.pathname.startsWith('/shorts');
-                
-                if (isShorts) {
-                    const activeShort = document.querySelector('ytd-reel-video-renderer[is-active]');
-                    if (activeShort && !activeShort.querySelector('.ypp-player-controls')) {
-                        // Remove old ones
-                        document.querySelectorAll('.ypp-player-controls').forEach(e => e.remove());
-                        const video = activeShort.querySelector('video');
-                        const controls = activeShort.querySelector('.overlay.ytd-reel-video-renderer');
-                        if (video && controls) {
-                            this.injectControls(video, controls, isShorts);
-                        }
-                    }
-                } else {
-                    if (!document.querySelector('.ypp-player-controls') && document.querySelector('.ytp-right-controls')) {
-                        const video = document.querySelector('video');
-                        const controls = document.querySelector('.ytp-right-controls');
-                        if (video && controls) {
-                            this.injectControls(video, controls, false);
-                        }
-                    }
-                }
-            });
-            const playerContainer = document.querySelector('#page-manager') || document.body;
-            this._observer.observe(playerContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['is-active'] });
-        }
+        if (!window.YPP?.sharedObserver) return;
+        
+        window.YPP.sharedObserver.register('player_shorts', 'ytd-reel-video-renderer[is-active]:not([data-ypp-processed])', (elements) => {
+            if (!this.isEnabled) return;
+            const activeShort = elements[0];
+            document.querySelectorAll('.ypp-player-controls').forEach(e => e.remove());
+            const video = activeShort.querySelector('video');
+            const controls = activeShort.querySelector('.overlay.ytd-reel-video-renderer');
+            if (video && controls) {
+                this.injectControls(video, controls, true);
+                activeShort.setAttribute('data-ypp-processed', 'true');
+            }
+        }, true);
+        
+        window.YPP.sharedObserver.register('player_watch', '.ytp-right-controls:not([data-ypp-processed])', (elements) => {
+            if (!this.isEnabled || window.location.pathname.startsWith('/shorts')) return;
+            const controls = elements[0];
+            const video = document.querySelector('video');
+            if (video && controls) {
+                this.injectControls(video, controls, false);
+                controls.setAttribute('data-ypp-processed', 'true');
+            }
+        }, true);
     }
 
     onPageChange(url) {
@@ -144,6 +139,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         // Always remove stale controls when navigating
         const stale = document.querySelectorAll('.ypp-player-controls');
         stale.forEach(e => e.remove());
+        document.querySelectorAll('.ytp-right-controls[data-ypp-processed], ytd-reel-video-renderer[data-ypp-processed]').forEach(el => el.removeAttribute('data-ypp-processed'));
         this.injectedButtons = false;
 
         if (!url.includes('/watch') && !url.includes('/shorts')) {
@@ -166,7 +162,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             }
         };
         this._boundPiP = handleVisibility;
-        document.addEventListener('visibilitychange', handleVisibility);
+        this.addListener(document, 'visibilitychange', handleVisibility);
     }
 
     injectControls(video, controls, isShorts) {
@@ -243,7 +239,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             btn.textContent = rate + 'x';
             btn.dataset.speed = rate;
             if (video.playbackRate === parseFloat(rate)) btn.classList.add('active');
-            btn.addEventListener('click', (e) => {
+            this.addListener(btn, 'click', (e) => {
                 video.playbackRate = parseFloat(rate);
                 this.updateSpeedButtons(container, rate);
             });
@@ -262,11 +258,11 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
                     await video.requestPictureInPicture();
                 }
             } catch (e) {
-                console.error('[YPP:PLAYER] PiP failed', e);
+                this.utils?.log?.('[YPP:PLAYER] PiP failed: ' + e.message, 'PLAYER', 'error');
             }
         });
-        video.addEventListener('enterpictureinpicture', () => btn.classList.add('active'));
-        video.addEventListener('leavepictureinpicture', () => btn.classList.remove('active'));
+        this.addListener(video, 'enterpictureinpicture', () => btn.classList.add('active'));
+        this.addListener(video, 'leavepictureinpicture', () => btn.classList.remove('active'));
         return btn;
     }
 

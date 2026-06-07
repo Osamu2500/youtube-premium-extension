@@ -38,7 +38,7 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             
             this._applyFeatures();
         } catch (e) {
-            console.error('Error enabling WatchRedesign', e);
+            this.utils?.log?.('Error enabling WatchRedesign: ' + e.message, 'WATCH_REDESIGN', 'error');
         }
     }
 

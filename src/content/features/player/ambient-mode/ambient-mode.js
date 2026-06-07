@@ -97,9 +97,9 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
                     
                     // Save state to storage
                     try {
-                        const settings = await chrome.storage.local.get('settings');
-                        const newSettings = { ...(settings.settings || {}), ambientMode: willEnable };
-                        await chrome.storage.local.set({ settings: newSettings });
+                        const settings = await this.utils.loadSettings();
+                        const newSettings = { ...settings, ambientMode: willEnable };
+                        await this.utils.saveSettings(newSettings);
                     } catch (error) {
                         this.utils.log?.('Failed to save ambient mode state: ' + error.message, 'AMBIENT', 'error');
                     }

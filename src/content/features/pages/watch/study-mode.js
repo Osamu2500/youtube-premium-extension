@@ -64,7 +64,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
                     const video = elements[0];
                     if (video) {
                         video.removeEventListener('ratechange', this._boundEnforceState);
-                        video.addEventListener('ratechange', this._boundEnforceState);
+                        this.addListener(video, 'ratechange', this._boundEnforceState);
                         this._enforceState();
                     }
                 }, true);

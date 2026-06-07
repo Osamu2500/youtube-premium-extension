@@ -45,7 +45,7 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
       this._removeStyle();
       this._currentLayout = null;
     } catch (err) {
-      console.error('[YPP] SidebarLayout disable error:', err);
+      this.utils?.log?.('[YPP] SidebarLayout disable error: ' + err.message, 'SIDEBAR_LAYOUT', 'error');
     }
   }
 

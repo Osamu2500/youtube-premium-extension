@@ -1,3 +1,5 @@
+import { animate, stagger } from 'animejs';
+
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -403,6 +405,15 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             document.body.appendChild(panel);
         }
         ctx._volumePopup = panel;
+
+        animate({
+            targets: panel.querySelectorAll('.ypp-eq-band-col'),
+            translateY: [20, 0],
+            opacity: [0, 1],
+            delay: stagger(30, { start: 150 }),
+            easing: 'spring(1, 80, 10, 0)',
+            duration: 600,
+        });
 
         // Visualizer Loop
         let animFrameId = null;

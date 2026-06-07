@@ -99,14 +99,10 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         }
     }
 
-    mountUI() {
+    async mountUI() {
         // Find the main header on the history page
-        const header = document.querySelector('ytd-browse[page-subtype="history"] #primary');
-        if (!header) {
-            // If it's not ready, try again shortly (BaseFeature utility isn't strictly needed if we rely on DOMObserver, but a simple timeout works)
-            setTimeout(() => this.mountUI(), 500);
-            return;
-        }
+        const header = await this.waitForElement('ytd-browse[page-subtype="history"] #primary', 5000);
+        if (!header) return;
 
         if (!document.getElementById('ypp-history-tracker-widget')) {
             const widget = this.createWidget();

@@ -19,11 +19,11 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
 
         this.calculateDuration();
 
+        this._debouncedCalculate = this.utils.debounce(this._boundCalculate, 1000);
         this.observer.start();
         this.observer.register('playlist-duration', 'ytd-app', () => {
              if (location.pathname.includes('/playlist')) {
-                 clearTimeout(this.debounceTimer);
-                 this.debounceTimer = setTimeout(this._boundCalculate, 1000);
+                 this._debouncedCalculate();
              }
         }, false);
     }
@@ -34,7 +34,6 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
             this.observer.unregister('playlist-duration');
             this.observer.stop();
         }
-        clearTimeout(this.debounceTimer);
         if (this.card) {
             this.card.remove();
             this.card = null;

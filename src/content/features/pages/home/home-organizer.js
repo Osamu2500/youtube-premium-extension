@@ -190,12 +190,19 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         // Handle standalone shelves priority
         const lowPrioritySelectors = ['ytd-rich-shelf-renderer[is-shorts]', 'ytd-reel-shelf-renderer'];
         lowPrioritySelectors.forEach(sel => {
-            contents.querySelectorAll(sel).forEach(el => el.classList.add('ypp-priority-low'));
+            contents.querySelectorAll(sel).forEach(el => {
+                if (el.hasAttribute('data-ypp-processed')) return;
+                el.setAttribute('data-ypp-processed', 'true');
+                el.classList.add('ypp-priority-low');
+            });
         });
 
         // Single pass on video items
         const videoItems = contents.querySelectorAll('ytd-rich-item-renderer');
         videoItems.forEach(item => {
+            if (item.hasAttribute('data-ypp-processed')) return;
+            item.setAttribute('data-ypp-processed', 'true');
+
             // 1. Shorts Check Priority
             if (item.querySelector('a[href^="/shorts/"]')) {
                 item.classList.add('ypp-priority-low');

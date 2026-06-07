@@ -131,12 +131,12 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
                     this.disable();
                 }
             };
-            window.addEventListener('yt-navigate-start', this._navigationListener);
+            this.addListener(window, 'yt-navigate-start', this._navigationListener);
         }
     }
 
     _handleChipClick(chip, type, val) {
-        console.log('[YPP] Filter Click:', type, val);
+        this.Utils.log(`Filter Click: ${type} ${val}`, 'ADVANCED_FILTER', 'debug');
         const { filters } = this.state;
         const currentVal = filters[type];
 
@@ -187,6 +187,9 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
         });
 
         processingQueue.forEach(({ card, data }) => {
+            if (!card.hasAttribute('data-ypp-processed')) {
+                card.setAttribute('data-ypp-processed', 'true');
+            }
             const shouldShow = this._checkCriteriaStrict(data);
 
             if (shouldShow) {
@@ -208,7 +211,7 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
         // For now, adhere to Strict Mode as requested.
 
         this._updateStats(visibleCount);
-        console.log(`[YPP] Filter Applied. Visible: ${visibleCount}/${cards.length}`);
+        this.Utils.log(`Filter Applied. Visible: ${visibleCount}/${cards.length}`, 'ADVANCED_FILTER', 'debug');
     }
 
     _checkCriteriaStrict(data) {
@@ -271,7 +274,7 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
                 isShort: this._extractIsShort(card)
             };
         } catch (e) {
-            console.error('[YPP] Parse Error:', e);
+            this.Utils.log('Parse Error: ' + e.message, 'ADVANCED_FILTER', 'error');
             // Return safe default
             return { durationSec: -1, timeBucket: 'unknown', isSubscribed: 'unknown', isMix: false };
         }

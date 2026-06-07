@@ -62,7 +62,8 @@ window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP
         
         for (const video of videoArray) {
             // Check if we've already processed this video DOM element
-            if (video.classList.contains('previously-watched-video')) continue;
+            if (video.hasAttribute('data-ypp-processed')) continue;
+            video.setAttribute('data-ypp-processed', 'true');
 
             // Check if it has the red resume playback bar and it is partially filled
             const resumeBar = video.querySelector("ytd-thumbnail-overlay-resume-playback-renderer #progress");
@@ -95,10 +96,12 @@ window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP
                             const toast = this.utils.createToast(`Resume unfinished video? "${title.substring(0, 30)}..."`, 'info', 10000);
                             
                             // Wait a tick for toast to be in DOM
-                            setTimeout(() => {
-                                const toastEl = document.querySelector('.ypp-toast:last-child');
-                                if (toastEl) toastEl.appendChild(toastBtn);
-                            }, 50);
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    const toastEl = document.querySelector('.ypp-toast:last-child');
+                                    if (toastEl) toastEl.appendChild(toastBtn);
+                                });
+                            });
                         }
                     }
                 }

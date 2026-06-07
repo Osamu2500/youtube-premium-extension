@@ -55,7 +55,7 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
                 this._filterBtn = null;
             }
         } catch (err) {
-            console.error('[YPP] VideoFilters disable error:', err);
+            this.utils?.log?.('[YPP] VideoFilters disable error: ' + err.message, 'VideoFilters', 'error');
         }
     }
 
@@ -119,8 +119,8 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
         if (!video) return;
 
         if (this.isComparing) {
-            video.style.filter = 'none';
-            video.style.opacity = '1';
+            video.style.setProperty('filter', 'none', 'important');
+            video.style.setProperty('opacity', '1', 'important');
             window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
             return;
         }
@@ -190,7 +190,7 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
             finalFilter += ` url(#ypp-svg-sharpness)`;
         }
 
-        video.style.filter = finalFilter;
+        video.style.setProperty('filter', finalFilter, 'important');
 
         // Performance fix: only rebuild the overlay when preset, grain, or vignette actually changed
         const overlayKey = `${this.currentFilterIndex}:${adj.grain}:${adj.vignette}`;
@@ -245,14 +245,18 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
     }
 
     _showToast(video, message) {
-        const toast = document.createElement('div');
-        toast.className = 'ypp-toast-mini';
-        toast.textContent = message;
-        // Prefer movie_player (YouTube) then video parent, then body
-        const parent = document.getElementById('movie_player') || video?.parentElement || document.body;
-        if (parent) {
-            parent.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+        if (this.utils && this.utils.createToast) {
+            this.utils.createToast(message);
+        } else {
+            // Fallback
+            const toast = document.createElement('div');
+            toast.className = 'ypp-toast-mini';
+            toast.textContent = message;
+            const parent = document.getElementById('movie_player') || video?.parentElement || document.body;
+            if (parent) {
+                parent.appendChild(toast);
+                this.pollFor(() => false, 2000, 2000).catch(() => toast.remove()); // Uses timeout rejection
+            }
         }
     }
 };

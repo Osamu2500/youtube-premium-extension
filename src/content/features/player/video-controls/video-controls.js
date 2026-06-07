@@ -45,6 +45,8 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
             this.panel = null;
         }
 
+        document.querySelectorAll('[data-ypp-vcp-processed]').forEach(el => el.removeAttribute('data-ypp-vcp-processed'));
+
         // Clean up audio chain
         this._teardownAudio();
 
@@ -146,8 +148,10 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
 
         try {
             // Wait for player controls
-            const controls = await this.utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
+            const controls = await this.utils.pollFor(() => document.querySelector('.ytp-right-controls:not([data-ypp-vcp-processed])'), 10000, 500);
             if (!this.isEnabled || !controls) return;
+            
+            controls.setAttribute('data-ypp-vcp-processed', 'true');
             if (controls.querySelector('#ypp-vcp-toggle')) return;
 
             const btn = document.createElement('button');

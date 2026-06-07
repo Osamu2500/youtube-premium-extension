@@ -81,7 +81,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
                     this._eqGains = bands.map(v => typeof v === 'number' ? v : 0);
                 }
             } catch (e) {
-                console.warn('[YPP:VolumeBooster] Failed to parse EQ bands', e);
+                this.utils?.log?.('[YPP:VolumeBooster] Failed to parse EQ bands: ' + e.message, 'VolumeBooster', 'warn');
             }
         }
     }
@@ -115,8 +115,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
         // Clean up event listeners
         if (this._boundVideo && this._initHandler) {
-            this._boundVideo.removeEventListener('play', this._initHandler);
-            this._boundVideo.removeEventListener('volumechange', this._initHandler);
+            // Handled automatically by BaseFeature
             this._initHandler = null; // release closure reference
         }
 
@@ -224,14 +223,14 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
                 this._restoreAudioState();
 
             } catch (e) {
-                console.warn('[YPP:VolumeBooster] Audio engine init failed:', e);
+                this.utils?.log?.('[YPP:VolumeBooster] Audio engine init failed: ' + e.message, 'VolumeBooster', 'warn');
                 this._audioConnected = false;
             }
         };
 
         // Attempt immediate init if already playing, otherwise wait for interaction
-        video.addEventListener('play', this._initHandler, { once: true });
-        video.addEventListener('volumechange', this._initHandler, { once: true });
+        this.addListener(video, 'play', this._initHandler, { once: true });
+        this.addListener(video, 'volumechange', this._initHandler, { once: true });
         if (!video.paused) this._initHandler();
     }
 

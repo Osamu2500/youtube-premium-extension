@@ -264,7 +264,7 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
             this._clickTheaterButton();
         }
         // And on every subsequent navigation
-        window.addEventListener('yt-navigate-finish', this._navHandler);
+        this.addListener(window, 'yt-navigate-finish', this._navHandler);
         this.utils?.log?.('Auto Cinema enabled', 'MODES');
     }
 
@@ -277,8 +277,7 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
 
     _onNavigation() {
         if (this._settings?.autoCinema && location.pathname === '/watch') {
-            // Small delay to let YouTube render its player
-            setTimeout(() => this._clickTheaterButton(), 600);
+            this._clickTheaterButton();
         }
     }
 
@@ -303,7 +302,7 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
                 try { await document.exitPictureInPicture(); } catch (_) {}
             }
         };
-        document.addEventListener('visibilitychange', this._boundAutoPiP);
+        this.addListener(document, 'visibilitychange', this._boundAutoPiP);
         this.utils?.log?.('Auto PiP enabled', 'MODES');
     }
 

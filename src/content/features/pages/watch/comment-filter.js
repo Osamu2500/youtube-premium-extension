@@ -35,7 +35,7 @@ window.YPP.features.CommentFilter = class CommentFilter extends window.YPP.featu
 
         try {
             // Use our robust observer
-            this.observer.register('spam_comments', 'ytd-comment-thread-renderer:not(.ypp-comment-checked)', this.handleComments, true);
+            this.observer.register('spam_comments', 'ytd-comment-thread-renderer:not([data-ypp-processed])', this.handleComments, true);
             
             // Wait for comments section to exist
             const comments = await this.waitForElement('#comments', 10000);
@@ -71,10 +71,10 @@ window.YPP.features.CommentFilter = class CommentFilter extends window.YPP.featu
         if (!this.isEnabled) return;
         
         elements.forEach(container => {
-            if (this.processedComments.has(container)) return;
+            if (container.hasAttribute('data-ypp-processed')) return;
             
             // Mark as checked to prevent re-processing
-            container.classList.add('ypp-comment-checked');
+            container.setAttribute('data-ypp-processed', 'true');
             this.processedComments.add(container);
 
             const contentText = container.querySelector('#content-text');
@@ -91,8 +91,8 @@ window.YPP.features.CommentFilter = class CommentFilter extends window.YPP.featu
                 container.style.transition = 'opacity 0.2s';
                 
                 // Add hover effect to read it if user wants
-                container.addEventListener('mouseenter', () => container.style.opacity = '1');
-                container.addEventListener('mouseleave', () => container.style.opacity = '0.35');
+                this.addListener(container, 'mouseenter', () => container.style.opacity = '1');
+                this.addListener(container, 'mouseleave', () => container.style.opacity = '0.35');
 
                 // Visual Indicator
                 const header = container.querySelector('#header-author, #author-thumbnail');

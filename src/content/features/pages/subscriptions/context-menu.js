@@ -75,6 +75,9 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
     }
 
     injectButton(card) {
+        if (card.hasAttribute('data-ypp-processed')) return;
+        card.setAttribute('data-ypp-processed', 'true');
+
         if (card.querySelector('.ypp-add-to-group-btn')) return;
 
         // Find metadata container to append button
@@ -106,11 +109,11 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         btn.onmouseenter = () => btn.style.opacity = '1';
         btn.onmouseleave = () => btn.style.opacity = '0.6';
 
-        btn.onclick = (e) => {
+        this.addListener(btn, 'click', (e) => {
             e.stopPropagation();
             e.preventDefault();
             this.handleCardClick(card, e);
-        };
+        });
 
         meta.appendChild(btn);
     }
@@ -126,11 +129,11 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         btn.textContent = 'Add to Group';
         btn.style.marginRight = '8px';
         
-        btn.onclick = (e) => {
+        this.addListener(btn, 'click', (e) => {
             const nameEl = document.querySelector('#inner-header-container #text');
             const name = nameEl ? nameEl.textContent.trim() : 'Unknown';
             this.showGroupSelector(name, e.clientX, e.clientY);
-        };
+        });
 
         container.prepend(btn);
     }
@@ -226,14 +229,17 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
             }
             
             // Close on click outside
-            setTimeout(() => {
-                document.addEventListener('click', function close(e) {
-                    if (!popup.contains(e.target)) {
-                        popup.remove();
-                        document.removeEventListener('click', close);
-                    }
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const closeFn = (e) => {
+                        if (!popup.contains(e.target)) {
+                            popup.remove();
+                            document.removeEventListener('click', closeFn);
+                        }
+                    };
+                    this.addListener(document, 'click', closeFn);
                 });
-            }, 100);
+            });
         });
 
         document.body.appendChild(popup);

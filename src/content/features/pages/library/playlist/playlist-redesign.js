@@ -47,7 +47,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                 if (d && d.playlistCols) this._currentCols = d.playlistCols;
             });
         } catch (e) {
-            console.warn('[YPP] Failed to load column preference', e);
+            this.utils.log('Failed to load column preference: ' + e.message, 'PLAYLIST_REDESIGN', 'warn');
         }
 
         if (this._isPlaylistPage()) {
@@ -129,18 +129,15 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         if (!listContainer) return;
 
         if (window.YPP?.sharedObserver) {
-            let debounce = null;
-            window.YPP.sharedObserver.register('playlist-redesign-scanner', 'ytd-playlist-video-renderer', () => {
-                clearTimeout(debounce);
-                debounce = setTimeout(() => {
-                    const header = document.querySelector('ytd-playlist-header-renderer');
-                    const videos = document.querySelectorAll('ytd-playlist-video-renderer');
-                    // Only rebuild if we still have valid data
-                    if (header && videos.length > 0 && this.isEnabled) {
-                        this._build(header, videos);
-                    }
-                }, 600);
-            }, false); // don't fire immediately
+            const debouncedBuild = this.utils.debounce(() => {
+                const header = document.querySelector('ytd-playlist-header-renderer');
+                const videos = document.querySelectorAll('ytd-playlist-video-renderer');
+                // Only rebuild if we still have valid data
+                if (header && videos.length > 0 && this.isEnabled) {
+                    this._build(header, videos);
+                }
+            }, 600);
+            window.YPP.sharedObserver.register('playlist-redesign-scanner', 'ytd-playlist-video-renderer', debouncedBuild, false);
         }
     }
 
@@ -268,6 +265,9 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             ${PLAYLIST.ITEM_SECTION || 'ytd-browse[page-subtype="playlist"] ytd-item-section-renderer'}
         `);
         nativeTargets.forEach(el => el.classList.add('ypp-pl-hidden'));
+
+        // Clean up old event listeners before removing old container
+        this.cleanupEvents();
 
         // Remove old container
         document.getElementById('ypp-pl-root')?.remove();
@@ -539,13 +539,13 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         const root = this.container;
 
         // ── Play all ─────────────────────────────────────────────────────
-        root.querySelector('#ypp-pl-play')?.addEventListener('click', () => {
+        this.addListener(root.querySelector('#ypp-pl-play'), 'click', () => {
             const first = data.videos[0];
             if (first?.href) window.location.href = first.href;
         });
 
         // ── Shuffle ───────────────────────────────────────────────────────
-        root.querySelector('#ypp-pl-shuffle')?.addEventListener('click', () => {
+        this.addListener(root.querySelector('#ypp-pl-shuffle'), 'click', () => {
             const vids = data.videos.filter(v => v.href);
             if (!vids.length) return;
             const pick = vids[Math.floor(Math.random() * vids.length)];
@@ -575,7 +575,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         };
 
         const saveBtn = root.querySelector('#ypp-pl-save');
-        saveBtn?.addEventListener('click', () => {
+        this.addListener(saveBtn, 'click', () => {
             const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer button'));
             const nativeSave = btns.find(b => {
                 const label = (b.getAttribute('aria-label') || b.title || b.textContent || '').toLowerCase();
@@ -585,7 +585,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         });
 
         const shareBtn = root.querySelector('#ypp-pl-share');
-        shareBtn?.addEventListener('click', () => {
+        this.addListener(shareBtn, 'click', () => {
             const btns = Array.from(document.querySelectorAll('ytd-playlist-header-renderer button'));
             const nativeShare = btns.find(b => {
                 const label = (b.getAttribute('aria-label') || b.title || b.textContent || '').toLowerCase();
@@ -595,14 +595,14 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         });
 
         const menuBtn = root.querySelector('#ypp-pl-menu');
-        menuBtn?.addEventListener('click', () => {
+        this.addListener(menuBtn, 'click', () => {
             // Find the 3-dots menu which is usually inside a ytd-menu-renderer
             const nativeMenuBtn = document.querySelector('ytd-playlist-header-renderer ytd-menu-renderer button');
             _clickNativeButtonAt(menuBtn, nativeMenuBtn);
         });
 
         // ── Remove Watched Videos ──────────────────────────────────────────
-        root.querySelector('#ypp-pl-remove-watched')?.addEventListener('click', async (e) => {
+        this.addListener(root.querySelector('#ypp-pl-remove-watched'), 'click', async (e) => {
             const btn = e.currentTarget;
             const watchedCards = Array.from(root.querySelectorAll('.ypp-pl-card[data-progress]'))
                 .filter(c => parseInt(c.dataset.progress, 10) > 0);
@@ -661,7 +661,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         };
 
         root.querySelectorAll('.ypp-col-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            this.addListener(btn, 'click', () => {
                 const cols = btn.dataset.cols;
                 setColumns(cols);
                 try { chrome.storage.local.set({ playlistCols: cols }); } catch (_) {}
@@ -672,7 +672,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         setColumns(this._currentCols);
 
         // ── Filter input ──────────────────────────────────────────────────
-        root.querySelector('#ypp-pl-filter')?.addEventListener('input', e => {
+        this.addListener(root.querySelector('#ypp-pl-filter'), 'input', e => {
             const q = e.target.value.toLowerCase().trim();
             root.querySelectorAll('.ypp-pl-card').forEach(card => {
                 const match = !q || (card.dataset.title || '').includes(q);
@@ -681,7 +681,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         });
 
         // ── Card Context Menu ──────────────────────────────────────────────
-        grid?.addEventListener('click', e => {
+        this.addListener(grid, 'click', e => {
             const menuBtn = e.target.closest('.ypp-pl-card-menu');
             if (!menuBtn) return;
             
@@ -733,12 +733,12 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             document.body.appendChild(menu);
             
             // Wire menu actions
-            menu.querySelector('[data-action="open-new"]')?.addEventListener('click', () => {
+            this.addListener(menu.querySelector('[data-action="open-new"]'), 'click', () => {
                 window.open(href, '_blank');
                 menu.remove();
             });
             
-            menu.querySelector('[data-action="watch-later"]')?.addEventListener('click', () => {
+            this.addListener(menu.querySelector('[data-action="watch-later"]'), 'click', () => {
                 if (card) {
                     const idx = parseInt(card.dataset.index, 10);
                     const nativeVideos = document.querySelectorAll('ytd-playlist-video-renderer');
@@ -766,7 +766,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                 menu.remove();
             });
             
-            menu.querySelector('[data-action="remove"]')?.addEventListener('click', () => {
+            this.addListener(menu.querySelector('[data-action="remove"]'), 'click', () => {
                 if (card) {
                     const idx = parseInt(card.dataset.index, 10);
                     this._removeNativeVideo(idx).then(success => {

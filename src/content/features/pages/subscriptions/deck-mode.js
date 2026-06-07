@@ -53,7 +53,7 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
             Deck Mode
         `;
 
-        btn.addEventListener('click', () => {
+        this.addListener(btn, 'click', () => {
             this.isActive = !this.isActive;
             if (this.isActive) {
                 this.activateDeck();
@@ -120,7 +120,7 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
 
         const contentDiv = col.querySelector('.ypp-deck-col-content');
         let ticking = false;
-        col.addEventListener('scroll', () => {
+        this.addListener(col, 'scroll', () => {
             if (!ticking) {
                 window.requestAnimationFrame(() => {
                     if (col.scrollTop + col.clientHeight >= col.scrollHeight - 200) {
@@ -147,8 +147,8 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
             mainFeed.style.overflow = 'visible';
         }
         
-        const deckedItems = document.querySelectorAll('ytd-rich-item-renderer[data-decked]');
-        deckedItems.forEach(item => delete item.dataset.decked);
+        const deckedItems = document.querySelectorAll('ytd-rich-item-renderer[data-ypp-processed]');
+        deckedItems.forEach(item => item.removeAttribute('data-ypp-processed'));
     }
 
     // feedObserver removed; handled by sharedObserver
@@ -167,8 +167,8 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
 
             if (!channelName || !title || !url) return;
 
-            if (item.dataset.decked) return;
-            item.dataset.decked = 'true';
+            if (item.hasAttribute('data-ypp-processed')) return;
+            item.setAttribute('data-ypp-processed', 'true');
 
             const card = this.createCard(channelName, title, url, thumb, duration, meta);
 

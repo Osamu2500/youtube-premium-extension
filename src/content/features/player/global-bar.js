@@ -76,8 +76,8 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
                     this.scanForVideos();
                 }
             };
-            document.addEventListener('play', this._fallbackVideoScanner, true);
-            document.addEventListener('loadeddata', this._fallbackVideoScanner, true);
+            this.addListener(document, 'play', this._fallbackVideoScanner, true);
+            this.addListener(document, 'loadeddata', this._fallbackVideoScanner, true);
         }
     }
 
@@ -88,8 +88,7 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
                 window.YPP.sharedObserver.unregister('global-bar-scanner');
             }
             if (this._fallbackVideoScanner) {
-                document.removeEventListener('play', this._fallbackVideoScanner, true);
-                document.removeEventListener('loadeddata', this._fallbackVideoScanner, true);
+                // this.addListener will be cleaned up automatically by BaseFeature
                 this._fallbackVideoScanner = null;
             }
         }
@@ -97,19 +96,22 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
 
     scanForVideos() {
         const videos = document.querySelectorAll('video');
-        
         videos.forEach(video => {
-            if (this.ui.hasVideo(video)) return;
+            if (video.hasAttribute('data-ypp-processed') || this.ui.hasVideo(video)) return;
             
             // Wait for video to have layout dimensions
             if (video.offsetWidth > 0 && video.offsetHeight > 0) {
+                video.setAttribute('data-ypp-processed', 'true');
                 this.ui.trackVideo(video);
             } else {
-                setTimeout(() => {
-                    if (video.isConnected && !this.ui.hasVideo(video) && video.offsetWidth > 0) {
-                        this.ui.trackVideo(video);
-                    }
-                }, 2000);
+                this.pollFor(() => video.isConnected && video.offsetWidth > 0 ? video : null, 5000, 500)
+                    .then(v => {
+                        if (v && !v.hasAttribute('data-ypp-processed') && !this.ui.hasVideo(v)) {
+                            v.setAttribute('data-ypp-processed', 'true');
+                            this.ui.trackVideo(v);
+                        }
+                    })
+                    .catch(() => {});
             }
         });
     }

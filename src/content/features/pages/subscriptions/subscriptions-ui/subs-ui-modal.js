@@ -1,3 +1,5 @@
+import { animate, stagger } from 'animejs';
+
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -99,6 +101,15 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
 
             container.appendChild(el);
         });
+
+        animate({
+            targets: container.querySelectorAll('.ypp-channel-item'),
+            translateX: [-12, 0],
+            opacity: [0, 1],
+            delay: stagger(30, { start: 100 }),
+            easing: 'spring(1, 80, 10, 0)',
+            duration: 600,
+        });
     }
 
     static _scrapeChannelsFromPage() {
@@ -197,6 +208,15 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
             });
 
             container.appendChild(el);
+        });
+
+        animate({
+            targets: container.querySelectorAll('.ypp-category-item'),
+            translateX: [12, 0],
+            opacity: [0, 1],
+            delay: stagger(40, { start: 100 }),
+            easing: 'spring(1, 80, 10, 0)',
+            duration: 600,
         });
     }
 

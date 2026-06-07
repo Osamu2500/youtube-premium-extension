@@ -24,7 +24,7 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
     enable() {
         if (this.isActive) return;
         this.isActive = true;
-        console.log('YPP Audio Mode: Enabling');
+        this.utils?.log?.('YPP Audio Mode: Enabling', 'AUDIO_MODE', 'debug');
         
         this.injectStyles();
         this.showThumbnailOverlay();
@@ -36,7 +36,7 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
     disable() {
         if (!this.isActive) return;
         this.isActive = false;
-        console.log('YPP Audio Mode: Disabling');
+        this.utils?.log?.('YPP Audio Mode: Disabling', 'AUDIO_MODE', 'debug');
         
         const style = document.getElementById(this.styleId);
         if (style) style.remove();
@@ -86,14 +86,14 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         try {
             const player = await this.Utils.pollFor(() => document.querySelector('.html5-video-player'), 10000, 500);
             if (!player) {
-                console.error('YPP Audio Mode: Player not found');
+                this.utils?.log?.('YPP Audio Mode: Player not found', 'AUDIO_MODE', 'error');
                 return;
             }
 
         // Get video ID
         const videoId = new URLSearchParams(window.location.search).get('v');
         if (!videoId) {
-            console.error('YPP Audio Mode: Video ID not found');
+            this.utils?.log?.('YPP Audio Mode: Video ID not found', 'AUDIO_MODE', 'error');
             return;
         }
         
@@ -183,7 +183,7 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         player.prepend(overlay);
         this.overlay = overlay;
         } catch (error) {
-            console.error('YPP Audio Mode: Failed to overlay', error);
+            this.utils?.log?.('YPP Audio Mode: Failed to overlay ' + error.message, 'AUDIO_MODE', 'error');
         }
     }
 

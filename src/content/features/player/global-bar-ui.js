@@ -1,3 +1,5 @@
+import { animate, stagger } from 'animejs';
+
 /**
  * Global Bar UI
  * Owns: Generating the custom player bar DOM, injecting it over arbitrary <video>
@@ -169,6 +171,15 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         if ('popover' in bar) {
             try { bar.showPopover(); } catch (e) {}
         }
+
+        animate({
+            targets: bar.querySelectorAll('.ypp-gpb-btn, .ypp-gpb-divider, .ypp-gpb-time, .ypp-gpb-vol-wrap, #ypp-gpb-speed-container'),
+            translateY: [-12, 0],
+            opacity: [0, 1],
+            delay: stagger(40, { start: 100 }),
+            easing: 'spring(1, 80, 10, 0)',
+            duration: 600,
+        });
 
         this._abortController = new AbortController();
         const signal = this._abortController.signal;
