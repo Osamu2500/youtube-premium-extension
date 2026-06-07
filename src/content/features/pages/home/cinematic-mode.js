@@ -266,15 +266,21 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     if (element._isNetflixHeroPreview) {
                         e.stopPropagation();
                         e.stopImmediatePropagation();
-    _simulateHover(card) {
-        return new Promise(resolve => {
-            const element = card.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW) 
-                || card.querySelector('#content');
-            const thumbnailContainer = card.querySelector(CinematicMode.SELECTORS.THUMBNAIL);
-            
+                    }
+                };
+                this.addListener(element, 'mouseleave', blockLeave, true);
+                this.addListener(element, 'mouseout', blockLeave, true);
+                this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
+                this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
+                element._hoverLock = true;
+            }
+            element._isNetflixHeroPreview = true;
+
+            // Mute before dispatching to satisfy browser autoplay policies
+            this._syncMuteState();
+
+            // Dispatch hover events to start playback with coordinates
             const FULL_HOVER_EVENTS = ['pointerenter', 'pointerover', 'mouseenter', 'mouseover', 'pointermove', 'mousemove'];
-            
-            // Dispatch initially
             FULL_HOVER_EVENTS.forEach(eventType => {
                 [element, thumbnailContainer].forEach(target => {
                     if (target) {
@@ -289,29 +295,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     }
                 });
             });
-
-            // Set an interval to continuously spoof hover to prevent YouTube from hiding the preview
-            if (card._hoverInterval) clearInterval(card._hoverInterval);
-            card._isNetflixHeroPreview = true;
-            card._hoverInterval = setInterval(() => {
-                if (card._isNetflixHeroPreview && card.isConnected) {
-                    FULL_HOVER_EVENTS.forEach(eventType => {
-                        [element, thumbnailContainer].forEach(target => {
-                            if (target) {
-                                const rect = target.getBoundingClientRect();
-                                target.dispatchEvent(new MouseEvent(eventType, {
-                                    bubbles: true,
-                                    cancelable: true,
-                                    view: window,
-                                    clientX: rect.left + rect.width / 2,
-                                    clientY: rect.top + rect.height / 2
-                                }));
-                            }
-                        });
-                    });
-                } else {
-                    clearInterval(card._hoverInterval);
-                }
+            
+            // Wait for YouTube to load and mute
+            setTimeout(() => {
+                this._syncMuteState();
+                this._updateMuteButtonVisibility();
             }, 500);
         };
         
@@ -404,6 +392,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
             this._heroState.status = 'creating';
             this._heroState.currentVideo = videoElement;
+            videoElement.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
 
             const heroWrapper = document.createElement('div');
             heroWrapper.className = `netflix-hero ${CinematicMode.CLASSES.FADING}`;
