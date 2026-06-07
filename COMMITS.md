@@ -2,6 +2,11 @@
 
 This file documents every single commit and the detailed changes made in each, ensuring a granular history of architectural, visual, and performance modifications.
 
+## [2026-06-07] [Commit: c918cee] - Cleanup Temporary Files
+### Removed
+- Deleted legacy temporary files and folders (`cinematic temp/`, `scratch_native_css.css`, `scratch_native_js.js`, `structure.txt`) from the project root to keep the workspace clean.
+
+
 ## [2026-06-07] [Commit: 7baa0c6] - Shorts Fixes & Deep Architecture Audit
 ### Added
 - **Shorts Player Bar:** Injected the custom player control bar (volume booster, filters, pip, screenshot, speed, loop) directly into the Shorts player.
