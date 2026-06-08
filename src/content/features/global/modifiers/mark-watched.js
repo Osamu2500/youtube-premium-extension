@@ -67,19 +67,9 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
      */
     async _loadWatchedIds() {
         try {
-            if (window.YPP.StorageManager) {
-                const ids = await window.YPP.StorageManager.get(this._storageKey);
-                if (Array.isArray(ids)) {
-                    this._watchedIds = new Set(ids);
-                }
-            } else {
-                await new Promise(resolve => {
-                    chrome.storage.local.get([this._storageKey], (result) => {
-                        const ids = result[this._storageKey];
-                        if (Array.isArray(ids)) this._watchedIds = new Set(ids);
-                        resolve();
-                    });
-                });
+            const ids = await window.YPP.StorageManager.get(this._storageKey);
+            if (Array.isArray(ids)) {
+                this._watchedIds = new Set(ids);
             }
             // Seed the shared WatchedStore so HideWatched and others
             // can read watched state without coupling to this class
@@ -94,11 +84,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
      */
     async _saveWatchedIds() {
         try {
-            if (window.YPP.StorageManager) {
-                await window.YPP.StorageManager.set(this._storageKey, [...this._watchedIds], 365 * 24 * 60 * 60); // 1 year TTL
-            } else {
-                chrome.storage.local.set({ [this._storageKey]: [...this._watchedIds] });
-            }
+            await window.YPP.StorageManager.set(this._storageKey, [...this._watchedIds], 365 * 24 * 60 * 60); // 1 year TTL
         } catch (e) {
             this.utils.log?.(`Storage save error: ${e.message}`, 'MarkWatched', 'error');
         }

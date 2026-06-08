@@ -78,9 +78,11 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
 
         let data = {};
         try {
-            data = await chrome.storage.local.get(keys);
+            const dataPromises = keys.map(k => window.YPP.StorageManager.get(k).then(v => ({ k, v })));
+            const dataArray = await Promise.all(dataPromises);
+            dataArray.forEach(({ k, v }) => { data[k] = v; });
         } catch (e) {
-            console.warn('[YPP:StatsVisualizer] Storage read failed:', e);
+            this.utils?.log('Storage read failed', 'STATS', 'warn', e);
         }
 
         const analytics = this._aggregate(data, keys);

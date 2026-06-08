@@ -348,8 +348,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const saveFavs = (arr) => {
             try {
                 localStorage.setItem(FAV_KEY, JSON.stringify(arr));
-            } catch (e) {
-                console.warn('YPP: Failed to save favorite filters', e);
+            } catch(e) {
+                window.YPP.Utils.log('Failed to save favorite filters', 'VIDEO-FILTERS', 'warn', e);
             }
         };
         const toggleFav = (idx) => {

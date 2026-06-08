@@ -643,15 +643,15 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                     
                     if (!card.dataset.yppObserving) {
                         card.dataset.yppObserving = 'true';
-                        const mo = new MutationObserver(() => {
+                        window.YPP.Utils.pollFor(() => {
                             const chEl = card.querySelector('#channel-name a, .ytd-channel-name a');
-                            if (chEl && chEl.textContent.trim()) {
-                                mo.disconnect();
-                                delete card.dataset.yppObserving;
-                                this._debouncedApplyFilters();
-                            }
+                            return chEl && chEl.textContent.trim() ? true : false;
+                        }, 5000, 200).then((success) => {
+                            delete card.dataset.yppObserving;
+                            if (success) this._debouncedApplyFilters();
+                        }).catch(() => {
+                            delete card.dataset.yppObserving;
                         });
-                        mo.observe(card, { childList: true, subtree: true, characterData: true });
                     }
                     return;
                 }

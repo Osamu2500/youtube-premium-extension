@@ -115,7 +115,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
                     this._processSection(section);
                 }
             } catch (error) {
-                console.warn('[SearchObserver] _processSection error:', error.message);
+                this.utils?.log('_processSection error', 'SEARCH', 'warn', error);
             }
         });
     }
@@ -134,7 +134,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
                 this._processSection(itemSections[i]);
             }
         } catch (error) {
-            console.warn('[SearchObserver] processAll error:', error.message);
+            this.utils?.log('processAll error', 'SEARCH', 'warn', error);
         }
     }
 

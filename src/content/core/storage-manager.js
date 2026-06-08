@@ -22,14 +22,24 @@ window.YPP.StorageManager = class StorageManager {
         chrome.storage.onChanged.addListener((changes, area) => {
             if (area !== 'local') return;
             for (const [key, { newValue }] of Object.entries(changes)) {
+                let payloadData = newValue;
                 if (newValue === undefined) {
                     this._cache.delete(key);
+                    payloadData = undefined;
                 } else {
                     try {
-                        this._cache.set(key, JSON.parse(newValue));
+                        const parsed = JSON.parse(newValue);
+                        this._cache.set(key, parsed);
+                        payloadData = parsed.data;
                     } catch (e) {
                         this._cache.set(key, { data: newValue });
+                        payloadData = newValue;
                     }
+                }
+                
+                if (window.YPP.events) {
+                    window.YPP.events.emit(`storage:changed:${key}`, payloadData);
+                    window.YPP.events.emit('storage:changed', { key, newValue: payloadData });
                 }
             }
         });

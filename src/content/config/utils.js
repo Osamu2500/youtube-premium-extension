@@ -14,7 +14,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      * @param {string} type - Feature context (e.g., 'SIDEBAR')
      * @param {string} level - 'info', 'warn', 'error', or 'debug'
      */
-    log: (msg, type = 'MAIN', level = 'info') => {
+    log: (msg, type = 'MAIN', level = 'info', ...args) => {
         const prefix = `%c[YPP:${type}]`;
         const styles = {
             info: 'color: #3ea6ff; font-weight: bold;',
@@ -28,7 +28,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
         // Filter debug logs unless debug mode is active
         if (level === 'debug' && !window.YPP?.debug?.enabled) return;
 
-        consoleMethod(prefix, style, msg);
+        consoleMethod(prefix, style, msg, ...args);
     },
 
     /**

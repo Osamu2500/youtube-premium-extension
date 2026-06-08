@@ -45,7 +45,7 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
 
             this._videoElement = null;
         } catch (err) {
-            console.error('[YPP] TimeDisplay disable error:', err);
+            this.utils?.log('TimeDisplay disable error', 'TIME-DISPLAY', 'error', err);
         }
     }
 

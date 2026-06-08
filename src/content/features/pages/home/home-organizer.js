@@ -94,8 +94,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
      */
     async loadTags() {
         try {
-            const result = await chrome.storage.local.get('ypp_subscription_folders');
-            this.folders = result.ypp_subscription_folders || {};
+            const foldersData = await window.YPP.StorageManager.get('ypp_subscription_folders');
+            this.folders = foldersData || {};
             
             this.channelTags = {};
             for (const [folderName, channels] of Object.entries(this.folders)) {
@@ -136,7 +136,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         }
 
         try {
-            await chrome.storage.local.set({ 'ypp_subscription_folders': this.folders });
+            await window.YPP.StorageManager.set('ypp_subscription_folders', this.folders);
             this.Utils.createToast(added ? `Added to ${folderName}` : `Removed from ${folderName}`);
             await this.loadTags(); // Re-compute mappings
             this.refreshAllTagButtons();

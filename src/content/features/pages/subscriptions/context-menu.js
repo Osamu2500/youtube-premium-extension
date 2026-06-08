@@ -194,8 +194,8 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         popup.innerHTML = `<div style="padding:4px 8px; font-weight:bold; font-size:12px; opacity:0.7">Add ${channelName} to...</div>`;
 
         // Load groups
-        chrome.storage.local.get('ypp_subscription_folders').then(res => {
-            const groups = res['ypp_subscription_folders'] || {};
+        window.YPP.StorageManager.get('ypp_subscription_folders').then(groupsData => {
+            const groups = groupsData || {};
             const list = Object.keys(groups);
 
             if (list.length === 0) {
@@ -219,14 +219,14 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
                         // Let's do that if shared bus exists.
                         
                         // Fallback: Read-Modify-Write
-                        const latest = await chrome.storage.local.get('ypp_subscription_folders');
-                        const g = latest['ypp_subscription_folders'] || {};
+                        const latestData = await window.YPP.StorageManager.get('ypp_subscription_folders');
+                        const g = latestData || {};
                         if (!g[group]) g[group] = [];
                         
                         const alreadyExists = g[group].includes(channelName);
                         if (!alreadyExists) {
                             g[group].push(channelName);
-                            await chrome.storage.local.set({ 'ypp_subscription_folders': g });
+                            await window.YPP.StorageManager.set('ypp_subscription_folders', g);
                             window.YPP.Utils.createToast(`Added to ${group}`, 'success');
                             // Trigger refresh if needed
                         } else {

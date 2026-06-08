@@ -7974,3 +7974,230 @@ body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn.active {
 
 /* FIX for Duration Badge missing z-index */
 body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer { z-index: var(--ypp-z-content) !important; }
+
+/* =========================================================================
+   ACCOUNT MENU REDESIGN — Orbital Layout
+   Declared in styles.css (manifest content_script) so these rules have
+   the highest cascade priority and can safely override YouTube's native
+   tp-yt-iron-dropdown and ytd-multi-page-menu-renderer styles.
+   ========================================================================= */
+
+/* Ensure the dropdown host is wide enough and not clipped */
+tp-yt-iron-dropdown ytd-multi-page-menu-renderer[data-ypp-cloaked],
+tp-yt-iron-dropdown ytd-multi-page-menu-renderer[data-ypp-redesigned],
+ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-cloaked],
+ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-redesigned] {
+    overflow: visible !important;
+    min-width: 320px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* The custom panel itself */
+.ypp-account-menu {
+    width: 320px;
+    background: linear-gradient(135deg, rgba(22, 22, 26, 0.72), rgba(14, 14, 18, 0.82));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    font-family: 'Roboto', Arial, sans-serif;
+    color: rgba(255, 255, 255, 0.92);
+    position: relative;
+}
+
+/* Pop-in animation */
+@keyframes ypp-menu-pop {
+    0%   { opacity: 0; transform: scale(0.92) translateY(-10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Satellite hover interaction */
+.ypp-satellite {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+.ypp-satellite:hover {
+    opacity: 1;
+    z-index: 10;
+}
+.ypp-satellite:hover .ypp-letter-avatar {
+    box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.55) !important;
+    transform: scale(1.15);
+}
+
+/* Letter avatar transition */
+.ypp-letter-avatar {
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+/* Active account name / handle */
+.ypp-active-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.ypp-active-handle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 3px;
+}
+.ypp-channel-link {
+    display: inline-block;
+    font-size: 13px;
+    color: #3ea6ff;
+    text-decoration: none;
+    margin-top: 10px;
+    padding: 5px 16px;
+    background: rgba(62, 166, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(62, 166, 255, 0.2);
+    transition: background 0.15s, border-color 0.15s;
+}
+.ypp-channel-link:hover {
+    background: rgba(62, 166, 255, 0.18);
+    border-color: rgba(62, 166, 255, 0.35);
+    text-decoration: none;
+}
+
+/* Menu items — flex row, glass hover */
+.ypp-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    font-family: 'Roboto', Arial, sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: left;
+    box-sizing: border-box;
+    transition: background 0.15s ease, color 0.1s ease;
+    margin-bottom: 2px;
+}
+.ypp-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+.ypp-menu-item svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+}
+.ypp-menu-item:hover svg {
+    opacity: 1;
+}
+
+/* More-options collapsed section */
+.ypp-more-items {
+    display: none;
+}
+.ypp-more-items.open {
+    display: block;
+}
+.ypp-chevron {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+.ypp-more-toggle {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Sign-out button override */
+.ypp-signout {
+    justify-content: center;
+    background: rgba(255, 78, 69, 0.08) !important;
+    border: 1px solid rgba(255, 78, 69, 0.2) !important;
+    color: #ff4e45 !important;
+    font-weight: 500;
+    border-radius: 10px;
+}
+.ypp-signout:hover {
+    background: rgba(255, 78, 69, 0.15) !important;
+}
+
+/* Sign-out confirmation dialog overlay */
+.ypp-signout-confirm {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    z-index: 10;
+}
+.ypp-confirm-box {
+    background: rgba(28, 28, 32, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    color: #fff;
+    max-width: 240px;
+}
+.ypp-confirm-box p {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 500;
+}
+.ypp-confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+.ypp-confirm-actions button {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ypp-confirm-actions button:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+.ypp-confirm-actions button.danger {
+    background: rgba(255, 78, 69, 0.15);
+    border-color: rgba(255, 78, 69, 0.3);
+    color: #ff4e45;
+}
+.ypp-confirm-actions button.danger:hover {
+    background: rgba(255, 78, 69, 0.25);
+}
+
+/* =========================================================================
+   PHASE 4: SHORTS UI CLEAN-UP (Glassmorphism & Polish)
+   ========================================================================= */
+
+/* Remove black gradient overlays (scrims) on Shorts */
+html.yt-premium-plus-theme ytd-reel-video-renderer .scrim,
+html.yt-premium-plus-theme ytd-reel-video-renderer #overlay,
+html.yt-premium-plus-theme ytd-reel-video-renderer [class*="scrim"] {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* Glassmorphic Action Bar in Shorts */
+html.yt-premium-plus-theme ytd-reel-video-renderer #actions.ytd-reel-video-renderer {
+    background: rgba(15, 15, 20, 0.4) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 24px !important;
+    padding: 12px 4px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}

@@ -40,8 +40,8 @@ window.YPP.features.SearchViewMode = class SearchViewMode {
 
     run() {
         // Restore persisted view mode
-        chrome.storage.local.get(['searchViewMode'], (result) => {
-            const mode = result.searchViewMode
+        window.YPP.StorageManager.get('searchViewMode').then((val) => {
+            const mode = val
                       || localStorage.getItem('ypp_searchViewMode')
                       || 'grid';
             if (mode !== this._viewMode) {
@@ -104,7 +104,7 @@ window.YPP.features.SearchViewMode = class SearchViewMode {
 
         try {
             localStorage.setItem('ypp_searchViewMode', mode);
-            chrome.storage.local.set({ searchViewMode: mode });
+            window.YPP.StorageManager.set('searchViewMode', mode);
         } catch (_) {
             this._logFn('Failed to save view mode preference', 'warn');
         }

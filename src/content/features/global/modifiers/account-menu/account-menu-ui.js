@@ -167,8 +167,8 @@ window.YPP.features.AccountMenuUI = class AccountMenuUI {
         };
 
         const createBtn = (id, iconSvg, label, isLink = false, href = '') => `
-            <${isLink ? 'a href="'+href+'" target="_blank"' : 'button id="'+id+'"'} class="ypp-menu-item" style="padding: 10px 14px; border-radius: 10px; margin-bottom: 2px;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="${isLink ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="${isLink ? '0' : '2'}" aria-hidden="true" style="opacity:0.8; margin-right: 4px;">
+            <${isLink ? 'a href="'+href+'" target="_blank"' : 'button id="'+id+'"'} class="ypp-menu-item">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="${isLink ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="${isLink ? '0' : '1.5'}" aria-hidden="true" style="opacity:0.8; margin-right: 4px;">
                     ${iconSvg}
                 </svg>
                 ${label}

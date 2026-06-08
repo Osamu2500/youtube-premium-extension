@@ -38,13 +38,20 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
             // Listen to SPA navigations and DOM mutations to catch miniplayer activation
             this.addListener(window, 'yt-navigate-finish', this.checkMiniplayerState);
             this.addListener(document, 'click', () => setTimeout(this.checkMiniplayerState, 500));
-            // Find miniplayer once and observe its active attribute
+            // Find miniplayer once and check state
             this.utils.pollFor(() => document.querySelector('ytd-miniplayer'), 10000, 500)
                 .then(player => {
                     if (!player || !this.isEnabled) return;
-                    this.observer = new MutationObserver(() => this.checkMiniplayerState());
-                    this.observer.observe(player, { attributes: true, attributeFilter: ['active'] });
                     this.checkMiniplayerState();
+                    
+                    // Since we can't observe attributes with sharedObserver without leaking,
+                    // we observe the childList mutation when YouTube moves the video player
+                    // into or out of the miniplayer container.
+                    if (this.observer && this.observer.register) {
+                        this.observer.register('miniplayer-video-move', '.html5-video-player', () => {
+                            this.checkMiniplayerState();
+                        });
+                    }
                 }).catch(() => {});
         } catch (e) {
             this.utils?.log('Error enabling MiniPlayer', 'MINIPLAYER', 'error', e);
@@ -53,9 +60,8 @@ window.YPP.features.MiniPlayer = class MiniPlayer extends window.YPP.features.Ba
 
     async disable() {
         await super.disable();
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+        if (this.observer && this.observer.unregister) {
+            this.observer.unregister('miniplayer-video-move');
         }
         
         if (this.resizeHandle) {

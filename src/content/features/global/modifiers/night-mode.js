@@ -19,7 +19,7 @@
             try {
                 this.update(settings);
             } catch (err) {
-                console.error('[YPP] NightMode enable error:', err);
+                this.utils?.log('NightMode enable error', 'NIGHT-MODE', 'error', err);
             }
         }
         
@@ -31,7 +31,7 @@
                     this._elements.dim = null;
                 }
             } catch (err) {
-                console.error('[YPP] NightMode disable error:', err);
+                this.utils?.log('NightMode disable error', 'NIGHT-MODE', 'error', err);
             }
         }
 
@@ -40,7 +40,7 @@
                 this._applyBlueLight(settings?.blueLight || 0);
                 this._applyDim(settings?.dim || 0);
             } catch (err) {
-                console.error('[YPP] NightMode update error:', err);
+                this.utils?.log('NightMode update error', 'NIGHT-MODE', 'error', err);
             }
         }
 

@@ -127,7 +127,6 @@ class KeyboardShortcuts extends window.YPP.features.BaseFeature {
                 // Modifier: capitalize first letter
                 return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
             }
-            // Final key: uppercase if single char
             return part.length === 1 ? part.toUpperCase() : part;
         }).join('+');
     }
@@ -140,10 +139,10 @@ class KeyboardShortcuts extends window.YPP.features.BaseFeature {
      * Toggle a boolean setting and broadcast the change
      */
     async _toggleSetting(key) {
-        const data = await chrome.storage.local.get('settings');
-        const settings = data.settings || {};
+        const data = await window.YPP.StorageManager.get('settings');
+        const settings = data || {};
         settings[key] = !settings[key];
-        await chrome.storage.local.set({ settings });
+        await window.YPP.StorageManager.set('settings', settings);
 
         // Notify the feature manager to re-apply
         window.YPP.events?.emit('settings:changed', settings);

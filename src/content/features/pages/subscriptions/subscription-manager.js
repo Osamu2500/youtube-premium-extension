@@ -17,8 +17,8 @@ window.YPP.features.SubscriptionManager = class SubscriptionManager {
 
     async loadGroups() {
         try {
-            const result = await chrome.storage.local.get(this.STORAGE_KEY);
-            this.groups = result[this.STORAGE_KEY] || {};
+            const resultData = await window.YPP.StorageManager.get(this.STORAGE_KEY);
+            this.groups = resultData || {};
             window.YPP.Utils.log('Loaded groups', 'SubManager', 'debug');
         } catch (error) {
             window.YPP.Utils.log(`Failed to load groups: ${error?.message}`, 'SubManager', 'error');
@@ -27,7 +27,7 @@ window.YPP.features.SubscriptionManager = class SubscriptionManager {
 
     async saveGroups() {
         try {
-            await chrome.storage.local.set({ [this.STORAGE_KEY]: this.groups });
+            await window.YPP.StorageManager.set(this.STORAGE_KEY, this.groups);
             window.YPP.Utils.log('Saved groups', 'SubManager', 'debug');
         } catch (error) {
             window.YPP.Utils.log(`Failed to save groups: ${error?.message}`, 'SubManager', 'error');

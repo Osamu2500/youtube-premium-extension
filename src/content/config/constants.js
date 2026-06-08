@@ -397,6 +397,7 @@ window.YPP.CONSTANTS = {
         // New Features
         autoLike: 'AutoLike',
         hidePlaylists: 'HidePlaylistsPodcasts',
+        gridAnimator: 'GridAnimator',
         multiSelect: 'MultiSelect',
         hideMetrics: 'HideMetrics',
         hideThumbnails: 'HideThumbnails',

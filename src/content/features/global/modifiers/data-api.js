@@ -23,7 +23,7 @@ window.YPP.features.DataAPI = class DataAPI extends window.YPP.features.BaseFeat
     init() {
         this.extractData();
         // Log for debugging (remove in prod if noisy)
-        // console.log('[YPP DataAPI] Initialized:', this.apiKey ? 'Success' : 'Failed');
+        // this.utils?.log('Initialized: ' + (this.apiKey ? 'Success' : 'Failed'), 'DATA-API', 'debug');
     }
 
     extractData() {
@@ -42,7 +42,7 @@ window.YPP.features.DataAPI = class DataAPI extends window.YPP.features.BaseFeat
             }
 
         } catch (e) {
-            console.error('[YPP DataAPI] Extraction error:', e);
+            this.utils?.log('Extraction error', 'DATA-API', 'error', e);
         }
     }
 

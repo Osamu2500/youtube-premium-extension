@@ -63,18 +63,12 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         this.mountUI();
         this.loadStats();
 
-        if (!this._boundStorageChange) {
-            this._boundStorageChange = (changes, namespace) => {
-                if (namespace === 'local') {
-                    for (let key in changes) {
-                        if (key.startsWith(this.STORAGE_PREFIX)) {
-                            if (!document.hidden) this.loadStats();
-                            break;
-                        }
-                    }
+        if (!this._boundStorageChangeUnsub) {
+            this._boundStorageChangeUnsub = window.YPP.events.on('storage:changed', (payload) => {
+                if (payload.key && payload.key.startsWith(this.STORAGE_PREFIX)) {
+                    if (!document.hidden) this.loadStats();
                 }
-            };
-            chrome.storage.onChanged.addListener(this._boundStorageChange);
+            });
         }
 
         this.addListener(window, 'focus', this._boundLoadStats);
@@ -82,9 +76,9 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
     }
 
     _stopAndUnmount() {
-        if (this._boundStorageChange) {
-            chrome.storage.onChanged.removeListener(this._boundStorageChange);
-            this._boundStorageChange = null;
+        if (this._boundStorageChangeUnsub) {
+            this._boundStorageChangeUnsub();
+            this._boundStorageChangeUnsub = null;
         }
         
         const widget = document.getElementById('ypp-history-tracker-widget');
@@ -130,7 +124,10 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             keysToCheck.push(getKey(d));
         }
 
-        const data = await chrome.storage.local.get(keysToCheck);
+        const dataPromises = keysToCheck.map(key => window.YPP.StorageManager.get(key).then(val => ({ key, val })));
+        const dataArray = await Promise.all(dataPromises);
+        const data = {};
+        dataArray.forEach(({ key, val }) => { data[key] = val; });
         
         let tCount = 0, tSec = 0;
         let wCount = 0, wSec = 0;
@@ -208,8 +205,7 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             d.setDate(today.getDate() - daysAgo);
             const key = getKey(d);
 
-            const result = await chrome.storage.local.get([key]);
-            const dayData = result[key];
+            const dayData = await window.YPP.StorageManager.get(key);
             const hasData = dayData?.totalSeconds > 0;
 
             if (isFirstDay) {
@@ -220,8 +216,8 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
                     // Check yesterday. If yesterday has data, streak is pending today
                     const yesterday = new Date();
                     yesterday.setDate(today.getDate() - 1);
-                    const yResult = await chrome.storage.local.get([getKey(yesterday)]);
-                    if (yResult[getKey(yesterday)]?.totalSeconds > 0) {
+                    const yData = await window.YPP.StorageManager.get(getKey(yesterday));
+                    if (yData?.totalSeconds > 0) {
                         streak = 0;
                         daysAgo = 1; // start counting from yesterday
                     } else {

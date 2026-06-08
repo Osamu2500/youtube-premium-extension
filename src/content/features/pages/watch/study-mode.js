@@ -375,9 +375,9 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
      */
     async loadConfig() {
         try {
-            const result = await chrome.storage.local.get('ypp_study_mode');
-            if (result.ypp_study_mode) {
-                this.config = { ...this.config, ...result.ypp_study_mode };
+            const configData = await window.YPP.StorageManager.get('ypp_study_mode');
+            if (configData) {
+                this.config = { ...this.config, ...configData };
             }
         } catch (error) {
             this.utils?.log('Failed to load config: ' + error.message, 'STUDY', 'error');
@@ -390,7 +390,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
      */
     async saveConfig() {
         try {
-            await chrome.storage.local.set({ ypp_study_mode: this.config });
+            await window.YPP.StorageManager.set('ypp_study_mode', this.config);
         } catch (error) {
             this.utils?.log('Failed to save config: ' + error.message, 'STUDY', 'error');
         }

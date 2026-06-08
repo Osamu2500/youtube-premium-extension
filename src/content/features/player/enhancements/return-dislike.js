@@ -87,12 +87,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
             }
         } catch (e) {
             if (e.name !== 'AbortError' && !e.message?.includes('Extension context invalidated')) {
-                const Utils = window.YPP?.Utils;
-                if (Utils && Utils.log) {
-                    Utils.log(`Fetch error: ${e.message}`, 'ReturnDislike', 'debug');
-                } else {
-                    console.debug('[YPP ReturnDislike] Fetch error:', e.message);
-                }
+                this.utils?.log(`Fetch error: ${e.message}`, 'ReturnDislike', 'debug');
             }
         }
     }

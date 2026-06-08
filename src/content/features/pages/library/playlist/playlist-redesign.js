@@ -43,8 +43,8 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
     async enable() {
         // Pre-fetch column preference once during lifecycle startup
         try {
-            chrome.storage.local.get('playlistCols', (d) => {
-                if (d && d.playlistCols) this._currentCols = d.playlistCols;
+            window.YPP.StorageManager.get('playlistCols').then((val) => {
+                if (val) this._currentCols = val;
             });
         } catch (e) {
             this.utils.log('Failed to load column preference: ' + e.message, 'PLAYLIST_REDESIGN', 'warn');
@@ -664,7 +664,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             this.addListener(btn, 'click', () => {
                 const cols = btn.dataset.cols;
                 setColumns(cols);
-                try { chrome.storage.local.set({ playlistCols: cols }); } catch (_) {}
+                try { window.YPP.StorageManager.set('playlistCols', cols); } catch (_) {}
             });
         });
 

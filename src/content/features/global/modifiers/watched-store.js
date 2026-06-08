@@ -25,8 +25,7 @@ window.YPP.WatchedStore = (() => {
     async function load() {
         if (_loaded) return;
         return new Promise(resolve => {
-            chrome.storage.local.get([STORAGE_KEY], result => {
-                const arr = result[STORAGE_KEY];
+            window.YPP.StorageManager.get(STORAGE_KEY).then(arr => {
                 if (Array.isArray(arr)) _ids = new Set(arr);
                 _loaded = true;
                 resolve();
@@ -36,7 +35,7 @@ window.YPP.WatchedStore = (() => {
 
     /** Persist in-memory set to chrome.storage */
     function _persist() {
-        chrome.storage.local.set({ [STORAGE_KEY]: [..._ids] });
+        window.YPP.StorageManager.set(STORAGE_KEY, [..._ids]);
     }
 
     /** Notify all registered change listeners */

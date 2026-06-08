@@ -2,6 +2,7 @@ export const DEFAULT_SETTINGS = {
     schemaVersion: 1,
     // Theme
     premiumTheme: true,
+    gridAnimator: true,
     enableAccountMenu: true,
     activeTheme: 'default',
     cardStyle: 'glass',

@@ -8,10 +8,11 @@ window.YPP.features = window.YPP.features || {};
  *
  * Architecture:
  *  1. MutationObserver detects when the native menu appears in DOM.
- *  2. A polling loop waits until YouTube has hydrated account data.
- *  3. _doInject() hides native children, appends our panel, wires events.
- *  4. Data extraction is delegated to AccountMenuData.
- *  5. UI generation is delegated to AccountMenuUI.
+ *  2. We IMMEDIATELY hide the native menu children to prevent flash.
+ *  3. A polling loop waits until YouTube has hydrated account data.
+ *  4. _doInject() appends our panel and wires events.
+ *  5. Data extraction is delegated to AccountMenuData.
+ *  6. UI generation is delegated to AccountMenuUI.
  */
 window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.BaseFeature {
 
@@ -21,12 +22,12 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         this._pollTimer = null;
         /** @type {ReturnType<typeof setTimeout>|null} */
         this._avatarPollTimer = null;
-        /** @type {MutationObserver|null} */
-        this._observer = null;
+        /** @type {MutationObserver|null} — left for backward compat, now unused */
+        this._dropdownObserver = null;
         /** @type {boolean} */
         this._injected = false;
-        /** @type {Function|null} — stored so we can remove it on disable */
-        this._pageChangedHandler = null;
+        /** @type {Element|null} — the currently observed menu */
+        this._currentMenu = null;
     }
 
     getConfigKey() { return 'enableAccountMenu'; }
@@ -36,43 +37,26 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     async enable() {
         await super.enable();
         try {
+            // Use sharedObserver (architecture rule: never new MutationObserver)
             if (window.YPP?.sharedObserver) {
-                // Broaden selector to catch all known YouTube account menu variants
                 window.YPP.sharedObserver.register(
-                    'account-menu-scanner',
-                    'ytd-multi-page-menu-renderer[slot="menu"], tp-yt-iron-dropdown ytd-multi-page-menu-renderer, ytd-multi-page-menu-renderer',
-                    () => this._onMutation()
+                    'account-menu-dropdown',
+                    'tp-yt-iron-dropdown, ytd-multi-page-menu-renderer',
+                    () => { if (!this._injected) this._onMutation(); }
                 );
             }
 
-            // Also watch for the iron-dropdown itself becoming visible (opened)
-            this._dropdownObserver = new MutationObserver(() => {
-                if (!this._injected) this._onMutation();
-            });
-            const watchTarget = document.querySelector('#masthead tp-yt-iron-dropdown') ||
-                                document.querySelector('ytd-popup-container') ||
-                                document.body;
-            this._dropdownObserver.observe(watchTarget, { childList: true, subtree: true, attributes: true, attributeFilter: ['opened', 'aria-hidden'] });
-
-            this._pageChangedHandler = () => this._cleanup();
-            window.YPP.events?.on('page:changed', this._pageChangedHandler);
+            // Use onBusEvent() so the subscription is auto-cleaned on disable()
+            this.onBusEvent('page:changed', () => this._cleanup());
         } catch (e) {
             this.utils?.log('Error enabling AccountMenu', 'ACCOUNT', 'error', e);
         }
     }
 
     async disable() {
-        await super.disable();
+        await super.disable(); // cleanupEvents() called here — removes all busListeners
         if (window.YPP?.sharedObserver) {
-            window.YPP.sharedObserver.unregister('account-menu-scanner');
-        }
-        if (this._dropdownObserver) {
-            this._dropdownObserver.disconnect();
-            this._dropdownObserver = null;
-        }
-        if (this._pageChangedHandler) {
-            window.YPP.events?.off('page:changed', this._pageChangedHandler);
-            this._pageChangedHandler = null;
+            window.YPP.sharedObserver.unregister('account-menu-dropdown');
         }
         this._cleanup();
     }
@@ -81,90 +65,118 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
     _onMutation() {
         if (this._injected) return;
+        if (this._pollTimer) return; // already polling
 
         const menu = this._findMenu();
-        if (menu) this._startPolling(menu);
+        if (!menu) return;
+
+        // Immediately cloak so the user never sees the native menu flash
+        this._cloakNativeChildren(menu);
+        this._startPolling(menu);
     }
 
+    /**
+     * Find the account menu element. We look for the multi-page menu that
+     * contains the active account header, which is the most reliable signal.
+     * We intentionally do NOT require ytd-account-item-renderer here because
+     * single-account users don't have those.
+     *
+     * @returns {Element|null}
+     */
     _findMenu() {
-        const candidates = document.querySelectorAll(
-            'ytd-multi-page-menu-renderer[slot="menu"],' +
-            'tp-yt-iron-dropdown ytd-multi-page-menu-renderer'
-        );
-        for (const el of candidates) {
-            if (
-                el.querySelector('ytd-active-account-header-renderer') ||
-                el.querySelector('ytd-account-item-renderer')
-            ) {
-                return el;
-            }
+        // Strategy 1: slot="menu" inside a visible iron-dropdown
+        const dropdowns = document.querySelectorAll('tp-yt-iron-dropdown');
+        for (const dd of dropdowns) {
+            // Skip dropdowns that are explicitly hidden
+            if (dd.hasAttribute('aria-hidden') && dd.getAttribute('aria-hidden') === 'true') continue;
+            const menu = dd.querySelector('ytd-multi-page-menu-renderer');
+            if (menu && this._isAccountMenu(menu)) return menu;
         }
+
+        // Strategy 2: slot attribute on the renderer
+        const slotted = document.querySelector('ytd-multi-page-menu-renderer[slot="menu"]');
+        if (slotted && this._isAccountMenu(slotted)) return slotted;
+
+        // Strategy 3: any visible multi-page-menu with account header
+        const allMenus = document.querySelectorAll('ytd-multi-page-menu-renderer');
+        for (const m of allMenus) {
+            if (this._isAccountMenu(m)) return m;
+        }
+
         return null;
+    }
+
+    /**
+     * Returns true if the given menu element is the account menu.
+     * It must contain either an active-account-header or an account-item.
+     *
+     * @param {Element} menu
+     * @returns {boolean}
+     */
+    _isAccountMenu(menu) {
+        return !!(
+            menu.querySelector('ytd-active-account-header-renderer') ||
+            menu.querySelector('ytd-account-item-renderer') ||
+            menu.querySelector('ytd-account-item')
+        );
+    }
+
+    // ─── Cloaking — done BEFORE inject to prevent flash ───────────────────────
+
+    /**
+     * Immediately hides native children with a thin 1px slice (not display:none,
+     * so YouTube's IntersectionObserver still fires and loads lazy images).
+     *
+     * @param {Element} menu
+     */
+    _cloakNativeChildren(menu) {
+        if (menu.dataset.yppCloaked) return;
+        menu.dataset.yppCloaked = '1';
+
+        Array.from(menu.children).forEach(child => {
+            if (!child.classList.contains('ypp-account-menu')) {
+                child.style.setProperty('height', '1px', 'important');
+                child.style.setProperty('min-height', '0', 'important');
+                child.style.setProperty('overflow', 'hidden', 'important');
+                child.style.setProperty('opacity', '0.001', 'important');
+                child.style.setProperty('pointer-events', 'none', 'important');
+                child.style.setProperty('margin', '0', 'important');
+                child.style.setProperty('padding', '0', 'important');
+            }
+        });
     }
 
     // ─── Polling ──────────────────────────────────────────────────────────────
 
+    /**
+     * Polls until we have enough account data to render, then injects.
+     * Uses this.pollFor() (architecture rule: no raw setTimeout polling).
+     *
+     * @param {Element} menu
+     */
     _startPolling(menu) {
         if (this._pollTimer) return;
-        let attempts = 0;
-        const MAX_ATTEMPTS = 80; // 80 × 50ms = 4s max wait
-        let clickedSwitch = false;
+        // Mark as polling so _onMutation() short-circuits
+        this._pollTimer = true;
 
-        const tick = () => {
-            attempts++;
-
-            if (!menu.isConnected || attempts > MAX_ATTEMPTS) {
-                this._clearPollTimer();
-                return;
-            }
-
-            if (!clickedSwitch) {
-                clickedSwitch = true;
-                const switchBtn = Array.from(menu.querySelectorAll('ytd-compact-link-renderer, ytd-menu-navigation-item-renderer, tp-yt-paper-item')).find(el => {
-                    const text = el.textContent || '';
-                    return /(switch account|cambiar de|切り替える|wechseln|changer de|trocar de|cambia account|zmień konto|byta konto|skift konto|vaihda tili|mudar de|chuyển đổi|ganti akun|сменить аккаунт|змінити обліковий|تبديل الحساب|खाता बदलें)/i.test(text);
-                });
-                
-                const currentAccounts = menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').length;
-                if (switchBtn && currentAccounts === 0) {
-                    switchBtn.click();
-                    this._waitingForAccounts = true;
-                } else {
-                    this._waitingForAccounts = false;
+        this.pollFor(
+            () => {
+                if (!menu.isConnected) return true; // abort
+                this._cloakNativeChildren(menu);
+                const data = window.YPP.features.AccountMenuData.extractData(menu);
+                const hasActiveAccount = data.accounts.some(a => a.isActive && a.name);
+                if (hasActiveAccount) {
+                    this._pollTimer = null;
+                    this._doInject(menu, data);
+                    return true; // done
                 }
-            }
-
-            const data = window.YPP.features.AccountMenuData.extractData(menu);
-            const hasAnyAccount = data.accounts.some(a => a.name);
-
-            if (!hasAnyAccount) {
-                this._pollTimer = setTimeout(tick, 50);
-                return;
-            }
-
-            const nativeCount = menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').length;
-            const parsedOtherCount = data.accounts.filter(a => !a.isActive).length;
-
-            if (this._waitingForAccounts && nativeCount === 0 && attempts < 40) {
-                this._pollTimer = setTimeout(tick, 50);
-                return;
-            }
-
-            if (nativeCount > 0 && parsedOtherCount === 0 && attempts < 40) {
-                this._pollTimer = setTimeout(tick, 50);
-                return;
-            }
-
-            this._clearPollTimer();
-            this._doInject(menu, data);
-        };
-
-        this._pollTimer = setTimeout(tick, 30);
-    }
-
-    _clearPollTimer() {
-        clearTimeout(this._pollTimer);
-        this._pollTimer = null;
+                return false; // keep polling
+            },
+            4000, // 4s timeout
+            40    // 40ms interval
+        ).catch(() => {
+            this._pollTimer = null; // timed out, reset
+        });
     }
 
     _clearAvatarPollTimer() {
@@ -177,29 +189,16 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     _doInject(menu, data) {
         if (this._injected) return;
         this._injected = true;
+        this._currentMenu = menu;
 
         menu.dataset.yppRedesigned = '1';
 
-        Array.from(menu.children).forEach(child => {
-            if (!child.classList.contains('ypp-account-menu')) {
-                // Hide visually but keep in DOM for IntersectionObserver lazy loading
-                child.style.position = 'absolute';
-                child.style.opacity = '0';
-                child.style.pointerEvents = 'none';
-                child.style.zIndex = '-1';
-            }
-        });
-
-        // Force all native items to overlap at the top so they all trigger IntersectionObserver
-        menu.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach(item => {
-            item.style.setProperty('position', 'absolute', 'important');
-            item.style.setProperty('top', '0', 'important');
-            item.style.setProperty('left', '0', 'important');
-        });
+        // Remove any leftover panel from a previous session
+        menu.querySelector('.ypp-account-menu')?.remove();
 
         const panel = document.createElement('div');
         panel.className = 'ypp-account-menu';
-        panel.style.cssText = 'opacity:0;transform:translateY(-6px);transition:opacity 0.2s ease,transform 0.2s ease;';
+        panel.style.cssText = 'opacity:0;transform:translateY(-8px);transition:opacity 0.25s ease,transform 0.25s cubic-bezier(0.34,1.56,0.64,1);';
         panel.innerHTML = window.YPP.features.AccountMenuUI.buildMenuHTML(data);
         menu.appendChild(panel);
 
@@ -212,21 +211,39 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             });
         });
 
-        this._scheduleAvatarRefresh(panel);
+        // Schedule progressive avatar upgrades
+        this._scheduleAvatarRefresh(panel, menu);
     }
 
-    _scheduleAvatarRefresh(panel) {
-        const delays = [300, 800, 1600];
+    // ─── Avatar refresh ────────────────────────────────────────────────────────
+
+    /**
+     * Progressively upgrades letter-avatars to real photos once YouTube's
+     * IntersectionObserver has loaded the actual img.src values.
+     *
+     * @param {Element} panel  — our injected panel
+     * @param {Element} menu   — the native menu element
+     */
+    _scheduleAvatarRefresh(panel, menu) {
+        const DELAYS = [250, 700, 1400, 2500];
         let attempt = 0;
 
         const upgradeDisk = (container, acc, size, ring) => {
-            const letter = container.querySelector('.ypp-letter-avatar');
-            if (!letter) return;
+            if (!container) return;
+            // Only replace letter avatars — if an img is already there, skip
+            const existing = container.querySelector('.ypp-disk-wrap .ypp-disk-img');
+            if (existing && existing.getAttribute('src') === acc.avatar) return;
+
+            const letterEl = container.querySelector('.ypp-letter-avatar');
+            if (!letterEl) return;
+
             const temp = document.createElement('div');
             temp.innerHTML = window.YPP.features.AccountMenuUI.diskHTML(acc, size, ring);
             const newDisk = temp.firstElementChild;
-            letter.replaceWith(newDisk);
-            newDisk?.querySelector('.ypp-disk-img')?.addEventListener('error', () => {
+            if (!newDisk) return;
+            letterEl.replaceWith(newDisk);
+
+            newDisk.querySelector('.ypp-disk-img')?.addEventListener('error', () => {
                 const t = document.createElement('div');
                 t.innerHTML = window.YPP.features.AccountMenuUI.letterAvatar(acc.name, size, ring);
                 newDisk.replaceWith(t.firstElementChild);
@@ -235,34 +252,41 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
         const refresh = () => {
             if (!panel.isConnected) return;
-            const menu = this._findMenu();
-            if (!menu) return;
+
+            // Re-extract fresh data from the native menu
             const freshData = window.YPP.features.AccountMenuData.extractData(menu);
 
             freshData.accounts.forEach(acc => {
                 if (!acc.avatar) return;
 
                 if (acc.isActive) {
-                    const centerContainer = panel.querySelector(
-                        '.ypp-orbital-wrap > div:not(.ypp-satellite)'
-                    );
-                    if (centerContainer) upgradeDisk(centerContainer, acc, 64, true);
+                    // The center disk is inside the second direct child of .ypp-orbital-wrap
+                    // which is structured as: .ypp-orbital-wrap > satellites... > centerDiv
+                    // The center div is the one with position:absolute that isn't a .ypp-satellite
+                    const orbitalWrap = panel.querySelector('.ypp-orbital-wrap');
+                    if (orbitalWrap) {
+                        const centerDiv = orbitalWrap.querySelector('div:not(.ypp-satellite)');
+                        if (centerDiv) upgradeDisk(centerDiv, acc, 68, true);
+                    }
                 } else {
-                    const sat = panel.querySelector(
-                        `.ypp-satellite[title="${CSS.escape(acc.name)}"]`
-                    );
+                    // Find the satellite matching by title attribute
+                    const satTitle = acc.name;
+                    const sat = panel.querySelector(`.ypp-satellite[title="${CSS.escape(satTitle)}"]`);
                     if (sat) upgradeDisk(sat, acc, 40, false);
                 }
             });
 
             attempt++;
-            if (attempt < delays.length) {
-                const nextDelay = delays[attempt] - delays[attempt - 1];
-                this._avatarPollTimer = setTimeout(refresh, nextDelay);
+            if (attempt < DELAYS.length) {
+                const delay = attempt === 0
+                    ? DELAYS[0]
+                    : DELAYS[attempt] - DELAYS[attempt - 1];
+                this._avatarPollTimer = setTimeout(refresh, delay);
             }
         };
 
-        this._avatarPollTimer = setTimeout(refresh, delays[0]);
+        // Use tracked timer stored in _avatarPollTimer for cleanup
+        this._avatarPollTimer = window.setTimeout(refresh, DELAYS[0]);
     }
 
     // ─── Event wiring ──────────────────────────────────────────────────────────
@@ -279,7 +303,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                         'ytd-toggle-theme-compact-link-renderer button,' +
                         '[aria-label*="Appearance"]'
                     )?.click();
-                }, 100);
+                }, 150);
             });
 
         panel.querySelector('#ypp-settings')
@@ -288,29 +312,31 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 window.location.href = '/account';
             });
 
-        // Helper to click native sub-menu items by matching aria-labels or text
+        // Helper to click native sub-menu items by matching text or aria-labels
         const clickNativeItem = (keywords) => {
             this._closeMenu();
             setTimeout(() => {
-                const items = Array.from(document.querySelectorAll('ytd-compact-link-renderer, ytd-menu-navigation-item-renderer, ytd-toggle-theme-compact-link-renderer'));
+                const items = Array.from(document.querySelectorAll(
+                    'ytd-compact-link-renderer, ytd-menu-navigation-item-renderer, ytd-toggle-theme-compact-link-renderer'
+                ));
                 const target = items.find(el => {
                     const text = (el.textContent || '').toLowerCase();
                     const aria = (el.getAttribute('aria-label') || '').toLowerCase();
                     return keywords.some(k => text.includes(k) || aria.includes(k));
                 });
                 if (target) target.click();
-            }, 100);
+            }, 150);
         };
 
         panel.querySelector('#ypp-language')?.addEventListener('click', () => clickNativeItem(['language', 'idioma', 'langue', 'sprache', 'język']));
         panel.querySelector('#ypp-location')?.addEventListener('click', () => clickNativeItem(['location', 'ubicación', 'lieu', 'standort', 'lokalizacja']));
         panel.querySelector('#ypp-restricted')?.addEventListener('click', () => clickNativeItem(['restricted', 'restringido', 'restreint', 'eingeschränkt']));
-        
+
         panel.querySelector('#ypp-keyboard')?.addEventListener('click', () => {
             this._closeMenu();
             setTimeout(() => {
                 document.dispatchEvent(new KeyboardEvent('keydown', { key: '?', shiftKey: true, bubbles: true }));
-            }, 100);
+            }, 150);
         });
 
         panel.querySelector('#ypp-help')?.addEventListener('click', () => {
@@ -318,7 +344,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             window.open('https://support.google.com/youtube/', '_blank');
         });
 
-        panel.querySelector('#ypp-feedback')?.addEventListener('click', () => clickNativeItem(['feedback', 'comentarios', 'commentaires', 'feedback']));
+        panel.querySelector('#ypp-feedback')?.addEventListener('click', () => clickNativeItem(['feedback', 'comentarios', 'commentaires']));
 
         const moreToggle = panel.querySelector('#ypp-more-toggle');
         const moreItems  = panel.querySelector('#ypp-more-items');
@@ -352,6 +378,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 }
             });
 
+        // Image error fallback
         panel.querySelectorAll('.ypp-disk-img').forEach(img => {
             img.addEventListener('error', () => {
                 const wrap = img.closest('.ypp-disk-wrap');
@@ -365,11 +392,14 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             });
         });
 
+        // Satellite click → switch account
         panel.querySelectorAll('.ypp-satellite').forEach(sat => {
             const activate = () => {
                 const idx = parseInt(sat.dataset.accountIndex, 10);
                 if (!isNaN(idx)) {
-                    document.querySelectorAll('ytd-account-item-renderer')[idx]?.click();
+                    // The native account items are still in the DOM (just hidden)
+                    const items = document.querySelectorAll('ytd-account-item-renderer, ytd-account-item');
+                    if (items[idx]) items[idx].click();
                 }
             };
             sat.addEventListener('click', activate);
@@ -394,24 +424,48 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         this._clearPollTimer();
         this._clearAvatarPollTimer();
         this._injected = false;
+        this._currentMenu = null;
 
         document.querySelectorAll('[data-ypp-redesigned]').forEach(el => {
+            // Remove cloaking from all children
             Array.from(el.children).forEach(child => {
                 if (!child.classList.contains('ypp-account-menu')) {
-                    child.style.display = '';
-                    child.style.position = '';
-                    child.style.opacity = '';
-                    child.style.pointerEvents = '';
-                    child.style.zIndex = '';
+                    child.style.removeProperty('height');
+                    child.style.removeProperty('min-height');
+                    child.style.removeProperty('overflow');
+                    child.style.removeProperty('opacity');
+                    child.style.removeProperty('pointer-events');
+                    child.style.removeProperty('margin');
+                    child.style.removeProperty('padding');
                 }
             });
+            // Clean up any nested account items too
             el.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach(item => {
-                item.style.position = '';
-                item.style.top = '';
-                item.style.left = '';
+                item.style.removeProperty('height');
+                item.style.removeProperty('min-height');
+                item.style.removeProperty('overflow');
+                item.style.removeProperty('opacity');
+                item.style.removeProperty('pointer-events');
+                item.style.removeProperty('margin');
+                item.style.removeProperty('padding');
             });
             delete el.dataset.yppRedesigned;
+            delete el.dataset.yppCloaked;
             el.querySelector('.ypp-account-menu')?.remove();
+        });
+
+        // Also clean up any menus that were cloaked but not yet redesigned
+        document.querySelectorAll('[data-ypp-cloaked]').forEach(el => {
+            Array.from(el.children).forEach(child => {
+                child.style.removeProperty('height');
+                child.style.removeProperty('min-height');
+                child.style.removeProperty('overflow');
+                child.style.removeProperty('opacity');
+                child.style.removeProperty('pointer-events');
+                child.style.removeProperty('margin');
+                child.style.removeProperty('padding');
+            });
+            delete el.dataset.yppCloaked;
         });
     }
 };

@@ -22,6 +22,7 @@ import './features/player/enhancements/split-scrolling.js';
 // Global features
 import './features/global/modifiers/theme.js';
 import './features/global/modifiers/account-menu/index.js';
+import './features/global/modifiers/grid-animator.js';
 import './features/global/modifiers/content-control.js';
 import './features/global/modifiers/hide-playlists-podcasts.js';
 import './features/global/modifiers/hide-metrics.js';

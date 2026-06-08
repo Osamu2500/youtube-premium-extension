@@ -187,8 +187,8 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
         const storageKey = `${this.STORAGE_PREFIX}${dateKey}`;
 
         try {
-            const result = await chrome.storage.local.get(storageKey);
-            let dayRecord = result[storageKey] || { videos: {}, totalSeconds: 0 };
+            const resultData = await window.YPP.StorageManager.get(storageKey);
+            let dayRecord = resultData || { videos: {}, totalSeconds: 0 };
 
             if (!dayRecord.videos) dayRecord.videos = {};
             if (!dayRecord.totalSeconds) dayRecord.totalSeconds = 0;
@@ -211,7 +211,7 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
             if (vRec.title === 'Unknown Video' && info.title !== 'Unknown Video') vRec.title = info.title;
             if (vRec.channel === 'Unknown Channel' && info.channel !== 'Unknown Channel') vRec.channel = info.channel;
 
-            await chrome.storage.local.set({ [storageKey]: dayRecord });
+            await window.YPP.StorageManager.set(storageKey, dayRecord);
             
             this.utils.log?.(`Saved +${secToSave}s for ${videoId}. Total Today: ${dayRecord.totalSeconds}s`, 'TRACKER', 'debug');
 

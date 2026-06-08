@@ -1363,7 +1363,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     const contData = await contRes.json();
                     nextToken = extractChannelsFromData(contData);
                 } catch (err) {
-                    console.warn('[YPP] Failed to fetch continuation:', err);
+                    window.YPP.Utils?.log('Failed to fetch continuation', 'FOLDER-UI', 'warn', err);
                     break;
                 }
             }
@@ -1553,7 +1553,8 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 let currentIndex = 0;
                 
                 // Load Cache
-                const cacheData = await chrome.storage.local.get(['ypp_channel_health_cache_v2']);
+                const cacheResult = await window.YPP.StorageManager.get('ypp_channel_health_cache_v2');
+                const cacheData = cacheResult ? { ypp_channel_health_cache_v2: cacheResult } : {};
                 const healthCache = cacheData.ypp_channel_health_cache_v2 || {};
                 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
                 let cacheUpdated = false;
@@ -1625,7 +1626,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 await Promise.all(workers);
                 
                 if (cacheUpdated) {
-                    chrome.storage.local.set({ ypp_channel_health_cache_v2: healthCache });
+                    await window.YPP.StorageManager.set('ypp_channel_health_cache_v2', healthCache);
                 }
                 
                 ChannelHealthUI._lastScanChannels = channels;
@@ -1656,7 +1657,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             if (filterSel) filterSel.dispatchEvent(new Event('change'));
 
         } catch (e) {
-            console.error('[YPP] Scan error:', e);
+            window.YPP.Utils?.log('Scan error', 'CHANNEL-HEALTH', 'error', e);
             resultsEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.8);margin-top:40px;font-size:14px;">Scan failed: ' + (e.message || 'Unknown error') + '</div>';
             btn.textContent = 'Retry Scan';
             btn.disabled = false;
@@ -1692,7 +1693,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 if (!resolved) {
                     resolved = true;
                     window.removeEventListener('message', listener);
-                    console.warn('[YPP] _getYoutubeConfig timed out. Returning empty config.');
+                    window.YPP.Utils?.log('_getYoutubeConfig timed out. Returning empty config.', 'CHANNEL-HEALTH', 'warn');
                     resolve({}); // Will trigger the "Auth Error" dialog
                 }
             }, 1500);
@@ -1785,9 +1786,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 if (res.ok) return true;
             }
 
-            console.warn(`[YPP] API unsubscribe failed for ${channelData.id}: HTTP ${res.status}`, res.data);
+            window.YPP.Utils?.log(`API unsubscribe failed for ${channelData.id}: HTTP ${res.status}`, 'CHANNEL-HEALTH', 'warn', res.data);
         } catch (e) {
-            console.error('[YPP] API unsubscribe exception:', e);
+            window.YPP.Utils?.log('API unsubscribe exception', 'CHANNEL-HEALTH', 'error', e);
         }
         return false;
     }
@@ -1822,13 +1823,13 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     );
                     if (confirmBtn) {
                         confirmBtn.click();
-                        console.log(`[YPP] Native DOM unsubscribe succeeded for ${channelId}`);
+                        window.YPP.Utils?.log(`Native DOM unsubscribe succeeded for ${channelId}`, 'CHANNEL-HEALTH', 'debug');
                         return true;
                     }
                 }
             }
         } catch (e) {
-            console.warn('[YPP] Native DOM unsubscribe failed:', e);
+            window.YPP.Utils?.log('Native DOM unsubscribe failed', 'CHANNEL-HEALTH', 'warn', e);
         }
         return false;
     }
@@ -1859,7 +1860,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
 
             // Strategy 2: Native DOM click (fallback)
             if (!succeeded) {
-                console.warn(`[YPP] API failed for ${c.name || c.id}, trying native DOM fallback...`);
+                window.YPP.Utils?.log(`API failed for ${c.name || c.id}, trying native DOM fallback...`, 'CHANNEL-HEALTH', 'warn');
                 succeeded = await this._tryNativeDomUnsubscribe(c.id);
             }
 
@@ -1957,7 +1958,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 );
             }
         } catch (e) {
-            console.error('[YPP] individualUnsubscribe error:', e);
+            window.YPP.Utils?.log('individualUnsubscribe error', 'CHANNEL-HEALTH', 'error', e);
             resetBtn(originalText, null);
         }
     }

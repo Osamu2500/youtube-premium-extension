@@ -258,6 +258,10 @@ window.YPP.features.MultiSelect = class MultiSelect
 
     _showToast(message) {
         window.YPP.Utils?.showToast?.(message) ||
-        console.log(`[YPP] ${message}`);
+        this._log(message);
+    }
+
+    _log(message) {
+        this.utils?.log(message, 'MULTI-SELECT', 'debug');
     }
 };

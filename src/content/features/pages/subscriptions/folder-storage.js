@@ -29,16 +29,19 @@ window.YPP.features.FolderStorage = class FolderStorage {
     /** Load folders and config from Chrome storage. */
     async load() {
         try {
-            const result = await chrome.storage.local.get([this.STORAGE_KEY, 'ypp_folder_config']);
+            const [foldersData, configData] = await Promise.all([
+                window.YPP.StorageManager.get(this.STORAGE_KEY),
+                window.YPP.StorageManager.get('ypp_folder_config')
+            ]);
 
-            if (result[this.STORAGE_KEY]) {
-                this.folders = result[this.STORAGE_KEY];
+            if (foldersData) {
+                this.folders = foldersData;
             } else {
                 // First run — persist defaults
                 await this.save();
             }
 
-            this.folderConfig = result['ypp_folder_config'] || {};
+            this.folderConfig = configData || {};
         } catch (e) {
             window.YPP.Utils?.log('Failed to load subscription folders', 'FolderStorage', 'error');
         }
@@ -47,10 +50,10 @@ window.YPP.features.FolderStorage = class FolderStorage {
     /** Persist current folders and config to Chrome storage. */
     async save() {
         try {
-            await chrome.storage.local.set({
-                [this.STORAGE_KEY]:    this.folders,
-                'ypp_folder_config':   this.folderConfig,
-            });
+            await Promise.all([
+                window.YPP.StorageManager.set(this.STORAGE_KEY, this.folders),
+                window.YPP.StorageManager.set('ypp_folder_config', this.folderConfig)
+            ]);
         } catch (e) {
             window.YPP.Utils?.log('Failed to save subscription folders', 'FolderStorage', 'error');
         }
