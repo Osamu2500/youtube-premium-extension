@@ -59,8 +59,8 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
             window.YPP.ui.manager.remove('header-nav-group');
         }
 
-        if (this._headerMutationObserver) {
-            this._headerMutationObserver.disconnect();
+        if (this._domObserver) {
+            this._domObserver.unregister('header-nav-masthead');
         }
         
         if (this._observeTimeout) clearTimeout(this._observeTimeout);
@@ -108,25 +108,15 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         // Keep active state updated on SPA navigation
         window.addEventListener('yt-navigate-finish', this._boundHandleNavigate);
 
-        // Add a dedicated MutationObserver to ytd-masthead to handle YouTube's aggressive re-renders
-        this._headerMutationObserver = new MutationObserver(() => {
+        // Use sharedObserver instead of a dedicated MutationObserver to prevent memory leaks
+        this._domObserver.register('header-nav-masthead', 'ytd-masthead #end, ytd-masthead #end *', () => {
             const existing = document.querySelector('[data-ypp-id="header-nav-group"]');
             if (!existing && document.querySelector('ytd-masthead #end')) {
                 // It was wiped out by YouTube, re-inject
                 this._scheduleInjection();
                 if (window.YPP.ui?.manager) window.YPP.ui.manager.heal();
             }
-        });
-
-        const checkAndObserve = () => {
-            const masthead = document.querySelector('ytd-masthead');
-            if (masthead) {
-                this._headerMutationObserver.observe(masthead, { childList: true, subtree: true });
-            } else {
-                this._observeTimeout = setTimeout(checkAndObserve, 500);
-            }
-        };
-        checkAndObserve();
+        }, true);
     }
 
     _handleNavigate() {

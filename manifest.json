@@ -2,6 +2,7 @@
     "manifest_version": 3,
     "name": "YouTube Premium Plus",
     "version": "1.1.0",
+    "default_locale": "en",
     "description": "Enhance YouTube UI and add features globally.",
     "permissions": [
         "storage",
@@ -39,7 +40,10 @@
                 "*://www.youtube.com/*"
             ],
             "css": [
-                "src/content/styles.css"
+                "src/content/styles.css",
+                "src/content/features/global/layout/header-nav.css",
+                "src/content/features/pages/home/cards.css",
+                "src/content/features/player/player.css"
             ],
             "run_at": "document_idle",
             "all_frames": false,

@@ -21,14 +21,23 @@
   --ypp-radius-pill: 999px;
   
   /* Blurs & Glass */
-  --ypp-blur-subtle: blur(8px);
-  --ypp-blur-med: blur(16px);
-  --ypp-blur-high: blur(24px);
+  --ypp-blur-subtle: blur(12px) saturate(1.2);
+  --ypp-blur-med: blur(24px) saturate(1.5);
+  --ypp-blur-high: blur(40px) saturate(1.8);
+  --ypp-glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --ypp-glass-border-light: 1px solid rgba(255, 255, 255, 0.15);
   
   /* Transitions */
   --ypp-transition-fast: 0.15s cubic-bezier(0.2, 0.0, 0.2, 1);
   --ypp-transition: 0.25s cubic-bezier(0.2, 0.0, 0.2, 1);
   --ypp-transition-slow: 0.4s cubic-bezier(0.2, 0.0, 0.2, 1);
+  --ypp-transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Drop Shadows */
+  --ypp-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --ypp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --ypp-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ypp-shadow-glow: 0 0 20px var(--accent-glow);
 
   /* Z-Index Layers (Popup Internal) */
   --ypp-z-background: -1;

@@ -6,10 +6,112 @@ import { initStorage, loadSettings, state, saveSettings, updateSetting, notifyTh
 import * as UI from './popup-ui.js';
 import { initComponents } from './popup-components.js';
 import { initHistoryWidget, initBackupTools, initBookmarksManager } from './popup-extras.js';
-import { renderSchema } from './popup-renderer.js';
+import { renderSchema, registerSlot } from './popup-renderer.js';
+
+// --- Register Custom Slots ---
+registerSlot('shortcutsPanel', (container, state) => {
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            <div style="font-size:12px; color:rgba(255,255,255,0.5);">Click an input to map a new shortcut:</div>
+            <div id="shortcutsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+    `;
+    const list = container.querySelector('#shortcutsList');
+    
+    const shortcuts = [
+        { id: 'shortcut_zenMode', label: 'Toggle Zen Mode' },
+        { id: 'shortcut_focusMode', label: 'Toggle Focus Mode' },
+        { id: 'shortcut_cinemaMode', label: 'Toggle Cinema Mode' },
+        { id: 'shortcut_ambientMode', label: 'Toggle Ambient Mode' },
+        { id: 'shortcut_snapshot', label: 'Take Snapshot' },
+        { id: 'shortcut_loop', label: 'Toggle Loop' },
+        { id: 'shortcut_pip', label: 'Picture-in-Picture' },
+        { id: 'shortcut_speedDown', label: 'Speed Down' },
+        { id: 'shortcut_speedUp', label: 'Speed Up' },
+        { id: 'shortcut_speedReset', label: 'Reset Speed' }
+    ];
+
+    shortcuts.forEach(sc => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);';
+        
+        const label = document.createElement('span');
+        label.textContent = sc.label;
+        label.style.cssText = 'font-size:13px; color:#fff;';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = sc.id;
+        input.readOnly = true;
+        input.style.cssText = 'background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--accent-primary, #3ea6ff); font-family:monospace; font-size:12px; padding:4px 8px; width:80px; text-align:center; cursor:pointer; outline:none; transition:all 0.2s;';
+        
+        // Add to state so it saves automatically
+        state.elements[sc.id] = input;
+        if (!state.settingKeys.includes(sc.id)) state.settingKeys.push(sc.id);
+
+        input.addEventListener('focus', () => {
+            input.style.borderColor = 'var(--accent-primary, #3ea6ff)';
+            input.value = 'Press key...';
+        });
+
+        input.addEventListener('blur', () => {
+            input.style.borderColor = 'rgba(255,255,255,0.1)';
+            // Reload value if canceled
+            chrome.storage.local.get('settings', (res) => {
+                input.value = res.settings?.[sc.id] || input.dataset.default || '';
+            });
+        });
+
+        input.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            if (e.key === 'Escape') {
+                input.blur();
+                return;
+            }
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                input.value = '';
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.blur();
+                return;
+            }
+
+            let keys = [];
+            if (e.ctrlKey) keys.push('Ctrl');
+            if (e.shiftKey) keys.push('Shift');
+            if (e.altKey) keys.push('Alt');
+            if (e.metaKey) keys.push('Cmd');
+            
+            // Ignore if ONLY a modifier is pressed
+            if (['Control','Shift','Alt','Meta'].includes(e.key)) return;
+            
+            let key = e.key.toUpperCase();
+            if (key === ' ') key = 'Space';
+            keys.push(key);
+            
+            const combo = keys.join('+');
+            input.value = combo;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.blur();
+        });
+
+        row.appendChild(label);
+        row.appendChild(input);
+        list.appendChild(row);
+    });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
+        // 0. i18n Initialization
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n'));
+            if (msg) el.textContent = msg;
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n-placeholder'));
+            if (msg) el.setAttribute('placeholder', msg);
+        });
+
         // 1. v3.1: Render schema-driven tabs before settings hydration
     renderSchema(document, state);
 
@@ -44,6 +146,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 UI.updateDependencyUI(document);
                 UI.updateCustomizationPreview(document, state);
                 UI.syncModeCards(document);
+                
+                if (el.type === 'checkbox' && window.anime) {
+                    const toggleCard = el.closest('.toggle-card') || el.closest('.mode-card');
+                    if (toggleCard) {
+                        window.anime({
+                            targets: toggleCard,
+                            scale: [0.97, 1],
+                            duration: 400,
+                            easing: 'easeOutElastic(1, .6)'
+                        });
+                    }
+                    const slider = el.nextElementSibling;
+                    if (slider && slider.classList.contains('slider')) {
+                        window.anime({
+                            targets: slider,
+                            scale: [0.85, 1],
+                            duration: 400,
+                            easing: 'easeOutElastic(1, .6)'
+                        });
+                    }
+                }
             });
             if (el.type === 'color') {
                 el.addEventListener('input', () => {
@@ -177,7 +300,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── 5.2: Skeleton — remove popup-loading once settings are hydrated ──
     document.body.classList.add('popup-loading');
-    const _removeSkeleton = () => document.body.classList.remove('popup-loading');
+    const _removeSkeleton = () => {
+        document.body.classList.remove('popup-loading');
+        
+        // Spring stagger intro animations
+        if (window.anime) {
+            window.anime({
+                targets: '.nav-item',
+                translateX: [-20, 0],
+                opacity: [0, 1],
+                delay: window.anime.stagger(40),
+                duration: 800,
+                easing: 'easeOutElastic(1, .6)'
+            });
+            
+            window.anime({
+                targets: '.tab-content.active .card-group, .tab-content.active .feature-grid > div',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                delay: window.anime.stagger(60, {start: 100}),
+                duration: 800,
+                easing: 'easeOutElastic(1, .7)'
+            });
+        }
+    };
     // Remove after settings load (loadSettings triggers callbacks synchronously via chrome.storage)
     // We hook into it by appending our callback after the first loadSettings call above
     loadSettings([_removeSkeleton]);

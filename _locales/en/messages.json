@@ -1,0 +1,58 @@
+{
+    "nav_dash": {
+        "message": "Dash",
+        "description": "Navigation label for Dashboard"
+    },
+    "nav_home": {
+        "message": "Home",
+        "description": "Navigation label for Home"
+    },
+    "nav_shorts": {
+        "message": "Shorts",
+        "description": "Navigation label for Shorts"
+    },
+    "nav_player": {
+        "message": "Player",
+        "description": "Navigation label for Player"
+    },
+    "nav_search": {
+        "message": "Search",
+        "description": "Navigation label for Search"
+    },
+    "nav_subs": {
+        "message": "Subs",
+        "description": "Navigation label for Subscriptions"
+    },
+    "nav_history": {
+        "message": "History",
+        "description": "Navigation label for History"
+    },
+    "nav_bookmarks": {
+        "message": "Bookmarks",
+        "description": "Navigation label for Bookmarks"
+    },
+    "nav_focus": {
+        "message": "Focus",
+        "description": "Navigation label for Focus"
+    },
+    "nav_looks": {
+        "message": "Looks",
+        "description": "Navigation label for Customization"
+    },
+    "nav_pro": {
+        "message": "Pro",
+        "description": "Navigation label for Pro"
+    },
+    "nav_config": {
+        "message": "Config",
+        "description": "Navigation label for Config"
+    },
+    "title_dashboard": {
+        "message": "Dashboard",
+        "description": "Main title for the dashboard tab"
+    },
+    "search_placeholder": {
+        "message": "Search settings...",
+        "description": "Placeholder text for search input"
+    }
+}

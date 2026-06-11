@@ -1,0 +1,358 @@
+/* ===================================================================================
+   4. HEADER & NAVIGATION
+   =================================================================================== */
+
+/* Header Container - Fixed Position */
+.yt-premium-plus-theme #masthead-container {
+  position: fixed;
+  top: 0;
+  z-index: var(--ypp-z-header);
+  background: transparent;
+  box-shadow: none;
+  width: 100%;
+}
+
+/* Push Page Content Down */
+.yt-premium-plus-theme ytd-page-manager#page-manager {
+  margin-top: 100px;
+}
+
+/* Inner Masthead - The Floating Pill */
+.yt-premium-plus-theme ytd-masthead {
+  position: absolute;
+  top: 4px;
+  left: var(--ypp-header-margin);
+  right: var(--ypp-header-margin);
+  height: var(--ypp-header-height);
+  width: auto;
+  background: transparent;
+  padding: 0;
+  pointer-events: none;
+}
+
+/* The Visual Glass Container - Premium Frosted */
+.yt-premium-plus-theme ytd-masthead #container {
+  pointer-events: auto;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  ) !important;
+  backdrop-filter: blur(32px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; /* Lighter top, darker bottom */
+  border-radius: var(--ypp-radius-pill);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  transition:
+    box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    border-color 0.4s ease,
+    background 0.4s ease;
+  transform: translateZ(0); /* Hardware Acceleration */
+  
+}
+
+.yt-premium-plus-theme ytd-masthead #container:hover {
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.03)
+  ) !important;
+}
+
+.yt-premium-plus-theme ytd-masthead #background {
+  display: none;
+}
+
+/* Search Bar Styling */
+
+/* Search Bar Styling - Premium Upgrade */
+.yt-premium-plus-theme ytd-searchbox {
+  margin: 0 16px;
+  height: 40px; /* Sleeker height */
+  --ytd-searchbox-background: transparent !important;
+  --ytd-searchbox-border-radius: 20px !important;
+  --ytd-searchbox-text-color: var(--ypp-text-primary) !important;
+  overflow: visible !important; /* Allow pop-out shadows */
+}
+
+.yt-premium-plus-theme ytd-searchbox #container {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+.yt-premium-plus-theme ytd-searchbox #search-form {
+  display: flex;
+  height: 100%;
+  max-width: 800px;
+  flex: 1 1 auto;
+  margin-left: 0;
+  border-radius: 20px !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1) !important;
+  overflow: visible !important; /* Changed from hidden so inner shadows can bleed if needed */
+}
+
+.yt-premium-plus-theme ytd-searchbox #search-form:focus-within {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 2px rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.2) !important;
+}
+
+.yt-premium-plus-theme ytd-searchbox input#search {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 24px !important;
+  color: var(--ypp-text-primary) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  height: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.yt-premium-plus-theme ytd-searchbox #search-icon-legacy {
+  background: transparent !important;
+  border: none !important;
+  width: 64px !important;
+  height: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  color: rgba(255,255,255,0.6) !important;
+  border-radius: 0 20px 20px 0 !important;
+}
+
+.yt-premium-plus-theme ytd-searchbox #search-icon-legacy:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+/* Voice Search Button */
+.yt-premium-plus-theme #voice-search-button {
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 14px !important; /* Premium Squircle */
+  margin-left: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1) !important;
+}
+
+.yt-premium-plus-theme #voice-search-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 4px 12px rgba(0,0,0,0.3) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Center Section Alignment */
+.yt-premium-plus-theme #center.ytd-masthead {
+  margin-left: 0;
+  margin-right: 0;
+  justify-content: flex-start;
+  flex: 1;
+  max-width: none;
+  display: flex;
+}
+
+/* TopBar Buttons (Notifications, Create, etc) */
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer {
+  border-radius: 14px !important; /* Premium Squircle */
+  width: 40px !important;
+  height: 40px !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  margin-left: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1) !important;
+  overflow: hidden !important;
+}
+
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 4px 12px rgba(0,0,0,0.3) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Fix inner button of notification to be transparent/full size */
+.yt-premium-plus-theme ytd-notification-topbar-button-renderer #button {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Profile Avatar Outer Container */
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn) {
+  border-radius: 14px !important; /* Premium Squircle */
+  width: 40px !important;
+  height: 40px !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  margin-left: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn):hover {
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 4px 12px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.1) !important;
+}
+
+/* Make inner profile button transparent and full size */
+.yt-premium-plus-theme #avatar-btn {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important; /* Let container handle shape */
+}
+
+/* Ensure Image Fills */
+.yt-premium-plus-theme #avatar-btn yt-img-shadow,
+.yt-premium-plus-theme #avatar-btn img {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important; /* Let container handle shape */
+  object-fit: cover !important;
+  margin: 0 !important;
+}
+
+/* Header Navigation Buttons */
+.ypp-nav-group {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  pointer-events: auto !important; /* Ensure clickability - override masthead */
+  z-index: var(--ypp-z-popup) !important; /* Above all header elements and zen mode */
+  position: relative;
+  visibility: visible !important; /* Force visibility */
+  opacity: 1 !important; /* Force opacity */
+  order: -1; /* Visually prepend without DOM shifting */
+}
+
+/* Extra specificity for individual buttons */
+.ypp-nav-group .ypp-nav-btn {
+  pointer-events: auto !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.ypp-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  color: var(--ypp-text-secondary);
+  transition:
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  overflow: visible;
+  z-index: var(--ypp-z-popup); /* Ensure above other elements */
+  transform: translateZ(0); /* Hardware Acceleration */
+  will-change: transform, box-shadow, background-color, border-color, color;
+}
+
+.ypp-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ypp-accent), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border-color: var(--ypp-accent);
+}
+
+.ypp-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ypp-nav-btn:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ypp-nav-btn.active {
+  /* Active = accent-coloured icon + underline dot only — no background fill */
+  color: var(--ypp-accent, #fff) !important;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+}
+
+.ypp-nav-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  opacity: 0.9;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  transition: transform 0.3s ease;
+}
+
+.ypp-nav-btn:hover svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+/* Nav Icon Styling */
+.ypp-nav-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  pointer-events: none;
+  display: block;
+}
+

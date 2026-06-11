@@ -104,6 +104,21 @@ body {
   animation: popup-enter 0.28s var(--ease-snap) both;
 }
 
+/* ─── A11y Focus Rings ─── */
+:focus-visible {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-primary) 30%, transparent) !important;
+  border-radius: 4px;
+}
+.nav-item:focus-visible {
+  outline-offset: -2px !important;
+  border-radius: 12px;
+}
+.toggle-card:focus-within {
+  border-color: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+}
+
 /* ─── App shell ─── */
 .app-container {
   display: flex; gap: 8px; height: 100%;
