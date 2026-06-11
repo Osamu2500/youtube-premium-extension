@@ -8283,3 +8283,10 @@ html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar-line {
     background: var(--ypp-accent-color, #a78bfa) !important; /* Premium purple */
     border-radius: 4px !important;
 }
+
+/* Hide native Shorts vertical navigation buttons since we have a clean floating pill */
+html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-up,
+html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-down {
+    display: none !important;
+}
+

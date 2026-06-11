@@ -96,9 +96,34 @@ window.YPP.features.ShortsTools = class ShortsTools extends window.YPP.features.
             this.addListener(video, 'ended', this._boundHandleEnded);
             this.addListener(video, 'timeupdate', this._boundHandleTimeUpdate);
             this.utils.log?.('Attached auto-scroll listeners to new Short', 'ShortsTools');
+            
+            // Setup tooltips to replace hidden labels in Pro Max UI
+            setTimeout(() => this._setupTooltips(), 500);
         } catch (error) {
             this.utils.log?.(`Error attaching to video: ${error.message}`, 'ShortsTools', 'error');
         }
+    }
+
+    /**
+     * Copies the text from the hidden labels to the button's title attribute
+     * so it shows on hover.
+     */
+    _setupTooltips() {
+        if (!this.isEnabled) return;
+        const container = document.querySelector('ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer');
+        if (!container) return;
+
+        const actionButtons = container.querySelectorAll('ytd-toggle-button-renderer, ytd-button-renderer');
+        actionButtons.forEach(btnWrapper => {
+            const labelEl = btnWrapper.querySelector('.label.ytd-reel-player-overlay-renderer');
+            const btn = btnWrapper.querySelector('button') || btnWrapper.querySelector('a');
+            if (labelEl && btn) {
+                const text = labelEl.innerText.trim();
+                if (text && !btn.title) {
+                    btn.title = text;
+                }
+            }
+        });
     }
 
     _onVideoEnded() {
