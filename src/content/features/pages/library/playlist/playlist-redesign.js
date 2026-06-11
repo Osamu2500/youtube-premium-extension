@@ -36,7 +36,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         };
     }
 
-    getConfigKey() { return 'playlistRedesign'; }
+    getConfigKey() { return null; }
 
     // ─── Feature lifecycle ───────────────────────────────────────────────────
 

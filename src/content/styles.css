@@ -7391,3 +7391,8 @@ html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-down {
     display: none !important;
 }
 
+/* Remove frosted glass from topbar */
+#frosted-glass {
+    display: none !important;
+}
+
