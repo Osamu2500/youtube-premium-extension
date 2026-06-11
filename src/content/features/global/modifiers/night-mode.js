@@ -15,20 +15,19 @@
             };
         }
 
-        enable(settings) {
+        enable() {
             try {
-                this.update(settings);
+                this._applyBlueLight(this.settings?.blueLight || 0);
+                this._applyDim(this.settings?.dim || 0);
             } catch (err) {
                 this.utils?.log('NightMode enable error', 'NIGHT-MODE', 'error', err);
             }
         }
         
-
-
-        update(settings) {
+        onUpdate() {
             try {
-                this._applyBlueLight(settings?.blueLight || 0);
-                this._applyDim(settings?.dim || 0);
+                this._applyBlueLight(this.settings?.blueLight || 0);
+                this._applyDim(this.settings?.dim || 0);
             } catch (err) {
                 this.utils?.log('NightMode update error', 'NIGHT-MODE', 'error', err);
             }

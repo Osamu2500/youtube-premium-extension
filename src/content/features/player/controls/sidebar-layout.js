@@ -38,9 +38,11 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
     this._currentLayout = null;
   }
 
-  enable(settings)  { this.update(settings); }
+  async enable() {
+    this._applyLayout();
+  }
 
-  disable() {
+  async disable() {
     try {
       this._removeStyle();
       this._currentLayout = null;
@@ -49,8 +51,12 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
     }
   }
 
-  update(settings) {
-    const layout = settings?.sidebarLayout ?? 'compact';
+  async onUpdate() {
+    this._applyLayout();
+  }
+
+  _applyLayout() {
+    const layout = this.settings?.sidebarLayout ?? 'compact';
 
     if (this._currentLayout === layout) return;
     this._currentLayout = layout;

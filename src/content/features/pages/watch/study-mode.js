@@ -28,31 +28,9 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
     }
 
     /**
-     * Apply study mode settings
-     * @param {Object} settings - Settings object
-     */
-    run(settings) {
-        if (settings.studyMode) {
-            this.enable();
-        } else {
-            this.disable();
-        }
-    }
-
-    /**
-     * Update study mode settings
-     * @param {Object} settings - Updated settings
-     */
-    update(settings) {
-        this.run(settings);
-    }
-
-    /**
      * Enable study mode with speed and captions
      */
     enable() {
-        if (this._isEnabled) return;
-        this._isEnabled = true;
 
         try {
             this.utils?.createToast(`Study Mode: ${this.config.speed}x Speed ${this.config.enableCaptions ? '+ Captions' : ''}`);
@@ -77,12 +55,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         }
     }
 
-    /**
-     * Disable study mode and restore normal playback
-     */
     disable() {
-        if (!this._isEnabled) return;
-        this._isEnabled = false;
 
         try {
             if (window.YPP && window.YPP.sharedObserver) {

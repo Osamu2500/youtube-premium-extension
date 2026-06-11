@@ -86,10 +86,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         }
     }
 
-    enable(settings) {
-        this.settings = { ...this.settings, ...settings };
+    enable() {
         this._loadSettings(this.settings);
-        this.run();
+        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
+        if (video && this._needsAudioGraph()) this.initAudioContext(video);
     }
 
     disable() {
@@ -148,24 +148,12 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         }
     }
 
-    update(settings) {
-        this.settings = { ...this.settings, ...settings };
+    onUpdate() {
         this._loadSettings(this.settings);
-        if (this.settings.enableVolumeBoost) {
-            // Restore states if we were previously disabled
-            if (this._audioConnected) {
-                this._restoreAudioState();
-            }
-            this.run();
-        } else {
-            this.disable();
+        if (this._audioConnected) {
+            this._restoreAudioState();
         }
-    }
-
-    run() {
-        if (!this.settings || !this.settings.enableVolumeBoost) return;
-        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
-        if (video && this._needsAudioGraph()) this.initAudioContext(video);
+        this.enable();
     }
 
     onPageChange() {

@@ -53,14 +53,27 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         });
     }
 
-    getConfigKey() { return 'subscriptionFolders'; }
+    getConfigKey() { return null; }
 
     // =========================================================================
     // LIFECYCLE
     // =========================================================================
 
-    async update(settings) {
-        this.settings = { ...this.settings, ...(settings || {}) };
+    /**
+     * Abort-aware initializer called by LifecycleManager.
+     * Wraps the existing enable() call.
+     * @param {AbortSignal} [signal]
+     */
+    async init(signal) {
+        if (signal?.aborted) return;
+        this._injectNetworkInterceptor();
+        await this.enable();
+        if (signal?.aborted) {
+            this._teardown();
+        }
+    }
+
+    async enable() {
         this.enabled = this.settings.subscriptionFolders !== false || 
                        this.settings.enableFilterBar !== false || 
                        this.settings.enableChannelHealth !== false;
@@ -81,6 +94,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.handleNavigation();
         
         this.initialized = true;
+    }
+
+    async onUpdate() {
+        await this.enable();
     }
 
     _injectGridCSS() {

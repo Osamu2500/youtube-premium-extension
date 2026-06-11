@@ -18,28 +18,29 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         this._mountInterval = null; // Track interval
     }
 
-    /**
-     * Initializes the feature (called by FeatureManager)
-     */
-    init() {
-        this._injectCSS();
-        this._checkRoute();
-    }
+    getConfigKey() { return null; }
 
     /**
      * Handles enabling/disabling parts of the feature when settings change
      */
-    enable(settings) {
-        if (!settings) return;
+    enable() {
+        if (!this.settings) return;
         
         try {
-            this.glassPlayerEnabled = !!settings.glassPlayerUI;
-            this.sidebarCommentsEnabled = !!settings.sidebarComments;
+            this._injectCSS();
+            this._checkRoute();
+            
+            this.glassPlayerEnabled = !!this.settings.glassPlayerUI;
+            this.sidebarCommentsEnabled = !!this.settings.sidebarComments;
             
             this._applyFeatures();
         } catch (e) {
             this.utils?.log?.('Error enabling WatchRedesign: ' + e.message, 'WATCH_REDESIGN', 'error');
         }
+    }
+
+    onUpdate() {
+        this.enable();
     }
 
     /**

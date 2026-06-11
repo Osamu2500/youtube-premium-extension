@@ -35,23 +35,7 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
 
     // ── Public API (called by player.js / feature-manager) ────────────────────
 
-    run(settings) {
-        if (!this.isInitialized) {
-            this.isInitialized = true;
-        }
-        this.update(settings);
-    }
-
-    update(settings) {
-        const shouldEnable = settings?.statsVisualizer;
-        if (shouldEnable && !this.enabled) this._enable();
-        else if (!shouldEnable && this.enabled) this.disable();
-    }
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
-
-    _enable() {
-        this.enabled = true;
+    enable() {
         this._createOverlay();
         this._loadAndRender();
     }

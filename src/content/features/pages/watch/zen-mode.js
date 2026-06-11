@@ -35,49 +35,31 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         this._handleNavigation = this._handleNavigation.bind(this);
     }
 
-    run(settings) {
-        // Listen for navigations to refresh cached elements
-        this.addListener(window, 'yt-navigate-finish', this._handleNavigation);
-        this.update(settings);
-    }
-
-    update(settings) {
-        if (settings.zenMode) {
-            this.enable(settings);
-        } else {
-            this.disable();
-        }
-    }
-
-    enable(settings) {
-        this.isEnabled = true;
+    enable() {
         this.toggleZen(true);
     }
 
     disable() {
-        this.isEnabled = false;
         this.toggleZen(false);
         super.disable();
     }
 
-    _handleNavigation() {
-        if (this.isEnabled) {
-            // Re-acquire elements after navigation
-            this._clearCache();
-            const isWatchPage = location.pathname === '/watch';
-            
-            if (isWatchPage) {
-                // On watch page: apply zen mode class
-                document.body.classList.add('ypp-zen-mode');
-                // Auto-cinema disabled per user request
-                if (this.ambientActive) {
-                    this._applyAmbientMode(); // Restart/Refresh loop
-                }
-            } else {
-                // CRITICAL: Remove zen class when leaving watch page
-                document.body.classList.remove('ypp-zen-mode');
-                this._removeAmbientMode();
+    onPageChange() {
+        // Re-acquire elements after navigation
+        this._clearCache();
+        const isWatchPage = location.pathname === '/watch';
+        
+        if (isWatchPage) {
+            // On watch page: apply zen mode class
+            document.body.classList.add('ypp-zen-mode');
+            // Auto-cinema disabled per user request
+            if (this.ambientActive) {
+                this._applyAmbientMode(); // Restart/Refresh loop
             }
+        } else {
+            // CRITICAL: Remove zen class when leaving watch page
+            document.body.classList.remove('ypp-zen-mode');
+            this._removeAmbientMode();
         }
     }
 

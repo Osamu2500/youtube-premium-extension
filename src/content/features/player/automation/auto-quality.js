@@ -11,33 +11,9 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
         this.hasEnforcedTheater = false;
     }
 
-    getConfigKey() { return 'autoQuality'; }
+    getConfigKey() { return null; }
 
-    // Override update to handle both autoQuality and autoCinema settings
-    async update(settings) {
-        this.settings = { ...this.settings, ...settings };
-        
-        const shouldBeEnabled = !!(settings.autoQuality || settings.autoCinema);
-        
-        if (shouldBeEnabled && !this.isEnabled) {
-            this.utils?.log(`Enabling feature: ${this.name}`, 'MAIN', 'debug');
-            this.abortController = new AbortController();
-            await this.enable();
-            this.isEnabled = true;
-        } else if (!shouldBeEnabled && this.isEnabled) {
-            this.utils?.log(`Disabling feature: ${this.name}`, 'MAIN', 'debug');
-            if (this.abortController) {
-                this.abortController.abort();
-                this.abortController = null;
-            }
-            await this.disable();
-            this.isEnabled = false;
-        } else if (this.isEnabled) {
-            this.runAutoTasks();
-        }
-    }
-
-    async enable() {
+    enable() {
         try {
             this.runAutoTasks();
         } catch (e) {
@@ -45,16 +21,18 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
         }
     }
 
-    async disable() {
+    onUpdate() {
+        this.enable();
+    }
+
+    disable() {
         super.disable();
         this.hasEnforcedTheater = false;
     }
 
-    onVideoChange() {
+    onPageChange() {
         this.hasEnforcedTheater = false; // Reset for new video
-        if (this.isEnabled) {
-            this.runAutoTasks();
-        }
+        this.runAutoTasks();
     }
 
     runAutoTasks() {
@@ -78,7 +56,7 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
 
             // 2. Fallback: Player might not have quality levels ready immediately
             this.pollFor(() => {
-                if (!this.isEnabled) return true; // abort the poll gracefully
+                if (!this.settings?.autoQuality) return true; // abort the poll gracefully
                 const player = document.getElementById('movie_player');
                 if (player && typeof player.getAvailableQualityLevels === 'function') {
                     const available = player.getAvailableQualityLevels();
@@ -93,7 +71,7 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
 
         if (this.settings.autoCinema && !this.hasEnforcedTheater) {
             this.pollFor(() => {
-                if (!this.isEnabled) return true; // abort the poll gracefully
+                if (!this.settings?.autoCinema) return true; // abort the poll gracefully
                 if (this.hasEnforcedTheater) return true;
                 const controls = document.querySelector('.ytp-right-controls');
                 if (controls) {

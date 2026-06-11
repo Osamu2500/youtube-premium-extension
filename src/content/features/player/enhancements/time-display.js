@@ -18,9 +18,30 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
 
     getConfigKey() { return 'enableRemainingTime'; }
 
-    enable(settings) {
-        this.settings = { ...this.settings, ...settings };
-        this.run();
+    enable() {
+        if (!this.settings || !this.settings.enableRemainingTime) return;
+
+        const Utils = window.YPP.Utils;
+        if (!Utils) return;
+
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('time-display-video', 'video', (elements) => {
+                const video = elements[0];
+                if (!video) return;
+
+                const timeDisplay = document.querySelector('.ytp-time-display') ||
+                                    Array.from(document.querySelectorAll('.ytp-left-controls span')).find(el => el.textContent.includes('/'))?.parentElement;
+                
+                if (timeDisplay) {
+                    this.showRemainingTime(video, timeDisplay);
+                } else {
+                     const leftControls = document.querySelector('.ytp-left-controls');
+                     if (leftControls) {
+                         this.showRemainingTime(video, leftControls);
+                     }
+                }
+            }, true);
+        }
     }
 
     disable() {
@@ -56,39 +77,8 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         }
     }
 
-    update(settings) {
-        this.settings = { ...this.settings, ...settings };
-        if (this.settings.enableRemainingTime) {
-            this.run();
-        } else {
-            this.disable();
-        }
-    }
-
-    run() {
-        if (!this.settings || !this.settings.enableRemainingTime) return;
-
-        const Utils = window.YPP.Utils;
-        if (!Utils) return;
-
-        if (window.YPP.sharedObserver) {
-            window.YPP.sharedObserver.register('time-display-video', 'video', (elements) => {
-                const video = elements[0];
-                if (!video) return;
-
-                const timeDisplay = document.querySelector('.ytp-time-display') ||
-                                    Array.from(document.querySelectorAll('.ytp-left-controls span')).find(el => el.textContent.includes('/'))?.parentElement;
-                
-                if (timeDisplay) {
-                    this.showRemainingTime(video, timeDisplay);
-                } else {
-                     const leftControls = document.querySelector('.ytp-left-controls');
-                     if (leftControls) {
-                         this.showRemainingTime(video, leftControls);
-                     }
-                }
-            }, true);
-        }
+    onUpdate() {
+        this.enable();
     }
 
     showRemainingTime(video, container) {

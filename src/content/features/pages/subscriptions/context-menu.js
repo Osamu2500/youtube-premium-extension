@@ -14,9 +14,7 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         this._messageListener = this._handleMessage.bind(this);
     }
 
-    enable(settings) {
-        if (this.isActive) return;
-        this.isActive = true;
+    enable() {
         try {
             this.init();
         } catch (e) {
@@ -25,8 +23,6 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
     }
 
     disable() {
-        if (!this.isActive) return;
-        this.isActive = false;
         chrome.runtime.onMessage.removeListener(this._messageListener);
         this.observer.unregister('context-menu-cards');
         this.observer.unregister('context-menu-header');
@@ -34,9 +30,6 @@ window.YPP.features.ContextMenu = class ContextMenu extends window.YPP.features.
         document.querySelectorAll('.ypp-add-to-group-btn').forEach(btn => btn.remove());
         this.cleanupEvents();
     }
-
-    update(settings) {}
-    run(settings) { this.enable(settings); }
 
     onPageChange() {
         // Clear processed stamps so recycled DOM nodes get re-processed after SPA nav

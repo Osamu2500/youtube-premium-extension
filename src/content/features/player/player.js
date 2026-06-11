@@ -16,10 +16,6 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         this._videoElement = null;
     }
 
-    enable(settings) {
-        this.settings = { ...this.settings, ...settings };
-        this.run();
-    }
 
     disable() {
         const controls = document.querySelector('.ypp-player-controls');
@@ -46,19 +42,17 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         this.cleanupEvents();
     }
 
-    update(settings) {
-        this.settings = { ...this.settings, ...settings };
+    getConfigKey() { return null; }
 
-
-
-        const controls = document.querySelector('.ypp-player-controls');
-        if (controls) controls.remove();
+    onUpdate() {
+        const controls = document.querySelectorAll('.ypp-player-controls');
+        controls.forEach(c => c.remove());
         this.injectedButtons = false;
 
-        this.run();
+        this.enable();
     }
 
-    async run() {
+    async enable() {
         const Utils = window.YPP.Utils;
         if (!Utils) return;
 
@@ -148,7 +142,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
         }
         
         // Re-inject on navigation
-        this.run();
+        this.enable();
     }
 
     handleAutoPiP(video) {

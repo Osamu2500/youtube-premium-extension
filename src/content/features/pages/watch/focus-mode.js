@@ -182,7 +182,7 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
      * @param {boolean} enable
      */
     _hideDistractions(enable) {
-        const settings = this._settingsRef;
+        const settings = this.settings;
         if (!settings) return;
 
         const toggle = (cls, state) => {
@@ -355,31 +355,14 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
     // =========================================================================
 
     /**
-     * Check if focus mode is active
-     * @returns {boolean}
-     */
-    isActive() {
-        return this._isActive;
-    }
-
-    /**
-     * Update focus mode settings
-     * @param {Object} settings
-     */
-    update(settings) {
-        this._settingsRef = settings;
-        this._run(settings);
-    }
-
-    /**
      * Toggle a specific feature
      * @param {string} feature - Feature name
      * @param {boolean} enable
      */
     toggleFeature(feature, enable) {
-        if (!this._settingsRef) return;
+        if (!this.settings) return;
 
-        this._settingsRef[feature] = enable;
+        this.settings[feature] = enable;
 
         switch (feature) {
             case 'dopamineDetox':

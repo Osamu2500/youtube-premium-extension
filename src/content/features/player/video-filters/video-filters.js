@@ -41,9 +41,12 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
 
     getConfigKey() { return 'enableCinemaFilters'; }
 
-    enable(settings) {
-        this.settings = { ...this.settings, ...settings };
-        this.run();
+    enable() {
+        if (!this.settings || !this.settings.enableCinemaFilters) return;
+        const video = document.querySelector('video');
+        if (video) {
+            this._restoreFilterState(video);
+        }
     }
 
     disable() {
@@ -59,21 +62,8 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
         }
     }
 
-    update(settings) {
-        this.settings = { ...this.settings, ...settings };
-        if (!settings.enableCinemaFilters) {
-            this.disable();
-        } else {
-            this.run();
-        }
-    }
-
-    run() {
-        if (!this.settings || !this.settings.enableCinemaFilters) return;
-        const video = document.querySelector('video');
-        if (video) {
-            this._restoreFilterState(video);
-        }
+    onUpdate() {
+        this.enable();
     }
 
     createButton(video) {

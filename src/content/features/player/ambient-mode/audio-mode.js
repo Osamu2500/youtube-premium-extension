@@ -12,18 +12,7 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         this.overlay = null;
     }
 
-    run(settings) {
-        // Audio mode is usually toggled via UI, but we can persist state
-        if (settings.audioModeEnabled) {
-            this.enable();
-        } else {
-            this.disable();
-        }
-    }
-
     enable() {
-        if (this.isActive) return;
-        this.isActive = true;
         this.utils?.log?.('YPP Audio Mode: Enabling', 'AUDIO_MODE', 'debug');
         
         this.injectStyles();
@@ -34,8 +23,6 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
     }
 
     disable() {
-        if (!this.isActive) return;
-        this.isActive = false;
         this.utils?.log?.('YPP Audio Mode: Disabling', 'AUDIO_MODE', 'debug');
         
         const style = document.getElementById(this.styleId);

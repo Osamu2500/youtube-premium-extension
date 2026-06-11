@@ -48,10 +48,9 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
 
     /**
      * Enable theme features
-     * @param {Object} settings - User settings
      */
-    enable(settings) {
-        this._run(settings);
+    enable() {
+        this._run(this.settings);
     }
 
     /**
@@ -72,10 +71,9 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
 
     /**
      * Update theme with new settings
-     * @param {Object} settings - Updated settings
      */
-    update(settings) {
-        this._run(settings);
+    onUpdate() {
+        this._run(this.settings);
     }
 
     // =========================================================================

@@ -47,54 +47,14 @@ window.YPP.features.PlayerTools = class PlayerTools extends window.YPP.features.
         this._boundHandleRateChange = this._onRateChange.bind(this);
     }
 
-    /**
-     * Run the feature with settings
-     * @param {Object} settings - User settings
-     */
-    run(settings) {
-        this._update(settings);
-    }
-
-    /**
-     * Update settings
-     * @private
-     * @param {Object} settings - Updated settings
-     */
-    _update(settings) {
-        this._settings = settings || {};
-
-        if (this._settings.enableCustomSpeed) {
-            this._enable();
-        } else {
-            this._disable();
-        }
-    }
-    
-    // Alias common name
-    update(settings) {
-        this._update(settings);
-    }
-
-    /**
-     * Enable player tools
-     * @private
-     */
-    _enable() {
-        if (this._isActive) return;
-
-        this._isActive = true;
+    enable() {
         this.utils.log('Enabled Player Tools', 'PLAYER_TOOLS');
         
         // Start monitoring
         this._startMonitoring();
     }
 
-    /**
-     * Disable player tools
-     * @private
-     */
-    _disable() {
-        this._isActive = false;
+    disable() {
         this._removeControls();
         this._cleanupListeners();
         // BaseFeature automatically unbinds added listeners on disable

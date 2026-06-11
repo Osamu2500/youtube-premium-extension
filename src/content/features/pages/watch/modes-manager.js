@@ -38,12 +38,12 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
     // LIFECYCLE — called by FeatureManager on every settings change/page nav
     // =========================================================================
 
-    run(settings) {
-        this._applyAll(settings);
+    enable() {
+        this._applyAll();
     }
 
-    update(settings) {
-        this._applyAll(settings);
+    onUpdate() {
+        this._applyAll();
     }
 
     disable() {
@@ -58,9 +58,9 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
     // ORCHESTRATION
     // =========================================================================
 
-    _applyAll(settings) {
+    _applyAll() {
+        const settings = this.settings;
         if (!settings) return;
-        this._settings = settings;
 
         // --- Cinema Mode ---
         if (settings.cinemaMode && !this._active.cinemaMode) {

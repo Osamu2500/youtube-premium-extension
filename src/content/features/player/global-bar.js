@@ -32,8 +32,7 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
         this._repositionListener = () => this.ui.updatePosition();
     }
 
-    update(settings) {
-        this.settings = { ...this.settings, ...settings };
+    onUpdate() {
         if (this.ui) {
             this.ui.updateSettings(this.settings);
         }
