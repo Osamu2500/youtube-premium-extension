@@ -134,6 +134,26 @@ export const POPUP_SCHEMA = [
                 ]
             },
             {
+                title: 'Custom Player Bar (Placements)',
+                items: [
+                    { type:'select', id:'pb_snapshot', label:'Snapshot Button', desc:'Extension feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_loop', label:'Loop Button', desc:'Extension feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_speed', label:'Speed Controls', desc:'Extension feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_pip', label:'PiP Button', desc:'Extension feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_volume', label:'Volume Booster', desc:'Extension feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_cinema', label:'Cinema Filters', desc:'Extension feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_play', label:'Native Play/Pause', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_next', label:'Native Next', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_mute', label:'Native Mute/Volume', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_cast', label:'Native Cast/TV', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_autoplay', label:'Native Autoplay', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_cc', label:'Native CC/Subtitles', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_miniplayer', label:'Native Miniplayer', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_theater', label:'Native Theater Mode', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_native_fullscreen', label:'Native Fullscreen', desc:'YouTube feature', options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                ]
+            },
+            {
                 title: 'Auto-Skip & Integrations',
                 items: [
                     { type:'toggle', id:'adSkipper',            label:'Ad Skipper',        desc:'Auto-skip video ads',       icon:P('M5 4l15 8-15 8V4z M19 5v14') },

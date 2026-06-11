@@ -89,6 +89,23 @@ export const DEFAULT_SETTINGS = {
     cinemaFilterBlur: 0,
     cinemaFilterOpacity: 100,
 
+    // Custom Player Bar
+    pb_snapshot: 'front',
+    pb_loop: 'front',
+    pb_speed: 'front',
+    pb_pip: 'front',
+    pb_volume: 'front',
+    pb_cinema: 'front',
+    pb_native_play: 'front',
+    pb_native_next: 'front',
+    pb_native_mute: 'front',
+    pb_native_cast: 'front',
+    pb_native_autoplay: 'front',
+    pb_native_cc: 'front',
+    pb_native_miniplayer: 'front',
+    pb_native_theater: 'front',
+    pb_native_fullscreen: 'front',
+
     // Ad Skipper
     adSkipper: true,
     sponsorBlock: true,

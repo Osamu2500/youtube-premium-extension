@@ -377,10 +377,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             root.style.setProperty('--ypp-accent-glow', hex + '66');
             root.style.setProperty('--ypp-accent-hover', hex + 'cc');
             root.style.setProperty('--ypp-accent-gradient', `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`);
-            
-            // Subtly inject into YouTube's own variable to override native buttons
-            root.style.setProperty('--yt-spec-static-brand-red', hex); 
-            root.style.setProperty('--yt-spec-brand-button-background', hex);
         }
 
         // Animations / Reduced Motion
@@ -456,8 +452,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         root.style.removeProperty('--ypp-accent-gradient');
         root.style.removeProperty('--ypp-thumb-radius');
         root.style.removeProperty('--ypp-sidebar-opacity');
-        root.style.removeProperty('--yt-spec-static-brand-red');
-        root.style.removeProperty('--yt-spec-brand-button-background');
         
         // Remove styling data attributes
         root.removeAttribute('data-ypp-density');

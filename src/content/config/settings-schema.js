@@ -212,6 +212,23 @@ window.YPP.SettingsSchema = {
         // --- Global Player Bar ---
         globalPlayerBarPosition: { type: 'string', default: 'right', values: ['right', 'left', 'top'] },
 
+        // --- Custom Player Bar (Placements) ---
+        pb_snapshot:         { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_loop:             { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_speed:            { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_pip:              { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_volume:           { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_cinema:           { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_play:      { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_next:      { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_mute:      { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_cast:      { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_autoplay:  { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_cc:        { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_miniplayer:{ type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_theater:   { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_native_fullscreen:{ type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+
         // --- Sidebar Layout ---
         sidebarLayout:       { type: 'string',  default: 'compact', values: ['compact', 'expanded'] },
         splitScrolling:      { type: 'boolean', default: false },

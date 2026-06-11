@@ -5321,42 +5321,44 @@ ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
    =================================================================================== */
 
 /* ── 1. Detached Glass Control Bar (ytp-chrome-bottom) ── */
-body.yt-premium-plus-theme .ytp-chrome-bottom {
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-bottom,
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls,
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-left-controls,
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-right-controls {
   margin: 0 !important;
-  /* UI placement based on video ratio, keeping it strictly inside edges */
-  left: calc(var(--ypp-video-left, 0px) + 24px) !important;
-  right: auto !important;
-  width: calc(var(--ypp-video-width, 100%) - 48px) !important;
-  bottom: 20px !important;
-
-  /* Completely transparent player bar as requested */
+  /* Completely transparent player bar */
   background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: none !important;
   box-shadow: none !important;
+}
 
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-bottom {
+  left: calc(var(--ypp-video-left, 0px) + 24px) !important;
+  right: auto !important;
+  width: calc(var(--ypp-video-width, 100%) - 48px) !important;
+  bottom: 20px !important;
   transition: transform 0.2s ease, opacity 0.2s ease;
-  
-  padding: 0 !important; /* Remove padding so progress bar aligns with buttons edge-to-edge */
+  padding: 0 !important;
   box-sizing: border-box !important;
   overflow: visible !important;
 }
 
-body.yt-premium-plus-theme .ytp-chrome-bottom:hover {
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-bottom:hover {
   transform: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
 }
 
 /* ── Glowing Progress Bar ── */
-body.yt-premium-plus-theme .ytp-progress-bar-container {
+html body.yt-premium-plus-theme .html5-video-player .ytp-progress-bar-container {
   bottom: calc(100% + 12px) !important; /* Float 12px above the buttons */
   width: 100% !important; /* Inherits the 100% - 48px from the transparent player bar */
   height: 6px !important;
 }
 
-body.yt-premium-plus-theme .ytp-progress-list {
+html body.yt-premium-plus-theme .html5-video-player .ytp-progress-list {
   background: rgba(255, 255, 255, 0.15) !important;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.3) !important;
   border-radius: 6px !important;
@@ -5364,55 +5366,58 @@ body.yt-premium-plus-theme .ytp-progress-list {
   transform: scaleY(1) !important;
   transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1) !important;
 }
-body.yt-premium-plus-theme .ytp-progress-bar-container:hover .ytp-progress-list {
+html body.yt-premium-plus-theme .html5-video-player .ytp-progress-bar-container:hover .ytp-progress-list {
   transform: scaleY(1.4) !important;
 }
 
-body.yt-premium-plus-theme .ytp-load-progress {
+html body.yt-premium-plus-theme .html5-video-player .ytp-load-progress {
   background: rgba(255, 255, 255, 0.25) !important;
   border-radius: 6px !important;
 }
 
-body.yt-premium-plus-theme .ytp-play-progress {
-  background: var(--ypp-accent-color, #ff0000) !important;
+html body.yt-premium-plus-theme .html5-video-player .ytp-play-progress,
+html body.yt-premium-plus-theme .html5-video-player .ytp-swatch-background-color,
+html body.yt-premium-plus-theme .html5-video-player .ytp-swatch-background-color-secondary {
+  background: #ff0000 !important;
+  background-color: #ff0000 !important;
+  background-image: none !important;
   border-radius: 6px !important;
+}
+
+html body.yt-premium-plus-theme .html5-video-player .ytp-play-progress {
   position: relative;
 }
 
 /* Bright leading edge for progress */
-body.yt-premium-plus-theme .ytp-play-progress::after {
+html body.yt-premium-plus-theme .html5-video-player .ytp-play-progress::after {
   content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
   background: #fff; border-radius: 2px;
 }
 
-body.yt-premium-plus-theme .ytp-scrubber-button {
+html body.yt-premium-plus-theme .html5-video-player .ytp-scrubber-button {
   background: #ffffff !important;
   border: 1px solid rgba(255,255,255,0.8) !important;
   transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1) !important;
 }
 /* Scrubber Hover Ring */
-body.yt-premium-plus-theme .ytp-progress-bar-container:hover .ytp-scrubber-button,
-body.yt-premium-plus-theme .ytp-scrubber-button:hover {
+html body.yt-premium-plus-theme .html5-video-player .ytp-progress-bar-container:hover .ytp-scrubber-button,
+html body.yt-premium-plus-theme .html5-video-player .ytp-scrubber-button:hover {
   transform: scale(1.35) !important;
 }
 
 /* ── Player Control Buttons ── */
-body.yt-premium-plus-theme .ytp-chrome-controls {
-  background: transparent !important; /* Force the inner capsule to be transparent in new YT UI */
-}
-
-body.yt-premium-plus-theme .ytp-chrome-controls .ytp-button {
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-button {
   border-radius: 12px !important;
   transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1), background 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-body.yt-premium-plus-theme .ytp-chrome-controls .ytp-button:hover {
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-button:hover {
   background: rgba(255, 255, 255, 0.12) !important;
   transform: translateY(-2px) scale(1.05) !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
 }
 
-body.yt-premium-plus-theme .ytp-chrome-controls .ytp-button:active {
+html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-button:active {
   transform: translateY(0) scale(0.95) !important;
   background: rgba(255, 255, 255, 0.2) !important;
 }
@@ -5421,6 +5426,8 @@ body.yt-premium-plus-theme .ytp-chrome-controls .ytp-button:active {
 body.yt-premium-plus-theme .ytp-gradient-bottom,
 body.yt-premium-plus-theme .ytp-gradient-top {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 

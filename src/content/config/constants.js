@@ -404,7 +404,7 @@ window.YPP.CONSTANTS = {
         redirectHome: 'RedirectHome',
         intentionalDelay: 'IntentionalDelay',
         playlistDuration: 'PlaylistDuration',
-        statsVisualizer: 'StatsVisualizer',
+        // statsVisualizer: 'StatsVisualizer', // Disabled per user request
         watchHistory: 'WatchHistoryTracker',
         historyTracker: 'HistoryTracker',
         historyRedesign: 'HistoryRedesign',
