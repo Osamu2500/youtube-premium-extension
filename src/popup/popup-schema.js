@@ -129,6 +129,8 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'enableSnapshot',       label:'Snapshot Button',  desc:'Save frame as image',        icon:P('M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z') },
                     { type:'toggle', id:'enableRemainingTime',  label:'Time Remaining',   desc:'Next to duration',           icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
                     { type:'toggle', id:'enableBookmarks',      label:'Bookmarks',        desc:'Capture clips & text',       icon:P('M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z') },
+                    { type:'layoutToggle', id:'sidebarLayout',        label:'Sidebar Layout',   desc:'Video cards size' },
+                    { type:'toggle', id:'splitScrolling',       label:'Split Scrolling',  desc:'Scroll sidebar independently', icon:P('M12 5l0 14M19 12l-7 7-7-7') },
                 ]
             },
             {

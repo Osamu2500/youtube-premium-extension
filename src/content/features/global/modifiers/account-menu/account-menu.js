@@ -135,13 +135,10 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
         Array.from(menu.children).forEach(child => {
             if (!child.classList.contains('ypp-account-menu')) {
-                child.style.setProperty('height', '1px', 'important');
-                child.style.setProperty('min-height', '0', 'important');
-                child.style.setProperty('overflow', 'hidden', 'important');
+                child.style.setProperty('position', 'absolute', 'important');
                 child.style.setProperty('opacity', '0.001', 'important');
                 child.style.setProperty('pointer-events', 'none', 'important');
-                child.style.setProperty('margin', '0', 'important');
-                child.style.setProperty('padding', '0', 'important');
+                child.style.setProperty('z-index', '-1', 'important');
             }
         });
     }
@@ -430,24 +427,18 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             // Remove cloaking from all children
             Array.from(el.children).forEach(child => {
                 if (!child.classList.contains('ypp-account-menu')) {
-                    child.style.removeProperty('height');
-                    child.style.removeProperty('min-height');
-                    child.style.removeProperty('overflow');
+                    child.style.removeProperty('position');
                     child.style.removeProperty('opacity');
                     child.style.removeProperty('pointer-events');
-                    child.style.removeProperty('margin');
-                    child.style.removeProperty('padding');
+                    child.style.removeProperty('z-index');
                 }
             });
             // Clean up any nested account items too
             el.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach(item => {
-                item.style.removeProperty('height');
-                item.style.removeProperty('min-height');
-                item.style.removeProperty('overflow');
+                item.style.removeProperty('position');
                 item.style.removeProperty('opacity');
                 item.style.removeProperty('pointer-events');
-                item.style.removeProperty('margin');
-                item.style.removeProperty('padding');
+                item.style.removeProperty('z-index');
             });
             delete el.dataset.yppRedesigned;
             delete el.dataset.yppCloaked;
@@ -457,13 +448,10 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         // Also clean up any menus that were cloaked but not yet redesigned
         document.querySelectorAll('[data-ypp-cloaked]').forEach(el => {
             Array.from(el.children).forEach(child => {
-                child.style.removeProperty('height');
-                child.style.removeProperty('min-height');
-                child.style.removeProperty('overflow');
+                child.style.removeProperty('position');
                 child.style.removeProperty('opacity');
                 child.style.removeProperty('pointer-events');
-                child.style.removeProperty('margin');
-                child.style.removeProperty('padding');
+                child.style.removeProperty('z-index');
             });
             delete el.dataset.yppCloaked;
         });

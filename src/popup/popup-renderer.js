@@ -157,6 +157,133 @@ function renderSelect(item, state) {
     return wrap;
 }
 
+function renderLayoutToggle(item, state) {
+    if (item.hidden) return null;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'setting-item';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'stretch';
+    wrap.style.marginTop = '8px';
+    wrap.style.background = 'rgba(255,255,255,0.02)';
+    wrap.style.padding = '12px';
+    wrap.style.borderRadius = '12px';
+    wrap.style.border = '1px solid rgba(255,255,255,0.05)';
+
+    // Header row
+    const headerRow = document.createElement('div');
+    headerRow.style.display = 'flex';
+    headerRow.style.justifyContent = 'space-between';
+    headerRow.style.alignItems = 'center';
+    headerRow.style.marginBottom = '12px';
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.innerHTML = `<span class="name">${item.label}</span><span class="desc">${item.desc || 'Video cards size'}</span>`;
+    headerRow.appendChild(info);
+
+    // Toggle Buttons
+    const toggleWrap = document.createElement('div');
+    toggleWrap.id = item.id + 'Toggle';
+    toggleWrap.className = 'sidebar-layout-toggle';
+    toggleWrap.style.display = 'inline-flex';
+    toggleWrap.style.background = 'rgba(255,255,255,0.06)';
+    toggleWrap.style.padding = '3px';
+    toggleWrap.style.borderRadius = '8px';
+    toggleWrap.style.border = '1px solid rgba(255,255,255,0.08)';
+
+    const svgCompact = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="6" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><rect x="3" y="13" width="6" height="4" rx="1"/><line x1="11" y1="15" x2="21" y2="15"/></svg>`;
+    const svgExpanded = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="11" rx="2"/><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="21" x2="15" y2="21"/></svg>`;
+
+    const btnStyle = 'display:flex; align-items:center; gap:5px; font-size:11px; padding:5px 14px; border:none; cursor:pointer; transition:all 0.2s; font-weight:500; border-radius:6px; background:transparent; color:rgba(255,255,255,0.5);';
+
+    const btnCompact = document.createElement('button');
+    btnCompact.type = 'button';
+    btnCompact.className = 'sidebar-layout-btn';
+    btnCompact.dataset.layout = 'compact';
+    btnCompact.style.cssText = btnStyle;
+    btnCompact.innerHTML = `${svgCompact} Compact`;
+
+    const btnExpanded = document.createElement('button');
+    btnExpanded.type = 'button';
+    btnExpanded.className = 'sidebar-layout-btn';
+    btnExpanded.dataset.layout = 'expanded';
+    btnExpanded.style.cssText = btnStyle;
+    btnExpanded.innerHTML = `${svgExpanded} Expanded`;
+
+    toggleWrap.appendChild(btnCompact);
+    toggleWrap.appendChild(btnExpanded);
+    headerRow.appendChild(toggleWrap);
+    wrap.appendChild(headerRow);
+
+    // Explanation Cards
+    const cardsRow = document.createElement('div');
+    cardsRow.style.display = 'flex';
+    cardsRow.style.gap = '8px';
+
+    const cardCompact = document.createElement('div');
+    cardCompact.className = 'layout-card';
+    cardCompact.dataset.layout = 'compact';
+    cardCompact.style.cssText = 'flex:1; border-radius:8px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); cursor:pointer; transition:all 0.2s;';
+    cardCompact.innerHTML = `<div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:3px; pointer-events:none;">Compact</div><div style="font-size:10px; color:rgba(255,255,255,0.4); line-height:1.4; pointer-events:none;">Small thumbnail · text on right · more videos visible</div>`;
+
+    const cardExpanded = document.createElement('div');
+    cardExpanded.className = 'layout-card';
+    cardExpanded.dataset.layout = 'expanded';
+    cardExpanded.style.cssText = 'flex:1; border-radius:8px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); cursor:pointer; transition:all 0.2s;';
+    cardExpanded.innerHTML = `<div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:3px; pointer-events:none;">Expanded</div><div style="font-size:10px; color:rgba(255,255,255,0.4); line-height:1.4; pointer-events:none;">Large thumbnail · stacked card · richer preview</div>`;
+
+    cardsRow.appendChild(cardCompact);
+    cardsRow.appendChild(cardExpanded);
+    wrap.appendChild(cardsRow);
+
+    // Hidden input
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.id = item.id;
+    hiddenInput.value = item.default || 'compact';
+    wrap.appendChild(hiddenInput);
+
+    // Logic
+    const applyActiveState = (layout) => {
+        hiddenInput.value = layout;
+        [btnCompact, btnExpanded].forEach(b => {
+            const isActive = b.dataset.layout === layout;
+            b.classList.toggle('active', isActive);
+            b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
+            b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
+        });
+        
+        [cardCompact, cardExpanded].forEach(c => {
+            const isCompact = c === cardCompact && layout === 'compact';
+            const isExpanded = c === cardExpanded && layout === 'expanded';
+            const isActive = isCompact || isExpanded;
+            c.style.borderColor = isActive ? 'var(--accent, rgba(62,166,255,0.5))' : 'rgba(255,255,255,0.08)';
+            c.style.background = isActive ? 'rgba(62,166,255,0.05)' : 'rgba(255,255,255,0.04)';
+        });
+        
+        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // Ensure robust saving
+        import('./popup-state.js').then(module => {
+            if (module.saveSettings) {
+                module.saveSettings();
+            }
+        });
+    };
+
+    btnCompact.onclick = () => applyActiveState('compact');
+    btnExpanded.onclick = () => applyActiveState('expanded');
+    cardCompact.onclick = () => applyActiveState('compact');
+    cardExpanded.onclick = () => applyActiveState('expanded');
+
+    // Initialize UI state
+    setTimeout(() => applyActiveState(hiddenInput.value), 10);
+    
+    _registerInput(hiddenInput, state);
+    return wrap;
+}
+
 function renderCustomSlot(item) {
     if (item.hidden) return null;
     // The slot element will be filled by the custom renderer registered
@@ -171,6 +298,7 @@ const ITEM_RENDERERS = {
     toggle: renderToggle,
     range:  renderRange,
     select: renderSelect,
+    layoutToggle: renderLayoutToggle,
     custom: renderCustomSlot,
 };
 

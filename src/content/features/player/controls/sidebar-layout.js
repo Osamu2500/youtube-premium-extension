@@ -52,15 +52,9 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
   update(settings) {
     const layout = settings?.sidebarLayout ?? 'compact';
 
-    if (layout === 'expanded') {
-      if (this._currentLayout === 'expanded') return;
-      this._currentLayout = 'expanded';
-      this._injectStyle();
-    } else {
-      if (this._currentLayout === 'compact') return;
-      this._currentLayout = 'compact';
-      this._removeStyle();
-    }
+    if (this._currentLayout === layout) return;
+    this._currentLayout = layout;
+    this._injectStyle(layout);
   }
 
   /**
@@ -68,168 +62,139 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
    * so just ensure it's still present (YouTube doesn't wipe <head>).
    */
   onPageChange() {
-    if (this._currentLayout === 'expanded') {
-      // Re-inject if YouTube wiped our style (rare but possible)
-      if (!document.getElementById(_STYLE_ID)) {
-        this._injectStyle();
-      }
+    if (!document.getElementById(_STYLE_ID)) {
+      this._injectStyle(this._currentLayout || 'compact');
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  _injectStyle() {
+  _injectStyle(layout) {
     this._removeStyle(); // Ensure no duplicates
 
     const style = document.createElement('style');
     style.id = _STYLE_ID;
     style.setAttribute('data-ypp-feature', 'sidebarLayout');
+    style.setAttribute('data-ypp-layout', layout);
 
-    // Selectors use Polymer's class-scoping pattern:
-    // Elements inside ytd-compact-video-renderer get the component name
-    // added as a CSS class — so #dismissible.ytd-compact-video-renderer
-    // targets div#dismissible INSIDE the component (light DOM, not shadow DOM).
-    style.textContent = `
-      /* ══ YPP: Large Sidebar Thumbnails (2026 YouTube layout) ═════════════ */
+    if (layout === 'expanded') {
+        style.textContent = `
+          /* ══ YPP: Large Sidebar Thumbnails (2026 YouTube layout) ═════════════ */
+          ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer {
+            display: block !important;
+            margin-bottom: 12px !important;
+          }
 
-      /* Switch card from inline-flex row → block so thumbnail stacks on top */
-      ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer {
-        display: block !important;
-        margin-bottom: 12px !important;
-      }
+          ytd-watch-next-secondary-results-renderer #dismissible.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model > *,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model > *,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #content {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            align-items: stretch !important;
+          }
 
-      /* Dismissible wrapper: must be column flex for thumbnail-on-top layout */
-      ytd-watch-next-secondary-results-renderer #dismissible.ytd-compact-video-renderer {
-        display: flex !important;
-        flex-direction: column !important;
-        width: 100% !important;
-        align-items: stretch !important;
-      }
+          ytd-watch-next-secondary-results-renderer #thumbnail.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image),
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image),
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer ytd-thumbnail {
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 16 / 9 !important;
+            max-width: 100% !important;
+            margin-bottom: 8px !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            flex: none !important;
+          }
 
-      /* Thumbnail: full-width 16:9 block */
-      ytd-watch-next-secondary-results-renderer #thumbnail.ytd-compact-video-renderer {
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 16 / 9 !important;
-        max-width: 100% !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-      }
+          ytd-watch-next-secondary-results-renderer #details.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #details {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            padding: 0 !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
 
-      /* ytd-thumbnail host — same treatment */
-      ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer {
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 16 / 9 !important;
-      }
+          ytd-watch-next-secondary-results-renderer #video-title.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model h3,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model h3,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #video-title {
+            -webkit-line-clamp: unset !important;
+            max-height: unset !important;
+            white-space: normal !important;
+            overflow: visible !important;
+          }
+        `;
+    } else {
+        // FORCE COMPACT LAYOUT (Reverse YouTube's A/B test)
+        style.textContent = `
+          /* ══ YPP: Compact Sidebar Thumbnails (Classic Layout) ═════════════ */
+          ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer {
+            display: block !important;
+            margin-bottom: 8px !important;
+          }
 
-      /* Inner image */
-      ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        display: block !important;
-      }
+          ytd-watch-next-secondary-results-renderer #dismissible.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model > *,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model > *,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #content {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
 
-      /* Details row below thumbnail */
-      ytd-watch-next-secondary-results-renderer #details.ytd-compact-video-renderer {
-        display: flex !important;
-        flex-direction: row !important;
-        width: 100% !important;
-        padding: 0 !important;
-        align-items: flex-start !important;
-        gap: 8px !important;
-      }
+          ytd-watch-next-secondary-results-renderer #thumbnail.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image),
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image),
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer ytd-thumbnail {
+            display: block !important;
+            width: 168px !important;
+            height: 94px !important;
+            max-width: 168px !important;
+            min-width: 168px !important;
+            margin-bottom: 0 !important;
+            border-radius: 8px !important;
+            flex: none !important;
+          }
 
-      /* Meta text */
-      ytd-watch-next-secondary-results-renderer #meta.ytd-compact-video-renderer {
-        flex: 1 !important;
-        min-width: 0 !important;
-      }
+          ytd-watch-next-secondary-results-renderer #details.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #details {
+            display: flex !important;
+            flex-direction: column !important;
+            flex: 1 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+          }
 
-      /* Title: unclamp for full display */
-      ytd-watch-next-secondary-results-renderer #video-title.ytd-compact-video-renderer {
-        -webkit-line-clamp: unset !important;
-        max-height: unset !important;
-        white-space: normal !important;
-        overflow: visible !important;
-      }
-
-      /* Sidebar list padding */
-      ytd-watch-next-secondary-results-renderer #items.ytd-watch-next-secondary-results-renderer {
-        padding: 0 !important;
-      }
-
-      /* ══ YPP: Support for new yt-lockup-view-model ═══════════════════════ */
-
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model {
-        display: block !important;
-        margin-bottom: 12px !important;
-      }
-      
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model > *,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model > * {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        width: 100% !important;
-        max-width: 100% !important;
-      }
-
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image),
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(img),
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image),
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(img) {
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 16 / 9 !important;
-        max-width: 100% !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-        flex: none !important;
-        position: relative !important;
-      }
-
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image) yt-image,
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image) img,
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(img) yt-image,
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(img) img,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image) yt-image,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image) img,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(img) yt-image,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(img) img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        display: block !important;
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-      }
-
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
-        padding: 0 !important;
-        width: 100% !important;
-      }
-
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model h3,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model h3,
-      ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-metadata-view-model-wiz__title,
-      ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz__title {
-        -webkit-line-clamp: unset !important;
-        max-height: unset !important;
-        white-space: normal !important;
-        overflow: visible !important;
-      }
-
-    `;
+          ytd-watch-next-secondary-results-renderer #video-title.ytd-compact-video-renderer,
+          ytd-watch-next-secondary-results-renderer yt-lockup-view-model h3,
+          ytd-watch-next-secondary-results-renderer ytd-lockup-view-model h3,
+          ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #video-title {
+            -webkit-line-clamp: 2 !important;
+            max-height: 3.2rem !important;
+            overflow: hidden !important;
+          }
+        `;
+    }
 
     document.head.appendChild(style);
   }

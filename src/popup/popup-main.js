@@ -10,11 +10,11 @@ import { renderSchema } from './popup-renderer.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // 1. Initialize State (cache DOM elements)
-    initStorage(document);
-
-    // 1.5 v3.1: Render schema-driven tabs before settings hydration
+        // 1. v3.1: Render schema-driven tabs before settings hydration
     renderSchema(document, state);
+
+    // 1.5 Initialize State (cache DOM elements)
+    initStorage(document);
 
     // 2. Initialize Core UI (Tabs, Modals, Global Search)
     UI.initUI(document);
@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     components.initPremiumAccentDropdown();
     components.initSearchViewMode();
-    components.initSidebarLayoutToggle();
     components.initHideWatchedModePill();
     components.initAccentColorSwatches();
 

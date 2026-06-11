@@ -70,14 +70,6 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         style.id = 'ypp-watch-redesign-style';
         style.textContent = `
             /* ========================================================
-               GLOBAL: DYNAMIC PROGRESS BAR ALIGNMENT
-               ======================================================== */
-            .html5-video-player .ytp-chrome-bottom {
-                transform: translateY(calc(var(--ypp-letterbox-bottom, 0px) * -1)) !important;
-                transition: transform 0.2s ease-out !important;
-            }
-
-            /* ========================================================
                PHASE 1: GLASS PLAYER UI
                ======================================================== */
             html.ypp-glass-player-active ytd-watch-flexy .html5-video-player {
@@ -93,7 +85,6 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
                 -webkit-backdrop-filter: blur(12px) !important;
                 border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
                 border-radius: 0 0 16px 16px !important;
-                padding-bottom: 4px !important;
                 text-shadow: none !important;
                 width: 100% !important;
                 left: 0 !important;
@@ -308,83 +299,11 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         this._stopTrackingVideoRatio();
     }
 
-    /**
-     * Tracks the video aspect ratio and calculates letterboxing height.
-     * Uses ResizeObserver to dynamically update `--ypp-letterbox-bottom`.
-     */
     _startTrackingVideoRatio() {
-        this._stopTrackingVideoRatio(); // Ensure clean slate
-
-        const updateRatio = () => {
-            if (!this.isWatchPage) return;
-            
-            const video = document.querySelector('video.video-stream');
-            const container = document.querySelector('.html5-video-player');
-            
-            if (!video || !container) return;
-            if (!video.videoWidth || !video.videoHeight || !container.clientHeight || !container.clientWidth) {
-                container.style.removeProperty('--ypp-letterbox-bottom');
-                return;
-            }
-            
-            const videoRatio = video.videoWidth / video.videoHeight;
-            const containerRatio = container.clientWidth / container.clientHeight;
-            
-            let letterboxBottom = 0;
-            if (videoRatio > containerRatio) {
-                // Video is wider than container, meaning black bars are on top and bottom
-                const videoHeightInContainer = container.clientWidth / videoRatio;
-                letterboxBottom = (container.clientHeight - videoHeightInContainer) / 2;
-            }
-            
-            // Set css variable dynamically for the progress bar
-            container.style.setProperty('--ypp-letterbox-bottom', `${Math.max(0, letterboxBottom)}px`);
-        };
-
-        this._resizeObserver = new ResizeObserver(() => updateRatio());
-        
-        // We need to wait for the player container to exist
-        if (window.YPP.Utils && window.YPP.Utils.pollFor) {
-            window.YPP.Utils.pollFor(() => {
-                const container = document.querySelector('.html5-video-player');
-                const video = document.querySelector('video.video-stream');
-                if (container && video) return { container, video };
-                return null;
-            }, 10000, 500).then((elements) => {
-                if (!elements) return;
-                const { container, video } = elements;
-                this._ratioInterval = null;
-                
-                this._resizeObserver.observe(container);
-                video.addEventListener('loadedmetadata', updateRatio);
-                
-                // Store reference for cleanup
-                this._trackedVideo = video;
-                this._updateRatioFn = updateRatio;
-                
-                updateRatio();
-            });
-        }
+        // Removed: Letterbox tracking causes player controls to overlap and breaks autohide.
     }
 
     _stopTrackingVideoRatio() {
-        if (this._resizeObserver) {
-            this._resizeObserver.disconnect();
-            this._resizeObserver = null;
-        }
-        if (this._ratioInterval) {
-            clearInterval(this._ratioInterval);
-            this._ratioInterval = null;
-        }
-        if (this._trackedVideo && this._updateRatioFn) {
-            this._trackedVideo.removeEventListener('loadedmetadata', this._updateRatioFn);
-            this._trackedVideo = null;
-            this._updateRatioFn = null;
-        }
-        
-        const container = document.querySelector('.html5-video-player');
-        if (container) {
-            container.style.removeProperty('--ypp-letterbox-bottom');
-        }
+        // Removed.
     }
 }

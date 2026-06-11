@@ -3,8 +3,16 @@
  * Detects external <video> tags (non-YouTube) and injects a custom floating
  * player bar for speed/filters/PiP. Relies on GlobalBarUI and FilterPresets.
  */
-import './global-bar.css';
+import css from './global-bar.css?inline';
 
+if (typeof document !== 'undefined') {
+    const style = document.createElement('style');
+    style.id = 'ypp-global-bar-css';
+    style.textContent = css;
+    if (!document.getElementById('ypp-global-bar-css')) {
+        document.head.appendChild(style);
+    }
+}
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -56,6 +64,11 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
         this.stopObserver();
         this.ui.removeAll();
         this.utils?.removeStyle('ypp-global-bar-css');
+        
+        // Clean up DOM stamps so the feature can cleanly restart if re-enabled
+        document.querySelectorAll('video[data-ypp-processed]').forEach(v => {
+            v.removeAttribute('data-ypp-processed');
+        });
     }
 
     // =========================================================================

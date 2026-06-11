@@ -8,7 +8,8 @@ export const state = {
     settingKeys: [],
     settings: {},
     _settingsWriteQueue: [],
-    _isWritingSettings: false
+    _isWritingSettings: false,
+    isLoaded: false
 };
 
 export function initStorage(document) {
@@ -70,10 +71,17 @@ export function loadSettings(updateUICallbacks) {
                                 b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
                                 b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
                             });
+                            document.querySelectorAll('.layout-card').forEach(c => {
+                                const isActive = c.dataset.layout === layout;
+                                c.style.borderColor = isActive ? 'var(--accent, rgba(62,166,255,0.5))' : 'rgba(255,255,255,0.08)';
+                                c.style.background = isActive ? 'rgba(62,166,255,0.05)' : 'rgba(255,255,255,0.04)';
+                            });
                         }
                     }
                 }
             });
+
+            state.isLoaded = true;
 
             if (updateUICallbacks) {
                 updateUICallbacks.forEach(cb => cb(state.settings));
@@ -99,6 +107,15 @@ export function gatherSettings() {
         }
     });
     return s;
+}
+
+export function saveSettings(showIndicatorCb) {
+    if (!state.isLoaded) return;
+    const s = gatherSettings();
+    state._settingsWriteQueue.push({ fullState: s });
+    _processWriteQueue();
+    if (showIndicatorCb) showIndicatorCb();
+    sendPreviewUpdate();
 }
 
 const sendPreviewUpdate = (() => {
@@ -166,21 +183,6 @@ export function updateSetting(key, value) {
     queueSettingsWrite({ key, value });
 }
 
-export const persistSettings = (() => {
-    let timer = null;
-    return () => {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-            const uiSettings = gatherSettings();
-            try {
-                queueSettingsWrite({ fullState: uiSettings });
-            } catch (e) {
-                getUtils().log('Critical Save Error: ' + e.message, 'POPUP', 'error');
-            }
-        }, 500);
-    };
-})();
-
 export function notifyThemeChange(newTheme) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0] && tabs[0].id) {
@@ -190,10 +192,4 @@ export function notifyThemeChange(newTheme) {
             });
         }
     });
-}
-
-export function saveSettings(showIndicatorCb) {
-    sendPreviewUpdate();
-    persistSettings();
-    if (showIndicatorCb) showIndicatorCb();
 }

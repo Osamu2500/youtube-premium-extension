@@ -20,15 +20,15 @@ window.YPP.features.AccountMenuData = class AccountMenuData {
      * @returns {string} URL or empty string
      */
     static getAvatarUrl(el, { isActive = false } = {}) {
-        // ── Strategy 1: yt-img-shadow[src] HTML attribute ────────────────────
-        const ytImg = el.querySelector('yt-img-shadow');
+        // ── Strategy 1: yt-img-shadow[src] or yt-image[src] HTML attribute ───
+        const ytImg = el.querySelector('yt-img-shadow, yt-image');
         const ytAttr = ytImg?.getAttribute('src');
         if (ytAttr && !ytAttr.startsWith('data:') && ytAttr !== window.location.href) {
             return ytAttr;
         }
 
         // ── Strategy 2: inner <img> src attribute/property ───────────────────
-        const img = el.querySelector('img#img, yt-img-shadow img, img');
+        const img = el.querySelector('img#img, yt-img-shadow img, yt-image img, img');
         const imgSrc = img?.getAttribute('src') || img?.src || '';
         if (imgSrc && !imgSrc.startsWith('data:') && imgSrc !== window.location.href) {
             return imgSrc;
@@ -57,6 +57,7 @@ window.YPP.features.AccountMenuData = class AccountMenuData {
             const headerImg = document.querySelector(
                 '#masthead #avatar-btn img,' +
                 '#avatar-btn yt-img-shadow img,' +
+                '#avatar-btn yt-image img,' +
                 '#avatar-btn img'
             );
             const hSrc = headerImg?.getAttribute('src') || headerImg?.src || '';

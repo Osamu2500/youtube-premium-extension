@@ -59,6 +59,13 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
             window.YPP.ui.manager.remove('header-nav-group');
         }
 
+        if (this._headerMutationObserver) {
+            this._headerMutationObserver.disconnect();
+        }
+        
+        if (this._observeTimeout) clearTimeout(this._observeTimeout);
+        if (this._injectTimeout) clearTimeout(this._injectTimeout);
+
         window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
 
         // Call super to clean up any tracked listeners
@@ -95,23 +102,31 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
         this._domObserver.start();
 
-        // Watch for ytd-masthead #end — our injection target
-        this._domObserver.register(
-            'header-nav-end',
-            'ytd-masthead #end',
-            () => {
-                // #end appeared (or was re-rendered) — re-inject and heal
-                this._scheduleInjection();
-                window.YPP.ui?.manager?.heal();
-            },
-            true  // immediate: trigger if #end already exists
-        );
-
-        // Initial injection attempt (covers cases where #end is already in DOM)
+        // Initial injection
         this._scheduleInjection();
 
         // Keep active state updated on SPA navigation
         window.addEventListener('yt-navigate-finish', this._boundHandleNavigate);
+
+        // Add a dedicated MutationObserver to ytd-masthead to handle YouTube's aggressive re-renders
+        this._headerMutationObserver = new MutationObserver(() => {
+            const existing = document.querySelector('[data-ypp-id="header-nav-group"]');
+            if (!existing && document.querySelector('ytd-masthead #end')) {
+                // It was wiped out by YouTube, re-inject
+                this._scheduleInjection();
+                if (window.YPP.ui?.manager) window.YPP.ui.manager.heal();
+            }
+        });
+
+        const checkAndObserve = () => {
+            const masthead = document.querySelector('ytd-masthead');
+            if (masthead) {
+                this._headerMutationObserver.observe(masthead, { childList: true, subtree: true });
+            } else {
+                this._observeTimeout = setTimeout(checkAndObserve, 500);
+            }
+        };
+        checkAndObserve();
     }
 
     _handleNavigate() {
@@ -126,7 +141,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
             const injected = this._injectButtons();
             // If injection was skipped because UIManager wasn't ready yet, retry
             if (!injected && retryCount < 10) {
-                setTimeout(() => this._scheduleInjection(retryCount + 1), 200);
+                this._injectTimeout = setTimeout(() => this._scheduleInjection(retryCount + 1), 200);
             }
         });
     }
@@ -171,6 +186,11 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         });
 
         window.YPP.ui.manager.mount('headerRight', { id: 'header-nav-group', el: this.navGroup });
+
+        if (!document.contains(this.navGroup)) {
+            // Target was not ready or mount failed, retry needed
+            return false;
+        }
 
         this._updateActiveStates();
         return true; // injection succeeded

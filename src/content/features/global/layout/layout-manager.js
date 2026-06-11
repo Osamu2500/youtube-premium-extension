@@ -241,6 +241,21 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             cols = this.settings?.subscriptionsColumns ?? 4;
         }
 
+        // Apply auto-scale grid logic if enabled, but ONLY on the home page
+        const isHome = path === '/' || path === '/index';
+        if (this.settings?.autoScaleLayout && isHome) {
+            let width = window.innerWidth;
+            if (gridRenderer && gridRenderer.clientWidth > 0) {
+                width = gridRenderer.clientWidth;
+            }
+            if (width >= 2100) cols = 6;
+            else if (width >= 1800) cols = 5;
+            else if (width >= 1400) cols = 4;
+            else if (width >= 1000) cols = 3;
+            else if (width >= 600) cols = 2;
+            else cols = 1;
+        }
+
         // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
         if (cols === 0) {
             contents.classList.remove('ypp-grid-container');
@@ -253,6 +268,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
 
         // Fix YouTube's row wrappers (use display: contents to flatten)
         // Moved to styles.css for massive performance boost.
+
+        // Apply ypp-grid-item to any newly loaded items immediately
+        const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
+        items.forEach(item => {
+            if (!item.classList.contains('ypp-grid-item')) {
+                item.classList.add('ypp-grid-item');
+            }
+        });
 
         // Performance: Skip if already processed and unchanged
         if (this._processedContainers.has(contents)) {
@@ -286,14 +309,6 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         // Update the CSS min-column variable so responsive breakpoints in styles.css stay consistent
         document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
 
-
-        // Style grid items
-        const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
-        items.forEach(item => {
-            if (!item.classList.contains('ypp-grid-item')) {
-                item.classList.add('ypp-grid-item');
-            }
-        });
 
         // (Row wrappers flattening is now handled earlier in the function)
 

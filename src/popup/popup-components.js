@@ -139,31 +139,6 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
         });
     }
 
-    function initSidebarLayoutToggle() {
-        const container = document.getElementById('sidebarLayoutToggle');
-        if (!container) return;
-
-        const btns = container.querySelectorAll('.sidebar-layout-btn');
-        const hiddenInput = document.getElementById('sidebarLayout');
-        if (!hiddenInput) return;
-
-        const applyActiveState = (layout) => {
-            hiddenInput.value = layout;
-            btns.forEach(b => {
-                const isActive = b.dataset.layout === layout;
-                b.classList.toggle('active', isActive);
-                b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
-                b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
-            });
-        };
-
-        btns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                applyActiveState(btn.dataset.layout);
-                saveSettings(() => ui.showSaveIndicator(document));
-            });
-        });
-    }
 
     function initHideWatchedModePill() {
         const btns = document.querySelectorAll('.hw-mode-btn');
@@ -238,7 +213,6 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
         initThemeSelector,
         initPremiumAccentDropdown,
         initSearchViewMode,
-        initSidebarLayoutToggle,
         initHideWatchedModePill,
         initAccentColorSwatches,
         applyThemeToPopup
