@@ -66,11 +66,12 @@ window.YPP.features.MultiSelect = class MultiSelect
         );
     }
 
+    /** @param {HTMLElement} card */
     _getVideoData(card) {
-        const anchor = card.querySelector(
+        const anchor = /** @type {HTMLAnchorElement} */ (card.querySelector(
             'a#thumbnail, a.ytd-thumbnail, ' +
             'a#wc-endpoint, a.ytd-playlist-video-renderer'
-        );
+        ));
         const href = anchor?.href || '';
         const videoId = href.match(/[?&]v=([^&]+)/)?.[1];
         const title = card.querySelector(
@@ -80,7 +81,8 @@ window.YPP.features.MultiSelect = class MultiSelect
     }
 
     _attachCheckboxes() {
-        this._getVideoCards().forEach(card => {
+        this._getVideoCards().forEach(el => {
+            const card = /** @type {HTMLElement} */ (el);
             if (card.dataset.yppMultiSelect) return;
             card.dataset.yppMultiSelect = '1';
 
@@ -114,6 +116,12 @@ window.YPP.features.MultiSelect = class MultiSelect
         });
     }
 
+    /** 
+     * @param {HTMLElement} card 
+     * @param {string} videoId 
+     * @param {string} href 
+     * @param {string} title 
+     */
     _toggleSelect(card, videoId, href, title) {
         if (this._selected.has(videoId)) {
             this._selected.delete(videoId);
@@ -132,8 +140,9 @@ window.YPP.features.MultiSelect = class MultiSelect
 
     _clearAll() {
         this._selected.forEach(({ element }) => {
-            element.classList.remove('ypp-ms-selected');
-            element.querySelector('.ypp-ms-checkbox')
+            const el = /** @type {HTMLElement} */ (element);
+            el.classList.remove('ypp-ms-selected');
+            el.querySelector('.ypp-ms-checkbox')
                 ?.classList.remove('ypp-ms-checked');
         });
         this._selected.clear();
@@ -215,7 +224,7 @@ window.YPP.features.MultiSelect = class MultiSelect
         // Fast update instead of full innerHTML re-render
         const countSpan = this._actionBar.querySelector('#ypp-ms-count-val');
         const labelSpan = this._actionBar.querySelector('#ypp-ms-count-label');
-        if (countSpan) countSpan.textContent = count;
+        if (countSpan) countSpan.textContent = count.toString();
         if (labelSpan) labelSpan.textContent = `video${count !== 1 ? 's' : ''} selected`;
     }
 
@@ -227,7 +236,6 @@ window.YPP.features.MultiSelect = class MultiSelect
             setTimeout(() => {
                 // Trigger YouTube's native "Add to queue" by navigating
                 // with &list= parameter or using the internal API
-                const url = new URL(href);
                 window.open(href, '_blank');
             }, i * 200);
         });
@@ -236,60 +244,60 @@ window.YPP.features.MultiSelect = class MultiSelect
         this._clearAll();
     }
 
-    _addToWatchLater() {
+    async _addToWatchLater() {
         const videos = [...this._selected.values()];
 
-        videos.forEach(({ element }) => {
+        for (const { element } of videos) {
             // Find and click the native "Save to Watch Later" 
             // from the three-dot menu
-            const menuBtn = element.querySelector(
+            const menuBtn = /** @type {HTMLElement} */ (element.querySelector(
                 'ytd-menu-renderer button, ' +
                 '#button[aria-label*="Action menu"]'
-            );
-            if (!menuBtn) return;
+            ));
+            if (!menuBtn) continue;
 
             menuBtn.click();
 
-            setTimeout(() => {
-                const watchLaterBtn = document.querySelector(
-                    'ytd-menu-service-item-renderer:first-child, ' +
-                    '[aria-label*="Watch later"], ' +
-                    'yt-formatted-string:first-child'
-                );
-                watchLaterBtn?.click();
-            }, 300);
-        });
+            const watchLaterBtn = /** @type {HTMLElement} */ (await this.waitForElement(
+                'ytd-menu-service-item-renderer:first-child, ' +
+                '[aria-label*="Watch later"], ' +
+                'yt-formatted-string:first-child',
+                2000
+            ));
+            watchLaterBtn?.click();
+        }
 
         this._showToast(`${videos.length} videos saved to Watch Later`);
         this._clearAll();
     }
 
-    _showPlaylistPicker() {
+    async _showPlaylistPicker() {
         // Trigger YouTube's native playlist save dialog
         // on the first selected video's three-dot menu
         const first = [...this._selected.values()][0];
         if (!first) return;
 
-        const menuBtn = first.element.querySelector(
+        const menuBtn = /** @type {HTMLElement} */ (first.element.querySelector(
             'ytd-menu-renderer button'
-        );
+        ));
         menuBtn?.click();
 
-        setTimeout(() => {
-            const saveBtn = document.querySelector(
-                '[aria-label*="Save to playlist"], ' +
-                'ytd-menu-service-item-renderer:nth-child(2)'
-            );
-            saveBtn?.click();
-        }, 300);
+        const saveBtn = /** @type {HTMLElement} */ (await this.waitForElement(
+            '[aria-label*="Save to playlist"], ' +
+            'ytd-menu-service-item-renderer:nth-child(2)',
+            2000
+        ));
+        saveBtn?.click();
     }
 
+    /** @param {string} message */
     _showToast(message) {
         window.YPP.Utils?.showToast?.(message) ||
         this._log(message);
     }
 
+    /** @param {string} message */
     _log(message) {
-        this.utils?.log(message, 'MULTI-SELECT', 'debug');
+        window.YPP.Utils?.log?.(message, 'MULTI-SELECT', 'debug');
     }
 };

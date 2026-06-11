@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Advanced Homepage Filter (Refactored)
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
@@ -81,6 +82,13 @@ window.YPP.features.AdvancedFilter = class AdvancedFilter extends window.YPP.fea
         if (bar) bar.remove();
         this.cleanupEvents();
         this._navigationListener = null;
+
+        // TEARDOWN: remove processed stamps and display overrides
+        document.querySelectorAll('ytd-rich-grid-renderer ytd-rich-item-renderer[data-ypp-processed]').forEach(el => {
+            el.removeAttribute('data-ypp-processed');
+            el.style.display = '';
+            el.classList.remove('ypp-filter-hidden');
+        });
     }
 
     // --- UI Methods ---

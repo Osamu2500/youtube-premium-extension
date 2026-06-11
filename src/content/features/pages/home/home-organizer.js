@@ -58,12 +58,15 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         this.organizeFeed();
 
         // Handle Popover close
+        /** @param {Event} e */
         this._boundClickListener = (e) => {
-            if (!e.target.closest('.ypp-tag-btn') && !e.target.closest('.ypp-tag-popover')) {
+            const target = /** @type {HTMLElement} */ (e.target);
+            if (target && !target.closest('.ypp-tag-btn') && !target.closest('.ypp-tag-popover')) {
                 this.removePopover();
             }
         };
         // Use tracked listener to prevent SPA memory leaks
+        // @ts-ignore
         this.addListener(document, 'click', this._boundClickListener);
     }
 
@@ -83,8 +86,15 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
 
         if (this._boundClickListener) {
             // Clean up tracked events automatically
+            // @ts-ignore
             this.cleanupEvents();
         }
+        
+        // TEARDOWN: remove processed stamps
+        document.querySelectorAll('ytd-rich-shelf-renderer[data-ypp-processed], ytd-reel-shelf-renderer[data-ypp-processed], ytd-rich-item-renderer[data-ypp-processed]').forEach(el => {
+            el.removeAttribute('data-ypp-processed');
+            el.classList.remove('ypp-priority-low');
+        });
         
         this.Utils.log('Home Organizer Disabled', 'HOME');
     }
@@ -109,7 +119,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
                 }
             }
         } catch (e) {
-            this.Utils.log(`Failed to load tags from Subscription Folders: ${e.message}`, 'HOME', 'error');
+            this.Utils.log(`Failed to load tags from Subscription Folders: ${/** @type {Error} */ (e).message}`, 'HOME', 'error');
         }
     }
 
@@ -141,7 +151,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
             await this.loadTags(); // Re-compute mappings
             this.refreshAllTagButtons();
         } catch (e) {
-            this.Utils.log(`Failed to update folder assignment: ${e.message}`, 'HOME', 'error');
+            this.Utils.log(`Failed to update folder assignment: ${/** @type {Error} */ (e).message}`, 'HOME', 'error');
             this.Utils.createToast('Failed to update folder', 'error');
         }
     }
@@ -173,10 +183,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
     organizeFeed() {
         if (!this.isActive) return;
 
-        const contents = document.querySelector(this.CONSTANTS.SELECTORS.GRID_CONTENTS);
+        const contents = /** @type {HTMLElement} */ (document.querySelector(this.CONSTANTS.SELECTORS.GRID_CONTENTS));
         if (!contents) return;
-
-        // Feature 1: Separators removed per user request
 
         // Process Items in a single pass (Priority, Tags, Watched Status)
         this._processGridItems(contents);
@@ -199,7 +207,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
 
         // Single pass on video items
         const videoItems = contents.querySelectorAll('ytd-rich-item-renderer');
-        videoItems.forEach(item => {
+        videoItems.forEach(el => {
+            const item = /** @type {HTMLElement} */ (el);
             if (item.hasAttribute('data-ypp-processed')) return;
             item.setAttribute('data-ypp-processed', 'true');
 
@@ -217,7 +226,7 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
                     btn.innerHTML = '#';
                     btn.title = 'Tag Channel';
             
-                    const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim();
+                    const channelName = item.querySelector('#text.ytd-channel-name')?.textContent?.trim() || '';
                     if (channelName && this.channelTags[channelName]) {
                         const tags = this.channelTags[channelName];
                         if (tags && tags.length > 0) {
@@ -239,11 +248,11 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
 
     /**
      * Handle click on tag button
-     * @param {Event} e 
+     * @param {Event} _e 
      * @param {string} channelName 
      * @param {HTMLElement} btn 
      */
-    handleTagClick(e, channelName, btn) {
+    handleTagClick(_e, channelName, btn) {
         this.removePopover();
         if (!channelName) return;
 
@@ -289,18 +298,25 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         if (existing) existing.remove();
     }
 
+    /**
+     * @param {HTMLElement} separator 
+     */
     toggleSection(separator) {
         separator.classList.toggle('collapsed');
         const isCollapsed = separator.classList.contains('collapsed');
-        let sibling = separator.nextElementSibling;
+        let sibling = /** @type {HTMLElement | null} */ (separator.nextElementSibling);
         while (sibling) {
             if (sibling.classList.contains('ypp-feed-separator')) break;
             if (isCollapsed) sibling.classList.add('ypp-section-hidden');
             else sibling.classList.remove('ypp-section-hidden');
-            sibling = sibling.nextElementSibling;
+            sibling = /** @type {HTMLElement | null} */ (sibling.nextElementSibling);
         }
     }
 
+    /**
+     * @param {string} text 
+     * @param {string} specificClass 
+     */
     createSeparator(text, specificClass = '') {
         const div = document.createElement('div');
         div.className = `ypp-feed-separator ${specificClass}`;

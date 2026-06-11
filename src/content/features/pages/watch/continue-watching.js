@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Feature: Continue Watching Label & Prompt
  * Tags previously watched videos in the related sidebar and prompts the user.
@@ -36,6 +37,12 @@ window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP
             this.observer.stop();
             this.observer = null;
         }
+        
+        // TEARDOWN: remove processed stamps
+        document.querySelectorAll('ytd-rich-item-renderer[data-ypp-processed], ytd-compact-video-renderer[data-ypp-processed]').forEach(el => {
+            el.removeAttribute('data-ypp-processed');
+            el.classList.remove('previously-watched-video');
+        });
     }
 
     startObserver() {

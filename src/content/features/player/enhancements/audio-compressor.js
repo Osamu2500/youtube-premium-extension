@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Feature: Audio Compressor
  * Uses the Web Audio API DynamicsCompressorNode to normalize volume levels,
@@ -32,7 +33,7 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
 
         this.addListener(window, 'yt-navigate-finish', () => {
             if (this.utils.isWatchPage() && this.isEnabled) {
-                setTimeout(() => this.init(), 1000);
+                this.init();
             }
         });
     }

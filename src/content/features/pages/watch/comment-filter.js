@@ -75,6 +75,11 @@ window.YPP.features.CommentFilter = class CommentFilter extends window.YPP.featu
             });
         }
         document.querySelectorAll('.ypp-spam-label').forEach(el => el.remove());
+        
+        // TEARDOWN: remove processed stamps so re-enabling works
+        document.querySelectorAll('ytd-comment-thread-renderer[data-ypp-processed]').forEach(el => {
+            el.removeAttribute('data-ypp-processed');
+        });
         this.processedComments.clear();
     }
 
