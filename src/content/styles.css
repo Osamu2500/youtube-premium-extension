@@ -239,7 +239,7 @@ body:not(.cinematic-home) ytd-rich-item-renderer, ytd-video-renderer, ytd-compac
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
   ytd-grid-playlist-renderer, ytd-grid-radio-renderer
 ) {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 /* Flat Cards */
@@ -536,7 +536,7 @@ html.yt-premium-plus-theme ytd-menu-navigation-item-renderer {
   margin: 4px 12px !important;
   width: calc(100% - 24px) !important;
   border-radius: 10px !important;
-  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
   box-sizing: border-box !important;
   background: transparent !important;
 }
@@ -3381,7 +3381,7 @@ ytd-watch-metadata #owner {
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 ytd-watch-metadata #owner:hover {
@@ -3401,7 +3401,7 @@ ytd-menu-renderer ytd-button-renderer {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.03);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 ytd-menu-renderer ytd-button-renderer:hover {
@@ -5405,7 +5405,7 @@ body.yt-premium-plus-theme .ytp-popup {
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   height: 24px !important;
   font-family: var(--ypp-font-family, "Inter", sans-serif) !important;
 }
@@ -5486,7 +5486,7 @@ body.yt-premium-plus-theme
   text-transform: uppercase !important;
   letter-spacing: 1px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
 body.yt-premium-plus-theme
@@ -7747,7 +7747,7 @@ body.ypp-floating-player-active ytd-player[id="ytd-player"] {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--ypp-thumb-radius, 12px) !important;
     overflow: hidden !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     transform: translateZ(0) !important; /* Force hardware acceleration */
 }
 
@@ -8200,4 +8200,86 @@ html.yt-premium-plus-theme ytd-reel-video-renderer #actions.ytd-reel-video-rende
     border-radius: 24px !important;
     padding: 12px 4px !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+/* Apply Global Glassmorphism to native YouTube context menus and flyouts */
+html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-menu-popup-renderer) {
+    background: transparent !important;
+}
+
+html.yt-premium-plus-theme ytd-menu-popup-renderer,
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) {
+    background: linear-gradient(135deg, rgba(22, 22, 26, 0.72), rgba(14, 14, 18, 0.82)) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Ensure inner elements don't block the glass effect */
+html.yt-premium-plus-theme ytd-menu-popup-renderer tp-yt-paper-listbox,
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) #container,
+html.yt-premium-plus-theme ytd-simple-menu-header-renderer {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* ========================================================================= */
+/* SHORTS UI "PRO MAX" REDESIGN                                            */
+/* ========================================================================= */
+
+/* 1. Floating Horizontal Action Pill */
+html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-evenly !important;
+    position: absolute !important;
+    bottom: 30px !important;
+    right: 20px !important;
+    width: auto !important;
+    padding: 8px 16px !important;
+    background: linear-gradient(135deg, rgba(22, 22, 26, 0.65), rgba(14, 14, 18, 0.75)) !important;
+    backdrop-filter: blur(20px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+    border-radius: 40px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    z-index: 50 !important;
+    transform: none !important;
+}
+
+/* Remove margins between action buttons to fit nicely in the pill */
+html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer > * {
+    margin: 0 8px !important;
+    transform: scale(0.9) !important;
+}
+
+/* Remove original action column container constraints */
+html.yt-premium-plus-theme ytd-reel-video-renderer[is-active] #overlay {
+    /* Allow the pill to position properly within the overlay */
+}
+
+/* Hide labels text in the pill to save space, keeping icons clean */
+html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions .label.ytd-reel-player-overlay-renderer {
+    display: none !important;
+}
+
+/* 2. Slim Minimalist Progress Bar */
+html.yt-premium-plus-theme ytd-shorts-player-controls {
+    bottom: 12px !important;
+}
+html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar {
+    height: 3px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+    transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+}
+html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar:hover {
+    height: 8px !important;
+}
+html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar-line {
+    background: var(--ypp-accent-color, #a78bfa) !important; /* Premium purple */
+    border-radius: 4px !important;
 }

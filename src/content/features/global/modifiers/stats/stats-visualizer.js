@@ -21,6 +21,7 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
         this.isInitialized = false;
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
+        this._rafDrag = null;
 
         // Binds
         this._onMouseMove = this._onMouseMove.bind(this);
@@ -44,7 +45,7 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
     update(settings) {
         const shouldEnable = settings?.statsVisualizer;
         if (shouldEnable && !this.enabled) this._enable();
-        else if (!shouldEnable && this.enabled) this._disable();
+        else if (!shouldEnable && this.enabled) this.disable();
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -55,7 +56,8 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
         this._loadAndRender();
     }
 
-    _disable() {
+    disable() {
+        super.disable();
         this.enabled = false;
         if (this.overlay) {
             this.overlay.remove();
@@ -63,11 +65,16 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
         }
         window.removeEventListener('mousemove', this._onMouseMove);
         window.removeEventListener('mouseup', this._onMouseUp);
+        if (this._rafDrag) {
+            cancelAnimationFrame(this._rafDrag);
+            this._rafDrag = null;
+        }
     }
 
     // ── Data Loading ──────────────────────────────────────────────────────────
 
     async _loadAndRender() {
+        if (document.hidden) return; // Wait until visible to avoid background thrashing
         const today = new Date();
         const keys = [];
         for (let i = 0; i < 30; i++) {
@@ -199,15 +206,17 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
             </div>
         `;
 
-        el.querySelector('#ypp-sv-close').addEventListener('click', () => this._disable());
+        el.querySelector('#ypp-sv-close').addEventListener('click', () => this.disable());
 
         // Drag
         const header = el.querySelector('.ypp-sv-header');
         header.addEventListener('mousedown', e => {
             this.isDragging = true;
             el.style.cursor = 'grabbing';
-            this.dragOffset.x = e.clientX - el.getBoundingClientRect().left;
-            this.dragOffset.y = e.clientY - el.getBoundingClientRect().top;
+            el.style.willChange = 'transform, top, left';
+            const rect = el.getBoundingClientRect();
+            this.dragOffset.x = e.clientX - rect.left;
+            this.dragOffset.y = e.clientY - rect.top;
         });
         
         // Attach to window (will be cleaned up in _disable)
@@ -220,13 +229,29 @@ window.YPP.features.StatsVisualizer = class StatsVisualizer extends window.YPP.f
 
     _onMouseMove(e) {
         if (!this.isDragging || !this.overlay) return;
-        this.overlay.style.left = `${e.clientX - this.dragOffset.x}px`;
-        this.overlay.style.top  = `${e.clientY - this.dragOffset.y}px`;
+        const targetX = e.clientX - this.dragOffset.x;
+        const targetY = e.clientY - this.dragOffset.y;
+        
+        if (this._rafDrag) return;
+        this._rafDrag = requestAnimationFrame(() => {
+            if (this.overlay) {
+                this.overlay.style.left = `${targetX}px`;
+                this.overlay.style.top  = `${targetY}px`;
+            }
+            this._rafDrag = null;
+        });
     }
 
     _onMouseUp() {
         this.isDragging = false;
-        if (this.overlay) this.overlay.style.cursor = '';
+        if (this.overlay) {
+            this.overlay.style.cursor = '';
+            this.overlay.style.willChange = '';
+        }
+        if (this._rafDrag) {
+            cancelAnimationFrame(this._rafDrag);
+            this._rafDrag = null;
+        }
     }
 
     // ── Render ────────────────────────────────────────────────────────────────

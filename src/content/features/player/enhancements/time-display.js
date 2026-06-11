@@ -13,6 +13,7 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         this._boundTimeUpdate = null;
         this._videoElement = null;
         this._pollInterval = null;
+        this._timeRemainingNode = null; // Cached reference — avoids querySelector in disable()
     }
 
     getConfigKey() { return 'enableRemainingTime'; }
@@ -33,14 +34,20 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
             }
 
             if (this._videoElement && this._boundTimeUpdate) {
-                this._videoElement.removeEventListener('timeupdate', this._boundTimeUpdate);
-                this._videoElement.removeEventListener('ratechange', this._boundTimeUpdate);
+                this._videoElement.removeEventListener('timeupdate', this._boundTimeUpdate.throttled ?? this._boundTimeUpdate);
+                this._videoElement.removeEventListener('ratechange', this._boundTimeUpdate.raw ?? this._boundTimeUpdate);
                 this._boundTimeUpdate = null;
             }
 
-            const timeRemainingNode = document.querySelector('.ypp-time-remaining');
+            if (this._timeRemainingNode) {
+                this._timeRemainingNode.remove();
+                this._timeRemainingNode = null;
+            } else {
+                // Fallback: query only if cached ref is missing (e.g. after hard reload)
+                const timeRemainingNode = document.querySelector('.ypp-time-remaining');
+                if (timeRemainingNode) timeRemainingNode.remove();
+            }
             const sepNode = document.querySelector('.ypp-time-separator-appended');
-            if (timeRemainingNode) timeRemainingNode.remove();
             if (sepNode) sepNode.remove();
 
             this._videoElement = null;
@@ -129,6 +136,7 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
                 return;
             }
         }
+        this._timeRemainingNode = timeRemainingNode; // Cache for teardown — no querySelector needed
 
         const format = (s) => {
             if (s === undefined || s === null || isNaN(s) || s < 0) return '0:00';
@@ -186,13 +194,16 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         };
 
         if (this._boundTimeUpdate) {
-            video.removeEventListener('timeupdate', this._boundTimeUpdate);
-            video.removeEventListener('ratechange', this._boundTimeUpdate);
+            video.removeEventListener('timeupdate', this._boundTimeUpdate.throttled ?? this._boundTimeUpdate);
+            video.removeEventListener('ratechange', this._boundTimeUpdate.raw ?? this._boundTimeUpdate);
         }
-        
-        this._boundTimeUpdate = update;
-        video.addEventListener('timeupdate', update);
+
+        // Throttle timeupdate to 1s — it fires 4-8×/sec but display only updates once/sec.
+        // ratechange fires rarely so it gets the unthrottled version for instant response.
+        const throttledUpdate = window.YPP.Utils?.throttle?.(update, 1000) ?? update;
+        this._boundTimeUpdate = { throttled: throttledUpdate, raw: update };
+        video.addEventListener('timeupdate', throttledUpdate);
         video.addEventListener('ratechange', update);
-        update(); 
+        update(); // Immediate initial render
     }
 };

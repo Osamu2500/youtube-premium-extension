@@ -82,11 +82,19 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             .ypp-filter-card.active {
                 background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5);
                 box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35);
-                animation: ypp-card-active-glow 2.5s ease-in-out infinite;
             }
-            @keyframes ypp-card-active-glow {
-                0%, 100% { box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.35); }
-                50%       { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.65), 0 0 12px rgba(255,255,255,0.12); }
+            .ypp-filter-card.active::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                box-shadow: 0 0 18px rgba(255,255,255,0.2);
+                animation: ypp-card-glow-fade 2.5s ease-in-out infinite;
+                pointer-events: none;
+            }
+            @keyframes ypp-card-glow-fade {
+                0%, 100% { opacity: 0.5; }
+                50%       { opacity: 1; }
             }
             .ypp-filter-lut-preview {
                 width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
@@ -213,9 +221,11 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             tabTransitionTimeout = setTimeout(() => {
                 hide.style.display = 'none';
                 show.style.display = 'block';
-                // Trigger reflow before fading in
-                void show.offsetWidth;
-                show.style.opacity = '1';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        show.style.opacity = '1';
+                    });
+                });
             }, 180);
         };
 
@@ -345,6 +355,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // ── Favorites (localStorage)
         const FAV_KEY  = 'ypp-fav-filters';
         const loadFavs = () => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch { return []; } };
+        let currentFavs = loadFavs();
         const saveFavs = (arr) => {
             try {
                 localStorage.setItem(FAV_KEY, JSON.stringify(arr));
@@ -353,9 +364,9 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             }
         };
         const toggleFav = (idx) => {
-            const f = loadFavs(), pos = f.indexOf(idx);
-            pos === -1 ? f.push(idx) : f.splice(pos, 1);
-            saveFavs(f);
+            const pos = currentFavs.indexOf(idx);
+            pos === -1 ? currentFavs.push(idx) : currentFavs.splice(pos, 1);
+            saveFavs(currentFavs);
         };
 
         // ── Search bar
@@ -379,7 +390,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const buildCard = (filter, index) => {
             const card = document.createElement('div');
             const isActive = ctx.currentFilterIndex === index;
-            const isFav    = loadFavs().includes(index);
+            const isFav    = currentFavs.includes(index);
             card.className = `ypp-filter-card ${isActive ? 'active' : ''}`;
             const cssFilter = filter.css === 'none' ? 'grayscale(0%)' : filter.css;
             card.innerHTML = `
@@ -392,10 +403,6 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             starBtn.onclick = (e) => {
                 e.stopPropagation();
                 toggleFav(index);
-                const nowFav = loadFavs().includes(index);
-                starBtn.innerHTML  = nowFav ? starFilled : starOutline;
-                starBtn.dataset.fav = nowFav;
-                starBtn.title = nowFav ? 'Remove from Favorites' : 'Add to Favorites';
                 renderFilteredList(searchInput.value);
             };
             card.onclick = (e) => {
@@ -457,11 +464,10 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             listContainer.innerHTML = '';
             const q = query.toLowerCase();
             const FILTERS = window.YPP?.features?.VideoFiltersPresets?.FILTERS || [];
-            const favs = loadFavs();
 
             // Favorites at top — always open, only shown without search
-            if (!query && favs.length > 0) {
-                const favItems = favs.filter(i => FILTERS[i]).map(i => ({ filter: FILTERS[i], index: i }));
+            if (!query && currentFavs.length > 0) {
+                const favItems = currentFavs.filter(i => FILTERS[i]).map(i => ({ filter: FILTERS[i], index: i }));
                 if (favItems.length) listContainer.appendChild(buildCategory('⭐ Favorites', favItems, true));
             }
 

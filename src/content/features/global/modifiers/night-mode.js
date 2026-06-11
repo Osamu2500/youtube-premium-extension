@@ -23,17 +23,7 @@
             }
         }
         
-        disable() {
-            try {
-                this._removeBlueLight();
-                if (this._elements.dim) {
-                    this._elements.dim.remove();
-                    this._elements.dim = null;
-                }
-            } catch (err) {
-                this.utils?.log('NightMode disable error', 'NIGHT-MODE', 'error', err);
-            }
-        }
+
 
         update(settings) {
             try {
@@ -130,12 +120,16 @@
             this._elements.dim.style.opacity = (value / 100).toString();
         }
 
-        async disable() {
-            super.disable();
-            this._removeBlueLight();
-            if (this._elements.dim) {
-                this._elements.dim.remove();
-                this._elements.dim = null;
+        disable() {
+            try {
+                this._removeBlueLight();
+                if (this._elements.dim) {
+                    this._elements.dim.remove();
+                    this._elements.dim = null;
+                }
+                super.disable();
+            } catch (err) {
+                this.utils?.log('NightMode disable error', 'NIGHT-MODE', 'error', err);
             }
         }
     }

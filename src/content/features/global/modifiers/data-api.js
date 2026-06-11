@@ -14,6 +14,8 @@ window.YPP.features.DataAPI = class DataAPI extends window.YPP.features.BaseFeat
         this.clientVersion = null;
         this.context = null;
         this.loggedOnly = false;
+        this._extracted = false;     // Guard: scrape script tags only once per session
+        this._cachedHeaders = null;  // Cache: avoid new object on every getHeaders() call
     }
 
     disable() {
@@ -27,20 +29,15 @@ window.YPP.features.DataAPI = class DataAPI extends window.YPP.features.BaseFeat
     }
 
     extractData() {
+        if (this._extracted) return; // Guard: only scan script tags once per session
         try {
-            // Method 1: ytcfg global object (most reliable if script runs after it)
-            // Since we are in an extension content script, we might not have direct access to page window variables
-            // correctly without injection. However, sometimes we can scrape it from the DOM.
-            
-            // Actually, content scripts live in an isolated world. We can't access 'window.ytcfg' directly.
-            // We need to inject a script to get it, OR scrape it from <script> tags.
-            
+            // Content scripts live in an isolated world — can't access window.ytcfg directly.
+            // Scrape from inline <script> tags instead.
             this.scrapeFromScriptTags();
-            
-            if (!this.apiKey) {
-                // Fallback: try to find it in the darker corners of the DOM
-            }
 
+            if (this.apiKey) {
+                this._extracted = true; // Success — no more script tag iterations needed
+            }
         } catch (e) {
             this.utils?.log('Extraction error', 'DATA-API', 'error', e);
         }
@@ -69,10 +66,14 @@ window.YPP.features.DataAPI = class DataAPI extends window.YPP.features.BaseFeat
 
     getHeaders() {
         if (!this.apiKey) return null;
-        return {
-            'X-Goog-Visitor-Id': this.context?.client?.visitorData || '',
-            'X-Youtube-Client-Name': this.clientName || '1',
-            'X-Youtube-Client-Version': this.clientVersion || '2.20210101.00.00'
-        };
+        // Cache result — headers are stable for the entire session
+        if (!this._cachedHeaders) {
+            this._cachedHeaders = {
+                'X-Goog-Visitor-Id': this.context?.client?.visitorData || '',
+                'X-Youtube-Client-Name': this.clientName || '1',
+                'X-Youtube-Client-Version': this.clientVersion || '2.20210101.00.00'
+            };
+        }
+        return this._cachedHeaders;
     }
 };

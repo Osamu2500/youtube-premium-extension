@@ -12,7 +12,8 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         this.isActive = false;
         this.videoId = null;
         this.abortController = null;
-        this.cache = new Map(); // Simple cache to avoid re-fetching
+        this.cache = new Map(); // Simple LRU-lite cache (max 50 entries)
+        this._cacheMax = 50;
         
         // Binds
         this.handleNavigation = this.handleNavigation.bind(this);
@@ -65,7 +66,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
 
         // Check cache
         if (this.cache.has(videoId)) {
-            this.updateUI(this.cache.get(videoId));
+            this.updateUI(this.cache.get(videoId), videoId);
             return;
         }
 
@@ -80,8 +81,12 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
 
             if (response && response.status === 200 && response.data) {
                 const data = response.data;
+                // LRU eviction: drop oldest entry when cache is at capacity
+                if (this.cache.size >= this._cacheMax) {
+                    this.cache.delete(this.cache.keys().next().value);
+                }
                 this.cache.set(videoId, data);
-                this.updateUI(data);
+                this.updateUI(data, videoId);
             } else {
                 throw new Error(response?.error || 'API Error');
             }
@@ -92,7 +97,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         }
     }
 
-    async updateUI(data) {
+    async updateUI(data, videoId) {
         if (!data || !this.isActive) return;
 
         const Utils = window.YPP.Utils;
@@ -104,9 +109,18 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
             return el ? el : null;
         }, 10000, 500);
         
-        // Ensure feature is still active and on the same video after async wait
-        const currentVideoId = new URLSearchParams(window.location.search).get('v');
+        // Use the passed videoId — avoids a URL parse after an async 500ms wait
+        const currentVideoId = videoId || new URLSearchParams(window.location.search).get('v');
         if (!buttons || !this.isActive || this.videoId !== currentVideoId) return;
+
+        // Fast path: if we already injected the text span, just update the number and return.
+        // Skips all the expensive DOM walking below on subsequent navigations to the same video.
+        const existingText = buttons.querySelector('.ypp-dislike-text');
+        if (existingText) {
+            existingText.textContent = this.formatNumber(data.dislikes);
+            existingText.title = data.dislikes.toLocaleString();
+            return;
+        }
 
         // Find the dislike button
         // 1. Try finding by specific icon path or aria-label if possible, but structure varies.

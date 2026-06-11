@@ -8,6 +8,7 @@ window.YPP.features.MultiSelect = class MultiSelect
         super('MultiSelect');
         this._selected = new Map(); // videoId → { title, href, element }
         this._bound = this._init.bind(this);
+        this._debouncedBound = null;
         this._actionBar = null;
     }
 
@@ -16,21 +17,43 @@ window.YPP.features.MultiSelect = class MultiSelect
     async enable() {
         await super.enable();
         this._init();
+        this._debouncedBound = window.YPP.Utils?.debounce
+            ? window.YPP.Utils.debounce(this._bound, 200)
+            : this._bound;
         window.YPP.events?.on('page:changed', this._bound);
-        window.YPP.events?.on('dom:nodes-added', this._bound);
+        window.YPP.events?.on('dom:nodes-added', this._debouncedBound);
     }
 
     async disable() {
         await super.disable();
         window.YPP.events?.off('page:changed', this._bound);
-        window.YPP.events?.off('dom:nodes-added', this._bound);
+        if (this._debouncedBound) window.YPP.events?.off('dom:nodes-added', this._debouncedBound);
         this._clearAll();
         this._actionBar?.remove();
         this._actionBar = null;
     }
 
     _init() {
+        this._injectStyle();
         this._attachCheckboxes();
+    }
+
+    _injectStyle() {
+        if (!document.getElementById('ypp-ms-styles')) {
+            const s = document.createElement('style');
+            s.id = 'ypp-ms-styles';
+            s.textContent = `
+                ytd-thumbnail, #thumbnail { position: relative; }
+                .ypp-ms-bar {
+                    animation: ypp-ms-bar-in 0.25s cubic-bezier(0.2, 0, 0, 1) forwards;
+                }
+                @keyframes ypp-ms-bar-in {
+                    from { opacity: 0; transform: translateY(100%); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            (document.head || document.documentElement).appendChild(s);
+        }
     }
 
     _getVideoCards() {
@@ -79,7 +102,6 @@ window.YPP.features.MultiSelect = class MultiSelect
             // Position on thumbnail
             const thumb = card.querySelector('ytd-thumbnail, #thumbnail');
             if (thumb) {
-                thumb.style.position = 'relative';
                 thumb.appendChild(cb);
             }
 
@@ -131,64 +153,70 @@ window.YPP.features.MultiSelect = class MultiSelect
             this._actionBar = document.createElement('div');
             this._actionBar.className = 'ypp-ms-bar';
             document.body.appendChild(this._actionBar);
+            
+            this._actionBar.innerHTML = `
+                <div class="ypp-ms-bar-info">
+                    <span class="ypp-ms-count" id="ypp-ms-count-val">${count}</span>
+                    <span class="ypp-ms-label" id="ypp-ms-count-label">
+                        video${count !== 1 ? 's' : ''} selected
+                    </span>
+                </div>
+                <div class="ypp-ms-bar-actions">
+                    <button class="ypp-ms-btn" id="ypp-ms-queue">
+                        <svg viewBox="0 0 24 24" width="15" height="15" 
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                        Add to Queue
+                    </button>
+                    <button class="ypp-ms-btn" id="ypp-ms-playlist">
+                        <svg viewBox="0 0 24 24" width="15" height="15" 
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 
+                                2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                        </svg>
+                        Save to Playlist
+                    </button>
+                    <button class="ypp-ms-btn" id="ypp-ms-wl">
+                        <svg viewBox="0 0 24 24" width="15" height="15" 
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Watch Later
+                    </button>
+                    <button class="ypp-ms-btn ypp-ms-btn-clear" 
+                        id="ypp-ms-clear">
+                        ✕ Clear
+                    </button>
+                </div>
+            `;
+            
+            // Wire buttons ONLY once
+            this._actionBar.querySelector('#ypp-ms-queue')
+                ?.addEventListener('click', () => this._addToQueue());
+
+            this._actionBar.querySelector('#ypp-ms-wl')
+                ?.addEventListener('click', () => this._addToWatchLater());
+
+            this._actionBar.querySelector('#ypp-ms-playlist')
+                ?.addEventListener('click', () => this._showPlaylistPicker());
+
+            this._actionBar.querySelector('#ypp-ms-clear')
+                ?.addEventListener('click', () => this._clearAll());
         }
 
-        this._actionBar.innerHTML = `
-            <div class="ypp-ms-bar-info">
-                <span class="ypp-ms-count">${count}</span>
-                <span class="ypp-ms-label">
-                    video${count !== 1 ? 's' : ''} selected
-                </span>
-            </div>
-            <div class="ypp-ms-bar-actions">
-                <button class="ypp-ms-btn" id="ypp-ms-queue">
-                    <svg viewBox="0 0 24 24" width="15" height="15" 
-                        fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="8" y1="6" x2="21" y2="6"/>
-                        <line x1="8" y1="12" x2="21" y2="12"/>
-                        <line x1="8" y1="18" x2="21" y2="18"/>
-                        <line x1="3" y1="6" x2="3.01" y2="6"/>
-                        <line x1="3" y1="12" x2="3.01" y2="12"/>
-                        <line x1="3" y1="18" x2="3.01" y2="18"/>
-                    </svg>
-                    Add to Queue
-                </button>
-                <button class="ypp-ms-btn" id="ypp-ms-playlist">
-                    <svg viewBox="0 0 24 24" width="15" height="15" 
-                        fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 
-                            2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                        <polyline points="17 21 17 13 7 13 7 21"/>
-                    </svg>
-                    Save to Playlist
-                </button>
-                <button class="ypp-ms-btn" id="ypp-ms-wl">
-                    <svg viewBox="0 0 24 24" width="15" height="15" 
-                        fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    Watch Later
-                </button>
-                <button class="ypp-ms-btn ypp-ms-btn-clear" 
-                    id="ypp-ms-clear">
-                    ✕ Clear
-                </button>
-            </div>
-        `;
-
-        // Wire buttons
-        this._actionBar.querySelector('#ypp-ms-queue')
-            ?.addEventListener('click', () => this._addToQueue());
-
-        this._actionBar.querySelector('#ypp-ms-wl')
-            ?.addEventListener('click', () => this._addToWatchLater());
-
-        this._actionBar.querySelector('#ypp-ms-playlist')
-            ?.addEventListener('click', () => this._showPlaylistPicker());
-
-        this._actionBar.querySelector('#ypp-ms-clear')
-            ?.addEventListener('click', () => this._clearAll());
+        // Fast update instead of full innerHTML re-render
+        const countSpan = this._actionBar.querySelector('#ypp-ms-count-val');
+        const labelSpan = this._actionBar.querySelector('#ypp-ms-count-label');
+        if (countSpan) countSpan.textContent = count;
+        if (labelSpan) labelSpan.textContent = `video${count !== 1 ? 's' : ''} selected`;
     }
 
     _addToQueue() {

@@ -553,12 +553,18 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
      */
     _normChannel(name) {
         if (!name) return '';
-        return name
+        if (!this._normCache) this._normCache = new Map();
+        if (this._normCache.has(name)) return this._normCache.get(name);
+        
+        const result = name
             .replace(/[\u200B-\u200D\uFEFF]/g, '')  // zero-width chars
-            .replace(/[\u2713\u2714\u2705\u2022]/g, '') // verified checkmarks YouTube injects into text nodes
+            .replace(/[\u2713\u2714\u2705\u2022]/g, '') // verified checkmarks
             .replace(/\s+/g, ' ')
             .trim()
             .toLowerCase();
+            
+        this._normCache.set(name, result);
+        return result;
     }
 
     _applyFeedFiltersNow() {

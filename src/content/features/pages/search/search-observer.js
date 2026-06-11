@@ -72,10 +72,16 @@ window.YPP.features.SearchObserver = class SearchObserver {
         this._containerSelector = containerSelector;
 
         if (window.YPP?.sharedObserver) {
+            // Debounce: batches rapid mutations (20 items loading at once) into a
+            // single _processMatches call rather than firing 20 separate times.
+            const debouncedProcess = window.YPP.Utils?.debounce
+                ? window.YPP.Utils.debounce((matches) => this._processMatches(matches), 150)
+                : (matches) => this._processMatches(matches);
+
             window.YPP.sharedObserver.register(
                 'search-results-scanner',
                 'ytd-item-section-renderer, ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-channel-renderer',
-                (matches) => this._processMatches(matches)
+                debouncedProcess
             );
             this.processAll();
         }
