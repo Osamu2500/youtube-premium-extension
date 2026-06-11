@@ -8308,10 +8308,7 @@ html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-pl
     transform: scale(0.9) !important;
 }
 
-/* Remove original action column container constraints */
-html.yt-premium-plus-theme ytd-reel-video-renderer[is-active] #overlay {
-    /* Allow the pill to position properly within the overlay */
-}
+/* Remove original action column container constraints to allow the pill to position properly within the overlay */
 
 /* Hide labels text in the pill to save space, keeping icons clean */
 html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions .label.ytd-reel-player-overlay-renderer {
