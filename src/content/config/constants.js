@@ -380,7 +380,6 @@ window.YPP.CONSTANTS = {
         layout: 'Layout',
         homeOrganizer: 'HomeOrganizer',
         subsOrganizer: 'SubscriptionsOrganizer',
-        // advancedFilter: 'AdvancedFilter', // Ghost/Incomplete
         zenMode: 'ZenMode',
         studyMode: 'StudyMode',
         focusMode: 'FocusMode',
@@ -404,7 +403,6 @@ window.YPP.CONSTANTS = {
         redirectHome: 'RedirectHome',
         intentionalDelay: 'IntentionalDelay',
         playlistDuration: 'PlaylistDuration',
-        // statsVisualizer: 'StatsVisualizer', // Disabled per user request
         watchHistory: 'WatchHistoryTracker',
         historyTracker: 'HistoryTracker',
         historyRedesign: 'HistoryRedesign',
@@ -414,12 +412,9 @@ window.YPP.CONSTANTS = {
         videoControls: 'VideoControls',
         returnYouTubeDislike: 'ReturnDislike',
         sponsorBlock: 'SponsorBlock',
-        // miniPlayer: 'MiniPlayer', // Ghost/Incomplete
         floatingPlayer: 'FloatingPlayer',
         videoFilters: 'VideoFilters',
         reversePlaylist: 'ReversePlaylist',
-        // dataAPI: 'DataAPI', // Ghost/Incomplete
-        // nightMode: 'NightModeManager', // Missing global assignment
         continueWatching: 'ContinueWatching',
         subscriptionFolders: 'SubscriptionFolders',
         contextMenu: 'ContextMenu',

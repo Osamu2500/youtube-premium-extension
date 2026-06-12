@@ -42,8 +42,6 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
     }
 
     apply() {
-        // Re-inject header if missing (e.g. after nav)
-        // this.injectHeaderWidget(); // Removed - logic moved to HistoryTracker
         this.injectStyles(); // Ensure styles are re-injected if needed
         if (typeof this.injectCalendarModal === 'function') {
              this.injectCalendarModal();
