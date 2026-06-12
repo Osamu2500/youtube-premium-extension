@@ -10,6 +10,11 @@ export const DEFAULT_SETTINGS = {
     hideScrollbar: false,
     customScrollbar: false,
     grayscaleThumbnails: false,
+    
+    // Advanced Theming
+    glassBlur: 16,
+    glassTintOpacity: 85,
+    borderOpacity: 8,
 
     // Layout
     grid4x4: false,

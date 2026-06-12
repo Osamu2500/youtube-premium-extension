@@ -82,12 +82,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     switch (action) {
         case 'GET_SETTINGS':
-            chrome.storage.local.get('settings').then((data) => {
-                sendResponse(data.settings || DEFAULT_SETTINGS);
-            }).catch((error) => {
-                console.error('[YPP] Error getting settings:', error);
-                sendResponse(DEFAULT_SETTINGS);
-            });
+            (async () => {
+                try {
+                    let data = await chrome.storage.sync.get('settings');
+                    if (!data || Object.keys(data).length === 0 || !data.settings) {
+                        data = await chrome.storage.local.get('settings');
+                    }
+                    sendResponse(data.settings || DEFAULT_SETTINGS);
+                } catch (error) {
+                    console.error('[YPP] Error getting settings:', error);
+                    sendResponse(DEFAULT_SETTINGS);
+                }
+            })();
             return true; // Indicate async response
 
         case 'getTimer':
@@ -189,15 +195,22 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('[YPP] Service Worker Installed:', details.reason);
     try {
         // Retrieve existing settings
-        const data = await chrome.storage.local.get('settings');
-        const existingSettings = data.settings || {};
+        const localData = await chrome.storage.local.get('settings');
+        const syncData = await chrome.storage.sync.get('settings');
+        
+        const existingSettings = { ...(localData.settings || {}), ...(syncData.settings || {}) };
 
         // Shallow merge defaults underneath existing user preferences
         const newSettings = { ...DEFAULT_SETTINGS, ...existingSettings };
         
         // Persist the consolidated settings
+        try {
+            await chrome.storage.sync.set({ settings: newSettings });
+        } catch (e) {
+            console.warn('[YPP] Sync storage full, falling back to local only', e);
+        }
         await chrome.storage.local.set({ settings: newSettings });
-        console.log('[YPP] Settings initialized and merged successfully');
+        console.log('[YPP] Settings initialized and merged successfully (Sync + Local)');
         
         // Initialize Context Menu
         initContextMenu();

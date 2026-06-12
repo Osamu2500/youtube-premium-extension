@@ -23,10 +23,15 @@ export function initStorage(document) {
 export function loadSettings(updateUICallbacks) {
     const Utils = getUtils();
     try {
-        chrome.storage.local.get('settings', (data) => {
-            if (chrome.runtime.lastError) {
-                Utils.log('Load Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
-                return;
+        (async () => {
+            let data;
+            try {
+                data = await chrome.storage.sync.get('settings');
+            } catch (e) {
+                Utils.log('Sync Storage Load Error: ' + e.message, 'POPUP', 'error');
+            }
+            if (!data || Object.keys(data).length === 0 || !data.settings) {
+                data = await chrome.storage.local.get('settings');
             }
 
             const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
@@ -86,7 +91,7 @@ export function loadSettings(updateUICallbacks) {
             if (updateUICallbacks) {
                 updateUICallbacks.forEach(cb => cb(state.settings));
             }
-        });
+        })();
     } catch (e) {
         Utils.log('Critical Load Error: ' + e.message, 'POPUP', 'error');
     }
@@ -144,7 +149,17 @@ function _processWriteQueue() {
     const updates = [...state._settingsWriteQueue];
     state._settingsWriteQueue = [];
     
-    chrome.storage.local.get(['settings'], (result) => {
+    (async () => {
+        let result = {};
+        try {
+            result = await chrome.storage.sync.get('settings');
+            if (!result || !result.settings) {
+                result = await chrome.storage.local.get('settings');
+            }
+        } catch (e) {
+            result = await chrome.storage.local.get('settings');
+        }
+
         const currentSettings = result.settings || {};
         
         updates.forEach(update => {
@@ -162,16 +177,18 @@ function _processWriteQueue() {
              Object.assign(currentSettings, defaultSettings, currentSettings);
         }
 
-        chrome.storage.local.set({ settings: currentSettings }, () => {
-            state._isWritingSettings = false;
-            if (chrome.runtime.lastError) {
-                Utils.log('Save Error: ' + chrome.runtime.lastError.message, 'POPUP', 'error');
-            }
-            if (state._settingsWriteQueue.length > 0) {
-                _processWriteQueue();
-            }
-        });
-    });
+        try {
+            await chrome.storage.sync.set({ settings: currentSettings });
+        } catch (e) {
+            Utils.log('Sync Save Error: ' + e.message, 'POPUP', 'warn');
+        }
+        await chrome.storage.local.set({ settings: currentSettings });
+        
+        state._isWritingSettings = false;
+        if (state._settingsWriteQueue.length > 0) {
+            _processWriteQueue();
+        }
+    })();
 }
 
 export function queueSettingsWrite(payload) {

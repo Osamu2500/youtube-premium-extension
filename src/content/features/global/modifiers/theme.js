@@ -397,6 +397,17 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         if (this._settings.sidebarOpacity !== undefined) {
             root.style.setProperty('--ypp-sidebar-opacity', (this._settings.sidebarOpacity / 100).toFixed(2));
         }
+
+        // Glassmorphism Tuning
+        if (this._settings.glassBlur !== undefined) {
+            root.style.setProperty('--ypp-glass-blur', `blur(${this._settings.glassBlur}px)`);
+        }
+        if (this._settings.glassTintOpacity !== undefined) {
+            root.style.setProperty('--ypp-glass-tint', `rgba(20, 20, 20, ${(this._settings.glassTintOpacity / 100).toFixed(2)})`);
+        }
+        if (this._settings.borderOpacity !== undefined) {
+            root.style.setProperty('--ypp-border-opacity', (this._settings.borderOpacity / 100).toFixed(2));
+        }
     }
 
     /**
@@ -452,6 +463,9 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         root.style.removeProperty('--ypp-accent-gradient');
         root.style.removeProperty('--ypp-thumb-radius');
         root.style.removeProperty('--ypp-sidebar-opacity');
+        root.style.removeProperty('--ypp-glass-blur');
+        root.style.removeProperty('--ypp-glass-tint');
+        root.style.removeProperty('--ypp-border-opacity');
         
         // Remove styling data attributes
         root.removeAttribute('data-ypp-density');

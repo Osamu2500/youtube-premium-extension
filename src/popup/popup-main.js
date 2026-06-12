@@ -13,7 +13,7 @@ registerSlot('shortcutsPanel', (container, state) => {
     container.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div style="font-size:12px; color:rgba(255,255,255,0.5);">Click an input to map a new shortcut:</div>
-            <div id="shortcutsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+            <div id="shortcutsList" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;"></div>
         </div>
     `;
     const list = container.querySelector('#shortcutsList');
@@ -33,17 +33,17 @@ registerSlot('shortcutsPanel', (container, state) => {
 
     shortcuts.forEach(sc => {
         const row = document.createElement('div');
-        row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);';
+        row.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start; gap:6px; background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);';
         
         const label = document.createElement('span');
         label.textContent = sc.label;
-        label.style.cssText = 'font-size:13px; color:#fff;';
+        label.style.cssText = 'font-size:11px; font-weight:500; color:rgba(255,255,255,0.8);';
         
         const input = document.createElement('input');
         input.type = 'text';
         input.id = sc.id;
         input.readOnly = true;
-        input.style.cssText = 'background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--accent-primary, #3ea6ff); font-family:monospace; font-size:12px; padding:4px 8px; width:80px; text-align:center; cursor:pointer; outline:none; transition:all 0.2s;';
+        input.style.cssText = 'background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); border-radius:6px; color:var(--text-1, #fff); font-family:monospace; font-size:11px; padding:4px 8px; width:100%; box-sizing:border-box; text-align:left; cursor:pointer; outline:none; transition:all 0.2s;';
         
         // Add to state so it saves automatically
         state.elements[sc.id] = input;
@@ -201,9 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    ['fontScale', 'thumbRadius', 'sidebarOpacity'].forEach(id => {
+    ['fontScale', 'thumbRadius', 'sidebarOpacity', 'glassBlur', 'glassTintOpacity', 'borderOpacity'].forEach(id => {
         const el = document.getElementById(id);
-        const suffix = id === 'fontScale' || id === 'sidebarOpacity' ? '%' : 'px';
+        const suffix = (id === 'fontScale' || id === 'sidebarOpacity' || id === 'glassTintOpacity' || id === 'borderOpacity') ? '%' : 'px';
         const disp = document.getElementById(id + 'Value');
         if (el) {
             el.addEventListener('input', () => {

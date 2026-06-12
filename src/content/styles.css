@@ -112,11 +112,14 @@
 
 :root {
   /* UI Architecture Core Variables */
-  --ypp-bg-surface: rgba(20, 20, 20, 0.85);
+  --ypp-bg-surface: var(--ypp-glass-tint, rgba(20, 20, 20, 0.85));
   --ypp-bg-hover: rgba(255, 255, 255, 0.1);
   --ypp-bg-active: rgba(255, 255, 255, 0.2);
-  --ypp-glass-blur: blur(16px);
-  --ypp-glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --ypp-glass-blur-default: blur(16px);
+  --ypp-glass-border-default: 1px solid rgba(255, 255, 255, 0.08);
+  --ypp-glass-blur-active: var(--ypp-glass-blur, var(--ypp-glass-blur-default));
+  --ypp-glass-border-active: 1px solid rgba(255, 255, 255, var(--ypp-border-opacity, 0.08));
+  
   --ypp-radius-sm: 6px;
   --ypp-radius-md: 10px;
   --ypp-radius-lg: 14px;
@@ -298,11 +301,11 @@ ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-grid-playlist-renderer, ytd-grid-radio-renderer
 ) {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-top-color: rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 12px rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: var(--ypp-glass-blur-active) saturate(1.2) !important;
+  -webkit-backdrop-filter: var(--ypp-glass-blur-active) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, var(--ypp-border-opacity, 0.08)) !important;
+  border-top-color: rgba(255, 255, 255, calc(var(--ypp-border-opacity, 0.08) * 2.25)) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--ypp-border-opacity, 0.08)), inset 0 0 12px rgba(255, 255, 255, 0.02) !important;
   padding: var(--ypp-density-pad, 16px) !important;
   border-radius: var(--ypp-radius-lg, 16px) !important;
   margin-bottom: var(--ypp-density-gap, 16px) !important;
@@ -482,10 +485,10 @@ html.yt-premium-plus-theme ytd-multi-page-menu-renderer,
 html.yt-premium-plus-theme .ytp-popup {
   border-radius: 16px !important;
   overflow: hidden !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  background: rgba(20, 20, 20, 0.65) !important;
-  backdrop-filter: blur(32px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, var(--ypp-border-opacity, 0.08)) !important;
+  background: var(--ypp-bg-surface) !important;
+  backdrop-filter: var(--ypp-glass-blur-active) saturate(1.5) !important;
+  -webkit-backdrop-filter: var(--ypp-glass-blur-active) saturate(1.5) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0,0,0,0.6) !important;
 }
 
@@ -494,9 +497,9 @@ html.yt-premium-plus-theme .ytp-popup {
    Also needs border-radius applied to inner content, not the wrapper. */
 html.yt-premium-plus-theme tp-yt-iron-dropdown {
   border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(32px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, var(--ypp-border-opacity, 0.08)) !important;
+  backdrop-filter: var(--ypp-glass-blur-active) saturate(1.5) !important;
+  -webkit-backdrop-filter: var(--ypp-glass-blur-active) saturate(1.5) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0,0,0,0.6) !important;
 }
 

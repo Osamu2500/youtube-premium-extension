@@ -745,17 +745,22 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
-     * Load settings from Chrome storage with default fallback
+     * Load settings from Chrome storage with default fallback (prefers sync over local)
      * @returns {Promise<Object>}
      */
     loadSettings: async () => {
         try {
-            if (!chrome?.storage?.local) {
+            if (!chrome?.storage) {
                 window.YPP.Utils?.log('Chrome storage not available', 'UTILS', 'warn');
                 return CONSTANTS.DEFAULT_SETTINGS || {};
             }
 
-            const data = await chrome.storage.local.get('settings');
+            // Prefer sync storage, fallback to local if empty
+            let data = await chrome.storage.sync.get('settings');
+            if (!data || Object.keys(data).length === 0 || !data.settings) {
+                data = await chrome.storage.local.get('settings');
+            }
+            
             const raw = data.settings || {};
 
             // Run through schema validator if available (settings-schema.js loads before utils)
@@ -772,16 +777,25 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
     },
 
     /**
-     * Save settings to Chrome storage
+     * Save settings to Chrome storage (sync and local)
      * @param {Object} settings - Settings object to save
      * @returns {Promise<void>}
      */
     saveSettings: async (settings) => {
         try {
-            if (!chrome?.storage?.local) {
+            if (!chrome?.storage) {
                 window.YPP.Utils?.log('Chrome storage not available', 'UTILS', 'warn');
                 return;
             }
+            
+            // Try saving to sync storage first
+            try {
+                await chrome.storage.sync.set({ settings });
+            } catch (e) {
+                window.YPP.Utils?.log('Sync storage quota exceeded, falling back to local: ' + e.message, 'UTILS', 'warn');
+            }
+            
+            // Always save to local as a reliable backup
             await chrome.storage.local.set({ settings });
             window.YPP.Utils?.log('Settings saved', 'UTILS', 'debug');
         } catch (error) {
