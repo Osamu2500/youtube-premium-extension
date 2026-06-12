@@ -17,6 +17,7 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         
         // Bind methods for safe event listener removal
         this.checkRedirect = this.checkRedirect.bind(this);
+        this.handleMixClick = this.handleMixClick.bind(this);
         this.handleShortsAdded = this.handleShortsAdded.bind(this);
         this._isMonitoringShorts = false;
     }
@@ -36,6 +37,8 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         await super.enable();
         // Register navigation listener once, checkRedirect handles settings check
         this.addListener(window, 'yt-navigate-start', this.checkRedirect);
+        // Register click listener in capture phase for mix URLs
+        this.addListener(document, 'click', this.handleMixClick, true);
         this.applySettings();
     }
 
@@ -311,6 +314,34 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
     }
 
     /**
+     * Intercept clicks on links that contain Mix playlists and clean them
+     */
+    handleMixClick(e) {
+        if (!this.settings?.cleanMixUrls) return;
+        
+        // Find the closest anchor tag that was clicked
+        const a = e.target.closest('a[href]');
+        if (a && a.href.includes('list=RD')) {
+            try {
+                // Parse URL and strip Mix parameters
+                const url = new URL(a.href, window.location.origin);
+                const list = url.searchParams.get('list');
+                
+                if (list && list.startsWith('RD')) {
+                    url.searchParams.delete('list');
+                    url.searchParams.delete('start_radio');
+                    
+                    // Update the href so YouTube's SPA router picks up the clean URL
+                    a.href = url.pathname + url.search + url.hash;
+                    this.utils?.log('Cleaned Mix URL on click:', a.href, 'CONTENT');
+                }
+            } catch (err) {
+                // Ignore URL parsing errors
+            }
+        }
+    }
+
+    /**
      * Start continuous monitoring for dynamically loaded Shorts
      * Uses centralized DOMObserver.
      */
@@ -352,7 +383,7 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
      * @param {HTMLElement[]} elements - Array of newly added or modified elements
      */
     handleShortsAdded(elements) {
-        if (!this.settings?.hideShorts) return;
+        if (!this.settings?.hideShorts && !this.settings?.stopShortsLooping) return;
 
         // On search results, ytd-video-renderer cards are real results — never delete them here.
         // The CSS :has(a[href*="/shorts/"]) + removeShortsFromDOM() handle search Shorts precisely.
@@ -368,7 +399,30 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
 
         elements.forEach(el => {
             if (!el) return;
+
+            // Stop Shorts Looping logic
+            if (this.settings?.stopShortsLooping) {
+                const video = el.tagName?.toLowerCase() === 'video' ? el : el.querySelector('video');
+                if (video && !video.hasAttribute('data-ypp-no-loop')) {
+                    video.loop = false;
+                    video.removeAttribute('loop');
+                    video.setAttribute('data-ypp-no-loop', 'true');
+                    
+                    // Enforce no loop even if YouTube tries to re-add it
+                    const loopObserver = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.attributeName === 'loop' && video.hasAttribute('loop')) {
+                                video.loop = false;
+                                video.removeAttribute('loop');
+                            }
+                        });
+                    });
+                    loopObserver.observe(video, { attributes: true, attributeFilter: ['loop'] });
+                }
+            }
             
+            if (!this.settings?.hideShorts) return;
+
             // First check if the element itself is a short/shorts chip
             if (this._isShortsElement(el)) {
                 if (!el.hasAttribute('data-ypp-is-short')) {
@@ -390,7 +444,7 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
                 return;
             }
 
-            // Otherwise, see if it CONTAINS known short elements (rare for these specific selectors but safe to check)
+            // Otherwise, see if it CONTAINS known short elements
             try {
                 const nestedShorts = el.querySelectorAll('ytd-reel-shelf-renderer, a[href*="/shorts/"]');
                 if (nestedShorts.length > 0 && this._isShortsElement(el)) {
@@ -403,7 +457,7 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         });
 
         if (removed > 0) {
-            this.utils?.log(`Dynamic removal (Optimized): ${removed} Shorts elements`, 'CONTENT');
+            this.utils?.log(`Dynamic removal: ${removed} Shorts elements`, 'CONTENT');
         }
     }
 };

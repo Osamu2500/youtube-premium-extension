@@ -209,12 +209,18 @@ window.YPP.SettingsSchema = {
         hideCards:           { type: 'boolean', default: false },
         hideMetrics:         { type: 'boolean', default: false },
         redirectHome:        { type: 'boolean', default: false },
-        redirectShorts:      { type: 'boolean', default: false },
         multiSelect:         { type: 'boolean', default: true  },
         autoLike:            { type: 'boolean', default: false },
         autoQuality:         { type: 'boolean', default: false },
         intentionalDelay:    { type: 'boolean', default: false },
         markWatched:         { type: 'boolean', default: true  },
+        hideVoiceSearch:     { type: 'boolean', default: false },
+        cleanMixUrls:        { type: 'boolean', default: false },
+        stopShortsLooping:   { type: 'boolean', default: false },
+
+        // --- Blocklist ---
+        blockedChannels:     { type: 'string',  default: '' },
+        blockedKeywords:     { type: 'string',  default: '' },
 
         // --- Playlist & History (missing from original schema) ---
         reversePlaylist:     { type: 'boolean', default: false },

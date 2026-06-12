@@ -187,6 +187,8 @@ export const POPUP_SCHEMA = [
                 items: [
                     { type:'range', id:'channelColumns',       label:'Channel Columns',    unit:'', min:2, max:10, step:1 },
                     { type:'range', id:'subscriptionsColumns', label:'Feed Grid Columns',  unit:'', min:1, max:8,  step:1 },
+                    { type:'toggle', id:'useSquareCorners',    label:'Square Corners',     desc:'Sharp edges for videos',   icon:P('M3 3h18v18H3z') },
+                    { type:'toggle', id:'revertProgressBar',   label:'Classic Progress Bar', desc:'Solid red, no pink gradient', icon:P('M3 3h18v18H3zM3 9h18') }
                 ]
             }
         ]
@@ -217,11 +219,14 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Auto-hide watched videos',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'), slot:'hideWatchedOptions' },
                     { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
                     { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
+                    { type:'toggle', id:'cleanMixUrls',      label:'Clean Mix URLs',    desc:'Prevent Mix Auto-Play',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z') },
                     { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },
                     { type:'toggle', id:'hidePodcasts',      label:'Hide Podcasts',     desc:'Remove podcast cards',     icon:P('M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1v-6h3v4z M3 19a2 2 0 0 0 2 2h1v-6H3v4z') },
                     { type:'toggle', id:'hidePosts',         label:'Hide Posts',        desc:'Remove community posts',   icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
                     { type:'toggle', id:'hidePromoShelves',  label:'Hide Promos',       desc:'Remove shelves & games',   icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
+                    { type:'toggle', id:'hideVoiceSearch',   label:'Hide Voice Search', desc:'Remove microphone icon',    icon:P('M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-4.08A7 7 0 0 0 19 11h-2z') },
                     { type:'toggle', id:'aggressiveShortsBlock', label:'Nuke Shorts', desc:'Remove everywhere', icon:P('M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12z') },
+                    { type:'toggle', id:'stopShortsLooping',     label:'Stop Looping', desc:'No auto-replay on Shorts', icon:P('M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z') },
                     { type:'toggle', id:'hideShortVideos', label:'Duration Filter', desc:'Hide short videos', icon:P('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6') },
                     { type:'range', id:'minVideoDuration', label:'Min Duration', min: 1, max: 60, step: 1, unit:'m' },
                 ]
