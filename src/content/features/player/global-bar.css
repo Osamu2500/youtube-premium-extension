@@ -266,7 +266,7 @@
     font-size: 11px !important;
     border-radius: 16px !important;
     overflow: visible !important; /* panels are in a dialog portal — must not self-clip */
-    zoom: 0.85;
+    zoom: 0.75;
 }
 
 /* ════ VIDEO FILTER PANEL compact overrides ════ */
