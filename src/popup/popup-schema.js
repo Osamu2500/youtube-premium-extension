@@ -55,20 +55,6 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'autoScaleLayout',  label:'Auto-Scale Grid',  desc:'Adapt to zoom/window size', icon:P('M15 3l6 6M15 3h6v6M9 21l-6-6M9 21H3v-6') },
                     { type:'range', id:'homeColumns', label:'Grid Columns', unit:'', min:1, max:8, step:1 },
                 ]
-            },
-            {
-                title: 'Content Filters',
-                items: [
-                    { type:'toggle', id:'hideExploreTopics', label:'Hide Topics Bar',   desc:'Remove category chips',    icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M3.6 9h16.8 M3.6 15h16.8') },
-                    { type:'toggle', id:'hidePromoShelves',  label:'Hide Promos',       desc:'Remove shelves & games',   icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
-                    { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },
-                    { type:'toggle', id:'hidePodcasts',      label:'Hide Podcasts',     desc:'Remove podcast cards',     icon:P('M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1v-6h3v4z M3 19a2 2 0 0 0 2 2h1v-6H3v4z') },
-                    { type:'toggle', id:'hidePosts',         label:'Hide Posts',        desc:'Remove community posts',   icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
-                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Dim or remove watched',    icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'), slot:'hideWatchedOptions' },
-                    { type:'toggle', id:'hideThumbnails',    label:'Hide Thumbnails',   desc:'Blur on hover to reveal',  icon:P('M3 3h18v18H3z M8.5 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21') },
-                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
-                    { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
-                ]
             }
         ]
     },
@@ -217,23 +203,49 @@ export const POPUP_SCHEMA = [
     { id: 'bookmarks', label: 'Marks', icon: P('M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'), custom: true, sections: [] },
 
     // ──────────────────────────────────────────────────────────────────
-    // WELLNESS
+    // WELLNESS (FOCUS)
     // ──────────────────────────────────────────────────────────────────
     {
         id: 'wellness', label: 'Focus',
         icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 8v4l3 3'),
         sections: [
             {
-                title: 'Focus & Distractions',
+                title: 'Global Filters (All Pages)',
+                items: [
+                    { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
+                    { type:'toggle', id:'hideThumbnails',    label:'Hide Thumbnails',   desc:'Blur on hover to reveal',  icon:P('M3 3h18v18H3z M8.5 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21') },
+                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Auto-hide watched videos',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'), slot:'hideWatchedOptions' },
+                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
+                    { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
+                    { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },
+                    { type:'toggle', id:'hidePodcasts',      label:'Hide Podcasts',     desc:'Remove podcast cards',     icon:P('M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1v-6h3v4z M3 19a2 2 0 0 0 2 2h1v-6H3v4z') },
+                    { type:'toggle', id:'hidePosts',         label:'Hide Posts',        desc:'Remove community posts',   icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hidePromoShelves',  label:'Hide Promos',       desc:'Remove shelves & games',   icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
+                    { type:'toggle', id:'aggressiveShortsBlock', label:'Nuke Shorts', desc:'Remove everywhere', icon:P('M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12z') },
+                    { type:'toggle', id:'hideShortVideos', label:'Duration Filter', desc:'Hide short videos', icon:P('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6') },
+                    { type:'range', id:'minVideoDuration', label:'Min Duration', min: 1, max: 60, step: 1, unit:'m' },
+                ]
+            },
+            {
+                title: 'Homepage',
+                items: [
+                    { type:'toggle', id:'hideFeed',       label:'Hide Homepage Feed',  desc:'Blank homepage', icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
+                    { type:'toggle', id:'hideExploreTopics', label:'Hide Topics Bar',   desc:'Remove category chips',    icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M3.6 9h16.8 M3.6 15h16.8') },
+                    { type:'toggle', id:'hideTrending',   label:'Hide Trending/Explore',icon:P('M13 2L3 14h9l-1 8 10-12h-9l1-8z') },
+                ]
+            },
+            {
+                title: 'Player Page',
                 items: [
                     { type:'toggle', id:'hideComments',   label:'Hide Comments',       icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
                     { type:'toggle', id:'commentFilter',  label:'Comment Spam Filter', desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
                     { type:'select', id:'commentFilterAction', label:'Spam Action', desc:'What to do with spam', icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'), options: [{value:'dim',label:'Dim (Hover to reveal)'},{value:'hide',label:'Hide completely'}] },
-                    { type:'toggle', id:'hideEndScreens', label:'Hide End Screens',    icon:P('M3 3h18v18H3zM3 9h18M9 21V9') },
-                    { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
-                    { type:'toggle', id:'hideCards',      label:'Hide Video Cards',    icon:P('M3 3h18v18H3zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0') },
-                    { type:'toggle', id:'hideMerch',      label:'Hide Merch/Offers',   icon:P('M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0') },
+                    { type:'toggle', id:'hideRelated',    label:'Hide Related Feed',   desc:'Hide sidebar videos', icon:P('M3 3h18v18H3zM14 8h6M14 12h6M14 16h6') },
                     { type:'toggle', id:'hideLiveChat',   label:'Hide Live Chat',      icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hideEndScreens', label:'Hide End Screens',    icon:P('M3 3h18v18H3zM3 9h18M9 21V9') },
+                    { type:'toggle', id:'hideCards',      label:'Hide Video Cards',    icon:P('M3 3h18v18H3zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0') },
+                    { type:'toggle', id:'hideAnnotations',label:'Hide Annotations',    icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hideMerch',      label:'Hide Merch/Offers',   icon:P('M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0') },
                     { type:'toggle', id:'hideFundraiser', label:'Hide Donations',      icon:P('M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z') },
                 ]
             }

@@ -34,6 +34,7 @@ import './features/global/modifiers/hide-thumbnails.js';
 import './features/global/modifiers/redirect-home.js';
 import './features/global/modifiers/hide-watched.js';
 import './features/global/modifiers/keyboard-shortcuts.js';
+import './features/global/modifiers/duration-filter.js';
 
 
 // Layout features

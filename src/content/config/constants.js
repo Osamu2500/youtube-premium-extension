@@ -435,7 +435,8 @@ window.YPP.CONSTANTS = {
         watchRedesign: 'WatchRedesign',
         bookmarksManager: 'BookmarksManager',
         cinematicMode: 'CinematicMode',
-        splitScrolling: 'SplitScrolling'
+        splitScrolling: 'SplitScrolling',
+        durationFilter: 'DurationFilter'
     }
 };
 

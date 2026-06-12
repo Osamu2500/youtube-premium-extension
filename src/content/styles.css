@@ -663,9 +663,13 @@ body.ypp-hide-explore-topics #chips-wrapper {
   display: none !important;
 }
 
+/* ==========================================================================
+   UNHOOK & FOCUS MODE FEATURES
+   ========================================================================== */
+
 /* Hide Comments */
 .ypp-hide-comments #comments {
-  display: none;
+  display: none !important;
 }
 
 /* Hide Sidebar */
@@ -680,7 +684,61 @@ body.ypp-hide-explore-topics #chips-wrapper {
   display: none !important;
 }
 
+/* Hide Annotations & Cards */
+.ypp-hide-annotations .ytp-ce-element,
+.ypp-hide-annotations .ytp-ce-shadow,
+.ypp-hide-cards .ytp-cards-button,
+.ypp-hide-cards .ytp-cards-teaser,
+.ypp-hide-cards .iv-drawer {
+  display: none !important;
+}
 
+/* Hide Related Feed (Watch Page) */
+.ypp-hide-related #related,
+.ypp-hide-related ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+/* Hide Homepage Feed */
+.ypp-hide-feed ytd-browse[page-subtype="home"] #primary {
+  display: none !important;
+}
+
+/* Hide Trending / Explore */
+.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/trending"]),
+.ypp-hide-trending ytd-mini-guide-entry-renderer:has(a[href*="/feed/trending"]),
+.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/explore"]) {
+  display: none !important;
+}
+
+/* Hide Mixes & Playlists */
+.ypp-hide-mixes ytd-rich-item-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+.ypp-hide-mixes ytd-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+.ypp-hide-mixes ytd-grid-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+.ypp-hide-mixes ytd-compact-radio-renderer,
+.ypp-hide-mixes ytd-radio-renderer {
+  display: none !important;
+}
+
+/* Aggressive Shorts Block (CSS) */
+.ypp-aggressive-shorts-block ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-compact-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-playlist-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-reel-shelf-renderer,
+.ypp-aggressive-shorts-block ytd-rich-shelf-renderer[is-shorts],
+.ypp-aggressive-shorts-block ytm-reel-shelf-renderer,
+.ypp-aggressive-shorts-block ytd-guide-entry-renderer:has(a[title="Shorts"]),
+.ypp-aggressive-shorts-block ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
+.ypp-aggressive-shorts-block yt-tab-shape[tab-title="Shorts"] {
+  display: none !important;
+}
+
+/* Duration Filter */
+.ypp-hidden-duration {
+  display: none !important;
+}
 
 /* ==========================================================================
    FLOATING GLASSMORPHIC GUIDE DOCK
@@ -950,22 +1008,18 @@ body.ypp-display-full-title ytd-video-renderer #video-title {
 
 /* Hide Scrollbar */
 body.ypp-hide-scrollbar::-webkit-scrollbar,
-body.ypp-hide-scrollbar *::-webkit-scrollbar {
+html:has(body.ypp-hide-scrollbar)::-webkit-scrollbar,
+body.ypp-hide-scrollbar ytd-app::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
 }
 
 body.ypp-hide-scrollbar,
-body.ypp-hide-scrollbar * {
+html:has(body.ypp-hide-scrollbar),
+body.ypp-hide-scrollbar ytd-app {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
-
-/* Also target html and ytd-app which YouTube uses as the actual scroll container */
-body.ypp-hide-scrollbar ~ * ::-webkit-scrollbar { display: none !important; }
-html:has(body.ypp-hide-scrollbar)::-webkit-scrollbar { display: none !important; }
-html:has(body.ypp-hide-scrollbar) { scrollbar-width: none !important; }
-html:has(body.ypp-hide-scrollbar) ytd-app::-webkit-scrollbar { display: none !important; }
 
 /* ===================================================================================
    SHORTS & MIXES HIDING (Global Coverage)

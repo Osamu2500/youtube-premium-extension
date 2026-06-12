@@ -300,6 +300,14 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             if (card.hasAttribute('hidden') || card.style.display === 'none') return;
 
             const videoId = this._getVideoId(card);
+            const progress = this._getWatchProgress(card);
+            
+            // PERFORMANCE: DOM Stamping to prevent re-evaluating the exact same state
+            // YouTube recycles DOM nodes, so we must include the videoId and progress in the stamp
+            const stampKey = `${videoId || 'unknown'}-${threshold}-${progress || 0}`;
+            if (card.dataset.yppWatchedProcessed === stampKey) return;
+            card.dataset.yppWatchedProcessed = stampKey;
+
             const watched = this._isWatched(card, videoId, watchedIds, threshold);
 
             const currentlyMarked = card.getAttribute('data-ypp-watched') === '1';
@@ -312,6 +320,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         } catch (err) {
             // Silently trap and ignore individual card processing errors
             // This ensures a single malformed DOM node doesn't break the entire sweep
+            this.utils.log(err.message, 'HIDE_WATCHED', 'debug');
         }
     }
 };

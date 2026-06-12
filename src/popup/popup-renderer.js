@@ -161,7 +161,6 @@ function renderSelect(item, state) {
     const select = document.createElement('select');
     select.id = item.id;
     select.className = 'theme-select';
-    select.style.width = '130px';
     (item.options || []).forEach(opt => {
         const o = document.createElement('option');
         o.value = opt.value;

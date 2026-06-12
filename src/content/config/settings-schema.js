@@ -56,6 +56,15 @@ window.YPP.SettingsSchema = {
         hideChannelCards:    { type: 'boolean', default: false },
         autoVideoFilter:     { type: 'boolean', default: true },
 
+        // --- Content Filtering / Unhook ---
+        hideAnnotations:     { type: 'boolean', default: false },
+        hideRelated:         { type: 'boolean', default: false },
+        hideFeed:            { type: 'boolean', default: false },
+        hideTrending:        { type: 'boolean', default: false },
+        aggressiveShortsBlock: { type: 'boolean', default: false },
+        hideShortVideos:     { type: 'boolean', default: false },
+        minVideoDuration:    { type: 'number',  default: 5, min: 0, max: 60 },
+
         // --- Customization ---
         fontFamily:          { type: 'string',  default: 'inter', values: ['inter', 'system', 'mono'] },
         fontScale:           { type: 'number',  default: 100, min: 80, max: 130 },

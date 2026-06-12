@@ -85,6 +85,14 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
         toggle('ypp-hide-cards', settings.hideCards);
         toggle('ypp-hide-merch', settings.hideMerch);
         toggle('ypp-hide-promo-shelves', settings.hidePromoShelves);
+        
+        // Unhook & Focus Modifiers
+        toggle('ypp-hide-annotations', settings.hideAnnotations);
+        toggle('ypp-hide-related', settings.hideRelated);
+        toggle('ypp-hide-feed', settings.hideFeed);
+        toggle('ypp-hide-trending', settings.hideTrending);
+        toggle('ypp-hide-mixes', settings.hideMixes);
+        toggle('ypp-aggressive-shorts-block', settings.aggressiveShortsBlock);
     }
 
     /**
@@ -99,7 +107,13 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             'ypp-hide-endscreens',
             'ypp-hide-cards',
             'ypp-hide-merch',
-            'ypp-hide-shorts'
+            'ypp-hide-shorts',
+            'ypp-hide-annotations',
+            'ypp-hide-related',
+            'ypp-hide-feed',
+            'ypp-hide-trending',
+            'ypp-hide-mixes',
+            'ypp-aggressive-shorts-block'
         );
         document.querySelectorAll('[data-ypp-is-short]').forEach(el => el.removeAttribute('data-ypp-is-short'));
     }
