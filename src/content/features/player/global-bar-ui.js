@@ -150,9 +150,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         const bar = document.createElement('div');
         bar.className = 'ypp-global-player-bar ypp-glass-panel';
 
-        const isInIframe = window.self !== window.top;
-        if (isInIframe) bar.classList.add('ypp-gpb-iframe');
-
         bar.innerHTML = BAR_HTML;
 
         this.barElement = bar;

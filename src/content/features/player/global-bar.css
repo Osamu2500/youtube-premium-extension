@@ -467,20 +467,3 @@
     width: 100% !important;
     margin-left: 0 !important;
 }
-
-/* ── Iframe Specific ── */
-.ypp-global-player-bar.ypp-gpb-iframe {
-    padding: 10px 6px;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-.ypp-gpb-iframe .ypp-gpb-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
-}
-
-.ypp-gpb-iframe .ypp-gpb-divider {
-    width: 18px;
-}
