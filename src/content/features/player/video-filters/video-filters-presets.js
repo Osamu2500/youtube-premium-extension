@@ -32,7 +32,7 @@ window.YPP.features.VideoFiltersPresets = {
         { category: 'Artistic', name: '80s Synthwave', css: 'hue-rotate(300deg) saturate(180%) contrast(130%) brightness(100%)', overlay: null },
         { category: 'Artistic', name: 'Neon Noir',     css: 'hue-rotate(280deg) saturate(200%) contrast(140%) brightness(85%)', overlay: null },
         { category: 'Artistic', name: 'Sci-Fi',        css: 'hue-rotate(220deg) saturate(140%) contrast(125%) brightness(90%)', overlay: null },
-        { category: 'Artistic', name: 'Anime',         css: 'saturate(180%) contrast(115%) brightness(110%)', overlay: null },
+
         { category: 'Artistic', name: 'Comic Book',    css: 'contrast(200%) saturate(150%) brightness(110%)', overlay: null },
         { category: 'Artistic', name: 'Lomo',          css: 'saturate(150%) contrast(110%) brightness(95%) vignette(0.5)', overlay: null },
 
@@ -106,6 +106,18 @@ window.YPP.features.VideoFiltersPresets = {
         { category: 'Social Media', name: 'Walden',      css: 'sepia(35%) contrast(80%) brightness(125%) saturate(140%) hue-rotate(-10deg)', overlay: null },
         { category: 'Social Media', name: 'Willow',      css: 'grayscale(100%) sepia(20%) contrast(110%) brightness(120%)', overlay: null },
         { category: 'Social Media', name: 'X-Pro II',    css: 'sepia(45%) contrast(125%) brightness(175%) saturate(130%) hue-rotate(-5deg)', overlay: null },
+
+        // ── Anime Worlds ──
+        { category: 'Anime Worlds', name: 'Studio Ghibli',   css: 'sepia(15%) saturate(160%) contrast(110%) brightness(110%) hue-rotate(5deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'Makoto Shinkai',  css: 'saturate(200%) contrast(125%) brightness(115%) hue-rotate(350deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'KyoAni Soft',     css: 'saturate(140%) contrast(95%) brightness(115%)', overlay: null },
+        { category: 'Anime Worlds', name: 'Ufotable Night',  css: 'saturate(170%) contrast(135%) brightness(105%) hue-rotate(210deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'MAPPA Dark',      css: 'saturate(80%) contrast(130%) brightness(90%) hue-rotate(200deg)', overlay: null },
+        { category: 'Anime Worlds', name: '90s Retro Anime', css: 'sepia(30%) contrast(95%) saturate(120%) brightness(105%) hue-rotate(345deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'Pastel Shojo',    css: 'sepia(20%) saturate(130%) contrast(90%) brightness(120%) hue-rotate(330deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'Isekai Fantasy',  css: 'saturate(170%) contrast(115%) brightness(110%) hue-rotate(10deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'Cyberpunk Edgerunner', css: 'saturate(180%) contrast(140%) brightness(95%) hue-rotate(290deg)', overlay: null },
+        { category: 'Anime Worlds', name: 'Shonen Pop',      css: 'saturate(160%) contrast(120%) brightness(110%)', overlay: null },
 
         // ── Cinematic Worlds ──
         // Each filter is tuned to recreate the iconic color grade of a specific film/franchise
