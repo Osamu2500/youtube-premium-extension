@@ -392,6 +392,7 @@ window.YPP.CONSTANTS = {
         searchRedesign: 'SearchRedesign',
         shortsTools: 'ShortsTools',
         redirectShorts: 'RedirectShorts',
+        shortsOptimizer: 'ShortsOptimizer',
         playerTools: 'PlayerTools',
         // New Features
         autoLike: 'AutoLike',

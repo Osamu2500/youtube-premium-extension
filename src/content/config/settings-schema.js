@@ -104,6 +104,8 @@ window.YPP.SettingsSchema = {
 
         // --- Shorts Tools ---
         shortsAutoScroll:    { type: 'boolean', default: false },
+        shortsVolumeNormalizer:{ type: 'boolean', default: true },
+        hideShortsInteraction: { type: 'boolean', default: false },
 
         // --- Player Tools ---
         enableCustomSpeed:       { type: 'boolean', default: true },

@@ -66,10 +66,14 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
             this.hideShortsGlobally();
             this.removeShortsFromDOM();  // Initial removal
             this.startShortsMonitoring(); // Continuous monitoring
-            this.checkRedirect(); // Immediate check
         } else {
             this.showShortsGlobally();
             this.stopShortsMonitoring();
+        }
+
+        // Redirect shorts
+        if (settings.redirectShorts) {
+            this.checkRedirect();
         }
 
         // 2. Class Toggles for other elements
@@ -273,11 +277,9 @@ window.YPP.features.ContentControl = class ContentControl extends window.YPP.fea
 
     /**
      * Check if current URL is a Short and redirect to standard Watch.
-     * Only runs when BOTH hideShorts AND redirectShorts are enabled.
+     * Runs when redirectShorts is enabled.
      */
     checkRedirect() {
-        if (!this.settings?.hideShorts) return;
-        // Only redirect to the normal player if the user explicitly enabled "Redirect Shorts"
         if (!this.settings?.redirectShorts) return;
 
         if (location.pathname.startsWith('/shorts/')) {

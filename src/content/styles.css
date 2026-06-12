@@ -7399,3 +7399,7 @@ html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-down {
     display: none !important;
 }
 
+
+/* Hide Shorts Interaction Bar */
+body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer { display: none !important; }
+

@@ -41,11 +41,12 @@ import './features/global/layout/layout-manager.js';
 import './features/global/layout/header-nav.js';
 import './features/global/layout/sidebar.js';
 
-// Home page features
+// Home page & Shorts features
 import './features/pages/home/home-organizer.js';
 import './features/pages/home/shorts-tools.js';
 import './features/pages/home/redirect-shorts.js';
 import './features/pages/home/cinematic-mode.js';
+import './features/pages/shorts/shorts-optimizer.js';
 
 // Subscription features
 import './features/pages/subscriptions/folder-storage.js';
