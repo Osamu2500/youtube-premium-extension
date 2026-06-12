@@ -29,7 +29,12 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
             { key: 'cherry', label: 'Cherry', meta: 'Pink', color: '#26181b' },
             { key: 'coffee', label: 'Coffee', meta: 'Latte', color: '#2a201c' },
             { key: 'cyberpunk', label: 'Cyberpunk', meta: 'Neon', color: '#0a0a0f' },
-            { key: 'nord', label: 'Nord', meta: 'Frost', color: '#2e3440' }
+            { key: 'nord', label: 'Nord', meta: 'Frost', color: '#2e3440' },
+            { key: 'discord', label: 'Discord Dark', meta: 'Chat', color: '#36393f' },
+            { key: 'hacker', label: 'Hacker Green', meta: 'Terminal', color: '#0a140a' },
+            { key: 'outrun', label: 'Outrun Synth', meta: '80s Retro', color: '#1a0524' },
+            { key: 'bloodmoon', label: 'Blood Moon', meta: 'Crimson', color: '#1a0505' },
+            { key: 'deepspace', label: 'Deep Space', meta: 'Nebula', color: '#020205' }
         ];
 
         themes.forEach(theme => {

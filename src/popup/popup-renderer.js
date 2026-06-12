@@ -335,11 +335,67 @@ function renderInlineToggle(item, state) {
     return wrap;
 }
 
+function renderColor(item, state) {
+    if (item.hidden) return null;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'inline-setting-row';
+    wrap.style.marginTop = '8px';
+
+    const infoGroup = document.createElement('div');
+    infoGroup.style.display = 'flex';
+    infoGroup.style.alignItems = 'center';
+    infoGroup.style.gap = '12px';
+
+    if (item.icon) {
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'feature-icon';
+        iconWrap.style.flexShrink = '0';
+        iconWrap.appendChild(makeSVG(item.icon, 14));
+        infoGroup.appendChild(iconWrap);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.style.display = 'flex';
+    info.style.flexDirection = 'column';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = item.label;
+    info.appendChild(nameEl);
+    if (item.desc) {
+        const d = document.createElement('span');
+        d.className = 'desc';
+        d.textContent = item.desc;
+        info.appendChild(d);
+    }
+    infoGroup.appendChild(info);
+    wrap.appendChild(infoGroup);
+
+    const input = document.createElement('input');
+    input.type = 'color';
+    input.id = item.id;
+    input.className = 'color-picker';
+    input.style.border = 'none';
+    input.style.width = '32px';
+    input.style.height = '32px';
+    input.style.borderRadius = '8px';
+    input.style.padding = '0';
+    input.style.background = 'none';
+    input.style.cursor = 'pointer';
+    wrap.appendChild(input);
+
+    _registerInput(input, state);
+    return wrap;
+}
+
 const ITEM_RENDERERS = {
     toggle: renderToggle,
     inlineToggle: renderInlineToggle,
     range:  renderRange,
     select: renderSelect,
+    color: renderColor,
     layoutToggle: renderLayoutToggle,
     custom: renderCustomSlot,
 };

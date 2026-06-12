@@ -148,6 +148,45 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             /* ========================================================
                PHASE 2: SIDEBAR COMMENTS
                ======================================================== */
+               
+            /* ========================================================
+               PHASE 3: LIVE CHAT GLASSMORPHISM
+               ======================================================== */
+            html.ypp-glass-player-active ytd-live-chat-frame {
+                border-radius: 16px !important;
+                overflow: hidden !important;
+                box-shadow: 0 12px 48px rgba(0,0,0,0.5) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            
+            /* Apply glass to iframe interior by targeting wrapper, but we only have CSS on host.
+               YouTube's live chat is an iframe. We can style the container. */
+            html.ypp-glass-player-active #chat {
+                border-radius: 16px !important;
+            }
+            
+            /* THEATER MODE OVERLAY FOR LIVE CHAT */
+            html.ypp-glass-player-active ytd-watch-flexy[flexy][theater] #chat {
+                position: absolute !important;
+                top: 24px !important;
+                right: 24px !important;
+                bottom: 120px !important; /* space for controls */
+                z-index: 1000 !important;
+                background: rgba(10, 10, 12, 0.6) !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
+                border-radius: 16px !important;
+                min-height: 400px !important;
+                max-height: calc(100vh - 150px) !important;
+                box-shadow: 0 16px 64px rgba(0,0,0,0.6) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                opacity: 0.9 !important;
+                transition: opacity 0.3s ease, transform 0.3s ease !important;
+            }
+            
+            html.ypp-glass-player-active ytd-watch-flexy[flexy][theater] #chat:hover {
+                opacity: 1 !important;
+            }
             
             /* CSS-only Sidebar Comments via CSS Grid and display: contents */
             

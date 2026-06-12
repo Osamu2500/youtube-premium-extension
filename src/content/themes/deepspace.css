@@ -1,0 +1,30 @@
+html.yt-premium-plus-theme {
+    --ypp-bg-base: #000002;
+    --ypp-bg-surface: #020205;
+    --ypp-bg-glass: rgba(0, 0, 2, 0.95);
+    --ypp-glass-border: rgba(100, 100, 255, 0.05);
+    --ypp-glass-highlight: rgba(100, 100, 255, 0.08);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(100, 100, 255, 0.05) 0%, transparent 100%);
+    
+    --ypp-text-primary: #e6e6fa;
+    --ypp-text-secondary: #8e8eb2;
+    
+    --ypp-accent: #6b6bff;
+    --ypp-accent-hover: #8f8fff;
+    --ypp-accent-glow: rgba(107, 107, 255, 0.3);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.8);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.9);
+    --ypp-shadow-glow: 0 0 24px rgba(107, 107, 255, 0.15);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: rgba(5, 5, 15, 0.8);
+    --ytd-searchbox-text-color: #e6e6fa;
+    --ytd-searchbox-border-radius: 24px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 24px 24px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(107, 107, 255, 0.1);
+}

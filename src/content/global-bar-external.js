@@ -85,9 +85,16 @@
             this.isEnabled = false;
             this.settings  = {};
             this.utils     = window.YPP.Utils;
+            this.eventListeners = [];
+            this.abortController = new AbortController();
         }
         async enable()  {}
-        async disable() {}
+        async disable() {
+            this.eventListeners.forEach(({target, type, listener, options}) => {
+                target.removeEventListener(type, listener, options);
+            });
+            this.eventListeners = [];
+        }
         update(settings) {
             this.settings = { ...this.settings, ...settings };
             if (this.onUpdate) this.onUpdate();
@@ -95,6 +102,25 @@
         getConfigKey() {
             if (!this.name) return null;
             return this.name.charAt(0).toLowerCase() + this.name.slice(1);
+        }
+        addListener(target, type, listener, options) {
+            target.addEventListener(type, listener, options);
+            this.eventListeners.push({ target, type, listener, options });
+        }
+        pollFor(conditionFn, timeout = 10000, intervalMs = 250) {
+            return new Promise((resolve, reject) => {
+                const startTime = Date.now();
+                const check = () => {
+                    if (this.abortController?.signal?.aborted) return reject(new Error('Aborted'));
+                    try {
+                        const result = conditionFn();
+                        if (result) return resolve(result);
+                    } catch (e) {}
+                    if (Date.now() - startTime >= timeout) return reject(new Error('Timeout'));
+                    setTimeout(check, intervalMs);
+                };
+                check();
+            });
         }
     };
 

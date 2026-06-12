@@ -227,7 +227,8 @@ export const POPUP_SCHEMA = [
                 title: 'Focus & Distractions',
                 items: [
                     { type:'toggle', id:'hideComments',   label:'Hide Comments',       icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
-                    { type:'toggle', id:'commentFilter',  label:'Comment Filter',      desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'toggle', id:'commentFilter',  label:'Comment Spam Filter', desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'select', id:'commentFilterAction', label:'Spam Action', desc:'What to do with spam', icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'), options: [{value:'dim',label:'Dim (Hover to reveal)'},{value:'hide',label:'Hide completely'}] },
                     { type:'toggle', id:'hideEndScreens', label:'Hide End Screens',    icon:P('M3 3h18v18H3zM3 9h18M9 21V9') },
                     { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
                     { type:'toggle', id:'hideCards',      label:'Hide Video Cards',    icon:P('M3 3h18v18H3zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0') },

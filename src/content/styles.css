@@ -7403,3 +7403,7 @@ html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-down {
 /* Hide Shorts Interaction Bar */
 body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer { display: none !important; }
 
+
+/* Hide Search Shelves */
+body.ypp-search-clean-grid ytd-search ytd-shelf-renderer, body.ypp-search-clean-grid ytd-search ytd-reel-shelf-renderer, body.ypp-search-clean-grid ytd-search ytd-horizontal-card-list-renderer { display: none !important; }
+

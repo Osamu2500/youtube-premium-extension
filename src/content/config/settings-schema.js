@@ -159,6 +159,8 @@ window.YPP.SettingsSchema = {
         videoResumer:        { type: 'boolean', default: true },
         autoPause:           { type: 'boolean', default: false },
         commentFilter:       { type: 'boolean', default: true },
+        commentFilterAction: { type: 'string', default: 'dim', values: ['dim', 'hide'] },
+        commentFilterCustomKeywords: { type: 'string', default: '' },
         contextMenu:         { type: 'boolean', default: true },
         enableAccountMenu:   { type: 'boolean', default: true },
         playlistRedesign:    { type: 'boolean', default: true },
@@ -247,8 +249,19 @@ window.YPP.SettingsSchema = {
         enableChannelHealth: { type: 'boolean', default: false },
 
         // --- UI Redesigns (popup Customization tab) ---
-        glassPlayerUI:       { type: 'boolean', default: false },
-        sidebarComments:     { type: 'boolean', default: false }
+
+        // --- New Customization Engine Variables ---
+        glassBlur:           { type: 'number',  default: 120, min: 0, max: 200 },
+        glassTintOpacity:    { type: 'number',  default: 50,  min: 0, max: 100 },
+        borderOpacity:       { type: 'number',  default: 8,   min: 0, max: 100 },
+        fontFamily:          { type: 'string',  default: 'inter', values: ['inter', 'system', 'mono'] },
+        enableAnimations:    { type: 'boolean', default: true },
+        reducedMotion:       { type: 'boolean', default: false },
+        accentColor:         { type: 'string',  default: '#3ea6ff' },
+        thumbRadius:         { type: 'number',  default: 12, min: 0, max: 24 },
+        densityMode:         { type: 'string',  default: 'comfortable', values: ['compact', 'comfortable', 'spacious'] },
+        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated'] },
+        sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 }
     }),
 
     // =========================================================================
