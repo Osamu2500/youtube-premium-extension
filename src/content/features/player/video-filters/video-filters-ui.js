@@ -37,7 +37,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 WebkitBackdropFilter: 'blur(24px) saturate(160%)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                width: '440px'
+                width: '540px'
                 // bottom/right reset not needed — position switches to absolute in portal
             });
         }
@@ -292,7 +292,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             this._injectStyle('ypp-scale-anim', '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(calc(0.92 * var(--ypp-auto-scale, 1)))}to{opacity:1;transform:scale(var(--ypp-auto-scale, 1))}}');
 
             // Position now (estimate), then reposition after first layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 440);
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 540);
             reposition();
             requestAnimationFrame(reposition);
 

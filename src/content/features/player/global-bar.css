@@ -264,8 +264,9 @@
 #ypp-eq-panel.ypp-panel-transparent,
 #ypp-cinema-panel.ypp-panel-transparent {
     font-size: 11px !important;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
     overflow: visible !important; /* panels are in a dialog portal — must not self-clip */
+    zoom: 0.85;
 }
 
 /* ════ VIDEO FILTER PANEL compact overrides ════ */
@@ -288,9 +289,9 @@
     font-size: 10px !important;
 }
 
-/* Filter card grid — 2 columns to fill the wider panel */
+/* Filter card grid — 3 columns to fill the wider panel */
 #ypp-cinema-panel.ypp-panel-transparent .ypp-filter-card-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 5px !important;
     padding: 8px 10px !important;
 }

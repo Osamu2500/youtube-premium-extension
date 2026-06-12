@@ -55,7 +55,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             panel.style.webkitBackdropFilter = 'blur(24px) saturate(160%)';
             panel.style.boxShadow = '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)';
             panel.style.border = '1px solid rgba(255,255,255,0.1)';
-            panel.style.width = '360px';
+            panel.style.width = '440px';
             // bottom/right reset not needed — position switches to absolute in portal
         }
 
@@ -391,7 +391,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             dlg.appendChild(panel);
 
             // Position now (estimate), reposition after layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, anchorBtn, video, 360);
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, anchorBtn, video, 440);
             reposition();
             requestAnimationFrame(reposition);
 
