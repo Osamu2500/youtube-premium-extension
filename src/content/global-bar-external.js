@@ -88,6 +88,10 @@
         }
         async enable()  {}
         async disable() {}
+        update(settings) {
+            this.settings = { ...this.settings, ...settings };
+            if (this.onUpdate) this.onUpdate();
+        }
         getConfigKey() {
             if (!this.name) return null;
             return this.name.charAt(0).toLowerCase() + this.name.slice(1);

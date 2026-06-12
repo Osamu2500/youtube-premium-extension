@@ -89,7 +89,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 body {
   margin: 0; padding: 6px;
-  width: 800px; height: 600px;
+  width: 1000px; height: 750px;
+  zoom: 0.8;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   background: var(--bg-primary);
@@ -413,10 +414,10 @@ body {
 }
 .setting-item:hover { background: rgba(255, 255, 255, 0.03); transform: translateX(2px); }
 
-/* ─── Feature grid — 2-column ─── */
+/* ─── Feature grid ─── */
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -633,7 +634,7 @@ input[type="range"]:focus::-webkit-slider-runnable-track { background: rgba(255,
 .view-mode-btn.active { background: var(--accent-grad); color: #fff; border-radius: var(--r-sm); }
 
 /* ─── Theme grid ─── */
-.theme-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-top: 10px; width: 100%; }
+.theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 10px; width: 100%; }
 .theme-btn {
   display: flex; align-items: center; gap: 10px; padding: 10px 12px;
   background: var(--bg-card); border: 1px solid var(--border);
@@ -666,16 +667,20 @@ input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,.
 
 /* ─── Shortcut rows ─── */
 .shortcut-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 0; font-size: 11px; color: var(--text-2);
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: 8px 10px; font-size: 11px; color: var(--text-1);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
 }
+.shortcut-row span { font-weight: 500; }
 .shortcut-input {
-  width: 90px; background: var(--bg-card);
+  width: 100%; background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,.12);
   border-radius: var(--r-sm); color: #fff;
   font-size: 11px; font-family: 'Inter', monospace;
-  text-align: center; padding: 3px 6px; outline: none; cursor: text;
+  text-align: center; padding: 6px; outline: none; cursor: text;
+  transition: border-color 0.2s, background 0.2s;
 }
 .shortcut-input:focus { border-color: var(--accent-primary); background: var(--red-dim); }
 
@@ -692,6 +697,8 @@ input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,.
 .theme-select option { background: #1a1a1a; color: white; }
 
 /* ─── Inline setting row (customization) ─── */
+.select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.hotkey-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 10px 10px; }
 .inline-setting-row {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 14px; border-radius: 12px; transition: all 0.25s var(--ease-spring);
@@ -730,7 +737,7 @@ input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,.
 /* ─── Modes grid (dashboard) ─── */
 .modes-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 

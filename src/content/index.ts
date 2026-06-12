@@ -26,8 +26,7 @@ import './features/global/modifiers/grid-animator.js';
 import './features/global/modifiers/content-control.js';
 import './features/global/modifiers/hide-playlists-podcasts.js';
 import './features/global/modifiers/hide-metrics.js';
-import './features/global/modifiers/night-mode.js';
-import './features/global/modifiers/data-api.js';
+
 import './features/global/modifiers/watched-store.js';
 import './features/global/modifiers/mark-watched.js';
 import './features/global/modifiers/multi-select.js';
@@ -35,7 +34,7 @@ import './features/global/modifiers/hide-thumbnails.js';
 import './features/global/modifiers/redirect-home.js';
 import './features/global/modifiers/hide-watched.js';
 import './features/global/modifiers/keyboard-shortcuts.js';
-import './features/global/modifiers/stats/stats-visualizer.js';
+
 
 // Layout features
 import './features/global/layout/layout-manager.js';
@@ -63,7 +62,7 @@ import './features/pages/search/search-view-mode.js';
 import './features/pages/search/search-observer.js';
 import './features/pages/search/search-filter.js';
 import './features/pages/search/search-redesign.js';
-import './features/pages/search/advanced-filter.js';
+
 
 // Library & History features
 import './features/pages/library/history/history-tracker.js';
@@ -93,7 +92,7 @@ import './features/player/automation/auto-like.js';
 import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
-import './features/player/controls/mini-player.js';
+
 import './features/player/controls/floating-player.js';
 import './features/player/video-filters/index.js';
 import './features/player/volume-booster/index.js';

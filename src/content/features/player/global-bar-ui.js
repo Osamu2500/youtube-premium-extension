@@ -172,7 +172,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             try { bar.showPopover(); } catch (e) {}
         }
 
-        animate({
+        this._entranceAnim = animate({
             targets: bar.querySelectorAll('.ypp-gpb-btn, .ypp-gpb-divider, .ypp-gpb-time, .ypp-gpb-vol-wrap, #ypp-gpb-speed-container'),
             translateY: [-12, 0],
             opacity: [0, 1],
@@ -207,6 +207,10 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     }
     
     removeBar() {
+        if (this._entranceAnim) {
+            this._entranceAnim.pause();
+            this._entranceAnim = null;
+        }
         if (this._abortController) {
             this._abortController.abort();
             this._abortController = null;
@@ -238,7 +242,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 zIndex: '2147483647',
                 display: 'flex',
                 visibility: 'visible',
-                transform: ''
+                transform: 'translateX(-50%)'
             });
         } else if (pos === 'left') {
             Object.assign(bar.style, {

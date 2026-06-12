@@ -127,8 +127,24 @@ function renderSelect(item, state) {
     wrap.className = 'inline-setting-row';
     wrap.style.marginTop = '8px';
 
+    const infoGroup = document.createElement('div');
+    infoGroup.style.display = 'flex';
+    infoGroup.style.alignItems = 'center';
+    infoGroup.style.gap = '12px';
+
+    if (item.icon) {
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'feature-icon';
+        iconWrap.style.flexShrink = '0';
+        iconWrap.appendChild(makeSVG(item.icon, 14));
+        infoGroup.appendChild(iconWrap);
+    }
+
     const info = document.createElement('div');
     info.className = 'info';
+    info.style.display = 'flex';
+    info.style.flexDirection = 'column';
+
     const nameEl = document.createElement('span');
     nameEl.className = 'name';
     nameEl.textContent = item.label;
@@ -139,7 +155,8 @@ function renderSelect(item, state) {
         d.textContent = item.desc;
         info.appendChild(d);
     }
-    wrap.appendChild(info);
+    infoGroup.appendChild(info);
+    wrap.appendChild(infoGroup);
 
     const select = document.createElement('select');
     select.id = item.id;
@@ -216,26 +233,7 @@ function renderLayoutToggle(item, state) {
     headerRow.appendChild(toggleWrap);
     wrap.appendChild(headerRow);
 
-    // Explanation Cards
-    const cardsRow = document.createElement('div');
-    cardsRow.style.display = 'flex';
-    cardsRow.style.gap = '8px';
 
-    const cardCompact = document.createElement('div');
-    cardCompact.className = 'layout-card';
-    cardCompact.dataset.layout = 'compact';
-    cardCompact.style.cssText = 'flex:1; border-radius:8px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); cursor:pointer; transition:all 0.2s;';
-    cardCompact.innerHTML = `<div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:3px; pointer-events:none;">Compact</div><div style="font-size:10px; color:rgba(255,255,255,0.4); line-height:1.4; pointer-events:none;">Small thumbnail · text on right · more videos visible</div>`;
-
-    const cardExpanded = document.createElement('div');
-    cardExpanded.className = 'layout-card';
-    cardExpanded.dataset.layout = 'expanded';
-    cardExpanded.style.cssText = 'flex:1; border-radius:8px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); cursor:pointer; transition:all 0.2s;';
-    cardExpanded.innerHTML = `<div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:3px; pointer-events:none;">Expanded</div><div style="font-size:10px; color:rgba(255,255,255,0.4); line-height:1.4; pointer-events:none;">Large thumbnail · stacked card · richer preview</div>`;
-
-    cardsRow.appendChild(cardCompact);
-    cardsRow.appendChild(cardExpanded);
-    wrap.appendChild(cardsRow);
 
     // Hidden input
     const hiddenInput = document.createElement('input');
@@ -254,14 +252,6 @@ function renderLayoutToggle(item, state) {
             b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
         });
         
-        [cardCompact, cardExpanded].forEach(c => {
-            const isCompact = c === cardCompact && layout === 'compact';
-            const isExpanded = c === cardExpanded && layout === 'expanded';
-            const isActive = isCompact || isExpanded;
-            c.style.borderColor = isActive ? 'var(--accent, rgba(62,166,255,0.5))' : 'rgba(255,255,255,0.08)';
-            c.style.background = isActive ? 'rgba(62,166,255,0.05)' : 'rgba(255,255,255,0.04)';
-        });
-        
         hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
         
         // Ensure robust saving
@@ -274,8 +264,6 @@ function renderLayoutToggle(item, state) {
 
     btnCompact.onclick = () => applyActiveState('compact');
     btnExpanded.onclick = () => applyActiveState('expanded');
-    cardCompact.onclick = () => applyActiveState('compact');
-    cardExpanded.onclick = () => applyActiveState('expanded');
 
     // Initialize UI state
     setTimeout(() => applyActiveState(hiddenInput.value), 10);
@@ -294,8 +282,62 @@ function renderCustomSlot(item) {
     return slot;
 }
 
+function renderInlineToggle(item, state) {
+    if (item.hidden && (typeof item.hidden === 'function' ? item.hidden(state) : item.hidden)) return null;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'inline-setting-row';
+    wrap.style.marginTop = '8px';
+
+    const infoGroup = document.createElement('div');
+    infoGroup.style.display = 'flex';
+    infoGroup.style.alignItems = 'center';
+    infoGroup.style.gap = '12px';
+
+    if (item.icon) {
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'feature-icon';
+        iconWrap.style.flexShrink = '0';
+        iconWrap.appendChild(makeSVG(item.icon, 14));
+        infoGroup.appendChild(iconWrap);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.style.display = 'flex';
+    info.style.flexDirection = 'column';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = item.label;
+    info.appendChild(nameEl);
+    if (item.desc) {
+        const d = document.createElement('span');
+        d.className = 'desc';
+        d.textContent = item.desc;
+        info.appendChild(d);
+    }
+    infoGroup.appendChild(info);
+    wrap.appendChild(infoGroup);
+
+    const label = document.createElement('label');
+    label.className = 'toggle';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = item.id;
+    label.appendChild(input);
+    const span = document.createElement('span');
+    span.className = 'slider';
+    label.appendChild(span);
+    wrap.appendChild(label);
+
+    _registerInput(input, state);
+    return wrap;
+}
+
 const ITEM_RENDERERS = {
     toggle: renderToggle,
+    inlineToggle: renderInlineToggle,
     range:  renderRange,
     select: renderSelect,
     layoutToggle: renderLayoutToggle,
@@ -351,7 +393,21 @@ function buildSection(section, state) {
         });
     }
 
-    wideItems.forEach(item => {
+    const selectItems = wideItems.filter(i => i.type === 'select' || i.type === 'inlineToggle');
+    const otherItems  = wideItems.filter(i => i.type !== 'select' && i.type !== 'inlineToggle');
+
+    if (selectItems.length > 0) {
+        const grid = document.createElement('div');
+        grid.className = 'select-grid';
+        selectItems.forEach(item => {
+            const fn = ITEM_RENDERERS[item.type];
+            const el = fn ? fn(item, state) : null;
+            if (el) grid.appendChild(el);
+        });
+        grp.appendChild(grid);
+    }
+
+    otherItems.forEach(item => {
         const fn = ITEM_RENDERERS[item.type];
         const el = fn ? fn(item, state) : null;
         if (el) grp.appendChild(el);

@@ -395,12 +395,20 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             reposition();
             requestAnimationFrame(reposition);
 
-            // Self-cleaning resize listener
+            // Self-cleaning throttled resize listener
+            let resizeTicking = false;
             const onResize = () => {
-                if (ctx._volumePopup) { reposition(); }
-                else { window.removeEventListener('resize', onResize); }
+                if (!ctx._volumePopup) { window.removeEventListener('resize', onResize); return; }
+                if (!resizeTicking) {
+                    resizeTicking = true;
+                    requestAnimationFrame(() => {
+                        reposition();
+                        resizeTicking = false;
+                    });
+                }
             };
-            window.addEventListener('resize', onResize, { passive: true });
+            if (ctx.addListener) ctx.addListener(window, 'resize', onResize, { passive: true });
+            else window.addEventListener('resize', onResize, { passive: true });
         } else {
             document.body.appendChild(panel);
         }
@@ -437,7 +445,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             }
         };
         ctx._volumePopupOutsideHandler = outside;
-        setTimeout(() => document.addEventListener('click', outside), 0);
+        setTimeout(() => ctx.addListener ? ctx.addListener(document, 'click', outside) : document.addEventListener('click', outside), 0);
 
         // Escape key closes the EQ panel
         const onKeyDown = (e) => {
@@ -449,7 +457,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             }
         };
         ctx._volumePopupEscapeHandler = onKeyDown;
-        document.addEventListener('keydown', onKeyDown);
+        if (ctx.addListener) ctx.addListener(document, 'keydown', onKeyDown);
+        else document.addEventListener('keydown', onKeyDown);
     }
 
     static syncBandUI(ctx, panel, canvas) {

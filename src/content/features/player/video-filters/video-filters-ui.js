@@ -297,14 +297,25 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             requestAnimationFrame(reposition);
 
             // Keep popup correctly placed when user resizes the window
+            let resizeTicking = false;
             const onResize = () => {
-                if (ctx._filterPanel) { reposition(); }
-                else if (ctx._filterPanelResizeHandler) { 
-                    window.removeEventListener('resize', ctx._filterPanelResizeHandler); 
+                if (!ctx._filterPanel) {
+                    if (ctx._filterPanelResizeHandler) { 
+                        window.removeEventListener('resize', ctx._filterPanelResizeHandler); 
+                    }
+                    return;
+                }
+                if (!resizeTicking) {
+                    resizeTicking = true;
+                    requestAnimationFrame(() => {
+                        reposition();
+                        resizeTicking = false;
+                    });
                 }
             };
             ctx._filterPanelResizeHandler = onResize;
-            window.addEventListener('resize', onResize, { passive: true });
+            if (ctx.addListener) ctx.addListener(window, 'resize', onResize, { passive: true });
+            else window.addEventListener('resize', onResize, { passive: true });
         } else {
             document.body.appendChild(panel);
         }
@@ -316,7 +327,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             }
         };
         ctx._filterPanelOutsideHandler = outside;
-        setTimeout(() => document.addEventListener('click', outside), 0);
+        setTimeout(() => ctx.addListener ? ctx.addListener(document, 'click', outside) : document.addEventListener('click', outside), 0);
 
         // Escape key closes the panel
         const onKeyDown = (e) => {
@@ -327,7 +338,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             }
         };
         ctx._filterPanelKeydownHandler = onKeyDown;
-        document.addEventListener('keydown', onKeyDown);
+        if (ctx.addListener) ctx.addListener(document, 'keydown', onKeyDown);
+        else document.addEventListener('keydown', onKeyDown);
         
         // Piggyback cleanup on the existing outside handler removal
         const origRemove = ctx._removeFilterPanel.bind(ctx);
