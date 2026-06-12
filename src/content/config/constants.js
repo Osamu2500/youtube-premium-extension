@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from '../../shared/default-settings.js';
 window.YPP = window.YPP || {};
 
 window.YPP.CONSTANTS = {
+    DEFAULT_SETTINGS,
     // =========================================================================
     // PREMIUM COLORS (56 Themes from Tempo)
     // =========================================================================
@@ -436,7 +437,8 @@ window.YPP.CONSTANTS = {
         bookmarksManager: 'BookmarksManager',
         cinematicMode: 'CinematicMode',
         splitScrolling: 'SplitScrolling',
-        durationFilter: 'DurationFilter'
+        durationFilter: 'DurationFilter',
+        videoSpeedController: 'VideoSpeedController'
     }
 };
 

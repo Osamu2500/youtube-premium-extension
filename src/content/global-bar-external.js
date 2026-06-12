@@ -140,12 +140,15 @@
     await import('./features/player/video-filters/video-filters-overlay.js');
     await import('./features/player/video-filters/video-filters-ui.js');
     await import('./features/player/video-filters/video-filters.js');
+    await import('./features/player/enhancements/video-speed-controller.js');
 
     // ── 3. Read user settings ────────────────────────────────────────────────
     let settings = {};
     try {
+        const { DEFAULT_SETTINGS } = await import('../shared/default-settings.js');
+        settings = { ...DEFAULT_SETTINGS };
         const data = await chrome.storage.local.get('settings');
-        settings = data.settings || {};
+        Object.assign(settings, data.settings || {});
     } catch (_) {}
 
     // Mock FeatureManager so GlobalBarUI can fetch VolumeBoost / VideoFilters
@@ -156,11 +159,18 @@
 
     if (window.YPP.features.VolumeBooster) {
         instances['volumeBoost'] = new window.YPP.features.VolumeBooster();
-        if (settings.enableVolumeBoost) instances['volumeBoost'].enable(settings);
+        instances['volumeBoost'].update(settings);
+        if (settings.enableVolumeBoost) instances['volumeBoost'].enable();
     }
     if (window.YPP.features.VideoFilters) {
         instances['videoFilters'] = new window.YPP.features.VideoFilters();
-        if (settings.enableCinemaFilters) instances['videoFilters'].enable(settings);
+        instances['videoFilters'].update(settings);
+        if (settings.enableCinemaFilters) instances['videoFilters'].enable();
+    }
+    if (window.YPP.features.VideoSpeedController) {
+        instances['videoSpeedController'] = new window.YPP.features.VideoSpeedController();
+        instances['videoSpeedController'].update(settings);
+        if (settings.enableCustomSpeed !== false) instances['videoSpeedController'].enable();
     }
 
     // Default ON — show bar unless user explicitly disabled it
@@ -195,6 +205,9 @@
             }
             if (instances['videoFilters']) {
                 instances['videoFilters'].update(newSettings);
+            }
+            if (instances['videoSpeedController']) {
+                instances['videoSpeedController'].update(newSettings);
             }
         });
     } catch (_) {}

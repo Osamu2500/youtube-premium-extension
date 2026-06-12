@@ -30,6 +30,7 @@ import './features/global/modifiers/hide-metrics.js';
 import './features/global/modifiers/watched-store.js';
 import './features/global/modifiers/mark-watched.js';
 import './features/global/modifiers/multi-select.js';
+import './features/global/modifiers/multi-select.css';
 import './features/global/modifiers/hide-thumbnails.js';
 import './features/global/modifiers/redirect-home.js';
 import './features/global/modifiers/hide-watched.js';
@@ -94,6 +95,7 @@ import './features/player/automation/auto-like.js';
 import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
+import './features/player/enhancements/video-speed-controller.js';
 
 import './features/player/controls/floating-player.js';
 import './features/player/video-filters/index.js';

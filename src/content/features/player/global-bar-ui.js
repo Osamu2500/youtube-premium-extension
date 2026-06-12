@@ -25,20 +25,14 @@ const BAR_HTML = `
         <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-play" title="Play / Pause All">
             ${ICONS.play}
         </button>
-        <div class="ypp-gpb-divider"></div>
         <div id="ypp-gpb-time" class="ypp-gpb-time" title="Current Time">0:00</div>
-        <div class="ypp-gpb-divider"></div>
         <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-mute" title="Mute / Unmute All">
             ${ICONS.volumeHigh}
         </button>
         <div id="ypp-gpb-vol-wrap" class="ypp-gpb-vol-wrap" title="Volume">
             <input type="range" id="ypp-gpb-vol" min="0" max="1" step="0.02" value="1" class="ypp-gpb-vol-slider">
         </div>
-        <div class="ypp-gpb-divider"></div>
-        <div id="ypp-gpb-speed-container"></div>
-        <div class="ypp-gpb-divider"></div>
         <div id="ypp-gpb-features-container"></div>
-        <div class="ypp-gpb-divider"></div>
         <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-loop" title="Toggle Loop All">
             ${ICONS.loop}
         </button>
@@ -48,7 +42,6 @@ const BAR_HTML = `
         <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-fullscreen" title="Fullscreen">
             ${ICONS.fullscreen}
         </button>
-        <div class="ypp-gpb-divider"></div>
         <button class="ypp-gpb-btn ypp-action-btn" id="ypp-gpb-close" title="Hide Bar">
             ${ICONS.close}
         </button>
@@ -144,6 +137,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     /** Create the singular global player bar DOM */
     createBar() {
         if (this.barElement) return;
+        if (window.YPP.gpbDismissed) return;
 
         window.YPP.Utils?.log('Creating singular global player bar', 'GlobalBarUI', 'debug');
 
@@ -151,6 +145,18 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         bar.className = 'ypp-global-player-bar ypp-glass-panel';
 
         bar.innerHTML = BAR_HTML;
+
+        // Apply visibility settings from preferences
+        const t = this.settings;
+        if (t.gpb_showPlay === false) bar.querySelector('#ypp-gpb-play').style.display = 'none';
+        if (t.gpb_showTime === false) bar.querySelector('#ypp-gpb-time').style.display = 'none';
+        if (t.gpb_showVolume === false) {
+            bar.querySelector('#ypp-gpb-mute').style.display = 'none';
+            bar.querySelector('#ypp-gpb-vol-wrap').style.display = 'none';
+        }
+        if (t.gpb_showLoop === false) bar.querySelector('#ypp-gpb-loop').style.display = 'none';
+        if (t.gpb_showPip === false) bar.querySelector('#ypp-gpb-pip').style.display = 'none';
+        if (t.gpb_showFullscreen === false) bar.querySelector('#ypp-gpb-fullscreen').style.display = 'none';
 
         this.barElement = bar;
         this.ICONS = ICONS;
@@ -170,7 +176,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         }
 
         this._entranceAnim = animate({
-            targets: bar.querySelectorAll('.ypp-gpb-btn, .ypp-gpb-divider, .ypp-gpb-time, .ypp-gpb-vol-wrap, #ypp-gpb-speed-container'),
+            targets: bar.querySelectorAll('.ypp-gpb-btn, .ypp-gpb-time, .ypp-gpb-vol-wrap'),
             translateY: [-12, 0],
             opacity: [0, 1],
             delay: stagger(40, { start: 100 }),
@@ -344,12 +350,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             loopBtn.style.opacity = primary.loop ? '1' : '0.5';
         }
 
-        // Speed
-        const speedInput = this.barElement.querySelector('.ypp-gpb-speed-input');
-        if (speedInput && document.activeElement !== speedInput) {
-            speedInput.value = primary.playbackRate.toFixed(1);
-        }
-
         // Fullscreen
         const fullscreenBtn = this.barElement.querySelector('#ypp-gpb-fullscreen');
         if (fullscreenBtn) {
@@ -379,14 +379,25 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
 
         featsCont.innerHTML = ''; // Clear stale buttons
 
-        const volFeature = window.YPP.featureManager.getFeature('volumeBoost');
-        if (volFeature?.createButton) {
-            featsCont.appendChild(volFeature.createButton(primary));
+        if (this.settings.gpb_showVolumeBoost !== false) {
+            const volFeature = window.YPP.featureManager.getFeature('volumeBoost');
+            if (volFeature?.createButton) {
+                featsCont.appendChild(volFeature.createButton(primary));
+            }
         }
         
-        const filterFeature = window.YPP.featureManager.getFeature('videoFilters');
-        if (filterFeature?.createButton) {
-            featsCont.appendChild(filterFeature.createButton(primary));
+        if (this.settings.gpb_showFilters !== false) {
+            const filterFeature = window.YPP.featureManager.getFeature('videoFilters');
+            if (filterFeature?.createButton) {
+                featsCont.appendChild(filterFeature.createButton(primary));
+            }
+        }
+
+        // Hide container if empty to avoid double dividers
+        if (featsCont.children.length === 0) {
+            featsCont.style.display = 'none';
+        } else {
+            featsCont.style.display = 'flex';
         }
     }
 
@@ -398,7 +409,6 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         this._bindPlaybackControls();
         this._bindVolumeControls();
         this._bindWindowControls();
-        this._bindSpeedControl();
     }
 
     _bindPlaybackControls() {
@@ -489,44 +499,8 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         const closeBtn = bar.querySelector('#ypp-gpb-close');
         closeBtn.onclick = (e) => {
             e.stopPropagation();
+            window.YPP.gpbDismissed = true;
             this.removeAll();
         };
-    }
-
-    _bindSpeedControl() {
-        const speedCont = this.barElement.querySelector('#ypp-gpb-speed-container');
-        
-        const speedInput = document.createElement('input');
-        speedInput.type = 'number';
-        speedInput.className = 'ypp-gpb-speed-input';
-        speedInput.min = '0.1';
-        speedInput.max = '16.0';
-        speedInput.step = '0.1';
-        speedInput.title = 'Playback Speed';
-        speedInput.style.cssText = `
-            width: 44px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 12px;
-            padding: 2px;
-            font-family: inherit;
-            outline: none;
-        `;
-        
-        speedInput.oninput = (e) => {
-            e.stopPropagation();
-            let val = parseFloat(e.target.value);
-            if (!isNaN(val) && val >= 0.1 && val <= 16.0) {
-                for (const v of this.trackedVideos) {
-                    v.playbackRate = val;
-                }
-            }
-        };
-        speedInput.onkeydown = (e) => e.stopPropagation();
-        
-        speedCont.appendChild(speedInput);
     }
 };

@@ -158,7 +158,13 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
     _processCards() {
         MarkWatched.SELECTORS.CARDS.forEach(selector => {
             document.querySelectorAll(selector).forEach(card => {
-                if (card.dataset.yppMarkProcessed) return; // Stamping guard
+                if (card.dataset.yppMarkProcessed) {
+                    // Re-attach hover icon click if icon is present but has no live listener
+                    // (happens after disable/re-enable cycle wipes addListener() registrations)
+                    const videoId = card.dataset.yppVideoId;
+                    if (videoId) this._reattachHoverIcon(card, videoId);
+                    return;
+                }
                 this._processCard(card);
             });
         });
@@ -225,29 +231,45 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         if (!icon) {
             icon = document.createElement('div');
             icon.className = 'ypp-watched-icon-permanent';
+            icon.dataset.yppWatchIconFor = videoId;
             icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`;
             thumbnail.appendChild(icon);
 
-            this.addListener(icon, 'mouseenter', () => {
+            // Use native listeners — they survive disable/re-enable cycles
+            // because the icon stays in the DOM. The handler reads from `this`
+            // at call time, so it always picks up the latest state.
+            icon.addEventListener('mouseenter', () => {
                 icon.style.background = 'var(--ypp-accent, #3ea6ff)';
                 icon.style.transform = 'scale(1.1)';
             });
-            this.addListener(icon, 'mouseleave', () => {
+            icon.addEventListener('mouseleave', () => {
                 icon.style.background = '';
                 icon.style.transform = '';
             });
+            icon.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (!this.isEnabled) return; // Guard: feature might be disabled
+                if (this._watchedIds.has(videoId)) {
+                    this.unmarkAsWatched(videoId);
+                } else {
+                    this.markAsWatched(videoId);
+                }
+            });
         }
         
-        this.addListener(icon, 'click', (ev) => {
-            ev.preventDefault();
-            ev.stopPropagation();
-            if (this._watchedIds.has(videoId)) {
-                this.unmarkAsWatched(videoId);
-            } else {
-                this.markAsWatched(videoId);
-            }
-        });
-        
+        icon.title = this._watchedIds.has(videoId) ? 'Unmark as watched' : 'Mark as watched';
+    }
+
+    /**
+     * Re-attach click behaviour to an existing icon (for disable/re-enable cycles).
+     * Since the icon already has native listeners, just refresh the title.
+     * @param {HTMLElement} card
+     * @param {string} videoId
+     */
+    _reattachHoverIcon(card, videoId) {
+        const icon = card.querySelector('.ypp-watched-icon-permanent');
+        if (!icon) return;
         icon.title = this._watchedIds.has(videoId) ? 'Unmark as watched' : 'Mark as watched';
     }
 

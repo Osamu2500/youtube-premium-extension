@@ -97,6 +97,7 @@ export const DEFAULT_SETTINGS = {
     pb_snapshot: 'front',
     pb_loop: 'front',
     pb_speed: 'front',
+    pb_bookmark: 'front',
     pb_pip: 'front',
     pb_volume: 'front',
     pb_cinema: 'front',
@@ -109,6 +110,16 @@ export const DEFAULT_SETTINGS = {
     pb_native_miniplayer: 'front',
     pb_native_theater: 'front',
     pb_native_fullscreen: 'front',
+
+    // Global Player Bar toggles
+    gpb_showPlay: true,
+    gpb_showTime: true,
+    gpb_showVolume: true,
+    gpb_showVolumeBoost: true,
+    gpb_showFilters: true,
+    gpb_showLoop: true,
+    gpb_showPip: true,
+    gpb_showFullscreen: true,
 
     // Ad Skipper
     adSkipper: true,
@@ -193,9 +204,11 @@ export const DEFAULT_SETTINGS = {
     shortcut_snapshot:    'Shift+S',
     shortcut_loop:        'Shift+L',
     shortcut_pip:         'Shift+P',
-    shortcut_speedDown:   'Shift+,',
-    shortcut_speedUp:     'Shift+.',
-    shortcut_speedReset:  'Shift+R',
+    shortcut_vscSlower:   'Shift+,',
+    shortcut_vscFaster:   'Shift+.',
+    shortcut_vscRewind:   'Shift+ArrowLeft',
+    shortcut_vscAdvance:  'Shift+ArrowRight',
+    shortcut_vscReset:    'Shift+R',
     shortcut_ambientMode: 'Shift+A',
 
     // Onboarding

@@ -18,27 +18,39 @@ registerSlot('shortcutsPanel', (container, state) => {
     `;
     const list = container.querySelector('#shortcutsList');
     
+    const svgIcon = (path) => `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>`;
+
     const shortcuts = [
-        { id: 'shortcut_zenMode', label: 'Toggle Zen Mode' },
-        { id: 'shortcut_focusMode', label: 'Toggle Focus Mode' },
-        { id: 'shortcut_cinemaMode', label: 'Toggle Cinema Mode' },
-        { id: 'shortcut_ambientMode', label: 'Toggle Ambient Mode' },
-        { id: 'shortcut_snapshot', label: 'Take Snapshot' },
-        { id: 'shortcut_loop', label: 'Toggle Loop' },
-        { id: 'shortcut_pip', label: 'Picture-in-Picture' },
-        { id: 'shortcut_speedDown', label: 'Speed Down' },
-        { id: 'shortcut_speedUp', label: 'Speed Up' },
-        { id: 'shortcut_speedReset', label: 'Reset Speed' }
+        { id: 'shortcut_zenMode', label: 'Toggle Zen Mode', icon: svgIcon('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6') },
+        { id: 'shortcut_focusMode', label: 'Toggle Focus Mode', icon: svgIcon('M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7') },
+        { id: 'shortcut_cinemaMode', label: 'Toggle Cinema Mode', icon: svgIcon('M2 3h20v14H2zM8 21h8M12 17v4') },
+        { id: 'shortcut_ambientMode', label: 'Toggle Ambient Mode', icon: svgIcon('M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41') },
+        { id: 'shortcut_snapshot', label: 'Take Snapshot', icon: svgIcon('M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z') },
+        { id: 'shortcut_loop', label: 'Toggle Loop', icon: svgIcon('M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z') },
+        { id: 'shortcut_pip', label: 'Picture-in-Picture', icon: svgIcon('M3 3h18v14H3zM12 14h7v5h-7z') },
+        { id: 'shortcut_vscSlower', label: 'Speed Slower', icon: svgIcon('M11 17l-5-5 5-5M18 17l-5-5 5-5') },
+        { id: 'shortcut_vscFaster', label: 'Speed Faster', icon: svgIcon('M13 17l5-5-5-5M6 17l5-5-5-5') },
+        { id: 'shortcut_vscReset', label: 'Reset Speed', icon: svgIcon('M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5') },
+        { id: 'shortcut_vscRewind', label: 'Rewind 10s', icon: svgIcon('M11 17l-5-5 5-5M18 17l-5-5 5-5') },
+        { id: 'shortcut_vscAdvance', label: 'Advance 10s', icon: svgIcon('M13 17l5-5-5-5M6 17l5-5-5-5') }
     ];
 
     shortcuts.forEach(sc => {
         const row = document.createElement('div');
         row.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start; gap:6px; background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);';
+        const labelWrap = document.createElement('div');
+        labelWrap.style.cssText = 'display:flex; align-items:center; gap:6px; margin-bottom: 2px;';
+        
+        const iconWrap = document.createElement('div');
+        iconWrap.style.cssText = 'display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.6);';
+        iconWrap.innerHTML = sc.icon || '';
         
         const label = document.createElement('span');
         label.textContent = sc.label;
         label.style.cssText = 'font-size:11px; font-weight:500; color:rgba(255,255,255,0.8);';
         
+        labelWrap.appendChild(iconWrap);
+        labelWrap.appendChild(label);
         const input = document.createElement('input');
         input.type = 'text';
         input.id = sc.id;
@@ -94,7 +106,7 @@ registerSlot('shortcutsPanel', (container, state) => {
             input.blur();
         });
 
-        row.appendChild(label);
+        row.appendChild(labelWrap);
         row.appendChild(input);
         list.appendChild(row);
     });

@@ -54,6 +54,7 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'displayFullTitle', label:'Full Video Titles', desc:'Prevent truncation',        icon:P('M4 6h16M4 12h16M4 18h16') },
                     { type:'toggle', id:'autoScaleLayout',  label:'Auto-Scale Grid',  desc:'Adapt to zoom/window size', icon:P('M15 3l6 6M15 3h6v6M9 21l-6-6M9 21H3v-6') },
                     { type:'range', id:'homeColumns', label:'Grid Columns', unit:'', min:1, max:8, step:1 },
+                    { type:'toggle', id:'useSquareCorners',    label:'Square Corners',     desc:'Sharp edges for videos',   icon:P('M3 3h18v18H3z') }
                 ]
             }
         ]
@@ -105,12 +106,14 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'enableVolumeBoost',  label:'Volume Booster',    desc:'Increase past 100%',         icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07') },
                     { type:'toggle', id:'audioCompressor',    label:'Audio Compressor',  desc:'Compress loud sounds',       icon:P('M22 12h-4l-3 9L9 3l-3 9H2') },
                     { type:'toggle', id:'wheelControls',      label:'Wheel Controls',    desc:'Shift/Alt+Scroll to control', icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
-                    { type:'toggle', id:'enableCustomSpeed',  label:'Playback Speed',    desc:'Custom speed steps',         icon:P('M5 4l15 8-15 8V4z M19 5v14') },
+                    { type:'toggle', id:'enableCustomSpeed',  label:'Video Speed Controller', desc:'Custom speed & hotkeys', icon:P('M4 6v12l8.5-6L4 6zm9 0v12l8.5-6L13 6z') },
                 ]
             },
+
             {
                 title: 'Player UI Components',
                 items: [
+                    { type:'toggle', id:'revertProgressBar',   label:'Classic Progress Bar', desc:'Solid red, no pink gradient', icon:P('M3 3h18v18H3zM3 9h18') },
                     { type:'toggle', id:'videoControlsEnabled', label:'Video Controls UI', desc:'Custom floating panel',     icon:P('M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z') },
                     { type:'toggle', id:'enableCinemaFilters',  label:'Filters',          desc:'Visual effects panel',       icon:P('M22 3H2l8 9.46V19l4 2v-8.54L22 3z') },
                     { type:'toggle', id:'enableLoop',           label:'Loop Button',      desc:'Add loop toggle',            icon:P('M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z') },
@@ -127,6 +130,7 @@ export const POPUP_SCHEMA = [
                     { type:'select', id:'pb_snapshot', label:'Snapshot Button', desc:'Extension feature', icon:P('M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_loop', label:'Loop Button', desc:'Extension feature', icon:P('M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_speed', label:'Speed Controls', desc:'Extension feature', icon:P('M5 4l15 8-15 8V4z M19 5v14'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                    { type:'select', id:'pb_bookmark', label:'Bookmark Button', desc:'Extension feature', icon:P('M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_pip', label:'PiP Button', desc:'Extension feature', icon:P('M3 3h18v14H3zM12 14h7v5h-7z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_volume', label:'Volume Booster', desc:'Extension feature', icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_cinema', label:'Cinema Filters', desc:'Extension feature', icon:P('M22 3H2l8 9.46V19l4 2v-8.54L22 3z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
@@ -186,9 +190,7 @@ export const POPUP_SCHEMA = [
                 title: 'Columns',
                 items: [
                     { type:'range', id:'channelColumns',       label:'Channel Columns',    unit:'', min:2, max:10, step:1 },
-                    { type:'range', id:'subscriptionsColumns', label:'Feed Grid Columns',  unit:'', min:1, max:8,  step:1 },
-                    { type:'toggle', id:'useSquareCorners',    label:'Square Corners',     desc:'Sharp edges for videos',   icon:P('M3 3h18v18H3z') },
-                    { type:'toggle', id:'revertProgressBar',   label:'Classic Progress Bar', desc:'Solid red, no pink gradient', icon:P('M3 3h18v18H3zM3 9h18') }
+                    { type:'range', id:'subscriptionsColumns', label:'Feed Grid Columns',  unit:'', min:1, max:8,  step:1 }
                 ]
             }
         ]
@@ -282,6 +284,19 @@ export const POPUP_SCHEMA = [
                         type:'select', id:'globalPlayerBarPosition', label:'Player Bar Position', desc:'Global Player Bar layout',
                         options: [ {value:'right',label:'Right'}, {value:'left',label:'Left'}, {value:'top',label:'Top'} ]
                     },
+                ]
+            },
+            {
+                title: 'Global Player Bar (Elements)',
+                items: [
+                    { type:'toggle', id:'gpb_showPlay', label:'Play/Pause', desc:'Native Play/Pause', icon:P('M5 3l14 9-14 9V3z') },
+                    { type:'toggle', id:'gpb_showTime', label:'Current Time', desc:'Time Display', icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
+                    { type:'toggle', id:'gpb_showVolume', label:'Volume/Mute', desc:'Native Volume slider', icon:P('M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07') },
+                    { type:'toggle', id:'gpb_showVolumeBoost', label:'Volume Booster', desc:'Sub-feature toggle', icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07') },
+                    { type:'toggle', id:'gpb_showFilters', label:'Cinema Filters', desc:'Sub-feature toggle', icon:P('M22 3H2l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'toggle', id:'gpb_showLoop', label:'Loop', desc:'Native Loop toggle', icon:P('M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z') },
+                    { type:'toggle', id:'gpb_showPip', label:'PiP', desc:'Picture-in-Picture', icon:P('M3 3h18v14H3zM12 14h7v5h-7z') },
+                    { type:'toggle', id:'gpb_showFullscreen', label:'Fullscreen', desc:'Native Fullscreen', icon:P('M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z') },
                 ]
             },
             {

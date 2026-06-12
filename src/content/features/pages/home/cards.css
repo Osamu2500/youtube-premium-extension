@@ -99,7 +99,7 @@ body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp
   position: relative;
 }
 
-/* Permanent eye icon for Mark as Watched feature — always visible on thumbnail */
+/* Permanent eye icon for Mark as Watched feature — hidden by default, visible on hover */
 .ypp-watched-icon-permanent {
   position: absolute !important;
   top: 8px !important;
@@ -113,8 +113,27 @@ body.yt-premium-plus-theme:not(.cinematic-home):not(.ypp-playlist-page):not(.ypp
   justify-content: center !important;
   cursor: pointer !important;
   z-index: var(--ypp-z-popup) !important;
-  transition: background 0.2s, transform 0.2s !important;
+  transition: background 0.2s, transform 0.2s, opacity 0.2s, visibility 0.2s !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: scale(0.8) !important;
+}
+
+body.yt-premium-plus-theme ytd-rich-item-renderer:hover .ypp-watched-icon-permanent,
+body.yt-premium-plus-theme ytd-video-renderer:hover .ypp-watched-icon-permanent,
+body.yt-premium-plus-theme ytd-compact-video-renderer:hover .ypp-watched-icon-permanent,
+body.yt-premium-plus-theme ytd-grid-video-renderer:hover .ypp-watched-icon-permanent,
+body.yt-premium-plus-theme ytd-playlist-video-renderer:hover .ypp-watched-icon-permanent {
+  opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: auto !important;
+  transform: scale(1) !important;
+}
+
+.ypp-watched-icon-permanent:hover {
+  background: var(--ypp-accent, #3ea6ff) !important;
+  transform: scale(1.1) !important;
 }
 
 /* Video Cards - Reset Child Styling (Since parent now has card style) */

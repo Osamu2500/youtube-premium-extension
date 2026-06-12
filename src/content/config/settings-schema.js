@@ -120,6 +120,12 @@ window.YPP.SettingsSchema = {
         enableCustomSpeed:       { type: 'boolean', default: true },
         enableCinemaFilters:     { type: 'boolean', default: true },
         enableGlobalPlayerBar:   { type: 'boolean', default: true },
+        // Video Speed Controller (Advanced)
+        enableVideoSpeedController: { type: 'boolean', default: true },
+        vscSpeedStep:            { type: 'number',  default: 0.25, min: 0.05, max: 1.0 },
+        vscPreferredSpeed:       { type: 'number',  default: 2.0, min: 0.1, max: 16.0 },
+        vscRememberSpeed:        { type: 'boolean', default: true },
+        vscControllerOpacity:    { type: 'number',  default: 0.3, min: 0.1, max: 1.0 },
         // Cinema Filters — persisted state (preset index + slider adjustments)
         cinemaFilterIndex:       { type: 'number',  default: 0,   min: 0, max: 42 }, // 43 filters total (0-42)
         cinemaFilterBrightness:  { type: 'number',  default: 100, min: 0, max: 200 },
@@ -200,6 +206,15 @@ window.YPP.SettingsSchema = {
         shortcut_speedUp:       { type: 'string', default: 'Shift+.' },
         shortcut_speedReset:    { type: 'string', default: 'Shift+R' },
         shortcut_ambientMode:   { type: 'string', default: 'Shift+M' },
+        
+        // Video Speed Controller Shortcuts
+        vscShortcutSlower:       { type: 'string',  default: 's' },
+        vscShortcutFaster:       { type: 'string',  default: 'd' },
+        vscShortcutRewind:       { type: 'string',  default: 'z' },
+        vscShortcutAdvance:      { type: 'string',  default: 'x' },
+        vscShortcutReset:        { type: 'string',  default: 'r' },
+        vscShortcutPreferred:    { type: 'string',  default: 'g' },
+        vscShortcutToggleDisplay:{ type: 'string',  default: 'v' },
 
         // --- Content Visibility (missing from original schema) ---
         hidePlaylists:       { type: 'boolean', default: false },

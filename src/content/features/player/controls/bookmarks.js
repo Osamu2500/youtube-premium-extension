@@ -86,6 +86,9 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
     }
 
     _injectControls() {
+        const placement = this.settings?.pb_bookmark || 'front';
+        if (placement !== 'front') return;
+        
         if (document.querySelector('.ypp-capture-btn')) return;
 
         const btn = document.createElement('button');

@@ -34,26 +34,52 @@ window.YPP.features.MultiSelect = class MultiSelect
     }
 
     _init() {
-        this._injectStyle();
         this._attachCheckboxes();
     }
 
-    _injectStyle() {
-        if (!document.getElementById('ypp-ms-styles')) {
-            const s = document.createElement('style');
-            s.id = 'ypp-ms-styles';
-            s.textContent = `
-                ytd-thumbnail, #thumbnail { position: relative; }
-                .ypp-ms-bar {
-                    animation: ypp-ms-bar-in 0.25s cubic-bezier(0.2, 0, 0, 1) forwards;
-                }
-                @keyframes ypp-ms-bar-in {
-                    from { opacity: 0; transform: translateY(100%); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-            `;
-            (document.head || document.documentElement).appendChild(s);
+    _simulateMouseClick(el) {
+        if (!el) return;
+        ['pointerdown','mousedown','pointerup','mouseup','click'].forEach(name => {
+            const ev = new MouseEvent(name, {bubbles:true, cancelable:true, view:window});
+            el.dispatchEvent(ev);
+        });
+    }
+
+    _findNearestDropdownTo(menuBtn) {
+        const btnRect = menuBtn.getBoundingClientRect();
+        if (!btnRect) return null;
+        const dropdowns = Array.from(document.querySelectorAll('tp-yt-iron-dropdown, yt-sheet-view-model, ytd-popup-container'))
+            .filter(d => {
+                const r = d.getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+            });
+        if (!dropdowns.length) return null;
+        let best = null, bestDist = Infinity;
+        const bx = btnRect.left + btnRect.width/2, by = btnRect.top + btnRect.height/2;
+        for (const d of dropdowns) {
+            const r = d.getBoundingClientRect();
+            const dx = (r.left + r.width/2) - bx;
+            const dy = (r.top + r.height/2) - by;
+            const dist = Math.hypot(dx, dy);
+            if (dist < bestDist) { bestDist = dist; best = d; }
         }
+        return best;
+    }
+
+    _waitForNearestDropdown(menuBtn, timeout = 2500) {
+        return new Promise(resolve => {
+            const start = Date.now();
+            const handle = setInterval(() => {
+                const popup = this._findNearestDropdownTo(menuBtn);
+                if (popup) {
+                    clearInterval(handle);
+                    resolve(popup);
+                } else if (Date.now() - start > timeout) {
+                    clearInterval(handle);
+                    resolve(null);
+                }
+            }, 60);
+        });
     }
 
     _getVideoCards() {
@@ -200,6 +226,14 @@ window.YPP.features.MultiSelect = class MultiSelect
                         </svg>
                         Watch Later
                     </button>
+                    <button class="ypp-ms-btn" id="ypp-ms-not-interested">
+                        <svg viewBox="0 0 24 24" width="15" height="15" 
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                        </svg>
+                        Not Interested
+                    </button>
                     <button class="ypp-ms-btn ypp-ms-btn-clear" 
                         id="ypp-ms-clear">
                         ✕ Clear
@@ -216,6 +250,9 @@ window.YPP.features.MultiSelect = class MultiSelect
 
             this._actionBar.querySelector('#ypp-ms-playlist')
                 ?.addEventListener('click', () => this._showPlaylistPicker());
+
+            this._actionBar.querySelector('#ypp-ms-not-interested')
+                ?.addEventListener('click', () => this._markNotInterested());
 
             this._actionBar.querySelector('#ypp-ms-clear')
                 ?.addEventListener('click', () => this._clearAll());
@@ -248,23 +285,31 @@ window.YPP.features.MultiSelect = class MultiSelect
         const videos = [...this._selected.values()];
 
         for (const { element } of videos) {
-            // Find and click the native "Save to Watch Later" 
-            // from the three-dot menu
             const menuBtn = /** @type {HTMLElement} */ (element.querySelector(
                 'ytd-menu-renderer button, ' +
-                '#button[aria-label*="Action menu"]'
+                'button[aria-label*="More actions"], button[aria-label*="Action menu"]'
             ));
             if (!menuBtn) continue;
 
-            menuBtn.click();
+            this._simulateMouseClick(menuBtn);
 
-            const watchLaterBtn = /** @type {HTMLElement} */ (await this.waitForElement(
-                'ytd-menu-service-item-renderer:first-child, ' +
-                '[aria-label*="Watch later"], ' +
-                'yt-formatted-string:first-child',
-                2000
-            ));
-            watchLaterBtn?.click();
+            const popup = await this._waitForNearestDropdown(menuBtn, 3000);
+            if (!popup) continue;
+
+            const items = Array.from(popup.querySelectorAll('[role="menuitem"], yt-list-item-view-model-wiz, yt-list-item-view-model'));
+            let wlItem = null;
+            for (const it of items) {
+                const txt = (it.innerText || it.textContent || '').trim().toLowerCase();
+                if (txt.includes('watch later')) {
+                    wlItem = it;
+                    break;
+                }
+            }
+
+            if (wlItem) {
+                const clickable = wlItem.querySelector('.yt-list-item-view-model-wiz__label') || wlItem;
+                this._simulateMouseClick(clickable);
+            }
         }
 
         this._showToast(`${videos.length} videos saved to Watch Later`);
@@ -272,22 +317,70 @@ window.YPP.features.MultiSelect = class MultiSelect
     }
 
     async _showPlaylistPicker() {
-        // Trigger YouTube's native playlist save dialog
-        // on the first selected video's three-dot menu
         const first = [...this._selected.values()][0];
         if (!first) return;
 
         const menuBtn = /** @type {HTMLElement} */ (first.element.querySelector(
-            'ytd-menu-renderer button'
+            'ytd-menu-renderer button, ' +
+            'button[aria-label*="More actions"], button[aria-label*="Action menu"]'
         ));
-        menuBtn?.click();
+        if (!menuBtn) return;
 
-        const saveBtn = /** @type {HTMLElement} */ (await this.waitForElement(
-            '[aria-label*="Save to playlist"], ' +
-            'ytd-menu-service-item-renderer:nth-child(2)',
-            2000
-        ));
-        saveBtn?.click();
+        this._simulateMouseClick(menuBtn);
+
+        const popup = await this._waitForNearestDropdown(menuBtn, 3000);
+        if (!popup) return;
+
+        const items = Array.from(popup.querySelectorAll('[role="menuitem"], yt-list-item-view-model-wiz, yt-list-item-view-model'));
+        let saveItem = null;
+        for (const it of items) {
+            const txt = (it.innerText || it.textContent || '').trim().toLowerCase();
+            if (txt.includes('save to playlist') || txt === 'save') {
+                saveItem = it;
+                break;
+            }
+        }
+
+        if (saveItem) {
+            const clickable = saveItem.querySelector('.yt-list-item-view-model-wiz__label') || saveItem;
+            this._simulateMouseClick(clickable);
+        }
+    }
+
+    async _markNotInterested() {
+        const videos = [...this._selected.values()];
+
+        for (const { element } of videos) {
+            const menuBtn = /** @type {HTMLElement} */ (element.querySelector(
+                'ytd-menu-renderer button, ' +
+                'button[aria-label*="More actions"], button[aria-label*="Action menu"]'
+            ));
+            if (!menuBtn) continue;
+
+            this._simulateMouseClick(menuBtn);
+
+            const popup = await this._waitForNearestDropdown(menuBtn, 3000);
+            if (!popup) continue;
+
+            const items = Array.from(popup.querySelectorAll('[role="menuitem"], yt-list-item-view-model-wiz, yt-list-item-view-model'));
+            let notInterestedItem = null;
+            for (const it of items) {
+                const txt = (it.innerText || it.textContent || '').trim().toLowerCase();
+                if (txt.includes('not interested')) {
+                    notInterestedItem = it;
+                    break;
+                }
+            }
+
+            if (notInterestedItem) {
+                const clickable = notInterestedItem.querySelector('.yt-list-item-view-model-wiz__label') || notInterestedItem;
+                this._simulateMouseClick(clickable);
+                try { element.style.opacity = '0.45'; } catch(e){}
+            }
+        }
+
+        this._showToast(`${videos.length} videos marked as Not Interested`);
+        this._clearAll();
     }
 
     /** @param {string} message */

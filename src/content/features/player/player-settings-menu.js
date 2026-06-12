@@ -120,6 +120,14 @@ window.YPP.features.PlayerSettingsMenu = class PlayerSettingsMenu {
             const icon = `<svg height="24" width="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zM9 9c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/><path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h4.05l.59-.65L9.88 4h4.24l1.24 1.35.59.65H20v12zM12 17c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0-8c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/></svg>`;
             panelMenu.appendChild(this.createSettingsMenuItem('Take Snapshot', icon, () => this.controls.takeSnapshot(video)));
         }
+        if (this.player.settings.pb_bookmark === 'back') {
+            _addSeparator();
+            const icon = `<svg height="24" width="24" viewBox="0 0 24 24" fill="#fff"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`;
+            panelMenu.appendChild(this.createSettingsMenuItem('Bookmark Highlight', icon, async () => {
+                const bmFeature = window.YPP.featureManager?.getFeature('BookmarksManager');
+                if (bmFeature) await bmFeature._captureHighlight();
+            }));
+        }
         if (this.player.settings.pb_loop === 'back') {
             _addSeparator();
             const icon = `<svg height="24" width="24" viewBox="0 0 24 24" fill="#fff"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v6z"/></svg>`;

@@ -1,0 +1,467 @@
+// f:\Youtube 2.0\src\content\features\player\enhancements\video-speed-controller.js
+import './video-speed-controller.css';
+
+window.YPP = window.YPP || {};
+window.YPP.features = window.YPP.features || {};
+
+window.YPP.features.VideoSpeedController = class VideoSpeedController extends window.YPP.features.BaseFeature {
+    constructor() {
+        super('VideoSpeedController');
+        this.controllers = new WeakMap();
+        this._mutationObserver = null;
+        this._lastActiveVideo = null;
+        this._boundHandleKeyDown = this.handleKeyDown.bind(this);
+    }
+
+    getConfigKey() {
+        return 'enableCustomSpeed';
+    }
+
+    async enable() {
+        if (!this.settings || this.settings.enableCustomSpeed === false) return;
+        
+        this.utils?.log('Enabling Global Video Speed Controller', 'VSC');
+        
+        // Scan for existing videos
+        document.querySelectorAll('video').forEach(video => this.attachToVideo(video));
+
+        // Start observing for new videos
+        this._mutationObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                for (const node of mutation.addedNodes) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.tagName === 'VIDEO') {
+                            this.attachToVideo(node);
+                        } else {
+                            node.querySelectorAll('video').forEach(video => this.attachToVideo(video));
+                        }
+                    }
+                }
+            }
+        });
+
+        this._mutationObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Global keyboard shortcuts
+        document.addEventListener('keydown', this._boundHandleKeyDown, true);
+    }
+
+    async disable() {
+        if (this._mutationObserver) {
+            this._mutationObserver.disconnect();
+            this._mutationObserver = null;
+        }
+
+        document.removeEventListener('keydown', this._boundHandleKeyDown, true);
+
+        // Remove all controllers
+        document.querySelectorAll('video').forEach(video => {
+            const state = this.controllers.get(video);
+            if (state && state.cleanup) state.cleanup();
+        });
+        document.querySelectorAll('ypp-vsc-controller').forEach(c => c.remove());
+        this.controllers = new WeakMap();
+    }
+
+    onUpdate() {
+        // Nothing needed here for now
+    }
+
+    attachToVideo(video) {
+        if (this.controllers.has(video)) return;
+        if (!video.isConnected) return;
+        if (video.hasAttribute('data-ypp-vsc-attached')) return;
+        video.setAttribute('data-ypp-vsc-attached', 'true');
+
+        this.utils?.log('Attaching VSC to video', 'VSC');
+
+        const controller = document.createElement('ypp-vsc-controller');
+        
+        // Inject CSS natively into the document head
+        const styleId = 'ypp-vsc-style';
+        if (!document.getElementById(styleId)) {
+            const link = document.createElement('link');
+            link.id = styleId;
+            link.rel = 'stylesheet';
+            link.href = chrome.runtime.getURL('src/content/features/player/enhancements/video-speed-controller.css');
+            document.head.appendChild(link);
+        }
+
+        // UI Container
+        const container = document.createElement('div');
+        container.className = 'ypp-vsc-panel';
+        
+        // Elements
+        const display = document.createElement('span');
+        display.className = 'ypp-vsc-speed-display'; // Fix class name to match CSS!
+        display.textContent = '1.00';
+
+        const ICONS = {
+            rewind: `<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>`,
+            slower: `<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 13H5v-2h14v2z"/></svg>`,
+            faster: `<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`,
+            advance: `<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>`,
+            close: `<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>`
+        };
+
+        const formatKey = (key) => key ? key.replace('Shift+', '⇧') : '';
+
+        const btnRewind = this.createButton(ICONS.rewind, `Rewind 10s (${formatKey(this.settings?.shortcut_vscRewind)})`, () => { video.currentTime -= 10; });
+        const btnSlower = this.createButton(ICONS.slower, `Slower -0.1x (${formatKey(this.settings?.shortcut_vscSlower)})`, () => this.adjustSpeed(video, -0.1));
+        const btnFaster = this.createButton(ICONS.faster, `Faster +0.1x (${formatKey(this.settings?.shortcut_vscFaster)})`, () => this.adjustSpeed(video, 0.1));
+        const btnAdvance = this.createButton(ICONS.advance, `Advance 10s (${formatKey(this.settings?.shortcut_vscAdvance)})`, () => { video.currentTime += 10; });
+        const btnClose = this.createButton(ICONS.close, `Hide Controller`, () => { controller.style.display = 'none'; });
+        btnClose.classList.add('ypp-vsc-close');
+
+        // Assemble
+        container.appendChild(display);
+        container.appendChild(btnRewind);
+        container.appendChild(btnSlower);
+        container.appendChild(btnFaster);
+        container.appendChild(btnAdvance);
+        container.appendChild(btnClose);
+        controller.appendChild(container);
+
+        // Generate unique class name for this video's controller (instead of anchorName)
+        const controllerClass = `ypp-vsc-${Math.random().toString(36).substr(2, 9)}`;
+        controller.classList.add(controllerClass);
+        
+        // Ensure absolute positioning
+        controller.style.position = 'absolute';
+        controller.style.zIndex = '9999999';
+
+        // Append to parent element so it naturally flows with fullscreen video
+        const parent = video.parentElement || document.body;
+        parent.insertBefore(controller, video.nextSibling || video);
+        
+        // Position Calculation Logic (from folder 4's battle-tested approach)
+        let currentOffsetX = 12;
+        let currentOffsetY = 12;
+
+        const applyPosition = () => {
+            if (!video.isConnected || !controller.isConnected) return;
+            const t = video.getBoundingClientRect();
+            const o = controller.offsetParent?.getBoundingClientRect();
+            
+            const topOffset = Math.max(t.top - (o?.top || 0), 0) + currentOffsetY;
+            const leftOffset = Math.max(t.left - (o?.left || 0), 0) + currentOffsetX;
+            
+            controller.style.top = `${topOffset}px`;
+            controller.style.left = `${leftOffset}px`;
+            controller.style.right = 'auto';
+            controller.style.bottom = 'auto';
+        };
+
+        // Initial position
+        applyPosition();
+
+        // Listen for layout changes
+        const resizeObserver = new ResizeObserver(() => applyPosition());
+        resizeObserver.observe(video);
+        if (controller.offsetParent) {
+            resizeObserver.observe(controller.offsetParent);
+        }
+        
+        // Handle window resizes and scrolls
+        window.addEventListener('resize', applyPosition, { passive: true });
+        
+        // Dragging Logic
+        let isDragging = false;
+        let startX, startY;
+
+        const applyPositionDragged = () => {
+            applyPosition();
+        };
+
+        display.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            e.preventDefault(); // prevent text selection
+        });
+
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            currentOffsetX += dx;
+            currentOffsetY += dy;
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            applyPosition();
+        };
+
+        const onMouseUp = () => {
+            isDragging = false;
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+
+        // Store state
+        this.controllers.set(video, {
+            element: controller,
+            display: display,
+            manualHide: false,
+            hideTimeout: null,
+            fightbackCount: 0,
+            fightbackTimer: null,
+            lastInteraction: 0,
+            cleanup: () => {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            }
+        });
+
+        // Initialize speed from memory
+        const savedSpeed = this.settings.vscLastSpeed || 1.0;
+        if (savedSpeed !== 1.0) {
+            this.setSpeed(video, savedSpeed);
+        }
+
+        // Event Listeners for UI state
+        video.addEventListener('ratechange', (e) => this.handleRateChange(video, e));
+
+        // UI auto-hide logic for external websites
+        video.addEventListener('play', () => {
+            this._lastActiveVideo = video;
+            this.showController(video);
+            this.hideControllerDelay(video);
+        });
+        video.addEventListener('pause', () => {
+            this.showController(video);
+            this.hideControllerDelay(video);
+        });
+        
+        // Listen to document for mouse events because video players often have complex overlays
+        // In iframes, moving the mouse anywhere should reveal the controls.
+        const doc = video.ownerDocument;
+        if (doc) {
+            doc.addEventListener('mousemove', () => {
+                this.showController(video);
+                this.hideControllerDelay(video);
+            });
+            doc.addEventListener('click', () => { 
+                this._lastActiveVideo = video; 
+                this.showController(video);
+                this.hideControllerDelay(video);
+            });
+        }
+        
+        // Also listen to the controller itself so it doesn't hide while hovered
+        controller.addEventListener('mouseenter', () => {
+            this.showController(video);
+            if (this.controllers.has(video)) {
+                const state = this.controllers.get(video);
+                if (state.hideTimeout) {
+                    clearTimeout(state.hideTimeout);
+                    state.hideTimeout = null;
+                }
+            }
+        });
+        controller.addEventListener('mouseleave', () => this.hideControllerDelay(video));
+
+        this.hideControllerDelay(video);
+    }
+
+    createButton(html, title, onClick) {
+        const btn = document.createElement('button');
+        btn.className = 'ypp-vsc-btn';
+        btn.innerHTML = html;
+        btn.title = title;
+        btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+        };
+        btn.onmousedown = (e) => e.stopPropagation();
+        return btn;
+    }
+
+    handleRateChange(video, e) {
+        const state = this.controllers.get(video);
+        if (!state) return;
+
+        const actualSpeed = video.playbackRate;
+        const targetSpeed = this.settings.vscLastSpeed || 1.0;
+
+        if (Math.abs(actualSpeed - targetSpeed) < 0.01) {
+            state.display.textContent = actualSpeed.toFixed(2);
+            return;
+        }
+
+        if (e.detail && e.detail.origin === 'videoSpeed') return;
+
+        const timeSinceUser = Date.now() - state.lastInteraction;
+        if (timeSinceUser < 300) {
+            // User did this
+            if (window.YPP.StorageManager) {
+                window.YPP.StorageManager.set({ vscLastSpeed: actualSpeed });
+            }
+            this.settings.vscLastSpeed = actualSpeed;
+            state.display.textContent = actualSpeed.toFixed(2);
+            state.fightbackCount = 0;
+            return;
+        }
+
+        // Fightback
+        state.fightbackCount++;
+        if (state.fightbackTimer) clearTimeout(state.fightbackTimer);
+        state.fightbackTimer = setTimeout(() => { state.fightbackCount = 0; }, 3000);
+
+        if (state.fightbackCount >= 5) {
+            state.fightbackCount = 0;
+            state.display.textContent = actualSpeed.toFixed(2);
+        } else {
+            video.playbackRate = targetSpeed;
+            e.stopImmediatePropagation();
+        }
+    }
+
+    showController(video) {
+        const state = this.controllers.get(video);
+        if (!state) return;
+
+        if (state.hideTimeout) {
+            clearTimeout(state.hideTimeout);
+            state.hideTimeout = null;
+        }
+
+        state.element.classList.remove('ypp-vsc-hidden');
+        state.element.style.display = ''; // Reset display in case it was closed
+    }
+
+    hideControllerDelay(video) {
+        // If inside a YouTube player, let native .ytp-autohide handle it
+        if (video.closest('.html5-video-player')) return;
+
+        const state = this.controllers.get(video);
+        if (!state) return;
+
+        if (state.hideTimeout) clearTimeout(state.hideTimeout);
+        state.hideTimeout = setTimeout(() => {
+            state.element.classList.add('ypp-vsc-hidden');
+        }, 2500);
+    }
+
+    setSpeed(video, speed) {
+        const state = this.controllers.get(video);
+        if (!state) return;
+
+        speed = Math.max(0.1, Math.min(speed, 16.0));
+        video.playbackRate = speed;
+        
+        // Save to memory
+        this.settings.vscLastSpeed = speed;
+        if (window.YPP.StorageManager) {
+            // This ensures we remember speed settings!
+            window.YPP.StorageManager.set({ vscLastSpeed: speed });
+        }
+        
+        state.display.textContent = speed.toFixed(2);
+        this.showController(video);
+        this.hideControllerDelay(video);
+
+        video.dispatchEvent(new CustomEvent('ratechange', {
+            bubbles: true,
+            composed: true,
+            detail: { origin: 'videoSpeed', speed: speed }
+        }));
+    }
+
+    adjustSpeed(video, delta) {
+        let current = video.playbackRate;
+        let newSpeed = Math.round((current + delta) * 10) / 10;
+        this.setSpeed(video, newSpeed);
+    }
+
+    handleKeyDown(e) {
+        // Ignore if typing in an input
+        const target = e.target;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+
+        // Use the last active video, or find the largest video on screen
+        let video = this._lastActiveVideo;
+        if (!video || !video.isConnected) {
+            video = this.findLargestVideo();
+        }
+
+        if (!video) return;
+        
+        // Ensure the video is attached so state is available
+        if (!this.controllers.has(video)) {
+            this.attachToVideo(video);
+        }
+
+        const state = this.controllers.get(video);
+        if (state) state.lastInteraction = Date.now();
+
+        const shortcuts = this.settings;
+        let handled = false;
+
+        const isMatch = (shortcutKey) => {
+            if (!shortcuts || !shortcuts[shortcutKey]) return false;
+            const parts = shortcuts[shortcutKey].toLowerCase().split('+');
+            const key = parts.pop();
+            const ctrl = parts.includes('ctrl');
+            const shift = parts.includes('shift');
+            const alt = parts.includes('alt');
+            
+            let eKey = e.key.toLowerCase();
+            if (eKey === ' ') eKey = 'space';
+            
+            // Allow loose matching if e.key matches the key directly (handles Caps Lock or shifted chars)
+            if (eKey === key) return e.ctrlKey === ctrl && e.altKey === alt;
+            
+            if (e.shiftKey) {
+                const shiftMap = { '<': ',', '>': '.', '?': '/', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '~': '`', '_': '-', '+': '=' };
+                if (shiftMap[eKey]) eKey = shiftMap[eKey];
+            }
+            
+            return eKey === key && e.ctrlKey === ctrl && e.shiftKey === shift && e.altKey === alt;
+        };
+
+        if (isMatch('shortcut_vscSlower')) {
+            this.adjustSpeed(video, -0.1);
+            handled = true;
+        } else if (isMatch('shortcut_vscFaster')) {
+            this.adjustSpeed(video, 0.1);
+            handled = true;
+        } else if (isMatch('shortcut_vscRewind')) {
+            video.currentTime -= 10;
+            handled = true;
+        } else if (isMatch('shortcut_vscAdvance')) {
+            video.currentTime += 10;
+            handled = true;
+        } else if (isMatch('shortcut_vscReset')) {
+            this.setSpeed(video, 1.0);
+            handled = true;
+        }
+
+        if (handled) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showController(video);
+        }
+    }
+
+    findLargestVideo() {
+        let largest = null;
+        let maxArea = 0;
+        document.querySelectorAll('video').forEach(video => {
+            const rect = video.getBoundingClientRect();
+            const area = rect.width * rect.height;
+            if (area > maxArea) {
+                maxArea = area;
+                largest = video;
+            }
+        });
+        return largest;
+    }
+};
