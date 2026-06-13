@@ -13,6 +13,19 @@ export function initHistoryWidget() {
     setupCalendarListeners();
 }
 
+function parseStorageData(raw) {
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+        try {
+            const parsed = JSON.parse(raw);
+            return parsed.data !== undefined ? parsed.data : parsed;
+        } catch(e) {
+            return raw;
+        }
+    }
+    return raw;
+}
+
 function setupCalendarListeners() {
     const btn = document.getElementById('history-calendar-btn');
     const panel = document.getElementById('history-details-panel');
@@ -56,7 +69,7 @@ function renderHeatmap() {
 
     chrome.storage.local.get([...keys, todayKey], (result) => {
         // Update today's display
-        const todayData = result[todayKey];
+        const todayData = parseStorageData(result[todayKey]);
         let todaySeconds = 0;
         if (typeof todayData === 'number') todaySeconds = todayData;
         else if (todayData && todayData.totalSeconds) todaySeconds = todayData.totalSeconds;
@@ -70,7 +83,7 @@ function renderHeatmap() {
         // Render Heatmap
         heatmapContainer.innerHTML = '';
         dates.forEach(date => {
-            const dayData = result[`ypp_analytics_${date}`];
+            const dayData = parseStorageData(result[`ypp_analytics_${date}`]);
             let seconds = 0;
             if (typeof dayData === 'number') seconds = dayData;
             else if (dayData && dayData.totalSeconds) seconds = dayData.totalSeconds;
@@ -131,7 +144,7 @@ function renderCalendar(date) {
     chrome.storage.local.get(dateKeys, (result) => {
         for (let i = 1; i <= daysInMonth; i++) {
             const dayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            const data = result[`ypp_analytics_${dayString}`];
+            const data = parseStorageData(result[`ypp_analytics_${dayString}`]);
 
             const cell = document.createElement('div');
             cell.className = 'calendar-day';

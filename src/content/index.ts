@@ -95,6 +95,8 @@ import './features/pages/library/playlist/reverse-playlist.js';
 
 // Watch page features
 import './features/pages/watch/watch-history.js';
+import './features/pages/watch/watch-time-alert.js';
+import './features/pages/watch/watch-time-limit.js';
 import './features/pages/watch/continue-watching.js';
 import './features/pages/watch/zen-mode.js';
 import './features/pages/watch/focus-mode.js';

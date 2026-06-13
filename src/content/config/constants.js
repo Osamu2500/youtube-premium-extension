@@ -407,6 +407,8 @@ window.YPP.CONSTANTS = {
         intentionalDelay: 'IntentionalDelay',
         playlistDuration: 'PlaylistDuration',
         watchHistory: 'WatchHistoryTracker',
+        watchTimeAlert: 'WatchTimeAlert',
+        watchTimeLimit: 'WatchTimeLimit',
         historyTracker: 'HistoryTracker',
         historyRedesign: 'HistoryRedesign',
         playlistRedesign: 'PlaylistRedesign',
