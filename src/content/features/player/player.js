@@ -166,7 +166,7 @@ window.YPP.features.Player = class Player extends window.YPP.features.BaseFeatur
             'pb_native_next': '.ytp-next-button',
             'pb_native_mute': '.ytp-mute-button',
             'pb_native_cast': '.ytp-remote-button',
-            'pb_native_autoplay': '.ytp-autoplay-button',
+            'pb_native_autoplay': '.ytp-autonav-button, .ytp-autonav-toggle-button',
             'pb_native_cc': '.ytp-subtitles-button',
             'pb_native_miniplayer': '.ytp-miniplayer-button',
             'pb_native_theater': '.ytp-size-button',
