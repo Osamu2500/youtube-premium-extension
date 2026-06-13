@@ -9,6 +9,163 @@ import { initHistoryWidget, initBackupTools, initBookmarksManager } from './popu
 import { renderSchema, registerSlot } from './popup-renderer.js';
 
 // --- Register Custom Slots ---
+registerSlot('vsc_shortcuts_manager', (container, state) => {
+    container.innerHTML = `
+        <div class="vsc-shortcuts-header" style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; font-size:12px; opacity:0.7;">
+            <span style="flex:2">Action</span>
+            <span style="flex:1">Key</span>
+            <span style="flex:1">Value</span>
+            <span style="width:24px"></span>
+        </div>
+        <div id="vsc-shortcuts-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
+        <button id="vsc-add-shortcut" class="ypp-btn" style="width:100%; padding:8px; border-radius:8px; background:var(--bg-card); color:var(--text-primary); border:1px solid rgba(255,255,255,0.1); cursor:pointer;">+ Add Shortcut</button>
+    `;
+
+    const listContainer = container.querySelector('#vsc-shortcuts-list');
+    const addBtn = container.querySelector('#vsc-add-shortcut');
+
+    const ACTIONS = {
+        showHide: 'Show/hide controller',
+        decrease: 'Decrease speed',
+        increase: 'Increase speed',
+        rewind: 'Rewind',
+        advance: 'Advance',
+        reset: 'Reset speed',
+        preferred: 'Preferred speed',
+        mute: 'Mute',
+        decreaseVolume: 'Decrease volume',
+        increaseVolume: 'Increase volume',
+        pause: 'Pause',
+        setMarker: 'Set marker',
+        jumpMarker: 'Jump to marker'
+    };
+
+    const renderList = (shortcuts) => {
+        listContainer.innerHTML = '';
+        shortcuts.forEach((sc, index) => {
+            const row = document.createElement('div');
+            row.className = 'vsc-shortcut-row';
+            row.style.cssText = 'display:flex; gap:8px; align-items:center; background:rgba(0,0,0,0.2); padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);';
+
+            const select = document.createElement('select');
+            select.className = 'theme-select'; // inherit option dark background from CSS
+            select.style.cssText = 'flex:2; background:var(--bg-dark); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px; font-size:12px; outline:none;';
+            for (const [val, label] of Object.entries(ACTIONS)) {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = label;
+                opt.style.background = '#1a1a1a'; // Force dark background as fallback
+                opt.style.color = '#ffffff';
+                if (sc.action === val) opt.selected = true;
+                select.appendChild(opt);
+            }
+            
+            const keyInput = document.createElement('input');
+            keyInput.type = 'text';
+            keyInput.value = sc.key || '';
+            keyInput.placeholder = 'None';
+            keyInput.style.cssText = 'flex:1; width:10px; background:var(--bg-dark); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px; font-size:12px; text-align:center; text-transform:uppercase; outline:none;';
+            
+            keyInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') return; // Let tab navigate naturally
+                e.preventDefault();
+                
+                const keys = [];
+                if (e.ctrlKey) keys.push('Ctrl');
+                if (e.metaKey) keys.push('Meta');
+                if (e.altKey) keys.push('Alt');
+                if (e.shiftKey) keys.push('Shift');
+                
+                let keyName = e.key;
+                if (keyName === ' ') keyName = 'Space';
+                
+                if (['Control', 'Shift', 'Alt', 'Meta'].includes(keyName)) {
+                    keyInput.value = keys.join('+') + '+...';
+                    return; // Wait for the actual key
+                }
+                
+                keyName = keyName.toUpperCase();
+                keys.push(keyName);
+                const finalKey = keys.join('+');
+                
+                sc.key = finalKey;
+                keyInput.value = finalKey;
+                save();
+            });
+
+            const valInput = document.createElement('input');
+            valInput.type = 'number';
+            valInput.step = 'any';
+            valInput.value = sc.value === null ? '' : sc.value;
+            valInput.placeholder = 'N/A';
+            valInput.style.cssText = 'flex:1; width:10px; background:var(--bg-dark); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px; font-size:12px; outline:none;';
+            
+            const updateValDisabled = () => {
+                const needsValue = ['decrease', 'increase', 'rewind', 'advance', 'reset', 'preferred'].includes(sc.action);
+                valInput.disabled = !needsValue;
+                valInput.style.opacity = needsValue ? '1' : '0.3';
+                if (!needsValue) valInput.value = '';
+            };
+            updateValDisabled();
+
+            select.addEventListener('change', (e) => {
+                sc.action = e.target.value;
+                updateValDisabled();
+                save();
+            });
+
+            valInput.addEventListener('input', (e) => {
+                sc.value = parseFloat(e.target.value) || null;
+                save();
+            });
+
+            const rmBtn = document.createElement('button');
+            rmBtn.innerHTML = '✕';
+            rmBtn.style.cssText = 'width:24px; height:24px; background:transparent; color:#ff4e45; border:none; border-radius:4px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;';
+            rmBtn.addEventListener('click', () => {
+                shortcuts.splice(index, 1);
+                save();
+                renderList(shortcuts);
+            });
+
+            row.appendChild(select);
+            row.appendChild(keyInput);
+            row.appendChild(valInput);
+            row.appendChild(rmBtn);
+            listContainer.appendChild(row);
+        });
+    };
+
+    const save = () => {
+        chrome.storage.local.get('settings', (data) => {
+            const settings = data.settings || {};
+            settings.vscShortcuts = currentShortcuts;
+            chrome.storage.local.set({ settings });
+            if(updateSetting) updateSetting('vscShortcuts', currentShortcuts);
+        });
+    };
+
+    let currentShortcuts = [];
+    chrome.storage.local.get('settings', (data) => {
+        currentShortcuts = data.settings?.vscShortcuts || [
+            { action: 'showHide', key: 'V', value: null },
+            { action: 'decrease', key: 'Z', value: 0.1 },
+            { action: 'increase', key: 'X', value: 0.1 },
+            { action: 'rewind', key: 'S', value: 10 },
+            { action: 'advance', key: 'D', value: 10 },
+            { action: 'reset', key: 'R', value: 1.0 },
+            { action: 'preferred', key: 'G', value: 2.0 }
+        ];
+        renderList(currentShortcuts);
+    });
+
+    addBtn.addEventListener('click', () => {
+        currentShortcuts.push({ action: 'showHide', key: '', value: null });
+        save();
+        renderList(currentShortcuts);
+    });
+});
+
 registerSlot('shortcutsPanel', (container, state) => {
     container.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
@@ -112,7 +269,7 @@ registerSlot('shortcutsPanel', (container, state) => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+const initApp = () => {
     try {
         // 0. i18n Initialization
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -340,53 +497,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // We hook into it by appending our callback after the first loadSettings call above
     loadSettings([_removeSkeleton]);
 
-    // ── 5.4: First-run onboarding banner ─────────────────────────────────
-    chrome.storage.local.get('settings', (data) => {
-        const settings = data.settings || {};
-        if (settings.hasSeenOnboarding) return;
-
-        const banner = document.createElement('div');
-        banner.className = 'ypp-onboarding-banner';
-        banner.innerHTML = `
-            <div class="ypp-onboarding-icon">🚀</div>
-            <div class="ypp-onboarding-body">
-                <p class="ypp-onboarding-title">Welcome to YouTube Premium+</p>
-                <p class="ypp-onboarding-desc">
-                    You have <strong>50+ features</strong> ready to use — SponsorBlock, Ambient Mode,
-                    Bookmark Highlights, Subscription Folders, and much more. Open the popup to explore!
-                </p>
-                <div class="ypp-onboarding-actions">
-                    <button class="ypp-onboarding-btn ypp-onboarding-btn-primary" id="yppOnboardingOpen">Open Settings</button>
-                    <button class="ypp-onboarding-btn ypp-onboarding-btn-dismiss" id="yppOnboardingDismiss">Got it</button>
-                </div>
-            </div>
-            <button class="ypp-onboarding-close" id="yppOnboardingClose" title="Dismiss">✕</button>`;
-        document.body.appendChild(banner);
-
-        // Animate in
-        requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('show')));
-
-        const _dismiss = () => {
-            banner.classList.remove('show');
-            setTimeout(() => banner.remove(), 500);
-            chrome.storage.local.get('settings', (d) => {
-                const s = { ...(d.settings || {}), hasSeenOnboarding: true };
-                chrome.storage.local.set({ settings: s });
-            });
-        };
-
-        document.getElementById('yppOnboardingClose')?.addEventListener('click', _dismiss);
-        document.getElementById('yppOnboardingDismiss')?.addEventListener('click', _dismiss);
-        document.getElementById('yppOnboardingOpen')?.addEventListener('click', () => {
-            chrome.runtime.openOptionsPage?.() ?? chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
-            _dismiss();
-        });
-
-        // Auto-dismiss after 18 seconds
-        setTimeout(_dismiss, 18000);
-    });
 
     } catch (e) {
         document.body.innerHTML = `<div style="color:red; padding:20px; font-size:16px;">Error initializing popup: ${e.message}<br><pre>${e.stack}</pre></div>`;
     }
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}

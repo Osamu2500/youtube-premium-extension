@@ -36,7 +36,19 @@ window.YPP.features.PlayerControls = class PlayerControls {
             btn.dataset.speed = rate;
             if (video.playbackRate === parseFloat(rate)) btn.classList.add('active');
             this.player.addListener(btn, 'click', (e) => {
-                video.playbackRate = parseFloat(rate);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const newSpeed = parseFloat(rate);
+                const vsc = window.YPP.featureManager?.getFeature('videoSpeedController');
+                
+                if (vsc) {
+                    if (!vsc.controllers.has(video)) vsc.attachToVideo(video);
+                    vsc.setSpeed(video, newSpeed);
+                } else {
+                    video.playbackRate = newSpeed;
+                }
+                
                 this.updateSpeedButtons(container, rate);
             });
             container.appendChild(btn);

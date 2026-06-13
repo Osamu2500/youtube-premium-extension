@@ -42,6 +42,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             <span class="nav-label" data-i18n="nav_player">Player</span>
           </button>
+          <button class="nav-item" data-tab="speed" title="Video Speed Controller">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6v12l8.5-6L4 6zm9 0v12l8.5-6L13 6z"></path></svg>
+            <span class="nav-label">Speed</span>
+          </button>
           <button class="nav-item" data-tab="search" title="Search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <span class="nav-label" data-i18n="nav_search">Search</span>
@@ -310,9 +314,12 @@
         <!-- PLAYER — rendered by popup-renderer.js -->
         <section id="tab-player" class="tab-content">
           <!-- schema-driven: populated at runtime -->
-
         </section>
 
+        <!-- SPEED — rendered by popup-renderer.js -->
+        <section id="tab-speed" class="tab-content">
+          <!-- schema-driven: populated at runtime -->
+        </section>
 
         <!-- WELLNESS — rendered by popup-renderer.js -->
         <section id="tab-wellness" class="tab-content">

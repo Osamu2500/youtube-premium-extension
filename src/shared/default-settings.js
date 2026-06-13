@@ -204,12 +204,28 @@ export const DEFAULT_SETTINGS = {
     shortcut_snapshot:    'Shift+S',
     shortcut_loop:        'Shift+L',
     shortcut_pip:         'Shift+P',
-    shortcut_vscSlower:   'Shift+,',
-    shortcut_vscFaster:   'Shift+.',
-    shortcut_vscRewind:   'Shift+ArrowLeft',
-    shortcut_vscAdvance:  'Shift+ArrowRight',
-    shortcut_vscReset:    'Shift+R',
     shortcut_ambientMode: 'Shift+A',
+
+    // Video Speed Controller (Advanced)
+    vscAudioSupport: false,
+    vscRememberSpeed: true,
+    vscHideByDefault: false,
+    vscForceSpeed: false,
+    vscShortcuts: [
+        { action: 'showHide', key: 'V', value: null },
+        { action: 'decrease', key: 'Z', value: 0.25 },
+        { action: 'increase', key: 'X', value: 0.25 },
+        { action: 'rewind', key: 'W', value: 10 },
+        { action: 'advance', key: 'E', value: 10 },
+        { action: 'reset', key: 'A', value: 1.0 },
+        { action: 'preferred', key: 'Q', value: 2.0 },
+        { action: 'mute', key: 'null', value: null },
+        { action: 'decreaseVolume', key: 'null', value: null },
+        { action: 'increaseVolume', key: 'null', value: null },
+        { action: 'pause', key: 'null', value: null },
+        { action: 'setMarker', key: 'null', value: null },
+        { action: 'jumpMarker', key: 'null', value: null }
+    ],
 
     // Onboarding
     hasSeenOnboarding: false,

@@ -137,7 +137,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
     /** Create the singular global player bar DOM */
     createBar() {
         if (this.barElement) return;
-        if (window.YPP.gpbDismissed) return;
+        if (sessionStorage.getItem('ypp-gpb-dismissed') === 'true') return;
 
         window.YPP.Utils?.log('Creating singular global player bar', 'GlobalBarUI', 'debug');
 
@@ -499,7 +499,7 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         const closeBtn = bar.querySelector('#ypp-gpb-close');
         closeBtn.onclick = (e) => {
             e.stopPropagation();
-            window.YPP.gpbDismissed = true;
+            sessionStorage.setItem('ypp-gpb-dismissed', 'true');
             this.removeAll();
         };
     }

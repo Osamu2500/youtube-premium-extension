@@ -1,5 +1,6 @@
 // f:\Youtube 2.0\src\content\features\player\enhancements\video-speed-controller.js
 import './video-speed-controller.css';
+import { VideoSpeedHotkeys } from './video-speed-hotkeys.js';
 
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
@@ -8,9 +9,11 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
     constructor() {
         super('VideoSpeedController');
         this.controllers = new WeakMap();
+        this.markers = new WeakMap();
         this._mutationObserver = null;
         this._lastActiveVideo = null;
         this._boundHandleKeyDown = this.handleKeyDown.bind(this);
+        this.hotkeyManager = new VideoSpeedHotkeys(this);
     }
 
     getConfigKey() {
@@ -23,17 +26,18 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         this.utils?.log('Enabling Global Video Speed Controller', 'VSC');
         
         // Scan for existing videos
-        document.querySelectorAll('video').forEach(video => this.attachToVideo(video));
+        const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
+        document.querySelectorAll(selector).forEach(video => this.attachToVideo(video));
 
         // Start observing for new videos
         this._mutationObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 for (const node of mutation.addedNodes) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
-                        if (node.tagName === 'VIDEO') {
+                        if (node.tagName === 'VIDEO' || (this.settings?.vscAudioSupport && node.tagName === 'AUDIO')) {
                             this.attachToVideo(node);
                         } else {
-                            node.querySelectorAll('video').forEach(video => this.attachToVideo(video));
+                            node.querySelectorAll(selector).forEach(video => this.attachToVideo(video));
                         }
                     }
                 }
@@ -57,8 +61,8 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
 
         document.removeEventListener('keydown', this._boundHandleKeyDown, true);
 
-        // Remove all controllers
-        document.querySelectorAll('video').forEach(video => {
+        const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
+        document.querySelectorAll(selector).forEach(video => {
             const state = this.controllers.get(video);
             if (state && state.cleanup) state.cleanup();
         });
@@ -108,12 +112,13 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         };
 
         const formatKey = (key) => key ? key.replace('Shift+', '⇧') : '';
+        const getSc = (action) => this.settings?.vscShortcuts?.find(s => s.action === action)?.key || '';
 
-        const btnRewind = this.createButton(ICONS.rewind, `Rewind 10s (${formatKey(this.settings?.shortcut_vscRewind)})`, () => { video.currentTime -= 10; });
-        const btnSlower = this.createButton(ICONS.slower, `Slower -0.1x (${formatKey(this.settings?.shortcut_vscSlower)})`, () => this.adjustSpeed(video, -0.1));
-        const btnFaster = this.createButton(ICONS.faster, `Faster +0.1x (${formatKey(this.settings?.shortcut_vscFaster)})`, () => this.adjustSpeed(video, 0.1));
-        const btnAdvance = this.createButton(ICONS.advance, `Advance 10s (${formatKey(this.settings?.shortcut_vscAdvance)})`, () => { video.currentTime += 10; });
-        const btnClose = this.createButton(ICONS.close, `Hide Controller`, () => { controller.style.display = 'none'; });
+        const btnRewind = this.createButton(ICONS.rewind, `Rewind 10s (${formatKey(getSc('rewind'))})`, () => { video.currentTime -= 10; });
+        const btnSlower = this.createButton(ICONS.slower, `Slower -0.1x (${formatKey(getSc('decrease'))})`, () => this.adjustSpeed(video, -0.1));
+        const btnFaster = this.createButton(ICONS.faster, `Faster +0.1x (${formatKey(getSc('increase'))})`, () => this.adjustSpeed(video, 0.1));
+        const btnAdvance = this.createButton(ICONS.advance, `Advance 10s (${formatKey(getSc('advance'))})`, () => { video.currentTime += 10; });
+        const btnClose = this.createButton(ICONS.close, `Hide Controller (${formatKey(getSc('showHide'))})`, () => { controller.style.display = 'none'; });
         btnClose.classList.add('ypp-vsc-close');
 
         // Assemble
@@ -220,7 +225,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         });
 
         // Initialize speed from memory
-        const savedSpeed = this.settings.vscLastSpeed || 1.0;
+        const savedSpeed = (this.settings.vscRememberSpeed !== false && this.settings.vscLastSpeed) ? this.settings.vscLastSpeed : 1.0;
         if (savedSpeed !== 1.0) {
             this.setSpeed(video, savedSpeed);
         }
@@ -267,7 +272,12 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         });
         controller.addEventListener('mouseleave', () => this.hideControllerDelay(video));
 
-        this.hideControllerDelay(video);
+        if (this.settings?.vscHideByDefault) {
+            controller.style.display = 'none';
+            controller.classList.add('ypp-vsc-hidden');
+        } else {
+            this.hideControllerDelay(video);
+        }
     }
 
     createButton(html, title, onClick) {
@@ -275,10 +285,14 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         btn.className = 'ypp-vsc-btn';
         btn.innerHTML = html;
         btn.title = title;
-        btn.onclick = (e) => {
+        btn.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             e.stopPropagation();
             onClick();
+        });
+        btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
         };
         btn.onmousedown = (e) => e.stopPropagation();
         return btn;
@@ -298,9 +312,16 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
 
         if (e.detail && e.detail.origin === 'videoSpeed') return;
 
+        if (state.blockNativeUpdatesUntil && Date.now() < state.blockNativeUpdatesUntil) {
+            // My extension recently set the speed, ignore native discrepancies and FIGHT BACK
+            video.playbackRate = targetSpeed;
+            e.stopImmediatePropagation();
+            return;
+        }
+
         const timeSinceUser = Date.now() - state.lastInteraction;
         if (timeSinceUser < 300) {
-            // User did this
+            // User did this (via native UI)
             if (window.YPP.StorageManager) {
                 window.YPP.StorageManager.set({ vscLastSpeed: actualSpeed });
             }
@@ -310,12 +331,13 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             return;
         }
 
-        // Fightback
+        // Fightback against automatic YouTube SPA resets
         state.fightbackCount++;
         if (state.fightbackTimer) clearTimeout(state.fightbackTimer);
         state.fightbackTimer = setTimeout(() => { state.fightbackCount = 0; }, 3000);
 
-        if (state.fightbackCount >= 5) {
+        const fightbackLimit = this.settings?.vscForceSpeed ? 1000 : 5;
+        if (state.fightbackCount >= fightbackLimit) {
             state.fightbackCount = 0;
             state.display.textContent = actualSpeed.toFixed(2);
         } else {
@@ -357,16 +379,17 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         speed = Math.max(0.1, Math.min(speed, 16.0));
         video.playbackRate = speed;
         
-        // Save to memory
         this.settings.vscLastSpeed = speed;
-        if (window.YPP.StorageManager) {
-            // This ensures we remember speed settings!
+        if (this.settings?.vscRememberSpeed !== false && window.YPP.StorageManager) {
             window.YPP.StorageManager.set({ vscLastSpeed: speed });
         }
         
         state.display.textContent = speed.toFixed(2);
         this.showController(video);
         this.hideControllerDelay(video);
+
+        // Block native speed changes from overriding our explicit set command for the next 500ms
+        state.blockNativeUpdatesUntil = Date.now() + 500;
 
         video.dispatchEvent(new CustomEvent('ratechange', {
             bubbles: true,
@@ -402,59 +425,22 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         const state = this.controllers.get(video);
         if (state) state.lastInteraction = Date.now();
 
-        const shortcuts = this.settings;
-        let handled = false;
-
-        const isMatch = (shortcutKey) => {
-            if (!shortcuts || !shortcuts[shortcutKey]) return false;
-            const parts = shortcuts[shortcutKey].toLowerCase().split('+');
-            const key = parts.pop();
-            const ctrl = parts.includes('ctrl');
-            const shift = parts.includes('shift');
-            const alt = parts.includes('alt');
-            
-            let eKey = e.key.toLowerCase();
-            if (eKey === ' ') eKey = 'space';
-            
-            // Allow loose matching if e.key matches the key directly (handles Caps Lock or shifted chars)
-            if (eKey === key) return e.ctrlKey === ctrl && e.altKey === alt;
-            
-            if (e.shiftKey) {
-                const shiftMap = { '<': ',', '>': '.', '?': '/', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '~': '`', '_': '-', '+': '=' };
-                if (shiftMap[eKey]) eKey = shiftMap[eKey];
-            }
-            
-            return eKey === key && e.ctrlKey === ctrl && e.shiftKey === shift && e.altKey === alt;
-        };
-
-        if (isMatch('shortcut_vscSlower')) {
-            this.adjustSpeed(video, -0.1);
-            handled = true;
-        } else if (isMatch('shortcut_vscFaster')) {
-            this.adjustSpeed(video, 0.1);
-            handled = true;
-        } else if (isMatch('shortcut_vscRewind')) {
-            video.currentTime -= 10;
-            handled = true;
-        } else if (isMatch('shortcut_vscAdvance')) {
-            video.currentTime += 10;
-            handled = true;
-        } else if (isMatch('shortcut_vscReset')) {
-            this.setSpeed(video, 1.0);
-            handled = true;
-        }
+        const shortcuts = this.settings?.vscShortcuts || [];
+        
+        const handled = this.hotkeyManager.handleKeyDown(e, video, state, shortcuts);
 
         if (handled) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.showController(video);
+            if (!this.settings?.vscHideByDefault) {
+                this.showController(video);
+            }
         }
     }
 
     findLargestVideo() {
         let largest = null;
         let maxArea = 0;
-        document.querySelectorAll('video').forEach(video => {
+        const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
+        document.querySelectorAll(selector).forEach(video => {
             const rect = video.getBoundingClientRect();
             const area = rect.width * rect.height;
             if (area > maxArea) {

@@ -106,7 +106,6 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'enableVolumeBoost',  label:'Volume Booster',    desc:'Increase past 100%',         icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07') },
                     { type:'toggle', id:'audioCompressor',    label:'Audio Compressor',  desc:'Compress loud sounds',       icon:P('M22 12h-4l-3 9L9 3l-3 9H2') },
                     { type:'toggle', id:'wheelControls',      label:'Wheel Controls',    desc:'Shift/Alt+Scroll to control', icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
-                    { type:'toggle', id:'enableCustomSpeed',  label:'Video Speed Controller', desc:'Custom speed & hotkeys', icon:P('M4 6v12l8.5-6L4 6zm9 0v12l8.5-6L13 6z') },
                 ]
             },
 
@@ -143,6 +142,37 @@ export const POPUP_SCHEMA = [
                     { type:'select', id:'pb_native_miniplayer', label:'Native Miniplayer', desc:'YouTube feature', icon:P('M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_native_theater', label:'Native Theater Mode', desc:'YouTube feature', icon:P('M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
                     { type:'select', id:'pb_native_fullscreen', label:'Native Fullscreen', desc:'YouTube feature', icon:P('M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z'), options: [{value:'front',label:'Front (Player)'},{value:'back',label:'Back (Settings)'},{value:'hidden',label:'Hidden'}] },
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // VIDEO SPEED CONTROLLER
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'speed', label: 'Speed',
+        icon: P('M4 6v12l8.5-6L4 6zm9 0v12l8.5-6L13 6z'),
+        sections: [
+            {
+                title: 'Video Speed Controller',
+                items: [
+                    { type:'toggle', id:'enableCustomSpeed',  label:'Enable Speed Controller', desc:'Master toggle for custom speed features', icon:P('M4 6v12l8.5-6L4 6zm9 0v12l8.5-6L13 6z') },
+                ]
+            },
+            {
+                title: 'Other Settings',
+                items: [
+                    { type:'toggle', id:'vscAudioSupport',  label:'Audio Support', desc:'Control speed of HTML5 <audio> elements', icon:P('M12 3v9.28a4.39 4.39 0 0 0-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z') },
+                    { type:'toggle', id:'vscRememberSpeed', label:'Remember playback speed', desc:'Restore speed across videos', icon:P('M19 8l-4 4h3c0 3.31-2.69 6-6 6a5.87 5.87 0 0 1-2.8-.7l-1.46 1.46A7.93 7.93 0 0 0 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46A7.93 7.93 0 0 0 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z') },
+                    { type:'toggle', id:'vscHideByDefault', label:'Hide controller by default', desc:'Only show when changing speed', icon:P('M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.28 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z') },
+                    { type:'toggle', id:'vscForceSpeed',    label:'Force last saved speed', desc:'Prevent video players that override VSC speed', icon:P('M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM12 11.25V9c0-1.1-.9-2-2-2H8v8h2v-2.5h2v2.5h2V11.25zM10 9v1.25H8V9h2zm4 0v8h2V9h-2z') },
+                ]
+            },
+            {
+                title: 'Shortcuts',
+                items: [
+                    { type:'custom', id:'vsc_shortcuts_manager' }
                 ]
             }
         ]
@@ -277,6 +307,13 @@ export const POPUP_SCHEMA = [
         icon: P('M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'),
         sections: [
             {
+                title: 'Hotkeys (Watch Page)',
+                items: [
+                    { type:'toggle', id:'keyboardShortcuts', label:'Enable Hotkeys', icon:P('M2 4h20v16H2z M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10') },
+                    { type:'custom', id:'shortcutsPanel', slot:'shortcutsPanel' },
+                ]
+            },
+            {
                 title: 'External Integrations',
                 items: [
                     { type:'inlineToggle', id:'enableGlobalPlayerBar', label:'Global Player Bar', desc:'External sites UI', icon:P('M3 3h18v14H3zM3 15h18') },
@@ -303,13 +340,6 @@ export const POPUP_SCHEMA = [
                 title: 'Stats & Overlays',
                 items: [
                     { type:'toggle', id:'enableStatsForNerds', label:'Stats Overlay', desc:'View tech details', icon:P('M4 17l6-6 4 4 6-8') },
-                ]
-            },
-            {
-                title: 'Hotkeys (Watch Page)',
-                items: [
-                    { type:'toggle', id:'keyboardShortcuts', label:'Enable Hotkeys', icon:P('M2 4h20v16H2z M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10') },
-                    { type:'custom', id:'shortcutsPanel', slot:'shortcutsPanel' },
                 ]
             }
         ]
