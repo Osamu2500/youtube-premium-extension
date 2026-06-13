@@ -648,11 +648,20 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                     channelName = lockup ?? legacy ?? null;
                 }
 
-                // Fallback: DOM attribute — avatar link title is the most reliable DOM source
+                // Fallback 1: DOM attribute — avatar link title is the most reliable DOM source
                 // and doesn't include badge characters (unlike textContent).
                 // ⚠️ YouTube-Fragile: a#avatar-link[title] attribute
                 if (!channelName) {
                     channelName = card.querySelector('a#avatar-link')?.title?.trim() || null;
+                }
+
+                // Fallback 2: Text content of the channel name link (most resilient to structural changes,
+                // but requires _normChannel to strip out verified checkmarks later).
+                if (!channelName) {
+                    const textEl = card.querySelector('#channel-name a, ytd-channel-name a, ytd-channel-name yt-formatted-string, #text.ytd-channel-name');
+                    if (textEl && textEl.textContent) {
+                        channelName = textEl.textContent.trim();
+                    }
                 }
 
                 // Cache to avoid re-running on every filter pass
