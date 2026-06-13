@@ -17,7 +17,14 @@ const ICONS = {
     loop:       `<svg viewBox="0 0 36 36" fill="currentColor"><path d="m 13,13 h 10 v 3 l 4,-4 -4,-4 v 3 H 11 v 6 h 2 z M 23,23 H 13 v -3 l -4,4 4,4 v -3 h 12 v -6 h -2 z"/></svg>`,
     pip:        `<svg viewBox="0 0 36 36" fill="currentColor"><path d="m 21.554375,7.9999999 h 2.02 V 10.02 h -2.02 z m 4.04,0 h 2.02 V 10.02 h -2.02 z M 5.394375,16.08 h 2.02 v 2.02 h -2.02 z m 0,-4.04 h 2.02 v 2.02 h -2.02 z m 0,8.08 h 2.02 v 2.02 h -2.02 z m 12.12,-12.1200001 h 2.02 V 10.02 h -2.02 z M 30.605625,26.18 H 9.434375 V 12.04 h 21.17125 z m -2.02,-12.12 h -17.13125 v 10.1 h 17.13125 z M 13.474375,7.9999999 h 2.02 V 10.02 h -2.02 z m -4.04,0 h 2.02 V 10.02 h -2.02 z m -4.04,0 h 2.02 V 10.02 h -2.02 z"/></svg>`,
     fullscreen: `<svg viewBox="0 0 36 36" fill="currentColor"><path d="M 5.390625,7.9999999 V 26.179687 h 25.21875 V 7.9999999 Z M 7.410156,10.009766 H 28.589844 V 24.169922 H 7.410156 Z m 4.040294,4.050342 h 3.029835 V 12.040219 H 9.430562 v 5.049722 h 2.019888 z m 15.118897,3.029833 h -2.019888 v 3.029834 h -3.029834 v 2.019889 h 5.049722 z"/></svg>`,
-    close:      `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`
+    close:      `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`,
+    zen:        `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><path d="M8 12a4 4 0 0 1 4-4"/></svg>`,
+    ambient:    `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`,
+    focus:      `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+    study:      `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+    dislike:    `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>`,
+    adSkip:     `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>`,
+    sponsor:    `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>`
 };
 
 const BAR_HTML = `
@@ -247,19 +254,24 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 visibility: 'visible',
                 transform: 'translateX(-50%)'
             });
-        } else if (pos === 'left') {
+        } else if (pos === 'back' || pos === 'left') {
             Object.assign(bar.style, {
                 position: 'fixed',
                 left: '16px',
                 right: 'auto',
                 top: '50%',
                 bottom: 'auto',
-                zIndex: '2147483647',
+                zIndex: '0', // "back" means it pushes it backward in z-index but on the left for external sites
                 display: 'flex',
                 visibility: 'visible',
                 transform: ''
             });
+        } else if (pos === 'hidden') {
+            Object.assign(bar.style, {
+                display: 'none'
+            });
         } else {
+            // 'front' or 'right'
             Object.assign(bar.style, {
                 position: 'fixed',
                 right: '16px',
@@ -271,6 +283,26 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 visibility: 'visible',
                 transform: ''
             });
+        }
+        
+        // Add glowing style to the document if not present
+        if (!document.getElementById('ypp-gpb-glow-style')) {
+            const style = document.createElement('style');
+            style.id = 'ypp-gpb-glow-style';
+            style.textContent = `
+                .ypp-gpb-btn svg {
+                    filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
+                    transition: filter 0.2s;
+                }
+                .ypp-gpb-btn:hover svg {
+                    filter: drop-shadow(0 0 8px rgba(255,255,255,0.8));
+                }
+                .ypp-gpb-btn.active svg {
+                    filter: drop-shadow(0 0 10px var(--accent, #3ea6ff));
+                    color: var(--accent, #3ea6ff);
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
 
@@ -392,6 +424,15 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
                 featsCont.appendChild(filterFeature.createButton(primary));
             }
         }
+        
+        // Add Dashboard Features
+        this._addDashboardFeatureToggle(featsCont, 'zenMode', 'Zen Mode', this.ICONS.zen);
+        this._addDashboardFeatureToggle(featsCont, 'ambientMode', 'Ambient Mode', this.ICONS.ambient);
+        this._addDashboardFeatureToggle(featsCont, 'enableFocusMode', 'Focus Mode', this.ICONS.focus);
+        this._addDashboardFeatureToggle(featsCont, 'studyMode', 'Study Mode', this.ICONS.study);
+        this._addDashboardFeatureToggle(featsCont, 'returnYouTubeDislike', 'Return Dislike', this.ICONS.dislike);
+        this._addDashboardFeatureToggle(featsCont, 'adSkipper', 'Ad Skipper', this.ICONS.adSkip);
+        this._addDashboardFeatureToggle(featsCont, 'sponsorBlock', 'SponsorBlock', this.ICONS.sponsor);
 
         // Hide container if empty to avoid double dividers
         if (featsCont.children.length === 0) {
@@ -399,6 +440,46 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
         } else {
             featsCont.style.display = 'flex';
         }
+    }
+    
+    _addDashboardFeatureToggle(container, configKey, label, iconHtml) {
+        // Only add if it's currently enabled in settings, or if it has a feature toggle
+        const btn = document.createElement('button');
+        btn.className = 'ypp-gpb-btn ypp-action-btn';
+        btn.title = label;
+        btn.innerHTML = iconHtml;
+        
+        // Check current setting
+        if (this.settings[configKey]) {
+            btn.classList.add('active');
+        }
+        
+        btn.onclick = async (e) => {
+            e.stopPropagation();
+            const newVal = !this.settings[configKey];
+            this.settings[configKey] = newVal;
+            
+            // Re-apply to UI
+            btn.classList.toggle('active', newVal);
+            
+            // Save to chrome.storage
+            try {
+                if (window.YPP.Utils?.saveSettings) {
+                    await window.YPP.Utils.saveSettings({ [configKey]: newVal });
+                }
+            } catch (err) {}
+            
+            // If the feature manager is active, toggle it immediately!
+            if (window.YPP.featureManager) {
+                const feat = Object.values(window.YPP.featureManager.features).find(f => f.getConfigKey && f.getConfigKey() === configKey);
+                if (feat) {
+                    if (newVal) await feat.enable();
+                    else await feat.disable();
+                }
+            }
+        };
+        
+        container.appendChild(btn);
     }
 
     // =========================================================================

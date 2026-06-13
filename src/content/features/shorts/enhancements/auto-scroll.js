@@ -4,9 +4,10 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.ShortsAutoScroll = class ShortsAutoScroll extends window.YPP.features.BaseFeature {
     constructor() {
         super('ShortsAutoScroll');
-        this.handleVideoAdded = this.handleVideoAdded.bind(this);
-        this.handleVideoEnded = this.handleVideoEnded.bind(this);
+        this._autoScrollInterval = null;
         this._isMonitoring = false;
+        // Keep track of the last scrolled video to prevent double-skipping
+        this._lastScrolledVideo = null;
     }
 
     getConfigKey() { return 'shortsAutoScroll'; }
@@ -34,59 +35,52 @@ window.YPP.features.ShortsAutoScroll = class ShortsAutoScroll extends window.YPP
 
     startMonitoring() {
         if (this._isMonitoring) return;
-        this.utils?.log('Starting Shorts Auto-Scroll monitoring', 'AutoScroll');
+        this.utils?.log('Starting Shorts Auto-Scroll interval monitoring', 'AutoScroll');
         
-        // Find existing video to attach to immediately
-        const activeVideo = document.querySelector('ytd-reel-video-renderer[is-active] video');
-        if (activeVideo) {
-            this.attachToVideo(activeVideo);
-        }
+        this._autoScrollInterval = setInterval(() => {
+            this._checkAndScroll();
+        }, 200);
 
-        // Monitor for new videos getting added/activated
-        this.observer.register(
-            'shorts-video-monitor',
-            'ytd-reel-video-renderer video',
-            this.handleVideoAdded,
-            true 
-        );
         this._isMonitoring = true;
     }
 
     stopMonitoring() {
         if (!this._isMonitoring) return;
-        this.observer.unregister('shorts-video-monitor');
-        // Remove event listeners from all tracked videos
-        document.querySelectorAll('video[data-ypp-autoscroll]').forEach(video => {
-            video.removeEventListener('ended', this.handleVideoEnded);
-            video.removeAttribute('data-ypp-autoscroll');
-        });
+        if (this._autoScrollInterval) {
+            clearInterval(this._autoScrollInterval);
+            this._autoScrollInterval = null;
+        }
         this._isMonitoring = false;
+        this._lastScrolledVideo = null;
         this.utils?.log('Stopped Shorts Auto-Scroll monitoring', 'AutoScroll');
     }
 
-    handleVideoAdded(elements) {
-        if (!elements) return;
-        elements.forEach(video => {
-            this.attachToVideo(video);
-        });
-    }
-
-    attachToVideo(video) {
-        if (!video || video.hasAttribute('data-ypp-autoscroll')) return;
+    _checkAndScroll() {
+        const activeReel = document.querySelector('ytd-reel-video-renderer[is-active]');
+        if (!activeReel) return;
         
-        video.setAttribute('data-ypp-autoscroll', 'true');
-        video.addEventListener('ended', this.handleVideoEnded);
-    }
+        const video = activeReel.querySelector('video');
+        if (!video || isNaN(video.duration) || video.duration === 0) return;
 
-    handleVideoEnded(e) {
-        // Ensure this is the currently active reel
-        const reel = e.target.closest('ytd-reel-video-renderer');
-        if (!reel || !reel.hasAttribute('is-active')) return;
+        // If the video has ended naturally OR is within 0.1s of ending (which catches it before it loops)
+        if (video.ended || (video.currentTime > 0 && video.duration > 0 && video.duration - video.currentTime <= 0.1)) {
+            
+            // Prevent scrolling multiple times for the same video instance during transition
+            if (this._lastScrolledVideo === video && video.currentTime > 0.5) {
+                return;
+            }
 
-        const nextButton = document.querySelector('#navigation-button-down ytd-button-renderer button, .navigation-button.down button');
-        if (nextButton) {
-            this.utils?.log('Short ended. Auto-scrolling to next.', 'AutoScroll', 'info');
-            nextButton.click();
+            const nextButton = document.querySelector('#navigation-button-down ytd-button-renderer button, .navigation-button.down button');
+            if (nextButton) {
+                this._lastScrolledVideo = video;
+                this.utils?.log('Short ended. Auto-scrolling to next.', 'AutoScroll', 'info');
+                nextButton.click();
+            }
+        } else {
+            // Reset last scrolled video if we're playing a new video
+            if (this._lastScrolledVideo && video !== this._lastScrolledVideo && video.currentTime < 1) {
+                this._lastScrolledVideo = null;
+            }
         }
     }
 };

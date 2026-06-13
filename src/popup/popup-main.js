@@ -444,6 +444,50 @@ const initApp = () => {
 
     // ── 4.2: SponsorBlock per-category panel wiring ──────────────────────
     const sbToggle  = document.getElementById('sponsorBlock');
+    
+    // ── 4.3: Custom Player Bar Position Buttons ──────────────────────
+    const gpbBtns = document.querySelectorAll('.gpb-pos-btn');
+    const gpbInput = document.getElementById('globalPlayerBarPosition');
+    if (gpbBtns.length && gpbInput) {
+        gpbBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pos = btn.dataset.pos;
+                // Update UI
+                gpbBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.color = 'rgba(255,255,255,0.6)';
+                    b.style.background = 'transparent';
+                });
+                btn.classList.add('active');
+                btn.style.color = '#fff';
+                btn.style.background = 'rgba(255,255,255,0.1)'; // Highlight background
+                
+                // Update hidden input and save
+                gpbInput.value = pos;
+                const e = new Event('change');
+                gpbInput.dispatchEvent(e);
+            });
+        });
+        
+        // Initial state sync
+        chrome.storage.local.get(['settings'], (res) => {
+            if (res.settings && res.settings.globalPlayerBarPosition) {
+                const pos = res.settings.globalPlayerBarPosition;
+                const activeBtn = document.querySelector(`.gpb-pos-btn[data-pos="${pos}"]`);
+                if (activeBtn) {
+                    gpbBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.style.color = 'rgba(255,255,255,0.6)';
+                        b.style.background = 'transparent';
+                    });
+                    activeBtn.classList.add('active');
+                    activeBtn.style.color = '#fff';
+                    activeBtn.style.background = 'rgba(255,255,255,0.1)';
+                    gpbInput.value = pos;
+                }
+            }
+        });
+    }
     const sbPanel   = document.getElementById('sponsorBlockCategories');
     const sbCatIds  = ['sb_sponsor','sb_intro','sb_selfpromo','sb_interaction','sb_music_offtopic','sb_preview'];
     if (sbToggle && sbPanel) {

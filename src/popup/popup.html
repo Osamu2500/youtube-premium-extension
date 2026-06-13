@@ -751,14 +751,14 @@
                 </div>
               </div>
               
-              <div class="inline-setting-row" style="margin-top:8px;">
-                <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="15" x2="21" y2="15"></line></svg></div>
-                  <div class="info"><span class="name">Player Bar Position</span><span class="desc">Global Player Bar layout</span></div>
-                <select id="globalPlayerBarPosition" class="theme-select" style="width: 130px;">
-                  <option value="right">Right</option>
-                  <option value="left">Left</option>
-                  <option value="top">Top</option>
-                </select>
+              <div class="inline-setting-row" style="flex-wrap:wrap; gap:10px;">
+                <div class="info"><span class="name">Player Bar Position</span></div>
+                <div style="display:flex; background:var(--bg-elevated); border-radius:8px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1);">
+                  <button type="button" id="gpbPos-front" class="gpb-pos-btn active" data-pos="front" style="padding: 6px 12px; font-size: 11px; background: transparent; border: none; color: #fff; cursor: pointer; transition: 0.2s; border-right: 1px solid rgba(255,255,255,0.1);">Front</button>
+                  <button type="button" id="gpbPos-back" class="gpb-pos-btn" data-pos="back" style="padding: 6px 12px; font-size: 11px; background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; transition: 0.2s; border-right: 1px solid rgba(255,255,255,0.1);">Back</button>
+                  <button type="button" id="gpbPos-hidden" class="gpb-pos-btn" data-pos="hidden" style="padding: 6px 12px; font-size: 11px; background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; transition: 0.2s;">Hidden</button>
+                </div>
+                <input type="hidden" id="globalPlayerBarPosition" value="front" />
               </div>
             </div>
           </div>
