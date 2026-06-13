@@ -68,11 +68,16 @@ export const POPUP_SCHEMA = [
         icon: P('M12 20V10M18 20V4M6 20v-4'),
         sections: [
             {
-                title: 'Shorts Preferences',
+                title: 'Visibility & Routing',
                 items: [
                     { type:'toggle', id:'hideShorts',       label:'Hide Shorts',        desc:'Remove from Home feed',    icon:P('M12 20V10M18 20V4M6 20v-4') },
                     { type:'toggle', id:'hideSearchShorts', label:'Hide Search Shorts', desc:'Remove from search results', icon:P('M21 21l-4.35-4.35M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z') },
                     { type:'toggle', id:'redirectShorts',   label:'Redirect Shorts',    desc:'Play in normal UI',        icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
+                ]
+            },
+            {
+                title: 'Playback Enhancements',
+                items: [
                     { type:'toggle', id:'shortsAutoScroll', label:'Auto-Scroll',        desc:'Skip when ended',          icon:P('M12 5l0 14M19 12l-7 7-7-7') },
                     { type:'toggle', id:'shortsVolumeNormalizer', label:'Normalize Volume', desc:'Enforce default volume', icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07') },
                     { type:'toggle', id:'hideShortsInteraction', label:'Hide Interaction Bar', desc:'Hide likes/comments on right', icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },

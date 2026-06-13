@@ -43,12 +43,16 @@ import './features/global/layout/layout-manager.js';
 import './features/global/layout/header-nav.js';
 import './features/global/layout/sidebar.js';
 
-// Home page & Shorts features
+// Home page features
 import './features/pages/home/home-organizer.js';
-import './features/pages/home/shorts-tools.js';
-import './features/pages/home/redirect-shorts.js';
 import './features/pages/home/cinematic-mode.js';
-import './features/pages/shorts/shorts-optimizer.js';
+
+// Shorts features
+import './features/shorts/modifiers/hide-shorts.js';
+import './features/shorts/modifiers/redirect-shorts.js';
+import './features/shorts/enhancements/auto-scroll.js';
+import './features/shorts/enhancements/volume-normalizer.js';
+import './features/shorts/ui/hide-interaction-bar.js';
 
 // Subscription features
 import './features/pages/subscriptions/folder-storage.js';

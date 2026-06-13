@@ -306,7 +306,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             if (cls) document.body.classList.toggle(cls, !!state);
         };
 
-        toggle(this._CSS_CLASSES.HIDE_SHORTS, this._settings.hideShorts);
+
         toggle(this._CSS_CLASSES.HIDE_MIXES, this._settings.hideMixes);
         toggle(this._CSS_CLASSES.HIDE_EXPLORE_TOPICS, this._settings.hideExploreTopics);
         toggle(this._CSS_CLASSES.HIDE_WATCHED, this._settings.hideWatched);
@@ -322,7 +322,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
 
         // Search specific
         toggle('ypp-clean-search', this._settings.cleanSearch);
-        toggle('ypp-hide-search-shorts', this._settings.hideSearchShorts);
+
         toggle('ypp-search-grid-mode', this._settings.searchGrid);
     }
 
