@@ -13,9 +13,11 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
         
         // Use a bound method for the observer callback
         this._boundHandleMutations = this._handleMutations.bind(this);
+        this._interval = null;
     }
 
     getConfigKey() {
+        // Run if the master switch or any sub-switches are on
         return 'adSkipper';
     }
 
@@ -31,12 +33,18 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
                 }
             }, true);
             
-            // Register a mutation observer on the document body or player to catch dynamically added ad buttons
+            // Catch dynamically added overlays/promos
             this.addListener(document.body, 'DOMNodeInserted', this._boundHandleMutations);
         }
+
+        if (this._interval) clearInterval(this._interval);
+        this._interval = setInterval(() => {
+            this._checkPromosAndNext();
+        }, 500);
         
         // Initial check
         this._checkForAds();
+        this._checkPromosAndNext();
     }
 
     async disable() {
@@ -44,17 +52,24 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
         if (window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('ad-skipper');
         }
+        if (this._interval) {
+            clearInterval(this._interval);
+            this._interval = null;
+        }
     }
 
     _handleMutations(e) {
         if (!this.isEnabled) return;
-        // Optimization: only process if the inserted node or its parent might be related to ads
-        if (e.target && e.target.className && typeof e.target.className === 'string' && e.target.className.includes('ad')) {
-            this._checkForAds();
+        if (e.target && e.target.className && typeof e.target.className === 'string') {
+            if (e.target.className.includes('ad')) {
+                this._checkForAds();
+            }
         }
     }
 
     _checkForAds(container = document) {
+        if (this.settings?.autoSkipAds === false && this.settings?.adSkipper === false) return;
+
         // 1. Click skip buttons
         for (const selector of this.selectors) {
             const btn = container.querySelector(selector);
@@ -78,9 +93,48 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
                     this.utils?.log?.('Fast-forwarding unskippable ad', 'AD_SKIPPER', 'debug');
                 }
             }
-        } else {
-             // Reset playback rate if we sped it up, but usually video element gets reset or we don't know the user's preferred speed.
-             // Best to rely on the video speed controller to restore the speed if it was overridden.
+        }
+    }
+
+    _checkPromosAndNext() {
+        if (!this.settings) return;
+
+        // --- Skip Promos / Banners ---
+        if (this.settings.autoSkipPromos || this.settings.adSkipper) {
+            // Overlay ads in player
+            const overlayCloseBtns = document.querySelectorAll('.ytp-ad-overlay-close-button');
+            overlayCloseBtns.forEach(btn => btn.click());
+
+            // Generic YT Promos (Premium, Music, etc.)
+            const promoDismissBtns = document.querySelectorAll('#dismiss-button.ytd-button-renderer');
+            promoDismissBtns.forEach(btn => {
+                if (btn.closest('ytd-mealbar-promo-renderer') || btn.closest('ytd-popup-container')) {
+                    btn.click();
+                    this.utils?.log?.('Dismissed promo', 'AD_SKIPPER', 'debug');
+                }
+            });
+        }
+
+        // --- Skip Sponsor Banners (native) ---
+        if (this.settings.autoSkipSponsors) {
+            // YouTube occasionally natively labels paid promotions.
+            const paidPromo = document.querySelector('.ytp-paid-content-overlay');
+            if (paidPromo && paidPromo.style.display !== 'none') {
+                paidPromo.style.display = 'none';
+            }
+        }
+
+        // --- Auto Play Next ---
+        if (this.settings.autoPlayNext) {
+            const video = document.querySelector('video');
+            if (video && video.ended) {
+                const nextBtn = document.querySelector('.ytp-next-button');
+                const upNextCancel = document.querySelector('.ytp-autonav-cancel-button');
+                if (nextBtn && !upNextCancel) {
+                    nextBtn.click();
+                    this.utils?.log?.('Triggered auto play next', 'AD_SKIPPER', 'debug');
+                }
+            }
         }
     }
 };

@@ -41,9 +41,17 @@ import './features/global/modifiers/toggles/hide-playlists.js';
 import './features/global/modifiers/toggles/hide-podcasts.js';
 import './features/global/modifiers/toggles/hide-mixes.js';
 import './features/global/modifiers/toggles/hide-posts.js';
+import './features/global/modifiers/toggles/hide-explore-topics.js';
+import './features/global/modifiers/toggles/hide-livechat.js';
+import './features/global/modifiers/toggles/hide-fundraiser.js';
 import './features/global/modifiers/hide-metrics.js';
 import './features/global/modifiers/full-video-titles.js';
 import './features/global/modifiers/square-corners.js';
+import './features/global/modifiers/toggles/animations.js';
+import './features/global/modifiers/toggles/hide-scrollbar.js';
+import './features/global/modifiers/toggles/custom-scrollbar.js';
+import './features/global/modifiers/toggles/grayscale-thumbs.js';
+import './features/global/modifiers/screen-filters.js';
 
 import './features/global/modifiers/watched-store.js';
 import './features/global/modifiers/mark-watched.js';
@@ -54,6 +62,7 @@ import './features/global/modifiers/redirect-home.js';
 import './features/global/modifiers/hide-watched.js';
 import './features/global/modifiers/keyboard-shortcuts.js';
 import './features/global/modifiers/duration-filter.js';
+import './features/global/modifiers/blocklist-filter.js';
 
 
 // Layout features
@@ -135,6 +144,10 @@ import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
 import './features/player/enhancements/video-speed-controller.js';
+import './features/player/enhancements/audio-eq.js';
+import './features/player/automation/auto-transcript.js';
+import './features/player/automation/stats-for-nerds.js';
+import './features/player/automation/mini-player-scroll.js';
 import './features/player/enhancements/vsc-audio-support.js';
 import './features/player/enhancements/vsc-hide-by-default.js';
 import './features/player/enhancements/vsc-force-speed.js';

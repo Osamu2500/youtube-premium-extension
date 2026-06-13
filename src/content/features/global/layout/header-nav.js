@@ -12,7 +12,8 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         Shorts: '<rect x="5" y="2" width="14" height="20" rx="3" ry="3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></rect><polygon points="10 9 14 12 10 15 10 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polygon>',
         WatchLater: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></circle><polyline points="12 7 12 12 15 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polyline>',
         Playlists: '<line x1="12" y1="12" x2="20" y2="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></line><line x1="16" y1="6" x2="20" y2="6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></line><line x1="12" y1="18" x2="20" y2="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></line><polygon points="4 6 8 8.5 4 11 4 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polygon>',
-        History: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 7v5l4 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>'
+        History: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 7v5l4 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>',
+        Library: '<path d="M4 22H20C21.1 22 22 21.1 22 20V8C22 6.9 21.1 6 20 6H12L10 4H4C2.9 4 2 4.9 2 6V20C2 21.1 2.9 22 4 22ZM4 8H20V20H4V8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>'
     };
 
     constructor() {
@@ -38,7 +39,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const s = this.settings || {};
 
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
-            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+            s.navPlaylists || s.navLibrary || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
 
         if (!shouldRun) return; // No nav items configured — nothing to do
 
@@ -76,7 +77,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         // Feature manager called this because it's enabled and settings updated
         const s = this.settings || {};
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
-            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+            s.navPlaylists || s.navLibrary || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
 
         this._applySidebarState();
 
@@ -143,6 +144,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const allButtons = [
             { setting: 'navSubscriptions', label: 'Subscriptions', url: '/feed/subscriptions', icon: HeaderNav.ICONS.Subscriptions },
             { setting: 'navShorts',        label: 'Shorts',        url: '/shorts',             icon: HeaderNav.ICONS.Shorts },
+            { setting: 'navLibrary',       label: 'Library',       url: '/feed/library',       icon: HeaderNav.ICONS.Library },
             { setting: 'navWatchLater',    label: 'Watch Later',   url: '/playlist?list=WL',   icon: HeaderNav.ICONS.WatchLater },
             { setting: 'navPlaylists',     label: 'Playlists',     url: '/feed/playlists',     icon: HeaderNav.ICONS.Playlists },
             { setting: 'navHistory',       label: 'History',       url: '/feed/history',       icon: HeaderNav.ICONS.History }

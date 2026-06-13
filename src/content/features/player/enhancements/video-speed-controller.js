@@ -112,13 +112,13 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         };
 
         const formatKey = (key) => key ? key.replace('Shift+', '⇧') : '';
-        const getSc = (action) => this.settings?.vscShortcuts?.find(s => s.action === action)?.key || '';
+        const step = this.settings?.vscSpeedStep ?? 0.25;
 
-        const btnRewind = this.createButton(ICONS.rewind, `Rewind 10s (${formatKey(getSc('rewind'))})`, () => { video.currentTime -= 10; });
-        const btnSlower = this.createButton(ICONS.slower, `Slower -0.1x (${formatKey(getSc('decrease'))})`, () => this.adjustSpeed(video, -0.1));
-        const btnFaster = this.createButton(ICONS.faster, `Faster +0.1x (${formatKey(getSc('increase'))})`, () => this.adjustSpeed(video, 0.1));
-        const btnAdvance = this.createButton(ICONS.advance, `Advance 10s (${formatKey(getSc('advance'))})`, () => { video.currentTime += 10; });
-        const btnClose = this.createButton(ICONS.close, `Hide Controller (${formatKey(getSc('showHide'))})`, () => { controller.style.display = 'none'; });
+        const btnRewind = this.createButton(ICONS.rewind, `Rewind 10s (${formatKey(this.settings?.vscShortcutRewind)})`, () => { video.currentTime -= 10; });
+        const btnSlower = this.createButton(ICONS.slower, `Slower -${step}x (${formatKey(this.settings?.vscShortcutSlower)})`, () => this.adjustSpeed(video, -step));
+        const btnFaster = this.createButton(ICONS.faster, `Faster +${step}x (${formatKey(this.settings?.vscShortcutFaster)})`, () => this.adjustSpeed(video, step));
+        const btnAdvance = this.createButton(ICONS.advance, `Advance 10s (${formatKey(this.settings?.vscShortcutAdvance)})`, () => { video.currentTime += 10; });
+        const btnClose = this.createButton(ICONS.close, `Hide Controller (${formatKey(this.settings?.vscShortcutToggleDisplay)})`, () => { controller.style.display = 'none'; });
         btnClose.classList.add('ypp-vsc-close');
 
         // Assemble
@@ -128,6 +128,14 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         container.appendChild(btnFaster);
         container.appendChild(btnAdvance);
         container.appendChild(btnClose);
+        
+        // Apply Opacity
+        const opacity = this.settings?.vscControllerOpacity ?? 0.3;
+        container.style.opacity = opacity;
+        // Increase opacity on hover
+        container.addEventListener('mouseenter', () => container.style.opacity = '1');
+        container.addEventListener('mouseleave', () => container.style.opacity = opacity);
+
         controller.appendChild(container);
 
         // Generate unique class name for this video's controller (instead of anchorName)
@@ -425,7 +433,18 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         const state = this.controllers.get(video);
         if (state) state.lastInteraction = Date.now();
 
-        const shortcuts = this.settings?.vscShortcuts || [];
+        const step = this.settings?.vscSpeedStep ?? 0.25;
+        const preferred = this.settings?.vscPreferredSpeed ?? 2.0;
+        
+        const shortcuts = [
+            { action: 'decrease', key: this.settings?.vscShortcutSlower, value: step },
+            { action: 'increase', key: this.settings?.vscShortcutFaster, value: step },
+            { action: 'rewind', key: this.settings?.vscShortcutRewind, value: 10 },
+            { action: 'advance', key: this.settings?.vscShortcutAdvance, value: 10 },
+            { action: 'reset', key: this.settings?.vscShortcutReset, value: 1.0 },
+            { action: 'preferred', key: this.settings?.vscShortcutPreferred, value: preferred },
+            { action: 'showHide', key: this.settings?.vscShortcutToggleDisplay, value: 0 }
+        ];
         
         const handled = this.hotkeyManager.handleKeyDown(e, video, state, shortcuts);
 

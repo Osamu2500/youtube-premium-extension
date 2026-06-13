@@ -59,7 +59,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     disable() {
         try {
             this._toggleTheme(false);
-            this._applyHideScrollbar(false);
             this._cleanupClasses();
             this._cleanupCustomVariables();
 
@@ -98,9 +97,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
 
             // Apply global customizations (Typography, density, accent color, etc)
             this._applyCustomizationSettings();
-
-            // Apply UI customization
-            this._applyHideScrollbar(this._settings.hideScrollbar);
 
         } catch (error) {
             this._Utils.log?.(`Error running theme: ${error.message}`, 'THEME', 'error');
@@ -261,41 +257,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
 
 
 
-    /**
-     * Apply hide scrollbar
-     * @private
-     * @param {boolean} enable
-     */
-    _applyHideScrollbar(enable) {
-        document.documentElement.classList.toggle('ypp-hide-scrollbar', enable);
-        document.body.classList.toggle('ypp-hide-scrollbar', enable);
 
-        // Natively hide the viewport scrollbar by injecting a naked ::-webkit-scrollbar rule
-        let styleNode = document.getElementById('ypp-hide-scrollbar-style');
-        if (enable) {
-            if (!styleNode) {
-                styleNode = document.createElement('style');
-                styleNode.id = 'ypp-hide-scrollbar-style';
-                styleNode.textContent = `
-                    ::-webkit-scrollbar {
-                        display: none !important;
-                        width: 0px !important;
-                        height: 0px !important;
-                        background: transparent !important;
-                        -webkit-appearance: none !important;
-                    }
-                    * {
-                        scrollbar-width: none !important;
-                    }
-                `;
-                document.documentElement.appendChild(styleNode);
-            }
-        } else {
-            if (styleNode) {
-                styleNode.remove();
-            }
-        }
-    }
 
     /**
      * Apply visibility settings
@@ -306,21 +268,8 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             if (cls) document.body.classList.toggle(cls, !!state);
         };
 
-
-        toggle(this._CSS_CLASSES.HIDE_MIXES, this._settings.hideMixes);
-        toggle(this._CSS_CLASSES.HIDE_EXPLORE_TOPICS, this._settings.hideExploreTopics);
-        toggle(this._CSS_CLASSES.HIDE_WATCHED, this._settings.hideWatched);
-        toggle(this._CSS_CLASSES.HIDE_MERCH, this._settings.hideMerch);
-        toggle(this._CSS_CLASSES.HIDE_COMMENTS, this._settings.hideComments);
-        toggle(this._CSS_CLASSES.HIDE_ENDSCREENS, this._settings.hideEndScreens);
-        toggle(this._CSS_CLASSES.HIDE_LIVE_CHAT, this._settings.hideLiveChat);
-        toggle(this._CSS_CLASSES.HIDE_FUNDRAISER, this._settings.hideFundraiser);
-        toggle(this._CSS_CLASSES.CUSTOM_SCROLLBAR, this._settings.customScrollbar && !this._settings.hideScrollbar);
-        toggle(this._CSS_CLASSES.GRAYSCALE_THUMBNAILS, this._settings.grayscaleThumbnails);
-
         // Search specific
         toggle('ypp-clean-search', this._settings.cleanSearch);
-
         toggle('ypp-search-grid-mode', this._settings.searchGrid);
     }
 
@@ -377,9 +326,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             root.style.setProperty('--ypp-accent-gradient', `linear-gradient(135deg, ${hex} 0%, ${hex}cc 100%)`);
         }
 
-        // Animations / Reduced Motion
-        root.classList.toggle('ypp-no-animations', this._settings.enableAnimations === false);
-        root.classList.toggle('ypp-reduced-motion', !!this._settings.reducedMotion);
+
 
         // Card Style
         if (this._settings.cardStyle) {
@@ -416,23 +363,8 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         // Collect all potential classes managed by visibility toggles
         const classes = [
             this._CSS_CLASSES.THEME_ENABLED,
-            this._CSS_CLASSES.HIDE_SHORTS,
-            this._CSS_CLASSES.HIDE_MIXES,
-            this._CSS_CLASSES.HIDE_EXPLORE_TOPICS,
-            this._CSS_CLASSES.HIDE_WATCHED,
-            this._CSS_CLASSES.HIDE_MERCH,
-            this._CSS_CLASSES.HIDE_COMMENTS,
-            this._CSS_CLASSES.HIDE_ENDSCREENS,
-            this._CSS_CLASSES.HIDE_LIVE_CHAT,
-            this._CSS_CLASSES.HIDE_FUNDRAISER,
-            this._CSS_CLASSES.CUSTOM_SCROLLBAR,
-            this._CSS_CLASSES.GRAYSCALE_THUMBNAILS,
             'ypp-clean-search',
-            'ypp-hide-search-shorts',
-            'ypp-search-grid-mode',
-            'ypp-hide-scrollbar',
-            'ypp-no-animations',
-            'ypp-reduced-motion'
+            'ypp-search-grid-mode'
         ].filter(Boolean); // Filter out any undefined constants
 
         // Clean both documentElement and body just in case
