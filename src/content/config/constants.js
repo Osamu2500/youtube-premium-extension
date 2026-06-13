@@ -460,7 +460,13 @@ window.YPP.CONSTANTS = {
         hidePlaylists: 'HidePlaylists',
         hidePodcasts: 'HidePodcasts',
         hideMixes: 'HideMixes',
-        hidePosts: 'HidePosts'
+        hidePosts: 'HidePosts',
+        // --- Missing Toggles & Layouts ---
+        hookFreeHome: 'HookFreeHome',
+        autoScaleLayout: 'AutoScaleGrid',
+        displayFullTitle: 'FullVideoTitles',
+        useSquareCorners: 'SquareCorners',
+        hideExploreTopics: 'HideExploreTopics'
     }
 };
 
