@@ -805,6 +805,7 @@ window.YPP.features.FolderUI = class FolderUI {
         const rect = buttonEl.getBoundingClientRect();
         popover.style.top  = `${rect.bottom + window.scrollY + 8}px`;
         popover.style.left = `${rect.left + window.scrollX}px`;
+        popover.style.zIndex = '999999';
 
         // Static shell only — no dynamic values interpolated here.
         popover.innerHTML = `
@@ -1499,7 +1500,6 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 cb.value = c.id;
                 cb.dataset.params = c.unsubParams || '';
                 cb.style.cssText = 'width:15px;height:15px;cursor:pointer;accent-color:#fff;';
-                if (c.status === 'dead') cb.checked = true;
                 label.appendChild(cb);
                 label.appendChild(document.createTextNode('Select'));
                 actionsDiv.appendChild(label);
@@ -2231,6 +2231,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 // Re-render sidebar/header filters to reflect new counts
                 if (folderUI.renderGuideFolders) folderUI.renderGuideFolders();
                 if (folderUI.renderFilterChips) folderUI.renderFilterChips();
+
+                // Re-render the modal's side pane to update folder numbers
+                ChannelHealthUI.runScan(overlay, folderUI, true);
 
                 popup.remove();
                 
