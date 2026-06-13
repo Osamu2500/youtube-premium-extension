@@ -655,7 +655,8 @@ html.yt-premium-plus-theme body {
 body.ypp-hide-explore-topics ytd-feed-filter-chip-bar-renderer,
 body.ypp-hide-explore-topics yt-chip-cloud-renderer,
 body.ypp-hide-explore-topics yt-related-chip-cloud-renderer,
-body.ypp-hide-explore-topics #chips-wrapper {
+body.ypp-hide-explore-topics #chips-wrapper,
+body.ypp-hide-explore-topics ytd-rich-grid-renderer > #header {
   display: none !important;
 }
 
@@ -1414,8 +1415,22 @@ ytd-app[mini-guide-visible] #content {
 }
 
 /* Hook-Free Home */
-body:not(.cinematic-home) .ypp-hook-free ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
+body:not(.cinematic-home).ypp-hook-free ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
   display: none;
+}
+
+/* Auto Scale Grid */
+html[style*="--ypp-dynamic-cols"] ytd-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: var(--ypp-dynamic-cols) !important;
+}
+
+/* Full Video Titles */
+body.ypp-full-title #video-title,
+body.ypp-full-title yt-formatted-string[id="video-title"] {
+  display: block !important;
+  max-height: none !important;
+  -webkit-line-clamp: unset !important;
+  white-space: normal !important;
 }
 
 /* ===================================================================================

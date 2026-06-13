@@ -29,7 +29,9 @@ window.YPP.features.SquareCorners = class SquareCorners extends window.YPP.featu
                 .${this.CSS_CLASS} ytd-playlist-thumbnail,
                 .${this.CSS_CLASS} .ytp-videowall-still-image,
                 .${this.CSS_CLASS} yt-img-shadow,
-                .${this.CSS_CLASS} #thumbnail.ytd-rich-grid-media {
+                .${this.CSS_CLASS} #thumbnail.ytd-rich-grid-media,
+                .${this.CSS_CLASS} yt-image,
+                .${this.CSS_CLASS} .yt-core-image {
                     border-radius: 0 !important;
                 }
             `;
