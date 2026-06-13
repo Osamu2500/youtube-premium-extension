@@ -50,6 +50,7 @@ import './features/pages/home/cinematic-mode.js';
 // Shorts features
 import './features/shorts/modifiers/hide-shorts.js';
 import './features/shorts/modifiers/redirect-shorts.js';
+import './features/shorts/modifiers/stop-looping.js';
 import './features/shorts/enhancements/auto-scroll.js';
 import './features/shorts/enhancements/volume-normalizer.js';
 import './features/shorts/ui/hide-interaction-bar.js';
