@@ -1,6 +1,11 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
+const SELECTORS = {
+    PLAYER_CONTAINER: 'ytd-player, #player-container-outer, ytd-watch-flexy',
+    VIDEO: 'ytd-player video'
+};
+
 window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.BaseFeature {
     constructor() {
         super('AmbientMode');
@@ -39,6 +44,10 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         
         await super.enable();
         
+        // Wait for video element to be available (replaces setTimeout)
+        const videoReady = await this.waitForElement(SELECTORS.VIDEO, 5000);
+        if (!videoReady) return;
+        
         this.initDOM();
         this.startLoop();
     }
@@ -59,8 +68,6 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         if (window.YPP && window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('ambient-mode-btn');
         }
-
-        document.removeEventListener('visibilitychange', this._visibilityHandler);
 
         if (this.gl) {
             if (this.program) this.gl.deleteProgram(this.program);
@@ -92,8 +99,6 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         if (!this.isEnabled) return;
         
         if (this.utils.isWatchPage()) {
-            // Wait a tick for YouTube's DOM to settle
-            await new Promise(r => setTimeout(r, 100));
             await this.disable();
             this.isEnabled = true; // keep logical state true
             await this.enable();
@@ -113,11 +118,14 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
     }
 
     initDOM() {
-        this.video = document.querySelector('video');
+        this.video = document.querySelector(SELECTORS.VIDEO);
         if (!this.video) return;
 
+        // Prevent duplicate injection
+        if (document.getElementById('ypp-massive-ambient-container')) return;
+
         // ytd-player wraps the video in both default and theater modes
-        const playerContainer = document.querySelector('ytd-player') || document.querySelector('#player-container-outer') || document.querySelector('ytd-watch-flexy');
+        const playerContainer = document.querySelector(SELECTORS.PLAYER_CONTAINER);
         if (!playerContainer) return;
 
         // Create container for the massive glow
@@ -287,7 +295,7 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             this._intersectionObserver.observe(this.video);
         }
 
-        document.addEventListener('visibilitychange', this._visibilityHandler);
+        this.addListener(document, 'visibilitychange', this._visibilityHandler);
 
         const loop = (timestamp) => {
             if (!this.isEnabled) return;
@@ -370,25 +378,29 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
     }
 
     _initAudioContextSafe() {
-        if (!this.video || window.YPP.audioContextInitialized) return;
+        if (!this.video) return;
         
         try {
-            window.YPP.audioContextInitialized = true;
             window.YPP.audioContext = window.YPP.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+            window.YPP.audioSources = window.YPP.audioSources || new WeakMap();
             
-            // Only create source if not already created
-            if (!window.YPP.audioSource) {
+            // Only create source if not already created for THIS specific video element
+            if (!window.YPP.audioSources.has(this.video)) {
                 // IMPORTANT: Some DRM videos block this. We wrap in try-catch.
-                window.YPP.audioSource = window.YPP.audioContext.createMediaElementSource(this.video);
-                window.YPP.audioAnalyser = window.YPP.audioContext.createAnalyser();
-                window.YPP.audioAnalyser.fftSize = 64; // Small FFT size for fast bass detection
+                const source = window.YPP.audioContext.createMediaElementSource(this.video);
                 
-                window.YPP.audioSource.connect(window.YPP.audioAnalyser);
-                window.YPP.audioAnalyser.connect(window.YPP.audioContext.destination);
+                if (!window.YPP.globalAudioAnalyser) {
+                    window.YPP.globalAudioAnalyser = window.YPP.audioContext.createAnalyser();
+                    window.YPP.globalAudioAnalyser.fftSize = 64; // Small FFT size for fast bass detection
+                    window.YPP.globalAudioAnalyser.connect(window.YPP.audioContext.destination);
+                }
+                
+                source.connect(window.YPP.globalAudioAnalyser);
+                window.YPP.audioSources.set(this.video, source);
             }
             
             this.audioContext = window.YPP.audioContext;
-            this.analyser = window.YPP.audioAnalyser;
+            this.analyser = window.YPP.globalAudioAnalyser;
             this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
             
             if (this.audioContext.state === 'suspended') {

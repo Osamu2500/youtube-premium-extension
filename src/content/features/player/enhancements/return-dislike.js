@@ -137,15 +137,17 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         // 1. Try finding by specific icon path or aria-label if possible, but structure varies.
         // 2. Fallback: assumption that it's the 2nd button in the segmented button group.
         
-        let dislikeButton = buttons.querySelector('ytd-toggle-button-renderer:nth-child(2)'); // Classic
+        // Modern YouTube uses dislike-button-view-model or segmented-dislike-button
+        let dislikeButton = buttons.querySelector('dislike-button-view-model, #segmented-dislike-button-renderer, #segmented-dislike-button');
         
-        // If not found, try searching children for specific attributes
+        // Classic fallback
         if (!dislikeButton) {
-             const allButtons = buttons.querySelectorAll('ytd-toggle-button-renderer, button, #segmented-dislike-button-renderer');
-             // Often it's in a segmented container now
-             const segment = buttons.querySelector('#segmented-dislike-button-renderer');
-             if (segment) dislikeButton = segment;
-             else if (allButtons.length >= 2) dislikeButton = allButtons[1];
+            dislikeButton = buttons.querySelector('ytd-toggle-button-renderer:nth-child(2)');
+        }
+        
+        if (!dislikeButton) {
+             const allButtons = buttons.querySelectorAll('ytd-toggle-button-renderer, button');
+             if (allButtons.length >= 2) dislikeButton = allButtons[1];
         }
 
         if (!dislikeButton) return;
@@ -157,9 +159,12 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
             textEl.className = 'ypp-dislike-text';
             Object.assign(textEl.style, {
                 marginLeft: '6px',
-                fontSize: '13px',
+                fontSize: '14px',
                 fontWeight: '500',
-                lineHeight: '1.5rem' // Match YouTube's line height
+                lineHeight: 'normal',
+                opacity: '0.9',
+                display: 'inline-flex',
+                alignItems: 'center'
             });
             
             // Insert into the button content

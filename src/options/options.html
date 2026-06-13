@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Premium Plus - Dashboard</title>
+    <link rel="stylesheet" href="options.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blur"></div>
+    <div class="dashboard-container">
+        
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="../assets/icon-48.png" alt="Logo">
+                <h1>Premium Plus</h1>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-target="general">General</button>
+                <button class="nav-btn" data-target="player">Video Player</button>
+                <button class="nav-btn" data-target="shorts">Shorts</button>
+                <button class="nav-btn" data-target="sponsor">SponsorBlock</button>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <!-- General Settings -->
+            <section id="general" class="settings-section active">
+                <h2>General Enhancements</h2>
+                
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Custom Theme</h3>
+                        <p>Change the overall color scheme of YouTube.</p>
+                    </div>
+                    <div class="setting-control">
+                        <select id="themeSelect">
+                            <option value="default">Default</option>
+                            <option value="bloodmoon">Bloodmoon</option>
+                            <option value="deepspace">Deep Space</option>
+                            <option value="hacker">Hacker</option>
+                            <option value="outrun">Outrun</option>
+                            <option value="discord">Discord</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Ad Skipper</h3>
+                        <p>Automatically click "Skip Ad" and fast-forward video ads.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="adSkipper"><span class="slider"></span></label>
+                    </div>
+                </div>
+                
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Custom Scrollbar</h3>
+                        <p>Replace YouTube's chunky scrollbar with a slim, minimal one.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="customScrollbar"><span class="slider"></span></label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Video Player Settings -->
+            <section id="player" class="settings-section">
+                <h2>Video Player</h2>
+                
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Return YouTube Dislike</h3>
+                        <p>Fetch and display dislikes natively below the video.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="returnYouTubeDislike"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Video Speed Controller</h3>
+                        <p>Enable precise speed control (0.1x to 16x) with custom hotkeys.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="enableCustomSpeed"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Force Playback Speed</h3>
+                        <p>Prevent YouTube from automatically resetting your speed.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="vscForceSpeed"><span class="slider"></span></label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shorts Settings -->
+            <section id="shorts" class="settings-section">
+                <h2>YouTube Shorts</h2>
+
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Redirect Shorts to Normal Player</h3>
+                        <p>Forces all Shorts to play in the standard YouTube video UI.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="redirectShorts"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Stop Shorts Looping</h3>
+                        <p>Automatically pause Shorts when they reach the end.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="stopShortsLoop"><span class="slider"></span></label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SponsorBlock Settings -->
+            <section id="sponsor" class="settings-section">
+                <h2>SponsorBlock Engine</h2>
+
+                <div class="setting-card">
+                    <div class="setting-info">
+                        <h3>Enable SponsorBlock</h3>
+                        <p>Automatically skip sponsored segments and draw markers on the timeline.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" id="sponsorBlock"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <h3>Skip Categories</h3>
+                <div class="sponsor-categories">
+                    <label class="category-toggle"><input type="checkbox" id="sb_sponsor"> Sponsor <span class="color-dot" style="background:#00d400"></span></label>
+                    <label class="category-toggle"><input type="checkbox" id="sb_intro"> Intro <span class="color-dot" style="background:#00ffff"></span></label>
+                    <label class="category-toggle"><input type="checkbox" id="sb_outro"> Outro <span class="color-dot" style="background:#0202ed"></span></label>
+                    <label class="category-toggle"><input type="checkbox" id="sb_interaction"> Interaction <span class="color-dot" style="background:#cc00ff"></span></label>
+                    <label class="category-toggle"><input type="checkbox" id="sb_selfpromo"> Self Promo <span class="color-dot" style="background:#ffff00"></span></label>
+                    <label class="category-toggle"><input type="checkbox" id="sb_music_offtopic"> Music/Offtopic <span class="color-dot" style="background:#ff9900"></span></label>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>

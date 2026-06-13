@@ -81,14 +81,28 @@ class UIManager {
 
     /**
      * Re-mounts any components that were wiped away by YouTube rerenders.
+     * Batches all DOM reads before any DOM writes to prevent Layout Thrashing.
      */
     heal() {
-        this.components.forEach(comp => {
-            if (!document.contains(comp.el)) {
-                // Temporarily remove from registry so mount() allows recreation
+        if (this._healPending) return;
+        this._healPending = true;
+
+        requestAnimationFrame(() => {
+            this._healPending = false;
+            
+            // Phase 1: Reads (Determine which components need remounting)
+            const toRemount = [];
+            this.components.forEach(comp => {
+                if (!document.contains(comp.el)) {
+                    toRemount.push(comp);
+                }
+            });
+
+            // Phase 2: Writes (Remount them)
+            toRemount.forEach(comp => {
                 this.components.delete(comp.id);
                 this.mount(comp.mountPoint, comp, comp.position);
-            }
+            });
         });
     }
 

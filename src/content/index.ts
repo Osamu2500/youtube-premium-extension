@@ -8,6 +8,7 @@ import './config/utils.js';
 import './core/event-bus.js';
 import './core/dom-api.js';
 import './core/dom-observer.js';
+import './core/storage-manager.js';
 
 // UI Architecture (Phase 4)
 import './ui/ui-manager.js';
@@ -142,6 +143,7 @@ import './features/player/automation/auto-like.js';
 import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
+import './features/player/enhancements/sponsor-block.js';
 import './features/player/enhancements/video-speed-controller.js';
 import './features/player/enhancements/audio-eq.js';
 import './features/player/automation/auto-transcript.js';

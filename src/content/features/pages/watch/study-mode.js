@@ -124,10 +124,8 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Dist
             // Cleanup Note Panel
             this._removeNotePanel();
 
-            // Cleanup Smart Captions
-            if (this.captionObserver) {
-                this.captionObserver.disconnect();
-                this.captionObserver = null;
+            if (window.YPP.sharedObserver) {
+                window.YPP.sharedObserver.unregister('study-mode-captions');
             }
         } catch (error) {
             this.utils?.log(`Error disabling study mode: ${error.message}`, 'STUDY', 'error');
@@ -471,6 +469,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Dist
         }
         
         this.sessionTimer = setInterval(() => {
+            if (document.hidden) return;
             const video = document.querySelector('video');
             if (video && !video.paused) {
                 this.elapsedSeconds++;
@@ -574,51 +573,39 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Dist
     // =========================================================================
 
     _initSmartCaptions() {
-        if (this.captionObserver) {
-            this.captionObserver.disconnect();
-        }
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('study-mode-captions', '.ytp-caption-segment', () => {
+                if (!this.config.forceSubtitles) return;
+                
+                const captionContainer = document.querySelector('.ytp-caption-window-container');
+                if (!captionContainer) return;
+                
+                const text = captionContainer.textContent.trim();
+                const video = document.querySelector('video');
+                if (!video) return;
 
-        const captionContainer = document.querySelector('.ytp-caption-window-container');
-        if (!captionContainer) {
-            // Might not be rendered yet, retry in 2s
-            setTimeout(() => this._initSmartCaptions(), 2000);
-            return;
-        }
-
-        this.captionObserver = new MutationObserver((mutations) => {
-            if (!this.config.forceSubtitles) return;
-            
-            const text = captionContainer.textContent.trim();
-            const video = document.querySelector('video');
-            if (!video) return;
-
-            // Define "dense" as more than 80 characters on screen at once
-            if (text.length > 80) {
-                if (this.originalSpeed === null) {
-                    this.originalSpeed = video.playbackRate;
-                    const newSpeed = Math.max(0.25, this.originalSpeed - 0.15); // Slow down by 0.15x
-                    
-                    // Temporarily remove our enforce listener so we don't fight ourselves
-                    video.removeEventListener('ratechange', this._boundEnforceState);
-                    video.playbackRate = newSpeed;
-                    video.addEventListener('ratechange', this._boundEnforceState);
+                // Define "dense" as more than 80 characters on screen at once
+                if (text.length > 80) {
+                    if (this.originalSpeed === null) {
+                        this.originalSpeed = video.playbackRate;
+                        const newSpeed = Math.max(0.25, this.originalSpeed - 0.15); // Slow down by 0.15x
+                        
+                        video.playbackRate = newSpeed;
+                        window.dispatchEvent(new CustomEvent('ypp-vsc-force-speed', {
+                            detail: { enabled: true, speed: newSpeed }
+                        }));
+                    }
+                } else {
+                    if (this.originalSpeed !== null) {
+                        video.playbackRate = this.originalSpeed;
+                        window.dispatchEvent(new CustomEvent('ypp-vsc-force-speed', {
+                            detail: { enabled: true, speed: this.originalSpeed }
+                        }));
+                        this.originalSpeed = null;
+                    }
                 }
-            } else {
-                if (this.originalSpeed !== null) {
-                    // Restore speed
-                    video.removeEventListener('ratechange', this._boundEnforceState);
-                    video.playbackRate = this.originalSpeed;
-                    video.addEventListener('ratechange', this._boundEnforceState);
-                    this.originalSpeed = null;
-                }
-            }
-        });
-
-        this.captionObserver.observe(captionContainer, {
-            childList: true,
-            subtree: true,
-            characterData: true
-        });
+            }, false);
+        }
     }
 
     // =========================================================================

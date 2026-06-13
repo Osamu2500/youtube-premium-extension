@@ -38,6 +38,7 @@ window.YPP.features.ShortsAutoScroll = class ShortsAutoScroll extends window.YPP
         this.utils?.log('Starting Shorts Auto-Scroll interval monitoring', 'AutoScroll');
         
         this._autoScrollInterval = setInterval(() => {
+            if (document.hidden) return;
             this._checkAndScroll();
         }, 200);
 

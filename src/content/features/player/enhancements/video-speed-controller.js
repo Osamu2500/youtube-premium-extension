@@ -25,29 +25,17 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         
         this.utils?.log('Enabling Global Video Speed Controller', 'VSC');
         
-        // Scan for existing videos
+        // Scan and observe using centralized engine
         const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
-        document.querySelectorAll(selector).forEach(video => this.attachToVideo(video));
-
-        // Start observing for new videos
-        this._mutationObserver = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                for (const node of mutation.addedNodes) {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        if (node.tagName === 'VIDEO' || (this.settings?.vscAudioSupport && node.tagName === 'AUDIO')) {
-                            this.attachToVideo(node);
-                        } else {
-                            node.querySelectorAll(selector).forEach(video => this.attachToVideo(video));
-                        }
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('video-speed-controller', selector, (elements) => {
+                elements.forEach(node => {
+                    if (node.tagName === 'VIDEO' || (this.settings?.vscAudioSupport && node.tagName === 'AUDIO')) {
+                        this.attachToVideo(node);
                     }
-                }
-            }
-        });
-
-        this._mutationObserver.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+                });
+            }, true); // immediate=true scans for existing videos automatically
+        }
 
         // Global keyboard shortcuts
         document.addEventListener('keydown', this._boundHandleKeyDown, true);
@@ -75,9 +63,8 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
     }
 
     async disable() {
-        if (this._mutationObserver) {
-            this._mutationObserver.disconnect();
-            this._mutationObserver = null;
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('video-speed-controller');
         }
 
         if (this._storageListener) {
@@ -185,17 +172,24 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         let currentOffsetX = 12;
         let currentOffsetY = 12;
 
+        let isPositioning = false;
         const applyPosition = () => {
             if (!video.isConnected || !controller.isConnected) return;
+            if (isPositioning) return;
+            
             const t = video.getBoundingClientRect();
             
             if (t.width === 0 && t.height === 0) {
                 // Audio element with no dimensions
-                controller.style.position = 'fixed';
-                controller.style.top = `${Math.max(currentOffsetY, 12)}px`;
-                controller.style.left = `${Math.max(currentOffsetX, 12)}px`;
-                controller.style.right = 'auto';
-                controller.style.bottom = 'auto';
+                isPositioning = true;
+                requestAnimationFrame(() => {
+                    controller.style.position = 'fixed';
+                    controller.style.top = `${Math.max(currentOffsetY, 12)}px`;
+                    controller.style.left = `${Math.max(currentOffsetX, 12)}px`;
+                    controller.style.right = 'auto';
+                    controller.style.bottom = 'auto';
+                    isPositioning = false;
+                });
                 return;
             }
 
@@ -204,11 +198,15 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             const topOffset = Math.max(t.top - (o?.top || 0), 0) + currentOffsetY;
             const leftOffset = Math.max(t.left - (o?.left || 0), 0) + currentOffsetX;
             
-            controller.style.position = 'absolute';
-            controller.style.top = `${topOffset}px`;
-            controller.style.left = `${leftOffset}px`;
-            controller.style.right = 'auto';
-            controller.style.bottom = 'auto';
+            isPositioning = true;
+            requestAnimationFrame(() => {
+                controller.style.position = 'absolute';
+                controller.style.top = `${topOffset}px`;
+                controller.style.left = `${leftOffset}px`;
+                controller.style.right = 'auto';
+                controller.style.bottom = 'auto';
+                isPositioning = false;
+            });
         };
 
         // Initial position

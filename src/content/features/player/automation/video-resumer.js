@@ -102,8 +102,8 @@ window.YPP.features.VideoResumer = class VideoResumer extends window.YPP.feature
         if (!this.videoId || !this.videoElement) return;
         
         try {
-            const data = await chrome.storage.local.get([this.STORAGE_KEY_PREFIX + this.videoId]);
-            const savedTimeStr = data[this.STORAGE_KEY_PREFIX + this.videoId];
+            const data = await window.YPP.StorageManager.get(this.STORAGE_KEY_PREFIX + this.videoId);
+            const savedTimeStr = data;
             if (!savedTimeStr) return;
 
             const savedTime = parseFloat(savedTimeStr);
@@ -115,7 +115,7 @@ window.YPP.features.VideoResumer = class VideoResumer extends window.YPP.feature
                 // Check if it's near the end (e.g. 95%) - if so, don't resume, treat as watched
                 const duration = this.videoElement.duration;
                 if (duration && savedTime / duration > 0.95) {
-                    chrome.storage.local.remove([this.STORAGE_KEY_PREFIX + this.videoId]);
+                    window.YPP.StorageManager.remove(this.STORAGE_KEY_PREFIX + this.videoId);
                     return;
                 }
 
@@ -138,13 +138,10 @@ window.YPP.features.VideoResumer = class VideoResumer extends window.YPP.feature
         const duration = this.videoElement.duration;
         
         try {
-            // If watched over 95%, clear it
             if (duration && (currentTime / duration > 0.95)) {
-                chrome.storage.local.remove([this.STORAGE_KEY_PREFIX + this.videoId]);
+                window.YPP.StorageManager.remove(this.STORAGE_KEY_PREFIX + this.videoId);
             } else if (currentTime > 5) {
-                const data = {};
-                data[this.STORAGE_KEY_PREFIX + this.videoId] = currentTime.toString();
-                chrome.storage.local.set(data);
+                window.YPP.StorageManager.set(this.STORAGE_KEY_PREFIX + this.videoId, currentTime.toString());
             }
         } catch (e) {
             // Ignore quota errors during unload

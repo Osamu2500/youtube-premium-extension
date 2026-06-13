@@ -67,6 +67,7 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
         const btn = this._overlay.querySelector('.ypp-id-skip');
         
         this._countdownInterval = setInterval(() => {
+            if (document.hidden) return;
             count--;
             if (count <= 0) {
                 clearInterval(this._countdownInterval);

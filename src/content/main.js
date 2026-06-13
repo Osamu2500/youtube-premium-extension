@@ -143,9 +143,8 @@
 
         /**
          * Wait for a condition to be true.
-         * Uses MutationObserver for reactivity instead of setInterval polling,
-         * so conditions that depend on DOM changes resolve immediately rather
-         * than waiting up to 100ms per check.
+         * Uses requestAnimationFrame for zero-overhead polling instead of
+         * attaching a heavy MutationObserver to the entire document subtree.
          * @private
          * @param {Function} condition - Function that returns true when condition is met
          * @param {number} timeout - Maximum wait time in ms
@@ -159,39 +158,28 @@
                 }
 
                 let resolved = false;
-                let timeoutId = null;
-                let observer = null;
-
-                const cleanup = () => {
-                    if (observer) { observer.disconnect(); observer = null; }
-                    if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
-                };
+                let startTime = performance.now();
+                let rafId = null;
 
                 const check = () => {
                     if (resolved) return;
+                    
                     if (condition()) {
                         resolved = true;
-                        cleanup();
                         resolve(true);
+                        return;
                     }
+
+                    if (performance.now() - startTime > timeout) {
+                        resolved = true;
+                        resolve(false);
+                        return;
+                    }
+
+                    rafId = requestAnimationFrame(check);
                 };
 
-                // MutationObserver fires synchronously within the same microtask when
-                // a script sets window.YPP.Utils etc., so resolution is near-instant.
-                observer = new MutationObserver(check);
-                observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-
-                // Also check on a fast initial tick in case condition becomes true
-                // before any mutation fires (e.g. already-loaded scripts).
-                Promise.resolve().then(check);
-
-                timeoutId = setTimeout(() => {
-                    if (!resolved) {
-                        resolved = true;
-                        cleanup();
-                        resolve(false);
-                    }
-                }, timeout);
+                rafId = requestAnimationFrame(check);
             });
         },
 
@@ -379,13 +367,19 @@
                     // as the popup may send partial objects (e.g. just { sidebarLayout })
                     this.settings = { ...this.settings, ...request.settings };
                     this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
-                    if (this.featureManager) {
-                        try {
-                            this.featureManager.init(this.settings);
-                        } catch (error) {
-                            this.Utils?.log(`Error re-initializing features on instant update: ${error.message}`, 'MAIN', 'error');
+                    
+                    if (this._settingsUpdateTimeout) clearTimeout(this._settingsUpdateTimeout);
+                    this._settingsUpdateTimeout = setTimeout(() => {
+                        this._settingsUpdateTimeout = null;
+                        if (this.featureManager) {
+                            try {
+                                this.featureManager.init(this.settings);
+                            } catch (error) {
+                                this.Utils?.log(`Error re-initializing features on instant update: ${error.message}`, 'MAIN', 'error');
+                            }
                         }
-                    }
+                    }, 150);
+
                     sendResponse({ success: true });
                 }
                 

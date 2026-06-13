@@ -39,6 +39,7 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
 
         if (this._interval) clearInterval(this._interval);
         this._interval = setInterval(() => {
+            if (document.hidden) return;
             this._checkPromosAndNext();
         }, 500);
         

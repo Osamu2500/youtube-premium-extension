@@ -72,6 +72,8 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
         
         // Every 5 seconds, ensure YouTube hasn't auto-downgraded the quality
         this.enforcerInterval = setInterval(() => {
+            if (document.hidden) return;
+            
             if (!this.settings?.autoQuality || this.settings.autoQuality === 'off') {
                 this.stopEnforcer();
                 return;

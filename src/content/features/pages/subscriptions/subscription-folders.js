@@ -8,6 +8,12 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends window.YPP.features.BaseFeature {
+    static SELECTORS = {
+        FEED_CARDS: 'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ytd-browse[page-subtype="subscriptions"] ytd-video-renderer',
+        FEED_CONTAINER: 'ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents, ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer #contents',
+        CONTINUATION: 'ytd-continuation-item-renderer'
+    };
+
     constructor() {
         // CRITICAL: Must call super() before accessing `this` — sets up name, isEnabled,
         // utils, events, observer, eventListeners, busListeners from BaseFeature.
@@ -364,7 +370,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.ui.renderFilterChips();
         this.updateFilterState();
         
-        this.observer.register('feed-filter-loop', 'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ytd-browse[page-subtype="subscriptions"] ytd-video-renderer', () => {
+        this.observer.register('feed-filter-loop', SubscriptionFolders.SELECTORS.FEED_CARDS, () => {
             if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest') {
                 // Debounced: rapid card additions (lazy-load batches) coalesce into one pass
                 this._debouncedApplyFilters();
@@ -587,10 +593,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     _applyFeedFiltersNow() {
         if (!this._isFeedPage) return;
 
-        const videoCards = document.querySelectorAll(
-            'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ' +
-            'ytd-browse[page-subtype="subscriptions"] ytd-video-renderer'
-        );
+        const videoCards = document.querySelectorAll(SubscriptionFolders.SELECTORS.FEED_CARDS);
 
         // Build a normalised lookup set for the active folder for O(1) checks.
         // activeChannelSet stores names as-saved (from Channel Health scan or popover).
@@ -730,17 +733,19 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             console.groupEnd();
         }
 
-        const container = document.querySelector(
-            'ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents, ' +
-            'ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer #contents'
-        );
+        const container = document.querySelector(SubscriptionFolders.SELECTORS.FEED_CONTAINER);
         if (container) this._applySortOrder(container);
 
         // Nudge scroll to trigger YouTube's lazy-load continuation
-        const spinner = document.querySelector('ytd-continuation-item-renderer');
-        if (spinner && spinner.getBoundingClientRect().top < window.innerHeight * 2) {
-            window.scrollBy(0, 1);
-            window.scrollBy(0, -1);
+        const spinner = document.querySelector(SubscriptionFolders.SELECTORS.CONTINUATION);
+        if (spinner) {
+            // Batch DOM read (getBoundingClientRect) inside rAF to prevent forced sync layout
+            requestAnimationFrame(() => {
+                if (spinner.getBoundingClientRect().top < window.innerHeight * 2) {
+                    window.scrollBy(0, 1);
+                    window.scrollBy(0, -1);
+                }
+            });
         }
     }
 
@@ -750,10 +755,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             return;
         }
 
-        const videoCards = document.querySelectorAll(
-            'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer, ' +
-            'ytd-browse[page-subtype="subscriptions"] ytd-video-renderer'
-        );
+        const videoCards = document.querySelectorAll(SubscriptionFolders.SELECTORS.FEED_CARDS);
         videoCards.forEach(card => {
             card.style.display = '';
             card.classList.remove('ypp-filtered-in');

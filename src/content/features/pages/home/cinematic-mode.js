@@ -244,21 +244,12 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
     // ─── Hero Manager ─────────────────────────────────────────────────────────
 
-    _simulateHover(element) {
+    async _simulateHover(element) {
         if (!element) return;
         
-        const MAX_RETRIES = 3;
-        const RETRY_DELAY = 250;
-
-        const _attemptHover = (retryCount = 0) => {
-            const thumbnailContainer = element.querySelector(CinematicMode.SELECTORS.THUMBNAIL);
-            
-            if (!thumbnailContainer && retryCount < MAX_RETRIES) {
-                if (!this._cinematicActive) return;
-                setTimeout(() => _attemptHover(retryCount + 1), RETRY_DELAY);
-                return;
-            }
-            if (!thumbnailContainer) return;
+        try {
+            const thumbnailContainer = await this.pollFor(() => element.querySelector(CinematicMode.SELECTORS.THUMBNAIL), 3000, 250);
+            if (!thumbnailContainer || !this._cinematicActive) return;
 
             // Intercept mouseleave events to trick YouTube into keeping the preview playing indefinitely!
             if (!element._hoverLock) {
@@ -304,14 +295,14 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     this._updateMuteButtonVisibility();
                 }, 500);
             }, 100);
-        };
-        
-        _attemptHover();
+        } catch (e) {
+            // Timeout gracefully without crashing
+        }
     }
 
     async _waitForPreview(videoElement) {
         try {
-            this._simulateHover(videoElement);
+            await this._simulateHover(videoElement);
             return await this.pollFor(() => videoElement.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW), 10000, 100);
         } catch (e) {
             this.utils.log(e.message, "CINEMATIC", "error");
@@ -460,7 +451,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         }[tag]));
     }
 
-    _updateHeroContent(videoElement) {
+    async _updateHeroContent(videoElement) {
         if (this._heroState.status !== 'ready' || !this._heroState.heroElement) return;
         
         const existingContent = this._heroState.heroElement.querySelector('.netflix-hero-content');
@@ -472,39 +463,40 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             return t ? t.trim() : null;
         };
 
-        // Memoize DOM queries to prevent layout thrashing and redundant O(n) lookups during retry loops
-        if (!videoElement._yppData) {
-            videoElement._yppData = {
-                titleEl: videoElement.querySelector('#video-title, #video-title-link, yt-formatted-string.ytd-rich-grid-media'),
-                avatarEl: videoElement.querySelector('yt-avatar-shape img, #avatar-link img, #avatar img'),
-                channelEl: videoElement.querySelector('ytd-channel-name a, ytd-channel-name yt-formatted-string, #channel-name a, yt-formatted-string[id="text"].ytd-channel-name'),
-                titleLink: videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail')
-            };
+        try {
+            await this.pollFor(() => {
+                if (!videoElement._yppData) {
+                    videoElement._yppData = {
+                        titleEl: videoElement.querySelector('#video-title, #video-title-link, yt-formatted-string.ytd-rich-grid-media'),
+                        avatarEl: videoElement.querySelector('yt-avatar-shape img, #avatar-link img, #avatar img'),
+                        channelEl: videoElement.querySelector('ytd-channel-name a, ytd-channel-name yt-formatted-string, #channel-name a, yt-formatted-string[id="text"].ytd-channel-name'),
+                        titleLink: videoElement.querySelector('a#video-title-link, a#video-title, a#thumbnail')
+                    };
+                }
+                
+                const t = getText(videoElement._yppData.titleEl);
+                const c = getText(videoElement._yppData.channelEl);
+                
+                if (!t || !c || t === '' || c === '') {
+                    videoElement._yppData = null; // force re-query!
+                    return false;
+                }
+                return true;
+            }, 3000, 200);
+        } catch (e) {
+            // Proceed with fallback text if timeout
         }
 
-        const titleEl = videoElement._yppData.titleEl;
-        let title = getText(titleEl);
+        if (!this._cinematicActive) return;
+
+        const titleEl = videoElement._yppData?.titleEl;
+        let title = getText(titleEl) || 'Featured Video';
         
-        const avatarEl = videoElement._yppData.avatarEl;
+        const avatarEl = videoElement._yppData?.avatarEl;
         const avatar = avatarEl ? avatarEl.src : null;
         
-        const channelEl = videoElement._yppData.channelEl;
-        let channelName = getText(channelEl);
-        
-        // If data is still loading from Polymer data binding, wait and retry!
-        if (!title || !channelName || title === '' || channelName === '') {
-            videoElement._yppData = null; // Clear memoized data to force re-query!
-            if (!videoElement._heroRetryCount) videoElement._heroRetryCount = 0;
-            if (videoElement._heroRetryCount < 15) {
-                videoElement._heroRetryCount++;
-                if (!this._cinematicActive) return;
-                setTimeout(() => this._updateHeroContent(videoElement), 200);
-                return;
-            }
-        }
-        
-        title = title || 'Featured Video';
-        channelName = channelName || 'YouTube Creator';
+        const channelEl = videoElement._yppData?.channelEl;
+        let channelName = getText(channelEl) || 'YouTube Creator';
         
         const titleLink = videoElement._yppData.titleLink;
         const url = titleLink?.href || '#';

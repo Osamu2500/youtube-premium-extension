@@ -187,7 +187,7 @@ window.YPP.FeatureManager = class FeatureManager {
 
             // Yield to browser paint cycle if there are more chunks
             if (i + CHUNK_SIZE < entries.length) {
-                await new Promise(resolve => setTimeout(resolve, 0));
+                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
             }
         }
 

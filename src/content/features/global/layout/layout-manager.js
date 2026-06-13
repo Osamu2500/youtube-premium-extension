@@ -77,7 +77,12 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             this._retryCount = 0;
             this.utils.log?.('Initializing 4x4 grid...', 'LAYOUT');
 
-            this._applyWithRetry();
+            // Wait for grid to exist before applying
+            const grid = await this.waitForElement(GridLayoutManager.SELECTORS.GRID_RENDERER, 10000);
+            if (grid) {
+                this.applyGridLayout();
+            }
+
             this.startObserver();
             this.addResizeListener();
         } catch (e) {
@@ -164,31 +169,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      */
     addResizeListener() {
         // Use shared utils.debounce
-        const applyFn = () => this._applyWithRetry();
+        const applyFn = () => this.applyGridLayout();
         
         const resizeListener = this.utils.debounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY);
             
         this.addListener(window, 'resize', resizeListener);
     }
 
-    /**
-     * Apply layout with exponential backoff retry
-     * @private
-     */
-    _applyWithRetry() {
-        const success = this.applyGridLayout();
-        
-        if (!success && this._retryCount < GridLayoutManager.CONFIG.MAX_RETRIES) {
-            this._retryCount++;
-            const delay = GridLayoutManager.CONFIG.BASE_RETRY_DELAY * 
-                         Math.pow(GridLayoutManager.CONFIG.RETRY_BACKOFF_FACTOR, this._retryCount - 1);
-            
-            this.utils.log?.(`Retry ${this._retryCount}/${GridLayoutManager.CONFIG.MAX_RETRIES} in ${delay}ms`, 'LAYOUT', 'debug');
-            setTimeout(() => this._applyWithRetry(), delay);
-        } else if (!success) {
-            this.utils.log?.('Max retries reached, grid application failed', 'LAYOUT', 'debug');
-        }
-    }
+
 
     /**
      * Apply grid layout classes to DOM elements
