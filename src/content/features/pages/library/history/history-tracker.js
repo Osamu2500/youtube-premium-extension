@@ -187,7 +187,8 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             week: { count: wCount, seconds: wSec },
             month: { count: mCount, seconds: mSec },
             streak: this.stats.streak,
-            topChannel: topChannelName
+            topChannel: topChannelName,
+            dailyData: data
         };
 
         this.updateWidgetValues();
@@ -281,6 +282,15 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
                 <div class="ypp-stat-card secondary hidden full-width premium-card">
                      <span class="label">Top Channel (Today)</span>
                      <span class="value text-value" id="ypp-stats-top-channel">-</span>
+                </div>
+            </div>
+            
+            <div class="ypp-calendar-container" id="ypp-calendar-view" style="display: none;">
+                <div class="ypp-calendar-header">
+                    <span class="label">Activity Calendar (Last 30 Days)</span>
+                </div>
+                <div class="ypp-calendar-grid" id="ypp-calendar-grid">
+                    <!-- Calendar cells will be injected here -->
                 </div>
             </div>
         `;
@@ -462,6 +472,41 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
                     grid-template-columns: 1fr 1fr;
                 }
             }
+
+            /* Calendar Styles */
+            .ypp-calendar-container {
+                margin-top: 24px;
+                padding: 0 24px 24px 24px;
+            }
+            .ypp-calendar-header {
+                font-size: 14px;
+                font-weight: 600;
+                color: #aaa;
+                margin-bottom: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .ypp-calendar-grid {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .ypp-calendar-cell {
+                width: 20px;
+                height: 20px;
+                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.05);
+                transition: transform 0.2s;
+            }
+            .ypp-calendar-cell:hover {
+                transform: scale(1.2);
+                z-index: 2;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            }
+            .ypp-calendar-cell.level-1 { background: rgba(62, 166, 255, 0.3); }
+            .ypp-calendar-cell.level-2 { background: rgba(62, 166, 255, 0.6); }
+            .ypp-calendar-cell.level-3 { background: rgba(62, 166, 255, 0.8); }
+            .ypp-calendar-cell.level-4 { background: rgba(62, 166, 255, 1.0); box-shadow: 0 0 8px rgba(62, 166, 255, 0.6); }
         `;
         document.head.appendChild(style);
     }
@@ -470,14 +515,17 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         const content = document.getElementById('ypp-tracker-content');
         const toggle = document.getElementById('ypp-tracker-toggle');
         const secondary = document.querySelectorAll('.ypp-stat-card.secondary');
+        const calendar = document.getElementById('ypp-calendar-view');
         
         if (this.isExpanded) {
             content.classList.add('expanded');
             secondary.forEach(el => el.classList.remove('hidden'));
+            if (calendar) calendar.style.display = 'block';
             toggle.classList.add('rotated');
         } else {
             content.classList.remove('expanded');
             secondary.forEach(el => el.classList.add('hidden'));
+            if (calendar) calendar.style.display = 'none';
             toggle.classList.remove('rotated');
         }
     }
@@ -504,5 +552,44 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         setVal('ypp-stats-month-time', fmtTime(this.stats.month.seconds));
         setVal('ypp-stats-streak', this.stats.streak || 0);
         setVal('ypp-stats-top-channel', this.stats.topChannel || '-');
+
+        if (this.stats.dailyData) {
+            this._renderCalendar(this.stats.dailyData);
+        }
+    }
+
+    _renderCalendar(dailyData) {
+        const grid = document.getElementById('ypp-calendar-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        // Create 30 cells representing the last 30 days
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const key = this.STORAGE_PREFIX + `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            
+            const dayData = dailyData[key];
+            const seconds = dayData ? (dayData.totalSeconds || 0) : 0;
+            
+            let intensityClass = 'level-0';
+            if (seconds > 0) intensityClass = 'level-1';
+            if (seconds > 3600) intensityClass = 'level-2'; // 1 hour
+            if (seconds > 7200) intensityClass = 'level-3'; // 2 hours
+            if (seconds > 14400) intensityClass = 'level-4'; // 4 hours
+            
+            const cell = document.createElement('div');
+            cell.className = `ypp-calendar-cell ${intensityClass}`;
+            
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            
+            const h = Math.floor(seconds / 3600);
+            const min = Math.floor((seconds % 3600) / 60);
+            const timeStr = seconds > 0 ? (h > 0 ? `${h}h ${min}m` : `${min}m`) : 'No watch time';
+            
+            cell.title = `${date.getFullYear()}-${m}-${d}: ${timeStr}`;
+            grid.appendChild(cell);
+        }
     }
 };
