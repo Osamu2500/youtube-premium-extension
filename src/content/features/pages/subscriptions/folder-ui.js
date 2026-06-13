@@ -1713,25 +1713,22 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 }
             }, 1500);
 
-            const script = document.createElement('script');
-            script.textContent = `
-                try {
-                    window.postMessage({
-                        type: 'YPP_YTCFG_RESPONSE',
-                        reqId: '${reqId}',
-                        config: {
-                            apiKey:        window.ytcfg?.get('INNERTUBE_API_KEY'),
-                            context:       window.ytcfg?.get('INNERTUBE_CONTEXT'),
-                            visitorData:   window.ytcfg?.get('VISITOR_DATA'),
-                            clientVersion: window.ytcfg?.get('INNERTUBE_CLIENT_VERSION') || '2.20240101.01.00',
-                            sessionIndex:  window.ytcfg?.get('SESSION_INDEX') || '0',
-                            pageId:        window.ytcfg?.get('DELEGATED_SESSION_ID') || window.ytcfg?.get('PAGE_ID')
-                        }
-                    }, '*');
-                } catch(e) {}
-            `;
-            document.documentElement.appendChild(script);
-            script.remove();
+            // Ensure the bridge script is injected
+            if (!document.getElementById('ypp-ytcfg-bridge')) {
+                const script = document.createElement('script');
+                script.id = 'ypp-ytcfg-bridge';
+                script.src = chrome.runtime.getURL('src/inject/ytcfg-bridge.js');
+                document.documentElement.appendChild(script);
+            }
+
+            // Give the script a short moment to load/parse if newly injected,
+            // then send the request.
+            setTimeout(() => {
+                window.postMessage({
+                    type: 'YPP_YTCFG_REQUEST',
+                    reqId: reqId
+                }, '*');
+            }, 50);
         });
     }
 
