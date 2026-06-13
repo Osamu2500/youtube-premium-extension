@@ -353,6 +353,19 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     // =========================================================================
 
     setupFeedFilters() {
+        if (!document.getElementById('ypp-filter-styles')) {
+            const style = document.createElement('style');
+            style.id = 'ypp-filter-styles';
+            style.textContent = `
+                ytd-rich-item-renderer[data-ypp-hidden="true"],
+                ytd-video-renderer[data-ypp-hidden="true"],
+                ytd-grid-video-renderer[data-ypp-hidden="true"] {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
         const pendingPlayAll = sessionStorage.getItem('ypp_pending_play_all');
         const pendingFolder = sessionStorage.getItem('ypp_pending_folder');
         
@@ -655,10 +668,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                     channelName = card.querySelector('a#avatar-link')?.title?.trim() || null;
                 }
 
-                // Fallback 2: Text content of the channel name link (most resilient to structural changes,
+                // Fallback 2: Text content of the channel name element (most resilient to structural changes,
                 // but requires _normChannel to strip out verified checkmarks later).
                 if (!channelName) {
-                    const textEl = card.querySelector('#channel-name a, ytd-channel-name a, ytd-channel-name yt-formatted-string, #text.ytd-channel-name');
+                    const textEl = card.querySelector('ytd-channel-name, #channel-name');
                     if (textEl && textEl.textContent) {
                         channelName = textEl.textContent.trim();
                     }
@@ -679,7 +692,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                     if (!card.dataset.yppObserving) {
                         card.dataset.yppObserving = 'true';
                         window.YPP.Utils.pollFor(() => {
-                            const chEl = card.querySelector('#channel-name a, .ytd-channel-name a');
+                            const chEl = card.querySelector('ytd-channel-name, #channel-name');
                             return chEl && chEl.textContent.trim() ? true : false;
                         }, 5000, 200).then((success) => {
                             delete card.dataset.yppObserving;
@@ -727,11 +740,13 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             if (isVisible && !this._matchesDateFilter(card))     isVisible = false;
 
             if (isVisible) {
-                card.style.display = '';
+                card.style.removeProperty('display');
+                card.removeAttribute('data-ypp-hidden');
                 card.classList.add('ypp-filtered-in');
                 this._updateFolderIndicator(card, channelName);
             } else {
-                card.style.display = 'none';
+                card.style.setProperty('display', 'none', 'important');
+                card.setAttribute('data-ypp-hidden', 'true');
                 card.classList.remove('ypp-filtered-in');
             }
         });
