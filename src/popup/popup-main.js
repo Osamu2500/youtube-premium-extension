@@ -347,19 +347,13 @@ const initApp = () => {
         }
     });
 
-    ['ambientIntensity', 'ambientBlur', 'blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold'].forEach(key => {
+    ['ambientIntensity', 'ambientBlur', 'blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold', 'autoLikeThreshold', 'intentionalDelayTime'].forEach(key => {
         const slider = state.elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {
             slider.addEventListener('input', () => {
                 if (display) {
-                     if (key.includes('Columns')) {
-                         display.textContent = slider.value;
-                     } else if (key === 'watchTimeAlertHours') {
-                         display.textContent = slider.value + 'h';
-                     } else {
-                         display.textContent = slider.value + '%';
-                     }
+                     display.textContent = slider.value;
                 }
                 
                 if (key.includes('Columns') && state.elements['autoScaleLayout'] && state.elements['autoScaleLayout'].checked) {

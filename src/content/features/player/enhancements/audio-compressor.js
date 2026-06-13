@@ -101,21 +101,26 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
         // Browsers block AudioContext creation until user gesture
         // We might fail here if the user hasn't interacted with the page yet
         try {
-            if (!this.audioContext) {
-                // AudioContext can only be instantiated once per page realistically without memory leaks
-                // Reusing a global one if possible
-                window.YPP.audioContext = window.YPP.audioContext || new (window.AudioContext || window.webkitAudioContext)();
-                this.audioContext = window.YPP.audioContext;
+            // Share AudioContext with VolumeBooster
+            if (this.videoElement.__ypp_ctx) {
+                this.audioContext = this.videoElement.__ypp_ctx;
+            } else {
+                this.audioContext = window.YPP.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+                window.YPP.audioContext = this.audioContext;
+                this.videoElement.__ypp_ctx = this.audioContext;
             }
 
             // Create media element source if not already created
-            if (!this.videoElement._yppAudioSource) {
-                this.videoElement._yppAudioSource = this.audioContext.createMediaElementSource(this.videoElement);
+            if (!this.videoElement.__ypp_source) {
+                this.videoElement.__ypp_source = this.audioContext.createMediaElementSource(this.videoElement);
             }
-            this.sourceNode = this.videoElement._yppAudioSource;
+            this.sourceNode = this.videoElement.__ypp_source;
 
-            // Disconnect whatever was connected (e.g. previous runs)
-            this.sourceNode.disconnect();
+            // Prevent disconnect if VolumeBooster is using it
+            const vbActive = window.YPP.featureManager?.getFeature('volumeBoost')?._audioConnected;
+            if (!vbActive) {
+                this.sourceNode.disconnect();
+            }
 
             // Create compressor
             if (!this.compressorNode) {
@@ -134,7 +139,6 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
             }
 
             // Dynamic clipping prevention
-            // A limiter node (another compressor) just before destination
             if (!this.limiterNode) {
                 this.limiterNode = this.audioContext.createDynamicsCompressor();
                 this.limiterNode.threshold.value = -1.0; 
@@ -144,11 +148,27 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
                 this.limiterNode.release.value = 0.050;
             }
 
-            // Route audio: Source -> Compressor -> Gain -> Limiter -> Speakers
-            this.sourceNode.connect(this.compressorNode);
-            this.compressorNode.connect(this.gainNode);
-            this.gainNode.connect(this.limiterNode);
-            this.limiterNode.connect(this.audioContext.destination);
+            // Expose our nodes for VolumeBooster to chain into if it enables AFTER us
+            this.videoElement.__ypp_ext_compressor = {
+                input: this.compressorNode,
+                output: this.limiterNode
+            };
+
+            // Route audio
+            if (vbActive) {
+                // VolumeBooster is already active. Tell it to rebuild its graph to include us.
+                const vb = window.YPP.featureManager.getFeature('volumeBoost');
+                if (vb._buildAudioGraph) {
+                    vb.source.disconnect();
+                    vb._buildAudioGraph(); // It will check __ypp_ext_compressor and pipe into it
+                }
+            } else {
+                // Standalone routing
+                this.sourceNode.connect(this.compressorNode);
+                this.compressorNode.connect(this.gainNode);
+                this.gainNode.connect(this.limiterNode);
+                this.limiterNode.connect(this.audioContext.destination);
+            }
 
             if (this.audioContext.state === 'suspended') {
                 this.audioContext.resume();

@@ -14,7 +14,7 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
         this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
         
         // State tracking
-        this.wasMutedByUs = false;
+        this.wasPausedByUs = false;
         this.video = null;
     }
 
@@ -48,7 +48,7 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
     async disable() {
         await super.disable();
         this.video = null;
-        this.wasMutedByUs = false;
+        this.wasPausedByUs = false;
     }
 
     /**
@@ -59,7 +59,7 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
         if (!this.isEnabled) return;
         
         // Reset state for the new video
-        this.wasMutedByUs = false;
+        this.wasPausedByUs = false;
         this._cacheVideoElement();
     }
 
@@ -100,33 +100,34 @@ window.YPP.features.AutoPause = class AutoPause extends window.YPP.features.Base
         // If the user has explicitly triggered PiP, they want the video to play while hidden.
         // We MUST NOT pause the video in this scenario.
         if (document.pictureInPictureElement) {
-            this.wasMutedByUs = false; // Reset state so it doesn't auto-mute unexpectedly later
+            this.wasPausedByUs = false; // Reset state
             return;
         }
 
         if (document.hidden) {
             // Tab is hidden
             if (!this.video.paused && !this.video.ended) {
-                // Check if it's already muted by the user
-                this.wasMutedByUs = !this.video.muted;
-                
-                if (this.wasMutedByUs) {
-                    this.video.muted = true;
-                    this.utils.log?.('Auto muted video (tab hidden)', 'AutoPause');
-                }
+                // Video is currently playing. We will pause it.
+                this.wasPausedByUs = true;
+                this.video.pause();
+                this.utils.log?.('Auto paused video (tab hidden)', 'AutoPause');
             } else {
-                this.wasMutedByUs = false;
+                // Video was ALREADY paused manually by the user before they switched tabs.
+                // We should NOT auto-resume it when they come back.
+                this.wasPausedByUs = false;
             }
         } else {
             // Tab is visible again
-            if (this.wasMutedByUs) {
-                // Restore volume
-                this.video.muted = false;
-                this.utils.log?.('Auto unmuted video (tab visible)', 'AutoPause');
+            if (this.wasPausedByUs) {
+                // We were the ones who paused it, so we can safely resume it
+                this.video.play().catch(e => {
+                    this.utils.log?.('Failed to auto-resume video: ' + e.message, 'AutoPause', 'warn');
+                });
+                this.utils.log?.('Auto resumed video (tab visible)', 'AutoPause');
             }
             
             // Always reset state after becoming visible
-            this.wasMutedByUs = false;
+            this.wasPausedByUs = false;
         }
     }
 };

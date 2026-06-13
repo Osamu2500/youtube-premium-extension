@@ -49,11 +49,7 @@ export function loadSettings(updateUICallbacks) {
                         el.value = state.settings[key] !== undefined ? state.settings[key] : el.value;
                         const display = document.getElementById(key + 'Value');
                         if (display) {
-                            const isCount = key.toLowerCase().includes('columns');
-                            const isHour  = key === 'watchTimeAlertHours';
-                            display.textContent = isCount ? el.value
-                                               : isHour  ? el.value + 'h'
-                                               : el.value + '%';
+                            display.textContent = el.value;
                         }
                     } else if (el.type === 'color' || el.type === 'text' || el.type === 'select-one') {
                         el.value = state.settings[key] || '';

@@ -85,6 +85,8 @@ import './features/pages/watch/watch-redesign.js';
 
 // Player features
 import './features/player/player-controls.js';
+import './features/player/controls/snapshot-button.js';
+import './features/player/controls/loop-button.js';
 import './features/player/player-settings-menu.js';
 import './features/player/player.js';
 import './features/player/filter-presets.js';
@@ -106,10 +108,13 @@ import './features/player/automation/sponsor-block.js';
 import './features/player/ambient-mode/ambient-mode.js';
 import './features/player/ambient-mode/audio-mode.js';
 import './features/player/video-controls/video-controls.js';
+import './features/player/video-controls/classic-progress-bar.js';
 import './features/player/controls/wheel-controls.js';
 import './features/player/enhancements/audio-compressor.js';
 import './features/player/automation/video-resumer.js';
 import './features/player/automation/auto-pause.js';
+import './features/player/automation/auto-cinema.js';
+import './features/player/automation/auto-pip.js';
 import './features/player/controls/sidebar-layout.js';
 
 // Feature Manager & Main entry

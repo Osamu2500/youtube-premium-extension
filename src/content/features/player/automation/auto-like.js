@@ -33,8 +33,8 @@ window.YPP.features.AutoLike = class AutoLike
         const videoId = url.match(/[?&]v=([^&]+)/)?.[1];
         if (!videoId) return;
 
-        // Don't attempt twice for same video
-        if (this._attempted.has(videoId)) return;
+        // Don't attempt twice for same video (check memory and persistent storage)
+        if (this._attempted.has(videoId) || localStorage.getItem(`ypp_liked_${videoId}`)) return;
 
         this._waitForPercentage(videoId);
     }
@@ -54,8 +54,10 @@ window.YPP.features.AutoLike = class AutoLike
                     return;
                 }
 
+                const targetPercentage = this.settings?.autoLikeThreshold ?? 50;
+                
                 const percentage = (video.currentTime / video.duration) * 100;
-                if (percentage >= 50 || video.ended) {
+                if (percentage >= targetPercentage || video.ended) {
                     video.removeEventListener('timeupdate', checkProgress);
                     this._waitAndLike(videoId);
                 }
@@ -83,15 +85,21 @@ window.YPP.features.AutoLike = class AutoLike
             // Check if already liked — do NOT interfere
             const isLiked = this._isAlreadyLiked(likeBtn);
             if (isLiked) {
-                this._attempted.add(videoId);
+                this._markAttempted(videoId);
                 return;
             }
 
-            // Mark as attempted before clicking to prevent double-click
-            this._attempted.add(videoId);
+            // Dislike Protection: check if user explicitly disliked
+            const isDisliked = this._isDisliked();
+            if (isDisliked) {
+                this.utils?.log?.(`User disliked video ${videoId}, skipping auto-like`, 'AUTO-LIKE', 'info');
+                this._markAttempted(videoId);
+                return;
+            }
 
             // Click the like button
             likeBtn.click();
+            this._markAttempted(videoId);
 
             window.YPP.Utils?.log(
                 `Auto-liked video: ${videoId}`, 'AUTO-LIKE', 'info'
@@ -99,6 +107,13 @@ window.YPP.features.AutoLike = class AutoLike
         } catch (e) {
             // Timeout or abort
         }
+    }
+
+    _markAttempted(videoId) {
+        this._attempted.add(videoId);
+        try {
+            localStorage.setItem(`ypp_liked_${videoId}`, 'true');
+        } catch(e) {}
     }
 
     _getLikeButton() {
@@ -121,6 +136,23 @@ window.YPP.features.AutoLike = class AutoLike
         return null;
     }
 
+    _isDisliked() {
+        const selectors = [
+            'dislike-button-view-model button',
+            '[aria-label*="dislike this video"]',
+            '[aria-label*="I dislike this"]'
+        ];
+        for (const sel of selectors) {
+            const btn = document.querySelector(sel);
+            if (btn) {
+                const isPressed = btn.getAttribute('aria-pressed') === 'true';
+                const isActive = btn.classList.contains('active') || btn.classList.contains('style-default-active');
+                if (isPressed || isActive) return true;
+            }
+        }
+        return false;
+    }
+
     _isAlreadyLiked(likeBtn) {
         // Check multiple signals that indicate already liked
         const isPressed = likeBtn.getAttribute('aria-pressed') === 'true';
@@ -134,6 +166,6 @@ window.YPP.features.AutoLike = class AutoLike
         const svgPath = likeBtn.querySelector('path');
         const isFilled = svgPath?.getAttribute('fill-rule') === 'evenodd';
 
-        return isPressed || isActive || !!parentActive;
+        return isPressed || isActive || !!parentActive || isFilled;
     }
 };

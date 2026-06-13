@@ -84,7 +84,13 @@ window.YPP.features.WheelControls = class WheelControls extends window.YPP.featu
             // Align to 0.25 tick marks to prevent floating point drift
             nextSpeed = Math.round(nextSpeed * 4) / 4;
             
-            video.playbackRate = nextSpeed;
+            const vsc = window.YPP.featureManager?.getFeature('videoSpeedController');
+            if (vsc) {
+                if (!vsc.controllers.has(video)) vsc.attachToVideo(video);
+                vsc.setSpeed(video, nextSpeed);
+            } else {
+                video.playbackRate = nextSpeed;
+            }
 
             if (this.utils.createToast) {
                 this.utils.createToast(`Speed: ${nextSpeed}x`, 'info');
@@ -95,8 +101,15 @@ window.YPP.features.WheelControls = class WheelControls extends window.YPP.featu
             let nextVol = scrollingUp ? currentVol + 0.05 : currentVol - 0.05;
             
             nextVol = Math.max(0, Math.min(nextVol, 1));
-            video.volume = nextVol;
-            video.muted = nextVol === 0 ? true : false;
+            const moviePlayer = document.querySelector('#movie_player');
+            
+            if (moviePlayer && moviePlayer.setVolume) {
+                moviePlayer.setVolume(Math.round(nextVol * 100));
+                if (nextVol > 0 && moviePlayer.isMuted()) moviePlayer.unMute();
+            } else {
+                video.volume = nextVol;
+                video.muted = nextVol === 0;
+            }
             
             if (this.utils.createToast) {
                 this.utils.createToast(`Volume: ${Math.round(nextVol * 100)}%`, 'info');

@@ -465,7 +465,8 @@ body {
 .toggle-card:hover .feature-icon {
   color: var(--accent-primary);
 }
-.toggle-card:has(input:checked) .feature-icon {
+.toggle-card:has(input:checked) .feature-icon,
+.feature-icon.active {
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 20%, transparent), color-mix(in srgb, var(--accent-secondary) 20%, transparent));
   border-color: color-mix(in srgb, var(--accent-primary) 50%, transparent);
   box-shadow: 0 0 12px var(--accent-glow);

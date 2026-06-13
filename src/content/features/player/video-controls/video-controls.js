@@ -105,14 +105,22 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
             this._pannerNode.pan.value = 0;
 
             // Chain: source → bass → mid → treble → panner → compressor → gain → output
+            // Chain: source → bass → mid → treble → panner → compressor → gain
             this._sourceNode
                 .connect(this._bassFilter)
                 .connect(this._midFilter)
                 .connect(this._trebleFilter)
                 .connect(this._pannerNode)
                 .connect(this._compressor)
-                .connect(this._gainNode)
-                .connect(this._audioCtx.destination);
+                .connect(this._gainNode);
+
+            // Chain to AudioCompressor if it is active, otherwise go straight to destination
+            if (video.__ypp_ext_compressor) {
+                this._gainNode.connect(video.__ypp_ext_compressor.input);
+                video.__ypp_ext_compressor.output.connect(this._audioCtx.destination);
+            } else {
+                this._gainNode.connect(this._audioCtx.destination);
+            }
 
             this._audioConnected = true;
             this.utils?.log('Audio engine started', 'VideoControls');

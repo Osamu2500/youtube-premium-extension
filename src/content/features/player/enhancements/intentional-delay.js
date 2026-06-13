@@ -24,6 +24,9 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
         if (!this.settings?.intentionalDelay) return;
         if (!location.pathname.startsWith('/watch')) return;
         
+        // Skip delay if the video was opened in a background tab
+        if (document.hidden) return;
+        
         const videoId = new URL(location.href).searchParams.get('v');
         if (!videoId || this._activeVideoId === videoId) return;
         
@@ -45,19 +48,21 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
         document.body.appendChild(pauseScript);
         pauseScript.remove();
 
+        const duration = this.settings?.intentionalDelayTime ?? 3;
+
         this._overlay = document.createElement('div');
         this._overlay.className = 'ypp-intentional-delay-overlay';
         this._overlay.innerHTML = `
             <div class="ypp-id-content">
                 <h2>Take a breath.</h2>
                 <p>Is this video intentional, or are you just scrolling?</p>
-                <div class="ypp-id-timer">3</div>
+                <div class="ypp-id-timer">${duration}</div>
                 <button class="ypp-id-skip" style="display:none;">Proceed to Video</button>
             </div>
         `;
         document.body.appendChild(this._overlay);
 
-        let count = 3;
+        let count = duration;
         const timerEl = this._overlay.querySelector('.ypp-id-timer');
         const btn = this._overlay.querySelector('.ypp-id-skip');
         

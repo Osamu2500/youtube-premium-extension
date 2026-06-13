@@ -84,62 +84,81 @@ window.YPP.features.VideoResumer = class VideoResumer extends window.YPP.feature
                 this.videoElement = video;
                 
                 // Restore previous time if available
-                this.restoreTime();
+                await this.restoreTime();
 
                 // Save time periodically
                 this.addListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
+                this.addListener(window, 'pagehide', () => this.forceSave());
+                this.addListener(document, 'visibilitychange', () => {
+                    if (document.hidden) this.forceSave();
+                });
             }
         } catch (e) {
             this.utils.log?.('Smart Video Resumer timed out', 'RESUMER', 'warn');
         }
     }
 
-    restoreTime() {
+    async restoreTime() {
         if (!this.videoId || !this.videoElement) return;
         
-        const savedTimeStr = localStorage.getItem(this.STORAGE_KEY_PREFIX + this.videoId);
-        if (!savedTimeStr) return;
+        try {
+            const data = await chrome.storage.local.get([this.STORAGE_KEY_PREFIX + this.videoId]);
+            const savedTimeStr = data[this.STORAGE_KEY_PREFIX + this.videoId];
+            if (!savedTimeStr) return;
 
-        const savedTime = parseFloat(savedTimeStr);
-        if (isNaN(savedTime)) return;
+            const savedTime = parseFloat(savedTimeStr);
+            if (isNaN(savedTime)) return;
+            
+            // Don't seek if we're already past it or it's within the first 5 seconds
+            if (this.videoElement.currentTime < savedTime && savedTime > 5) {
+                
+                // Check if it's near the end (e.g. 95%) - if so, don't resume, treat as watched
+                const duration = this.videoElement.duration;
+                if (duration && savedTime / duration > 0.95) {
+                    chrome.storage.local.remove([this.STORAGE_KEY_PREFIX + this.videoId]);
+                    return;
+                }
+
+                this.videoElement.currentTime = savedTime;
+                this.utils.log?.(`Resumed at ${savedTime}s`, 'RESUMER');
+                
+                if (this.utils.createToast) {
+                    this.utils.createToast('Playback Resumed', 'info');
+                }
+            }
+        } catch (e) {
+            this.utils.log?.('Failed to restore time from storage', 'RESUMER', 'warn', e);
+        }
+    }
+
+    forceSave() {
+        if (!this.videoElement || !this.videoId) return;
         
-        // Don't seek if we're already past it or it's within the first 5 seconds (YouTube naturally handles basic resume sometimes)
-        // But YouTube's native resume is hit or miss, so we enforce ours.
-        if (this.videoElement.currentTime < savedTime && savedTime > 5) {
-            
-            // Check if it's near the end (e.g. 95%) - if so, don't resume, treat as watched
-            const duration = this.videoElement.duration;
-            if (duration && savedTime / duration > 0.95) {
-                // Basically finished
-                localStorage.removeItem(this.STORAGE_KEY_PREFIX + this.videoId);
-                return;
+        const currentTime = this.videoElement.currentTime;
+        const duration = this.videoElement.duration;
+        
+        try {
+            // If watched over 95%, clear it
+            if (duration && (currentTime / duration > 0.95)) {
+                chrome.storage.local.remove([this.STORAGE_KEY_PREFIX + this.videoId]);
+            } else if (currentTime > 5) {
+                const data = {};
+                data[this.STORAGE_KEY_PREFIX + this.videoId] = currentTime.toString();
+                chrome.storage.local.set(data);
             }
-
-            this.videoElement.currentTime = savedTime;
-            this.utils.log?.(`Resumed at ${savedTime}s`, 'RESUMER');
-            
-            if (this.utils.createToast) {
-                this.utils.createToast('Playback Resumed', 'info');
-            }
+        } catch (e) {
+            // Ignore quota errors during unload
         }
     }
 
     handleTimeUpdate() {
-        // Throttle saves directly in connection with time update to avoid `setInterval` drift bugs
+        // Throttle saves directly in connection with time update to avoid drift bugs
         if (!this.videoElement || !this.videoId) return;
         
         const now = Date.now();
-        if (!this.lastSave || now - this.lastSave > 2000) {
-            const currentTime = this.videoElement.currentTime;
-            const duration = this.videoElement.duration;
-            
-            // If watched over 95%, clear it
-            if (duration && (currentTime / duration > 0.95)) {
-                localStorage.removeItem(this.STORAGE_KEY_PREFIX + this.videoId);
-            } else if (currentTime > 5) {
-                localStorage.setItem(this.STORAGE_KEY_PREFIX + this.videoId, currentTime.toString());
-            }
-
+        // Relaxed interval to 10 seconds for performance, relying on pagehide for accuracy
+        if (!this.lastSave || now - this.lastSave > 10000) {
+            this.forceSave();
             this.lastSave = now;
         }
     }

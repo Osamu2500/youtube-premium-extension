@@ -1,13 +1,13 @@
 /**
  * Modes Manager — YouTube Premium Plus
- * Handles: Cinema Mode, Minimal Mode, Auto Cinema, Auto PiP
+ * Handles: Cinema Mode, Minimal Mode
  * These modes modify the YouTube player/page layout and are toggled from the
  * popup's "Modes" section or the presets in the Dashboard.
  *
  * Pattern: each mode has a dedicated _enable/disable method that:
  *  1. Adds/removes a body CSS class (for the styles.css rules to react)
  *  2. Injects/removes a scoped <style> tag for any mode-specific rules
- *  3. Calls the YouTube native API when needed (theater mode, PiP)
+ *  3. Calls the YouTube native API when needed (theater mode)
  *  4. Shows a toast notification via Utils.createToast
  *  5. Cleans up completely on disable — no zombie DOM nodes
  */
@@ -24,14 +24,7 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
         this._active = {
             cinemaMode:  false,
             minimalMode: false,
-            autoCinema:  false,
-            autoPiP:     false,
         };
-
-        // Bound handlers for cleanup
-        this._boundAutoPiP = null;
-        this._boundAutoCinema = null;
-        this._navHandler = this._onNavigation.bind(this);
     }
 
     // =========================================================================
@@ -49,8 +42,6 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
     disable() {
         this._disableCinemaMode();
         this._disableMinimalMode();
-        this._disableAutoCinema();
-        this._disableAutoPiP();
         this.cleanupEvents();
     }
 
@@ -74,20 +65,6 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
             this._enableMinimalMode();
         } else if (!settings.minimalMode && this._active.minimalMode) {
             this._disableMinimalMode();
-        }
-
-        // --- Auto Cinema (expand to theater on video load) ---
-        if (settings.autoCinema && !this._active.autoCinema) {
-            this._enableAutoCinema();
-        } else if (!settings.autoCinema && this._active.autoCinema) {
-            this._disableAutoCinema();
-        }
-
-        // --- Auto PiP (Picture-in-Picture when tab hidden) ---
-        if (settings.autoPiP && !this._active.autoPiP) {
-            this._enableAutoPiP();
-        } else if (!settings.autoPiP && this._active.autoPiP) {
-            this._disableAutoPiP();
         }
     }
 
@@ -250,74 +227,6 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
         this._removeStyle('ypp-minimal-style');
         this.utils?.createToast?.('Minimal Mode Off');
         this.utils?.log?.('Minimal mode disabled', 'MODES');
-    }
-
-    // =========================================================================
-    // AUTO CINEMA
-    // Automatically clicks the theater button whenever a watch page loads.
-    // =========================================================================
-
-    _enableAutoCinema() {
-        this._active.autoCinema = true;
-        // Run immediately if we're on a watch page
-        if (location.pathname === '/watch') {
-            this._clickTheaterButton();
-        }
-        // And on every subsequent navigation
-        this.addListener(window, 'yt-navigate-finish', this._navHandler);
-        this.utils?.log?.('Auto Cinema enabled', 'MODES');
-    }
-
-    _disableAutoCinema() {
-        if (!this._active.autoCinema) return;
-        this._active.autoCinema = false;
-        window.removeEventListener('yt-navigate-finish', this._navHandler);
-        this.utils?.log?.('Auto Cinema disabled', 'MODES');
-    }
-
-    _onNavigation() {
-        if (this._settings?.autoCinema && location.pathname === '/watch') {
-            this._clickTheaterButton();
-        }
-    }
-
-    // =========================================================================
-    // AUTO PIP
-    // Enters Picture-in-Picture when the tab is hidden (user switches tabs).
-    // Exits PiP when the user comes back.
-    // =========================================================================
-
-    _enableAutoPiP() {
-        this._active.autoPiP = true;
-        this._boundAutoPiP = async () => {
-            const video = document.querySelector('video');
-            if (!video) return;
-            if (document.hidden && !video.paused) {
-                // Tab hidden → enter PiP
-                if (document.pictureInPictureEnabled && !document.pictureInPictureElement) {
-                    try { await video.requestPictureInPicture(); } catch (_) {}
-                }
-            } else if (!document.hidden && document.pictureInPictureElement) {
-                // Tab visible again → exit PiP
-                try { await document.exitPictureInPicture(); } catch (_) {}
-            }
-        };
-        this.addListener(document, 'visibilitychange', this._boundAutoPiP);
-        this.utils?.log?.('Auto PiP enabled', 'MODES');
-    }
-
-    _disableAutoPiP() {
-        if (!this._active.autoPiP) return;
-        this._active.autoPiP = false;
-        if (this._boundAutoPiP) {
-            document.removeEventListener('visibilitychange', this._boundAutoPiP);
-            this._boundAutoPiP = null;
-        }
-        // Exit PiP if currently active
-        if (document.pictureInPictureElement) {
-            document.exitPictureInPicture().catch(() => {});
-        }
-        this.utils?.log?.('Auto PiP disabled', 'MODES');
     }
 
     // =========================================================================

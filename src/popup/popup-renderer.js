@@ -94,15 +94,25 @@ function renderRange(item, state) {
     if (item.hidden) return null;
 
     const wrap = document.createElement('div');
-    wrap.className = 'setting-item';
-    wrap.style.marginTop = '6px';
+    wrap.className = 'setting-item toggle-card';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'stretch';
+    wrap.style.gap = '8px';
+    wrap.style.marginTop = '4px';
+    wrap.style.marginBottom = '4px';
+
+    const headerRow = document.createElement('div');
+    headerRow.style.display = 'flex';
+    headerRow.style.alignItems = 'center';
+    headerRow.style.justifyContent = 'space-between';
 
     const info = document.createElement('div');
     info.className = 'info';
     const valueId = item.id + 'Value';
     const unit = item.unit != null ? item.unit : '%';
     info.innerHTML = `<span class="name">${item.label}</span><span class="desc"><span id="${valueId}">${item.min ?? 0}</span>${unit}</span>`;
-    wrap.appendChild(info);
+    headerRow.appendChild(info);
+    wrap.appendChild(headerRow);
 
     const rangeWrap = document.createElement('div');
     rangeWrap.className = 'range-container';
@@ -124,20 +134,22 @@ function renderSelect(item, state) {
     if (item.hidden) return null;
 
     const wrap = document.createElement('div');
-    wrap.className = 'inline-setting-row';
-    wrap.style.marginTop = '8px';
+    wrap.className = 'toggle-card';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'stretch';
+    wrap.style.gap = '4px';
 
-    const infoGroup = document.createElement('div');
-    infoGroup.style.display = 'flex';
-    infoGroup.style.alignItems = 'center';
-    infoGroup.style.gap = '12px';
+    const headerRow = document.createElement('div');
+    headerRow.style.display = 'flex';
+    headerRow.style.alignItems = 'center';
+    headerRow.style.gap = '10px';
 
     if (item.icon) {
         const iconWrap = document.createElement('div');
         iconWrap.className = 'feature-icon';
         iconWrap.style.flexShrink = '0';
         iconWrap.appendChild(makeSVG(item.icon, 14));
-        infoGroup.appendChild(iconWrap);
+        headerRow.appendChild(iconWrap);
     }
 
     const info = document.createElement('div');
@@ -149,18 +161,23 @@ function renderSelect(item, state) {
     nameEl.className = 'name';
     nameEl.textContent = item.label;
     info.appendChild(nameEl);
+    
     if (item.desc) {
         const d = document.createElement('span');
         d.className = 'desc';
         d.textContent = item.desc;
         info.appendChild(d);
     }
-    infoGroup.appendChild(info);
-    wrap.appendChild(infoGroup);
+    headerRow.appendChild(info);
+    wrap.appendChild(headerRow);
 
     const select = document.createElement('select');
     select.id = item.id;
     select.className = 'theme-select';
+    select.style.padding = '6px 10px';
+    select.style.fontSize = '11px';
+    select.style.marginTop = '4px';
+    
     (item.options || []).forEach(opt => {
         const o = document.createElement('option');
         o.value = opt.value;
@@ -389,6 +406,126 @@ function renderColor(item, state) {
     return wrap;
 }
 
+function renderButtonGroup(item, state) {
+    if (item.hidden) return null;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'toggle-card';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'stretch';
+    wrap.style.gap = '8px';
+
+    const headerRow = document.createElement('div');
+    headerRow.style.display = 'flex';
+    headerRow.style.alignItems = 'center';
+    headerRow.style.gap = '10px';
+
+    let iconWrap = null;
+    if (item.icon) {
+        iconWrap = document.createElement('div');
+        iconWrap.className = 'feature-icon';
+        iconWrap.style.flexShrink = '0';
+        iconWrap.appendChild(makeSVG(item.icon, 14));
+        headerRow.appendChild(iconWrap);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.style.display = 'flex';
+    info.style.flexDirection = 'column';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = item.label;
+    info.appendChild(nameEl);
+    
+    if (item.desc) {
+        const d = document.createElement('span');
+        d.className = 'desc';
+        d.textContent = item.desc;
+        info.appendChild(d);
+    }
+    headerRow.appendChild(info);
+    wrap.appendChild(headerRow);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'button-group';
+    btnGroup.style.display = 'flex';
+    btnGroup.style.gap = '4px';
+    btnGroup.style.marginTop = '4px';
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.id = item.id;
+    wrap.appendChild(input);
+
+    const btns = [];
+    (item.options || []).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'group-btn';
+        btn.textContent = opt.label;
+        btn.dataset.value = opt.value;
+        
+        btn.style.flex = '1';
+        btn.style.padding = '6px 4px';
+        btn.style.fontSize = '10px';
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.border = '1px solid rgba(255,255,255,0.1)';
+        btn.style.color = 'rgba(255,255,255,0.5)';
+        btn.style.borderRadius = '4px';
+        btn.style.cursor = 'pointer';
+        btn.style.transition = 'all 0.2s ease';
+        
+        btn.onclick = () => {
+            btns.forEach(b => {
+                b.style.background = 'rgba(255,255,255,0.05)';
+                b.style.color = 'rgba(255,255,255,0.5)';
+                b.style.borderColor = 'rgba(255,255,255,0.1)';
+            });
+            btn.style.background = 'rgba(62,166,255,0.22)';
+            btn.style.color = 'var(--accent, #3ea6ff)';
+            btn.style.borderColor = 'rgba(62,166,255,0.5)';
+            
+            input.value = opt.value;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+        
+        btns.push(btn);
+        btnGroup.appendChild(btn);
+    });
+    
+    wrap.appendChild(btnGroup);
+
+    const originalValueDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    Object.defineProperty(input, 'value', {
+        get: function() { return originalValueDesc.get.call(this); },
+        set: function(val) {
+            originalValueDesc.set.call(this, val);
+            const activeBtn = btns.find(b => b.dataset.value === val) || btns[0];
+            if (activeBtn) {
+                btns.forEach(b => {
+                    b.style.background = 'rgba(255,255,255,0.05)';
+                    b.style.color = 'rgba(255,255,255,0.5)';
+                    b.style.borderColor = 'rgba(255,255,255,0.1)';
+                });
+                activeBtn.style.background = 'rgba(62,166,255,0.22)';
+                activeBtn.style.color = 'var(--accent, #3ea6ff)';
+                activeBtn.style.borderColor = 'rgba(62,166,255,0.5)';
+            }
+            if (iconWrap) {
+                if (val && val !== 'hidden') {
+                    iconWrap.classList.add('active');
+                } else {
+                    iconWrap.classList.remove('active');
+                }
+            }
+        }
+    });
+
+    _registerInput(input, state);
+    return wrap;
+}
+
 const ITEM_RENDERERS = {
     toggle: renderToggle,
     inlineToggle: renderInlineToggle,
@@ -397,6 +534,7 @@ const ITEM_RENDERERS = {
     color: renderColor,
     layoutToggle: renderLayoutToggle,
     custom: renderCustomSlot,
+    'button-group': renderButtonGroup,
 };
 
 // ── Section builder ────────────────────────────────────────────────────
@@ -421,15 +559,16 @@ function buildSection(section, state) {
     const grp = document.createElement('div');
     grp.className = 'card-group';
 
-    // Separate items into grid-eligible (toggle) and full-width (range, select, custom)
-    const gridItems  = section.items.filter(i => i.type === 'toggle' && !i.hidden);
-    const wideItems  = section.items.filter(i => i.type !== 'toggle' && !i.hidden);
+    // Separate items into grid-eligible and full-width
+    const gridItems  = section.items.filter(i => (i.type === 'toggle' || i.type === 'range' || i.type === 'select' || i.type === 'button-group') && !i.hidden);
+    const wideItems  = section.items.filter(i => (i.type !== 'toggle' && i.type !== 'range' && i.type !== 'select' && i.type !== 'button-group') && !i.hidden);
 
     if (gridItems.length > 0) {
         const grid = document.createElement('div');
         grid.className = 'feature-grid';
         gridItems.forEach(item => {
-            const el = renderToggle(item, state);
+            const fn = ITEM_RENDERERS[item.type];
+            const el = fn ? fn(item, state) : null;
             if (el) grid.appendChild(el);
         });
         grp.appendChild(grid);
@@ -448,13 +587,13 @@ function buildSection(section, state) {
         });
     }
 
-    const selectItems = wideItems.filter(i => i.type === 'select' || i.type === 'inlineToggle');
-    const otherItems  = wideItems.filter(i => i.type !== 'select' && i.type !== 'inlineToggle');
+    const inlineToggleItems = wideItems.filter(i => i.type === 'inlineToggle');
+    const otherItems  = wideItems.filter(i => i.type !== 'inlineToggle');
 
-    if (selectItems.length > 0) {
+    if (inlineToggleItems.length > 0) {
         const grid = document.createElement('div');
         grid.className = 'select-grid';
-        selectItems.forEach(item => {
+        inlineToggleItems.forEach(item => {
             const fn = ITEM_RENDERERS[item.type];
             const el = fn ? fn(item, state) : null;
             if (el) grid.appendChild(el);

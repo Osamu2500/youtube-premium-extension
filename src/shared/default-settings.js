@@ -46,7 +46,7 @@ export const DEFAULT_SETTINGS = {
 
     // Player
     autoCinema: false,
-    autoQuality: false,
+    autoQuality: 'highres',
     enablePiP: true,
     enableTranscript: true,
     enableSnapshot: true,
@@ -160,6 +160,7 @@ export const DEFAULT_SETTINGS = {
     
     // New Features
     autoLike: false,
+    autoLikeThreshold: 50,
     hidePlaylists: false,
     hidePodcasts: false,
     multiSelect: true,
@@ -167,6 +168,7 @@ export const DEFAULT_SETTINGS = {
     hideThumbnails: false,
     redirectHome: false,
     intentionalDelay: false,
+    intentionalDelayTime: 3,
     ambientMode: false,
     audioModeEnabled: false,
     videoControlsEnabled: true,

@@ -438,7 +438,10 @@ window.YPP.CONSTANTS = {
         cinematicMode: 'CinematicMode',
         splitScrolling: 'SplitScrolling',
         durationFilter: 'DurationFilter',
-        videoSpeedController: 'VideoSpeedController'
+        videoSpeedController: 'VideoSpeedController',
+        snapshotButton: 'SnapshotButton',
+        loopButton: 'LoopButton',
+        classicProgressBar: 'ClassicProgressBar'
     }
 };
 

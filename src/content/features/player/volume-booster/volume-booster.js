@@ -265,7 +265,15 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.pannerNode.connect(this.compressorNode);
         this.compressorNode.connect(this.gainNode);
         this.gainNode.connect(this.analyserNode);
-        this.analyserNode.connect(this.ctx.destination);
+
+        // Chain to AudioCompressor if it is active, otherwise go straight to destination
+        const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+        if (video && video.__ypp_ext_compressor) {
+            this.analyserNode.connect(video.__ypp_ext_compressor.input);
+            video.__ypp_ext_compressor.output.connect(this.ctx.destination);
+        } else {
+            this.analyserNode.connect(this.ctx.destination);
+        }
     }
 
     /**
