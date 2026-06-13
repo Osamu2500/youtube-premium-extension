@@ -56,6 +56,9 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
 
     async disable() {
         await super.disable();
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('sponsor-video');
+        }
         this.stop();
         this.clearSegments();
     }
@@ -90,29 +93,22 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         this.videoId = this.getVideoId();
         if (!this.videoId) return;
 
-        try {
-            // Wait for video element
-            const video = await this.utils.pollFor(() => {
-                const v = document.querySelector('video');
-                if (v && v.readyState >= 1) return v;
-                return null;
-            }, 10000, 500);
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('sponsor-video', 'video', (elements) => {
+                const video = elements[0];
+                if (video && !this.videoElement) {
+                    this.videoElement = video;
+                    this.addListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
+                    this.addListener(this.videoElement, 'loadedmetadata', this.handleVideoLoaded);
+                    this.addListener(this.videoElement, 'durationchange', this.handleVideoLoaded);
+                    
+                    if (this.videoElement.duration) {
+                         this.handleVideoLoaded();
+                    }
 
-            if (video) {
-                this.videoElement = video;
-                this.addListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
-                this.addListener(this.videoElement, 'loadedmetadata', this.handleVideoLoaded);
-                this.addListener(this.videoElement, 'durationchange', this.handleVideoLoaded);
-                
-                // If it already has duration, render directly
-                if (this.videoElement.duration) {
-                     this.handleVideoLoaded();
+                    this.fetchSegments();
                 }
-
-                this.fetchSegments();
-            }
-        } catch (error) {
-            this.utils.log?.('SponsorBlock initialization timed out waiting for video', 'SPONSOR', 'warn');
+            }, true);
         }
         
         // Observe for player controls recreating, which wipes our segments

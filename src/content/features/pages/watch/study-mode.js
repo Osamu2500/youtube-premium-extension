@@ -60,6 +60,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         try {
             if (window.YPP && window.YPP.sharedObserver) {
                 window.YPP.sharedObserver.unregister('study-mode-video');
+                window.YPP.sharedObserver.unregister('study-mode-controls');
             }
 
             const video = document.querySelector('video');
@@ -85,29 +86,25 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
      * @private
      */
     async injectSpeedControl() {
-        if (!this.utils) return;
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('study-mode-controls', '.ytp-right-controls', (elements) => {
+                const rightControls = elements[0];
+                if (!rightControls || document.getElementById('ypp-study-btn')) return;
 
-        try {
-            // Wait for player controls
-            const rightControls = await this.utils.pollFor(() => document.querySelector('.ytp-right-controls'), 10000, 500);
-            
-            if (!rightControls || document.getElementById('ypp-study-btn')) return;
+                // Create button
+                const btn = document.createElement('button');
+                btn.id = 'ypp-study-btn';
+                btn.className = 'ytp-button';
+                btn.title = 'Study Mode Speed';
+                btn.innerHTML = `<span style="font-size: 13px; font-weight: 500; color: #3ea6ff;">${this.config.speed}x</span>`;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.toggleSpeedPanel();
+                };
 
-            // Create button
-            const btn = document.createElement('button');
-            btn.id = 'ypp-study-btn';
-            btn.className = 'ytp-button';
-            btn.title = 'Study Mode Speed';
-            btn.innerHTML = `<span style="font-size: 13px; font-weight: 500; color: #3ea6ff;">${this.config.speed}x</span>`;
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                this.toggleSpeedPanel();
-            };
-
-            rightControls.insertBefore(btn, rightControls.firstChild);
-            this.controlBtn = btn;
-        } catch (error) {
-            this.utils?.log('Failed to inject controls: ' + error.message, 'STUDY', 'error');
+                rightControls.insertBefore(btn, rightControls.firstChild);
+                this.controlBtn = btn;
+            }, true);
         }
     }
 

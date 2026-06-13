@@ -126,27 +126,24 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         this._initCanvas();
         this.lastUpdate = 0;
         
-        // Ensure player elements exist before starting loop
-        const Utils = window.YPP.Utils;
-        if (Utils) {
-            try {
-                const elements = await Utils.pollFor(() => {
-                    const player = document.querySelector('#ytd-player') || 
-                                 document.querySelector('#player-container-outer') || 
-                                 document.querySelector('.html5-video-player');
-                    const video = document.querySelector('video');
-                    
-                    if (player && video) return { player, video };
-                    return null;
-                }, 10000, 500);
-                
-                if (elements && this.ambientActive) {
-                    this.playerElement = elements.player;
-                    this.videoElement = elements.video;
-                    this.animationFrame = requestAnimationFrame(this._loop);
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('zen-mode-player', 'ytd-player, #player-container-outer, .html5-video-player', (elements) => {
+                const player = elements[0];
+                const video = document.querySelector('video');
+                if (player && video && this.ambientActive) {
+                    this.playerElement = player;
+                    this.videoElement = video;
+                    if (!this.animationFrame) {
+                        this.animationFrame = requestAnimationFrame(this._loop);
+                    }
                 }
-            } catch (e) {
-                Utils.log?.('ZenMode failed to find player elements', 'ZEN', 'warn');
+            }, true);
+        } else {
+            // Fallback
+            this.playerElement = document.querySelector('ytd-player') || document.querySelector('.html5-video-player');
+            this.videoElement = document.querySelector('video');
+            if (this.playerElement && this.videoElement) {
+                this.animationFrame = requestAnimationFrame(this._loop);
             }
         }
     }
@@ -221,6 +218,10 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
+        }
+        
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('zen-mode-player');
         }
 
         // Clean up styles

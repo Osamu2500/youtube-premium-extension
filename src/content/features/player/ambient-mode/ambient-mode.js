@@ -42,6 +42,10 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             this._intersectionObserver.disconnect();
             this._intersectionObserver = null;
         }
+        
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('ambient-mode-btn');
+        }
 
         document.removeEventListener('visibilitychange', this._visibilityHandler);
 
@@ -77,12 +81,10 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
     }
 
     async injectToggleButton() {
-        try {
-            if (!this.utils.pollFor) return;
-
-            // Wait for controls to be ready
-            const theaterBtn = await this.utils.pollFor(() => document.querySelector('.ytp-size-button'), 10000, 250);
-            
+        if (!window.YPP || !window.YPP.sharedObserver) return;
+        
+        window.YPP.sharedObserver.register('ambient-mode-btn', '.ytp-size-button', (elements) => {
+            const theaterBtn = elements[0];
             if (theaterBtn && !document.getElementById('ypp-ambient-toggle')) {
                 const btn = document.createElement('button');
                 btn.id = 'ypp-ambient-toggle';
@@ -120,9 +122,7 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
                     this.toggleBtn = btn;
                 }
             }
-        } catch (error) {
-            this.utils.log?.('Failed to inject toggle button: ' + error.message, 'AMBIENT', 'error');
-        }
+        }, true);
     }
 
     initDOM() {

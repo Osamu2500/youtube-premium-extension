@@ -4,89 +4,83 @@ window.YPP.features = window.YPP.features || {};
 window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.BaseFeature {
     constructor() {
         super('AdSkipper');
-        this._isAdSkipping = false;
-        this._observer = null;
+        this.selectors = [
+            '.ytp-ad-skip-button-modern',
+            '.ytp-ad-skip-button',
+            '.ytp-skip-ad-button',
+            '.videoAdUiSkipButton'
+        ];
+        
+        // Use a bound method for the observer callback
         this._boundHandleMutations = this._handleMutations.bind(this);
     }
 
-    getConfigKey() { return 'adSkipper'; }
+    getConfigKey() {
+        return 'adSkipper';
+    }
 
     async enable() {
         await super.enable();
-        this._startObserver();
-        this._skipAdIfPresent(); // Check immediately
+        
+        if (window.YPP.sharedObserver) {
+            // Register for any DOM mutations inside the player
+            window.YPP.sharedObserver.register('ad-skipper', 'ytd-player, #player-container', (elements) => {
+                const player = elements[0];
+                if (player) {
+                    this._checkForAds(player);
+                }
+            }, true);
+            
+            // Register a mutation observer on the document body or player to catch dynamically added ad buttons
+            this.addListener(document.body, 'DOMNodeInserted', this._boundHandleMutations);
+        }
+        
+        // Initial check
+        this._checkForAds();
     }
 
     async disable() {
         await super.disable();
-        this._stopObserver();
-    }
-
-    _startObserver() {
-        if (this._observer) return;
-        
-        const target = document.querySelector('ytd-player') || document.getElementById('movie_player') || document.body;
-        if (!target) return;
-        
-        this._observer = new MutationObserver(this._boundHandleMutations);
-        this._observer.observe(target, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-    }
-
-    _stopObserver() {
-        if (this._observer) {
-            this._observer.disconnect();
-            this._observer = null;
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('ad-skipper');
         }
     }
 
-    _handleMutations(mutations) {
+    _handleMutations(e) {
         if (!this.isEnabled) return;
-        
-        for (const mutation of mutations) {
-            if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                this._skipAdIfPresent();
-            }
+        // Optimization: only process if the inserted node or its parent might be related to ads
+        if (e.target && e.target.className && typeof e.target.className === 'string' && e.target.className.includes('ad')) {
+            this._checkForAds();
         }
     }
 
-    _skipAdIfPresent() {
-        if (this._isAdSkipping) return;
-        
-        const adShowing = document.querySelector('.ad-showing, .ad-interrupting');
-        const skipButton = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
-        
-        if (adShowing || skipButton) {
-            this._isAdSkipping = true;
-            this.utils.log?.('Ad detected. Skipping...', 'AdSkipper');
-            
-            // Speed up ad if it's unskippable currently
-            const video = document.querySelector('video');
+    _checkForAds(container = document) {
+        // 1. Click skip buttons
+        for (const selector of this.selectors) {
+            const btn = container.querySelector(selector);
+            if (btn && btn.offsetParent !== null) { // is visible
+                btn.click();
+                this.utils?.log?.('Skipped Ad via Button Click', 'AD_SKIPPER', 'debug');
+                return;
+            }
+        }
+
+        // 2. Fast forward unskippable ads
+        const player = document.querySelector('.html5-video-player');
+        if (player && player.classList.contains('ad-showing')) {
+            const video = player.querySelector('video');
             if (video && !video.paused) {
-                try {
-                    video.playbackRate = 16.0;
-                    video.volume = 0;
-                    video.muted = true;
-                    // Force skip to end of ad
-                    if (video.duration && !isNaN(video.duration)) {
-                        video.currentTime = video.duration - 0.1;
-                    }
-                } catch(e) {}
+                // If it's a long ad without skip button, speed it up
+                if (video.playbackRate !== 16) {
+                    video.playbackRate = 16;
+                    // Optional: mute the ad
+                    if (!video.muted) video.muted = true;
+                    this.utils?.log?.('Fast-forwarding unskippable ad', 'AD_SKIPPER', 'debug');
+                }
             }
-            
-            // Click skip button if it exists
-            if (skipButton) {
-                skipButton.click();
-            }
-            
-            // Hide ad overlays
-            const overlayAds = document.querySelectorAll('.ytp-ad-overlay-container, .ytp-ad-image-overlay');
-            overlayAds.forEach(el => {
-                if (el) el.style.display = 'none';
-            });
-            
-            setTimeout(() => {
-                this._isAdSkipping = false;
-            }, 1000);
+        } else {
+             // Reset playback rate if we sped it up, but usually video element gets reset or we don't know the user's preferred speed.
+             // Best to rely on the video speed controller to restore the speed if it was overridden.
         }
     }
 };

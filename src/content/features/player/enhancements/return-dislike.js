@@ -15,6 +15,9 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         this.cache = new Map(); // Simple LRU-lite cache (max 50 entries)
         this._cacheMax = 50;
         
+        this.currentDislikesData = null;
+        this.buttonsElement = null;
+        
         // Binds
         this.handleNavigation = this.handleNavigation.bind(this);
     }
@@ -34,6 +37,13 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         // Listen for navigation
         this.addListener(window, 'yt-navigate-finish', this.handleNavigation);
         
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('return-dislike-buttons', '#top-level-buttons-computed', (elements) => {
+                this.buttonsElement = elements[0];
+                this.renderDislikes();
+            }, false); // don't disconnect on first find, buttons might re-render
+        }
+        
         // Initial check
         if (this.isWatchPage()) {
             this.handleNavigation();
@@ -43,6 +53,11 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
     disable() {
         if (!this.isActive) return;
         this.isActive = false;
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('return-dislike-buttons');
+        }
+        this.buttonsElement = null;
+        this.currentDislikesData = null;
         super.disable();
     }
 
@@ -56,6 +71,7 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         const videoId = new URLSearchParams(window.location.search).get('v');
         if (videoId && videoId !== this.videoId) {
             this.videoId = videoId;
+            this.currentDislikesData = null; // Clear old data
             this.fetchDislikes(videoId);
         }
     }
@@ -66,7 +82,8 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
 
         // Check cache
         if (this.cache.has(videoId)) {
-            this.updateUI(this.cache.get(videoId), videoId);
+            this.currentDislikesData = this.cache.get(videoId);
+            this.renderDislikes();
             return;
         }
 
@@ -86,7 +103,11 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
                     this.cache.delete(this.cache.keys().next().value);
                 }
                 this.cache.set(videoId, data);
-                this.updateUI(data, videoId);
+                
+                if (this.videoId === videoId) { // Check if we haven't navigated away
+                    this.currentDislikesData = data;
+                    this.renderDislikes();
+                }
             } else {
                 throw new Error(response?.error || 'API Error');
             }
@@ -97,21 +118,11 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         }
     }
 
-    async updateUI(data, videoId) {
-        if (!data || !this.isActive) return;
+    renderDislikes() {
+        if (!this.isActive || !this.currentDislikesData || !this.buttonsElement) return;
 
-        const Utils = window.YPP.Utils;
-        if (!Utils) return;
-
-        // Wait for the like/dislike buttons to appear using pollFor
-        const buttons = await Utils.pollFor(() => {
-            const el = document.querySelector('#top-level-buttons-computed');
-            return el ? el : null;
-        }, 10000, 500);
-        
-        // Use the passed videoId — avoids a URL parse after an async 500ms wait
-        const currentVideoId = videoId || new URLSearchParams(window.location.search).get('v');
-        if (!buttons || !this.isActive || this.videoId !== currentVideoId) return;
+        const data = this.currentDislikesData;
+        const buttons = this.buttonsElement;
 
         // Fast path: if we already injected the text span, just update the number and return.
         // Skips all the expensive DOM walking below on subsequent navigations to the same video.

@@ -34,6 +34,10 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         }
         
         this.Utils.createToast?.('Audio Mode Disabled');
+        
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('audio-mode-player');
+        }
     }
 
     injectStyles() {
@@ -68,21 +72,17 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
     }
 
     async showThumbnailOverlay() {
-        if (!this.Utils.pollFor) return;
+        if (window.YPP && window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('audio-mode-player', '.html5-video-player', async (elements) => {
+                const player = elements[0];
+                if (!player || this.overlay) return;
 
-        try {
-            const player = await this.Utils.pollFor(() => document.querySelector('.html5-video-player'), 10000, 500);
-            if (!player) {
-                this.utils?.log?.('YPP Audio Mode: Player not found', 'AUDIO_MODE', 'error');
-                return;
-            }
-
-        // Get video ID
-        const videoId = new URLSearchParams(window.location.search).get('v');
-        if (!videoId) {
-            this.utils?.log?.('YPP Audio Mode: Video ID not found', 'AUDIO_MODE', 'error');
-            return;
-        }
+                // Get video ID
+                const videoId = new URLSearchParams(window.location.search).get('v');
+                if (!videoId) {
+                    this.utils?.log?.('YPP Audio Mode: Video ID not found', 'AUDIO_MODE', 'error');
+                    return;
+                }
         
         // Try multiple thumbnail resolutions with fallbacks
         const thumbUrl = await this.getThumbnailUrl(videoId);
@@ -167,10 +167,9 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
             }
         };
 
-        player.prepend(overlay);
-        this.overlay = overlay;
-        } catch (error) {
-            this.utils?.log?.('YPP Audio Mode: Failed to overlay ' + error.message, 'AUDIO_MODE', 'error');
+            player.prepend(overlay);
+            this.overlay = overlay;
+            }, true);
         }
     }
 
