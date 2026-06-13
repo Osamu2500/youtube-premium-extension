@@ -108,10 +108,15 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
                 background: #050505 !important;
             }
 
-            /* Dim masthead */
+            /* Dim masthead by default, hide completely on idle */
             .ypp-cinema-mode ytd-masthead {
                 opacity: 0.4;
-                transition: opacity 0.3s;
+                transition: opacity 0.5s ease, transform 0.5s ease;
+            }
+            .ypp-cinema-idle ytd-masthead {
+                opacity: 0 !important;
+                transform: translateY(-100%);
+                pointer-events: none;
             }
             /* Ultra-Dark Contrast for Video */
             .ypp-cinema-mode video {
@@ -153,8 +158,36 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
 
         // Try to enable YouTube's native theater mode
         this._clickTheaterButton();
+        this._setupCinemaIdle();
         this.utils?.createToast?.('Cinema Mode On 🎬');
         this.utils?.log?.('Cinema mode enabled', 'MODES');
+    }
+
+    _setupCinemaIdle() {
+        this._cinemaIdleTimer = null;
+        this._cinemaMouseMoveHandler = () => {
+            document.body.classList.remove('ypp-cinema-idle');
+            clearTimeout(this._cinemaIdleTimer);
+            this._cinemaIdleTimer = setTimeout(() => {
+                if (this._active.cinemaMode) {
+                    document.body.classList.add('ypp-cinema-idle');
+                }
+            }, 3000);
+        };
+        document.addEventListener('mousemove', this._cinemaMouseMoveHandler);
+        this._cinemaMouseMoveHandler();
+    }
+
+    _teardownCinemaIdle() {
+        if (this._cinemaMouseMoveHandler) {
+            document.removeEventListener('mousemove', this._cinemaMouseMoveHandler);
+            this._cinemaMouseMoveHandler = null;
+        }
+        if (this._cinemaIdleTimer) {
+            clearTimeout(this._cinemaIdleTimer);
+            this._cinemaIdleTimer = null;
+        }
+        document.body.classList.remove('ypp-cinema-idle');
     }
 
     _disableCinemaMode() {
@@ -162,6 +195,8 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
         this._active.cinemaMode = false;
         document.body.classList.remove('ypp-cinema-mode');
         this._removeStyle('ypp-cinema-style');
+
+        this._teardownCinemaIdle();
 
         // Exit theater mode if we entered it
         this._exitTheaterModeIfNeeded();

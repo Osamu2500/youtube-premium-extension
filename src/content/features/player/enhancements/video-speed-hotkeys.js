@@ -8,16 +8,20 @@ export class VideoSpeedHotkeys {
 
         const keys = [];
         if (e.ctrlKey) keys.push('Ctrl');
-        if (e.metaKey) keys.push('Meta');
         if (e.altKey) keys.push('Alt');
         if (e.shiftKey) keys.push('Shift');
+        if (e.metaKey) keys.push('Meta');
         
         let keyName = e.key;
+        if (e.shiftKey) {
+            const shiftMap = { '<': ',', '>': '.', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '?': '/', '~': '`', '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0', '_': '-', '+': '=' };
+            if (shiftMap[keyName]) keyName = shiftMap[keyName];
+        }
         if (keyName === ' ') keyName = 'Space';
         
         if (['Control', 'Shift', 'Alt', 'Meta'].includes(keyName)) return false; // Ignore standalone modifiers
         
-        keyName = keyName.toUpperCase();
+        keyName = keyName.length === 1 ? keyName.toUpperCase() : keyName;
         keys.push(keyName);
         const comboKey = keys.join('+').toUpperCase();
 
@@ -37,7 +41,7 @@ export class VideoSpeedHotkeys {
                 e.stopPropagation();
             }
             
-            const val = sc.value || 0;
+            const val = parseFloat(sc.value) || 0;
             switch (sc.action) {
                 case 'showHide':
                     const controllerEl = video.parentElement?.querySelector('ypp-vsc-controller');

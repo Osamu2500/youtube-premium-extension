@@ -62,6 +62,14 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
 
         document.removeEventListener('visibilitychange', this._visibilityHandler);
 
+        if (this.gl) {
+            if (this.program) this.gl.deleteProgram(this.program);
+            if (this.texture) this.gl.deleteTexture(this.texture);
+            const ext = this.gl.getExtension('WEBGL_lose_context');
+            if (ext) ext.loseContext();
+            this.gl = null;
+        }
+
         if (this.canvas) {
             this.canvas.remove();
             this.canvas = null;
@@ -76,11 +84,7 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
     async onUpdate() {
         if (this.isEnabled && this.canvas && this.container) {
             const intensity = this.settings?.ambientIntensity ?? 0.6;
-            const blurAmount = this.settings?.ambientBlur ?? 120;
-            
             this.container.style.opacity = intensity;
-            // The massive CSS blur gives us the final soft light spread on the GPU
-            this.canvas.style.filter = `blur(${blurAmount}px)`;
         }
     }
 
@@ -149,7 +153,6 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             image-rendering: auto;
             mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
-            filter: blur(${blurAmount}px);
         `;
         
         this.container.appendChild(this.canvas);
@@ -187,16 +190,28 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             }
         `;
 
-        // Fragment Shader: Boosts saturation and brightness
+        // Fragment Shader: Native WebGL Blur, saturation and brightness boost
         const fsSource = `
             precision mediump float;
             varying vec2 vTexCoord;
             uniform sampler2D uSampler;
             uniform float uSaturationBoost;
             uniform float uBrightnessBoost;
+            uniform float uBlurIntensity;
 
             void main() {
-                vec4 color = texture2D(uSampler, vTexCoord);
+                vec4 color = vec4(0.0);
+                float total = 0.0;
+                
+                // 9-tap simple blur
+                for(float x = -1.0; x <= 1.0; x++) {
+                    for(float y = -1.0; y <= 1.0; y++) {
+                        vec2 offset = vec2(x, y) * uBlurIntensity;
+                        color += texture2D(uSampler, vTexCoord + offset);
+                        total += 1.0;
+                    }
+                }
+                color /= total;
                 
                 // Boost saturation and brightness
                 float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
@@ -231,6 +246,7 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
 
         this.uSaturationBoost = gl.getUniformLocation(this.program, 'uSaturationBoost');
         this.uBrightnessBoost = gl.getUniformLocation(this.program, 'uBrightnessBoost');
+        this.uBlurIntensity = gl.getUniformLocation(this.program, 'uBlurIntensity');
         
         gl.uniform1f(this.uSaturationBoost, 2.0);
         gl.uniform1f(this.uBrightnessBoost, 0.85);
@@ -326,11 +342,13 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
                     
                     // Lerp blur for smoothness
                     this.currentBlur += (this.targetBlur - this.currentBlur) * 0.1;
-                    this.canvas.style.filter = `blur(${this.currentBlur}px)`;
 
                     // 3. Render WebGL with Dynamic Boosts
                     const gl = this.gl;
                     gl.useProgram(this.program);
+                    
+                    // WebGL Blur Intensity mapping (canvas is tiny, offset should be small)
+                    gl.uniform1f(this.uBlurIntensity, this.currentBlur / 1500.0);
                     
                     // Base sat 2.0, max 3.5 with audio
                     gl.uniform1f(this.uSaturationBoost, 2.0 + (audioBoost * 1.5));

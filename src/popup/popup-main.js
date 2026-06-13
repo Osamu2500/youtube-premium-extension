@@ -72,11 +72,15 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
                 
                 const keys = [];
                 if (e.ctrlKey) keys.push('Ctrl');
-                if (e.metaKey) keys.push('Meta');
                 if (e.altKey) keys.push('Alt');
                 if (e.shiftKey) keys.push('Shift');
+                if (e.metaKey) keys.push('Meta');
                 
                 let keyName = e.key;
+                if (e.shiftKey) {
+                    const shiftMap = { '<': ',', '>': '.', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '?': '/', '~': '`', '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0', '_': '-', '+': '=' };
+                    if (shiftMap[keyName]) keyName = shiftMap[keyName];
+                }
                 if (keyName === ' ') keyName = 'Space';
                 
                 if (['Control', 'Shift', 'Alt', 'Meta'].includes(keyName)) {
@@ -84,7 +88,7 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
                     return; // Wait for the actual key
                 }
                 
-                keyName = keyName.toUpperCase();
+                keyName = keyName.length === 1 ? keyName.toUpperCase() : keyName;
                 keys.push(keyName);
                 const finalKey = keys.join('+');
                 
@@ -141,7 +145,15 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
             const settings = data.settings || {};
             settings.vscShortcuts = currentShortcuts;
             chrome.storage.local.set({ settings });
-            if(updateSetting) updateSetting('vscShortcuts', currentShortcuts);
+            // Immediately notify the active tab so hotkeys update without reload
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0]?.id) {
+                    chrome.tabs.sendMessage(tabs[0].id, {
+                        action: 'UPDATE_SETTINGS',
+                        settings: { vscShortcuts: currentShortcuts }
+                    });
+                }
+            });
         });
     };
 
@@ -149,12 +161,12 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
     chrome.storage.local.get('settings', (data) => {
         currentShortcuts = data.settings?.vscShortcuts || [
             { action: 'showHide', key: 'V', value: null },
-            { action: 'decrease', key: 'Z', value: 0.1 },
-            { action: 'increase', key: 'X', value: 0.1 },
-            { action: 'rewind', key: 'S', value: 10 },
-            { action: 'advance', key: 'D', value: 10 },
-            { action: 'reset', key: 'R', value: 1.0 },
-            { action: 'preferred', key: 'G', value: 2.0 }
+            { action: 'decrease', key: 'Z', value: 0.25 },
+            { action: 'increase', key: 'X', value: 0.25 },
+            { action: 'rewind', key: 'W', value: 10 },
+            { action: 'advance', key: 'E', value: 10 },
+            { action: 'reset', key: 'A', value: 1.0 },
+            { action: 'preferred', key: 'Q', value: 2.0 }
         ];
         renderList(currentShortcuts);
     });
@@ -184,12 +196,7 @@ registerSlot('shortcutsPanel', (container, state) => {
         { id: 'shortcut_ambientMode', label: 'Toggle Ambient Mode', icon: svgIcon('M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41') },
         { id: 'shortcut_snapshot', label: 'Take Snapshot', icon: svgIcon('M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z') },
         { id: 'shortcut_loop', label: 'Toggle Loop', icon: svgIcon('M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z') },
-        { id: 'shortcut_pip', label: 'Picture-in-Picture', icon: svgIcon('M3 3h18v14H3zM12 14h7v5h-7z') },
-        { id: 'shortcut_vscSlower', label: 'Speed Slower', icon: svgIcon('M11 17l-5-5 5-5M18 17l-5-5 5-5') },
-        { id: 'shortcut_vscFaster', label: 'Speed Faster', icon: svgIcon('M13 17l5-5-5-5M6 17l5-5-5-5') },
-        { id: 'shortcut_vscReset', label: 'Reset Speed', icon: svgIcon('M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5') },
-        { id: 'shortcut_vscRewind', label: 'Rewind 10s', icon: svgIcon('M11 17l-5-5 5-5M18 17l-5-5 5-5') },
-        { id: 'shortcut_vscAdvance', label: 'Advance 10s', icon: svgIcon('M13 17l5-5-5-5M6 17l5-5-5-5') }
+        { id: 'shortcut_pip', label: 'Picture-in-Picture', icon: svgIcon('M3 3h18v14H3zM12 14h7v5h-7z') }
     ];
 
     shortcuts.forEach(sc => {
@@ -246,16 +253,22 @@ registerSlot('shortcutsPanel', (container, state) => {
 
             let keys = [];
             if (e.ctrlKey) keys.push('Ctrl');
-            if (e.shiftKey) keys.push('Shift');
             if (e.altKey) keys.push('Alt');
-            if (e.metaKey) keys.push('Cmd');
+            if (e.shiftKey) keys.push('Shift');
+            if (e.metaKey) keys.push('Meta');
+            
+            let keyName = e.key;
+            if (e.shiftKey) {
+                const shiftMap = { '<': ',', '>': '.', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '?': '/', '~': '`', '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0', '_': '-', '+': '=' };
+                if (shiftMap[keyName]) keyName = shiftMap[keyName];
+            }
+            if (keyName === ' ') keyName = 'Space';
             
             // Ignore if ONLY a modifier is pressed
-            if (['Control','Shift','Alt','Meta'].includes(e.key)) return;
+            if (['Control','Shift','Alt','Meta'].includes(keyName)) return;
             
-            let key = e.key.toUpperCase();
-            if (key === ' ') key = 'Space';
-            keys.push(key);
+            keyName = keyName.length === 1 ? keyName.toUpperCase() : keyName;
+            keys.push(keyName);
             
             const combo = keys.join('+');
             input.value = combo;

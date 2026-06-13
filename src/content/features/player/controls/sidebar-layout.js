@@ -38,6 +38,12 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
     this._currentLayout = null;
   }
 
+  /**
+   * Always active — runs on every featureManager.init() call.
+   * The setting value (compact/expanded) is read inside _applyLayout().
+   */
+  getConfigKey() { return null; }
+
   async enable() {
     this.observer.register(
       'sidebarLayoutObserver',
@@ -60,6 +66,8 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
   }
 
   async onUpdate() {
+    // Force re-apply on every settings update (layout may have changed)
+    this._currentLayout = null;
     this._applyLayout();
   }
 
@@ -77,17 +85,21 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
       'ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer'
     ].join(', ');
     
+    // Clear stale stamps FIRST so _applyLayoutToNode doesn't skip already-stamped nodes
+    document.querySelectorAll('[data-ypp-processed-layout]').forEach(el => {
+      el.removeAttribute('data-ypp-processed-layout');
+    });
+
+    // Re-apply to all current sidebar items
     document.querySelectorAll(selectors).forEach(el => {
       this._applyLayoutToNode(el);
     });
   }
 
   onPageChange() {
-    // Re-apply to existing elements on page change to ensure consistency
-    if (this.isEnabled) {
-      this._currentLayout = null; // force re-apply
-      this._applyLayout();
-    }
+    // YouTube SPA navigation rebuilds the sidebar DOM — always re-apply
+    this._currentLayout = null;
+    this._applyLayout();
   }
 
   _applyLayoutToNode(node) {

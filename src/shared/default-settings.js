@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS = {
     navHistory: true,
     forceHideSidebar: false,
     logoRedirectSub: false,
-    sidebarLayout: 'expanded',
+    sidebarLayout: 'compact',
     
     // Playlist & History
     continueWatching: true,
@@ -221,12 +221,12 @@ export const DEFAULT_SETTINGS = {
         { action: 'advance', key: 'E', value: 10 },
         { action: 'reset', key: 'A', value: 1.0 },
         { action: 'preferred', key: 'Q', value: 2.0 },
-        { action: 'mute', key: 'null', value: null },
-        { action: 'decreaseVolume', key: 'null', value: null },
-        { action: 'increaseVolume', key: 'null', value: null },
-        { action: 'pause', key: 'null', value: null },
-        { action: 'setMarker', key: 'null', value: null },
-        { action: 'jumpMarker', key: 'null', value: null }
+        { action: 'mute', key: '', value: null },
+        { action: 'decreaseVolume', key: '', value: null },
+        { action: 'increaseVolume', key: '', value: null },
+        { action: 'pause', key: '', value: null },
+        { action: 'setMarker', key: '', value: null },
+        { action: 'jumpMarker', key: '', value: null }
     ],
 
     // Onboarding

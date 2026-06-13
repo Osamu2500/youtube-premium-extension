@@ -274,14 +274,90 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Dist
         const num2 = Math.floor(Math.random() * 50) + 15;
         const answer = num1 * num2;
         
-        const response = prompt(`To break Strict Mode, solve this: What is ${num1} * ${num2}?`);
-        if (response && parseInt(response.trim()) === answer) {
-            this.strictModeEndTime = null;
-            this.toggleFeature('enableFocusMode', false);
-            this.toggleFeature('dopamineDetox', false);
-            this.utils.createToast?.('Strict Mode Unlocked!');
-        } else {
-            alert('Incorrect. Focus Mode remains active.');
-        }
+        this._createMathModal(num1, num2, answer);
+    }
+
+    _createMathModal(num1, num2, answer) {
+        if (document.getElementById('ypp-strict-modal')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'ypp-strict-modal';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
+            z-index: 999999; display: flex; align-items: center; justify-content: center;
+        `;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: rgba(30, 30, 30, 0.9); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; padding: 32px; width: 340px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); font-family: 'Inter', sans-serif;
+            color: #fff; transition: transform 0.2s ease;
+        `;
+
+        modal.innerHTML = `
+            <div style="font-size: 24px; margin-bottom: 8px;">🔒 Strict Mode Active</div>
+            <div style="font-size: 14px; color: #aaa; margin-bottom: 24px;">To unlock, solve the equation:</div>
+            <div style="font-size: 32px; font-weight: bold; margin-bottom: 24px; color: #ff4e45;">${num1} × ${num2}</div>
+            <input type="number" id="ypp-strict-input" placeholder="Your Answer" style="
+                width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2);
+                background: rgba(0, 0, 0, 0.5); color: #fff; font-size: 18px; text-align: center;
+                box-sizing: border-box; outline: none; margin-bottom: 16px;
+            " autocomplete="off" />
+            <div style="display: flex; gap: 12px;">
+                <button id="ypp-strict-cancel" style="
+                    flex: 1; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1);
+                    color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
+                ">Cancel</button>
+                <button id="ypp-strict-submit" style="
+                    flex: 1; padding: 12px; border-radius: 8px; border: none; background: #ff4e45;
+                    color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
+                ">Unlock</button>
+            </div>
+            <div id="ypp-strict-error" style="color: #ff4e45; font-size: 12px; margin-top: 12px; min-height: 15px;"></div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const input = document.getElementById('ypp-strict-input');
+        const submitBtn = document.getElementById('ypp-strict-submit');
+        const cancelBtn = document.getElementById('ypp-strict-cancel');
+        const errorDiv = document.getElementById('ypp-strict-error');
+
+        input.focus();
+
+        const validate = () => {
+            if (parseInt(input.value.trim()) === answer) {
+                this.strictModeEndTime = null;
+                this.toggleFeature('enableFocusMode', false);
+                this.toggleFeature('dopamineDetox', false);
+                this.utils.createToast?.('Strict Mode Unlocked!');
+                overlay.remove();
+                
+                // Fire a click event on the toggle in the popup if it's open
+                const focusToggle = document.querySelector('#enableFocusMode');
+                if (focusToggle) focusToggle.checked = false;
+            } else {
+                errorDiv.textContent = 'Incorrect. Try again.';
+                input.value = '';
+                input.focus();
+                
+                // Shake animation
+                modal.style.transform = 'translateX(-10px)';
+                setTimeout(() => modal.style.transform = 'translateX(10px)', 50);
+                setTimeout(() => modal.style.transform = 'translateX(-10px)', 100);
+                setTimeout(() => modal.style.transform = 'translateX(10px)', 150);
+                setTimeout(() => modal.style.transform = 'translateX(0)', 200);
+            }
+        };
+
+        submitBtn.onclick = validate;
+        cancelBtn.onclick = () => overlay.remove();
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') validate();
+            if (e.key === 'Escape') overlay.remove();
+        };
     }
 };

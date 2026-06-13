@@ -108,8 +108,15 @@ class KeyboardShortcuts extends window.YPP.features.BaseFeature {
         if (e.shiftKey) parts.push('Shift');
         if (e.metaKey)  parts.push('Meta');
 
-        // Use e.key for the actual key, uppercase single letters
-        const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+        let key = e.key;
+        if (e.shiftKey) {
+            const shiftMap = { '<': ',', '>': '.', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '?': '/', '~': '`', '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0', '_': '-', '+': '=' };
+            if (shiftMap[key]) key = shiftMap[key];
+        }
+        if (key === ' ') key = 'Space';
+
+        // Use key for the actual key, uppercase single letters
+        key = key.length === 1 ? key.toUpperCase() : key;
         // Skip pure modifier keys
         if (['Control','Alt','Shift','Meta'].includes(key)) return '';
         parts.push(key);

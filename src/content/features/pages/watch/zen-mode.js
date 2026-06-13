@@ -314,6 +314,13 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
                 transition: opacity 0.5s ease !important;
             }
 
+            /* Breathing Visualizer */
+            @keyframes zenBreathing {
+                0% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
+                50% { box-shadow: 0 0 100px 20px rgba(255,255,255,0.25); transform: scale(1.01); }
+                100% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
+            }
+            
             /* Breathing Transitions: Scale and dim video on pause */
             body.ypp-zen-mode video {
                 transition: filter 1.5s ease-in-out, transform 1.5s ease-in-out !important;
@@ -321,7 +328,7 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
             }
             body.ypp-zen-mode .html5-video-player.paused-mode video {
                 filter: brightness(0.4) saturate(0.6) blur(2px) !important;
-                transform: scale(0.98) !important;
+                animation: zenBreathing 8s infinite ease-in-out !important;
             }
         `;
         document.head.appendChild(style);
@@ -382,6 +389,12 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
             } catch (e) {}
             this.delayNode = null;
             this.gainNode = null;
+        }
+        
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+            try {
+                this.audioContext.suspend();
+            } catch(e) {}
         }
     }
 };
