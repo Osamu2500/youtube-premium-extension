@@ -7502,3 +7502,12 @@ body.ypp-search-clean-grid ytd-search ytd-shelf-renderer, body.ypp-search-clean-
  } 
   
  
+/* Feature: Hide Search Shelves */
+body.ypp-hide-search-shelves .ypp-noise-section {
+    display: none !important;
+}
+
+/* Feature: Hide Channel Cards */
+body.ypp-hide-channel-cards ytd-channel-renderer {
+    display: none !important;
+}

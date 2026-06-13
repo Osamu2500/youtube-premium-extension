@@ -191,16 +191,12 @@ window.YPP.features.SearchObserver = class SearchObserver {
 
     _handleNoiseSection(section, stats, childCount) {
         if (stats.allNoise && !stats.hasTransients && childCount > 0) {
-            if (this._settings.hideSearchShelves) {
-                section.classList.add('ypp-noise-section');
-                section.style.setProperty('display', 'none', 'important');
-            }
+            section.classList.add('ypp-noise-section');
             return true;
         }
 
         if (section.classList.contains('ypp-noise-section') && stats.hasVideos) {
             section.classList.remove('ypp-noise-section');
-            section.style.removeProperty('display');
         }
         return false;
     }
@@ -243,11 +239,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
                     return;
                 }
 
-                // ── A1. Hide channel cards ─────────────────────────────────────────────
-                if (tag === 'ytd-channel-renderer' && this._settings.hideChannelCards) {
-                    node.style.setProperty('display', 'none', 'important');
-                    return;
-                }
+
 
                 // ── B. Shorts ─────────────────────────────────────────────────────────
                 if (isShorts) {

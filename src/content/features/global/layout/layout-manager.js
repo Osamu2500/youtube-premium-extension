@@ -126,18 +126,6 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         } else {
             root.style.removeProperty('--ypp-search-columns');
         }
-        
-        if (settings.channelColumns) {
-            root.style.setProperty('--ypp-channel-columns', settings.channelColumns);
-        } else {
-            root.style.removeProperty('--ypp-channel-columns');
-        }
-        
-        if (settings.subscriptionsColumns) {
-            root.style.setProperty('--ypp-subscriptions-columns', settings.subscriptionsColumns);
-        } else {
-            root.style.removeProperty('--ypp-subscriptions-columns');
-        }
     }
 
     /**

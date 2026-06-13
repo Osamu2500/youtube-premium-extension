@@ -104,7 +104,11 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         
         this._searchViewMode.run();
 
-        const shouldEnable = this._settings.searchGrid || this._settings.cleanSearch;
+        const shouldEnable = this._settings.searchGrid || 
+                             this._settings.cleanSearch || 
+                             this._settings.hideSearchShelves || 
+                             this._settings.hideChannelCards || 
+                             this._settings.autoVideoFilter;
         if (shouldEnable) {
             this.enable();
         } else {
@@ -178,8 +182,10 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
             );
             this._searchFilter.updateSettings(this._settings);
 
-            if (this._settings.searchGrid) {
-                this._searchViewMode.applyViewMode();
+            if (this._settings.searchGrid || this._settings.hideSearchShelves || this._settings.hideChannelCards || this._settings.cleanSearch) {
+                if (this._settings.searchGrid) {
+                    this._searchViewMode.applyViewMode();
+                }
                 this._searchObserver.start(SearchRedesign.SELECTORS.SEARCH_CONTAINER);
             }
 

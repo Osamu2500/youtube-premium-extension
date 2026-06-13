@@ -126,6 +126,9 @@ window.YPP.SettingsSchema = {
         vscSpeedStep:            { type: 'number',  default: 0.25, min: 0.05, max: 1.0 },
         vscPreferredSpeed:       { type: 'number',  default: 2.0, min: 0.1, max: 16.0 },
         vscRememberSpeed:        { type: 'boolean', default: true },
+        vscAudioSupport:         { type: 'boolean', default: false },
+        vscHideByDefault:        { type: 'boolean', default: false },
+        vscForceSpeed:           { type: 'boolean', default: false },
         vscControllerOpacity:    { type: 'number',  default: 0.3, min: 0.1, max: 1.0 },
         // Cinema Filters — persisted state (preset index + slider adjustments)
         cinemaFilterIndex:       { type: 'number',  default: 0,   min: 0, max: 42 }, // 43 filters total (0-42)

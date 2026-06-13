@@ -68,12 +68,22 @@ import './features/pages/subscriptions/subscription-manager.js';
 import './features/pages/subscriptions/subscriptions-ui/subscriptions-ui.js';
 import './features/pages/subscriptions/deck-mode.js';
 import './features/pages/subscriptions/index.js';
+import './features/pages/subscriptions/filter-bar.js';
+import './features/pages/subscriptions/channel-health.js';
+import './features/pages/subscriptions/group-sidebar.js';
+
+// Layout features
+import './features/global/layout/channel-columns.js';
+import './features/global/layout/feed-grid-columns.js';
 
 // Search features
 import './features/pages/search/search-view-mode.js';
 import './features/pages/search/search-observer.js';
 import './features/pages/search/search-filter.js';
 import './features/pages/search/search-redesign.js';
+import './features/pages/search/clean-search.js';
+import './features/pages/search/hide-search-shelves.js';
+import './features/pages/search/hide-channel-cards.js';
 
 
 // Library & History features
@@ -107,6 +117,10 @@ import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
 import './features/player/enhancements/video-speed-controller.js';
+import './features/player/enhancements/vsc-audio-support.js';
+import './features/player/enhancements/vsc-hide-by-default.js';
+import './features/player/enhancements/vsc-force-speed.js';
+import './features/player/enhancements/vsc-remember-speed.js';
 
 import './features/player/controls/floating-player.js';
 import './features/player/video-filters/index.js';
