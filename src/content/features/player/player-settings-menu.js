@@ -127,7 +127,7 @@ window.YPP.features.PlayerSettingsMenu = class PlayerSettingsMenu {
             { id: 'pb_native_next', selector: '.ytp-next-button', label: 'Next Video' },
             { id: 'pb_native_mute', selector: '.ytp-mute-button', label: 'Mute/Unmute' },
             { id: 'pb_native_cast', selector: '.ytp-remote-button', label: 'Cast to TV' },
-            { id: 'pb_native_autoplay', selector: '.ytp-autoplay-button', label: 'Autoplay' },
+            { id: 'pb_native_autoplay', selector: '.ytp-autonav-button, .ytp-autonav-toggle-button', label: 'Autoplay' },
             { id: 'pb_native_cc', selector: '.ytp-subtitles-button', label: 'Subtitles/CC' },
             { id: 'pb_native_miniplayer', selector: '.ytp-miniplayer-button', label: 'Miniplayer' },
             { id: 'pb_native_theater', selector: '.ytp-size-button', label: 'Theater Mode' },
