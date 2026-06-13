@@ -315,8 +315,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         toggle(this._CSS_CLASSES.HIDE_ENDSCREENS, this._settings.hideEndScreens);
         toggle(this._CSS_CLASSES.HIDE_LIVE_CHAT, this._settings.hideLiveChat);
         toggle(this._CSS_CLASSES.HIDE_FUNDRAISER, this._settings.hideFundraiser);
-        toggle(this._CSS_CLASSES.DISPLAY_FULL_TITLE, this._settings.displayFullTitle);
-        toggle(this._CSS_CLASSES.HOOK_FREE, this._settings.hookFreeHome);
         toggle(this._CSS_CLASSES.CUSTOM_SCROLLBAR, this._settings.customScrollbar && !this._settings.hideScrollbar);
         toggle(this._CSS_CLASSES.GRAYSCALE_THUMBNAILS, this._settings.grayscaleThumbnails);
 
@@ -427,8 +425,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             this._CSS_CLASSES.HIDE_ENDSCREENS,
             this._CSS_CLASSES.HIDE_LIVE_CHAT,
             this._CSS_CLASSES.HIDE_FUNDRAISER,
-            this._CSS_CLASSES.DISPLAY_FULL_TITLE,
-            this._CSS_CLASSES.HOOK_FREE,
             this._CSS_CLASSES.CUSTOM_SCROLLBAR,
             this._CSS_CLASSES.GRAYSCALE_THUMBNAILS,
             'ypp-clean-search',

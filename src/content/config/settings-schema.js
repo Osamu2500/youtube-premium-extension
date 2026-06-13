@@ -29,6 +29,7 @@ window.YPP.SettingsSchema = {
 
         // --- Layout ---
         autoScaleLayout:     { type: 'boolean', default: true },
+        useSquareCorners:    { type: 'boolean', default: false },
         grid4x4:             { type: 'boolean', default: false },
         homeColumns:         { type: 'number',  default: 4, min: 1, max: 8 },
         searchColumns:       { type: 'number',  default: 4, min: 1, max: 8 },

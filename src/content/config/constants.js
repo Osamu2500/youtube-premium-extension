@@ -200,6 +200,7 @@ window.YPP.CONSTANTS = {
         HIDE_LIVE_CHAT: 'ypp-hide-livechat',
         HIDE_FUNDRAISER: 'ypp-hide-fundraiser',
         DISPLAY_FULL_TITLE: 'ypp-display-full-title',
+        SQUARE_CORNERS: 'ypp-square-corners',
         DOPAMINE_DETOX: 'ypp-dopamine-detox',
         ZEN_MODE: 'ypp-zen-mode',
         HOOK_FREE: 'ypp-hook-free-home',

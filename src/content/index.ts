@@ -26,6 +26,8 @@ import './features/global/modifiers/grid-animator.js';
 import './features/global/modifiers/content-control.js';
 import './features/global/modifiers/hide-playlists-podcasts.js';
 import './features/global/modifiers/hide-metrics.js';
+import './features/global/modifiers/full-video-titles.js';
+import './features/global/modifiers/square-corners.js';
 
 import './features/global/modifiers/watched-store.js';
 import './features/global/modifiers/mark-watched.js';
@@ -40,10 +42,12 @@ import './features/global/modifiers/duration-filter.js';
 
 // Layout features
 import './features/global/layout/layout-manager.js';
+import './features/global/layout/auto-scale-grid.js';
 import './features/global/layout/header-nav.js';
 import './features/global/layout/sidebar.js';
 
 // Home page features
+import './features/pages/home/hook-free-home.js';
 import './features/pages/home/home-organizer.js';
 import './features/pages/home/cinematic-mode.js';
 

@@ -207,15 +207,6 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * @returns {boolean} True if layout was successfully applied
      */
     applyGridLayout() {
-        // Calculate global UI scale factor for fixed elements (like player bars)
-        if (this.settings?.autoScaleLayout) {
-            const availableWidth = window.innerWidth;
-            const uiScale = Math.max(0.7, Math.min(1.3, availableWidth / 1280));
-            document.documentElement.style.setProperty('--ypp-auto-scale', uiScale);
-        } else {
-            document.documentElement.style.setProperty('--ypp-auto-scale', 1);
-        }
-
         if (!this._isValidPage(window.location.pathname)) return false;
 
         // Skip layout manager entirely if cinematic mode is active
@@ -241,19 +232,13 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             cols = this.settings?.subscriptionsColumns ?? 4;
         }
 
-        // Apply auto-scale grid logic if enabled, but ONLY on the home page
+        // Apply auto-scale grid logic if enabled via AutoScaleGrid
         const isHome = path === '/' || path === '/index';
-        if (this.settings?.autoScaleLayout && isHome) {
-            let width = window.innerWidth;
-            if (gridRenderer && gridRenderer.clientWidth > 0) {
-                width = gridRenderer.clientWidth;
+        if (isHome) {
+            const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
+            if (dynamicCols) {
+                cols = parseInt(dynamicCols, 10);
             }
-            if (width >= 2100) cols = 6;
-            else if (width >= 1800) cols = 5;
-            else if (width >= 1400) cols = 4;
-            else if (width >= 1000) cols = 3;
-            else if (width >= 600) cols = 2;
-            else cols = 1;
         }
 
         // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
