@@ -60,6 +60,7 @@ window.YPP.features.CommentFilter = class CommentFilter extends window.YPP.featu
 
     async disable() {
         await super.disable();
+        if (this.observer) this.observer.unregister('spam_comments');
         const action = this.settings?.commentFilterAction || 'dim';
         if (action === 'dim') {
             document.querySelectorAll('.ypp-spam-comment').forEach(el => {

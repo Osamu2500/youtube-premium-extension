@@ -58,10 +58,6 @@
   --ypp-z-header: 2200;
   --ypp-z-popup: 2400;
 
-  /* ===================================================================================
-     CORE YOUTUBE VARIABLE MAPPINGS (Base Theme Layer)
-     =================================================================================== */
-
   /* Backgrounds */
   --yt-spec-base-background: var(--ypp-bg-base) !important;
   --yt-spec-raised-background: var(--ypp-bg-surface) !important;
@@ -7397,6 +7393,201 @@ html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-pl
     position: absolute !important;
     bottom: 30px !important;
     right: 20px !important;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 3px;
+}
+.ypp-channel-link {
+    display: inline-block;
+    font-size: 13px;
+    color: #3ea6ff;
+    text-decoration: none;
+    margin-top: 10px;
+    padding: 5px 16px;
+    background: rgba(62, 166, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(62, 166, 255, 0.2);
+    transition: background 0.15s, border-color 0.15s;
+}
+.ypp-channel-link:hover {
+    background: rgba(62, 166, 255, 0.18);
+    border-color: rgba(62, 166, 255, 0.35);
+    text-decoration: none;
+}
+
+/* Menu items — flex row, glass hover */
+.ypp-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    font-family: 'Roboto', Arial, sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: left;
+    box-sizing: border-box;
+    transition: background 0.15s ease, color 0.1s ease;
+    margin-bottom: 2px;
+}
+.ypp-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+.ypp-menu-item svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+}
+.ypp-menu-item:hover svg {
+    opacity: 1;
+}
+
+/* More-options collapsed section */
+.ypp-more-items {
+    display: none;
+}
+.ypp-more-items.open {
+    display: block;
+}
+.ypp-chevron {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+.ypp-more-toggle {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Sign-out button override */
+.ypp-signout {
+    justify-content: center;
+    background: rgba(255, 78, 69, 0.08) !important;
+    border: 1px solid rgba(255, 78, 69, 0.2) !important;
+    color: #ff4e45 !important;
+    font-weight: 500;
+    border-radius: 10px;
+}
+.ypp-signout:hover {
+    background: rgba(255, 78, 69, 0.15) !important;
+}
+
+/* Sign-out confirmation dialog overlay */
+.ypp-signout-confirm {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    z-index: 10;
+}
+.ypp-confirm-box {
+    background: rgba(28, 28, 32, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    color: #fff;
+    max-width: 240px;
+}
+.ypp-confirm-box p {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 500;
+}
+.ypp-confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+.ypp-confirm-actions button {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ypp-confirm-actions button:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+.ypp-confirm-actions button.danger {
+    background: rgba(255, 78, 69, 0.15);
+    border-color: rgba(255, 78, 69, 0.3);
+    color: #ff4e45;
+}
+.ypp-confirm-actions button.danger:hover {
+    background: rgba(255, 78, 69, 0.25);
+}
+
+/* =========================================================================
+   PHASE 4: SHORTS UI CLEAN-UP (Glassmorphism & Polish)
+   ========================================================================= */
+
+/* Remove black gradient overlays (scrims) on Shorts */
+html.yt-premium-plus-theme ytd-reel-video-renderer .scrim,
+html.yt-premium-plus-theme ytd-reel-video-renderer #overlay,
+html.yt-premium-plus-theme ytd-reel-video-renderer [class*="scrim"] {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* Glassmorphic Action Bar in Shorts */
+html.yt-premium-plus-theme ytd-reel-video-renderer #actions.ytd-reel-video-renderer {
+    background: rgba(15, 15, 20, 0.4) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 24px !important;
+    padding: 12px 4px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+/* Apply Global Glassmorphism to native YouTube context menus and flyouts */
+html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-menu-popup-renderer) {
+    background: transparent !important;
+}
+
+html.yt-premium-plus-theme ytd-menu-popup-renderer,
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) {
+    background: linear-gradient(135deg, rgba(22, 22, 26, 0.72), rgba(14, 14, 18, 0.82)) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Ensure inner elements don't block the glass effect */
+html.yt-premium-plus-theme ytd-menu-popup-renderer tp-yt-paper-listbox,
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) #container,
+html.yt-premium-plus-theme ytd-simple-menu-header-renderer {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* ========================================================================= */
+/* SHORTS UI "PRO MAX" REDESIGN                                            */
+/* ========================================================================= */
+
+/* 1. Floating Horizontal Action Pill */
+html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-evenly !important;
+    position: absolute !important;
+    bottom: 30px !important;
+    right: 20px !important;
     width: auto !important;
     padding: 8px 16px !important;
     background: linear-gradient(135deg, rgba(22, 22, 26, 0.65), rgba(14, 14, 18, 0.75)) !important;
@@ -7462,46 +7653,45 @@ body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-r
 body.ypp-search-clean-grid ytd-search ytd-shelf-renderer, body.ypp-search-clean-grid ytd-search ytd-reel-shelf-renderer, body.ypp-search-clean-grid ytd-search ytd-horizontal-card-list-renderer { display: none !important; }
 
 
- / *   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-       I M P O R T E D   F E A T U R E S   ( T h i r d - P a r t y   I n t e g r a t i o n ) 
-       = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =   * / 
- 
- / *   H i d e   V o i c e   S e a r c h   * / 
- b o d y . y p p - h i d e - v o i c e - s e a r c h   # v o i c e - s e a r c h - b u t t o n , 
- b o d y . y p p - h i d e - v o i c e - s e a r c h   y t m - v o i c e - s e a r c h - b u t t o n - r e n d e r e r   { 
-         d i s p l a y :   n o n e   ! i m p o r t a n t ; 
- } 
- 
- / *   S q u a r e   C o r n e r s   * / 
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   y t d - t h u m b n a i l ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   y t d - p l a y l i s t - t h u m b n a i l ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   . y t p - v i d e o w a l l - s t i l l - i m a g e ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   y t d - m a c r o - m a r k e r s - l i s t - i t e m - r e n d e r e r   i m g ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   # t h u m b n a i l ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   # a v a t a r ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   y t - i m g - s h a d o w ,   
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   . y t - s p e c - b u t t o n - s h a p e - n e x t , 
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   . y t T h u m b n a i l V i e w M o d e l S m a l l , 
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   . y t T h u m b n a i l V i e w M o d e l M e d i u m , 
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   . y t T h u m b n a i l V i e w M o d e l L a r g e , 
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   y t - a v a t a r - s h a p e , 
- b o d y . y p p - u s e - s q u a r e - c o r n e r s   y t - i m g - s h a d o w [ s h a p e = \  
- c i r c l e \ ]   { 
-         b o r d e r - r a d i u s :   0   ! i m p o r t a n t ; 
- } 
- 
- / *   R e v e r t   P r o g r e s s   B a r   ( R e m o v e   P i n k   G r a d i e n t )   * / 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   . y t p - p l a y - p r o g r e s s , 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   # p r o g r e s s . y t d - t h u m b n a i l - o v e r l a y - r e s u m e - p l a y b a c k - r e n d e r e r , 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   . y t T h u m b n a i l O v e r l a y P r o g r e s s B a r H o s t W a t c h e d P r o g r e s s B a r S e g m e n t , 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   . y t C h a p t e r e d P r o g r e s s B a r C h a p t e r e d P l a y e r B a r C h a p t e r S e e n , 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   . y t C h a p t e r e d P r o g r e s s B a r C h a p t e r e d P l a y e r B a r F i l l , 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   . y t S l i d e r S l i d e r P r i m a r y , 
- b o d y . y p p - r e v e r t - p r o g r e s s - b a r   . t h u m b n a i l - o v e r l a y - r e s u m e - p l a y b a c k - p r o g r e s s   { 
-         b a c k g r o u n d :   # f 0 0   ! i m p o r t a n t ; 
- } 
-  
- 
+/* ===================================================================================
+   IMPORTED FEATURES (Third-Party Integration)
+   =================================================================================== */
+
+/* Hide Voice Search */
+body.ypp-hide-voice-search #voice-search-button,
+body.ypp-hide-voice-search ytm-voice-search-button-renderer {
+    display: none !important;
+}
+
+/* Square Corners */
+body.ypp-use-square-corners ytd-thumbnail, 
+body.ypp-use-square-corners ytd-playlist-thumbnail, 
+body.ypp-use-square-corners .ytp-videowall-still-image, 
+body.ypp-use-square-corners ytd-macro-markers-list-item-renderer img, 
+body.ypp-use-square-corners #thumbnail, 
+body.ypp-use-square-corners #avatar, 
+body.ypp-use-square-corners yt-img-shadow, 
+body.ypp-use-square-corners .yt-spec-button-shape-next,
+body.ypp-use-square-corners .ytThumbnailViewModelSmall,
+body.ypp-use-square-corners .ytThumbnailViewModelMedium,
+body.ypp-use-square-corners .ytThumbnailViewModelLarge,
+body.ypp-use-square-corners yt-avatar-shape,
+body.ypp-use-square-corners yt-img-shadow[shape="circle"] {
+    border-radius: 0 !important;
+}
+
+/* Revert Progress Bar (Remove Pink Gradient) */
+body.ypp-revert-progress-bar .ytp-play-progress,
+body.ypp-revert-progress-bar #progress.ytd-thumbnail-overlay-resume-playback-renderer,
+body.ypp-revert-progress-bar .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment,
+body.ypp-revert-progress-bar .ytChapteredProgressBarChapteredPlayerBarChapterSeen,
+body.ypp-revert-progress-bar .ytChapteredProgressBarChapteredPlayerBarFill,
+body.ypp-revert-progress-bar .ytSliderSliderPrimary,
+body.ypp-revert-progress-bar .thumbnail-overlay-resume-playback-progress {
+    background: #f00 !important;
+}
+
+
 /* Feature: Hide Search Shelves */
 body.ypp-hide-search-shelves .ypp-noise-section {
     display: none !important;

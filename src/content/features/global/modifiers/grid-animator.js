@@ -33,6 +33,7 @@ window.YPP.features.GridAnimator = class GridAnimator extends window.YPP.feature
     }
 
     disable() {
+        this.observer.unregister('grid-animator');
         if (this._batchTimeout) {
             clearTimeout(this._batchTimeout);
             this._batchTimeout = null;

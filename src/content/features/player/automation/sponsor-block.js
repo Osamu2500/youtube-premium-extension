@@ -56,8 +56,9 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
 
     async disable() {
         await super.disable();
-        if (window.YPP.sharedObserver) {
+        if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('sponsor-video');
+            window.YPP.sharedObserver.unregister('sponsor-progress');
         }
         this.stop();
         this.clearSegments();

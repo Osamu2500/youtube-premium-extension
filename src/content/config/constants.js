@@ -387,7 +387,6 @@ window.YPP.CONSTANTS = {
         focusMode: 'FocusMode',
         modesManager: 'ModesManager',
         player: 'Player',
-        contentControl: 'ContentControl',
         accountMenu: 'AccountMenu',
         sidebar: 'SidebarManager',
         headerNav: 'HeaderNav',
@@ -398,7 +397,6 @@ window.YPP.CONSTANTS = {
         playerTools: 'PlayerTools',
         // New Features
         autoLike: 'AutoLike',
-        hidePlaylists: 'HidePlaylistsPodcasts',
         gridAnimator: 'GridAnimator',
         multiSelect: 'MultiSelect',
         hideMetrics: 'HideMetrics',
@@ -444,7 +442,25 @@ window.YPP.CONSTANTS = {
         videoSpeedController: 'VideoSpeedController',
         snapshotButton: 'SnapshotButton',
         loopButton: 'LoopButton',
-        classicProgressBar: 'ClassicProgressBar'
+        classicProgressBar: 'ClassicProgressBar',
+        // --- Toggles ---
+        cleanMixUrls: 'CleanMixUrls',
+        hideComments: 'HideComments',
+        hideSidebar: 'HideSidebar',
+        hideEndScreens: 'HideEndScreens',
+        hideCards: 'HideCards',
+        hideMerch: 'HideMerch',
+        hidePromoShelves: 'HidePromos',
+        hideAnnotations: 'HideAnnotations',
+        hideRelated: 'HideRelated',
+        hideFeed: 'HideFeed',
+        hideTrending: 'HideTrending',
+        aggressiveShortsBlock: 'AggressiveShortsBlock',
+        hideVoiceSearch: 'HideVoiceSearch',
+        hidePlaylists: 'HidePlaylists',
+        hidePodcasts: 'HidePodcasts',
+        hideMixes: 'HideMixes',
+        hidePosts: 'HidePosts'
     }
 };
 

@@ -35,6 +35,8 @@ window.YPP.features.DeckMode = class DeckMode extends window.YPP.features.BaseFe
     async disable() {
         await super.disable();
         this.deactivateDeck();
+        this.observer.unregister('deck-mode-btn');
+        this.observer.unregister('deck-mode-items');
         this.utils?.removeStyle('ypp-deck-css');
         document.getElementById('ypp-deck-toggle-btn')?.remove();
     }

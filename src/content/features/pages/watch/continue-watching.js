@@ -34,8 +34,11 @@ window.YPP.features.ContinueWatching = class ContinueWatching extends window.YPP
     async disable() {
         await super.disable();
         if (this.observer) {
-            this.observer.stop();
-            this.observer = null;
+            if (typeof this.observer.unregister === 'function') {
+                this.observer.unregister('related_videos_continue');
+            } else if (typeof this.observer.stop === 'function') {
+                this.observer.stop();
+            }
         }
         
         // TEARDOWN: remove processed stamps
