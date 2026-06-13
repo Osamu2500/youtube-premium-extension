@@ -113,8 +113,41 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
                 opacity: 0.4;
                 transition: opacity 0.3s;
             }
-            .ypp-cinema-mode ytd-masthead:hover {
-                opacity: 1;
+            /* Ultra-Dark Contrast for Video */
+            .ypp-cinema-mode video {
+                filter: contrast(1.1) brightness(0.95) !important;
+            }
+
+            /* Letterbox Subtitle Repositioning */
+            .ypp-cinema-mode .ytp-caption-window-container {
+                bottom: 2% !important;
+            }
+
+            /* Curtain Animation */
+            @keyframes yppOpenCurtains {
+                0% { transform: scaleX(1); }
+                100% { transform: scaleX(0); }
+            }
+            .ypp-cinema-mode::before, .ypp-cinema-mode::after {
+                content: '';
+                position: fixed;
+                top: 0;
+                width: 50vw;
+                height: 100vh;
+                background: #000;
+                z-index: 9999;
+                pointer-events: none;
+                animation: yppOpenCurtains 1.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+            }
+            .ypp-cinema-mode::before {
+                left: 0;
+                transform-origin: left;
+                box-shadow: inset -10px 0 30px rgba(0,0,0,0.8);
+            }
+            .ypp-cinema-mode::after {
+                right: 0;
+                transform-origin: right;
+                box-shadow: inset 10px 0 30px rgba(0,0,0,0.8);
             }
         `);
 
@@ -215,6 +248,15 @@ window.YPP.features.ModesManager = class ModesManager extends window.YPP.feature
                 transition: opacity 0.3s;
             }
             .ypp-minimal-mode #secondary:hover { opacity: 1; }
+
+            /* V2: Icon-Only Mode (Hide text labels on actions) */
+            .ypp-minimal-mode ytd-menu-renderer .yt-core-attributed-string,
+            .ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next--button-text-content {
+                display: none !important;
+            }
+            .ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next__icon {
+                margin: 0 !important;
+            }
         `);
         this.utils?.createToast?.('Minimal Mode On ◻');
         this.utils?.log?.('Minimal mode enabled', 'MODES');

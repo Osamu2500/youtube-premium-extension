@@ -2726,6 +2726,17 @@ body.ypp-zen-mode #merch-shelf {
 
 body.ypp-zen-mode #secondary {
   opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  width: 0 !important;
+  overflow: hidden !important;
+  flex: 0 !important;
+  min-width: 0 !important;
+}
+
+/* Collapse the grid sidebar width in Zen Mode so the player expands */
+body.ypp-zen-mode ytd-watch-flexy:not([theater]) #columns {
+  --ytd-watch-flexy-sidebar-width: 0px !important;
 }
 
 /* Zen Mode Title Enhancement */

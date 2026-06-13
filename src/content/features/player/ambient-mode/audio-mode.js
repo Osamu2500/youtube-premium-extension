@@ -77,13 +77,33 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
                 const player = elements[0];
                 if (!player || this.overlay) return;
 
-                // Get video ID
                 const videoId = new URLSearchParams(window.location.search).get('v');
-                if (!videoId) {
-                    this.utils?.log?.('YPP Audio Mode: Video ID not found', 'AUDIO_MODE', 'error');
-                    return;
-                }
+                if (!videoId) return;
         
+                await this._createOverlayForPlayer(player, videoId);
+            }, true);
+        }
+    }
+
+    async onVideoChange(videoId) {
+        if (!this.isEnabled) return;
+        
+        if (this.overlay) {
+            this.overlay.remove();
+            this.overlay = null;
+        }
+        
+        setTimeout(async () => {
+            const player = document.querySelector('.html5-video-player');
+            if (player && videoId) {
+                await this._createOverlayForPlayer(player, videoId);
+            }
+        }, 300); // small delay to let page update
+    }
+
+    async _createOverlayForPlayer(player, videoId) {
+        if (this.overlay) return;
+
         // Try multiple thumbnail resolutions with fallbacks
         const thumbUrl = await this.getThumbnailUrl(videoId);
 
@@ -103,6 +123,13 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
             overflow: hidden;
         `;
 
+        // We use a slight delay for getting the title to ensure it's loaded
+        let title = this.getVideoTitle();
+        if (title === 'Listening to Audio') {
+            await new Promise(r => setTimeout(r, 1000));
+            title = this.getVideoTitle();
+        }
+
         overlay.innerHTML = `
             <div style="text-align: center; position: relative; z-index: 2;">
                 <div style="position: relative; display: inline-block;">
@@ -114,7 +141,7 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
                     </div>
                 </div>
                 <div style="margin-top: 35px; font-family: 'YouTube Sans', 'Roboto', sans-serif; font-size: 18px; color: rgba(255,255,255,0.9); font-weight: 400; max-width: 600px; padding: 0 20px;">
-                    ${this.getVideoTitle()}
+                    ${title}
                 </div>
                 <!-- Animated visualizer -->
                 <div class="ypp-audio-waves" style="display: flex; gap: 5px; justify-content: center; margin-top: 25px; height: 40px; align-items: flex-end;">
@@ -167,10 +194,8 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
             }
         };
 
-            player.prepend(overlay);
-            this.overlay = overlay;
-            }, true);
-        }
+        player.prepend(overlay);
+        this.overlay = overlay;
     }
 
     /**

@@ -6,7 +6,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeature {
+window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.DistractionFreeBase {
     getConfigKey() { return 'zenMode'; }
     constructor() {
         super('zenMode');
@@ -18,6 +18,11 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         this.zenToastShown = false;
         this.ambientActive = false;
         this.animationFrame = null;
+        
+        // V2 Features
+        this.audioContext = null;
+        this.delayNode = null;
+        this.gainNode = null;
         
         // Cached Elements
         this.canvas = null;
@@ -49,16 +54,29 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         this._clearCache();
         const isWatchPage = location.pathname === '/watch';
         
-        if (isWatchPage) {
-            // On watch page: apply zen mode class
-            document.body.classList.add('ypp-zen-mode');
-            // Auto-cinema disabled per user request
+        if (isWatchPage && this.isEnabled) {
+            // On watch page: apply zen mode layout
+            this.enableDistractionFreeLayout('ypp-zen-mode', {
+                hideSidebar: true,
+                hideComments: true,
+                hideRelated: true,
+                hideShorts: true,
+                playerMaxWidth: '100%'
+            });
             if (this.ambientActive) {
                 this._applyAmbientMode(); // Restart/Refresh loop
             }
         } else {
             // CRITICAL: Remove zen class when leaving watch page
-            document.body.classList.remove('ypp-zen-mode');
+            this.disableDistractionFreeLayout('ypp-zen-mode', {
+                hideSidebar: true,
+                hideComments: true,
+                hideRelated: true,
+                hideShorts: true,
+                playerMaxWidth: '100%'
+            });
+            this._removeZenStyles();
+            this._disableAudioSpatialization();
             this._removeAmbientMode();
         }
     }
@@ -70,23 +88,37 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
 
     toggleZen(enable) {
         const isWatchPage = location.pathname === '/watch';
+        this.isEnabled = enable;
         
         // CRITICAL FIX: Only apply zen mode class on watch pages
-        // Remove class from all other pages to prevent hiding topbar everywhere
         if (enable && isWatchPage) {
-            document.body.classList.add('ypp-zen-mode');
-            // Auto-cinema disabled per user request - keep default view
+            this.enableDistractionFreeLayout('ypp-zen-mode', {
+                hideSidebar: true,
+                hideComments: true,
+                hideRelated: true,
+                hideShorts: true,
+                playerMaxWidth: '100%'
+            });
             this._applyAmbientMode();
             
             // Show toast notification once per session
             if (!this.zenToastShown) {
-                this.Utils.createToast?.('Zen Mode Enabled');
+                this.Utils.createToast?.('Zen Mode Enabled (V2)');
                 this.zenToastShown = true;
             }
+            this._injectZenStyles();
+            this._enableAudioSpatialization();
         } else {
-            // Remove zen class when not on watch page or when disabling
-            document.body.classList.remove('ypp-zen-mode');
+            this.disableDistractionFreeLayout('ypp-zen-mode', {
+                hideSidebar: true,
+                hideComments: true,
+                hideRelated: true,
+                hideShorts: true,
+                playerMaxWidth: '100%'
+            });
             this.zenToastShown = false;
+            this._removeZenStyles();
+            this._disableAudioSpatialization();
             this._removeAmbientMode();
         }
     }
@@ -249,6 +281,107 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         }
 
         if (count === 0) return [0, 0, 0];
-        return [Math.floor(r/count), Math.floor(g/count), Math.floor(b/count)];
+        return [Math.round(r / count), Math.round(g / count), Math.round(b / count)];
+    }
+
+    // =========================================================================
+    // ZEN MODE V2 - INVISIBLE UI & BREATHING TRANSITIONS
+    // =========================================================================
+
+    _injectZenStyles() {
+        if (document.getElementById('ypp-zen-styles-v2')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'ypp-zen-styles-v2';
+        style.textContent = `
+            /* True Invisible UI: Hide controls entirely when playing */
+            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-chrome-bottom,
+            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-chrome-top,
+            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-gradient-bottom,
+            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-gradient-top {
+                opacity: 0 !important;
+                pointer-events: none !important;
+                transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+
+            /* Reveal on pause */
+            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-chrome-bottom,
+            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-chrome-top,
+            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-gradient-bottom,
+            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-gradient-top {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transition: opacity 0.5s ease !important;
+            }
+
+            /* Breathing Transitions: Scale and dim video on pause */
+            body.ypp-zen-mode video {
+                transition: filter 1.5s ease-in-out, transform 1.5s ease-in-out !important;
+                transform-origin: center center !important;
+            }
+            body.ypp-zen-mode .html5-video-player.paused-mode video {
+                filter: brightness(0.4) saturate(0.6) blur(2px) !important;
+                transform: scale(0.98) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    _removeZenStyles() {
+        const style = document.getElementById('ypp-zen-styles-v2');
+        if (style) style.remove();
+    }
+
+    // =========================================================================
+    // ZEN MODE V2 - AUDIO SPATIALIZATION
+    // =========================================================================
+
+    _enableAudioSpatialization() {
+        const video = document.querySelector('video');
+        if (!video || window.YPP.zenAudioInitialized) return;
+        
+        try {
+            window.YPP.zenAudioInitialized = true;
+            window.YPP.audioContext = window.YPP.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+            
+            if (!window.YPP.audioSource) {
+                window.YPP.audioSource = window.YPP.audioContext.createMediaElementSource(video);
+            }
+            
+            this.audioContext = window.YPP.audioContext;
+            
+            // Create a Delay node to simulate room reflections
+            this.delayNode = this.audioContext.createDelay();
+            this.delayNode.delayTime.value = 0.04; // 40ms delay for small room feel
+            
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.gain.value = 0.25; // 25% wet mix
+            
+            // Route: Source -> Delay -> Gain -> Destination
+            window.YPP.audioSource.connect(this.delayNode);
+            this.delayNode.connect(this.gainNode);
+            this.gainNode.connect(this.audioContext.destination);
+            
+            // Re-connect original dry signal
+            window.YPP.audioSource.connect(this.audioContext.destination);
+            
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+        } catch (e) {
+            this.Utils?.log('Failed to init Zen Audio Spatialization', 'ZEN', 'warn');
+        }
+    }
+
+    _disableAudioSpatialization() {
+        if (this.delayNode && this.gainNode) {
+            try {
+                this.delayNode.disconnect();
+                this.gainNode.disconnect();
+                window.YPP.audioSource.disconnect(this.delayNode);
+            } catch (e) {}
+            this.delayNode = null;
+            this.gainNode = null;
+        }
     }
 };

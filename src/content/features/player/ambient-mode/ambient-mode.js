@@ -5,14 +5,28 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
     constructor() {
         super('AmbientMode');
         this.canvas = null;
-        this.ctx = null;
+        this.gl = null;
+        this.program = null;
+        this.texture = null;
         this.animationFrame = null;
         this.video = null;
         this.container = null;
-        this.toggleBtn = null;
-        this._playerVisible = true;  // IntersectionObserver sets this
+        this._playerVisible = true;
         this._intersectionObserver = null;
         this._visibilityHandler = this._onVisibilityChange.bind(this);
+        
+        // V2 Features
+        this.audioContext = null;
+        this.analyser = null;
+        this.dataArray = null;
+        
+        this.motionCanvas = document.createElement('canvas');
+        this.motionCtx = this.motionCanvas.getContext('2d', { willReadFrequently: true });
+        this.motionCanvas.width = 16;
+        this.motionCanvas.height = 16;
+        this.lastMotionData = null;
+        this.currentBlur = 120;
+        this.targetBlur = 120;
     }
 
     getConfigKey() {
@@ -26,7 +40,6 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         await super.enable();
         
         this.initDOM();
-        this.injectToggleButton();
         this.startLoop();
     }
 
@@ -58,80 +71,50 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             this.container.remove();
             this.container = null;
         }
-        
-        if (this.toggleBtn) {
-            this.toggleBtn.remove();
-            this.toggleBtn = null;
-        }
     }
 
     async onUpdate() {
-        // Handle live updates from the popup sliders
         if (this.isEnabled && this.canvas && this.container) {
             const intensity = this.settings?.ambientIntensity ?? 0.6;
             const blurAmount = this.settings?.ambientBlur ?? 120;
             
             this.container.style.opacity = intensity;
-            
-            const scaledBlur = Math.max(1, Math.round(blurAmount / 20));
-            if (this.ctx) {
-                this.ctx.filter = `blur(${scaledBlur}px) saturate(2.0) brightness(0.85)`;
-            }
+            // The massive CSS blur gives us the final soft light spread on the GPU
+            this.canvas.style.filter = `blur(${blurAmount}px)`;
         }
     }
 
-    async injectToggleButton() {
-        if (!window.YPP || !window.YPP.sharedObserver) return;
+    async onPageChange(url) {
+        if (!this.isEnabled) return;
         
-        window.YPP.sharedObserver.register('ambient-mode-btn', '.ytp-size-button', (elements) => {
-            const theaterBtn = elements[0];
-            if (theaterBtn && !document.getElementById('ypp-ambient-toggle')) {
-                const btn = document.createElement('button');
-                btn.id = 'ypp-ambient-toggle';
-                btn.className = 'ytp-button' + (this.isEnabled ? ' ypp-ambient-active' : '');
-                btn.title = 'Ambient Mode';
-                btn.setAttribute('aria-label', 'Ambient Mode');
-                btn.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>`;
-                
-                // Use the BaseFeature event listener system for automatic cleanup
-                this.addListener(btn, 'click', async () => {
-                    const willEnable = !this.isEnabled;
-                    
-                    if (willEnable) {
-                        await this.enable();
-                        this.isEnabled = true;
-                        btn.classList.add('ypp-ambient-active');
-                    } else {
-                        await this.disable();
-                        this.isEnabled = false;
-                        btn.classList.remove('ypp-ambient-active');
-                    }
-                    
-                    // Save state to storage
-                    try {
-                        const settings = await this.utils.loadSettings();
-                        const newSettings = { ...settings, ambientMode: willEnable };
-                        await this.utils.saveSettings(newSettings);
-                    } catch (error) {
-                        this.utils.log?.('Failed to save ambient mode state: ' + error.message, 'AMBIENT', 'error');
-                    }
-                });
+        if (this.utils.isWatchPage()) {
+            // Wait a tick for YouTube's DOM to settle
+            await new Promise(r => setTimeout(r, 100));
+            await this.disable();
+            this.isEnabled = true; // keep logical state true
+            await this.enable();
+        } else {
+            await this.disable();
+            this.isEnabled = true; // keep logical state true
+        }
+    }
 
-                if (theaterBtn.parentNode) {
-                    theaterBtn.parentNode.insertBefore(btn, theaterBtn);
-                    this.toggleBtn = btn;
-                }
-            }
-        }, true);
+    async onVideoChange(videoId) {
+        if (!this.isEnabled || !this.utils.isWatchPage()) return;
+        
+        // Re-initialize for the new video
+        await this.disable();
+        this.isEnabled = true;
+        await this.enable();
     }
 
     initDOM() {
         this.video = document.querySelector('video');
         if (!this.video) return;
 
-        // Find the watch page container to append the ambient canvas behind EVERYTHING
-        const watchContainer = document.querySelector('ytd-watch-flexy');
-        if (!watchContainer) return;
+        // ytd-player wraps the video in both default and theater modes
+        const playerContainer = document.querySelector('ytd-player') || document.querySelector('#player-container-outer') || document.querySelector('ytd-watch-flexy');
+        if (!playerContainer) return;
 
         // Create container for the massive glow
         this.container = document.createElement('div');
@@ -141,10 +124,10 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             top: 0;
             left: 0;
             width: 100%;
-            height: 150vh; /* Bleed way down the page */
-            z-index: -1; /* Behind all content */
+            height: 100%;
+            z-index: -1; /* Behind the player content */
             pointer-events: none;
-            overflow: hidden;
+            overflow: visible;
             transform: translateZ(0); /* Hardware acceleration */
             opacity: ${this.settings?.ambientIntensity || 0.6};
             transition: opacity 0.5s ease;
@@ -158,38 +141,128 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         
         this.canvas.style.cssText = `
             position: absolute;
-            top: 0;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%) scale(1.2);
-            width: 100vw;
-            height: 100vh;
-            image-rendering: auto; /* Allow native bilinear stretching */
+            transform: translate(-50%, -50%) scale(1.3);
+            width: 100%;
+            height: 100%;
+            image-rendering: auto;
             mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
+            filter: blur(${blurAmount}px);
         `;
         
         this.container.appendChild(this.canvas);
         
-        // Ensure ytd-watch-flexy doesn't clip our absolute child, and has relative positioning
-        watchContainer.style.position = 'relative';
+        playerContainer.style.position = 'relative';
+        playerContainer.style.zIndex = '0';
         
-        // Insert at the very beginning of watch container
-        watchContainer.insertBefore(this.container, watchContainer.firstChild);
+        playerContainer.insertBefore(this.container, playerContainer.firstChild);
 
-        this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
-        // Set the internal context blur based on settings, scaled for a 100x100 canvas.
-        // A blur of 120px on a 1920px screen is ~6% of the width. 
-        // 6% of our 100px canvas is 6px.
-        const originalBlur = this.settings?.ambientBlur || 120;
-        const scaledBlur = Math.max(1, Math.round(originalBlur / 20));
-        this.ctx.filter = `blur(${scaledBlur}px) saturate(2.0) brightness(0.85)`;
+        this.initWebGL();
+    }
+
+    initWebGL() {
+        // Very small canvas to let native GPU bilinear + CSS blur do the heavy lifting
+        this.canvas.width = 32;
+        this.canvas.height = 32;
+
+        const gl = this.canvas.getContext('webgl2', { alpha: false, depth: false, antialias: false, powerPreference: 'low-power' }) || 
+                   this.canvas.getContext('webgl', { alpha: false, depth: false, antialias: false, powerPreference: 'low-power' });
+        
+        if (!gl) {
+            this.utils?.log?.('WebGL not supported, ambient mode disabled', 'AMBIENT', 'error');
+            return;
+        }
+        this.gl = gl;
+
+        // Vertex Shader
+        const vsSource = `
+            attribute vec2 aPosition;
+            varying vec2 vTexCoord;
+            void main() {
+                vTexCoord = aPosition * 0.5 + 0.5;
+                vTexCoord.y = 1.0 - vTexCoord.y; // Flip Y
+                gl_Position = vec4(aPosition, 0.0, 1.0);
+            }
+        `;
+
+        // Fragment Shader: Boosts saturation and brightness
+        const fsSource = `
+            precision mediump float;
+            varying vec2 vTexCoord;
+            uniform sampler2D uSampler;
+            uniform float uSaturationBoost;
+            uniform float uBrightnessBoost;
+
+            void main() {
+                vec4 color = texture2D(uSampler, vTexCoord);
+                
+                // Boost saturation and brightness
+                float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+                vec3 boosted = mix(vec3(luminance), color.rgb, uSaturationBoost);
+                boosted = boosted * uBrightnessBoost;
+                
+                gl_FragColor = vec4(boosted, 1.0);
+            }
+        `;
+
+        const compileShader = (type, source) => {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        };
+
+        const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+        const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+
+        this.program = gl.createProgram();
+        gl.attachShader(this.program, vs);
+        gl.attachShader(this.program, fs);
+        gl.linkProgram(this.program);
+
+        gl.useProgram(this.program);
+
+        this.uSaturationBoost = gl.getUniformLocation(this.program, 'uSaturationBoost');
+        this.uBrightnessBoost = gl.getUniformLocation(this.program, 'uBrightnessBoost');
+        
+        gl.uniform1f(this.uSaturationBoost, 2.0);
+        gl.uniform1f(this.uBrightnessBoost, 0.85);
+
+        // Setup geometry (full screen quad)
+        const vertices = new Float32Array([
+            -1, -1,
+             1, -1,
+            -1,  1,
+             1,  1
+        ]);
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const aPosition = gl.getAttribLocation(this.program, 'aPosition');
+        gl.enableVertexAttribArray(aPosition);
+        gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+
+        // Setup texture
+        this.texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     }
 
     startLoop() {
         let lastTime = 0;
-        const fpsInterval = 1000 / 5; // 5 FPS — low enough to stay cheap, enough for smooth glow
+        const fpsInterval = 1000 / 30; // 30 FPS for WebGL is cheap and perfectly smooth
 
-        // Pause loop when player is off-screen (IntersectionObserver)
         if (this.video) {
             this._intersectionObserver = new IntersectionObserver(
                 ([entry]) => { this._playerVisible = entry.isIntersecting; },
@@ -198,7 +271,6 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
             this._intersectionObserver.observe(this.video);
         }
 
-        // Pause loop when browser tab is hidden
         document.addEventListener('visibilitychange', this._visibilityHandler);
 
         const loop = (timestamp) => {
@@ -214,28 +286,102 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
                     !this.video.paused &&
                     !this.video.ended &&
                     this.video.readyState >= 2 &&
-                    !document.hidden &&       // tab-level pause
-                    this._playerVisible;      // viewport-level pause
+                    !document.hidden &&
+                    this._playerVisible &&
+                    this.gl;
 
-                if (shouldDraw && this.ctx) {
-                    this.ctx.drawImage(this.video, 0, 0, 16, 16);
+                if (shouldDraw) {
+                    this._initAudioContextSafe();
+                    
+                    // 1. Calculate Audio Reactivity (Bass)
+                    let audioBoost = 0;
+                    if (this.analyser && this.dataArray) {
+                        this.analyser.getByteFrequencyData(this.dataArray);
+                        // Average lower frequencies (bass)
+                        let sum = 0;
+                        for (let i = 0; i < 10; i++) sum += this.dataArray[i];
+                        audioBoost = (sum / 10) / 255.0; // 0.0 to 1.0
+                    }
+
+                    // 2. Calculate Motion-Adaptive Blur
+                    this.motionCtx.drawImage(this.video, 0, 0, 16, 16);
+                    const currentFrame = this.motionCtx.getImageData(0, 0, 16, 16).data;
+                    let diff = 0;
+                    if (this.lastMotionData) {
+                        for (let i = 0; i < currentFrame.length; i += 4) {
+                            diff += Math.abs(currentFrame[i] - this.lastMotionData[i]) +
+                                    Math.abs(currentFrame[i+1] - this.lastMotionData[i+1]) +
+                                    Math.abs(currentFrame[i+2] - this.lastMotionData[i+2]);
+                        }
+                    }
+                    this.lastMotionData = currentFrame;
+                    
+                    // Normalize difference
+                    const motionScore = Math.min(1.0, diff / (16 * 16 * 3 * 255));
+                    
+                    // High motion = sharper light (lower blur)
+                    // Low motion = soft spread (higher blur)
+                    const baseBlur = this.settings?.ambientBlur || 120;
+                    this.targetBlur = baseBlur - (motionScore * 80); // Drops down to base-80 on high motion
+                    
+                    // Lerp blur for smoothness
+                    this.currentBlur += (this.targetBlur - this.currentBlur) * 0.1;
+                    this.canvas.style.filter = `blur(${this.currentBlur}px)`;
+
+                    // 3. Render WebGL with Dynamic Boosts
+                    const gl = this.gl;
+                    gl.useProgram(this.program);
+                    
+                    // Base sat 2.0, max 3.5 with audio
+                    gl.uniform1f(this.uSaturationBoost, 2.0 + (audioBoost * 1.5));
+                    // Base bright 0.85, max 1.25 with audio
+                    gl.uniform1f(this.uBrightnessBoost, 0.85 + (audioBoost * 0.4));
+                    
+                    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+                    // Upload video frame to GPU
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+                    
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
                 }
             }
             
             this.animationFrame = requestAnimationFrame(loop);
         };
-        
-        // Set canvas internal resolution extremely low for performance
-        if (this.canvas) {
-            this.canvas.width = 16;
-            this.canvas.height = 16;
-        }
 
         this.animationFrame = requestAnimationFrame(loop);
     }
-    /** Called by visibilitychange — no-op if loop isn't running */
+
+    _initAudioContextSafe() {
+        if (!this.video || window.YPP.audioContextInitialized) return;
+        
+        try {
+            window.YPP.audioContextInitialized = true;
+            window.YPP.audioContext = window.YPP.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Only create source if not already created
+            if (!window.YPP.audioSource) {
+                // IMPORTANT: Some DRM videos block this. We wrap in try-catch.
+                window.YPP.audioSource = window.YPP.audioContext.createMediaElementSource(this.video);
+                window.YPP.audioAnalyser = window.YPP.audioContext.createAnalyser();
+                window.YPP.audioAnalyser.fftSize = 64; // Small FFT size for fast bass detection
+                
+                window.YPP.audioSource.connect(window.YPP.audioAnalyser);
+                window.YPP.audioAnalyser.connect(window.YPP.audioContext.destination);
+            }
+            
+            this.audioContext = window.YPP.audioContext;
+            this.analyser = window.YPP.audioAnalyser;
+            this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+            
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+        } catch (e) {
+            this.utils?.log('Failed to init Audio Context (likely DRM/CORS)', 'AMBIENT', 'warn');
+        }
+    }
+
     _onVisibilityChange() {
-        // Loop already guards document.hidden; just log for debug purposes
         this.utils?.log?.(
             `Tab visibility: ${document.hidden ? 'hidden (paused)' : 'visible (resumed)'}`,
             'AMBIENT', 'debug'

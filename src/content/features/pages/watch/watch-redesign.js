@@ -189,9 +189,11 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             }
             
             /* CSS-only Sidebar Comments via CSS Grid and display: contents */
+            /* We use :not(:has(...)) so that if any distraction-free mode is active on the body, 
+               this custom grid layout is instantly disabled without any JS delay/glitch. */
             
             /* Convert the main wrapper into a Grid layout */
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #columns {
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #columns {
                 display: grid !important;
                 grid-template-columns: minmax(0, 1fr) var(--ytd-watch-flexy-sidebar-width, 402px) !important;
                 grid-template-rows: auto auto auto !important;
@@ -200,32 +202,32 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             }
 
             /* Flatten the hierarchy so children can participate in the Grid */
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #primary,
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #primary-inner,
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #secondary,
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #secondary-inner {
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #primary,
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #primary-inner,
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #secondary,
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #secondary-inner {
                 display: contents !important;
             }
 
             /* Place the elements into their grid cells */
             
             /* Left column: Video player and description */
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #player-container-outer,
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #player,
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #player-wide {
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #player-container-outer,
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #player,
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #player-wide {
                 grid-column: 1 !important;
                 grid-row: 1 !important;
                 width: 100% !important;
                 max-width: 100% !important;
             }
             
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #below {
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #below {
                 grid-column: 1 !important;
                 grid-row: 2 / span 2 !important;
             }
 
             /* Right column: Comments */
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #comments {
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #comments {
                 grid-column: 2 !important;
                 grid-row: 1 !important;
                 
@@ -244,10 +246,12 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
             }
 
             /* Right column: Related Videos (moved below comments) */
-            html.ypp-sidebar-comments-active ytd-watch-flexy[flexy] #related {
+            html.ypp-sidebar-comments-active:not(:has(body.ypp-zen-mode, body.ypp-cinema-mode, body.ypp-focus-mode, body.ypp-study-mode, body.ypp-minimal-mode)) ytd-watch-flexy[flexy] #related {
                 grid-column: 2 !important;
                 grid-row: 2 !important;
                 margin-top: 24px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
             }
             
             /* Custom scrollbar for sidebar comments */
@@ -323,6 +327,7 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         this._startTrackingVideoRatio();
 
         // Phase 2: Sidebar Comments
+        // Since we use CSS :has() now, we just unconditionally toggle the base class
         if (this.sidebarCommentsEnabled) {
             document.documentElement.classList.add('ypp-sidebar-comments-active');
         } else {

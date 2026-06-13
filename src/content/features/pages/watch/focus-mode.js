@@ -14,7 +14,7 @@ const waitForElement = (selector, timeout = 5000) => {
  * Focus Mode
  * @class FocusMode
  */
-window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.BaseFeature {
+window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.DistractionFreeBase {
     /**
      * Initialize Focus Mode
      * @constructor
@@ -57,9 +57,18 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
         // Disable all features
         this._toggleDetox(false);
         this._toggleFocus(false);
-        this._toggleCinemaMode(false);
-        this._toggleMinimalMode(false);
         await super.disable();
+    }
+
+    async onPageChange(url) {
+        if (!this.isEnabled) return;
+        
+        if (this.utils.isWatchPage()) {
+            this._run();
+        } else {
+            this._toggleDetox(false);
+            this._toggleFocus(false);
+        }
     }
 
     async onUpdate() {
@@ -80,8 +89,6 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
         try {
             this._toggleDetox(this.settings.dopamineDetox);
             this._toggleFocus(this.settings.enableFocusMode);
-            this._toggleCinemaMode(this.settings.cinemaMode);
-            this._toggleMinimalMode(this.settings.minimalMode);
             this._applyFocusState();
         } catch (error) {
             this.utils.log?.(`Error running focus mode: ${error.message}`, 'FOCUS', 'error');
@@ -96,9 +103,7 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
         const settings = this.settings;
         if (!settings) return;
 
-        if (settings.enableFocusMode) {
-            this._hideDistractions(true);
-        }
+        // The Focus layout is applied inside _toggleFocus using DistractionFreeBase
     }
 
     // =========================================================================
@@ -137,17 +142,26 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
         }
 
         style.textContent = `
+            /* V2: Thumbnail Eraser - completely hide images and show gray box */
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-thumbnail img,
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-grid-thumbnail img,
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} #thumbnail img {
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
             .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-thumbnail,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-grid-thumbnail,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} #thumbnail img,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} .ytp-thumbnail-overlay,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} .html5-main-video {
-                filter: grayscale(100%) !important;
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-grid-thumbnail {
+                background-color: #222 !important;
+                border: 1px solid #333 !important;
             }
 
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-video-renderer:hover ytd-thumbnail,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-rich-item-renderer:hover ytd-thumbnail {
-                filter: grayscale(60%) !important;
+            /* V2: Grayscale UI Enforcement - mute logos and buttons */
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-topbar-logo-renderer,
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-subscribe-button-renderer,
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} yt-icon,
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} .yt-spec-button-shape-next,
+            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-badge-supported-renderer {
+                filter: grayscale(100%) !important;
             }
         `;
     }
@@ -167,187 +181,39 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
     // =========================================================================
 
     /**
-     * Toggle generic distraction hiding
+     * Toggle Focus Mode layout
      * @private
      * @param {boolean} enable
      */
     _toggleFocus(enable) {
-        document.body.classList.toggle(this._CSS_CLASSES.FOCUS_MODE, enable);
-        this.utils.log?.(`Focus mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
-    }
-
-    /**
-     * Hide distractions based on settings
-     * @private
-     * @param {boolean} enable
-     */
-    _hideDistractions(enable) {
-        const settings = this.settings;
-        if (!settings) return;
-
-        const toggle = (cls, state) => {
-            if (cls) document.body.classList.toggle(cls, !!state);
-        };
-
-        toggle('ypp-hide-comments', settings.hideComments);
-        toggle('ypp-hide-shorts', settings.hideShorts);
-        toggle('ypp-hide-chat', settings.hideChat);
-        toggle('ypp-hide-live-chat', settings.hideLiveChat);
-        toggle('ypp-hide-recommendations', settings.hideRecommendations);
-    }
-
-    // =========================================================================
-    // CINEMA MODE
-    // =========================================================================
-
-    /**
-     * Toggle cinema mode
-     * @private
-     * @param {boolean} enable
-     */
-    _toggleCinemaMode(enable) {
-        document.body.classList.toggle(this._CSS_CLASSES.CINEMA_MODE, enable);
-
         if (enable) {
-            this._applyCinemaStyle();
-        } else {
-            this._removeCinemaStyle();
-        }
-
-        this.utils.log?.(`Cinema mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
-
-        // Logic to trigger YouTube's native theater mode if requested
-        // This coordinates with the CSS class to ensure the player expands
-        if (enable) {
-            this._ensureTheaterMode();
-        }
-    }
-
-    async _ensureTheaterMode() {
-        try {
-            const btn = await waitForElement('.ytp-size-button', 2000);
-            if (!btn) return;
+            this.enableDistractionFreeLayout(this._CSS_CLASSES.FOCUS_MODE || 'ypp-focus-mode', {
+                hideSidebar: true,
+                hideComments: this.settings?.hideComments,
+                hideRelated: this.settings?.hideRecommendations,
+                hideShorts: this.settings?.hideShorts,
+                playerMaxWidth: '1000px'
+            });
             
-            const isTheater = document.querySelector('ytd-watch-flexy[theater]');
-            if (!isTheater) {
-                btn.click();
-            }
-        } catch (e) {
-            // Ignore if fails, visual CSS fallback still applies
-        }
-    }
-
-    /**
-     * Apply cinema mode styles
-     * @private
-     */
-    _applyCinemaStyle() {
-        const styleId = this._CSS_CLASSES.CINEMA_STYLE || 'ypp-cinema-style';
-        let style = document.getElementById(styleId);
-
-        if (!style) {
-            style = document.createElement('style');
-            style.id = styleId;
-            document.head.appendChild(style);
-        }
-
-        style.textContent = `
-            .${this._CSS_CLASSES.CINEMA_MODE || 'ypp-cinema-mode'} #columns,
-            .${this._CSS_CLASSES.CINEMA_MODE || 'ypp-cinema-mode'} #primary + #secondary {
-                opacity: 0.3;
-                transform: scale(0.95);
-                transition: opacity 0.3s ease, transform 0.3s ease;
-                pointer-events: none;
-            }
-
-            .${this._CSS_CLASSES.CINEMA_MODE || 'ypp-cinema-mode'} #primary {
-                max-width: 1000px !important;
-                margin: 0 auto;
-            }
-
-            .${this._CSS_CLASSES.CINEMA_MODE || 'ypp-cinema-mode'} #columns:hover #primary + #secondary,
-            .${this._CSS_CLASSES.CINEMA_MODE || 'ypp-cinema-mode'} #columns:hover #secondary {
-                opacity: 1;
-                transform: scale(1);
-                pointer-events: auto;
-            }
-        `;
-    }
-
-    /**
-     * Remove cinema mode styles
-     * @private
-     */
-    _removeCinemaStyle() {
-        const styleId = this._CSS_CLASSES.CINEMA_STYLE || 'ypp-cinema-style';
-        const style = document.getElementById(styleId);
-        if (style) style.remove();
-    }
-
-    // =========================================================================
-    // MINIMAL MODE
-    // =========================================================================
-
-    /**
-     * Toggle minimal mode
-     * @private
-     * @param {boolean} enable
-     */
-    _toggleMinimalMode(enable) {
-        document.body.classList.toggle(this._CSS_CLASSES.MINIMAL_MODE, enable);
-
-        if (enable) {
-            this._applyMinimalStyle();
+            // Focus Mode hides chat
+            if (this.settings?.hideChat) document.body.classList.add('ypp-hide-chat');
+            if (this.settings?.hideLiveChat) document.body.classList.add('ypp-hide-live-chat');
+            
+            this.utils.log?.('Focus mode enabled', 'FOCUS');
         } else {
-            this._removeMinimalStyle();
+            this.disableDistractionFreeLayout(this._CSS_CLASSES.FOCUS_MODE || 'ypp-focus-mode', {
+                hideSidebar: true,
+                hideComments: this.settings?.hideComments,
+                hideRelated: this.settings?.hideRecommendations,
+                hideShorts: this.settings?.hideShorts,
+                playerMaxWidth: '1000px'
+            });
+            
+            document.body.classList.remove('ypp-hide-chat');
+            document.body.classList.remove('ypp-hide-live-chat');
+            
+            this.utils.log?.('Focus mode disabled', 'FOCUS');
         }
-
-        this.utils.log?.(`Minimal mode ${enable ? 'enabled' : 'disabled'}`, 'FOCUS');
-    }
-
-    /**
-     * Apply minimal mode styles
-     * @private
-     */
-    _applyMinimalStyle() {
-        const styleId = this._CSS_CLASSES.MINIMAL_STYLE || 'ypp-minimal-style';
-        let style = document.getElementById(styleId);
-
-        if (!style) {
-            style = document.createElement('style');
-            style.id = styleId;
-            document.head.appendChild(style);
-        }
-
-        style.textContent = `
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} ytd-masthead #buttons,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} ytd-masthead #end,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} ytd-video-primary-info-renderer #top-row,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} #owner,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} #comments,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} #secondary {
-                opacity: 0.2;
-                transition: opacity 0.3s ease;
-            }
-
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} ytd-masthead:hover #buttons,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} ytd-masthead:hover #end,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} #owner:hover,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} #comments:hover,
-            .${this._CSS_CLASSES.MINIMAL_MODE || 'ypp-minimal-mode'} #secondary:hover {
-                opacity: 1;
-            }
-        `;
-    }
-
-    /**
-     * Remove minimal mode styles
-     * @private
-     */
-    _removeMinimalStyle() {
-        const styleId = this._CSS_CLASSES.MINIMAL_STYLE || 'ypp-minimal-style';
-        const style = document.getElementById(styleId);
-        if (style) style.remove();
     }
 
     // =========================================================================
@@ -369,6 +235,13 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
                 this._toggleDetox(enable);
                 break;
             case 'enableFocusMode':
+                if (!enable && this._isStrictModeActive()) {
+                    this.utils.createToast?.('Strict Mode Active! Solve math to disable.', 5000);
+                    this._promptStrictMathUnlock();
+                    // Revert UI toggle since we blocked it
+                    // The toggle button will need its own sync, but for now we just block internal disable
+                    return;
+                }
                 this._toggleFocus(enable);
                 break;
             case 'cinemaMode':
@@ -377,6 +250,38 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
             case 'minimalMode':
                 this._toggleMinimalMode(enable);
                 break;
+        }
+    }
+
+    // =========================================================================
+    // FOCUS MODE V2 - STRICT MODE TIMER
+    // =========================================================================
+
+    _isStrictModeActive() {
+        if (!this.strictModeEndTime) return false;
+        return Date.now() < this.strictModeEndTime;
+    }
+
+    activateStrictMode(minutes = 30) {
+        this.strictModeEndTime = Date.now() + (minutes * 60 * 1000);
+        this.utils.createToast?.(`Strict Mode Locked for ${minutes}m`);
+        this.toggleFeature('enableFocusMode', true);
+        this.toggleFeature('dopamineDetox', true);
+    }
+
+    _promptStrictMathUnlock() {
+        const num1 = Math.floor(Math.random() * 50) + 15;
+        const num2 = Math.floor(Math.random() * 50) + 15;
+        const answer = num1 * num2;
+        
+        const response = prompt(`To break Strict Mode, solve this: What is ${num1} * ${num2}?`);
+        if (response && parseInt(response.trim()) === answer) {
+            this.strictModeEndTime = null;
+            this.toggleFeature('enableFocusMode', false);
+            this.toggleFeature('dopamineDetox', false);
+            this.utils.createToast?.('Strict Mode Unlocked!');
+        } else {
+            alert('Incorrect. Focus Mode remains active.');
         }
     }
 };
