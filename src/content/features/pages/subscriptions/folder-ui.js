@@ -935,6 +935,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Start Scan</button>
                         <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255,78,69,0.3); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255,78,69,0.4)'" onmouseout="this.style.background='rgba(255,78,69,0.3)'">Unsubscribe Selected</button>
                         <button id="ypp-health-add-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">Add to Folder</button>
+                        <button id="ypp-health-remove-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 152, 0, 0.2); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 152, 0, 0.3)'" onmouseout="this.style.background='rgba(255, 152, 0, 0.2)'">Remove from Folder</button>
                         <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
                         <button class="ypp-modal-close" style="background: transparent; border: none; color: #CAC4D0; font-size: 28px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; line-height: 1;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">&times;</button>
                     </div>
@@ -1120,6 +1121,12 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             if (folderUI) this.bulkAddToFolder(overlay, folderUI);
         });
 
+        overlay.querySelector('#ypp-health-remove-folder-btn').addEventListener('click', () => {
+            const folderFilter = overlay.querySelector('#ypp-health-folder-filter-dropdown').value;
+            if (folderFilter === 'all' || folderFilter === '__no_folder__') return;
+            if (folderUI) this.bulkRemoveFromFolder(overlay, folderUI, folderFilter);
+        });
+
         // Add filter functionality
         const stats = overlay.querySelectorAll('.ypp-health-stat');
         const resultsEl = overlay.querySelector('#ypp-health-results');
@@ -1135,6 +1142,33 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             stats.forEach(s => {
                 s.style.background = s.dataset.filter === filter ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)';
             });
+
+            // Sync left pane highlight
+            const listEl = overlay.querySelector('#ypp-organizer-folders-list');
+            if (listEl) {
+                listEl.querySelectorAll('div[data-folder]').forEach(fDiv => {
+                    if (fDiv.dataset.folder === folderFilter) {
+                        fDiv.style.background = 'rgba(208,188,255,0.15)';
+                        fDiv.style.borderLeft = '3px solid #d0bcff';
+                    } else {
+                        fDiv.style.background = 'rgba(255,255,255,0.03)';
+                        fDiv.style.borderLeft = '1px solid rgba(255,255,255,0.05)';
+                    }
+                });
+            }
+
+            // Sync checkbox buttons for Remove Folder
+            const n = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked').length;
+            const removeFolderBtn = overlay.querySelector('#ypp-health-remove-folder-btn');
+            if (removeFolderBtn) {
+                removeFolderBtn.textContent = n > 0 ? `Remove from Folder (${n})` : 'Remove from Folder';
+                removeFolderBtn.disabled = n === 0;
+                if (folderFilter !== 'all' && folderFilter !== '__no_folder__') {
+                    removeFolderBtn.style.display = n > 0 ? 'inline-block' : 'none';
+                } else {
+                    removeFolderBtn.style.display = 'none';
+                }
+            }
 
             const rows = Array.from(resultsEl.querySelectorAll('.ypp-channel-health-row'));
             
@@ -1224,6 +1258,15 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     <span class="ypp-folder-count-badge" style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; color:#fff;">${folderUI.storage.folders[fName].length}</span>
                 `;
                 
+                // Click to filter
+                fDiv.addEventListener('click', () => {
+                    const folderSel = overlay.querySelector('#ypp-health-folder-filter-dropdown');
+                    if (folderSel) {
+                        folderSel.value = folderSel.value === fName ? 'all' : fName;
+                        folderSel.dispatchEvent(new Event('change'));
+                    }
+                });
+
                 // Drag & Drop events
                 fDiv.addEventListener('dragover', (e) => {
                     e.preventDefault();
@@ -1660,10 +1703,23 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     const n = resultsEl.querySelectorAll('.ypp-unsub-checkbox:checked').length;
                     const unsubBtn    = overlay.querySelector('#ypp-health-unsub-btn');
                     const addFolderBtn = overlay.querySelector('#ypp-health-add-folder-btn');
+                    const removeFolderBtn = overlay.querySelector('#ypp-health-remove-folder-btn');
+                    const folderFilter = overlay.querySelector('#ypp-health-folder-filter-dropdown').value;
+
                     unsubBtn.textContent     = n > 0 ? `Unsubscribe Selected (${n})` : 'Unsubscribe Selected';
                     addFolderBtn.textContent = n > 0 ? `Add to Folder (${n})`        : 'Add to Folder';
                     unsubBtn.disabled     = n === 0;
                     addFolderBtn.disabled = n === 0;
+
+                    if (removeFolderBtn) {
+                        removeFolderBtn.textContent = n > 0 ? `Remove from Folder (${n})` : 'Remove from Folder';
+                        removeFolderBtn.disabled = n === 0;
+                        if (folderFilter !== 'all' && folderFilter !== '__no_folder__') {
+                            removeFolderBtn.style.display = n > 0 ? 'inline-block' : 'none';
+                        } else {
+                            removeFolderBtn.style.display = 'none';
+                        }
+                    }
                 });
             }
 
@@ -2142,6 +2198,36 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         setTimeout(() => {
             btn.style.display = 'none';
         }, 2000);
+    }
+
+    static async bulkRemoveFromFolder(overlay, folderUI, folderName) {
+        const checkboxes = overlay.querySelectorAll('.ypp-unsub-checkbox:checked');
+        if (checkboxes.length === 0) return;
+
+        const btn = overlay.querySelector('#ypp-health-remove-folder-btn');
+        const oldText = btn.textContent;
+        btn.textContent = 'Removing...';
+        btn.disabled = true;
+
+        const channels = Array.from(checkboxes).map(cb => ({
+            id: cb.value,
+            name: cb.closest('.ypp-channel-health-row').dataset.name
+        }));
+
+        let removedCount = 0;
+        channels.forEach(c => {
+            if (folderUI.storage.removeChannelFromFolder(c.name, folderName)) {
+                removedCount++;
+            }
+        });
+
+        if (removedCount > 0) {
+            folderUI.storage.save();
+            ChannelHealthUI.runScan(overlay, folderUI, true);
+        } else {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
     }
 
     static async bulkAddToFolder(overlay, folderUI) {
