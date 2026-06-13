@@ -21,12 +21,16 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
         // Use debounce for resize listener
         const resizeListener = this.utils.debounce(this._boundApplyScale, 150);
         this.addListener(window, 'resize', resizeListener);
+        // Force layout-manager to update instantly
+        window.dispatchEvent(new Event('resize'));
     }
 
     async disable() {
         document.documentElement.style.setProperty('--ypp-auto-scale', 1);
         document.documentElement.style.removeProperty('--ypp-dynamic-cols');
         this.cleanupEvents();
+        // Force layout-manager to update instantly
+        window.dispatchEvent(new Event('resize'));
     }
     
     async onUpdate() {
