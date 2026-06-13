@@ -51,7 +51,6 @@ window.YPP.SettingsSchema = {
         hideLiveChat:        { type: 'boolean', default: false },
         hideFundraiser:      { type: 'boolean', default: false },
         hideEndScreens:      { type: 'boolean', default: false },
-        hookFreeHome:        { type: 'boolean', default: false },
         // Search visibility
         hideSearchShelves:   { type: 'boolean', default: true },
         hideChannelCards:    { type: 'boolean', default: false },

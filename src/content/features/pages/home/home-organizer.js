@@ -7,7 +7,7 @@ window.YPP.features = window.YPP.features || {};
  * Manages channel tagging, visual priorities, and feed organization
  */
 window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.features.BaseFeature {
-    getConfigKey() { return 'hookFreeHome'; }
+    getConfigKey() { return 'hideFeed'; }
     constructor() {
         super('HomeOrganizer');
         this.CONSTANTS = window.YPP.CONSTANTS;
@@ -28,10 +28,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
      */
     async run(settings) {
         this.settings = { ...this.settings, ...settings };
-        // Logic: Enable unless "hookFreeHome" is ON (which implies a minimal home)
-        // Or maybe hookFreeHome means "clean home". 
-        // Assuming original logic: if !hookFreeHome, enable organizer.
-        if (!settings.hookFreeHome) {
+        // Logic: Enable unless "hideFeed" is ON (which implies a minimal home)
+        if (!settings.hideFeed) {
             await this.enable();
         } else {
             this.disable();

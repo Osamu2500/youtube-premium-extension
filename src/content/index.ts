@@ -69,10 +69,8 @@ import './features/global/modifiers/blocklist-filter.js';
 import './features/global/layout/layout-manager.js';
 import './features/global/layout/auto-scale-grid.js';
 import './features/global/layout/header-nav.js';
-import './features/global/layout/sidebar.js';
 
 // Home page features
-import './features/pages/home/hook-free-home.js';
 import './features/pages/home/home-organizer.js';
 import './features/pages/home/cinematic-mode.js';
 

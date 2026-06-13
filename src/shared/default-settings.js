@@ -39,7 +39,6 @@ export const DEFAULT_SETTINGS = {
     hideLiveChat: false,
     hideFundraiser: false,
     hideEndScreens: false,
-    hookFreeHome: false,
     hideSearchShelves: true,
     hideChannelCards: false,
     autoVideoFilter: true,

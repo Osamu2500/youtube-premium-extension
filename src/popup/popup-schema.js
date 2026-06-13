@@ -50,8 +50,8 @@ export const POPUP_SCHEMA = [
                 title: 'Feed Layout',
                 items: [
                     { type:'toggle', id:'cinematicMode',    label:'Cinematic Mode',   desc:'Netflix-style immersive UI', icon:P('M2 7h20v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z M17 2l5 5M7 2L2 7'), style:'border:1px solid var(--accent-primary)' },
-                    { type:'toggle', id:'hookFreeHome',     label:'Hook-Free Home',   desc:'Hide the feed entirely',   icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
                     { type:'toggle', id:'displayFullTitle', label:'Full Video Titles', desc:'Prevent truncation',        icon:P('M4 6h16M4 12h16M4 18h16') },
+                    { type:'toggle', id:'zenMode',          label:'Zen Mode',         desc:'Hide distractions & UI elements', icon:P('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6') },
                     { type:'toggle', id:'autoScaleLayout',  label:'Auto-Scale Grid',  desc:'Adapt to zoom/window size', icon:P('M15 3l6 6M15 3h6v6M9 21l-6-6M9 21H3v-6') },
                     { type:'range', id:'homeColumns', label:'Grid Columns', unit:'', min:1, max:8, step:1 },
                     { type:'toggle', id:'useSquareCorners',    label:'Square Corners',     desc:'Sharp edges for videos',   icon:P('M3 3h18v18H3z') }

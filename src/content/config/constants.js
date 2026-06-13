@@ -462,7 +462,6 @@ window.YPP.CONSTANTS = {
         hideMixes: 'HideMixes',
         hidePosts: 'HidePosts',
         // --- Missing Toggles & Layouts ---
-        hookFreeHome: 'HookFreeHome',
         autoScaleLayout: 'AutoScaleGrid',
         displayFullTitle: 'FullVideoTitles',
         useSquareCorners: 'SquareCorners',
