@@ -1263,6 +1263,27 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         renderFoldersList();
     }
 
+    static _extractYtInitialData(text) {
+        const markers = ['var ytInitialData = ', 'window["ytInitialData"] = ', 'window.ytInitialData = '];
+        for (const marker of markers) {
+            const startIdx = text.indexOf(marker);
+            if (startIdx !== -1) {
+                const jsonStart = startIdx + marker.length;
+                const endIdx = text.indexOf('</script>', jsonStart);
+                if (endIdx !== -1) {
+                    let jsonText = text.slice(jsonStart, endIdx).trim();
+                    if (jsonText.endsWith(';')) jsonText = jsonText.slice(0, -1);
+                    try {
+                        return JSON.parse(jsonText);
+                    } catch(e) {
+                        console.error('ChannelHealthUI: Failed to parse ytInitialData', e);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     static async runScan(overlay, folderUI, skipFetch = false) {
         const btn = overlay.querySelector('#ypp-health-scan-btn');
         const resultsEl = overlay.querySelector('#ypp-health-results');
@@ -1335,15 +1356,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             // First page from HTML
             const res  = await fetch('/feed/channels');
             const text = await res.text();
-            const START_MARKER = 'var ytInitialData = ';
-            const startIdx = text.indexOf(START_MARKER);
-            if (startIdx !== -1) {
-                const jsonStart = startIdx + START_MARKER.length;
-                const endIdx = text.indexOf(';</script>', jsonStart);
-                if (endIdx !== -1) {
-                    const data = JSON.parse(text.slice(jsonStart, endIdx));
-                    nextToken = extractChannelsFromData(data);
-                }
+            const data = this._extractYtInitialData(text);
+            if (data) {
+                nextToken = extractChannelsFromData(data);
             }
 
             // Follow continuation tokens for users with >100 subscriptions
@@ -1363,7 +1378,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     const contData = await contRes.json();
                     nextToken = extractChannelsFromData(contData);
                 } catch (err) {
-                    window.YPP.Utils?.log('Failed to fetch continuation', 'FOLDER-UI', 'warn', err);
+                    window.YPP.utils?.log('Failed to fetch continuation', 'CHANNEL-HEALTH', 'warn', err);
                     break;
                 }
             }
@@ -1852,33 +1867,26 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         try {
             const res = await fetch(`/channel/${channelId}`);
             const text = await res.text();
-            
-            const START_MARKER = 'var ytInitialData = ';
-            const startIdx = text.indexOf(START_MARKER);
-            if (startIdx !== -1) {
-                const jsonStart = startIdx + START_MARKER.length;
-                const endIdx = text.indexOf(';</script>', jsonStart);
-                if (endIdx !== -1) {
-                    const data = JSON.parse(text.slice(jsonStart, endIdx));
-                    let freshParams = null;
-                    const walk = (o) => {
-                        if (freshParams) return;
-                        if (!o || typeof o !== 'object') return;
-                        if (o.unsubscribeEndpoint?.params) {
-                            freshParams = o.unsubscribeEndpoint.params;
-                            return;
-                        }
-                        Object.values(o).forEach(walk);
-                    };
-                    walk(data);
-                    
-                    if (freshParams) {
-                        return await this._tryApiUnsubscribe({ id: channelId, params: freshParams }, config);
+            const data = this._extractYtInitialData(text);
+            if (data) {
+                let freshParams = null;
+                const walk = (o) => {
+                    if (freshParams) return;
+                    if (!o || typeof o !== 'object') return;
+                    if (o.unsubscribeEndpoint?.params) {
+                        freshParams = o.unsubscribeEndpoint.params;
+                        return;
                     }
+                    Object.values(o).forEach(walk);
+                };
+                walk(data);
+                    
+                if (freshParams) {
+                    return await this._tryApiUnsubscribe({ id: channelId, params: freshParams }, config);
                 }
             }
         } catch(e) {
-            window.YPP.Utils?.log('Fresh API unsub error', 'CHANNEL-HEALTH', 'warn', e);
+            window.YPP.utils?.log('Fresh API unsub error', 'CHANNEL-HEALTH', 'warn', e);
         }
         return false;
     }
