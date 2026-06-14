@@ -6,7 +6,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.DistractionFreeBase {
+window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeature {
     getConfigKey() { return 'zenMode'; }
     constructor() {
         super('zenMode');
@@ -55,27 +55,10 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
         const isWatchPage = location.pathname === '/watch';
         
         if (isWatchPage && this.isEnabled) {
-            // On watch page: apply zen mode layout
-            this.enableDistractionFreeLayout('ypp-zen-mode', {
-                hideSidebar: true,
-                hideComments: true,
-                hideRelated: true,
-                hideShorts: true,
-                playerMaxWidth: '100%'
-            });
             if (this.ambientActive) {
                 this._applyAmbientMode(); // Restart/Refresh loop
             }
         } else {
-            // CRITICAL: Remove zen class when leaving watch page
-            this.disableDistractionFreeLayout('ypp-zen-mode', {
-                hideSidebar: true,
-                hideComments: true,
-                hideRelated: true,
-                hideShorts: true,
-                playerMaxWidth: '100%'
-            });
-            this._removeZenStyles();
             this._disableAudioSpatialization();
             this._removeAmbientMode();
         }
@@ -90,15 +73,9 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
         const isWatchPage = location.pathname === '/watch';
         this.isEnabled = enable;
         
-        // CRITICAL FIX: Only apply zen mode class on watch pages
+        // WatchPageManager handles adding/removing body.ypp-zen-mode class.
+        // We only handle ambient mode and audio.
         if (enable && isWatchPage) {
-            this.enableDistractionFreeLayout('ypp-zen-mode', {
-                hideSidebar: true,
-                hideComments: true,
-                hideRelated: true,
-                hideShorts: true,
-                playerMaxWidth: '100%'
-            });
             this._applyAmbientMode();
             
             // Show toast notification once per session
@@ -106,18 +83,9 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
                 this.Utils.createToast?.('Zen Mode Enabled (V2)');
                 this.zenToastShown = true;
             }
-            this._injectZenStyles();
             this._enableAudioSpatialization();
         } else {
-            this.disableDistractionFreeLayout('ypp-zen-mode', {
-                hideSidebar: true,
-                hideComments: true,
-                hideRelated: true,
-                hideShorts: true,
-                playerMaxWidth: '100%'
-            });
             this.zenToastShown = false;
-            this._removeZenStyles();
             this._disableAudioSpatialization();
             this._removeAmbientMode();
         }
@@ -282,61 +250,6 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.Distract
 
         if (count === 0) return [0, 0, 0];
         return [Math.round(r / count), Math.round(g / count), Math.round(b / count)];
-    }
-
-    // =========================================================================
-    // ZEN MODE V2 - INVISIBLE UI & BREATHING TRANSITIONS
-    // =========================================================================
-
-    _injectZenStyles() {
-        if (document.getElementById('ypp-zen-styles-v2')) return;
-        
-        const style = document.createElement('style');
-        style.id = 'ypp-zen-styles-v2';
-        style.textContent = `
-            /* True Invisible UI: Hide controls entirely when playing */
-            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-chrome-bottom,
-            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-chrome-top,
-            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-gradient-bottom,
-            body.ypp-zen-mode .html5-video-player.playing-mode .ytp-gradient-top {
-                opacity: 0 !important;
-                pointer-events: none !important;
-                transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            }
-
-            /* Reveal on pause */
-            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-chrome-bottom,
-            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-chrome-top,
-            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-gradient-bottom,
-            body.ypp-zen-mode .html5-video-player.paused-mode .ytp-gradient-top {
-                opacity: 1 !important;
-                pointer-events: auto !important;
-                transition: opacity 0.5s ease !important;
-            }
-
-            /* Breathing Visualizer */
-            @keyframes zenBreathing {
-                0% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
-                50% { box-shadow: 0 0 100px 20px rgba(255,255,255,0.25); transform: scale(1.01); }
-                100% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
-            }
-            
-            /* Breathing Transitions: Scale and dim video on pause */
-            body.ypp-zen-mode video {
-                transition: filter 1.5s ease-in-out, transform 1.5s ease-in-out !important;
-                transform-origin: center center !important;
-            }
-            body.ypp-zen-mode .html5-video-player.paused-mode video {
-                filter: brightness(0.4) saturate(0.6) blur(2px) !important;
-                animation: zenBreathing 8s infinite ease-in-out !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    _removeZenStyles() {
-        const style = document.getElementById('ypp-zen-styles-v2');
-        if (style) style.remove();
     }
 
     // =========================================================================

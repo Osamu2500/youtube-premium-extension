@@ -131,7 +131,6 @@ import './features/pages/watch/watch-history.js';
 import './features/pages/watch/watch-time-alert.js';
 import './features/pages/watch/watch-time-limit.js';
 import './features/pages/watch/continue-watching.js';
-import './features/pages/watch/distraction-free-base.js';
 import './features/pages/watch/zen-mode.js';
 import './features/pages/watch/focus-mode.js';
 import './features/pages/watch/study-mode.js';

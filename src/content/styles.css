@@ -7859,3 +7859,105 @@ body.ypp-hide-channel-cards ytd-channel-renderer {
 .ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next__icon {
     margin: 0 !important;
 }
+
+/* =========================================================================
+   ZEN MODE
+   ========================================================================= */
+
+/* True Invisible UI: Hide controls entirely when playing */
+body.ypp-zen-mode .html5-video-player.playing-mode .ytp-chrome-bottom,
+body.ypp-zen-mode .html5-video-player.playing-mode .ytp-chrome-top,
+body.ypp-zen-mode .html5-video-player.playing-mode .ytp-gradient-bottom,
+body.ypp-zen-mode .html5-video-player.playing-mode .ytp-gradient-top {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Reveal on pause */
+body.ypp-zen-mode .html5-video-player.paused-mode .ytp-chrome-bottom,
+body.ypp-zen-mode .html5-video-player.paused-mode .ytp-chrome-top,
+body.ypp-zen-mode .html5-video-player.paused-mode .ytp-gradient-bottom,
+body.ypp-zen-mode .html5-video-player.paused-mode .ytp-gradient-top {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transition: opacity 0.5s ease !important;
+}
+
+/* Breathing Visualizer */
+@keyframes zenBreathing {
+    0% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
+    50% { box-shadow: 0 0 100px 20px rgba(255,255,255,0.25); transform: scale(1.01); }
+    100% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
+}
+
+/* Breathing Transitions: Scale and dim video on pause */
+body.ypp-zen-mode video {
+    transition: filter 1.5s ease-in-out, transform 1.5s ease-in-out !important;
+    transform-origin: center center !important;
+}
+body.ypp-zen-mode .html5-video-player.paused-mode video {
+    filter: brightness(0.4) saturate(0.6) blur(2px) !important;
+    animation: zenBreathing 8s infinite ease-in-out !important;
+}
+
+/* =========================================================================
+   FOCUS MODE / DOPAMINE DETOX
+   ========================================================================= */
+
+/* V2: Thumbnail Eraser - completely hide images and show gray box */
+body.ypp-dopamine-detox ytd-thumbnail img,
+body.ypp-dopamine-detox ytd-grid-thumbnail img,
+body.ypp-dopamine-detox #thumbnail img {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+body.ypp-dopamine-detox ytd-thumbnail,
+body.ypp-dopamine-detox ytd-grid-thumbnail {
+    background-color: #222 !important;
+    border: 1px solid #333 !important;
+}
+
+/* V2: Grayscale UI Enforcement - mute logos and buttons */
+body.ypp-dopamine-detox ytd-topbar-logo-renderer,
+body.ypp-dopamine-detox ytd-subscribe-button-renderer,
+body.ypp-dopamine-detox yt-icon,
+body.ypp-dopamine-detox .yt-spec-button-shape-next,
+body.ypp-dopamine-detox ytd-badge-supported-renderer {
+    filter: grayscale(100%) !important;
+}
+
+/* =========================================================================
+   DISTRACTION FREE BASE LAYOUTS
+   ========================================================================= */
+
+/* Base transition for smooth layout changes */
+ytd-watch-flexy[flexy] #columns,
+ytd-watch-flexy[flexy] #primary,
+ytd-watch-flexy[flexy] #secondary {
+    transition: max-width 0.4s cubic-bezier(0.2, 0, 0, 1), 
+                width 0.4s cubic-bezier(0.2, 0, 0, 1), 
+                opacity 0.3s ease,
+                min-width 0.4s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+body.ypp-sidebar-hidden ytd-watch-flexy:not([theater]) #columns {
+    --ytd-watch-flexy-sidebar-width: 0px !important;
+}
+body.ypp-sidebar-hidden #secondary {
+    opacity: 0;
+    pointer-events: none;
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    flex: 0 !important;
+}
+body.ypp-focus-mode #primary {
+    max-width: 1000px !important;
+    margin: 0 auto !important;
+}
+body.ypp-zen-mode #primary,
+body.ypp-study-mode #primary {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+}

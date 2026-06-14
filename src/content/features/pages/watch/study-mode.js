@@ -6,7 +6,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.DistractionFreeBase {
+window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.BaseFeature {
     getConfigKey() { return 'studyMode'; }
     constructor() {
         super('StudyMode');
@@ -59,15 +59,8 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Dist
             // Add UI controls
             this.injectSpeedControl();
 
-            // Apply distraction-free study layout
-            this.enableDistractionFreeLayout('ypp-study-mode', {
-                hideSidebar: true,
-                hideComments: true,
-                hideRelated: true,
-                hideShorts: true,
-                playerMaxWidth: '1000px'
-            });
-
+            // WatchPageManager handles applying ypp-study-mode class and layout
+            
             // Start session timer
             this._startSessionTimer();
 
@@ -106,15 +99,9 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Dist
                 this.utils?.createToast('Study Mode Disabled');
             }
 
-            // Remove distraction-free layout
-            this.disableDistractionFreeLayout('ypp-study-mode', {
-                hideSidebar: true,
-                hideComments: true,
-                hideRelated: true,
-                hideShorts: true,
-                playerMaxWidth: '1000px'
-            });
-
+            // Remove layout classes
+            // (Handled by WatchPageManager)
+            
             // Stop session timer
             this._stopSessionTimer();
 

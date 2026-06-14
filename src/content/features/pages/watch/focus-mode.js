@@ -14,7 +14,7 @@ const waitForElement = (selector, timeout = 5000) => {
  * Focus Mode
  * @class FocusMode
  */
-window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.DistractionFreeBase {
+window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.BaseFeature {
     /**
      * Initialize Focus Mode
      * @constructor
@@ -132,38 +132,7 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Dist
      * @private
      */
     _applyDetoxStyle() {
-        const styleId = this._CSS_CLASSES.DOPAMINE_DETOX_STYLE || 'ypp-detox-style';
-        let style = document.getElementById(styleId);
-
-        if (!style) {
-            style = document.createElement('style');
-            style.id = styleId;
-            document.head.appendChild(style);
-        }
-
-        style.textContent = `
-            /* V2: Thumbnail Eraser - completely hide images and show gray box */
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-thumbnail img,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-grid-thumbnail img,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} #thumbnail img {
-                opacity: 0 !important;
-                visibility: hidden !important;
-            }
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-thumbnail,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-grid-thumbnail {
-                background-color: #222 !important;
-                border: 1px solid #333 !important;
-            }
-
-            /* V2: Grayscale UI Enforcement - mute logos and buttons */
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-topbar-logo-renderer,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-subscribe-button-renderer,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} yt-icon,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} .yt-spec-button-shape-next,
-            .${this._CSS_CLASSES.DOPAMINE_DETOX || 'ypp-dopamine-detox'} ytd-badge-supported-renderer {
-                filter: grayscale(100%) !important;
-            }
-        `;
+        // Detox styles are now handled globally in styles.css via the ypp-dopamine-detox class
     }
 
     /**
@@ -171,9 +140,7 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Dist
      * @private
      */
     _removeDetoxStyle() {
-        const styleId = this._CSS_CLASSES.DOPAMINE_DETOX_STYLE || 'ypp-detox-style';
-        const style = document.getElementById(styleId);
-        if (style) style.remove();
+        // Detox styles are now handled globally in styles.css via the ypp-dopamine-detox class
     }
 
     // =========================================================================
@@ -187,13 +154,7 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Dist
      */
     _toggleFocus(enable) {
         if (enable) {
-            this.enableDistractionFreeLayout(this._CSS_CLASSES.FOCUS_MODE || 'ypp-focus-mode', {
-                hideSidebar: true,
-                hideComments: this.settings?.hideComments,
-                hideRelated: this.settings?.hideRecommendations,
-                hideShorts: this.settings?.hideShorts,
-                playerMaxWidth: '1000px'
-            });
+            // WatchPageManager handles adding/removing body.ypp-focus-mode class.
             
             // Focus Mode hides chat
             if (this.settings?.hideChat) document.body.classList.add('ypp-hide-chat');
@@ -201,14 +162,6 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Dist
             
             this.utils.log?.('Focus mode enabled', 'FOCUS');
         } else {
-            this.disableDistractionFreeLayout(this._CSS_CLASSES.FOCUS_MODE || 'ypp-focus-mode', {
-                hideSidebar: true,
-                hideComments: this.settings?.hideComments,
-                hideRelated: this.settings?.hideRecommendations,
-                hideShorts: this.settings?.hideShorts,
-                playerMaxWidth: '1000px'
-            });
-            
             document.body.classList.remove('ypp-hide-chat');
             document.body.classList.remove('ypp-hide-live-chat');
             
