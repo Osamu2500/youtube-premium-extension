@@ -1,4 +1,4 @@
-import { animate, stagger } from 'animejs';
+import anime from 'animejs/lib/anime.es.js';
 
 /**
  * Global Bar UI
@@ -175,11 +175,11 @@ window.YPP.features.GlobalBarUI = class GlobalBarUI {
             try { bar.showPopover(); } catch (e) {}
         }
 
-        this._entranceAnim = animate({
+        this._entranceAnim = anime({
             targets: bar.querySelectorAll('.ypp-gpb-btn, .ypp-gpb-time, .ypp-gpb-vol-wrap'),
             translateY: [-12, 0],
             opacity: [0, 1],
-            delay: stagger(40, { start: 100 }),
+            delay: anime.stagger(40, { start: 100 }),
             easing: 'spring(1, 80, 10, 0)',
             duration: 600,
         });

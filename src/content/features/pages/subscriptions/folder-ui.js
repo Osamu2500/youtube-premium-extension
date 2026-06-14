@@ -19,6 +19,9 @@
  *  - _getYoutubeConfig: extracted as a named private static method for clarity and
  *    independent testability.
  */
+
+import anime from 'animejs/lib/anime.es.js';
+
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
@@ -260,7 +263,7 @@ window.YPP.features.FolderUI = class FolderUI {
             el.className = 'ypp-folder-item';
             el.draggable = true;
             el.dataset.folder = folderName;
-            if (activeFolder === folderName) el.classList.add('active');
+            if (activeFolder && activeFolder.split(',').map(f => f.trim()).includes(folderName)) el.classList.add('active');
 
             // Use _escHtml for dynamic values going into innerHTML to prevent XSS
             const safeIcon = _escHtml(config.icon || '📁');
@@ -296,7 +299,7 @@ window.YPP.features.FolderUI = class FolderUI {
                     tempLink.click();
                     tempLink.remove();
                 } else {
-                    this.orchestrator.setActiveFolder(folderName);
+                    this.orchestrator.setActiveFolder(folderName, e.shiftKey || e.ctrlKey || e.metaKey);
                 }
             });
 
@@ -444,12 +447,23 @@ window.YPP.features.FolderUI = class FolderUI {
             if (!activeFolder) allOpt.selected = true;
             select.appendChild(allOpt);
 
+            const isMulti = activeFolder && activeFolder.includes(',');
+            
+            if (isMulti) {
+                const multiOpt = document.createElement('option');
+                multiOpt.value = activeFolder;
+                multiOpt.style.background = '#222';
+                multiOpt.textContent = 'Multiple Folders';
+                multiOpt.selected = true;
+                select.appendChild(multiOpt);
+            }
+
             Object.keys(this.storage.folders).forEach(folderName => {
                 const opt = document.createElement('option');
                 opt.value = folderName;
                 opt.style.background = '#222';
                 opt.textContent = folderName;
-                if (activeFolder === folderName) opt.selected = true;
+                if (!isMulti && activeFolder === folderName) opt.selected = true;
                 select.appendChild(opt);
             });
 
@@ -921,7 +935,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         document.body.appendChild(overlay);
 
         overlay.innerHTML = String.raw`
-            <div class="ypp-modal-content ypp-organizer-modal" style="font-family: 'Roboto', 'Google Sans', sans-serif; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: rgba(20, 19, 24, 0.95); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); overflow: hidden; animation: ypp-scale-in 0.3s cubic-bezier(0.2, 0, 0, 1);">
+            <div class="ypp-modal-content ypp-organizer-modal" style="font-family: 'Roboto', 'Google Sans', sans-serif; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: rgba(20, 19, 24, 0.95); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); overflow: hidden;">
                 <div class="ypp-modal-header" style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <div style="background: rgba(255, 255, 255, 0.1); border-radius: 50%; padding: 8px;">
@@ -949,6 +963,17 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         </h3>
                         <div id="ypp-organizer-folders-list" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
                             <!-- Populated dynamically -->
+                        </div>
+                        <div style="margin-top: 24px;">
+                            <h3 style="color: #E6E1E5; font-size: 14px; font-weight: 500; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,78,69,0.8)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                Filter Keywords
+                            </h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                <input type="text" id="ypp-blacklist-input" placeholder="e.g. spoiler, react" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none;">
+                                <button id="ypp-blacklist-add-btn" style="background: rgba(255,255,255,0.1); border: none; border-radius: 8px; padding: 0 12px; color: #fff; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Add</button>
+                            </div>
+                            <div id="ypp-blacklist-tags" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
                         </div>
                     </div>
                     <!-- RIGHT PANE: Channels -->
@@ -1004,6 +1029,15 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 </div>
             </div>
         `;
+
+        // Animate entrance using anime.js
+        anime({
+            targets: '.ypp-organizer-modal',
+            opacity: [0, 1],
+            scale: [0.95, 1],
+            easing: 'spring(1, 80, 10, 0)',
+            duration: 600
+        });
 
         overlay.querySelector('.ypp-modal-close').addEventListener('click', () => {
             overlay.classList.remove('open');
@@ -1095,8 +1129,9 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
             if (name && folderNames.includes(name.trim())) {
                 if (await window.YPP.features.CustomDialog.confirm('Delete Folder', `Are you sure you want to permanently delete "${name.trim()}"?`, 'Delete', true)) {
                     folderUI.storage.deleteFolder(name.trim());
-                    if (folderUI.orchestrator.getActiveFolder() === name.trim()) {
-                        folderUI.orchestrator.setActiveFolder(null);
+                    const af = folderUI.orchestrator.getActiveFolder();
+                    if (af && af.split(',').map(f => f.trim()).includes(name.trim())) {
+                        folderUI.orchestrator.setActiveFolder(name.trim(), true); // Toggle it off
                     }
                     if (folderUI.renderGuideFolders) folderUI.renderGuideFolders();
                     if (folderUI.renderFilterChips) folderUI.renderFilterChips();
@@ -1108,6 +1143,50 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 await window.YPP.features.CustomDialog.alert('Error', 'Folder not found. Make sure you typed the name exactly as shown.');
             }
         });
+
+        // Blacklist UI handlers
+        const renderBlacklistTags = () => {
+            const tagsContainer = overlay.querySelector('#ypp-blacklist-tags');
+            if (!tagsContainer) return;
+            tagsContainer.innerHTML = '';
+            const bl = folderUI?.storage?.keywordBlacklist || [];
+            bl.forEach(kw => {
+                const tag = document.createElement('div');
+                tag.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 4px 8px; font-size: 12px; color: #fff; display: flex; align-items: center; gap: 4px;';
+                tag.innerHTML = `<span>${_escHtml(kw)}</span><button class="ypp-blacklist-del-btn" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 0; font-size: 14px; line-height: 1;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">&times;</button>`;
+                tag.querySelector('button').addEventListener('click', () => {
+                    folderUI.storage.keywordBlacklist = folderUI.storage.keywordBlacklist.filter(item => item !== kw);
+                    folderUI.storage.save();
+                    renderBlacklistTags();
+                });
+                tagsContainer.appendChild(tag);
+            });
+        };
+
+        const blacklistInput = overlay.querySelector('#ypp-blacklist-input');
+        const blacklistAddBtn = overlay.querySelector('#ypp-blacklist-add-btn');
+        if (blacklistInput && blacklistAddBtn && folderUI) {
+            const addKw = () => {
+                const val = blacklistInput.value.trim();
+                if (val) {
+                    const kws = val.split(',').map(s => s.trim()).filter(Boolean);
+                    if (!folderUI.storage.keywordBlacklist) folderUI.storage.keywordBlacklist = [];
+                    kws.forEach(kw => {
+                        if (!folderUI.storage.keywordBlacklist.some(item => item.toLowerCase() === kw.toLowerCase())) {
+                            folderUI.storage.keywordBlacklist.push(kw);
+                        }
+                    });
+                    folderUI.storage.save();
+                    renderBlacklistTags();
+                    blacklistInput.value = '';
+                }
+            };
+            blacklistAddBtn.addEventListener('click', addKw);
+            blacklistInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') addKw();
+            });
+            renderBlacklistTags();
+        }
 
         overlay.querySelector('#ypp-health-scan-btn').addEventListener('click', () => {
             this.runScan(overlay, folderUI);
@@ -1290,10 +1369,21 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                             folderUI.storage.save();
                             renderFoldersList();
                             
-                            // Visual feedback
-                            const badge = fDiv.querySelector('.ypp-folder-count-badge');
-                            badge.style.background = '#22c55e';
-                            setTimeout(() => badge.style.background = 'rgba(255,255,255,0.1)', 1000);
+                            // Visual feedback with anime.js
+                            const newDiv = Array.from(listEl.children).find(d => d.dataset.folder === fName);
+                            if (newDiv) {
+                                const badge = newDiv.querySelector('.ypp-folder-count-badge');
+                                badge.style.background = '#22c55e';
+                                anime({
+                                    targets: badge,
+                                    scale: [1.5, 1],
+                                    duration: 600,
+                                    easing: 'spring(1, 80, 10, 0)',
+                                    complete: () => {
+                                        badge.style.background = 'rgba(255,255,255,0.1)';
+                                    }
+                                });
+                            }
                             
                             // Trigger re-render of channels to show new badge
                             this.runScan(overlay, folderUI, true);

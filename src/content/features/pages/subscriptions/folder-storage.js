@@ -20,6 +20,9 @@ window.YPP.features.FolderStorage = class FolderStorage {
 
         /** @type {Object<string, {icon?: string, color?: string}>} Per-folder UI config */
         this.folderConfig = {};
+        
+        /** @type {string[]} Keywords to hide from feed */
+        this.keywordBlacklist = [];
     }
 
     // =========================================================================
@@ -29,9 +32,10 @@ window.YPP.features.FolderStorage = class FolderStorage {
     /** Load folders and config from Chrome storage. */
     async load() {
         try {
-            const [foldersData, configData] = await Promise.all([
+            const [foldersData, configData, blacklistData] = await Promise.all([
                 window.YPP.StorageManager.get(this.STORAGE_KEY),
-                window.YPP.StorageManager.get('ypp_folder_config')
+                window.YPP.StorageManager.get('ypp_folder_config'),
+                window.YPP.StorageManager.get('ypp_keyword_blacklist')
             ]);
 
             if (foldersData) {
@@ -42,6 +46,7 @@ window.YPP.features.FolderStorage = class FolderStorage {
             }
 
             this.folderConfig = configData || {};
+            this.keywordBlacklist = blacklistData || [];
         } catch (e) {
             window.YPP.Utils?.log('Failed to load subscription folders', 'FolderStorage', 'error');
         }
@@ -52,7 +57,8 @@ window.YPP.features.FolderStorage = class FolderStorage {
         try {
             await Promise.all([
                 window.YPP.StorageManager.set(this.STORAGE_KEY, this.folders),
-                window.YPP.StorageManager.set('ypp_folder_config', this.folderConfig)
+                window.YPP.StorageManager.set('ypp_folder_config', this.folderConfig),
+                window.YPP.StorageManager.set('ypp_keyword_blacklist', this.keywordBlacklist)
             ]);
         } catch (e) {
             window.YPP.Utils?.log('Failed to save subscription folders', 'FolderStorage', 'error');

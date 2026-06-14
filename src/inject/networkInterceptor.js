@@ -39,7 +39,7 @@
     // Invalidate cache on storage change
     if (!window.__YPP_STORAGE_LISTENER_ADDED) {
         window.addEventListener('storage', (e) => {
-            if (e.key === 'ypp_active_folder' || e.key === 'ypp_folder_data') {
+            if (e.key === 'ypp_active_folder' || e.key === 'ypp_folder_data' || e.key === 'ypp_keyword_blacklist') {
                 _cachedFilterState = undefined;
             }
         });
@@ -50,7 +50,10 @@
         if (_cachedFilterState !== undefined) return _cachedFilterState;
         try {
             const activeFolder = localStorage.getItem('ypp_active_folder');
-            if (!activeFolder) {
+            const blacklistStr = localStorage.getItem('ypp_keyword_blacklist');
+            const blacklist = blacklistStr ? JSON.parse(blacklistStr) : [];
+            
+            if (!activeFolder && blacklist.length === 0) {
                 _cachedFilterState = null;
                 return null;
             }
@@ -58,17 +61,25 @@
             const folderDataStr = localStorage.getItem('ypp_folder_data');
             const folders = folderDataStr ? JSON.parse(folderDataStr) : {};
 
-            let activeChannelSet = new Set();
+            let state = { type: 'none', channels: new Set(), blacklist: blacklist };
+
             if (activeFolder === '__no_folder__') {
-                // Return a special flag for "No Folder" logic
-                _cachedFilterState = { type: 'no_folder', allFolders: folders };
-                return _cachedFilterState;
-            } else if (folders[activeFolder]) {
-                const arr = folders[activeFolder];
-                activeChannelSet = new Set(arr.map(n => normChannel(n)));
-                _cachedFilterState = { type: 'folder', channels: activeChannelSet };
-                return _cachedFilterState;
+                state.type = 'no_folder';
+                state.allFolders = folders;
+            } else if (activeFolder) {
+                const activeNames = activeFolder.split(',').map(f => f.trim());
+                let channels = [];
+                for (const f of activeNames) {
+                    if (folders[f]) {
+                        channels.push(...folders[f]);
+                    }
+                }
+                state.type = 'folder';
+                state.channels = new Set(channels.map(n => normChannel(n)));
             }
+            
+            _cachedFilterState = state;
+            return _cachedFilterState;
         } catch (e) {
             window.dispatchEvent(new CustomEvent('ypp-log', { detail: { msg: 'Failed to read filter state: ' + e.message, level: 'error', source: 'NETWORK_INTERCEPTOR' } }));
         }
@@ -95,6 +106,15 @@
 
         return lockup ?? legacy ?? null;
     }
+    
+    function getVideoTitleFromItem(item) {
+        const pd = item;
+        const lockup = pd.content?.lockupViewModel?.metadata?.lockupMetadataViewModel?.title?.content;
+        const legacy = pd.videoRenderer?.title?.runs?.[0]?.text 
+            ?? pd.content?.videoRenderer?.title?.runs?.[0]?.text 
+            ?? pd.richItemRenderer?.content?.videoRenderer?.title?.runs?.[0]?.text;
+        return (lockup ?? legacy ?? '').toLowerCase();
+    }
 
     /**
      * Filters an array of video items
@@ -104,9 +124,21 @@
 
         return items.filter(itemWrapper => {
             // Some items are continuation endpoints, ad slots, or shelf renderers. Keep them.
-            if (!itemWrapper.richItemRenderer && !itemWrapper.videoRenderer) {
+            if (!itemWrapper.richItemRenderer && !itemWrapper.videoRenderer && !itemWrapper.content?.lockupViewModel) {
                 return true; // Keep continuations/spinners
             }
+
+            // Keyword Blacklist Filter
+            if (state.blacklist && state.blacklist.length > 0) {
+                const title = getVideoTitleFromItem(itemWrapper);
+                if (title) {
+                    if (state.blacklist.some(keyword => title.includes(keyword.toLowerCase()))) {
+                        return false;
+                    }
+                }
+            }
+
+            if (state.type === 'none') return true;
 
             const channelName = getChannelNameFromItem(itemWrapper);
             if (!channelName) return true; // Can't resolve name, play it safe

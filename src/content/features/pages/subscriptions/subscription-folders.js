@@ -310,11 +310,23 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
      * Toggle-style setter — used by sidebar folder items.
      * Clicking the active folder deactivates it; clicking another activates it.
      */
-    setActiveFolder(folderName) {
-        if (this.activeFolder === folderName) {
-            this.activeFolder = null; // Toggle off
+    setActiveFolder(folderName, multiSelect = false) {
+        if (!folderName) {
+            this.activeFolder = null;
+        } else if (multiSelect && this.activeFolder && this.activeFolder !== '__no_folder__') {
+            let folders = this.activeFolder.split(',').map(f => f.trim());
+            if (folders.includes(folderName)) {
+                folders = folders.filter(f => f !== folderName);
+            } else {
+                folders.push(folderName);
+            }
+            this.activeFolder = folders.length > 0 ? folders.join(',') : null;
         } else {
-            this.activeFolder = folderName || null;
+            if (this.activeFolder === folderName) {
+                this.activeFolder = null; // Toggle off
+            } else {
+                this.activeFolder = folderName;
+            }
         }
         this._onFolderChanged();
     }
@@ -343,7 +355,16 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     forceRefreshFeed() {
         if (this.activeFolder) {
-            this.activeChannelSet = new Set(this.storage.folders[this.activeFolder] || []);
+            let channels = [];
+            if (this.activeFolder !== '__no_folder__') {
+                const folders = this.activeFolder.split(',').map(f => f.trim());
+                for (const f of folders) {
+                    if (this.storage.folders[f]) {
+                        channels.push(...this.storage.folders[f]);
+                    }
+                }
+            }
+            this.activeChannelSet = new Set(channels);
             this.applyFeedFilters();
         }
     }
@@ -384,7 +405,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.updateFilterState();
         
         this.observer.register('feed-filter-loop', SubscriptionFolders.SELECTORS.FEED_CARDS, () => {
-            if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest') {
+            if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest' || (this.storage.keywordBlacklist && this.storage.keywordBlacklist.length > 0)) {
                 // Debounced: rapid card additions (lazy-load batches) coalesce into one pass
                 this._debouncedApplyFilters();
             }
@@ -406,7 +427,16 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
         if (this.activeFolder) {
             document.body.classList.add('ypp-sub-folders-active');
-            this.activeChannelSet = new Set(this.storage.folders[this.activeFolder] || []);
+            let channels = [];
+            if (this.activeFolder !== '__no_folder__') {
+                const folders = this.activeFolder.split(',').map(f => f.trim());
+                for (const f of folders) {
+                    if (this.storage.folders[f]) {
+                        channels.push(...this.storage.folders[f]);
+                    }
+                }
+            }
+            this.activeChannelSet = new Set(channels);
             this.applyFeedFilters();
         } else {
             document.body.classList.remove('ypp-sub-folders-active');
@@ -634,6 +664,29 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         videoCards.forEach(card => {
             let isVisible = true;
 
+            // ── Keyword Blacklist Filter ──────────────
+            if (this.storage.keywordBlacklist && this.storage.keywordBlacklist.length > 0) {
+                let videoTitle = null;
+                const pd = card.data;
+                if (pd) {
+                    const lockup = pd.content?.lockupViewModel?.metadata?.lockupMetadataViewModel?.title?.content;
+                    const legacy = pd.videoRenderer?.title?.runs?.[0]?.text 
+                        ?? pd.content?.videoRenderer?.title?.runs?.[0]?.text 
+                        ?? pd.richItemRenderer?.content?.videoRenderer?.title?.runs?.[0]?.text;
+                    videoTitle = lockup ?? legacy ?? null;
+                }
+                if (!videoTitle) {
+                    const titleEl = card.querySelector('#video-title');
+                    if (titleEl) videoTitle = titleEl.textContent;
+                }
+                if (videoTitle) {
+                    const titleLower = videoTitle.toLowerCase();
+                    if (this.storage.keywordBlacklist.some(kw => titleLower.includes(kw.toLowerCase()))) {
+                        isVisible = false;
+                    }
+                }
+            }
+
             // ── Channel identification via Polymer data binding ──────────────
             // card.data is YouTube's internal Polymer object — the same structured JSON
             // the Channel Health scan reads via r.title.simpleText. Reading it directly
@@ -774,7 +827,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     }
 
     resetFeedVisibility() {
-        if (this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest') {
+        if (this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest' || (this.storage.keywordBlacklist && this.storage.keywordBlacklist.length > 0)) {
             this.applyFeedFilters();
             return;
         }
@@ -814,29 +867,44 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         let indicator = card.querySelector('.ypp-feed-folder-indicator');
         if (foldersForChannel.length === 0) {
             indicator?.remove();
+            card.style.boxShadow = '';
+            card.style.border = '';
             return;
         }
+
+        const primaryFolder = foldersForChannel[0];
+        let hash = 0;
+        for (let i = 0; i < primaryFolder.length; i++) {
+            hash = primaryFolder.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash) % 360;
 
         if (!indicator) {
             indicator = document.createElement('div');
             indicator.className = 'ypp-feed-folder-indicator';
-            indicator.style.cssText = [
-                'position:absolute', 'top:8px', 'right:8px',
-                'background:rgba(20,19,24,0.85)',
-                'backdrop-filter:blur(8px)',
-                '-webkit-backdrop-filter:blur(8px)',
-                'color:#fff',
-                'font-size:11px', 'padding:4px 8px', 'border-radius:6px',
-                'font-weight:500',
-                'font-family:"Roboto","Google Sans",sans-serif',
-                'z-index:10', 'pointer-events:none',
-                'border:1px solid rgba(208,188,255,0.15)',
-                'box-shadow:0 4px 12px rgba(0,0,0,0.3)'
-            ].join(';');
             card.style.position = 'relative';
             card.appendChild(indicator);
         }
+        
+        indicator.style.cssText = [
+            'position:absolute', 'top:8px', 'right:8px',
+            `background:hsla(${hue}, 70%, 50%, 0.15)`,
+            'backdrop-filter:blur(8px)',
+            '-webkit-backdrop-filter:blur(8px)',
+            `color:hsla(${hue}, 100%, 85%, 1)`,
+            'font-size:11px', 'padding:4px 8px', 'border-radius:6px',
+            'font-weight:600', 'letter-spacing: 0.5px',
+            'font-family:"Roboto","Google Sans",sans-serif',
+            'z-index:10', 'pointer-events:none',
+            `border:1px solid hsla(${hue}, 70%, 50%, 0.4)`,
+            `box-shadow:0 4px 12px hsla(${hue}, 70%, 50%, 0.2)`
+        ].join(';');
         indicator.textContent = foldersForChannel.join(', ');
+
+        // Apply glow to the card itself
+        card.style.boxShadow = `0 4px 20px hsla(${hue}, 70%, 50%, 0.08)`;
+        card.style.border = `1px solid hsla(${hue}, 70%, 50%, 0.15)`;
+        card.style.borderRadius = '12px';
     }
 
     async playAll(folderName) {

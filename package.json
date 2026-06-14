@@ -12,6 +12,6 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
-    "animejs": "^4.4.1"
+    "animejs": "^3.2.2"
   }
 }
