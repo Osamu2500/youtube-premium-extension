@@ -13,6 +13,11 @@ import './core/storage-manager.js';
 // Managers (Phase 4.5)
 import './managers/hotkeys-manager.js';
 import './managers/layout-manager.js';
+import './managers/base-page-manager.js';
+import './managers/home-page-manager.js';
+import './managers/watch-page-manager.js';
+import './managers/subs-page-manager.js';
+import './managers/search-page-manager.js';
 
 // UI Architecture (Phase 4)
 import './ui/ui-manager.js';
@@ -175,7 +180,7 @@ import './features/player/automation/video-resumer.js';
 import './features/player/automation/auto-pause.js';
 import './features/player/automation/auto-cinema.js';
 import './features/player/automation/auto-pip.js';
-import './features/player/controls/sidebar-layout.js';
+import './features/player/controls/sidebar-layout.css';
 
 // Feature Manager & Main entry
 import './core/feature-manager.js';

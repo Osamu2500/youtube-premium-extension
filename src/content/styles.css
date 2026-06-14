@@ -7718,3 +7718,144 @@ body.ypp-hide-search-shelves .ypp-noise-section {
 body.ypp-hide-channel-cards ytd-channel-renderer {
     display: none !important;
 }
+
+/* =========================================================================
+   CINEMA MODE & MINIMAL MODE (Migrated from modes-manager.js)
+   ========================================================================= */
+
+/* Cinema Mode — focus on the player */
+.ypp-cinema-mode ytd-watch-flexy:not([theater]) #columns {
+    --ytd-watch-flexy-sidebar-width: 0px !important;
+}
+
+/* Dim sidebar on watch page */
+.ypp-cinema-mode #secondary {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    width: 0 !important;
+    overflow: hidden !important;
+    flex: 0 !important;
+    min-width: 0 !important;
+}
+.ypp-cinema-mode #secondary:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Expand primary column */
+.ypp-cinema-mode #primary {
+    max-width: 100% !important;
+}
+
+/* Darken the page background for immersion */
+.ypp-cinema-mode ytd-page-manager {
+    background: #050505 !important;
+}
+
+/* Dim masthead by default, hide completely on idle */
+.ypp-cinema-mode ytd-masthead {
+    opacity: 0.4;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.ypp-cinema-idle ytd-masthead {
+    opacity: 0 !important;
+    transform: translateY(-100%);
+    pointer-events: none;
+}
+/* Ultra-Dark Contrast for Video */
+.ypp-cinema-mode video {
+    filter: contrast(1.1) brightness(0.95) !important;
+}
+
+/* Letterbox Subtitle Repositioning */
+.ypp-cinema-mode .ytp-caption-window-container {
+    bottom: 2% !important;
+}
+
+/* Curtain Animation */
+@keyframes yppOpenCurtains {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+}
+.ypp-cinema-mode::before, .ypp-cinema-mode::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
+    background: #000;
+    z-index: 9999;
+    pointer-events: none;
+    animation: yppOpenCurtains 1.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+.ypp-cinema-mode::before {
+    left: 0;
+    transform-origin: left;
+    box-shadow: inset -10px 0 30px rgba(0,0,0,0.8);
+}
+.ypp-cinema-mode::after {
+    right: 0;
+    transform-origin: right;
+    box-shadow: inset 10px 0 30px rgba(0,0,0,0.8);
+}
+
+
+/* Minimal Mode — strip non-essentials */
+.ypp-minimal-mode #masthead-container {
+    opacity: 0.15;
+    transition: opacity 0.3s;
+}
+.ypp-minimal-mode #masthead-container:hover {
+    opacity: 1;
+}
+
+/* Hide action buttons row (Like/Share/Save/…) */
+.ypp-minimal-mode ytd-watch-metadata #top-level-buttons-computed,
+.ypp-minimal-mode ytd-watch-metadata #flexible-item-buttons {
+    opacity: 0.2;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+.ypp-minimal-mode ytd-watch-metadata #top-level-buttons-computed:hover,
+.ypp-minimal-mode ytd-watch-metadata #flexible-item-buttons:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Fade subscriptions/channel row */
+.ypp-minimal-mode #owner {
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+.ypp-minimal-mode #owner:hover { opacity: 1; }
+
+/* Collapse comments section */
+.ypp-minimal-mode #comments {
+    opacity: 0.08;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    max-height: 60px;
+    overflow: hidden;
+}
+.ypp-minimal-mode #comments:hover {
+    opacity: 1;
+    pointer-events: auto;
+    max-height: none;
+}
+
+/* Dim sidebar recommendations */
+.ypp-minimal-mode #secondary {
+    opacity: 0.15;
+    transition: opacity 0.3s;
+}
+.ypp-minimal-mode #secondary:hover { opacity: 1; }
+
+/* V2: Icon-Only Mode (Hide text labels on actions) */
+.ypp-minimal-mode ytd-menu-renderer .yt-core-attributed-string,
+.ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next--button-text-content {
+    display: none !important;
+}
+.ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next__icon {
+    margin: 0 !important;
+}

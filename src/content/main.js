@@ -94,6 +94,18 @@
                     this.featureManager.init(this.settings);
                 }
 
+                // Initialize Page Managers
+                if (window.YPP.managers) {
+                    this.pageManagers = [
+                        new window.YPP.managers.HomePageManager(this.Utils, this.settings),
+                        new window.YPP.managers.WatchPageManager(this.Utils, this.settings),
+                        new window.YPP.managers.SubscriptionsPageManager(this.Utils, this.settings),
+                        new window.YPP.managers.SearchPageManager(this.Utils, this.settings)
+                    ];
+                } else {
+                    this.pageManagers = [];
+                }
+
                 this.updateContext();
                 this.setupEvents();
 
@@ -341,6 +353,10 @@
                                 this.settings = { ...this.settings, ...newSettings };
                                 this.Utils?.log('Settings updated from storage event', 'MAIN', 'debug');
                                 this._queueSettingsUpdate();
+                                
+                                if (this.pageManagers) {
+                                    this.pageManagers.forEach(m => m.updateSettings(this.settings));
+                                }
                             }
                         }
                     } catch (error) {
@@ -360,6 +376,10 @@
                     this.settings = { ...this.settings, ...request.settings };
                     this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
                     this._queueSettingsUpdate();
+                    
+                    if (this.pageManagers) {
+                        this.pageManagers.forEach(m => m.updateSettings(this.settings));
+                    }
 
                     sendResponse({ success: true });
                 }
@@ -481,6 +501,18 @@
                         document.body.classList.remove('yt-premium-plus-theme');
                     }
                 });
+
+                // Route to appropriate page managers
+                const currentUrl = window.location.href;
+                if (this.pageManagers) {
+                    this.pageManagers.forEach(manager => {
+                        if (manager.matches(currentUrl)) {
+                            manager.activate(currentUrl);
+                        } else {
+                            manager.deactivate();
+                        }
+                    });
+                }
 
                 this.Utils?.log('Context updated', 'MAIN', 'debug', this.context);
 
