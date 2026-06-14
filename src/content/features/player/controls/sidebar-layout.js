@@ -26,10 +26,17 @@
  * This CSS replicates what the experiment does natively.
  */
 
+import './sidebar-layout.css';
+
 window.YPP          = window.YPP          || {};
 window.YPP.features = window.YPP.features || {};
 
-
+const ROOT_SELECTORS = [
+  'ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer',
+  'ytd-watch-next-secondary-results-renderer yt-lockup-view-model',
+  'ytd-watch-next-secondary-results-renderer ytd-lockup-view-model',
+  'ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer'
+];
 
 window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.features.BaseFeature {
 
@@ -45,19 +52,12 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
   getConfigKey() { return null; }
 
   async enable() {
-    this.observer.register(
-      'sidebarLayoutObserver',
-      'ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer, ytd-watch-next-secondary-results-renderer yt-lockup-view-model, ytd-watch-next-secondary-results-renderer ytd-lockup-view-model, ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer',
-      (elements) => {
-        elements.forEach(el => this._applyLayoutToNode(el));
-      }
-    );
     this._applyLayout();
+    this._cleanUpLegacyStamps();
   }
 
   async disable() {
     try {
-      this.observer.unregister('sidebarLayoutObserver');
       this._teardown();
       this._currentLayout = null;
     } catch (err) {
@@ -66,7 +66,7 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
   }
 
   async onUpdate() {
-    // Force re-apply on every settings update (layout may have changed)
+    // Force re-apply on every settings update
     this._currentLayout = null;
     this._applyLayout();
   }
@@ -76,144 +76,40 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
 
     if (this._currentLayout === layout) return;
     this._currentLayout = layout;
-    
-    // Update existing elements instantly
-    const selectors = [
-      'ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer',
-      'ytd-watch-next-secondary-results-renderer yt-lockup-view-model',
-      'ytd-watch-next-secondary-results-renderer ytd-lockup-view-model',
-      'ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer'
-    ].join(', ');
-    
-    // Clear stale stamps FIRST so _applyLayoutToNode doesn't skip already-stamped nodes
+
+    if (window.YPP.layoutManager) {
+      window.YPP.layoutManager.setState('sidebarLayout', layout);
+    }
+  }
+
+  onPageChange() {
+    // LayoutManager handles SPA navigation re-application
+  }
+
+  _cleanUpLegacyStamps() {
+    // One-time cleanup of legacy DOM stamps left over from previous extension versions
     document.querySelectorAll('[data-ypp-processed-layout]').forEach(el => {
       el.removeAttribute('data-ypp-processed-layout');
     });
 
-    // Re-apply to all current sidebar items
-    document.querySelectorAll(selectors).forEach(el => {
-      this._applyLayoutToNode(el);
-    });
-  }
-
-  onPageChange() {
-    // YouTube SPA navigation rebuilds the sidebar DOM — always re-apply
-    this._currentLayout = null;
-    this._applyLayout();
-  }
-
-  _applyLayoutToNode(node) {
-    if (!node) return;
-    const layout = this._currentLayout || 'compact';
-
-    // Prevent double processing unless layout changed
-    if (node.getAttribute('data-ypp-processed-layout') === layout) return;
-    node.setAttribute('data-ypp-processed-layout', layout);
-
-    if (layout === 'expanded') {
-      node.style.setProperty('display', 'block', 'important');
-      node.style.setProperty('margin-bottom', '12px', 'important');
+    // Clean up any legacy inline styles that might have been applied by earlier code
+    document.querySelectorAll(ROOT_SELECTORS.join(', ')).forEach(node => {
+      if (node.style) {
+        node.style.removeProperty('display');
+        node.style.removeProperty('margin-bottom');
+      }
 
       const dismissible = node.querySelector('#dismissible') || node;
-      dismissible.style.setProperty('display', 'flex', 'important');
-      dismissible.style.setProperty('flex-direction', 'column', 'important');
-      dismissible.style.setProperty('width', '100%', 'important');
-      dismissible.style.setProperty('align-items', 'stretch', 'important');
+      if (dismissible && dismissible.style) {
+        dismissible.style.removeProperty('display');
+        dismissible.style.removeProperty('flex-direction');
+        dismissible.style.removeProperty('width');
+        dismissible.style.removeProperty('align-items');
+        dismissible.style.removeProperty('gap');
+      }
 
       const thumbnail = node.querySelector('#thumbnail, ytd-thumbnail, a:has(yt-image)');
-      if (thumbnail) {
-        thumbnail.style.setProperty('display', 'block', 'important');
-        thumbnail.style.setProperty('width', '100%', 'important');
-        thumbnail.style.setProperty('height', 'auto', 'important');
-        thumbnail.style.setProperty('aspect-ratio', '16 / 9', 'important');
-        thumbnail.style.setProperty('max-width', '100%', 'important');
-        thumbnail.style.setProperty('margin-bottom', '8px', 'important');
-        thumbnail.style.setProperty('border-radius', '8px', 'important');
-        thumbnail.style.setProperty('overflow', 'hidden', 'important');
-        thumbnail.style.setProperty('flex', 'none', 'important');
-      }
-
-      const details = node.querySelector('#details, .yt-lockup-metadata-view-model-wiz');
-      if (details) {
-        details.style.setProperty('display', 'flex', 'important');
-        details.style.setProperty('flex-direction', 'row', 'important');
-        details.style.setProperty('width', '100%', 'important');
-        details.style.setProperty('padding', '0', 'important');
-        details.style.setProperty('align-items', 'flex-start', 'important');
-        details.style.setProperty('gap', '8px', 'important');
-      }
-
-      const title = node.querySelector('#video-title, h3');
-      if (title) {
-        title.style.setProperty('-webkit-line-clamp', 'unset', 'important');
-        title.style.setProperty('max-height', 'unset', 'important');
-        title.style.setProperty('white-space', 'normal', 'important');
-        title.style.setProperty('overflow', 'visible', 'important');
-      }
-    } else {
-      node.style.setProperty('display', 'block', 'important');
-      node.style.setProperty('margin-bottom', '8px', 'important');
-
-      const dismissible = node.querySelector('#dismissible') || node;
-      dismissible.style.setProperty('display', 'flex', 'important');
-      dismissible.style.setProperty('flex-direction', 'row', 'important');
-      dismissible.style.setProperty('width', '100%', 'important');
-      dismissible.style.setProperty('align-items', 'flex-start', 'important');
-      dismissible.style.setProperty('gap', '8px', 'important');
-
-      const thumbnail = node.querySelector('#thumbnail, ytd-thumbnail, a:has(yt-image)');
-      if (thumbnail) {
-        thumbnail.style.setProperty('display', 'block', 'important');
-        thumbnail.style.setProperty('width', '168px', 'important');
-        thumbnail.style.setProperty('height', '94px', 'important');
-        thumbnail.style.setProperty('max-width', '168px', 'important');
-        thumbnail.style.setProperty('min-width', '168px', 'important');
-        thumbnail.style.setProperty('margin-bottom', '0', 'important');
-        thumbnail.style.setProperty('border-radius', '8px', 'important');
-        thumbnail.style.setProperty('flex', 'none', 'important');
-      }
-
-      const details = node.querySelector('#details, .yt-lockup-metadata-view-model-wiz');
-      if (details) {
-        details.style.setProperty('display', 'flex', 'important');
-        details.style.setProperty('flex-direction', 'column', 'important');
-        details.style.setProperty('flex', '1', 'important');
-        details.style.setProperty('min-width', '0', 'important');
-        details.style.setProperty('padding', '0', 'important');
-      }
-
-      const title = node.querySelector('#video-title, h3');
-      if (title) {
-        title.style.setProperty('-webkit-line-clamp', '2', 'important');
-        title.style.setProperty('max-height', '3.2rem', 'important');
-        title.style.setProperty('overflow', 'hidden', 'important');
-      }
-    }
-  }
-
-  _teardown() {
-    // Clean up DOM stamps and inline styles
-    const selectors = [
-      'ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer',
-      'ytd-watch-next-secondary-results-renderer yt-lockup-view-model',
-      'ytd-watch-next-secondary-results-renderer ytd-lockup-view-model',
-      'ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer'
-    ].join(', ');
-
-    document.querySelectorAll(selectors).forEach(node => {
-      node.removeAttribute('data-ypp-processed-layout');
-      node.style.removeProperty('display');
-      node.style.removeProperty('margin-bottom');
-
-      const dismissible = node.querySelector('#dismissible') || node;
-      dismissible.style.removeProperty('display');
-      dismissible.style.removeProperty('flex-direction');
-      dismissible.style.removeProperty('width');
-      dismissible.style.removeProperty('align-items');
-      dismissible.style.removeProperty('gap');
-
-      const thumbnail = node.querySelector('#thumbnail, ytd-thumbnail, a:has(yt-image)');
-      if (thumbnail) {
+      if (thumbnail && thumbnail.style) {
         thumbnail.style.removeProperty('display');
         thumbnail.style.removeProperty('width');
         thumbnail.style.removeProperty('height');
@@ -227,7 +123,7 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
       }
 
       const details = node.querySelector('#details, .yt-lockup-metadata-view-model-wiz');
-      if (details) {
+      if (details && details.style) {
         details.style.removeProperty('display');
         details.style.removeProperty('flex-direction');
         details.style.removeProperty('flex');
@@ -239,12 +135,18 @@ window.YPP.features.SidebarLayout = class SidebarLayout extends window.YPP.featu
       }
 
       const title = node.querySelector('#video-title, h3');
-      if (title) {
+      if (title && title.style) {
         title.style.removeProperty('-webkit-line-clamp');
         title.style.removeProperty('max-height');
         title.style.removeProperty('white-space');
         title.style.removeProperty('overflow');
       }
     });
+  }
+
+  _teardown() {
+    document.body.classList.remove('ypp-sidebar-expanded');
+    document.body.classList.remove('ypp-sidebar-compact');
+    this._cleanUpLegacyStamps();
   }
 };

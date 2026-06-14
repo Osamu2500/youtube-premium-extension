@@ -332,7 +332,7 @@ const initApp = () => {
                 if (el.type === 'checkbox' && window.anime) {
                     const toggleCard = el.closest('.toggle-card') || el.closest('.mode-card');
                     if (toggleCard) {
-                        window.anime({
+                        window.anime.animate({
                             targets: toggleCard,
                             scale: [0.97, 1],
                             duration: 400,
@@ -341,7 +341,7 @@ const initApp = () => {
                     }
                     const slider = el.nextElementSibling;
                     if (slider && slider.classList.contains('slider')) {
-                        window.anime({
+                        window.anime.animate({
                             targets: slider,
                             scale: [0.85, 1],
                             duration: 400,
@@ -481,7 +481,7 @@ const initApp = () => {
         
         // Spring stagger intro animations
         if (window.anime) {
-            window.anime({
+            window.anime.animate({
                 targets: '.nav-item',
                 translateX: [-20, 0],
                 opacity: [0, 1],
@@ -490,7 +490,7 @@ const initApp = () => {
                 easing: 'easeOutElastic(1, .6)'
             });
             
-            window.anime({
+            window.anime.animate({
                 targets: '.tab-content.active .card-group, .tab-content.active .feature-grid > div',
                 translateY: [20, 0],
                 opacity: [0, 1],

@@ -259,14 +259,18 @@ function renderLayoutToggle(item, state) {
     wrap.appendChild(hiddenInput);
 
     // Logic
-    const applyActiveState = (layout) => {
-        hiddenInput.value = layout;
+    const updateVisuals = (layout) => {
         [btnCompact, btnExpanded].forEach(b => {
             const isActive = b.dataset.layout === layout;
             b.classList.toggle('active', isActive);
             b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
             b.style.color = isActive ? 'var(--accent, #3ea6ff)' : 'rgba(255,255,255,0.5)';
         });
+    };
+
+    const applyActiveState = (layout) => {
+        hiddenInput.value = layout;
+        updateVisuals(layout);
         
         hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
         
@@ -281,8 +285,8 @@ function renderLayoutToggle(item, state) {
     btnCompact.onclick = () => applyActiveState('compact');
     btnExpanded.onclick = () => applyActiveState('expanded');
 
-    // Initialize UI state
-    setTimeout(() => applyActiveState(hiddenInput.value), 10);
+    // Initialize UI visual state without triggering save
+    updateVisuals(hiddenInput.value);
     
     _registerInput(hiddenInput, state);
     return wrap;

@@ -339,15 +339,8 @@
                             const newSettings = changes.settings.newValue;
                             if (newSettings) {
                                 this.settings = { ...this.settings, ...newSettings };
-                                this.Utils?.log('Settings updated from popup', 'MAIN', 'debug');
-
-                                if (this.featureManager) {
-                                    try {
-                                        this.featureManager.init(this.settings);
-                                    } catch (error) {
-                                        this.Utils?.log(`Error re-initializing features on settings change: ${error.message}`, 'MAIN', 'error');
-                                    }
-                                }
+                                this.Utils?.log('Settings updated from storage event', 'MAIN', 'debug');
+                                this._queueSettingsUpdate();
                             }
                         }
                     } catch (error) {
@@ -363,22 +356,10 @@
             // Listen for direct messages for instant updates
             const messageHandler = (request, sender, sendResponse) => {
                 if (request.action === 'UPDATE_SETTINGS' && request.settings) {
-                    // Merge incoming settings over current state — never replace wholesale,
-                    // as the popup may send partial objects (e.g. just { sidebarLayout })
+                    // Merge incoming settings over current state
                     this.settings = { ...this.settings, ...request.settings };
                     this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
-                    
-                    if (this._settingsUpdateTimeout) clearTimeout(this._settingsUpdateTimeout);
-                    this._settingsUpdateTimeout = setTimeout(() => {
-                        this._settingsUpdateTimeout = null;
-                        if (this.featureManager) {
-                            try {
-                                this.featureManager.init(this.settings);
-                            } catch (error) {
-                                this.Utils?.log(`Error re-initializing features on instant update: ${error.message}`, 'MAIN', 'error');
-                            }
-                        }
-                    }, 150);
+                    this._queueSettingsUpdate();
 
                     sendResponse({ success: true });
                 }
@@ -394,6 +375,24 @@
             };
             chrome.runtime.onMessage.addListener(messageHandler);
             this.eventListeners.push({ target: chrome.runtime.onMessage, event: 'message', handler: messageHandler });
+        },
+
+        /**
+         * Queues a debounced update to FeatureManager
+         * @private
+         */
+        _queueSettingsUpdate() {
+            if (this._settingsUpdateTimeout) clearTimeout(this._settingsUpdateTimeout);
+            this._settingsUpdateTimeout = setTimeout(() => {
+                this._settingsUpdateTimeout = null;
+                if (this.featureManager) {
+                    try {
+                        this.featureManager.init(this.settings);
+                    } catch (error) {
+                        this.Utils?.log(`Error re-initializing features: ${error.message}`, 'MAIN', 'error');
+                    }
+                }
+            }, 100);
         },
 
         /**

@@ -24,21 +24,46 @@ export function loadSettings(updateUICallbacks) {
     const Utils = getUtils();
     try {
         (async () => {
-            let data;
-            try {
-                data = await chrome.storage.sync.get('settings');
-            } catch (e) {
-                Utils.log('Sync Storage Load Error: ' + e.message, 'POPUP', 'error');
-            }
-            if (!data || Object.keys(data).length === 0 || !data.settings) {
-                data = await chrome.storage.local.get('settings');
+            const getStorage = async (area) => {
+                if (!area) return {};
+                try {
+                    return await new Promise(resolve => {
+                        let isResolved = false;
+                        const cb = (res) => {
+                            if (isResolved) return;
+                            isResolved = true;
+                            resolve(chrome.runtime.lastError ? {} : (res || {}));
+                        };
+                        const result = area.get('settings', cb);
+                        if (result && typeof result.then === 'function') {
+                            result.then(cb).catch(() => cb({}));
+                        }
+                    });
+                } catch (e) { return {}; }
+            };
+
+            const [syncData, localData] = await Promise.all([
+                getStorage(chrome.storage.sync),
+                getStorage(chrome.storage.local)
+            ]);
+            
+            const syncSettings = syncData?.settings;
+            const localSettings = localData?.settings;
+            
+            let raw = {};
+            if (syncSettings && localSettings) {
+                const syncTime = syncSettings.lastUpdated || 0;
+                const localTime = localSettings.lastUpdated || 0;
+                raw = syncTime >= localTime ? syncSettings : localSettings;
+            } else {
+                raw = syncSettings || localSettings || {};
             }
 
             const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
                 ? window.YPP.CONSTANTS.DEFAULT_SETTINGS 
                 : {};
             
-            state.settings = { ...defaultSettings, ...(data.settings || {}) };
+            state.settings = { ...defaultSettings, ...raw };
 
             state.settingKeys.forEach(key => {
                 const el = state.elements[key];
@@ -146,18 +171,41 @@ function _processWriteQueue() {
     state._settingsWriteQueue = [];
     
     (async () => {
-        let result = {};
-        try {
-            result = await chrome.storage.sync.get('settings');
-            if (!result || !result.settings) {
-                result = await chrome.storage.local.get('settings');
-            }
-        } catch (e) {
-            result = await chrome.storage.local.get('settings');
+        const getStorage = async (area) => {
+            if (!area) return {};
+            try {
+                return await new Promise(resolve => {
+                    let isResolved = false;
+                    const cb = (res) => {
+                        if (isResolved) return;
+                        isResolved = true;
+                        resolve(chrome.runtime.lastError ? {} : (res || {}));
+                    };
+                    const result = area.get('settings', cb);
+                    if (result && typeof result.then === 'function') {
+                        result.then(cb).catch(() => cb({}));
+                    }
+                });
+            } catch (e) { return {}; }
+        };
+
+        const [syncData, localData] = await Promise.all([
+            getStorage(chrome.storage.sync),
+            getStorage(chrome.storage.local)
+        ]);
+        
+        const syncSettings = syncData?.settings;
+        const localSettings = localData?.settings;
+        
+        let currentSettings = {};
+        if (syncSettings && localSettings) {
+            const syncTime = syncSettings.lastUpdated || 0;
+            const localTime = localSettings.lastUpdated || 0;
+            currentSettings = syncTime >= localTime ? syncSettings : localSettings;
+        } else {
+            currentSettings = syncSettings || localSettings || {};
         }
 
-        const currentSettings = result.settings || {};
-        
         updates.forEach(update => {
             if (update.fullState) {
                 Object.assign(currentSettings, update.fullState);
@@ -166,12 +214,7 @@ function _processWriteQueue() {
             }
         });
         
-        if (Object.keys(currentSettings).length < 2) {
-             const defaultSettings = (window.YPP && window.YPP.CONSTANTS) 
-                ? window.YPP.CONSTANTS.DEFAULT_SETTINGS 
-                : {};
-             Object.assign(currentSettings, defaultSettings, currentSettings);
-        }
+        currentSettings.lastUpdated = Date.now();
 
         try {
             await chrome.storage.sync.set({ settings: currentSettings });

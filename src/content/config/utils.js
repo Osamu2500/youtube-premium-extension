@@ -755,13 +755,30 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 return CONSTANTS.DEFAULT_SETTINGS || {};
             }
 
-            // Prefer sync storage, fallback to local if empty
-            let data = await chrome.storage.sync.get('settings');
-            if (!data || Object.keys(data).length === 0 || !data.settings) {
-                data = await chrome.storage.local.get('settings');
-            }
+            const getStorage = (area) => new Promise(resolve => {
+                try {
+                    area.get('settings', res => resolve(chrome.runtime.lastError ? {} : (res || {})));
+                } catch (e) { resolve({}); }
+            });
+
+            // Fetch from both sync and local storage
+            const [syncData, localData] = await Promise.all([
+                getStorage(chrome.storage.sync),
+                getStorage(chrome.storage.local)
+            ]);
             
-            const raw = data.settings || {};
+            const syncSettings = syncData?.settings;
+            const localSettings = localData?.settings;
+            
+            let raw = {};
+            if (syncSettings && localSettings) {
+                const syncTime = syncSettings.lastUpdated || 0;
+                const localTime = localSettings.lastUpdated || 0;
+                // Prefer the most recently updated settings to avoid stale sync overwrites
+                raw = syncTime >= localTime ? syncSettings : localSettings;
+            } else {
+                raw = syncSettings || localSettings || {};
+            }
 
             // Run through schema validator if available (settings-schema.js loads before utils)
             if (window.YPP?.SettingsSchema) {
@@ -788,15 +805,18 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
                 return;
             }
             
+            const currentSettings = await window.YPP.Utils.loadSettings();
+            const newSettings = { ...currentSettings, ...settings, lastUpdated: Date.now() };
+
             // Try saving to sync storage first
             try {
-                await chrome.storage.sync.set({ settings });
+                await chrome.storage.sync.set({ settings: newSettings });
             } catch (e) {
                 window.YPP.Utils?.log('Sync storage quota exceeded, falling back to local: ' + e.message, 'UTILS', 'warn');
             }
             
             // Always save to local as a reliable backup
-            await chrome.storage.local.set({ settings });
+            await chrome.storage.local.set({ settings: newSettings });
             window.YPP.Utils?.log('Settings saved', 'UTILS', 'debug');
         } catch (error) {
             window.YPP.Utils?.log('Error saving settings: ' + error.message, 'UTILS', 'error');

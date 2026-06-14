@@ -25,7 +25,7 @@ export class VideoSpeedHotkeys {
         keys.push(keyName);
         const comboKey = keys.join('+').toUpperCase();
 
-        console.log('[VSC Hotkeys] Pressed:', comboKey, 'Shortcuts:', shortcuts);
+        this.utils.log(`Pressed: ${comboKey} Shortcuts: ${JSON.stringify(shortcuts)}`, 'VSCHotkeys', 'info');
 
         let handled = false;
 
@@ -34,7 +34,7 @@ export class VideoSpeedHotkeys {
             const scKey = sc.key.toUpperCase();
             if (comboKey !== scKey) continue;
             
-            console.log('[VSC Hotkeys] Matched action:', sc.action);
+            this.utils.log(`Matched action: ${sc.action}`, 'VSCHotkeys', 'info');
             
             if (!handled) {
                 e.preventDefault();

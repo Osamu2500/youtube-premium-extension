@@ -2404,10 +2404,16 @@ body.ypp-search-grid-mode ytd-search-refinement-card-renderer {
    When it enters the viewport, YouTube's IntersectionObserver loads the next
    page of results. Hiding it with display:none breaks infinite scroll entirely.
    We just make it span the full row and keep it at the bottom of the grid. */
-body.ypp-search-grid-mode ytd-continuation-item-renderer {
-  grid-column: 1 / -1;
-  width: 100%;
+body.ypp-search-grid-mode ytd-continuation-item-renderer,
+body.yt-premium-plus-theme ytd-two-column-search-results-renderer ytd-continuation-item-renderer,
+body.yt-premium-plus-theme ytd-rich-grid-renderer ytd-continuation-item-renderer {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  flex-basis: 100%;
   min-height: 0 !important;
+  height: auto !important;
+  margin-top: 24px !important;
+  margin-bottom: 16px !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2867,12 +2873,7 @@ body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-section-renderer:empt
   width: 0 !important;
 }
 
-/* Continuation Items */
-body.ypp-search-grid-mode ytd-continuation-item-renderer {
-  width: 100%;
-  flex-basis: 100%;
-  margin-top: 24px;
-}
+
 
 /* ===================================================================================
    ENHANCED HOVER EFFECTS
@@ -3347,12 +3348,7 @@ body.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer {
   margin-bottom: 24px;
 }
 
-/* Handle continuation items (load more) */
-body.yt-premium-plus-theme ytd-continuation-item-renderer {
-  grid-column: 1 / -1 !important;
-  width: 100% !important;
-  margin-top: 24px !important;
-}
+
 
 /* ===================================================================================
    11. SEARCH GRID - STRICT SHORTS SUPPRESSION & LAYOUT HARDENING

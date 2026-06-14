@@ -327,11 +327,15 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
         this._startTrackingVideoRatio();
 
         // Phase 2: Sidebar Comments
-        // Since we use CSS :has() now, we just unconditionally toggle the base class
-        if (this.sidebarCommentsEnabled) {
-            document.documentElement.classList.add('ypp-sidebar-comments-active');
+        // Delegate to LayoutManager
+        if (window.YPP.layoutManager) {
+            window.YPP.layoutManager.setState('sidebarComments', this.sidebarCommentsEnabled);
         } else {
-            document.documentElement.classList.remove('ypp-sidebar-comments-active');
+            if (this.sidebarCommentsEnabled) {
+                document.documentElement.classList.add('ypp-sidebar-comments-active');
+            } else {
+                document.documentElement.classList.remove('ypp-sidebar-comments-active');
+            }
         }
     }
 
@@ -340,7 +344,11 @@ window.YPP.features.WatchRedesign = class WatchRedesign extends (window.YPP.feat
      */
     _cleanup() {
         document.documentElement.classList.remove('ypp-glass-player-active');
-        document.documentElement.classList.remove('ypp-sidebar-comments-active');
+        if (window.YPP.layoutManager) {
+            window.YPP.layoutManager.setState('sidebarComments', false);
+        } else {
+            document.documentElement.classList.remove('ypp-sidebar-comments-active');
+        }
         this._stopTrackingVideoRatio();
     }
 

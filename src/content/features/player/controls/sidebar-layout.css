@@ -1,0 +1,146 @@
+/* f:\Youtube 2.0\src\content\features\player\controls\sidebar-layout.css */
+/* 
+ * Sidebar Layout Component
+ * Toggles between YouTube's compact sidebar and the new 2026 large-thumbnail layout.
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * EXPANDED LAYOUT
+ * ══════════════════════════════════════════════════════════════════════════ */
+body.ypp-sidebar-expanded :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) {
+  display: block !important;
+  margin-bottom: 12px !important;
+}
+
+body.ypp-sidebar-expanded :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#dismissible, #content, .yt-lockup-view-model-wiz) {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  align-items: stretch !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.ypp-sidebar-expanded :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#thumbnail, ytd-thumbnail, a:has(yt-image)) {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  margin-bottom: 8px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  flex: none !important;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.ypp-sidebar-expanded :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#details, .yt-lockup-metadata-view-model-wiz) {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.ypp-sidebar-expanded :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#video-title, h3) {
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  max-height: unset !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * COMPACT LAYOUT
+ * ══════════════════════════════════════════════════════════════════════════ */
+body.ypp-sidebar-compact :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) {
+  display: block !important;
+  margin-bottom: 8px !important;
+}
+
+body.ypp-sidebar-compact :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#dismissible, #content, .yt-lockup-view-model-wiz) {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.ypp-sidebar-compact :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#thumbnail, ytd-thumbnail, a:has(yt-image)) {
+  display: block !important;
+  width: 168px !important;
+  aspect-ratio: 16 / 9 !important;
+  max-width: 168px !important;
+  min-width: 168px !important;
+  margin-bottom: 0 !important;
+  border-radius: 8px !important;
+  flex: none !important;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.ypp-sidebar-compact :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#details, .yt-lockup-metadata-view-model-wiz) {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.ypp-sidebar-compact :is(
+  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
+  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+) :is(#video-title, h3) {
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  max-height: 3.2rem !important;
+  overflow: hidden !important;
+}

@@ -23,6 +23,12 @@ window.YPP.features.DistractionFreeBase = class DistractionFreeBase extends wind
      */
     enableDistractionFreeLayout(modeClass, options = {}) {
         document.body.classList.add(modeClass);
+        
+        if (window.YPP.layoutManager) {
+            // Extract mode name from class (e.g., ypp-zen-mode -> zen)
+            const modeName = modeClass.replace('ypp-', '').replace('-mode', '');
+            window.YPP.layoutManager.setState('distractionFreeMode', modeName);
+        }
 
         if (options.hideRelated) document.body.classList.add('ypp-hide-related');
         if (options.hideComments) document.body.classList.add('ypp-hide-comments');
@@ -38,6 +44,10 @@ window.YPP.features.DistractionFreeBase = class DistractionFreeBase extends wind
      */
     disableDistractionFreeLayout(modeClass, options = {}) {
         document.body.classList.remove(modeClass);
+
+        if (window.YPP.layoutManager) {
+            window.YPP.layoutManager.setState('distractionFreeMode', 'none');
+        }
 
         if (options.hideRelated) document.body.classList.remove('ypp-hide-related');
         if (options.hideComments) document.body.classList.remove('ypp-hide-comments');

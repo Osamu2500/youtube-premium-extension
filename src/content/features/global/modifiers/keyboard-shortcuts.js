@@ -26,7 +26,6 @@ window.YPP.features = window.YPP.features || {};
 class KeyboardShortcuts extends window.YPP.features.BaseFeature {
     constructor() {
         super('KeyboardShortcuts');
-        this._boundHandler = this._handleKey.bind(this);
 
         // Default key bindings and labels pulled from static class properties
         // so getBindings() and the constructor always stay in sync
@@ -54,91 +53,33 @@ class KeyboardShortcuts extends window.YPP.features.BaseFeature {
 
     async enable() {
         await super.enable();
-        this.addListener(document, 'keydown', this._boundHandler, { capture: false });
+        
+        // Build bindings for the hotkeys manager
+        const bindings = [];
+        for (const [action, definition] of Object.entries(this.actions)) {
+            const boundKey = this.settings?.[`shortcut_${action}`] ?? this.defaults[action];
+            if (boundKey) {
+                bindings.push({
+                    combo: boundKey,
+                    callback: () => {
+                        definition.fn();
+                        this._showToast(definition.label);
+                    }
+                });
+            }
+        }
+        
+        window.YPP.hotkeysManager?.register('keyboard-shortcuts', bindings);
         this.utils?.log('Keyboard Shortcuts enabled', 'SHORTCUTS', 'debug');
     }
 
     async disable() {
         await super.disable();
-        // Listener removed automatically by BaseFeature.cleanupEvents()
+        window.YPP.hotkeysManager?.unregister('keyboard-shortcuts');
         this.utils?.log('Keyboard Shortcuts disabled', 'SHORTCUTS', 'debug');
     }
 
-    // =========================================================================
-    // KEY HANDLER
-    // =========================================================================
 
-    _handleKey(e) {
-        // Only fire on watch/shorts pages
-        const path = window.location.pathname;
-        if (!path.startsWith('/watch') && !path.startsWith('/shorts')) return;
-
-        // Never fire inside text inputs (search, comment boxes, etc.)
-        const tag = e.target?.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
-
-        const combo = this._comboFromEvent(e);
-        if (!combo) return;
-
-        for (const [action, definition] of Object.entries(this.actions)) {
-            const boundKey = this.settings?.[`shortcut_${action}`] ?? this.defaults[action];
-            if (boundKey && combo === this._normalizeCombo(boundKey)) {
-                e.preventDefault();
-                e.stopPropagation();
-                try {
-                    definition.fn();
-                    this._showToast(definition.label);
-                } catch (err) {
-                    this.utils?.log(`Shortcut error for ${action}: ${err.message}`, 'SHORTCUTS', 'error');
-                }
-                return;
-            }
-        }
-    }
-
-    /**
-     * Build a normalized combo string from a KeyboardEvent e.g. "Shift+Z"
-     * @param {KeyboardEvent} e
-     * @returns {string}
-     */
-    _comboFromEvent(e) {
-        const parts = [];
-        if (e.ctrlKey)  parts.push('Ctrl');
-        if (e.altKey)   parts.push('Alt');
-        if (e.shiftKey) parts.push('Shift');
-        if (e.metaKey)  parts.push('Meta');
-
-        let key = e.key;
-        if (e.shiftKey) {
-            const shiftMap = { '<': ',', '>': '.', ':': ';', '"': "'", '{': '[', '}': ']', '|': '\\', '?': '/', '~': '`', '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0', '_': '-', '+': '=' };
-            if (shiftMap[key]) key = shiftMap[key];
-        }
-        if (key === ' ') key = 'Space';
-
-        // Use key for the actual key, uppercase single letters
-        key = key.length === 1 ? key.toUpperCase() : key;
-        // Skip pure modifier keys
-        if (['Control','Alt','Shift','Meta'].includes(key)) return '';
-        parts.push(key);
-        return parts.join('+');
-    }
-
-    /**
-     * Normalize a stored combo string to match event format
-     * @param {string} combo - e.g. "Shift+z" or "shift+z"
-     * @returns {string} - e.g. "Shift+Z"
-     */
-    _normalizeCombo(combo) {
-        return combo.split('+').map((part, i, arr) => {
-            if (i < arr.length - 1) {
-                // Modifier: capitalize first letter
-                return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-            }
-            return part.length === 1 ? part.toUpperCase() : part;
-        }).join('+');
-    }
-
-    // =========================================================================
     // ACTION IMPLEMENTATIONS
     // =========================================================================
 

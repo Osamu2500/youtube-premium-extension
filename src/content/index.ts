@@ -10,6 +10,10 @@ import './core/dom-api.js';
 import './core/dom-observer.js';
 import './core/storage-manager.js';
 
+// Managers (Phase 4.5)
+import './managers/hotkeys-manager.js';
+import './managers/layout-manager.js';
+
 // UI Architecture (Phase 4)
 import './ui/ui-manager.js';
 import './ui/components/button.js';

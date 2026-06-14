@@ -578,10 +578,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
      */
     diagnose() {
         console.group('[YPP] Subscription Folder Diagnostic');
-        console.log('Active folder:', this.activeFolder);
-        console.log('Stored folders:', JSON.stringify(this.storage.folders, null, 2));
-        console.log('Active channel set (raw):', [...this.activeChannelSet]);
-        console.log('Active channel set (norm):', [...this.activeChannelSet].map(n => this._normChannel(n)));
+        this.utils.log(`Active folder: ${this.activeFolder}`, 'SubFolders', 'info');
+        this.utils.log(`Stored folders: ${JSON.stringify(this.storage.folders, null, 2)}`, 'SubFolders', 'info');
+        this.utils.log(`Active channel set (raw): ${[...this.activeChannelSet]}`, 'SubFolders', 'info');
+        this.utils.log(`Active channel set (norm): ${[...this.activeChannelSet].map(n => this._normChannel(n))}`, 'SubFolders', 'info');
 
         const cards = document.querySelectorAll(
             'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer'
@@ -652,8 +652,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         const DEBUG = !!window.__YPP_FILTER_DEBUG;
         if (DEBUG && this.activeFolder) {
             console.group(`[YPP Filter] folder="${this.activeFolder}"  stored=${this.activeChannelSet.size} channels`);
-            console.log('Stored (raw):', [...this.activeChannelSet]);
-            console.log('Stored (norm):', [...normActiveSet]);
+            this.utils.log(`Stored (raw): ${[...this.activeChannelSet]}`, 'SubFolders', 'info');
+            this.utils.log(`Stored (norm): ${[...normActiveSet]}`, 'SubFolders', 'info');
         }
 
         // Track cards whose channel name hasn't rendered yet so we can retry.

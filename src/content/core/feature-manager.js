@@ -20,6 +20,8 @@ window.YPP.FeatureManager = class FeatureManager {
         this.errorCounts = {};
         /** @type {number} Maximum errors before disabling feature */
         this.MAX_ERRORS = 3;
+        /** @type {number} Track execution loops to cancel stale ones */
+        this._currentApplyId = 0;
     }
 
     /**
@@ -150,6 +152,7 @@ window.YPP.FeatureManager = class FeatureManager {
      * @returns {Promise<void>}
      */
     async applyFeatures() {
+        const applyId = ++this._currentApplyId;
         const entries = Object.entries(this.features);
         
         // Phase 5: Chunk processing to avoid blocking main thread on boot
@@ -157,6 +160,8 @@ window.YPP.FeatureManager = class FeatureManager {
         const CHUNK_SIZE = 4;
         
         for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
+            if (this._currentApplyId !== applyId) return; // Cancelled by newer run
+
             const chunk = entries.slice(i, i + CHUNK_SIZE);
             const chunkPromises = chunk.map(([name, instance]) => {
                 if (this.errorCounts[name] >= this.MAX_ERRORS) {

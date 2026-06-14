@@ -112,7 +112,7 @@ window.YPP.features.SplitScrolling = class SplitScrolling extends window.YPP.fea
         // `ytd-watch-flexy:not([hidden])` targets only the active watch page —
         // the element persists in the DOM between navigations but gets [hidden]
         // while on non-watch pages, preventing unwanted style application.
-        const watchCtx = 'body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden])';
+        const watchCtx = 'html:not(.ypp-sidebar-comments-active) body.ypp-split-scrolling-enabled ytd-watch-flexy:not([hidden])';
 
         style.textContent = `
             /* ══ YPP: Independent Sidebar Scroll ══════════════════════════════ */
@@ -152,6 +152,7 @@ window.YPP.features.SplitScrolling = class SplitScrolling extends window.YPP.fea
                 position: sticky !important;
                 top: var(--ytd-masthead-height, 56px) !important;
                 height: calc(100vh - var(--ytd-masthead-height, 56px)) !important;
+                box-sizing: border-box !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 margin-top: 0 !important;

@@ -36,7 +36,7 @@ export function initUI(document) {
                                 el.style.opacity = '0';
                             });
                             
-                            window.anime({
+                            window.anime.animate({
                                 targets: animatableItems,
                                 translateX: [ -12, 0 ],
                                 opacity: [ 0, 1 ],

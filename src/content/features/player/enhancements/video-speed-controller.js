@@ -12,8 +12,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         this.markers = new WeakMap();
         this._mutationObserver = null;
         this._lastActiveVideo = null;
-        this._boundHandleKeyDown = this.handleKeyDown.bind(this);
-        this.hotkeyManager = new VideoSpeedHotkeys(this);
+        this._lastActiveVideo = null;
     }
 
     getConfigKey() {
@@ -37,8 +36,8 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             }, true); // immediate=true scans for existing videos automatically
         }
 
-        // Global keyboard shortcuts
-        document.addEventListener('keydown', this._boundHandleKeyDown, true);
+        // Global keyboard shortcuts are now handled via registerShortcuts()
+        this.registerShortcuts();
 
         // Cross-tab sync listener
         if (this.settings?.vscRememberSpeed !== false) {
@@ -72,7 +71,9 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             this._storageListener = null;
         }
 
-        document.removeEventListener('keydown', this._boundHandleKeyDown, true);
+        if (window.YPP.hotkeysManager) {
+            window.YPP.hotkeysManager.unregister('vsc');
+        }
 
         const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
         document.querySelectorAll(selector).forEach(video => {
@@ -452,38 +453,83 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         }, 500);
     }
 
-    handleKeyDown(e) {
-        // Ignore if typing in an input
-        const target = e.target;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
-
-        // Use the last active video, or find the largest video on screen
-        let video = this._lastActiveVideo;
-        if (!video || !video.isConnected) {
-            video = this.findLargestVideo();
-        }
-
-        if (!video) return;
-        
-        // Ensure the video is attached so state is available
-        if (!this.controllers.has(video)) {
-            this.attachToVideo(video);
-        }
-
-        const state = this.controllers.get(video);
-        if (state) state.lastInteraction = Date.now();
-
-        const step = this.settings?.vscSpeedStep ?? 0.25;
-        const preferred = this.settings?.vscPreferredSpeed ?? 2.0;
-        
+    registerShortcuts() {
         const shortcuts = this.settings?.vscShortcuts || [];
-        
-        const handled = this.hotkeyManager.handleKeyDown(e, video, state, shortcuts);
+        if (!shortcuts || shortcuts.length === 0) return;
 
-        if (handled) {
-            this.showController(video);
-            this.hideControllerDelay(video);
+        const bindings = [];
+        for (const sc of shortcuts) {
+            if (!sc.key) continue;
+            bindings.push({
+                combo: sc.key,
+                callback: (e) => {
+                    let video = this._lastActiveVideo;
+                    if (!video || !video.isConnected) {
+                        video = this.findLargestVideo();
+                    }
+                    if (!video) return;
+
+                    if (!this.controllers.has(video)) {
+                        this.attachToVideo(video);
+                    }
+
+                    const state = this.controllers.get(video);
+                    if (state) state.lastInteraction = Date.now();
+
+                    const val = parseFloat(sc.value) || 0;
+                    switch (sc.action) {
+                        case 'showHide':
+                            const controllerEl = video.parentElement?.querySelector('ypp-vsc-controller');
+                            if (controllerEl) {
+                                controllerEl.style.display = controllerEl.style.display === 'none' ? 'block' : 'none';
+                            }
+                            break;
+                        case 'decrease':
+                            this.adjustSpeed(video, -val);
+                            break;
+                        case 'increase':
+                            this.adjustSpeed(video, val);
+                            break;
+                        case 'rewind':
+                            video.currentTime -= val;
+                            break;
+                        case 'advance':
+                            video.currentTime += val;
+                            break;
+                        case 'reset':
+                        case 'preferred':
+                            this.setSpeed(video, val);
+                            break;
+                        case 'mute':
+                            video.muted = !video.muted;
+                            break;
+                        case 'decreaseVolume':
+                            video.volume = Math.max(0, video.volume - 0.1);
+                            break;
+                        case 'increaseVolume':
+                            video.volume = Math.min(1, video.volume + 0.1);
+                            break;
+                        case 'pause':
+                            if (video.paused) video.play();
+                            else video.pause();
+                            break;
+                        case 'setMarker':
+                            this.markers.set(video, video.currentTime);
+                            break;
+                        case 'jumpMarker':
+                            if (this.markers.has(video)) {
+                                video.currentTime = this.markers.get(video);
+                            }
+                            break;
+                    }
+
+                    this.showController(video);
+                    this.hideControllerDelay(video);
+                }
+            });
         }
+        
+        window.YPP.hotkeysManager?.register('vsc', bindings);
     }
 
     findLargestVideo() {
