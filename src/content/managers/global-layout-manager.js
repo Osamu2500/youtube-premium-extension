@@ -60,9 +60,12 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
     }
 
     applySettings(settings) {
+        this.settings = { ...this.settings, ...settings };
+        if (!this.isActive) return;
+        
         // Apply pure CSS toggles
         for (const [key, cssClass] of Object.entries(this.TOGGLE_MAP)) {
-            if (settings[key]) {
+            if (this.settings[key]) {
                 document.body.classList.add(cssClass);
             } else {
                 document.body.classList.remove(cssClass);

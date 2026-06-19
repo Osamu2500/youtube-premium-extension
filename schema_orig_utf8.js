@@ -1,4 +1,4 @@
-/**
+﻿/**
  * popup-schema.js  — v3.1 Architecture
  * ─────────────────────────────────────────────────────────────────────
  * Declarative definition of every popup tab, section, and setting.
@@ -30,6 +30,16 @@ const P = (d) => d;
 export const POPUP_SCHEMA = [
 
     // ──────────────────────────────────────────────────────────────────
+    // DASHBOARD (rendered by popup-components.js, schema provides meta)
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'dashboard', label: 'Dash',
+        icon: P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'),
+        custom: true,   // entirely custom-rendered, no sections here
+        sections: []
+    },
+
+    // ──────────────────────────────────────────────────────────────────
     // HOME FEED
     // ──────────────────────────────────────────────────────────────────
     {
@@ -44,35 +54,6 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'autoScaleLayout',  label:'Auto-Scale Grid',  desc:'Adapt to zoom/window size', icon:P('M15 3l6 6M15 3h6v6M9 21l-6-6M9 21H3v-6') },
                     { type:'range', id:'homeColumns', label:'Grid Columns', unit:'', min:1, max:8, step:1 },
                     { type:'toggle', id:'useSquareCorners',    label:'Square Corners',     desc:'Sharp edges for videos',   icon:P('M3 3h18v18H3z') }
-                ]
-            },
-            {
-                title: 'Video Management',
-                items: [
-                    { type:'toggle', id:'multiSelect', label:'Multi-Select Videos', desc:'Hold Shift + click to select multiple videos', icon:P('M9 12l2 2 4-4 M3 3h18v18H3z') }
-                ]
-            },
-            {
-                title: 'Homepage Features',
-                items: [
-                    { type:'toggle', id:'hideFeed',       label:'Hide Homepage Feed',  desc:'Blank homepage', icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
-                    { type:'toggle', id:'hideExploreTopics', label:'Hide Topics Bar',   desc:'Remove category chips',    icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M3.6 9h16.8 M3.6 15h16.8') },
-                    { type:'toggle', id:'hideTrending',   label:'Hide Trending/Explore',icon:P('M13 2L3 14h9l-1 8 10-12h-9l1-8z') },
-                ]
-            },
-            {
-                title: 'Global Filters (Feed)',
-                items: [
-                    { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
-                    { type:'toggle', id:'hideThumbnails',    label:'Hide Thumbnails',   desc:'Blur on hover to reveal',  icon:P('M3 3h18v18H3z M8.5 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21') },
-                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Auto-hide watched videos',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'), slot:'hideWatchedOptions' },
-                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
-                    { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
-                    { type:'toggle', id:'cleanMixUrls',      label:'Clean Mix URLs',    desc:'Prevent Mix Auto-Play',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z') },
-                    { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },
-                    { type:'toggle', id:'hidePodcasts',      label:'Hide Podcasts',     desc:'Remove podcast cards',     icon:P('M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1v-6h3v4z M3 19a2 2 0 0 0 2 2h1v-6H3v4z') },
-                    { type:'toggle', id:'hidePosts',         label:'Hide Posts',        desc:'Remove community posts',   icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
-                    { type:'toggle', id:'hidePromoShelves',  label:'Hide Promos',       desc:'Remove shelves & games',   icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
                 ]
             }
         ]
@@ -94,12 +75,11 @@ export const POPUP_SCHEMA = [
                 ]
             },
             {
-                title: 'Global Filters (Shorts)',
+                title: 'Playback Enhancements',
                 items: [
-                    { type:'toggle', id:'aggressiveShortsBlock', label:'Nuke Shorts', desc:'Remove everywhere', icon:P('M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12z') },
-                    { type:'toggle', id:'stopShortsLooping',     label:'Stop Looping', desc:'No auto-replay on Shorts', icon:P('M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z') },
-                    { type:'toggle', id:'hideShortVideos', label:'Duration Filter', desc:'Hide short videos', icon:P('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6') },
-                    { type:'range', id:'minVideoDuration', label:'Min Duration', min: 1, max: 60, step: 1, unit:'m' },
+                    { type:'toggle', id:'shortsAutoScroll', label:'Auto-Scroll',        desc:'Skip when ended',          icon:P('M12 5l0 14M19 12l-7 7-7-7') },
+                    { type:'toggle', id:'shortsVolumeNormalizer', label:'Normalize Volume', desc:'Enforce default volume', icon:P('M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07') },
+                    { type:'toggle', id:'hideShortsInteraction', label:'Hide Interaction Bar', desc:'Hide likes/comments on right', icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
                 ]
             }
         ]
@@ -177,41 +157,6 @@ export const POPUP_SCHEMA = [
                     { type:'button-group', id:'pb_autoQuality', label:'Auto Quality', desc:'Extension feature', icon:P('M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z'), options: [{value:'front',label:'Front'},{value:'back',label:'Back'},{value:'hidden',label:'Hidden'}] },
                     { type:'button-group', id:'pb_durationFilter', label:'Duration Filter', desc:'Extension feature', icon:P('M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'), options: [{value:'front',label:'Front'},{value:'back',label:'Back'},{value:'hidden',label:'Hidden'}] },
                 ]
-            },
-            {
-                title: 'Viewing Modes',
-                items: [
-                    { type:'toggle', id:'zenMode', label:'Zen Mode', desc:'Dim everything but video', icon:P('M12 8v4l3 3 M8 12a4 4 0 0 1 4-4 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z') },
-                    { type:'toggle', id:'cinemaMode', label:'Cinema Mode', desc:'Theater-like viewing', icon:P('M17 2l5 5M7 2L2 7 M2 7h20v15H2z') },
-                    { type:'toggle', id:'studyMode', label:'Study Mode', desc:'Focus + 1.25x Speed', icon:P('M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z') },
-                    { type:'toggle', id:'enableFocusMode', label:'Focus Mode', desc:'Hide all distractions', icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
-                    { type:'toggle', id:'minimalMode', label:'Minimal UI', desc:'Strip non-essentials', icon:P('M9 3v18M3 9h6 M3 3h18v18H3z') },
-                    { type:'toggle', id:'ambientMode', label:'Ambient Theater', desc:'Massive canvas ambilight', icon:P('M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41'), slot:'ambientModeOptions' },
-                    { type:'toggle', id:'audioModeEnabled', label:'Audio Mode', desc:'Listen only, hide video', icon:P('M9 18V5l12-2v13 M6 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M18 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z') }
-                ]
-            },
-            {
-                title: 'Player Page Filters',
-                items: [
-                    { type:'toggle', id:'hideComments',   label:'Hide Comments',       icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
-                    { type:'toggle', id:'commentFilter',  label:'Comment Spam Filter', desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
-                    { type:'select', id:'commentFilterAction', label:'Spam Action', desc:'What to do with spam', icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'), options: [{value:'dim',label:'Dim (Hover to reveal)'},{value:'hide',label:'Hide completely'}] },
-                    { type:'toggle', id:'hideRelated',    label:'Hide Related Feed',   desc:'Hide sidebar videos', icon:P('M3 3h18v18H3zM14 8h6M14 12h6M14 16h6') },
-                    { type:'toggle', id:'hideLiveChat',   label:'Hide Live Chat',      icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
-                    { type:'toggle', id:'hideEndScreens', label:'Hide End Screens',    icon:P('M3 3h18v18H3zM3 9h18M9 21V9') },
-                    { type:'toggle', id:'hideCards',      label:'Hide Video Cards',    icon:P('M3 3h18v18H3zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0') },
-                    { type:'toggle', id:'hideAnnotations',label:'Hide Annotations',    icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
-                    { type:'toggle', id:'hideMerch',      label:'Hide Merch/Offers',   icon:P('M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0') },
-                    { type:'toggle', id:'hideFundraiser', label:'Hide Donations',      icon:P('M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z') },
-                ]
-            },
-            {
-                title: 'API Integrations',
-                items: [
-                    { type:'toggle', id:'returnYouTubeDislike', label:'Return YouTube Dislike', desc:'Restore dislike count', icon:P('M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17') },
-                    { type:'toggle', id:'adSkipper', label:'Ad Skipper', desc:'Skip video ads automatically', icon:P('M5 4l10 8-10 8V4z M19 5v14') },
-                    { type:'toggle', id:'sponsorBlock', label:'SponsorBlock', desc:'Skip sponsored segments', icon:P('M13 2L3 14h9l-1 8 10-12h-9l1-8z'), slot:'sponsorBlockCategories' }
-                ]
             }
         ]
     },
@@ -264,12 +209,6 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'hideChannelCards',  label:'Hide Channel Cards',   desc:'Show videos only',         icon:P('M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z') },
                     { type:'range',  id:'searchColumns',     label:'Grid Columns', unit:'', min:1, max:8, step:1 },
                 ]
-            },
-            {
-                title: 'Global Filters (Search)',
-                items: [
-                    { type:'toggle', id:'hideVoiceSearch',   label:'Hide Voice Search', desc:'Remove microphone icon',    icon:P('M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-4.08A7 7 0 0 0 19 11h-2z') },
-                ]
             }
         ]
     },
@@ -311,7 +250,58 @@ export const POPUP_SCHEMA = [
     // ──────────────────────────────────────────────────────────────────
     { id: 'bookmarks', label: 'Marks', icon: P('M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'), custom: true, sections: [] },
 
-
+    // ──────────────────────────────────────────────────────────────────
+    // WELLNESS (FOCUS)
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'wellness', label: 'Focus',
+        icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 8v4l3 3'),
+        sections: [
+            {
+                title: 'Global Filters (All Pages)',
+                items: [
+                    { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
+                    { type:'toggle', id:'hideThumbnails',    label:'Hide Thumbnails',   desc:'Blur on hover to reveal',  icon:P('M3 3h18v18H3z M8.5 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21') },
+                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Auto-hide watched videos',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'), slot:'hideWatchedOptions' },
+                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
+                    { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
+                    { type:'toggle', id:'cleanMixUrls',      label:'Clean Mix URLs',    desc:'Prevent Mix Auto-Play',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z') },
+                    { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },
+                    { type:'toggle', id:'hidePodcasts',      label:'Hide Podcasts',     desc:'Remove podcast cards',     icon:P('M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1v-6h3v4z M3 19a2 2 0 0 0 2 2h1v-6H3v4z') },
+                    { type:'toggle', id:'hidePosts',         label:'Hide Posts',        desc:'Remove community posts',   icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hidePromoShelves',  label:'Hide Promos',       desc:'Remove shelves & games',   icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z') },
+                    { type:'toggle', id:'hideVoiceSearch',   label:'Hide Voice Search', desc:'Remove microphone icon',    icon:P('M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-4.08A7 7 0 0 0 19 11h-2z') },
+                    { type:'toggle', id:'aggressiveShortsBlock', label:'Nuke Shorts', desc:'Remove everywhere', icon:P('M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12z') },
+                    { type:'toggle', id:'stopShortsLooping',     label:'Stop Looping', desc:'No auto-replay on Shorts', icon:P('M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z') },
+                    { type:'toggle', id:'hideShortVideos', label:'Duration Filter', desc:'Hide short videos', icon:P('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6') },
+                    { type:'range', id:'minVideoDuration', label:'Min Duration', min: 1, max: 60, step: 1, unit:'m' },
+                ]
+            },
+            {
+                title: 'Homepage',
+                items: [
+                    { type:'toggle', id:'hideFeed',       label:'Hide Homepage Feed',  desc:'Blank homepage', icon:P('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z') },
+                    { type:'toggle', id:'hideExploreTopics', label:'Hide Topics Bar',   desc:'Remove category chips',    icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M3.6 9h16.8 M3.6 15h16.8') },
+                    { type:'toggle', id:'hideTrending',   label:'Hide Trending/Explore',icon:P('M13 2L3 14h9l-1 8 10-12h-9l1-8z') },
+                ]
+            },
+            {
+                title: 'Player Page',
+                items: [
+                    { type:'toggle', id:'hideComments',   label:'Hide Comments',       icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'commentFilter',  label:'Comment Spam Filter', desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
+                    { type:'select', id:'commentFilterAction', label:'Spam Action', desc:'What to do with spam', icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'), options: [{value:'dim',label:'Dim (Hover to reveal)'},{value:'hide',label:'Hide completely'}] },
+                    { type:'toggle', id:'hideRelated',    label:'Hide Related Feed',   desc:'Hide sidebar videos', icon:P('M3 3h18v18H3zM14 8h6M14 12h6M14 16h6') },
+                    { type:'toggle', id:'hideLiveChat',   label:'Hide Live Chat',      icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hideEndScreens', label:'Hide End Screens',    icon:P('M3 3h18v18H3zM3 9h18M9 21V9') },
+                    { type:'toggle', id:'hideCards',      label:'Hide Video Cards',    icon:P('M3 3h18v18H3zM12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0') },
+                    { type:'toggle', id:'hideAnnotations',label:'Hide Annotations',    icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
+                    { type:'toggle', id:'hideMerch',      label:'Hide Merch/Offers',   icon:P('M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0') },
+                    { type:'toggle', id:'hideFundraiser', label:'Hide Donations',      icon:P('M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z') },
+                ]
+            }
+        ]
+    },
 
     // ──────────────────────────────────────────────────────────────────
     // CUSTOMIZATION (custom — theme engine requires component hooks)

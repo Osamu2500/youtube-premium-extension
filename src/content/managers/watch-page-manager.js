@@ -62,23 +62,23 @@ class WatchPageManager extends window.YPP.BasePageManager {
     }
 
     applySettings(settings) {
-        // Evaluate settings to determine state
-        // This acts as the single source of truth for the watch page layout
+        this.settings = { ...this.settings, ...settings };
+        if (!this.isActive) return;
         
         let newSidebar = 'default';
         let newMode = 'default';
 
-        if (settings.sidebarLayout) {
-            newSidebar = settings.sidebarLayout;
+        if (this.settings.sidebarLayout) {
+            newSidebar = this.settings.sidebarLayout;
         }
 
         // Evaluate view modes (priority order)
         // NOTE: key is 'enableFocusMode' not 'focusMode' — must match default-settings.js
-        if (settings.studyMode) newMode = 'study';
-        else if (settings.enableFocusMode) newMode = 'focus';
-        else if (settings.zenMode) newMode = 'zen';
-        else if (settings.cinemaMode) newMode = 'cinema';
-        else if (settings.minimalMode) newMode = 'minimal';
+        if (this.settings.studyMode) newMode = 'study';
+        else if (this.settings.enableFocusMode) newMode = 'focus';
+        else if (this.settings.zenMode) newMode = 'zen';
+        else if (this.settings.cinemaMode) newMode = 'cinema';
+        else if (this.settings.minimalMode) newMode = 'minimal';
 
         this.setState({
             sidebar: newSidebar,

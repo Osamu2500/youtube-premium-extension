@@ -4,14 +4,12 @@ export function initUI(document) {
     const pageTitle = document.getElementById('page-title');
 
     const titles = {
-        'dashboard': 'Dashboard',
         'home': 'Home & Feed',
         'shorts': 'Shorts Tools',
         'player': 'Player Features',
         'search': 'Search Settings',
         'subscriptions': 'Subscriptions',
         'history': 'History & Watch Time',
-        'wellness': 'Focus & Wellness',
         'customization': 'Appearance & UI',
         'advanced': 'Advanced & System',
         'global': 'Global Configuration'
@@ -75,14 +73,28 @@ export function initUI(document) {
         switchTab(lastTab);
     }
 
-    const sectionHeaders = document.querySelectorAll('.section-header');
-    sectionHeaders.forEach(header => {
-        header.addEventListener('click', () => {
-            const section = header.closest('.settings-section');
-            if (section) {
-                section.classList.toggle('collapsed');
+    const sections = document.querySelectorAll('.settings-section');
+    sections.forEach(section => {
+        // The .section-content and .section-content-inner wrappers are now correctly built by popup-renderer.js
+
+        // 2. Add click listener to header
+        const header = section.querySelector('.section-header');
+        if (header) {
+            header.style.cursor = 'pointer';
+            const titleEl = header.querySelector('.section-title');
+            const title = titleEl ? titleEl.textContent : 'section';
+            
+            // Restore state
+            const isCollapsed = localStorage.getItem('ypp_collapse_' + title) === 'true';
+            if (isCollapsed) {
+                section.classList.add('collapsed');
             }
-        });
+
+            header.addEventListener('click', () => {
+                section.classList.toggle('collapsed');
+                localStorage.setItem('ypp_collapse_' + title, section.classList.contains('collapsed'));
+            });
+        }
     });
 
     const featureSearchInput = document.getElementById('featureSearch');

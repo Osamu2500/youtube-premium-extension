@@ -46,11 +46,14 @@ import './features/global/modifiers/hide-watched.js';
 import './features/global/modifiers/keyboard-shortcuts.js';
 import './features/global/modifiers/duration-filter.js';
 import './features/global/modifiers/blocklist-filter.js';
+import './features/global/modifiers/full-video-titles.js';
+import './features/global/modifiers/square-corners.js';
 
 
 // Layout features
 import './features/global/layout/auto-scale-grid.js';
 import './features/global/layout/header-nav.js';
+import './features/global/layout/layout-manager.js';
 
 // Home page features
 import './features/pages/home/home-organizer.js';

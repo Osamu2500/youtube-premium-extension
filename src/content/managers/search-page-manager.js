@@ -32,12 +32,12 @@ class SearchPageManager extends window.YPP.BasePageManager {
     }
 
     applySettings(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         if (!this.isActive) return;
 
         if (this.features.cleanSearch) {
             // Assume the feature has some toggle name like "cleanSearch" or it just runs when enabled
-            if (settings.cleanSearch !== false) {
+            if (this.settings.cleanSearch !== false) {
                 this.features.cleanSearch.enable();
             } else {
                 this.features.cleanSearch.disable();
@@ -46,7 +46,7 @@ class SearchPageManager extends window.YPP.BasePageManager {
 
         if (this.features.hideSearchShelves) {
             // Assume the feature has some toggle name like "hideSearchShelves"
-            if (settings.hideSearchShelves !== false) {
+            if (this.settings.hideSearchShelves !== false) {
                 this.features.hideSearchShelves.enable();
             } else {
                 this.features.hideSearchShelves.disable();

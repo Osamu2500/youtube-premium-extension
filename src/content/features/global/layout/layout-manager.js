@@ -104,6 +104,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      */
     async onUpdate() {
         if (this.settings) {
+            this.utils.log?.('GridLayoutManager onUpdate triggered. Settings homeColumns: ' + this.settings.homeColumns, 'LAYOUT');
             this.updateSettings(this.settings);
             // Force re-apply of grid structural styles when settings change
             this._processedContainers = new WeakSet();
@@ -191,92 +192,95 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             return false;
         }
 
-        const gridRenderer = document.querySelector(GridLayoutManager.SELECTORS.GRID_RENDERER);
-        if (!gridRenderer) return false;
+        const gridRenderers = document.querySelectorAll(GridLayoutManager.SELECTORS.GRID_RENDERER);
+        if (!gridRenderers || gridRenderers.length === 0) return false;
+        
+        let applied = false;
 
-        const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
-        if (!contents) return false;
+        gridRenderers.forEach(gridRenderer => {
+            const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
+            if (!contents) return;
 
-        // Determine column count from user settings per page type
-        let cols = this.settings?.homeColumns ?? 4;
-        const path = window.location.pathname;
-        if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
-            cols = this.settings?.channelColumns ?? 4;
-        } else if (path.startsWith('/results')) {
-            cols = this.settings?.searchColumns ?? 4;
-        } else if (path === '/feed/subscriptions') {
-            cols = this.settings?.subscriptionsColumns ?? 4;
-        }
-
-        // Apply auto-scale grid logic if enabled via AutoScaleGrid
-        const isHome = path === '/' || path === '/index';
-        if (isHome) {
-            const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
-            if (dynamicCols) {
-                cols = parseInt(dynamicCols, 10);
+            // Determine column count from user settings per page type
+            let cols = this.settings?.homeColumns ?? 4;
+            const path = window.location.pathname;
+            if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
+                cols = this.settings?.channelColumns ?? 4;
+            } else if (path.startsWith('/results')) {
+                cols = this.settings?.searchColumns ?? 4;
+            } else if (path === '/feed/subscriptions') {
+                cols = this.settings?.subscriptionsColumns ?? 4;
             }
-        }
 
-        // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
-        if (cols === 0) {
-            contents.classList.remove('ypp-grid-container');
-            contents.style.removeProperty('grid-template-columns');
-            contents.style.removeProperty('grid-auto-flow');
-            contents.removeAttribute('data-ypp-cols');
-            this._processedContainers.delete(contents);
-            return true;
-        }
-
-        // Fix YouTube's row wrappers (use display: contents to flatten)
-        // Moved to styles.css for massive performance boost.
-
-        // Apply ypp-grid-item to any newly loaded items immediately
-        const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
-        items.forEach(item => {
-            if (!item.classList.contains('ypp-grid-item')) {
-                item.classList.add('ypp-grid-item');
+            // Apply auto-scale grid logic if enabled via AutoScaleGrid
+            const isHome = path === '/' || path === '/index';
+            if (isHome) {
+                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
+                if (dynamicCols) {
+                    cols = parseInt(dynamicCols, 10);
+                    this.utils.log?.('dynamicCols found: ' + dynamicCols + ', overriding cols to ' + cols, 'LAYOUT');
+                }
             }
+            
+            this.utils.log?.('applyGridLayout cols evaluated to: ' + cols + ' for path: ' + path, 'LAYOUT');
+
+            // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
+            if (cols === 0 || cols === '0') {
+                contents.classList.remove('ypp-grid-container');
+                contents.style.removeProperty('grid-template-columns');
+                contents.style.removeProperty('grid-auto-flow');
+                contents.removeAttribute('data-ypp-cols');
+                this._processedContainers.delete(contents);
+                applied = true;
+                return;
+            }
+
+            // Apply ypp-grid-item to any newly loaded items immediately
+            const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
+            items.forEach(item => {
+                if (!item.classList.contains('ypp-grid-item')) {
+                    item.classList.add('ypp-grid-item');
+                }
+            });
+
+            // Performance: Skip if already processed and unchanged
+            if (this._processedContainers.has(contents)) {
+                const lastCols = parseInt(contents.getAttribute('data-ypp-cols'), 10);
+                if (lastCols !== cols || !contents.style.gridTemplateColumns) {
+                    contents.setAttribute('data-ypp-cols', cols);
+                    contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+                    contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+                    document.documentElement.style.setProperty('--ypp-active-columns', cols);
+                    document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
+                }
+                applied = true;
+                return;
+            }
+
+            // Apply grid container class
+            contents.classList.add('ypp-grid-container');
+            contents.setAttribute('data-ypp-cols', cols);
+
+            // Use repeat(N, 1fr) — reliable exact column count.
+            // minmax(0, 1fr) ensures columns never overflow when cards have wide content.
+            contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+
+            // Also set dense auto-flow so hidden items (Shorts, watched, filtered) don't leave blank cells
+            contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+
+            // Ensure CSS knows the active column count
+            document.documentElement.style.setProperty('--ypp-active-columns', cols);
+
+            // Update the CSS min-column variable so responsive breakpoints in styles.css stay consistent
+            document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
+
+            // Mark as processed
+            this._processedContainers.add(contents);
+            
+            applied = true;
         });
 
-        // Performance: Skip if already processed and unchanged
-        if (this._processedContainers.has(contents)) {
-            const lastCols = parseInt(contents.getAttribute('data-ypp-cols'), 10);
-            if (lastCols !== cols || !contents.style.gridTemplateColumns) {
-                contents.setAttribute('data-ypp-cols', cols);
-                contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
-                contents.style.setProperty('grid-auto-flow', 'dense', 'important');
-                document.documentElement.style.setProperty('--ypp-active-columns', cols);
-                document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
-            }
-            return true;
-        }
-
-        // Apply grid container class
-        contents.classList.add('ypp-grid-container');
-        contents.setAttribute('data-ypp-cols', cols);
-
-
-
-        // Use repeat(N, 1fr) — reliable exact column count.
-        // minmax(0, 1fr) ensures columns never overflow when cards have wide content.
-        contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
-
-        // Also set dense auto-flow so hidden items (Shorts, watched, filtered) don't leave blank cells
-        contents.style.setProperty('grid-auto-flow', 'dense', 'important');
-
-        // Ensure CSS knows the active column count
-        document.documentElement.style.setProperty('--ypp-active-columns', cols);
-
-        // Update the CSS min-column variable so responsive breakpoints in styles.css stay consistent
-        document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
-
-
-        // (Row wrappers flattening is now handled earlier in the function)
-
-        // Mark as processed
-        this._processedContainers.add(contents);
-
-        return true;
+        return applied;
     }
 
     /**

@@ -569,6 +569,12 @@ function buildSection(section, state) {
         </div>`;
     sec.appendChild(hdr);
 
+    // Content Wrapper for collapsing
+    const content = document.createElement('div');
+    content.className = 'section-content';
+    const contentInner = document.createElement('div');
+    contentInner.className = 'section-content-inner';
+
     // Group
     const grp = document.createElement('div');
     grp.className = 'card-group';
@@ -615,13 +621,17 @@ function buildSection(section, state) {
         grp.appendChild(grid);
     }
 
-    otherItems.forEach(item => {
-        const fn = ITEM_RENDERERS[item.type];
-        const el = fn ? fn(item, state) : null;
-        if (el) grp.appendChild(el);
-    });
+    if (otherItems.length > 0) {
+        otherItems.forEach(item => {
+            const fn = ITEM_RENDERERS[item.type];
+            const el = fn ? fn(item, state) : null;
+            if (el) grp.appendChild(el);
+        });
+    }
 
-    sec.appendChild(grp);
+    contentInner.appendChild(grp);
+    content.appendChild(contentInner);
+    sec.appendChild(content);
     return sec;
 }
 

@@ -25,17 +25,17 @@ class HomePageManager extends window.YPP.BasePageManager {
     }
 
     applySettings(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         if (!this.isActive) return;
 
         // Home Organizer (manages tagging unless hideFeed is active)
         if (this.features.homeOrganizer) {
-            if (settings.hideFeed) {
+            if (this.settings.hideFeed) {
                 // If hideFeed is true, we hide everything, so organizer should be disabled
                 this.features.homeOrganizer.disable();
             } else {
                 if (this.features.homeOrganizer.run) {
-                    this.features.homeOrganizer.run(settings);
+                    this.features.homeOrganizer.run(this.settings);
                 } else if (this.features.homeOrganizer.enable) {
                     this.features.homeOrganizer.enable();
                 }
@@ -44,7 +44,7 @@ class HomePageManager extends window.YPP.BasePageManager {
 
         // Cinematic Mode
         if (this.features.cinematicMode) {
-            if (settings.cinematicMode && !settings.hideFeed) {
+            if (this.settings.cinematicMode && !this.settings.hideFeed) {
                 this.features.cinematicMode.enable();
             } else {
                 this.features.cinematicMode.disable();

@@ -25,12 +25,12 @@ class SubscriptionsPageManager extends window.YPP.BasePageManager {
     }
 
     applySettings(settings) {
-        this.settings = settings;
+        this.settings = { ...this.settings, ...settings };
         if (!this.isActive) return;
 
         // Apply Deck Mode if enabled
         if (this.features.deckMode) {
-            if (settings.enableDeckMode) {
+            if (this.settings.enableDeckMode) {
                 this.features.deckMode.enable();
             } else {
                 this.features.deckMode.disable();
@@ -39,7 +39,7 @@ class SubscriptionsPageManager extends window.YPP.BasePageManager {
 
         // Apply Folders if enabled
         if (this.features.folderUi) {
-            if (settings.subscriptionFolders) {
+            if (this.settings.subscriptionFolders) {
                 this.features.folderUi.enable();
                 this.features.subscriptionsUi?.enable();
             } else {

@@ -45,7 +45,7 @@ class BasePageManager {
      * Called when settings are updated globally
      */
     updateSettings(newSettings) {
-        this.settings = newSettings;
+        this.settings = { ...this.settings, ...newSettings };
         if (this.isActive) {
             this.applySettings(newSettings);
         }
