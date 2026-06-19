@@ -107,6 +107,17 @@ window.YPP.features.BaseFeature = class BaseFeature {
     }
 
     /**
+     * Safely remove an event listener and untrack it
+     */
+    removeListener(target, event, handler, options = false) {
+        if (!target || !target.removeEventListener) return;
+        target.removeEventListener(event, handler, options);
+        this.eventListeners = this.eventListeners.filter(
+            l => !(l.target === target && l.event === event && l.handler === handler)
+        );
+    }
+
+    /**
      * Remove all tracked event listeners
      */
     cleanupEvents() {

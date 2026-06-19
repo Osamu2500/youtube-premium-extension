@@ -71,7 +71,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
     /**
      * Disable the feature
      */
-    disable() {
+    async disable() {
+        await super.disable();
         if (!this.isActive) return;
         this.isActive = false;
         
@@ -81,12 +82,6 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         document.querySelectorAll('.ypp-tag-btn').forEach(el => el.remove());
         document.querySelectorAll('.ypp-feed-separator').forEach(el => el.remove());
         this.removePopover();
-
-        if (this._boundClickListener) {
-            // Clean up tracked events automatically
-            // @ts-ignore
-            this.cleanupEvents();
-        }
         
         // TEARDOWN: remove processed stamps
         document.querySelectorAll('ytd-rich-shelf-renderer[data-ypp-processed], ytd-reel-shelf-renderer[data-ypp-processed], ytd-rich-item-renderer[data-ypp-processed]').forEach(el => {

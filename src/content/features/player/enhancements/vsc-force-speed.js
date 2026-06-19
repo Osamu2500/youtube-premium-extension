@@ -11,12 +11,14 @@ class VSCForceSpeed extends window.YPP.features.BaseFeature {
     }
 
     async enable() {
+        await super.enable();
         if (!this.settings || this.settings.vscForceSpeed === false) return;
         this.injectPageScript();
         this.syncSpeedToPage();
     }
 
     async disable() {
+        await super.disable();
         this.disablePageScript();
     }
 

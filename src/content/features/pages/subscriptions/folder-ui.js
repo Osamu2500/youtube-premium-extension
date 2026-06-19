@@ -243,11 +243,131 @@ window.YPP.features.FolderUI = class FolderUI {
             if (itemsContainer) {
                 itemsContainer.parentNode.insertBefore(container, itemsContainer.nextSibling);
             }
+
+            // === EVENT DELEGATION ===
+            // Attach listeners to the container once, avoiding memory leaks on re-renders.
+            // All interactions bubble up to this container.
+            this.orchestrator.addListener(container, 'click', async (e) => {
+                const addBtn = e.target.closest('#ypp-add-folder-btn');
+                if (addBtn) {
+                    const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter new folder name:');
+                    if (name && name.trim()) {
+                        if (this.storage.addFolder(name.trim())) {
+                            this._guideRenderKey = null;
+                            this.renderGuideFolders();
+                            this.renderFilterChips();
+                        }
+                    }
+                    return;
+                }
+
+                const playBtn = e.target.closest('.ypp-play-all-btn');
+                if (playBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const folderItem = playBtn.closest('.ypp-folder-item');
+                    if (folderItem) {
+                        this.orchestrator.playAll(folderItem.dataset.folder);
+                    }
+                    return;
+                }
+
+                const folderItem = e.target.closest('.ypp-folder-item');
+                if (folderItem) {
+                    const folderName = folderItem.dataset.folder;
+                    if (!window.location.href.includes('/feed/subscriptions')) {
+                        sessionStorage.setItem('ypp_pending_folder', folderName);
+                        const tempLink = document.createElement('a');
+                        tempLink.href = '/feed/subscriptions';
+                        document.body.appendChild(tempLink);
+                        tempLink.click();
+                        tempLink.remove();
+                    } else {
+                        this.orchestrator.setActiveFolder(folderName, e.shiftKey || e.ctrlKey || e.metaKey);
+                    }
+                }
+            });
+
+            this.orchestrator.addListener(container, 'dragstart', (e) => {
+                const folderItem = e.target.closest('.ypp-folder-item');
+                if (folderItem) {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', folderItem.dataset.folder);
+                    folderItem.classList.add('ypp-dragging');
+                }
+            });
+
+            this.orchestrator.addListener(container, 'dragend', (e) => {
+                const folderItem = e.target.closest('.ypp-folder-item');
+                if (folderItem) {
+                    folderItem.classList.remove('ypp-dragging');
+                    container.querySelectorAll('.ypp-folder-item').forEach(item => {
+                        item.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
+                    });
+                }
+            });
+
+            this.orchestrator.addListener(container, 'dragover', (e) => {
+                const folderItem = e.target.closest('.ypp-folder-item');
+                if (folderItem) {
+                    e.preventDefault();
+                    const rect = folderItem.getBoundingClientRect();
+                    const mid = rect.top + rect.height / 2;
+                    if (e.clientY < mid) {
+                        folderItem.classList.add('ypp-drag-over-top');
+                        folderItem.classList.remove('ypp-drag-over-bottom');
+                    } else {
+                        folderItem.classList.add('ypp-drag-over-bottom');
+                        folderItem.classList.remove('ypp-drag-over-top');
+                    }
+                }
+            });
+
+            this.orchestrator.addListener(container, 'dragleave', (e) => {
+                const folderItem = e.target.closest('.ypp-folder-item');
+                if (folderItem) {
+                    folderItem.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
+                }
+            });
+
+            this.orchestrator.addListener(container, 'drop', (e) => {
+                const folderItem = e.target.closest('.ypp-folder-item');
+                if (folderItem) {
+                    e.preventDefault();
+                    folderItem.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
+                    const folderName = folderItem.dataset.folder;
+                    const draggedFolder = e.dataTransfer.getData('text/plain');
+                    if (draggedFolder && draggedFolder !== folderName) {
+                        const keys = Object.keys(this.storage.folders);
+                        let dropIndex = keys.indexOf(folderName);
+                        
+                        const rect = folderItem.getBoundingClientRect();
+                        const mid = rect.top + rect.height / 2;
+                        if (e.clientY >= mid) {
+                            dropIndex += 1;
+                        }
+                        
+                        const oldIndex = keys.indexOf(draggedFolder);
+                        if (oldIndex < dropIndex) dropIndex -= 1;
+
+                        if (this.storage.reorderFolder(draggedFolder, dropIndex)) {
+                            this._guideRenderKey = null;
+                            this.renderGuideFolders();
+                            this.renderFilterChips();
+                        }
+                    }
+                }
+            });
+            // ========================
         }
         if (!container) return; // Wait for DOM
 
         // Build header (safe static HTML)
         container.innerHTML = `
+            <style>
+                /* Handle hover state with pure CSS instead of JS mouseenter/mouseleave */
+                .ypp-folder-item:hover .ypp-play-all-btn { opacity: 1 !important; }
+            </style>
             <div class="ypp-folder-header">
                 <h3>My Folders</h3>
                 <button id="ypp-add-folder-btn" class="ypp-icon-btn">+</button>
@@ -278,96 +398,7 @@ window.YPP.features.FolderUI = class FolderUI {
                     <svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 </button>
             `;
-
-            const playBtn = el.querySelector('.ypp-play-all-btn');
-            el.addEventListener('mouseenter', () => playBtn.style.opacity = '1');
-            el.addEventListener('mouseleave', () => playBtn.style.opacity = '0');
-
-            playBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.orchestrator.playAll(folderName);
-            });
-
-            el.addEventListener('click', (e) => {
-                if (e.target.closest('.ypp-play-all-btn')) return;
-                if (!window.location.href.includes('/feed/subscriptions')) {
-                    sessionStorage.setItem('ypp_pending_folder', folderName);
-                    const tempLink = document.createElement('a');
-                    tempLink.href = '/feed/subscriptions';
-                    document.body.appendChild(tempLink);
-                    tempLink.click();
-                    tempLink.remove();
-                } else {
-                    this.orchestrator.setActiveFolder(folderName, e.shiftKey || e.ctrlKey || e.metaKey);
-                }
-            });
-
-            // --- Drag & Drop Reordering ---
-            el.addEventListener('dragstart', (e) => {
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', folderName);
-                el.classList.add('ypp-dragging');
-            });
-            el.addEventListener('dragend', () => {
-                el.classList.remove('ypp-dragging');
-                document.querySelectorAll('.ypp-folder-item').forEach(item => {
-                    item.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
-                });
-            });
-            el.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                const rect = el.getBoundingClientRect();
-                const mid = rect.top + rect.height / 2;
-                if (e.clientY < mid) {
-                    el.classList.add('ypp-drag-over-top');
-                    el.classList.remove('ypp-drag-over-bottom');
-                } else {
-                    el.classList.add('ypp-drag-over-bottom');
-                    el.classList.remove('ypp-drag-over-top');
-                }
-            });
-            el.addEventListener('dragleave', () => {
-                el.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
-            });
-            el.addEventListener('drop', (e) => {
-                e.preventDefault();
-                el.classList.remove('ypp-drag-over-top', 'ypp-drag-over-bottom');
-                const draggedFolder = e.dataTransfer.getData('text/plain');
-                if (draggedFolder && draggedFolder !== folderName) {
-                    const keys = Object.keys(this.storage.folders);
-                    let dropIndex = keys.indexOf(folderName);
-                    
-                    const rect = el.getBoundingClientRect();
-                    const mid = rect.top + rect.height / 2;
-                    if (e.clientY >= mid) {
-                        dropIndex += 1;
-                    }
-                    
-                    const oldIndex = keys.indexOf(draggedFolder);
-                    if (oldIndex < dropIndex) dropIndex -= 1;
-
-                    if (this.storage.reorderFolder(draggedFolder, dropIndex)) {
-                        this._guideRenderKey = null;
-                        this.renderGuideFolders();
-                        this.renderFilterChips();
-                    }
-                }
-            });
-
             list.appendChild(el);
-        });
-
-        // Add Folder Button
-        container.querySelector('#ypp-add-folder-btn').addEventListener('click', async () => {
-            const name = await window.YPP.features.CustomDialog.prompt('New Folder', 'Enter new folder name:');
-            if (name && name.trim()) {
-                if (this.storage.addFolder(name.trim())) {
-                    this._guideRenderKey = null; // Invalidate cache
-                    this.renderGuideFolders();
-                    this.renderFilterChips();
-                }
-            }
         });
     }
 

@@ -101,18 +101,18 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
 
         this.extractMetadata();
 
-        this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
-        this.videoElement.addEventListener('play', this.handlePlay);
-        this.videoElement.addEventListener('pause', this.handlePause);
+        this.addListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
+        this.addListener(this.videoElement, 'play', this.handlePlay);
+        this.addListener(this.videoElement, 'pause', this.handlePause);
         
         this.utils.log?.(`Tracking started for ${this.activeVideoId}`, 'TRACKER');
     }
 
     stopTracking() {
         if (this.videoElement) {
-            this.videoElement.removeEventListener('timeupdate', this.handleTimeUpdate);
-            this.videoElement.removeEventListener('play', this.handlePlay);
-            this.videoElement.removeEventListener('pause', this.handlePause);
+            this.removeListener(this.videoElement, 'timeupdate', this.handleTimeUpdate);
+            this.removeListener(this.videoElement, 'play', this.handlePlay);
+            this.removeListener(this.videoElement, 'pause', this.handlePause);
         }
         
         this.saveData();

@@ -86,27 +86,25 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         }
     }
 
-    enable() {
+    async enable() {
+        await super.enable();
         this._loadSettings(this.settings);
         const video = document.querySelector('.html5-main-video') || document.querySelector('video');
         if (video && this._needsAudioGraph()) this.initAudioContext(video);
     }
 
-    disable() {
+    async disable() {
         // Clean up UI
         if (this._volumePopup) {
             this._volumePopup.remove();
             this._volumePopup = null;
-            if (this._volumePopupOutsideHandler) {
-                document.removeEventListener('click', this._volumePopupOutsideHandler);
-                this._volumePopupOutsideHandler = null;
-            }
-            if (this._volumePopupEscapeHandler) {
-                document.removeEventListener('keydown', this._volumePopupEscapeHandler);
-                this._volumePopupEscapeHandler = null;
-            }
         }
+        this._volumePopupOutsideHandler = null;
+        this._volumePopupEscapeHandler = null;
         
+        // Call super to run cleanupEvents and remove all tracked listeners
+        await super.disable();
+
         // Bug fix: scope button removal to this feature instance's video context,
         // not a global querySelector that could remove buttons on other instances.
         const btn = this._boundVideo?.closest?.('body')?.querySelector?.('#ypp-volume-boost-btn[data-vb-id="' + this._id + '"]')

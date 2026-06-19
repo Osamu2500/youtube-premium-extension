@@ -38,6 +38,7 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         if (window.YPP && window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('audio-mode-player');
         }
+        super.disable();
     }
 
     injectStyles() {
@@ -93,12 +94,12 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
             this.overlay = null;
         }
         
-        setTimeout(async () => {
-            const player = document.querySelector('.html5-video-player');
+        try {
+            const player = await this.waitForElement('.html5-video-player', 5000);
             if (player && videoId) {
                 await this._createOverlayForPlayer(player, videoId);
             }
-        }, 300); // small delay to let page update
+        } catch (e) {}
     }
 
     async _createOverlayForPlayer(player, videoId) {
@@ -126,7 +127,9 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         // We use a slight delay for getting the title to ensure it's loaded
         let title = this.getVideoTitle();
         if (title === 'Listening to Audio') {
-            await new Promise(r => setTimeout(r, 1000));
+            try {
+                await this.pollFor(() => this.getVideoTitle() !== 'Listening to Audio', 2000, 200);
+            } catch (e) {}
             title = this.getVideoTitle();
         }
 

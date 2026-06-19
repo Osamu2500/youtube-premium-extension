@@ -38,10 +38,96 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
             </div>
         `;
 
-        overlay.querySelector('.ypp-modal-close').addEventListener('click', () => this.closeModal(ctx));
-        overlay.addEventListener('click', e => { if (e.target === overlay) this.closeModal(ctx); });
-        overlay.querySelector('#ypp-add-cat-btn').addEventListener('click', () => this.promptNewCategory(ctx));
-        overlay.querySelector('#ypp-organizer-search').addEventListener('input', e => this.filterChannelsList(e.target.value));
+        const clickHandler = async e => {
+            if (e.target === overlay) this.closeModal(ctx);
+            if (e.target.closest('.ypp-modal-close')) this.closeModal(ctx);
+            if (e.target.closest('#ypp-add-cat-btn')) this.promptNewCategory(ctx);
+
+            const delBtn = e.target.closest('.ypp-del-cat-btn');
+            if (delBtn) {
+                e.stopPropagation();
+                const categoryItem = delBtn.closest('.ypp-category-item');
+                if (categoryItem) {
+                    const groupName = categoryItem.dataset.group;
+                    const confirmed = await window.YPP.features.CustomDialog.confirm(
+                        'Delete Category',
+                        `Delete category "${groupName}"? This cannot be undone.`,
+                        'Delete',
+                        true
+                    );
+                    if (confirmed) {
+                        ctx.manager.deleteGroup(groupName);
+                        this.renderCategoriesList(ctx);
+                    }
+                }
+            }
+        };
+
+        const inputHandler = e => {
+            if (e.target.id === 'ypp-organizer-search') this.filterChannelsList(e.target.value);
+        };
+
+        const dragStartHandler = e => {
+            const channelItem = e.target.closest('.ypp-channel-item');
+            if (channelItem) {
+                const channelName = channelItem.dataset.id;
+                const img = channelItem.querySelector('img');
+                ctx.draggedChannel = { name: channelName, id: channelName, icon: img ? img.src : '' };
+                channelItem.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', JSON.stringify(ctx.draggedChannel));
+                e.dataTransfer.effectAllowed = 'copy';
+            }
+        };
+
+        const dragEndHandler = e => {
+            const channelItem = e.target.closest('.ypp-channel-item');
+            if (channelItem) {
+                ctx.draggedChannel = null;
+                channelItem.classList.remove('dragging');
+            }
+        };
+
+        const dragOverHandler = e => {
+            const catItem = e.target.closest('.ypp-category-item');
+            if (catItem) {
+                e.preventDefault();
+                catItem.classList.add('drag-over');
+            }
+        };
+
+        const dragLeaveHandler = e => {
+            const catItem = e.target.closest('.ypp-category-item');
+            if (catItem) catItem.classList.remove('drag-over');
+        };
+
+        const dropHandler = e => {
+            const catItem = e.target.closest('.ypp-category-item');
+            if (catItem) {
+                e.preventDefault();
+                catItem.classList.remove('drag-over');
+                const groupName = catItem.dataset.group;
+                if (ctx.draggedChannel) this._addChannelToGroup(ctx, groupName, ctx.draggedChannel);
+            }
+        };
+
+        ctx.addListener(overlay, 'click', clickHandler);
+        ctx.addListener(overlay, 'input', inputHandler);
+        ctx.addListener(overlay, 'dragstart', dragStartHandler);
+        ctx.addListener(overlay, 'dragend', dragEndHandler);
+        ctx.addListener(overlay, 'dragover', dragOverHandler);
+        ctx.addListener(overlay, 'dragleave', dragLeaveHandler);
+        ctx.addListener(overlay, 'drop', dropHandler);
+
+        ctx._modalOverlay = overlay;
+        ctx._modalListeners = [
+            { event: 'click', handler: clickHandler },
+            { event: 'input', handler: inputHandler },
+            { event: 'dragstart', handler: dragStartHandler },
+            { event: 'dragend', handler: dragEndHandler },
+            { event: 'dragover', handler: dragOverHandler },
+            { event: 'dragleave', handler: dragLeaveHandler },
+            { event: 'drop', handler: dropHandler }
+        ];
 
         this.renderChannelsList(ctx);
         this.renderCategoriesList(ctx);
@@ -55,6 +141,14 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
         if (overlay) {
             overlay.classList.remove('open');
             setTimeout(() => overlay.remove(), 300);
+        }
+
+        if (ctx._modalOverlay && ctx._modalListeners) {
+            ctx._modalListeners.forEach(l => {
+                ctx.removeListener(ctx._modalOverlay, l.event, l.handler);
+            });
+            ctx._modalOverlay = null;
+            ctx._modalListeners = null;
         }
         ctx.isModalOpen = false;
         const bar = document.getElementById('ypp-subs-filter-bar');
@@ -87,17 +181,6 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
 
             el.appendChild(img);
             el.appendChild(nameSpan);
-
-            el.addEventListener('dragstart', (e) => {
-                ctx.draggedChannel = channel;
-                el.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', JSON.stringify(channel));
-                e.dataTransfer.effectAllowed = 'copy';
-            });
-            el.addEventListener('dragend', () => {
-                ctx.draggedChannel = null;
-                el.classList.remove('dragging');
-            });
 
             container.appendChild(el);
         });
@@ -166,19 +249,6 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
             const delBtn = document.createElement('button');
             delBtn.className = 'ypp-del-cat-btn';
             delBtn.textContent = '×';
-            delBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const confirmed = await window.YPP.features.CustomDialog.confirm(
-                    'Delete Category',
-                    `Delete category "${groupName}"? This cannot be undone.`,
-                    'Delete',
-                    true // danger = red button
-                );
-                if (confirmed) {
-                    ctx.manager.deleteGroup(groupName);
-                    this.renderCategoriesList(ctx);
-                }
-            });
 
             header.appendChild(nameSpan);
             header.appendChild(countSpan);
@@ -193,19 +263,9 @@ window.YPP.features.SubsUIModal = class SubsUIModal {
                 channelsDiv.appendChild(chip);
             });
 
+            el.dataset.group = groupName;
             el.appendChild(header);
             el.appendChild(channelsDiv);
-
-            el.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                el.classList.add('drag-over');
-            });
-            el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-            el.addEventListener('drop', (e) => {
-                e.preventDefault();
-                el.classList.remove('drag-over');
-                if (ctx.draggedChannel) this._addChannelToGroup(ctx, groupName, ctx.draggedChannel);
-            });
 
             container.appendChild(el);
         });

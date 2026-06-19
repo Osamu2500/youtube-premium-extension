@@ -14,13 +14,12 @@ window.YPP.features.MiniPlayerScroll = class MiniPlayerScroll extends window.YPP
 
     async enable() {
         await super.enable();
-        window.addEventListener('scroll', this._boundHandleScroll, { passive: true });
+        this.addListener(window, 'scroll', this._boundHandleScroll, { passive: true });
         this._handleScroll(); // Check initial state
     }
 
     async disable() {
         await super.disable();
-        window.removeEventListener('scroll', this._boundHandleScroll);
         
         // Revert to default if we forced miniplayer
         if (this.isMini) {

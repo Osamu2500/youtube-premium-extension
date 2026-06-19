@@ -60,6 +60,7 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
     }
 
     async disable() {
+        await super.disable();
         this.stopObserver();
         this.ui.removeAll();
         this.utils?.removeStyle('ypp-global-bar-css');

@@ -805,7 +805,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             // Push to end of event queue so the current click doesn't trigger close
             setTimeout(() => {
                 if (document.body.contains(menu)) {
-                    document.addEventListener('click', this._menuCloseFn);
+                    this.addListener(document, 'click', this._menuCloseFn);
                 }
             }, 0);
         });

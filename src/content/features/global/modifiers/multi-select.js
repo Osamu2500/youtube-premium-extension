@@ -134,7 +134,7 @@ window.YPP.features.MultiSelect = class MultiSelect
             }
 
             // Checkbox direct click
-            cb.addEventListener('click', (e) => {
+            this.addListener(cb, 'click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this._toggleSelect(card, videoId, href, title);
@@ -242,20 +242,20 @@ window.YPP.features.MultiSelect = class MultiSelect
             `;
             
             // Wire buttons ONLY once
-            this._actionBar.querySelector('#ypp-ms-queue')
-                ?.addEventListener('click', () => this._addToQueue());
+            const queueBtn = this._actionBar.querySelector('#ypp-ms-queue');
+            if (queueBtn) this.addListener(queueBtn, 'click', () => this._addToQueue());
 
-            this._actionBar.querySelector('#ypp-ms-wl')
-                ?.addEventListener('click', () => this._addToWatchLater());
+            const wlBtn = this._actionBar.querySelector('#ypp-ms-wl');
+            if (wlBtn) this.addListener(wlBtn, 'click', () => this._addToWatchLater());
 
-            this._actionBar.querySelector('#ypp-ms-playlist')
-                ?.addEventListener('click', () => this._showPlaylistPicker());
+            const plBtn = this._actionBar.querySelector('#ypp-ms-playlist');
+            if (plBtn) this.addListener(plBtn, 'click', () => this._showPlaylistPicker());
 
-            this._actionBar.querySelector('#ypp-ms-not-interested')
-                ?.addEventListener('click', () => this._markNotInterested());
+            const niBtn = this._actionBar.querySelector('#ypp-ms-not-interested');
+            if (niBtn) this.addListener(niBtn, 'click', () => this._markNotInterested());
 
-            this._actionBar.querySelector('#ypp-ms-clear')
-                ?.addEventListener('click', () => this._clearAll());
+            const clearBtn = this._actionBar.querySelector('#ypp-ms-clear');
+            if (clearBtn) this.addListener(clearBtn, 'click', () => this._clearAll());
         }
 
         // Fast update instead of full innerHTML re-render

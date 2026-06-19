@@ -296,7 +296,7 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         `;
         
         const toggle = div.querySelector('#ypp-tracker-toggle');
-        toggle.addEventListener('click', () => {
+        this.addListener(toggle, 'click', () => {
             this.isExpanded = !this.isExpanded;
             this.toggleExpand();
         });

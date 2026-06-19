@@ -41,7 +41,8 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
 
     getConfigKey() { return 'enableCinemaFilters'; }
 
-    enable() {
+    async enable() {
+        await super.enable();
         if (!this.settings || !this.settings.enableCinemaFilters) return;
         const video = document.querySelector('video');
         if (video) {
@@ -49,7 +50,8 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
         }
     }
 
-    disable() {
+    async disable() {
+        await super.disable();
         try {
             window.YPP.features.VideoFiltersOverlay.removeOverlay(this);
             this._removeFilterPanel();
@@ -106,11 +108,13 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
             this._filterPanel = null;
         }
         if (this._filterPanelOutsideHandler) {
-            document.removeEventListener('click', this._filterPanelOutsideHandler);
+            if (this.removeListener) this.removeListener(document, 'click', this._filterPanelOutsideHandler);
+            else document.removeEventListener('click', this._filterPanelOutsideHandler);
             this._filterPanelOutsideHandler = null;
         }
         if (this._filterPanelResizeHandler) {
-            window.removeEventListener('resize', this._filterPanelResizeHandler);
+            if (this.removeListener) this.removeListener(window, 'resize', this._filterPanelResizeHandler);
+            else window.removeEventListener('resize', this._filterPanelResizeHandler);
             this._filterPanelResizeHandler = null;
         }
         this._previewFilterIndex = undefined; // always reset on close

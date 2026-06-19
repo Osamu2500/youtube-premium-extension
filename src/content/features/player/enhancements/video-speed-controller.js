@@ -62,6 +62,9 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
     }
 
     async disable() {
+        await super.disable();
+        if (this._saveSpeedTimeout) clearTimeout(this._saveSpeedTimeout);
+
         if (window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('video-speed-controller');
         }
@@ -152,8 +155,8 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         const opacity = this.settings?.vscControllerOpacity ?? 0.3;
         container.style.opacity = opacity;
         // Increase opacity on hover
-        container.addEventListener('mouseenter', () => container.style.opacity = '1');
-        container.addEventListener('mouseleave', () => container.style.opacity = opacity);
+        this.addListener(container, 'mouseenter', () => container.style.opacity = '1');
+        this.addListener(container, 'mouseleave', () => container.style.opacity = opacity);
 
         controller.appendChild(container);
 
@@ -221,7 +224,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         }
         
         // Handle window resizes and scrolls
-        window.addEventListener('resize', applyPosition, { passive: true });
+        this.addListener(window, 'resize', applyPosition, { passive: true });
         
         // Dragging Logic
         let isDragging = false;
@@ -231,7 +234,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             applyPosition();
         };
 
-        display.addEventListener('mousedown', (e) => {
+        this.addListener(display, 'mousedown', (e) => {
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
@@ -256,8 +259,8 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             isDragging = false;
         };
 
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
+        this.addListener(window, 'mousemove', onMouseMove);
+        this.addListener(window, 'mouseup', onMouseUp);
 
         // Store state
         this.controllers.set(video, {
@@ -281,7 +284,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         }
 
         // Event Listeners for UI state
-        video.addEventListener('ratechange', (e) => this.handleRateChange(video, e));
+        this.addListener(video, 'ratechange', (e) => this.handleRateChange(video, e));
 
         const triggerShow = () => {
             if (this.settings?.vscHideController) return;
@@ -290,25 +293,25 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         };
 
         // UI auto-hide logic for external websites
-        video.addEventListener('play', () => {
+        this.addListener(video, 'play', () => {
             this._lastActiveVideo = video;
             triggerShow();
         });
-        video.addEventListener('pause', triggerShow);
+        this.addListener(video, 'pause', triggerShow);
         
         // Listen to document for mouse events because video players often have complex overlays
         // In iframes, moving the mouse anywhere should reveal the controls.
         const doc = video.ownerDocument;
         if (doc) {
-            doc.addEventListener('mousemove', triggerShow);
-            doc.addEventListener('click', () => { 
+            this.addListener(doc, 'mousemove', triggerShow);
+            this.addListener(doc, 'click', () => { 
                 this._lastActiveVideo = video; 
                 triggerShow();
             });
         }
         
         // Also listen to the controller itself so it doesn't hide while hovered
-        controller.addEventListener('mouseenter', () => {
+        this.addListener(controller, 'mouseenter', () => {
             this.showController(video);
             if (this.controllers.has(video)) {
                 const state = this.controllers.get(video);
@@ -318,7 +321,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
                 }
             }
         });
-        controller.addEventListener('mouseleave', () => this.hideControllerDelay(video));
+        this.addListener(controller, 'mouseleave', () => this.hideControllerDelay(video));
 
         if (this.settings?.vscHideController) {
             controller.style.display = 'none';
@@ -333,7 +336,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         btn.className = 'ypp-vsc-btn';
         btn.innerHTML = html;
         btn.title = title;
-        btn.addEventListener('pointerdown', (e) => {
+        this.addListener(btn, 'pointerdown', (e) => {
             e.preventDefault();
             e.stopPropagation();
             onClick();

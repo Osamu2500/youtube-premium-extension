@@ -240,11 +240,14 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             if (!newDisk) return;
             letterEl.replaceWith(newDisk);
 
-            newDisk.querySelector('.ypp-disk-img')?.addEventListener('error', () => {
-                const t = document.createElement('div');
-                t.innerHTML = window.YPP.features.AccountMenuUI.letterAvatar(acc.name, size, ring);
-                newDisk.replaceWith(t.firstElementChild);
-            });
+            const imgNode = newDisk.querySelector('.ypp-disk-img');
+            if (imgNode) {
+                this.addListener(imgNode, 'error', () => {
+                    const t = document.createElement('div');
+                    t.innerHTML = window.YPP.features.AccountMenuUI.letterAvatar(acc.name, size, ring);
+                    newDisk.replaceWith(t.firstElementChild);
+                });
+            }
         };
 
         const refresh = () => {
@@ -289,25 +292,25 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     // ─── Event wiring ──────────────────────────────────────────────────────────
 
     _wireEvents(panel) {
-        panel.querySelector('#ypp-view-channel')
-            ?.addEventListener('click', () => this._closeMenu());
+        const viewChannel = panel.querySelector('#ypp-view-channel');
+        if (viewChannel) this.addListener(viewChannel, 'click', () => this._closeMenu());
 
-        panel.querySelector('#ypp-appearance')
-            ?.addEventListener('click', () => {
-                this._closeMenu();
-                setTimeout(() => {
-                    document.querySelector(
-                        'ytd-toggle-theme-compact-link-renderer button,' +
-                        '[aria-label*="Appearance"]'
-                    )?.click();
-                }, 150);
-            });
+        const appearance = panel.querySelector('#ypp-appearance');
+        if (appearance) this.addListener(appearance, 'click', () => {
+            this._closeMenu();
+            setTimeout(() => {
+                document.querySelector(
+                    'ytd-toggle-theme-compact-link-renderer button,' +
+                    '[aria-label*="Appearance"]'
+                )?.click();
+            }, 150);
+        });
 
-        panel.querySelector('#ypp-settings')
-            ?.addEventListener('click', () => {
-                this._closeMenu();
-                window.location.href = '/account';
-            });
+        const settingsBtn = panel.querySelector('#ypp-settings');
+        if (settingsBtn) this.addListener(settingsBtn, 'click', () => {
+            this._closeMenu();
+            window.location.href = '/account';
+        });
 
         // Helper to click native sub-menu items by matching text or aria-labels
         const clickNativeItem = (keywords) => {
@@ -325,29 +328,35 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
             }, 150);
         };
 
-        panel.querySelector('#ypp-language')?.addEventListener('click', () => clickNativeItem(['language', 'idioma', 'langue', 'sprache', 'język']));
-        panel.querySelector('#ypp-location')?.addEventListener('click', () => clickNativeItem(['location', 'ubicación', 'lieu', 'standort', 'lokalizacja']));
-        panel.querySelector('#ypp-restricted')?.addEventListener('click', () => clickNativeItem(['restricted', 'restringido', 'restreint', 'eingeschränkt']));
+        const langBtn = panel.querySelector('#ypp-language');
+        if (langBtn) this.addListener(langBtn, 'click', () => clickNativeItem(['language', 'idioma', 'langue', 'sprache', 'język']));
+        const locBtn = panel.querySelector('#ypp-location');
+        if (locBtn) this.addListener(locBtn, 'click', () => clickNativeItem(['location', 'ubicación', 'lieu', 'standort', 'lokalizacja']));
+        const restBtn = panel.querySelector('#ypp-restricted');
+        if (restBtn) this.addListener(restBtn, 'click', () => clickNativeItem(['restricted', 'restringido', 'restreint', 'eingeschränkt']));
 
-        panel.querySelector('#ypp-keyboard')?.addEventListener('click', () => {
+        const keyboardBtn = panel.querySelector('#ypp-keyboard');
+        if (keyboardBtn) this.addListener(keyboardBtn, 'click', () => {
             this._closeMenu();
             setTimeout(() => {
                 document.dispatchEvent(new KeyboardEvent('keydown', { key: '?', shiftKey: true, bubbles: true }));
             }, 150);
         });
 
-        panel.querySelector('#ypp-help')?.addEventListener('click', () => {
+        const helpBtn = panel.querySelector('#ypp-help');
+        if (helpBtn) this.addListener(helpBtn, 'click', () => {
             this._closeMenu();
             window.open('https://support.google.com/youtube/', '_blank');
         });
 
-        panel.querySelector('#ypp-feedback')?.addEventListener('click', () => clickNativeItem(['feedback', 'comentarios', 'commentaires']));
+        const feedbackBtn = panel.querySelector('#ypp-feedback');
+        if (feedbackBtn) this.addListener(feedbackBtn, 'click', () => clickNativeItem(['feedback', 'comentarios', 'commentaires']));
 
         const moreToggle = panel.querySelector('#ypp-more-toggle');
         const moreItems  = panel.querySelector('#ypp-more-items');
         const chevron    = panel.querySelector('.ypp-chevron');
         if (moreToggle && moreItems) {
-            moreToggle.addEventListener('click', () => {
+            this.addListener(moreToggle, 'click', () => {
                 const open = moreItems.classList.toggle('open');
                 moreToggle.setAttribute('aria-expanded', String(open));
                 if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
@@ -355,29 +364,31 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         }
 
         const confirmDialog = panel.querySelector('#ypp-signout-confirm');
-        panel.querySelector('#ypp-signout')
-            ?.addEventListener('click', () => {
-                if (confirmDialog) confirmDialog.style.display = 'flex';
-            });
-        panel.querySelector('#ypp-confirm-cancel')
-            ?.addEventListener('click', () => {
-                if (confirmDialog) confirmDialog.style.display = 'none';
-            });
-        panel.querySelector('#ypp-confirm-ok')
-            ?.addEventListener('click', () => {
-                const nativeSignOut =
-                    document.querySelector('a[href*="logout"]') ||
-                    document.querySelector('a[href*="signout"]');
-                if (nativeSignOut) {
-                    nativeSignOut.click();
-                } else {
-                    window.location.href = 'https://www.youtube.com/logout';
-                }
-            });
+        const signoutBtn = panel.querySelector('#ypp-signout');
+        if (signoutBtn) this.addListener(signoutBtn, 'click', () => {
+            if (confirmDialog) confirmDialog.style.display = 'flex';
+        });
+        
+        const confirmCancel = panel.querySelector('#ypp-confirm-cancel');
+        if (confirmCancel) this.addListener(confirmCancel, 'click', () => {
+            if (confirmDialog) confirmDialog.style.display = 'none';
+        });
+        
+        const confirmOk = panel.querySelector('#ypp-confirm-ok');
+        if (confirmOk) this.addListener(confirmOk, 'click', () => {
+            const nativeSignOut =
+                document.querySelector('a[href*="logout"]') ||
+                document.querySelector('a[href*="signout"]');
+            if (nativeSignOut) {
+                nativeSignOut.click();
+            } else {
+                window.location.href = 'https://www.youtube.com/logout';
+            }
+        });
 
         // Image error fallback
         panel.querySelectorAll('.ypp-disk-img').forEach(img => {
-            img.addEventListener('error', () => {
+            this.addListener(img, 'error', () => {
                 const wrap = img.closest('.ypp-disk-wrap');
                 if (!wrap) return;
                 const name = wrap.dataset.fallbackName || '';
@@ -399,8 +410,8 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                     if (items[idx]) items[idx].click();
                 }
             };
-            sat.addEventListener('click', activate);
-            sat.addEventListener('keydown', e => {
+            this.addListener(sat, 'click', activate);
+            this.addListener(sat, 'keydown', e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     activate();
@@ -418,6 +429,7 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     // ─── Cleanup ───────────────────────────────────────────────────────────────
 
     _cleanup() {
+        if (typeof this.cleanupEvents === 'function') this.cleanupEvents();
         this._clearPollTimer();
         this._clearAvatarPollTimer();
         this._injected = false;

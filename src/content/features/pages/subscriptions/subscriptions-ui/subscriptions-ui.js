@@ -3,8 +3,9 @@ import './subs-ui-filter.js';
 import './subs-ui-sidebar.js';
 import './subs-ui-modal.js';
 
-window.YPP.features.SubscriptionUI = class SubscriptionUI {
+window.YPP.features.SubscriptionUI = class SubscriptionUI extends window.YPP.features.BaseFeature {
     constructor(manager) {
+        super('SubscriptionUI');
         this.manager = manager;
         this.isModalOpen = false;
         this.draggedChannel = null;
@@ -12,7 +13,8 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         this._debouncedFilter = null;
     }
 
-    enable() {
+    async enable() {
+        await super.enable();
         if (!this.manager && window.YPP.Main?.featureManager) {
             this.manager = window.YPP.Main.featureManager.getFeature('subscriptionsOrganizer')?.manager
                         || window.YPP.Main.featureManager.getFeature('subscriptionFolders');
@@ -54,6 +56,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
 
         this.isModalOpen = false;
         this._lastSidebarKey = null;
+        super.disable();
     }
 
     observePage() {
@@ -115,7 +118,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         if (!container) return;
 
         const btn = this._createButton('Manage Groups', 'ypp-manage-subs-btn');
-        btn.addEventListener('click', () => this.openOrganizer());
+        this.addListener(btn, 'click', () => this.openOrganizer());
         container.appendChild(btn);
     }
 
@@ -125,7 +128,7 @@ window.YPP.features.SubscriptionUI = class SubscriptionUI {
         if (!container) return;
 
         const btn = this._createButton('Organize', 'ypp-organize-btn');
-        btn.addEventListener('click', () => this.openOrganizer());
+        this.addListener(btn, 'click', () => this.openOrganizer());
         container.appendChild(btn);
     }
 

@@ -50,7 +50,7 @@ window.YPP.features.AutoLike = class AutoLike
                 
                 // Abort if user navigated away
                 if (currentVideoId !== videoId) {
-                    video.removeEventListener('timeupdate', checkProgress);
+                    this.removeListener(video, 'timeupdate', checkProgress);
                     return;
                 }
 
@@ -58,12 +58,12 @@ window.YPP.features.AutoLike = class AutoLike
                 
                 const percentage = (video.currentTime / video.duration) * 100;
                 if (percentage >= targetPercentage || video.ended) {
-                    video.removeEventListener('timeupdate', checkProgress);
+                    this.removeListener(video, 'timeupdate', checkProgress);
                     this._waitAndLike(videoId);
                 }
             };
 
-            video.addEventListener('timeupdate', checkProgress);
+            this.addListener(video, 'timeupdate', checkProgress);
         } catch (e) {
             // Timeout or abort
         }

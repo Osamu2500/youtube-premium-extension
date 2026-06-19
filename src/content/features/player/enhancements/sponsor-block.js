@@ -47,7 +47,7 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
                 const video = elements[0];
                 if (video && !video.dataset.sbHooked) {
                     video.dataset.sbHooked = 'true';
-                    video.addEventListener('timeupdate', this.handleTimeUpdate);
+                    this.addListener(video, 'timeupdate', this.handleTimeUpdate);
                 }
             }, true);
         }
@@ -65,11 +65,9 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
             window.YPP.sharedObserver.unregister('sponsor-block-video');
         }
 
-        const video = document.querySelector('video');
-        if (video) {
-            video.removeEventListener('timeupdate', this.handleTimeUpdate);
+        document.querySelectorAll('video').forEach(video => {
             delete video.dataset.sbHooked;
-        }
+        });
 
         this.removeMarkers();
         this.segments = [];
@@ -155,45 +153,44 @@ window.YPP.features.SponsorBlock = class SponsorBlock extends window.YPP.feature
         }
     }
 
-    drawMarkers() {
+    async drawMarkers() {
         if (!this.isActive || this.segments.length === 0) return;
 
-        // Try to draw markers multiple times because progress bar might not be loaded instantly
-        let attempts = 0;
-        const tryDraw = () => {
-            const progressList = document.querySelector('.ytp-progress-list');
-            const video = document.querySelector('video');
+        try {
+            const progressList = await this.waitForElement('.ytp-progress-list', 5000, 500);
+            const video = await this.waitForElement('video', 5000, 500);
             
-            if (progressList && video && video.duration > 0) {
-                this.removeMarkers();
-                
-                for (const segment of this.segments) {
-                    const [start, end] = segment.segment;
-                    const duration = video.duration;
-                    
-                    const leftPct = (start / duration) * 100;
-                    const widthPct = ((end - start) / duration) * 100;
-
-                    const marker = document.createElement('div');
-                    marker.className = 'ypp-sb-marker';
-                    marker.style.position = 'absolute';
-                    marker.style.left = `${leftPct}%`;
-                    marker.style.width = `${widthPct}%`;
-                    marker.style.height = '100%';
-                    marker.style.backgroundColor = this.categoryColors[segment.category] || '#ffffff';
-                    marker.style.opacity = '0.7';
-                    marker.style.pointerEvents = 'none'; // Don't interfere with clicks
-                    marker.style.zIndex = '34'; // Above progress bar bg, below playhead
-
-                    progressList.appendChild(marker);
-                }
-            } else if (attempts < 10) {
-                attempts++;
-                setTimeout(tryDraw, 500);
+            if (!video.duration || video.duration === 0) {
+                await this.pollFor(() => video.duration > 0, 5000, 500);
             }
-        };
 
-        tryDraw();
+            if (!this.isActive) return;
+
+            this.removeMarkers();
+            
+            for (const segment of this.segments) {
+                const [start, end] = segment.segment;
+                const duration = video.duration;
+                
+                const leftPct = (start / duration) * 100;
+                const widthPct = ((end - start) / duration) * 100;
+
+                const marker = document.createElement('div');
+                marker.className = 'ypp-sb-marker';
+                marker.style.position = 'absolute';
+                marker.style.left = `${leftPct}%`;
+                marker.style.width = `${widthPct}%`;
+                marker.style.height = '100%';
+                marker.style.backgroundColor = this.categoryColors[segment.category] || '#ffffff';
+                marker.style.opacity = '0.7';
+                marker.style.pointerEvents = 'none'; // Don't interfere with clicks
+                marker.style.zIndex = '34'; // Above progress bar bg, below playhead
+
+                progressList.appendChild(marker);
+            }
+        } catch(e) {
+            // Timeout occurred, elements not found
+        }
     }
 
     removeMarkers() {

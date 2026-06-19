@@ -32,14 +32,14 @@ window.YPP.features.SubsUIFilter = class SubsUIFilter {
         const allBtn = document.createElement('button');
         allBtn.className = 'ypp-filter-chip active';
         allBtn.textContent = 'All';
-        allBtn.addEventListener('click', () => ctx.filterFeed(null));
+        ctx.addListener(allBtn, 'click', () => ctx.filterFeed(null));
         container.appendChild(allBtn);
 
         Object.keys(groups).forEach(groupName => {
             const btn = document.createElement('button');
             btn.className = 'ypp-filter-chip';
             btn.textContent = groupName;
-            btn.addEventListener('click', () => ctx.filterFeed(groupName));
+            ctx.addListener(btn, 'click', () => ctx.filterFeed(groupName));
             container.appendChild(btn);
         });
 
@@ -51,7 +51,7 @@ window.YPP.features.SubsUIFilter = class SubsUIFilter {
         toggleShorts.className = 'ypp-filter-chip ypp-toggle-chip';
         toggleShorts.textContent = 'Hide Shorts';
         toggleShorts.dataset.toggle = 'shorts';
-        toggleShorts.addEventListener('click', () => {
+        ctx.addListener(toggleShorts, 'click', () => {
             toggleShorts.classList.toggle('active');
             ctx.reapplyFilters();
         });
@@ -61,7 +61,7 @@ window.YPP.features.SubsUIFilter = class SubsUIFilter {
         toggleWatched.className = 'ypp-filter-chip ypp-toggle-chip';
         toggleWatched.textContent = 'Hide Watched';
         toggleWatched.dataset.toggle = 'watched';
-        toggleWatched.addEventListener('click', () => {
+        ctx.addListener(toggleWatched, 'click', () => {
             toggleWatched.classList.toggle('active');
             ctx.reapplyFilters();
         });

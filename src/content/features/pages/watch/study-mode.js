@@ -65,7 +65,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
             this._startSessionTimer();
 
             // Setup Auto-Pause
-            document.addEventListener('visibilitychange', this._visibilityHandler);
+            this.addListener(document, 'visibilitychange', this._visibilityHandler);
 
             // Inject Notes Panel
             this._injectNotePanel();
@@ -77,7 +77,8 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         }
     }
 
-    disable() {
+    async disable() {
+        await super.disable();
 
         try {
             if (window.YPP && window.YPP.sharedObserver) {
@@ -104,9 +105,6 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
             
             // Stop session timer
             this._stopSessionTimer();
-
-            // Cleanup Auto-Pause
-            document.removeEventListener('visibilitychange', this._visibilityHandler);
 
             // Cleanup Note Panel
             this._removeNotePanel();
@@ -135,14 +133,13 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
     async onVideoChange(videoId) {
         if (!this.isEnabled) return;
         
-        // Let the DOM settle
-        setTimeout(() => {
-            const rightControls = document.querySelector('.ytp-right-controls');
+        try {
+            const rightControls = await this.waitForElement('.ytp-right-controls', 5000);
             if (rightControls) {
                 this._createButtonInControls(rightControls);
             }
             
-            const video = document.querySelector('video');
+            const video = await this.waitForElement('video', 5000);
             if (video && this._boundEnforceState) {
                 video.removeEventListener('ratechange', this._boundEnforceState);
                 this.addListener(video, 'ratechange', this._boundEnforceState);
@@ -153,7 +150,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
             if (this.notesPanel) {
                 this._loadNotes();
             }
-        }, 300);
+        } catch (e) {}
     }
 
     _createButtonInControls(rightControls) {
@@ -653,7 +650,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         input.placeholder = 'Type a note and press Enter...';
         input.style.cssText = 'width: 100%; height: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 8px; resize: none; font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;';
         
-        input.addEventListener('keydown', (e) => {
+        this.addListener(input, 'keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 const text = input.value.trim();

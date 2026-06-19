@@ -30,7 +30,7 @@ window.YPP.features.WheelControls = class WheelControls extends window.YPP.featu
             
             // Attach listener globally to ensure we catch edge-cases
             // Need `{ passive: false }` to prevent default scroll
-            window.addEventListener('wheel', this.handleWheel, { passive: false });
+            this.addListener(window, 'wheel', this.handleWheel, { passive: false });
         } catch (e) {
             this.utils?.log('Error enabling WheelControls', 'WHEEL', 'error', e);
         }
@@ -39,7 +39,6 @@ window.YPP.features.WheelControls = class WheelControls extends window.YPP.featu
     async disable() {
         this.isActive = false;
         await super.disable();
-        window.removeEventListener('wheel', this.handleWheel);
         this.playerContainer = null;
     }
 

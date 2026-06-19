@@ -67,8 +67,6 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         if (this._observeTimeout) clearTimeout(this._observeTimeout);
         if (this._injectTimeout) clearTimeout(this._injectTimeout);
 
-        window.removeEventListener('yt-navigate-finish', this._boundHandleNavigate);
-
         // Call super to clean up any tracked listeners
         await super.disable();
     }
@@ -107,7 +105,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         this._scheduleInjection();
 
         // Keep active state updated on SPA navigation
-        window.addEventListener('yt-navigate-finish', this._boundHandleNavigate);
+        this.addListener(window, 'yt-navigate-finish', this._boundHandleNavigate);
 
         // Use sharedObserver instead of a dedicated MutationObserver to prevent memory leaks
         this._domObserver.register('header-nav-masthead', 'ytd-masthead #end, ytd-masthead #end *', () => {
@@ -211,7 +209,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         component.el.dataset.url = url;
         component.el.setAttribute('tabindex', '0');
         component.el.setAttribute('role', 'button');
-        component.el.addEventListener('keydown', (e) => {
+        this.addListener(component.el, 'keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 handleClick(e);

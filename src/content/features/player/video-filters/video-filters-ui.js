@@ -387,15 +387,18 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const origRemove = ctx._removeFilterPanel.bind(ctx);
         ctx._removeFilterPanel = function() {
             if (ctx._filterPanelKeydownHandler) {
-                document.removeEventListener('keydown', ctx._filterPanelKeydownHandler);
+                if (ctx.removeListener) ctx.removeListener(document, 'keydown', ctx._filterPanelKeydownHandler);
+                else document.removeEventListener('keydown', ctx._filterPanelKeydownHandler);
                 ctx._filterPanelKeydownHandler = null;
             }
             if (ctx._filterPanelOutsideHandler) {
-                document.removeEventListener('click', ctx._filterPanelOutsideHandler);
+                if (ctx.removeListener) ctx.removeListener(document, 'click', ctx._filterPanelOutsideHandler);
+                else document.removeEventListener('click', ctx._filterPanelOutsideHandler);
                 ctx._filterPanelOutsideHandler = null;
             }
             if (ctx._filterPanelResizeHandler) {
-                window.removeEventListener('resize', ctx._filterPanelResizeHandler);
+                if (ctx.removeListener) ctx.removeListener(window, 'resize', ctx._filterPanelResizeHandler);
+                else window.removeEventListener('resize', ctx._filterPanelResizeHandler);
                 ctx._filterPanelResizeHandler = null;
             }
             ctx._removeFilterPanel = origRemove; // restore

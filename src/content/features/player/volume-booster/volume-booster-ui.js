@@ -30,11 +30,13 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             ctx._volumePopup = null;
             anchorBtn.classList.remove('active');
             if (ctx._volumePopupOutsideHandler) {
-                document.removeEventListener('click', ctx._volumePopupOutsideHandler);
+                if (ctx.removeListener) ctx.removeListener(document, 'click', ctx._volumePopupOutsideHandler);
+                else document.removeEventListener('click', ctx._volumePopupOutsideHandler);
                 ctx._volumePopupOutsideHandler = null;
             }
             if (ctx._volumePopupEscapeHandler) {
-                document.removeEventListener('keydown', ctx._volumePopupEscapeHandler);
+                if (ctx.removeListener) ctx.removeListener(document, 'keydown', ctx._volumePopupEscapeHandler);
+                else document.removeEventListener('keydown', ctx._volumePopupEscapeHandler);
                 ctx._volumePopupEscapeHandler = null;
             }
             return;

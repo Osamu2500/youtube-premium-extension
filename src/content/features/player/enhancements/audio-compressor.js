@@ -77,13 +77,12 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
                 // Doing this on loadeddata or readyState blocks the video pipeline and causes massive load delays.
                 const tryStart = () => {
                     this.setupAudioNodes();
-                    this.videoElement.removeEventListener('play', tryStart);
                 };
                 
                 if (!this.videoElement.paused) {
                     tryStart();
                 } else {
-                    this.videoElement.addEventListener('play', tryStart);
+                    this.addListener(this.videoElement, 'play', tryStart);
                 }
             }
         } catch (error) {
@@ -187,11 +186,11 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
 
             if (navigator.mediaDevices && !this._deviceChangeListenerBound) {
                 this._deviceChangeListenerBound = true;
-                navigator.mediaDevices.addEventListener('devicechange', () => {
+                this.addListener(navigator.mediaDevices, 'devicechange', () => {
                     this.utils.log?.('Audio output device changed. Re-initializing compressor graph...', 'AUDIO', 'warn');
                     if (this.isEnabled && this.isProcessing) {
                         this.disconnectAudio();
-                        setTimeout(() => this.setupAudioNodes(), 500);
+                        this.pollFor(() => true, 500, 500).then(() => this.setupAudioNodes());
                     }
                 });
             }
@@ -205,10 +204,9 @@ window.YPP.features.AudioCompressor = class AudioCompressor extends window.YPP.f
             const tryResume = () => {
                 if (this.isEnabled && !this.isProcessing) {
                     this.setupAudioNodes();
-                    this.videoElement.removeEventListener('play', tryResume);
                 }
             };
-            this.videoElement.addEventListener('play', tryResume, { once: true });
+            this.addListener(this.videoElement, 'play', tryResume, { once: true });
         }
     }
 };

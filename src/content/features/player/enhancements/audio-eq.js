@@ -83,7 +83,7 @@ window.YPP.features.AudioEQ = class AudioEQ extends window.YPP.features.BaseFeat
             this.trebleFilter.connect(this.audioContext.destination);
 
             // Handle speed change pitch correction issues in Chrome
-            video.addEventListener('ratechange', this._boundHandleRateChange);
+            this.addListener(video, 'ratechange', this._boundHandleRateChange);
 
             this._applyEQ();
             

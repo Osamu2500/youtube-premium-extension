@@ -44,7 +44,8 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         }
     }
 
-    disable() {
+    async disable() {
+        await super.disable();
         try {
             if (this._pollInterval) {
                 clearInterval(this._pollInterval);
@@ -192,8 +193,8 @@ window.YPP.features.TimeDisplay = class TimeDisplay extends window.YPP.features.
         // ratechange fires rarely so it gets the unthrottled version for instant response.
         const throttledUpdate = window.YPP.Utils?.throttle?.(update, 1000) ?? update;
         this._boundTimeUpdate = { throttled: throttledUpdate, raw: update };
-        video.addEventListener('timeupdate', throttledUpdate);
-        video.addEventListener('ratechange', update);
+        this.addListener(video, 'timeupdate', throttledUpdate);
+        this.addListener(video, 'ratechange', update);
         update(); // Immediate initial render
     }
 };

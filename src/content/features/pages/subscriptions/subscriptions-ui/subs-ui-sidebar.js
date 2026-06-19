@@ -28,6 +28,15 @@ window.YPP.features.SubsUISidebar = class SubsUISidebar {
             section.className = 'style-scope ytd-guide-renderer';
             const insertTarget = guide.children.length > 0 ? guide.children[1] : null;
             guide.insertBefore(section, insertTarget);
+
+            ctx.addListener(section, 'click', (e) => {
+                const entry = e.target.closest('.ypp-sidebar-entry');
+                if (entry) {
+                    e.preventDefault();
+                    const name = entry.querySelector('.title')?.textContent;
+                    if (name) window.location.href = `/feed/subscriptions?ypp_group=${encodeURIComponent(name)}`;
+                }
+            });
         }
 
         const folderSvg = `<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon" style="pointer-events:none;display:block;width:100%;height:100%"><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2,6v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18H4V6h5.17l2,2H20V18z"></path></svg>`;
@@ -50,13 +59,5 @@ window.YPP.features.SubsUISidebar = class SubsUISidebar {
                 }).join('')}
             </div>
         `;
-
-        section.querySelectorAll('.ypp-sidebar-entry').forEach(el => {
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                const name = el.querySelector('.title')?.textContent;
-                if (name) window.location.href = `/feed/subscriptions?ypp_group=${encodeURIComponent(name)}`;
-            });
-        });
     }
 };

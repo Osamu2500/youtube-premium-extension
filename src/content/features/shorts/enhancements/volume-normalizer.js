@@ -73,8 +73,6 @@ window.YPP.features.ShortsVolumeNormalizer = class ShortsVolumeNormalizer extend
         if (!this._isMonitoring) return;
         this.observer.unregister('shorts-volume-monitor');
         document.querySelectorAll('video[data-ypp-volume]').forEach(video => {
-            video.removeEventListener('volumechange', this.enforceVolume);
-            video.removeEventListener('play', this.enforceVolume);
             video.removeAttribute('data-ypp-volume');
         });
         this._isMonitoring = false;
@@ -93,8 +91,8 @@ window.YPP.features.ShortsVolumeNormalizer = class ShortsVolumeNormalizer extend
         if (!video || video.hasAttribute('data-ypp-volume')) return;
         
         video.setAttribute('data-ypp-volume', 'true');
-        video.addEventListener('volumechange', this.enforceVolume);
-        video.addEventListener('play', this.enforceVolume);
+        this.addListener(video, 'volumechange', this.enforceVolume);
+        this.addListener(video, 'play', this.enforceVolume);
     }
 
     enforceVolume(e) {

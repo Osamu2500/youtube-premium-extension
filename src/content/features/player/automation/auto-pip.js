@@ -14,7 +14,8 @@ window.YPP.features.AutoPiP = class AutoPiP extends window.YPP.features.BaseFeat
         this._boundAutoPiP = null;
     }
 
-    enable() {
+    async enable() {
+        await super.enable();
         if (this._boundAutoPiP) return; // Already enabled
         
         this._boundAutoPiP = async () => {
@@ -32,9 +33,9 @@ window.YPP.features.AutoPiP = class AutoPiP extends window.YPP.features.BaseFeat
                             if (document.pictureInPictureElement) {
                                 try { await document.exitPictureInPicture(); } catch (_) {}
                             }
-                            video.removeEventListener('ended', onEnded);
+                            this.removeListener(video, 'ended', onEnded);
                         };
-                        video.addEventListener('ended', onEnded);
+                        this.addListener(video, 'ended', onEnded);
                     } catch (_) {}
                 }
             } else if (!document.hidden && document.pictureInPictureElement) {
@@ -47,10 +48,9 @@ window.YPP.features.AutoPiP = class AutoPiP extends window.YPP.features.BaseFeat
         this.utils?.log?.('Auto PiP enabled', 'AUTO_PIP');
     }
 
-    disable() {
-        if (!this._boundAutoPiP) return;
+    async disable() {
+        await super.disable();
         
-        document.removeEventListener('visibilitychange', this._boundAutoPiP);
         this._boundAutoPiP = null;
         
         // Exit PiP if currently active

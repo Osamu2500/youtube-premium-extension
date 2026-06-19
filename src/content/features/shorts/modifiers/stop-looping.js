@@ -54,7 +54,6 @@ window.YPP.features.StopShortsLooping = class StopShortsLooping extends window.Y
         if (!this._isMonitoring) return;
         this.observer.unregister('shorts-loop-monitor');
         document.querySelectorAll('video[data-ypp-no-loop]').forEach(video => {
-            video.removeEventListener('play', this.preventLoop);
             video.removeAttribute('data-ypp-no-loop');
         });
         this._isMonitoring = false;
@@ -72,7 +71,7 @@ window.YPP.features.StopShortsLooping = class StopShortsLooping extends window.Y
         if (!video || video.hasAttribute('data-ypp-no-loop')) return;
         
         video.setAttribute('data-ypp-no-loop', 'true');
-        video.addEventListener('play', this.preventLoop);
+        this.addListener(video, 'play', this.preventLoop);
     }
 
     preventLoop(e) {

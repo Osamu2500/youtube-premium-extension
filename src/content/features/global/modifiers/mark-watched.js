@@ -238,15 +238,15 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
             // Use native listeners — they survive disable/re-enable cycles
             // because the icon stays in the DOM. The handler reads from `this`
             // at call time, so it always picks up the latest state.
-            icon.addEventListener('mouseenter', () => {
+            this.addListener(icon, 'mouseenter', () => {
                 icon.style.background = 'var(--ypp-accent, #3ea6ff)';
                 icon.style.transform = 'scale(1.1)';
             });
-            icon.addEventListener('mouseleave', () => {
+            this.addListener(icon, 'mouseleave', () => {
                 icon.style.background = '';
                 icon.style.transform = '';
             });
-            icon.addEventListener('click', (ev) => {
+            this.addListener(icon, 'click', (ev) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 if (!this.isEnabled) return; // Guard: feature might be disabled
@@ -374,7 +374,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
 
             this._onTimeUpdateBinded = checkProgress;
             // Use native addEventListener here specifically because we track its removal precisely above for SPA navs
-            this._activeVideoEl.addEventListener('timeupdate', this._onTimeUpdateBinded);
+            this.addListener(this._activeVideoEl, 'timeupdate', this._onTimeUpdateBinded);
         }).catch(() => {
             this.utils.log?.('Video element not found for tracking watch progress', 'MarkWatched', 'warn');
         });

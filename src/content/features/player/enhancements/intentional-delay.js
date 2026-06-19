@@ -79,7 +79,7 @@ window.YPP.features.IntentionalDelay = class IntentionalDelay extends window.YPP
             }
         }, 1000);
 
-        btn.addEventListener('click', () => {
+        this.addListener(btn, 'click', () => {
             this._removeOverlay();
             // Safely play using YouTube's native API
             const playScript = document.createElement('script');
