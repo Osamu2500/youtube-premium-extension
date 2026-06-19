@@ -14,10 +14,7 @@ import './core/storage-manager.js';
 import './managers/hotkeys-manager.js';
 import './managers/layout-manager.js';
 import './managers/base-page-manager.js';
-import './managers/home-page-manager.js';
 import './managers/watch-page-manager.js';
-import './managers/subs-page-manager.js';
-import './managers/search-page-manager.js';
 
 // UI Architecture (Phase 4)
 import './ui/ui-manager.js';

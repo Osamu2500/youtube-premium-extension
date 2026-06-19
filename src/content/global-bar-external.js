@@ -36,21 +36,70 @@
                 .forEach(el => el?.remove());
         },
         positionPopupBesideVideo: (panel, triggerBtn, video, panelW) => {
-            const GAP = 12, MARGIN = 8;
+            const GAP = 10, MARGIN = 8;
             const W = window.innerWidth, H = window.innerHeight;
             const btnRect = triggerBtn.getBoundingClientRect();
-            const estH = Math.min(panel.scrollHeight > 40 ? panel.scrollHeight : 400, H - MARGIN * 2);
+            const vRect   = video?.getBoundingClientRect?.() || null;
+            const hasVideo = vRect && vRect.width > 20 && vRect.height > 20;
 
+            // Auto-scale: shrink panelW to never exceed available space
+            let effectiveW = panelW;
+            if (hasVideo) {
+                const spaceLeft  = vRect.left - MARGIN;
+                const spaceRight = W - vRect.right - MARGIN;
+                const maxHoriz   = Math.max(spaceLeft, spaceRight, W * 0.45);
+                effectiveW = Math.min(panelW, Math.max(280, maxHoriz - GAP));
+            } else {
+                effectiveW = Math.min(panelW, W * 0.45);
+            }
+            panel.style.width = effectiveW + 'px';
+
+            // Clamp helpers (use effectiveW for horizontal)
+            const estH     = Math.min(panel.scrollHeight > 40 ? panel.scrollHeight : 380, H * 0.85);
             const clampTop  = t => Math.max(MARGIN, Math.min(t, H - estH - MARGIN));
-            const clampLeft = l => Math.max(MARGIN, Math.min(l, W - panelW - MARGIN));
-            
-            // Align vertically with the button center
-            const top = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
-            // Position exactly to the left of the button
-            const left = btnRect.left - GAP - panelW;
+            const clampLeft = l => Math.max(MARGIN, Math.min(l, W - effectiveW - MARGIN));
+
+            let left, top;
+
+            if (hasVideo) {
+                const spaceAbove = vRect.top - MARGIN;
+                const spaceBelow = H - vRect.bottom - MARGIN;
+                const spaceLeft  = vRect.left - MARGIN;
+                const spaceRight = W - vRect.right - MARGIN;
+
+                // Horizontal alignment: centre on button, clamp within viewport
+                const btnCentreX = btnRect.left + btnRect.width / 2;
+                const idealLeft  = clampLeft(btnCentreX - effectiveW / 2);
+
+                if (spaceAbove >= Math.min(estH, 260)) {
+                    // ABOVE the video — preferred when bar is on the side
+                    top  = vRect.top - GAP - estH;
+                    left = idealLeft;
+                } else if (spaceBelow >= Math.min(estH, 260)) {
+                    // BELOW the video
+                    top  = vRect.bottom + GAP;
+                    left = idealLeft;
+                } else if (spaceLeft >= effectiveW + MARGIN) {
+                    // LEFT of video
+                    left = vRect.left - GAP - effectiveW;
+                    top  = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
+                } else if (spaceRight >= effectiveW + MARGIN) {
+                    // RIGHT of video
+                    left = vRect.right + GAP;
+                    top  = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
+                } else {
+                    // Fallback: left of button, vertically centred
+                    left = btnRect.left - GAP - effectiveW;
+                    top  = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
+                }
+            } else {
+                // No video — just go left of the button
+                left = btnRect.left - GAP - effectiveW;
+                top  = clampTop(btnRect.top + btnRect.height / 2 - estH / 2);
+            }
 
             panel.style.left = clampLeft(left) + 'px';
-            panel.style.top  = clampTop(top)  + 'px';
+            panel.style.top  = clampTop(top)   + 'px';
         },
         getPopupPortal: () => {
             let dlg = document.getElementById('ypp-popup-portal');

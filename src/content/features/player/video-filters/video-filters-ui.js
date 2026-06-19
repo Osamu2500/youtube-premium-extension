@@ -2,6 +2,46 @@ window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
 window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
+
+    /**
+     * Debounce-saves all video filter state to Chrome storage so settings
+     * survive SPA navigation (switching episodes).
+     * Mirrors VolumeBoosterUI.saveVolumeSettings for the same pattern.
+     * @param {VideoFilters} ctx - The VideoFilters feature instance
+     */
+    static saveFilterSettings(ctx) {
+        if (!this._debouncedFilterSave) {
+            const debounce = window.YPP?.Utils?.debounce
+                || ((fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; });
+            this._debouncedFilterSave = debounce((ctxArg) => {
+                if (!window.YPP?.MainApp?.saveSettings) return;
+                const adj = ctxArg.filterAdjustments;
+                window.YPP.MainApp.saveSettings({
+                    cinemaFilterIndex:       ctxArg.currentFilterIndex,
+                    cinemaFilterIntensity:   ctxArg.filterIntensity,
+                    cinemaFilterBrightness:  adj.brightness,
+                    cinemaFilterContrast:    adj.contrast,
+                    cinemaFilterSaturate:    adj.saturate,
+                    cinemaFilterHue:         adj.hueRotate,
+                    cinemaFilterSepia:       adj.sepia,
+                    cinemaFilterGrayscale:   adj.grayscale,
+                    cinemaFilterInvert:      adj.invert,
+                    cinemaFilterBlur:        adj.blur,
+                    cinemaFilterOpacity:     adj.opacity,
+                    cinemaFilterDehaze:      adj.dehaze,
+                    cinemaFilterClarity:     adj.clarity,
+                    cinemaFilterGrain:       adj.grain,
+                    cinemaFilterSharpness:   adj.sharpness,
+                    cinemaFilterTemperature: adj.temperature,
+                    cinemaFilterVibrance:    adj.vibrance,
+                    cinemaFilterHighlights:  adj.highlights,
+                    cinemaFilterShadows:     adj.shadows,
+                    cinemaFilterVignette:    adj.vignette,
+                });
+            }, 300);
+        }
+        this._debouncedFilterSave(ctx);
+    }
     static createFilterPanel(ctx, video, btn) {
         const panel = document.createElement('div');
         panel.id = 'ypp-cinema-panel';
@@ -37,8 +77,10 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 WebkitBackdropFilter: 'blur(24px) saturate(160%)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                width: '540px'
-                // bottom/right reset not needed — position switches to absolute in portal
+                // Width is set dynamically by positionPopupBesideVideo (auto-scaled to fit)
+                maxHeight: Math.min(window.innerHeight * 0.85, 560) + 'px',
+                overflowY: 'auto',
+                overflowX: 'hidden'
             });
         }
 
@@ -267,6 +309,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 temperature: 0, vibrance: 100, highlights: 0, shadows: 0, vignette: 0
             };
             ctx._applyComputedFilter(video);
+            VideoFiltersUI.saveFilterSettings(ctx);
             if (btn) { btn.classList.remove('active'); btn.title = 'Cinema Filters'; }
             ctx._removeFilterPanel();
             this.createFilterPanel(ctx, video, btn);
@@ -281,8 +324,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             panel.style.pointerEvents = 'auto';
             // position:absolute inside inset:0 dialog maps 1:1 to viewport coords
             panel.style.position = 'absolute';
-            panel.style.overflow = 'visible';
-            panel.style.clip     = 'auto';
+            panel.style.overflow = 'hidden';  // clip to border-radius — no spill
             panel.style.clipPath = 'none';
             // Override the default translateY entrance — use scale-from-center instead
             panel.style.animation = 'ypp-panel-scale-in 0.22s cubic-bezier(0.2, 0, 0, 1) forwards';
@@ -292,7 +334,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             this._injectStyle('ypp-scale-anim', '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(calc(0.92 * var(--ypp-auto-scale, 1)))}to{opacity:1;transform:scale(var(--ypp-auto-scale, 1))}}');
 
             // Position now (estimate), then reposition after first layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 540);
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 480);
             reposition();
             requestAnimationFrame(reposition);
 
@@ -424,6 +466,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 ctx._previewFilterIndex = undefined;
                 ctx.currentFilterIndex = index;
                 ctx._applyComputedFilter(video);
+                VideoFiltersUI.saveFilterSettings(ctx);
                 if (btn) { index > 0 ? btn.classList.add('active') : btn.classList.remove('active'); }
                 ctx._showToast(video, `✨ ${filter.name}`);
                 const pill = ctx._filterPanel?.querySelector('#ypp-active-filter-name');
@@ -553,6 +596,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             ctx.filterIntensity = Number(e.target.value);
             intensitySection.querySelector('#ypp-int-val').textContent = ctx.filterIntensity + '%';
             ctx._applyComputedFilter(video);
+            VideoFiltersUI.saveFilterSettings(ctx);
         };
         intensitySection.appendChild(intSlider);
         wrap.appendChild(intensitySection);
@@ -643,6 +687,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 slider.value = cfg.def;
                 val.textContent = cfg.def + cfg.unit;
                 ctx._applyComputedFilter(video);
+                VideoFiltersUI.saveFilterSettings(ctx);
             };
             resetBtn.onmouseenter = () => resetBtn.style.color = '#fff';
             resetBtn.onmouseleave = () => resetBtn.style.color = 'rgba(255,255,255,0.5)';
@@ -662,6 +707,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 ctx.filterAdjustments[cfg.id] = v;
                 val.textContent = v + cfg.unit;
                 ctx._applyComputedFilter(video);
+                VideoFiltersUI.saveFilterSettings(ctx);
             };
 
             card.appendChild(headerRow);

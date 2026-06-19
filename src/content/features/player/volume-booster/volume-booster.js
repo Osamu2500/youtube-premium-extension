@@ -158,8 +158,32 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
     onPageChange() {
         if (!this.settings || !this.settings.enableVolumeBoost) return;
+        // Re-load from persisted settings on every page change to guarantee
+        // that in-memory values always match what was saved to Chrome storage.
+        this._loadSettings(this.settings);
         const video = document.querySelector('.html5-main-video') || document.querySelector('video');
-        if (video && this._needsAudioGraph()) this.initAudioContext(video);
+        if (video) {
+            if (this._audioConnected && this._boundVideo === video) {
+                // Same video element reused (YouTube SPA) — just re-apply state
+                this._restoreAudioState();
+            } else if (this._needsAudioGraph()) {
+                this.initAudioContext(video);
+            }
+        }
+    }
+
+    onVideoChange() {
+        // Called by FeatureManager when a new videoId is detected (app:videoChange event)
+        if (!this.settings || !this.settings.enableVolumeBoost) return;
+        this._loadSettings(this.settings);
+        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
+        if (!video) return;
+        if (this._audioConnected && this._boundVideo === video) {
+            // Same video element: just restore the correct audio values
+            this._restoreAudioState();
+        } else if (this._needsAudioGraph()) {
+            this.initAudioContext(video);
+        }
     }
 
     _needsAudioGraph() {

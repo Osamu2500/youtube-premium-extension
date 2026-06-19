@@ -97,10 +97,7 @@
                 // Initialize Page Managers
                 if (window.YPP.managers) {
                     this.pageManagers = [
-                        new window.YPP.managers.HomePageManager(this.Utils, this.settings),
-                        new window.YPP.managers.WatchPageManager(this.Utils, this.settings),
-                        new window.YPP.managers.SubscriptionsPageManager(this.Utils, this.settings),
-                        new window.YPP.managers.SearchPageManager(this.Utils, this.settings)
+                        new window.YPP.managers.WatchPageManager(this.Utils, this.settings)
                     ];
                 } else {
                     this.pageManagers = [];

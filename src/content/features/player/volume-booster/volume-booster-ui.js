@@ -55,8 +55,11 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             panel.style.webkitBackdropFilter = 'blur(24px) saturate(160%)';
             panel.style.boxShadow = '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)';
             panel.style.border = '1px solid rgba(255,255,255,0.1)';
-            panel.style.width = '440px';
-            // bottom/right reset not needed — position switches to absolute in portal
+            // Width is set dynamically by positionPopupBesideVideo (auto-scaled to fit)
+            // max-height caps it so it never overflows the viewport
+            panel.style.maxHeight = Math.min(window.innerHeight * 0.85, 580) + 'px';
+            panel.style.overflowY = 'auto';
+            panel.style.overflowX = 'hidden';
         }
 
 
@@ -185,8 +188,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
         // ── Canvas Curve (will be moved to eqContentWrap)
         const canvasEl = document.createElement('canvas');
-        canvasEl.width = isGlobalBar ? 268 : 340;
-        canvasEl.height = isGlobalBar ? 52 : 72;
+        canvasEl.width  = isGlobalBar ? 268 : 340;
+        canvasEl.height = isGlobalBar ? 52  : 72;
         canvasEl.className = 'ypp-eq-canvas';
         // NOTE: NOT appended to panel here — appended via eqContentWrap below
 
@@ -385,13 +388,12 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             const dlg = window.YPP.Utils.getPopupPortal();
             panel.style.pointerEvents = 'auto';
             panel.style.position = 'absolute';
-            panel.style.overflow = 'visible';
-            panel.style.clip     = 'auto';
+            panel.style.overflow = 'hidden'; // clip to border-radius — prevents empty bottom area
             panel.style.clipPath = 'none';
             dlg.appendChild(panel);
 
             // Position now (estimate), reposition after layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, anchorBtn, video, 440);
+            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, anchorBtn, video, 400);
             reposition();
             requestAnimationFrame(reposition);
 
