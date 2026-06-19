@@ -227,15 +227,16 @@ function renderLayoutToggle(item, state) {
 
     const svgCompact = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="6" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><rect x="3" y="13" width="6" height="4" rx="1"/><line x1="11" y1="15" x2="21" y2="15"/></svg>`;
     const svgExpanded = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="11" rx="2"/><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="21" x2="15" y2="21"/></svg>`;
+    const svgGrid = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
 
-    const btnStyle = 'display:flex; align-items:center; gap:5px; font-size:11px; padding:5px 14px; border:none; cursor:pointer; transition:all 0.2s; font-weight:500; border-radius:6px; background:transparent; color:rgba(255,255,255,0.5);';
+    const btnStyle = 'display:flex; align-items:center; justify-content:center; flex:1; gap:4px; font-size:11px; padding:5px 8px; border:none; cursor:pointer; transition:all 0.2s; font-weight:500; border-radius:6px; background:transparent; color:rgba(255,255,255,0.5);';
 
-    const btnCompact = document.createElement('button');
-    btnCompact.type = 'button';
-    btnCompact.className = 'sidebar-layout-btn';
-    btnCompact.dataset.layout = 'compact';
-    btnCompact.style.cssText = btnStyle;
-    btnCompact.innerHTML = `${svgCompact} Compact`;
+    const btnSpacious = document.createElement('button');
+    btnSpacious.type = 'button';
+    btnSpacious.className = 'sidebar-layout-btn';
+    btnSpacious.dataset.layout = 'spacious';
+    btnSpacious.style.cssText = btnStyle;
+    btnSpacious.innerHTML = `${svgCompact} Spacious`;
 
     const btnExpanded = document.createElement('button');
     btnExpanded.type = 'button';
@@ -244,8 +245,16 @@ function renderLayoutToggle(item, state) {
     btnExpanded.style.cssText = btnStyle;
     btnExpanded.innerHTML = `${svgExpanded} Expanded`;
 
-    toggleWrap.appendChild(btnCompact);
+    const btnGrid = document.createElement('button');
+    btnGrid.type = 'button';
+    btnGrid.className = 'sidebar-layout-btn';
+    btnGrid.dataset.layout = 'grid';
+    btnGrid.style.cssText = btnStyle;
+    btnGrid.innerHTML = `${svgGrid} Grid`;
+
+    toggleWrap.appendChild(btnSpacious);
     toggleWrap.appendChild(btnExpanded);
+    toggleWrap.appendChild(btnGrid);
     headerRow.appendChild(toggleWrap);
     wrap.appendChild(headerRow);
 
@@ -255,12 +264,12 @@ function renderLayoutToggle(item, state) {
     const hiddenInput = document.createElement('input');
     hiddenInput.type = 'hidden';
     hiddenInput.id = item.id;
-    hiddenInput.value = item.default || 'compact';
+    hiddenInput.value = item.default || 'spacious';
     wrap.appendChild(hiddenInput);
 
     // Logic
     const updateVisuals = (layout) => {
-        [btnCompact, btnExpanded].forEach(b => {
+        [btnSpacious, btnExpanded, btnGrid].forEach(b => {
             const isActive = b.dataset.layout === layout;
             b.classList.toggle('active', isActive);
             b.style.background = isActive ? 'rgba(62,166,255,0.22)' : 'transparent';
@@ -282,8 +291,9 @@ function renderLayoutToggle(item, state) {
         });
     };
 
-    btnCompact.onclick = () => applyActiveState('compact');
+    btnSpacious.onclick = () => applyActiveState('spacious');
     btnExpanded.onclick = () => applyActiveState('expanded');
+    btnGrid.onclick = () => applyActiveState('grid');
 
     // Initialize UI visual state without triggering save
     updateVisuals(hiddenInput.value);

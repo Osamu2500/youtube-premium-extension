@@ -15,7 +15,14 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
             hidePosts: 'ypp-hide-posts',
             hidePromos: 'ypp-hide-promos',
             hideVoiceSearch: 'ypp-hide-voice-search',
-            aggressiveShortsBlock: 'ypp-hide-shorts'
+            aggressiveShortsBlock: 'ypp-hide-shorts',
+            hideLiveChat: 'ypp-hide-livechat',
+            hideEndScreens: 'ypp-hide-endscreens',
+            hideCards: 'ypp-hide-cards',
+            hideAnnotations: 'ypp-hide-annotations',
+            hideMerch: 'ypp-hide-merch',
+            hideDonations: 'ypp-hide-fundraiser',
+            hideRelated: 'ypp-hide-related'
             // Features like stopLooping, durationFilter, cleanMixUrls will be handled via JS
         };
     }

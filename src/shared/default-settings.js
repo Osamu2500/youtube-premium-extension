@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS = {
     navHistory: true,
     forceHideSidebar: false,
     logoRedirectSub: false,
-    sidebarLayout: 'compact',
+    sidebarLayout: 'spacious',
     
     // Playlist & History
     continueWatching: true,

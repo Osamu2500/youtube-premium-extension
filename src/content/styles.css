@@ -7961,3 +7961,16 @@ body.ypp-study-mode #primary {
     max-width: 100% !important;
     margin: 0 auto !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * YOUTUBE UI AESTHETIC SYNC
+ * ══════════════════════════════════════════════════════════════════════════ */
+.html5-video-player.ytp-rounded-player {
+  border-radius: 12px;
+}
+.html5-video-player.ytp-rounded-player .ypp-overlay,
+.html5-video-player.ytp-rounded-player .ypp-player-bar {
+  border-radius: inherit;
+  overflow: hidden;
+}
+

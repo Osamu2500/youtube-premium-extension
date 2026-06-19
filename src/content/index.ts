@@ -12,8 +12,8 @@ import './core/storage-manager.js';
 
 // Managers (Phase 4.5)
 import './managers/hotkeys-manager.js';
-import './managers/global-layout-manager.js';
 import './managers/base-page-manager.js';
+import './managers/global-layout-manager.js';
 import './managers/home-page-manager.js';
 import './managers/subs-page-manager.js';
 import './managers/search-page-manager.js';

@@ -1,98 +1,103 @@
 /* f:\Youtube 2.0\src\content\features\player\controls\sidebar-layout.css */
 /* 
  * Sidebar Layout Component
- * Toggles between YouTube's compact sidebar and the new 2026 large-thumbnail layout.
+ * Toggles between YouTube's compact sidebar, the expanded modern layout, and a custom 2-column grid.
  */
 
 /* ══════════════════════════════════════════════════════════════════════════
  * EXPANDED LAYOUT
  * ══════════════════════════════════════════════════════════════════════════ */
 body.ypp-sidebar-expanded :is(
-  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer, 
+  #related
+) :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
 ) {
-  display: block !important;
-  margin-bottom: 12px !important;
+  margin-bottom: 12px;
 }
 
 body.ypp-sidebar-expanded :is(
-  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer, 
+  #related
+) :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
 ) :is(#dismissible, #content, .yt-lockup-view-model-wiz) {
-  display: flex !important;
   flex-direction: column !important;
-  width: 100% !important;
   align-items: stretch !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 body.ypp-sidebar-expanded :is(
-  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer, 
+  #related
+) :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
 ) :is(#thumbnail, ytd-thumbnail, a:has(yt-image)) {
-  display: block !important;
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: none !important;
   aspect-ratio: 16 / 9 !important;
+  height: auto !important;
   margin-bottom: 8px !important;
-  border-radius: 8px !important;
-  overflow: hidden !important;
-  flex: none !important;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin-right: 0 !important;
+  border-radius: 8px;
 }
 
 body.ypp-sidebar-expanded :is(
-  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer, 
+  #related
+) :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
 ) :is(#details, .yt-lockup-metadata-view-model-wiz) {
-  display: flex !important;
-  flex-direction: row !important;
-  width: 100% !important;
   padding: 0 !important;
-  align-items: flex-start !important;
-  gap: 8px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  width: 100% !important;
 }
 
 body.ypp-sidebar-expanded :is(
-  ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-  ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer, 
+  #related
 ) :is(#video-title, h3) {
-  -webkit-line-clamp: unset !important;
-  line-clamp: unset !important;
-  max-height: unset !important;
-  white-space: normal !important;
-  overflow: visible !important;
+  -webkit-line-clamp: 3 !important; /* Allow more lines of text */
+  line-clamp: 3 !important;
+  max-height: none !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
- * COMPACT LAYOUT
+ * SPACIOUS LAYOUT
  * ══════════════════════════════════════════════════════════════════════════ */
-body.ypp-sidebar-compact :is(
+body.ypp-sidebar-spacious :is(
   ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
   ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
   ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer,
+  #related ytd-compact-video-renderer,
+  #related yt-lockup-view-model,
+  #related ytd-lockup-view-model,
+  #related ytd-rich-item-renderer
 ) {
   display: block !important;
   margin-bottom: 8px !important;
 }
 
-body.ypp-sidebar-compact :is(
+body.ypp-sidebar-spacious :is(
   ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
   ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
   ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer,
+  #related ytd-compact-video-renderer,
+  #related yt-lockup-view-model,
+  #related ytd-lockup-view-model,
+  #related ytd-rich-item-renderer
 ) :is(#dismissible, #content, .yt-lockup-view-model-wiz) {
   display: flex !important;
   flex-direction: row !important;
@@ -102,11 +107,15 @@ body.ypp-sidebar-compact :is(
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-body.ypp-sidebar-compact :is(
+body.ypp-sidebar-spacious :is(
   ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
   ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
   ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer,
+  #related ytd-compact-video-renderer,
+  #related yt-lockup-view-model,
+  #related ytd-lockup-view-model,
+  #related ytd-rich-item-renderer
 ) :is(#thumbnail, ytd-thumbnail, a:has(yt-image)) {
   display: block !important;
   width: 168px !important;
@@ -119,11 +128,15 @@ body.ypp-sidebar-compact :is(
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-body.ypp-sidebar-compact :is(
+body.ypp-sidebar-spacious :is(
   ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
   ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
   ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer,
+  #related ytd-compact-video-renderer,
+  #related yt-lockup-view-model,
+  #related ytd-lockup-view-model,
+  #related ytd-rich-item-renderer
 ) :is(#details, .yt-lockup-metadata-view-model-wiz) {
   display: flex !important;
   flex-direction: column !important;
@@ -133,14 +146,94 @@ body.ypp-sidebar-compact :is(
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-body.ypp-sidebar-compact :is(
+body.ypp-sidebar-spacious :is(
   ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
   ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
   ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer
+  ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer,
+  #related ytd-compact-video-renderer,
+  #related yt-lockup-view-model,
+  #related ytd-lockup-view-model,
+  #related ytd-rich-item-renderer
 ) :is(#video-title, h3) {
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
   max-height: 3.2rem !important;
   overflow: hidden !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * GRID LAYOUT (NEW)
+ * ══════════════════════════════════════════════════════════════════════════ */
+body.ypp-sidebar-grid :is(
+  ytd-watch-next-secondary-results-renderer #items, 
+  #related #items,
+  #related ytd-item-section-renderer #contents,
+  #related ytd-rich-grid-renderer > #contents,
+  #related ytd-rich-grid-row > #contents,
+  #related div#contents:has(> ytd-rich-item-renderer),
+  #related div#contents:has(> ytd-compact-video-renderer)
+) {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+
+/* Reset margins inside grid items so they don't add extra space */
+body.ypp-sidebar-grid :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
+) {
+  margin-bottom: 0 !important;
+  width: 100% !important;
+}
+
+/* Stack thumbnail on top, details below */
+body.ypp-sidebar-grid :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
+) :is(#dismissible, #content, .yt-lockup-view-model-wiz) {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+/* Thumbnail takes full width of grid cell */
+body.ypp-sidebar-grid :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
+) :is(#thumbnail, ytd-thumbnail, a:has(yt-image)) {
+  width: 100% !important;
+  max-width: none !important;
+  aspect-ratio: 16 / 9 !important;
+  height: auto !important;
+  margin-bottom: 8px !important;
+  margin-right: 0 !important;
+  border-radius: 8px;
+}
+
+/* Details take full width under thumbnail */
+body.ypp-sidebar-grid :is(
+  ytd-compact-video-renderer,
+  yt-lockup-view-model,
+  ytd-lockup-view-model,
+  ytd-rich-item-renderer
+) :is(#details, .yt-lockup-metadata-view-model-wiz) {
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+/* Title text sizing for grid */
+body.ypp-sidebar-grid :is(
+  ytd-watch-next-secondary-results-renderer, 
+  #related
+) :is(#video-title, h3) {
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  font-size: 1.3rem !important;
 }

@@ -114,15 +114,16 @@ class WatchPageManager extends window.YPP.BasePageManager {
         
         // 1. Reset all managed classes
         const classesToRemove = [
-            'ypp-sidebar-compact', 'ypp-sidebar-expanded', 'ypp-sidebar-hidden',
+            'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
             'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode',
             'ypp-hide-comments'
         ];
         body.classList.remove(...classesToRemove);
 
         // 2. Apply Sidebar
-        if (this.state.sidebar === 'compact') body.classList.add('ypp-sidebar-compact');
+        if (this.state.sidebar === 'spacious') body.classList.add('ypp-sidebar-spacious');
         else if (this.state.sidebar === 'expanded') body.classList.add('ypp-sidebar-expanded');
+        else if (this.state.sidebar === 'grid') body.classList.add('ypp-sidebar-grid');
         else if (this.state.sidebar === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
             body.classList.add('ypp-sidebar-hidden'); // Force hide sidebar in extreme modes
         }
@@ -145,7 +146,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
 
     _cleanupDOM() {
         const classesToRemove = [
-            'ypp-sidebar-compact', 'ypp-sidebar-expanded', 'ypp-sidebar-hidden',
+            'ypp-sidebar-compact', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
             'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode',
             'ypp-hide-comments'
         ];
