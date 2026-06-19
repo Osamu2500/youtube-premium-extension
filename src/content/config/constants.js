@@ -430,6 +430,9 @@ window.YPP.CONSTANTS = {
         watchRedesign: 'WatchRedesign',
         bookmarksManager: 'BookmarksManager',
         classicProgressBar: 'ClassicProgressBar',
+        snapshotButton: 'SnapshotButton',
+        loopButton: 'LoopButton',
+        splitScrolling: 'SplitScrolling',
         // --- Missing Toggles & Layouts ---
         autoScaleLayout: 'AutoScaleGrid',
         displayFullTitle: 'FullVideoTitles',

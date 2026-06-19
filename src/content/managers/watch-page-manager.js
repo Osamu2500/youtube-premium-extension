@@ -149,13 +149,8 @@ class WatchPageManager extends window.YPP.BasePageManager {
             } else if (this.state.sidebar === 'grid') {
                 body.classList.add('ypp-sidebar-grid');
             }
-        } else {
-            // Custom sidebar is OFF — still enforce compact rows to defeat YouTube's
-            // A/B-tested "expanded" layout that is now the native default for many users.
-            body.classList.add('ypp-sidebar-compact');
         }
         
-
         if (this.state.sidebar === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
             body.classList.add('ypp-sidebar-hidden'); // Force hide sidebar in extreme modes
         }

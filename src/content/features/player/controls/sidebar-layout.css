@@ -138,6 +138,8 @@ body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer
 
 /* ── Global Typography & Spacing Fixes for Spacious ── */
 body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
   max-height: 3.8rem !important; /* Better breathing room */
@@ -262,10 +264,12 @@ body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-rendere
 
 /* Expanded Title styling */
 body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 3 !important;
   line-clamp: 3 !important;
   max-height: none !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   font-size: 1.5rem !important;
   line-height: 2rem !important;
   font-weight: 500 !important;
@@ -286,7 +290,7 @@ body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) d
 body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) div#contents:has(> yt-lockup-view-model),
 body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) div#contents:has(> ytd-lockup-view-model) {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
   gap: 12px !important;
 }
 
@@ -358,11 +362,14 @@ body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :
 
 /* Title text sizing for grid */
 body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
   font-size: 1.3rem !important;
   line-height: 1.8rem !important;
   margin-bottom: 4px !important;
+  overflow: hidden !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -489,12 +496,14 @@ body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-rendere
 
 /* ── Typography & Spacing Fixes ── */
 body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
-  max-height: 4.2rem !important;
+  max-height: 3.8rem !important;
   overflow: hidden !important;
   font-size: 1.5rem !important;
-  line-height: 2.0rem !important;
+  line-height: 1.9rem !important;
   font-weight: 500 !important;
   margin-bottom: 4px !important;
   margin-top: 2px !important;
