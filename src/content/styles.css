@@ -660,53 +660,107 @@ body.ypp-hide-explore-topics ytd-rich-grid-renderer > #header {
   display: none !important;
 }
 
-/* ==========================================================================
-   UNHOOK & FOCUS MODE FEATURES
-   ========================================================================== */
-
-/* Hide Comments */
-.ypp-hide-comments #comments {
+/* Hide Voice Search */
+body.ypp-hide-voice-search #voice-search-button,
+body.ypp-hide-voice-search ytm-voice-search-button-renderer {
   display: none !important;
 }
 
-/* Hide Sidebar */
-.ypp-hide-sidebar ytd-watch-flexy #secondary,
-.ypp-hide-sidebar ytd-watch-next-secondary-results-renderer {
+/* Hide Shorts Interaction Bar */
+body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer {
+  display: none !important;
+}
+
+/* Hide Shorts in Search Results */
+body.ypp-hide-search-shorts ytd-search ytd-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-search-shorts ytd-search ytd-reel-shelf-renderer,
+body.ypp-hide-search-shorts ytd-item-section-renderer:has(ytd-reel-shelf-renderer) {
+  display: none !important;
+}
+
+/* Nuke Shorts — Aggressive removal from all pages */
+body.ypp-nuke-shorts ytd-rich-section-renderer[is-shorts],
+body.ypp-nuke-shorts ytd-rich-item-renderer:has(ytd-reel-item-renderer),
+body.ypp-nuke-shorts ytd-reel-shelf-renderer,
+body.ypp-nuke-shorts ytd-guide-entry-renderer:has(a[href^="/shorts"]),
+body.ypp-nuke-shorts ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
+body.ypp-nuke-shorts [is-shorts],
+body.ypp-nuke-shorts ytd-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-nuke-shorts ytd-compact-video-renderer:has(a[href^="/shorts/"]) {
+  display: none !important;
+}
+
+/* ==========================================================================
+   UNHOOK & FOCUS MODE FEATURES — Core Feature Selectors
+   All rules use body. prefix for reliability in YouTube's SPA
+   ========================================================================== */
+
+/* Hide Comments */
+body.ypp-hide-comments #comments {
+  display: none !important;
+}
+
+/* Hide Live Chat */
+body.ypp-hide-live-chat ytd-live-chat-frame,
+body.ypp-hide-live-chat #chat {
+  display: none !important;
+}
+
+/* Hide Related Feed (Watch Page Sidebar) */
+body.ypp-hide-related #related,
+body.ypp-hide-related ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+/* Hide Annotations (on-screen overlays on player) */
+body.ypp-hide-annotations .ytp-ce-element,
+body.ypp-hide-annotations .ytp-ce-shadow {
+  display: none !important;
+}
+
+/* Hide Video Cards (player pop-up cards only) */
+body.ypp-hide-video-cards .ytp-cards-button,
+body.ypp-hide-video-cards .ytp-cards-teaser,
+body.ypp-hide-video-cards .iv-drawer {
   display: none !important;
 }
 
 /* Hide Promo/Game Shelves */
-.ypp-hide-promo-shelves ytd-rich-shelf-renderer:not([is-shorts]),
-.ypp-hide-promo-shelves ytd-rich-section-renderer:not([is-shorts]) {
-  display: none !important;
-}
-
-/* Hide Annotations & Cards */
-.ypp-hide-annotations .ytp-ce-element,
-.ypp-hide-annotations .ytp-ce-shadow,
-.ypp-hide-cards .ytp-cards-button,
-.ypp-hide-cards .ytp-cards-teaser,
-.ypp-hide-cards .iv-drawer {
-  display: none !important;
-}
-
-/* Hide Related Feed (Watch Page) */
-.ypp-hide-related #related,
-.ypp-hide-related ytd-watch-next-secondary-results-renderer {
+body.ypp-hide-promos ytd-rich-shelf-renderer:not([is-shorts]),
+body.ypp-hide-promos ytd-rich-section-renderer:not([is-shorts]) {
   display: none !important;
 }
 
 /* Hide Homepage Feed */
-.ypp-hide-feed ytd-browse[page-subtype="home"] #primary {
+body.ypp-hide-feed ytd-browse[page-subtype="home"] #primary {
   display: none !important;
 }
 
-/* Hide Trending / Explore */
-.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/trending"]),
-.ypp-hide-trending ytd-mini-guide-entry-renderer:has(a[href*="/feed/trending"]),
-.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/explore"]) {
+/* Hide Trending / Explore — global (guide sidebar + page) */
+body.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/trending"]),
+body.ypp-hide-trending ytd-mini-guide-entry-renderer:has(a[href*="/feed/trending"]),
+body.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/explore"]) {
   display: none !important;
 }
+
+/* Hide Merch Shelf */
+body.ypp-hide-merch #merch-shelf,
+body.ypp-hide-merch ytd-merch-shelf-renderer {
+  display: none !important;
+}
+
+/* Hide Fundraiser / Donations */
+body.ypp-hide-fundraiser ytd-donation-shelf-renderer {
+  display: none !important;
+}
+
+/* Hide End Screens */
+body.ypp-hide-endscreens .ytp-ce-element,
+body.ypp-hide-endscreens .ytp-endscreen-content {
+  display: none !important;
+}
+
+/* ========================================================================== */
 
 /* Hide Mixes & Playlists */
 .ypp-hide-mixes ytd-rich-item-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
@@ -7903,4 +7957,16 @@ body.ypp-study-mode #primary {
   overflow: hidden;
 }
 
+/* =========================================================================
+   GRAYSCALE THUMBNAILS (Re-implemented via Global Layout)
+   ========================================================================= */
+body.ypp-grayscale-thumbs ytd-thumbnail img,
+body.ypp-grayscale-thumbs ytd-playlist-thumbnail img {
+    filter: grayscale(100%) !important;
+    transition: filter 0.3s ease !important;
+}
 
+body.ypp-grayscale-thumbs ytd-thumbnail:hover img,
+body.ypp-grayscale-thumbs ytd-playlist-thumbnail:hover img {
+    filter: grayscale(0%) !important;
+}

@@ -6,7 +6,6 @@ class WatchPageManager extends window.YPP.BasePageManager {
         this.state = {
             sidebar: 'default', // 'default', 'compact', 'hidden'
             viewMode: 'default', // 'default', 'cinema', 'minimal', 'zen', 'focus', 'study'
-            comments: 'default', // 'default', 'hidden'
         };
 
         this.ROOT_SELECTORS = [
@@ -18,30 +17,37 @@ class WatchPageManager extends window.YPP.BasePageManager {
 
         this.injectedButtons = false;
         this._videoElement = null;
-        
-        // Use timeout to ensure YPP features are loaded before initializing helpers
-        setTimeout(() => {
-            if (window.YPP && window.YPP.features) {
-                if (window.YPP.features.PlayerControls) {
-                    this.controlsHelper = new window.YPP.features.PlayerControls(this);
-                    this.settingsMenuHelper = new window.YPP.features.PlayerSettingsMenu(this);
-                }
-                
-                // Mode features
-                this.features = {
-                    zenMode: window.YPP.features.ZenMode ? new window.YPP.features.ZenMode() : null,
-                    studyMode: window.YPP.features.StudyMode ? new window.YPP.features.StudyMode() : null,
-                    focusMode: window.YPP.features.FocusMode ? new window.YPP.features.FocusMode() : null
-                };
-            }
-        }, 100);
+        this._featuresInitialized = false;
     }
 
     onActivate() {
         this.utils.log('Watch Page Active', 'WATCH_MANAGER', 'info');
         this._cleanUpLegacyStamps();
         this._applyDOM();
+        this._initFeatures();
         this._initPlayer();
+    }
+
+    async _initFeatures() {
+        if (this._featuresInitialized) return;
+        // Use pollFor instead of setTimeout — reliable across fast and slow machines
+        try {
+            await this.utils.pollFor(() => window.YPP?.features?.PlayerControls, 5000, 100);
+            if (window.YPP?.features?.PlayerControls) {
+                this.controlsHelper = new window.YPP.features.PlayerControls(this);
+                this.settingsMenuHelper = new window.YPP.features.PlayerSettingsMenu(this);
+            }
+            this.features = {
+                zenMode:    window.YPP.features.ZenMode    ? new window.YPP.features.ZenMode()    : null,
+                studyMode:  window.YPP.features.StudyMode  ? new window.YPP.features.StudyMode()  : null,
+                focusMode:  window.YPP.features.FocusMode  ? new window.YPP.features.FocusMode()  : null,
+            };
+            this._featuresInitialized = true;
+            // Re-apply settings now that features are loaded
+            if (this.isActive) this.applySettings(this.settings);
+        } catch (e) {
+            this.utils.log('Feature init timed out', 'WATCH_MANAGER', 'warn');
+        }
     }
 
     onDeactivate() {
@@ -74,12 +80,9 @@ class WatchPageManager extends window.YPP.BasePageManager {
         else if (settings.cinemaMode) newMode = 'cinema';
         else if (settings.minimalMode) newMode = 'minimal';
 
-        if (settings.hideComments) newComments = 'hidden';
-
         this.setState({
             sidebar: newSidebar,
-            viewMode: newMode,
-            comments: newComments
+            viewMode: newMode
         });
         
         // Handle specific mode feature JS logic
@@ -115,8 +118,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
         // 1. Reset all managed classes
         const classesToRemove = [
             'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
-            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode',
-            'ypp-hide-comments'
+            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode'
         ];
         body.classList.remove(...classesToRemove);
 
@@ -133,11 +135,6 @@ class WatchPageManager extends window.YPP.BasePageManager {
             body.classList.add(`ypp-${this.state.viewMode}-mode`);
         }
 
-        // 4. Apply Comments
-        if (this.state.comments === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
-            body.classList.add('ypp-hide-comments'); // Force hide comments in extreme modes
-        }
-
         // Emit event for isolated features (like ZenMode canvas or StudyMode timer) to start/stop
         window.dispatchEvent(new CustomEvent('ypp-watch-mode-changed', { 
             detail: { mode: this.state.viewMode }
@@ -146,9 +143,9 @@ class WatchPageManager extends window.YPP.BasePageManager {
 
     _cleanupDOM() {
         const classesToRemove = [
-            'ypp-sidebar-compact', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
-            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode',
-            'ypp-hide-comments'
+            // Note: 'ypp-sidebar-spacious' is the current name — 'compact' was the old name
+            'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
+            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode'
         ];
         document.body.classList.remove(...classesToRemove);
     }

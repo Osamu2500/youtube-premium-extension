@@ -5,25 +5,37 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
         
         // Map settings keys to body CSS classes
         this.TOGGLE_MAP = {
-            hideComments: 'ypp-hide-comments',
-            hideMetrics: 'ypp-hide-metrics',
-            hideThumbnails: 'ypp-hide-thumbnails',
-            hideWatched: 'ypp-hide-watched',
-            hideMixes: 'ypp-hide-mixes',
-            hidePlaylists: 'ypp-hide-playlists',
-            hidePodcasts: 'ypp-hide-podcasts',
-            hidePosts: 'ypp-hide-posts',
-            hidePromos: 'ypp-hide-promos',
-            hideVoiceSearch: 'ypp-hide-voice-search',
-            aggressiveShortsBlock: 'ypp-hide-shorts',
-            hideLiveChat: 'ypp-hide-livechat',
-            hideEndScreens: 'ypp-hide-endscreens',
-            hideCards: 'ypp-hide-cards',
-            hideAnnotations: 'ypp-hide-annotations',
-            hideMerch: 'ypp-hide-merch',
-            hideDonations: 'ypp-hide-fundraiser',
-            hideRelated: 'ypp-hide-related'
-            // Features like stopLooping, durationFilter, cleanMixUrls will be handled via JS
+            // Global visibility toggles
+            hideComments:          'ypp-hide-comments',
+            hideMetrics:           'ypp-hide-metrics',
+            hideThumbnails:        'ypp-hide-thumbnails',
+            hideWatched:           'ypp-hide-watched',
+            hideMixes:             'ypp-hide-mixes',
+            hidePlaylists:         'ypp-hide-playlists',
+            hidePodcasts:          'ypp-hide-podcasts',
+            hidePosts:             'ypp-hide-posts',
+            hidePromoShelves:      'ypp-hide-promos',
+            hideShorts:            'ypp-hide-shorts',
+            hideLiveChat:          'ypp-hide-live-chat',   // Fixed: was ypp-hide-livechat
+            hideEndScreens:        'ypp-hide-endscreens',
+            hideChannelCards:      'ypp-hide-channel-cards',
+            hideCards:             'ypp-hide-video-cards', // Split: player cards only
+            hideMerch:             'ypp-hide-merch',
+            hideFundraiser:        'ypp-hide-fundraiser',
+            hideSearchShelves:     'ypp-hide-search-shelves',
+            // Previously unhandled — now wired up:
+            hideAnnotations:       'ypp-hide-annotations',
+            hideRelated:           'ypp-hide-related',
+            hideVoiceSearch:       'ypp-hide-voice-search',
+            hideShortsInteraction: 'ypp-hide-shorts-interaction',
+            hideTrending:          'ypp-hide-trending',          // Moved from HomePageManager
+            hideExploreTopics:     'ypp-hide-explore-topics',    // Moved from HomePageManager
+            hideFeed:              'ypp-hide-feed',              // Moved from HomePageManager
+            aggressiveShortsBlock: 'ypp-nuke-shorts',
+            hideSearchShorts:      'ypp-hide-search-shorts',
+            // Aesthetic toggles
+            customScrollbar:       'ypp-custom-scrollbar',
+            grayscaleThumbnails:   'ypp-grayscale-thumbs',
         };
     }
 
@@ -33,7 +45,18 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
     }
 
     onDeactivate() {
-        // Global manager is never deactivated unless extension is disabled
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('global_mixes');
+            window.YPP.sharedObserver.unregister('global_shorts');
+            window.YPP.sharedObserver.unregister('global_playlists');
+        }
+        
+        // Remove all dynamically added body classes from TOGGLE_MAP
+        const classesToRemove = Object.values(this.TOGGLE_MAP);
+        document.body.classList.remove(...classesToRemove);
+
+        // Remove event listeners
+        this._disableCleanMixUrls();
     }
 
     applySettings(settings) {
@@ -71,7 +94,7 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
 
         // Complex DOM filtering (Shorts)
         window.YPP.sharedObserver.register('global_shorts', 'ytd-rich-section-renderer, ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer', (elements) => {
-            if (!this.settings.aggressiveShortsBlock) return;
+            if (!this.settings.hideShorts) return;
             elements.forEach(el => {
                 if (el.hasAttribute('is-shorts') || el.querySelector('ytd-reel-item-renderer, ytd-rich-shelf-renderer[is-shorts], a[href^="/shorts/"]')) {
                     el.style.setProperty('display', 'none', 'important');

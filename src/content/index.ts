@@ -49,7 +49,6 @@ import './features/global/modifiers/blocklist-filter.js';
 
 
 // Layout features
-import './features/global/layout/layout-manager.js';
 import './features/global/layout/auto-scale-grid.js';
 import './features/global/layout/header-nav.js';
 

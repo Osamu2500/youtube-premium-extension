@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS = {
 
     // Visibility
     hideShorts: false,
-    hideSearchShorts: true,
+    hideSearchShorts: false,
     hideMixes: false,
     hideExploreTopics: false,
     hidePromoShelves: false,
@@ -41,6 +41,14 @@ export const DEFAULT_SETTINGS = {
     hideEndScreens: false,
     hideSearchShelves: true,
     hideChannelCards: false,
+    hideCards: false,            // Player video card pop-ups
+    hideAnnotations: false,      // Player on-screen annotations
+    hideRelated: false,          // Watch page related sidebar
+    hideVoiceSearch: false,      // Header microphone icon
+    hideTrending: false,         // Trending guide entries
+    hideFeed: false,             // Homepage feed
+    hideShortsInteraction: false, // Shorts like/comment bar
+    aggressiveShortsBlock: false, // Nuke shorts everywhere
     autoVideoFilter: true,
 
     // Player
@@ -79,6 +87,9 @@ export const DEFAULT_SETTINGS = {
     // Shorts Tools
     shortsAutoScroll: false,
     redirectShorts: false,
+    stopShortsLooping: false,
+    hideShortVideos: false,
+    minVideoDuration: 2,
 
     // Player Tools
     enableCustomSpeed: true,

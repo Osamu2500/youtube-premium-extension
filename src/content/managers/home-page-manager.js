@@ -28,27 +28,12 @@ class HomePageManager extends window.YPP.BasePageManager {
         this.settings = settings;
         if (!this.isActive) return;
 
-        // Apply page-specific toggles directly
-        if (settings.hideTrending) {
-            document.body.classList.add('ypp-hide-trending');
-        } else {
-            document.body.classList.remove('ypp-hide-trending');
-        }
-
-        if (settings.hideExploreTopics) {
-            document.body.classList.add('ypp-hide-explore-topics');
-        } else {
-            document.body.classList.remove('ypp-hide-explore-topics');
-        }
-
         // Home Organizer (manages tagging unless hideFeed is active)
         if (this.features.homeOrganizer) {
             if (settings.hideFeed) {
                 // If hideFeed is true, we hide everything, so organizer should be disabled
                 this.features.homeOrganizer.disable();
-                document.body.classList.add('ypp-hide-feed');
             } else {
-                document.body.classList.remove('ypp-hide-feed');
                 if (this.features.homeOrganizer.run) {
                     this.features.homeOrganizer.run(settings);
                 } else if (this.features.homeOrganizer.enable) {
