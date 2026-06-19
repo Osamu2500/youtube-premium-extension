@@ -197,7 +197,7 @@ window.YPP.CONSTANTS = {
         HIDE_MERCH: 'ypp-hide-merch',
         HIDE_COMMENTS: 'ypp-hide-comments',
         HIDE_ENDSCREENS: 'ypp-hide-endscreens',
-        HIDE_LIVE_CHAT: 'ypp-hide-livechat',
+        HIDE_LIVE_CHAT: 'ypp-hide-live-chat',
         HIDE_FUNDRAISER: 'ypp-hide-fundraiser',
         DISPLAY_FULL_TITLE: 'ypp-display-full-title',
         SQUARE_CORNERS: 'ypp-square-corners',
@@ -207,7 +207,7 @@ window.YPP.CONSTANTS = {
         SIDEBAR_COLLAPSED: 'ypp-sidebar-collapsed',
         SIDEBAR_EXPANDED: 'ypp-sidebar-expanded',
         CUSTOM_SCROLLBAR: 'ypp-custom-scrollbar',
-        GRAYSCALE_THUMBNAILS: 'ypp-grayscale-thumbnails',
+        GRAYSCALE_THUMBNAILS: 'ypp-grayscale-thumbs',
 
         // Mark as Watched
         MANUALLY_WATCHED: 'ypp-manually-watched',
@@ -227,10 +227,10 @@ window.YPP.CONSTANTS = {
         VIEW_TOGGLE: 'ypp-view-mode-toggle',
         TOGGLE_BTN: 'ypp-toggle-btn',
 
-        // Focus Mode
+        // Focus / View Modes
         FOCUS_MODE: 'ypp-focus-mode',
-        CINEMATIC_MODE: 'ypp-cinematic-mode',
         CINEMA_MODE: 'ypp-cinema-mode',
+        CINEMATIC_MODE: 'ypp-cinematic-mode',
         MINIMAL_MODE: 'ypp-minimal-mode',
         DOPAMINE_DETOX_STYLE: 'ypp-detox-style',
         CINEMA_STYLE: 'ypp-cinema-style',
@@ -381,9 +381,9 @@ window.YPP.CONSTANTS = {
         theme: 'Theme',
         layout: 'Layout',
         subsOrganizer: 'SubscriptionsOrganizer',
-        modesManager: 'ModesManager',
+        // NOTE: modesManager is handled by WatchPageManager — not a standalone feature
         accountMenu: 'AccountMenu',
-        sidebar: 'SidebarManager',
+        // NOTE: 'SidebarManager' class does not exist; sidebar is managed by WatchPageManager via SidebarLayout CSS
         headerNav: 'HeaderNav',
         shortsTools: 'ShortsTools',
         redirectShorts: 'RedirectShorts',

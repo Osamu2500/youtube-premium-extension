@@ -1,44 +1,38 @@
 /* f:\Youtube 2.0\src\content\features\player\controls\sidebar-layout.css */
 /* 
- * Sidebar Layout Component — v2.1 (Polymer-specificity fix)
+ * Sidebar Layout Component — v3.0 (Optimized with :is() & UI Polish)
  * 
  * ROOT CAUSE FIX (2026-06):
  *   CSS classes alone cannot override YouTube's Polymer/Lit inline styles.
- *   We now use Polymer's component-scoped class selectors (e.g. #dismissible.ytd-compact-video-renderer)
- *   combined with !important, which correctly targets light-DOM elements inside
- *   Polymer components and beats their internal style bindings.
- *
- *   Both legacy (ytd-compact-video-renderer) and new A/B (yt-lockup-view-model) 
- *   layouts are handled.
+ *   We use Polymer's component-scoped class selectors combined with !important.
  */
+
+:root {
+  --ypp-sidebar-target: :is(#related, ytd-watch-next-secondary-results-renderer);
+  --ypp-lockup: :is(yt-lockup-view-model, ytd-lockup-view-model);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
  * SPACIOUS LAYOUT  
  * Forces the traditional YouTube compact row layout (thumbnail left, text right).
- * 
- * Crucial fix: Many users are in YouTube's A/B test where the default is
- * stacked large cards. We MUST force the row layout via CSS here, otherwise
- * "Spacious" falls back to the A/B stacked layout (looking identical to Expanded).
+ * Improved with better readability margins and 12px gaps.
  * ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Legacy: ytd-compact-video-renderer ── */
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-body.ypp-sidebar-spacious #related ytd-compact-video-renderer {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) ytd-compact-video-renderer {
   display: block !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer #dismissible.ytd-compact-video-renderer,
-body.ypp-sidebar-spacious #related #dismissible.ytd-compact-video-renderer {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) #dismissible.ytd-compact-video-renderer {
   display: flex !important;
   flex-direction: row !important;
   width: 100% !important;
   align-items: flex-start !important;
-  gap: 8px !important;
+  gap: 12px !important; /* Increased from 8px for better breathing room */
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer #thumbnail.ytd-compact-video-renderer,
-body.ypp-sidebar-spacious #related #thumbnail.ytd-compact-video-renderer {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) #thumbnail.ytd-compact-video-renderer {
   display: block !important;
   width: 168px !important;
   min-width: 168px !important;
@@ -47,13 +41,12 @@ body.ypp-sidebar-spacious #related #thumbnail.ytd-compact-video-renderer {
   aspect-ratio: 16 / 9 !important;
   margin-bottom: 0 !important;
   margin-right: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important; /* Softer radius */
   flex: none !important;
   overflow: hidden !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer,
-body.ypp-sidebar-spacious #related ytd-thumbnail.ytd-compact-video-renderer {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) ytd-thumbnail.ytd-compact-video-renderer {
   display: block !important;
   width: 168px !important;
   min-width: 168px !important;
@@ -63,8 +56,7 @@ body.ypp-sidebar-spacious #related ytd-thumbnail.ytd-compact-video-renderer {
   flex: none !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer #details.ytd-compact-video-renderer,
-body.ypp-sidebar-spacious #related #details.ytd-compact-video-renderer {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) #details.ytd-compact-video-renderer {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 !important;
@@ -72,46 +64,22 @@ body.ypp-sidebar-spacious #related #details.ytd-compact-video-renderer {
   padding: 0 !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer #video-title.ytd-compact-video-renderer,
-body.ypp-sidebar-spacious #related #video-title.ytd-compact-video-renderer {
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  max-height: 3.2rem !important;
-  overflow: hidden !important;
-  font-size: 1.4rem !important;
-  line-height: 1.6rem !important;
-  font-weight: 500 !important;
-}
-
 /* ── New A/B UI: yt-lockup-view-model ── */
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-body.ypp-sidebar-spacious #related yt-lockup-view-model,
-body.ypp-sidebar-spacious #related ytd-lockup-view-model {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) {
   display: block !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-spacious #related yt-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-spacious #related ytd-lockup-view-model .yt-lockup-view-model-wiz {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-view-model-wiz {
   display: flex !important;
   flex-direction: row !important;
   align-items: flex-start !important;
-  gap: 8px !important;
+  gap: 12px !important; /* Increased from 8px */
   width: 100% !important;
 }
 
 /* Thumbnail anchor (wraps yt-image) */
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(img),
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(img),
-body.ypp-sidebar-spacious #related yt-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-spacious #related yt-lockup-view-model a:has(img),
-body.ypp-sidebar-spacious #related ytd-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-spacious #related ytd-lockup-view-model a:has(img) {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) a:is(:has(yt-image), :has(img)) {
   display: block !important;
   width: 168px !important;
   min-width: 168px !important;
@@ -119,64 +87,48 @@ body.ypp-sidebar-spacious #related ytd-lockup-view-model a:has(img) {
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
   margin-bottom: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important; /* Softer radius */
   overflow: hidden !important;
   flex: none !important;
   position: relative !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-spacious #related yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-spacious #related ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-metadata-view-model-wiz {
   flex: 1 !important;
   min-width: 0 !important;
   padding: 0 !important;
-}
-
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer yt-lockup-view-model h3,
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-lockup-view-model h3,
-body.ypp-sidebar-spacious #related yt-lockup-view-model h3,
-body.ypp-sidebar-spacious #related ytd-lockup-view-model h3 {
-  -webkit-line-clamp: 2 !important;
-  line-clamp: 2 !important;
-  max-height: 3.2rem !important;
-  overflow: hidden !important;
-  font-size: 1.4rem !important;
-  line-height: 1.6rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
 }
 
 /* ── Rich Item Grid UI: ytd-rich-item-renderer (A/B Test) ── */
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer,
-body.ypp-sidebar-spacious #related ytd-rich-item-renderer {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer {
   display: block !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
   width: 100% !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #content,
-body.ypp-sidebar-spacious #related ytd-rich-item-renderer #content {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer #content {
   display: flex !important;
   flex-direction: row !important;
   width: 100% !important;
   align-items: flex-start !important;
-  gap: 8px !important;
+  gap: 12px !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer ytd-thumbnail,
-body.ypp-sidebar-spacious #related ytd-rich-item-renderer ytd-thumbnail {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer ytd-thumbnail {
   display: block !important;
   width: 168px !important;
   min-width: 168px !important;
   max-width: 168px !important;
   aspect-ratio: 16 / 9 !important;
   margin-bottom: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   flex: none !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #details,
-body.ypp-sidebar-spacious #related ytd-rich-item-renderer #details {
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer #details {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 !important;
@@ -184,16 +136,27 @@ body.ypp-sidebar-spacious #related ytd-rich-item-renderer #details {
   padding: 0 !important;
 }
 
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer #video-title,
-body.ypp-sidebar-spacious #related ytd-rich-item-renderer #video-title,
-body.ypp-sidebar-spacious ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer h3,
-body.ypp-sidebar-spacious #related ytd-rich-item-renderer h3 {
+/* ── Global Typography & Spacing Fixes for Spacious ── */
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
-  max-height: 3.2rem !important;
+  max-height: 3.8rem !important; /* Better breathing room */
   overflow: hidden !important;
   font-size: 1.4rem !important;
+  line-height: 1.8rem !important; /* Improved readability */
+  font-weight: 500 !important;
+  margin-bottom: 4px !important; /* Push channel name down */
+  margin-top: 2px !important;
+}
+
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) .badge-shape-wiz {
+  margin-top: 6px !important; /* Fix badges crashing into view counts */
+  display: inline-flex !important;
+}
+
+body.ypp-sidebar-compact :is(#related, ytd-watch-next-secondary-results-renderer) :is(ytd-video-meta-block, .yt-core-attributed-string) {
   line-height: 1.6rem !important;
+  font-size: 1.2rem !important;
 }
 
 
@@ -204,36 +167,32 @@ body.ypp-sidebar-spacious #related ytd-rich-item-renderer h3 {
  * ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Legacy: ytd-compact-video-renderer ── */
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer,
-body.ypp-sidebar-expanded #related ytd-compact-video-renderer {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) ytd-compact-video-renderer {
   display: block !important;
-  margin-bottom: 14px !important;
+  margin-bottom: 16px !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer #dismissible.ytd-compact-video-renderer,
-body.ypp-sidebar-expanded #related #dismissible.ytd-compact-video-renderer {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) #dismissible.ytd-compact-video-renderer {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
   align-items: stretch !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer #thumbnail.ytd-compact-video-renderer,
-body.ypp-sidebar-expanded #related #thumbnail.ytd-compact-video-renderer {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) #thumbnail.ytd-compact-video-renderer {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
   min-width: unset !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
   margin-right: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer,
-body.ypp-sidebar-expanded #related ytd-thumbnail.ytd-compact-video-renderer {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) ytd-thumbnail.ytd-compact-video-renderer {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
@@ -241,45 +200,28 @@ body.ypp-sidebar-expanded #related ytd-thumbnail.ytd-compact-video-renderer {
   aspect-ratio: 16 / 9 !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-thumbnail.ytd-compact-video-renderer img,
-body.ypp-sidebar-expanded #related ytd-thumbnail.ytd-compact-video-renderer img {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) ytd-thumbnail.ytd-compact-video-renderer img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
   display: block !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer #details.ytd-compact-video-renderer,
-body.ypp-sidebar-expanded #related #details.ytd-compact-video-renderer {
-  padding: 0 !important;
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) #details.ytd-compact-video-renderer {
+  padding: 0 4px !important;
   width: 100% !important;
   display: flex !important;
   flex-direction: column !important;
-}
-
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer #video-title.ytd-compact-video-renderer,
-body.ypp-sidebar-expanded #related #video-title.ytd-compact-video-renderer {
-  -webkit-line-clamp: 3 !important;
-  line-clamp: 3 !important;
-  max-height: none !important;
-  overflow: visible !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
+  box-sizing: border-box !important;
 }
 
 /* ── New A/B UI: yt-lockup-view-model ── */
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model,
-body.ypp-sidebar-expanded #related yt-lockup-view-model,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) {
   display: block !important;
-  margin-bottom: 14px !important;
+  margin-bottom: 16px !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-expanded #related yt-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model .yt-lockup-view-model-wiz {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-view-model-wiz {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -287,38 +229,20 @@ body.ypp-sidebar-expanded #related ytd-lockup-view-model .yt-lockup-view-model-w
 }
 
 /* Thumbnail anchor (full width stacked) */
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(img),
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(img),
-body.ypp-sidebar-expanded #related yt-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-expanded #related yt-lockup-view-model a:has(img),
-body.ypp-sidebar-expanded #related ytd-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-expanded #related ytd-lockup-view-model a:has(img) {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) a:is(:has(yt-image), :has(img)) {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
-  margin-bottom: 8px !important;
-  border-radius: 8px !important;
+  margin-bottom: 10px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
   flex: none !important;
   position: relative !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image) yt-image,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(yt-image) img,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model a:has(img) img,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image) yt-image,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(yt-image) img,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model a:has(img) img,
-body.ypp-sidebar-expanded #related yt-lockup-view-model a:has(yt-image) yt-image,
-body.ypp-sidebar-expanded #related yt-lockup-view-model a:has(yt-image) img,
-body.ypp-sidebar-expanded #related yt-lockup-view-model a:has(img) img,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model a:has(yt-image) yt-image,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model a:has(yt-image) img,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model a:has(img) img {
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) a:is(:has(yt-image), :has(img)) :is(yt-image, img) {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -328,22 +252,24 @@ body.ypp-sidebar-expanded #related ytd-lockup-view-model a:has(img) img {
   left: 0 !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-expanded #related yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
-  padding: 0 !important;
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-metadata-view-model-wiz {
+  padding: 0 4px !important;
   width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer yt-lockup-view-model h3,
-body.ypp-sidebar-expanded ytd-watch-next-secondary-results-renderer ytd-lockup-view-model h3,
-body.ypp-sidebar-expanded #related yt-lockup-view-model h3,
-body.ypp-sidebar-expanded #related ytd-lockup-view-model h3 {
+/* Expanded Title styling */
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
   -webkit-line-clamp: 3 !important;
   line-clamp: 3 !important;
   max-height: none !important;
   overflow: visible !important;
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 6px !important;
 }
 
 
@@ -351,36 +277,42 @@ body.ypp-sidebar-expanded #related ytd-lockup-view-model h3 {
  * GRID LAYOUT
  * 2-column grid — each cell gets a stacked card.
  * ══════════════════════════════════════════════════════════════════════════ */
-body.ypp-sidebar-grid ytd-watch-next-secondary-results-renderer #items,
-body.ypp-sidebar-grid #related #items,
-body.ypp-sidebar-grid #related ytd-item-section-renderer #contents,
-body.ypp-sidebar-grid #related ytd-rich-grid-renderer > #contents,
-body.ypp-sidebar-grid #related ytd-rich-grid-row > #contents,
-body.ypp-sidebar-grid #related div#contents:has(> ytd-rich-item-renderer),
-body.ypp-sidebar-grid #related div#contents:has(> ytd-compact-video-renderer) {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) #items,
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) ytd-item-section-renderer #contents,
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-grid-renderer > #contents,
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-grid-row > #contents,
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) div#contents:has(> ytd-rich-item-renderer),
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) div#contents:has(> ytd-compact-video-renderer),
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) div#contents:has(> yt-lockup-view-model),
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) div#contents:has(> ytd-lockup-view-model) {
   display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-columns: repeat(3, 1fr) !important;
   gap: 12px !important;
 }
 
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) .yt-lockup-metadata-view-model-wiz > *,
+body.ypp-sidebar-expanded :is(#related, ytd-watch-next-secondary-results-renderer) .yt-lockup-metadata-view-model-wiz > * {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* Reset margins inside grid items */
-body.ypp-sidebar-grid ytd-compact-video-renderer,
-body.ypp-sidebar-grid yt-lockup-view-model,
-body.ypp-sidebar-grid ytd-lockup-view-model,
-body.ypp-sidebar-grid ytd-rich-item-renderer {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) ytd-compact-video-renderer,
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model),
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer {
   margin-bottom: 0 !important;
   width: 100% !important;
 }
 
 /* Stack layout inside grid cells — legacy */
-body.ypp-sidebar-grid #dismissible.ytd-compact-video-renderer {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) #dismissible.ytd-compact-video-renderer {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
 }
 
-body.ypp-sidebar-grid #thumbnail.ytd-compact-video-renderer,
-body.ypp-sidebar-grid ytd-thumbnail.ytd-compact-video-renderer {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(#thumbnail, ytd-thumbnail).ytd-compact-video-renderer {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
@@ -391,23 +323,21 @@ body.ypp-sidebar-grid ytd-thumbnail.ytd-compact-video-renderer {
   border-radius: 8px !important;
 }
 
-body.ypp-sidebar-grid #details.ytd-compact-video-renderer {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) #details.ytd-compact-video-renderer {
   padding: 0 !important;
   width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Grid — new yt-lockup-view-model */
-body.ypp-sidebar-grid yt-lockup-view-model .yt-lockup-view-model-wiz,
-body.ypp-sidebar-grid ytd-lockup-view-model .yt-lockup-view-model-wiz {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-view-model-wiz {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
 }
 
-body.ypp-sidebar-grid yt-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-grid yt-lockup-view-model a:has(img),
-body.ypp-sidebar-grid ytd-lockup-view-model a:has(yt-image),
-body.ypp-sidebar-grid ytd-lockup-view-model a:has(img) {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) a:is(:has(yt-image), :has(img)) {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
@@ -419,18 +349,163 @@ body.ypp-sidebar-grid ytd-lockup-view-model a:has(img) {
   position: relative !important;
 }
 
-body.ypp-sidebar-grid yt-lockup-view-model .yt-lockup-metadata-view-model-wiz,
-body.ypp-sidebar-grid ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-metadata-view-model-wiz {
   padding: 0 !important;
   width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Title text sizing for grid */
-body.ypp-sidebar-grid ytd-watch-next-secondary-results-renderer #video-title,
-body.ypp-sidebar-grid #related #video-title,
-body.ypp-sidebar-grid ytd-watch-next-secondary-results-renderer h3,
-body.ypp-sidebar-grid #related h3 {
+body.ypp-sidebar-grid :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
-  font-size: 1.2rem !important;
+  font-size: 1.3rem !important;
+  line-height: 1.8rem !important;
+  margin-bottom: 4px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * SPACIOUS LAYOUT (NEW)
+ * Mimics A/B UI: linear view, larger thumbnails.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Legacy: ytd-compact-video-renderer ── */
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) ytd-compact-video-renderer {
+  display: block !important;
+  margin-bottom: 12px !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) #dismissible.ytd-compact-video-renderer {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) #thumbnail.ytd-compact-video-renderer {
+  display: block !important;
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  margin-bottom: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 12px !important;
+  flex: none !important;
+  overflow: hidden !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) ytd-thumbnail.ytd-compact-video-renderer {
+  display: block !important;
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  flex: none !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) #details.ytd-compact-video-renderer {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+/* ── New A/B UI: yt-lockup-view-model ── */
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) {
+  display: block !important;
+  margin-bottom: 12px !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-view-model-wiz {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) a:is(:has(yt-image), :has(img)) {
+  display: block !important;
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  margin-bottom: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  flex: none !important;
+  position: relative !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(yt-lockup-view-model, ytd-lockup-view-model) .yt-lockup-metadata-view-model-wiz {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+}
+
+/* ── Rich Item Grid UI: ytd-rich-item-renderer (A/B Test) ── */
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer {
+  display: block !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer #content {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer ytd-thumbnail {
+  display: block !important;
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  aspect-ratio: 16 / 9 !important;
+  margin-bottom: 0 !important;
+  border-radius: 12px !important;
+  flex: none !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) ytd-rich-item-renderer #details {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+/* ── Typography & Spacing Fixes ── */
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(#video-title, h3) {
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  max-height: 4.2rem !important;
+  overflow: hidden !important;
+  font-size: 1.5rem !important;
+  line-height: 2.0rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px !important;
+  margin-top: 2px !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) .badge-shape-wiz {
+  margin-top: 6px !important;
+  display: inline-flex !important;
+}
+
+body.ypp-sidebar-spacious :is(#related, ytd-watch-next-secondary-results-renderer) :is(ytd-video-meta-block, .yt-core-attributed-string) {
+  line-height: 1.8rem !important;
+  font-size: 1.3rem !important;
 }

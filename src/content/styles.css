@@ -1592,11 +1592,15 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
     width: 100% !important;
 }
 
-/* OPTION A: Hide completely if clean search is on */
+/* OPTION A: Hide completely if clean search or hide search shelves is on */
 body.ypp-clean-search.ypp-search-page ytd-shelf-renderer,
 body.ypp-clean-search.ypp-search-page ytd-rich-shelf-renderer,
 body.ypp-clean-search.ypp-search-page ytd-reel-shelf-renderer,
-body.ypp-clean-search.ypp-search-page ytd-horizontal-card-list-renderer {
+body.ypp-clean-search.ypp-search-page ytd-horizontal-card-list-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-shelf-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-rich-shelf-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-reel-shelf-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-horizontal-card-list-renderer {
     display: none !important;
 }
 
@@ -1786,11 +1790,15 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
     box-sizing: border-box;
 }
 
-/* OPTION A: Hide completely if clean search is on */
+/* OPTION A: Hide completely if clean search or hide search shelves is on */
 body.ypp-clean-search.ypp-search-page ytd-shelf-renderer,
 body.ypp-clean-search.ypp-search-page ytd-rich-shelf-renderer,
 body.ypp-clean-search.ypp-search-page ytd-reel-shelf-renderer,
-body.ypp-clean-search.ypp-search-page ytd-horizontal-card-list-renderer {
+body.ypp-clean-search.ypp-search-page ytd-horizontal-card-list-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-shelf-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-rich-shelf-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-reel-shelf-renderer,
+body.ypp-hide-search-shelves.ypp-search-page ytd-horizontal-card-list-renderer {
     display: none !important;
 }
 
@@ -7215,448 +7223,14 @@ ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-redesigned] {
     text-decoration: none;
 }
 
-/* Menu items — flex row, glass hover */
-.ypp-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 10px 14px;
-    background: transparent;
-    border: none;
-    border-radius: 10px;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 14px;
-    font-family: 'Roboto', Arial, sans-serif;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: left;
-    box-sizing: border-box;
-    transition: background 0.15s ease, color 0.1s ease;
-    margin-bottom: 2px;
-}
-.ypp-menu-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
-.ypp-menu-item svg {
-    flex-shrink: 0;
-    opacity: 0.75;
-    transition: opacity 0.15s;
-}
-.ypp-menu-item:hover svg {
-    opacity: 1;
-}
-
-/* More-options collapsed section */
-.ypp-more-items {
-    display: none;
-}
-.ypp-more-items.open {
-    display: block;
-}
-.ypp-chevron {
-    margin-left: auto;
-    transition: transform 0.2s ease;
-}
-.ypp-more-toggle {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-/* Sign-out button override */
-.ypp-signout {
-    justify-content: center;
-    background: rgba(255, 78, 69, 0.08) !important;
-    border: 1px solid rgba(255, 78, 69, 0.2) !important;
-    color: #ff4e45 !important;
-    font-weight: 500;
-    border-radius: 10px;
-}
-.ypp-signout:hover {
-    background: rgba(255, 78, 69, 0.15) !important;
-}
-
-/* Sign-out confirmation dialog overlay */
-.ypp-signout-confirm {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    align-items: center;
-    justify-content: center;
-    border-radius: 18px;
-    z-index: 10;
-}
-.ypp-confirm-box {
-    background: rgba(28, 28, 32, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    padding: 24px 20px;
-    text-align: center;
-    color: #fff;
-    max-width: 240px;
-}
-.ypp-confirm-box p {
-    margin: 0 0 16px;
-    font-size: 15px;
-    font-weight: 500;
-}
-.ypp-confirm-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-}
-.ypp-confirm-actions button {
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-.ypp-confirm-actions button:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-.ypp-confirm-actions button.danger {
-    background: rgba(255, 78, 69, 0.15);
-    border-color: rgba(255, 78, 69, 0.3);
-    color: #ff4e45;
-}
-.ypp-confirm-actions button.danger:hover {
-    background: rgba(255, 78, 69, 0.25);
-}
-
-/* =========================================================================
-   PHASE 4: SHORTS UI CLEAN-UP (Glassmorphism & Polish)
-   ========================================================================= */
-
-/* Remove black gradient overlays (scrims) on Shorts */
-html.yt-premium-plus-theme ytd-reel-video-renderer .scrim,
-html.yt-premium-plus-theme ytd-reel-video-renderer #overlay,
-html.yt-premium-plus-theme ytd-reel-video-renderer [class*="scrim"] {
-    background: transparent !important;
-    background-image: none !important;
-}
-
-/* Glassmorphic Action Bar in Shorts */
-html.yt-premium-plus-theme ytd-reel-video-renderer #actions.ytd-reel-video-renderer {
-    background: rgba(15, 15, 20, 0.4) !important;
-    backdrop-filter: blur(16px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 24px !important;
-    padding: 12px 4px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-}
-/* Apply Global Glassmorphism to native YouTube context menus and flyouts */
-html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-menu-popup-renderer) {
-    background: transparent !important;
-}
-
-html.yt-premium-plus-theme ytd-menu-popup-renderer,
-html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) {
-    background: linear-gradient(135deg, rgba(22, 22, 26, 0.72), rgba(14, 14, 18, 0.82)) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border-radius: 18px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Ensure inner elements don't block the glass effect */
-html.yt-premium-plus-theme ytd-menu-popup-renderer tp-yt-paper-listbox,
-html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) #container,
-html.yt-premium-plus-theme ytd-simple-menu-header-renderer {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
-/* ========================================================================= */
-/* SHORTS UI "PRO MAX" REDESIGN                                            */
-/* ========================================================================= */
-
-/* 1. Floating Horizontal Action Pill */
-html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-evenly !important;
-    position: absolute !important;
-    bottom: 30px !important;
-    right: 20px !important;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.55);
-    margin-top: 3px;
-}
-.ypp-channel-link {
-    display: inline-block;
-    font-size: 13px;
-    color: #3ea6ff;
-    text-decoration: none;
-    margin-top: 10px;
-    padding: 5px 16px;
-    background: rgba(62, 166, 255, 0.1);
-    border-radius: 20px;
-    border: 1px solid rgba(62, 166, 255, 0.2);
-    transition: background 0.15s, border-color 0.15s;
-}
-.ypp-channel-link:hover {
-    background: rgba(62, 166, 255, 0.18);
-    border-color: rgba(62, 166, 255, 0.35);
-    text-decoration: none;
-}
-
-/* Menu items — flex row, glass hover */
-.ypp-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 10px 14px;
-    background: transparent;
-    border: none;
-    border-radius: 10px;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 14px;
-    font-family: 'Roboto', Arial, sans-serif;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: left;
-    box-sizing: border-box;
-    transition: background 0.15s ease, color 0.1s ease;
-    margin-bottom: 2px;
-}
-.ypp-menu-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
-.ypp-menu-item svg {
-    flex-shrink: 0;
-    opacity: 0.75;
-    transition: opacity 0.15s;
-}
-.ypp-menu-item:hover svg {
-    opacity: 1;
-}
-
-/* More-options collapsed section */
-.ypp-more-items {
-    display: none;
-}
-.ypp-more-items.open {
-    display: block;
-}
-.ypp-chevron {
-    margin-left: auto;
-    transition: transform 0.2s ease;
-}
-.ypp-more-toggle {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-/* Sign-out button override */
-.ypp-signout {
-    justify-content: center;
-    background: rgba(255, 78, 69, 0.08) !important;
-    border: 1px solid rgba(255, 78, 69, 0.2) !important;
-    color: #ff4e45 !important;
-    font-weight: 500;
-    border-radius: 10px;
-}
-.ypp-signout:hover {
-    background: rgba(255, 78, 69, 0.15) !important;
-}
-
-/* Sign-out confirmation dialog overlay */
-.ypp-signout-confirm {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    align-items: center;
-    justify-content: center;
-    border-radius: 18px;
-    z-index: 10;
-}
-.ypp-confirm-box {
-    background: rgba(28, 28, 32, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    padding: 24px 20px;
-    text-align: center;
-    color: #fff;
-    max-width: 240px;
-}
-.ypp-confirm-box p {
-    margin: 0 0 16px;
-    font-size: 15px;
-    font-weight: 500;
-}
-.ypp-confirm-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-}
-.ypp-confirm-actions button {
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-.ypp-confirm-actions button:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-.ypp-confirm-actions button.danger {
-    background: rgba(255, 78, 69, 0.15);
-    border-color: rgba(255, 78, 69, 0.3);
-    color: #ff4e45;
-}
-.ypp-confirm-actions button.danger:hover {
-    background: rgba(255, 78, 69, 0.25);
-}
-
-/* =========================================================================
-   PHASE 4: SHORTS UI CLEAN-UP (Glassmorphism & Polish)
-   ========================================================================= */
-
-/* Remove black gradient overlays (scrims) on Shorts */
-html.yt-premium-plus-theme ytd-reel-video-renderer .scrim,
-html.yt-premium-plus-theme ytd-reel-video-renderer #overlay,
-html.yt-premium-plus-theme ytd-reel-video-renderer [class*="scrim"] {
-    background: transparent !important;
-    background-image: none !important;
-}
-
-/* Glassmorphic Action Bar in Shorts */
-html.yt-premium-plus-theme ytd-reel-video-renderer #actions.ytd-reel-video-renderer {
-    background: rgba(15, 15, 20, 0.4) !important;
-    backdrop-filter: blur(16px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 24px !important;
-    padding: 12px 4px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-}
-/* Apply Global Glassmorphism to native YouTube context menus and flyouts */
-html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-menu-popup-renderer) {
-    background: transparent !important;
-}
-
-html.yt-premium-plus-theme ytd-menu-popup-renderer,
-html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) {
-    background: linear-gradient(135deg, rgba(22, 22, 26, 0.72), rgba(14, 14, 18, 0.82)) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border-radius: 18px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Ensure inner elements don't block the glass effect */
-html.yt-premium-plus-theme ytd-menu-popup-renderer tp-yt-paper-listbox,
-html.yt-premium-plus-theme ytd-multi-page-menu-renderer:not([data-ypp-redesigned]) #container,
-html.yt-premium-plus-theme ytd-simple-menu-header-renderer {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
-/* ========================================================================= */
-/* SHORTS UI "PRO MAX" REDESIGN                                            */
-/* ========================================================================= */
-
-/* 1. Floating Horizontal Action Pill */
-html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-evenly !important;
-    position: absolute !important;
-    bottom: 30px !important;
-    right: 20px !important;
-    width: auto !important;
-    padding: 8px 16px !important;
-    background: linear-gradient(135deg, rgba(22, 22, 26, 0.65), rgba(14, 14, 18, 0.75)) !important;
-    backdrop-filter: blur(20px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-    border-radius: 40px !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-    z-index: 50 !important;
-    transform: none !important;
-}
-
-/* Remove margins between action buttons to fit nicely in the pill */
-html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer > * {
-    margin: 0 8px !important;
-    transform: scale(0.9) !important;
-}
-
-/* Remove original action column container constraints to allow the pill to position properly within the overlay */
-
-/* Hide labels text in the pill to save space, keeping icons clean */
-html.yt-premium-plus-theme ytd-reel-player-overlay-renderer #actions .label.ytd-reel-player-overlay-renderer {
-    display: none !important;
-}
-
-/* 2. Slim Minimalist Progress Bar */
-html.yt-premium-plus-theme ytd-shorts-player-controls {
-    bottom: 12px !important;
-}
-html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar {
-    height: 3px !important;
-    background: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 4px !important;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    transform-origin: bottom center !important;
-    cursor: pointer !important;
-}
-html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar:hover {
-    transform: scaleY(2.66) !important;
-}
-html.yt-premium-plus-theme ytd-shorts-player-controls #progress-bar-line {
-    background: var(--ypp-accent-color, #a78bfa) !important; /* Premium purple */
-    border-radius: 4px !important;
-}
-
-/* Hide native Shorts vertical navigation buttons since we have a clean floating pill */
-html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-up,
-html.yt-premium-plus-theme ytd-reel-video-renderer #navigation-button-down {
-    display: none !important;
-}
-
-/* Remove frosted glass from topbar */
-#frosted-glass {
-    display: none !important;
-}
-
 
 /* Hide Shorts Interaction Bar */
 body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer { display: none !important; }
 
 
-/* Hide Search Shelves */
-body.ypp-search-clean-grid ytd-search ytd-shelf-renderer, body.ypp-search-clean-grid ytd-search ytd-reel-shelf-renderer, body.ypp-search-clean-grid ytd-search ytd-horizontal-card-list-renderer { display: none !important; }
 
 
-/* ===================================================================================
-   IMPORTED FEATURES (Third-Party Integration)
-   =================================================================================== */
 
-/* Hide Voice Search */
-body.ypp-hide-voice-search #voice-search-button,
-body.ypp-hide-voice-search ytm-voice-search-button-renderer {
-    display: none !important;
-}
 
 /* Square Corners */
 body.ypp-use-square-corners ytd-thumbnail, 
@@ -7909,14 +7483,7 @@ body.ypp-dopamine-detox ytd-badge-supported-renderer {
    DISTRACTION FREE BASE LAYOUTS
    ========================================================================= */
 
-/* Base transition for smooth layout changes - removed global width/max-width transitions 
-   because they cause YouTube's native resize observers to miscalculate during initial load,
-   forcing the sidebar into secondary-grid-columns="2" (expanded view) inadvertently. */
-ytd-watch-flexy[flexy] #columns,
-ytd-watch-flexy[flexy] #primary,
-ytd-watch-flexy[flexy] #secondary {
-    transition: opacity 0.3s ease !important;
-}
+
 
 body.ypp-sidebar-hidden ytd-watch-flexy:not([theater]) #columns {
     --ytd-watch-flexy-sidebar-width: 0px !important;

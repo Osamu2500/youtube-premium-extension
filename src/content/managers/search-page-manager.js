@@ -6,10 +6,7 @@ class SearchPageManager extends window.YPP.BasePageManager {
         // Initialize features managed by this page
         this.features = {
             searchRedesign: window.YPP.features.SearchRedesign ? new window.YPP.features.SearchRedesign() : null,
-            searchObserver: window.YPP.features.SearchObserver ? new window.YPP.features.SearchObserver() : null,
-            // Ensure search toggles are managed here
-            cleanSearch: window.YPP.features.CleanSearch ? new window.YPP.features.CleanSearch() : null,
-            hideSearchShelves: window.YPP.features.HideSearchShelves ? new window.YPP.features.HideSearchShelves() : null
+            searchObserver: window.YPP.features.SearchObserver ? new window.YPP.features.SearchObserver() : null
         };
     }
 
@@ -34,24 +31,6 @@ class SearchPageManager extends window.YPP.BasePageManager {
     applySettings(settings) {
         this.settings = { ...this.settings, ...settings };
         if (!this.isActive) return;
-
-        if (this.features.cleanSearch) {
-            // Assume the feature has some toggle name like "cleanSearch" or it just runs when enabled
-            if (this.settings.cleanSearch !== false) {
-                this.features.cleanSearch.enable();
-            } else {
-                this.features.cleanSearch.disable();
-            }
-        }
-
-        if (this.features.hideSearchShelves) {
-            // Assume the feature has some toggle name like "hideSearchShelves"
-            if (this.settings.hideSearchShelves !== false) {
-                this.features.hideSearchShelves.enable();
-            } else {
-                this.features.hideSearchShelves.disable();
-            }
-        }
     }
 }
 

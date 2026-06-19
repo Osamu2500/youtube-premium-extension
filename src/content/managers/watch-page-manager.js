@@ -24,9 +24,11 @@ class WatchPageManager extends window.YPP.BasePageManager {
     onActivate() {
         this.utils.log('Watch Page Active', 'WATCH_MANAGER', 'info');
         this._cleanUpLegacyStamps();
-        this._applyDOM();
-        this._initFeatures();
-        this._initPlayer();
+        // NOTE: _applyDOM() is NOT called here directly.
+        // The base class activate() calls applySettings() immediately after onActivate(),
+        // which calls setState() → _applyDOM(). Calling it here too would cause a double DOM apply.
+        this._initFeatures(); // async — will call applySettings again once features load
+        this._initPlayer();   // async — waits for video element
     }
 
     async _initFeatures() {
@@ -44,16 +46,18 @@ class WatchPageManager extends window.YPP.BasePageManager {
                 focusMode:  window.YPP.features.FocusMode  ? new window.YPP.features.FocusMode()  : null,
             };
             this._featuresInitialized = true;
-            // Re-apply settings now that features are loaded
+            // Re-apply settings now that mode features are loaded and can be enabled/disabled
             if (this.isActive) this.applySettings(this.settings);
         } catch (e) {
             this.utils.log('Feature init timed out', 'WATCH_MANAGER', 'warn');
         }
     }
 
+
     onDeactivate() {
         this._cleanupDOM();
         this._cleanupPlayer();
+        this._domApplied = false; // Reset so next activation always re-applies DOM
         
         if (this.features) {
             Object.values(this.features).forEach(feature => {
@@ -113,7 +117,9 @@ class WatchPageManager extends window.YPP.BasePageManager {
             changed = true;
         }
         
-        if (changed && this.isActive) {
+        // Always apply on first call after activation, or when state changed
+        if (this.isActive && (changed || !this._domApplied)) {
+            this._domApplied = true;
             this._applyDOM();
         }
     }
@@ -133,11 +139,23 @@ class WatchPageManager extends window.YPP.BasePageManager {
 
         // 2. Apply Sidebar
         if (this.settings.enableCustomSidebar) {
-            if (this.state.sidebar === 'spacious') body.classList.add('ypp-sidebar-spacious');
-            else if (this.state.sidebar === 'expanded') body.classList.add('ypp-sidebar-expanded');
-            else if (this.state.sidebar === 'grid') body.classList.add('ypp-sidebar-grid');
+            // Custom sidebar is ON — apply chosen layout
+            if (this.state.sidebar === 'compact' || this.state.sidebar === 'default') {
+                body.classList.add('ypp-sidebar-compact');
+            } else if (this.state.sidebar === 'spacious') {
+                body.classList.add('ypp-sidebar-spacious');
+            } else if (this.state.sidebar === 'expanded') {
+                body.classList.add('ypp-sidebar-expanded');
+            } else if (this.state.sidebar === 'grid') {
+                body.classList.add('ypp-sidebar-grid');
+            }
+        } else {
+            // Custom sidebar is OFF — still enforce compact rows to defeat YouTube's
+            // A/B-tested "expanded" layout that is now the native default for many users.
+            body.classList.add('ypp-sidebar-compact');
         }
         
+
         if (this.state.sidebar === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
             body.classList.add('ypp-sidebar-hidden'); // Force hide sidebar in extreme modes
         }
@@ -153,11 +171,63 @@ class WatchPageManager extends window.YPP.BasePageManager {
         }));
     }
 
+    _applySidebarLayout() {
+        const body = document.body;
+        const layout = this.settings.sidebarLayout;
+
+        // 1. Remove all possible layout classes to start fresh
+        body.classList.remove(
+            'ypp-sidebar-compact', 'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
+            'ypp-theater-mode-override'
+        );
+
+        // 2. If 'hidden' or invalid, exit early
+        if (!layout || layout === 'hidden') {
+            if (layout === 'hidden') body.classList.add('ypp-sidebar-hidden');
+            return;
+        }
+
+        // 3. Apply the layout class
+        body.classList.add(`ypp-sidebar-${layout}`);
+
+        // 4. Force default YouTube view state (prevents A/B test interference)
+        // If they use expanded/grid/compact, ensure we act like the default view is present
+        if (['compact', 'spacious', 'expanded', 'grid'].includes(layout)) {
+            body.classList.remove('ypp-sidebar-hidden');
+            
+            // If in theater mode and expanded/grid is selected, force sidebar to stack below player
+            // Native YouTube hides the sidebar in theater mode sometimes
+            const isTheater = body.hasAttribute('theater');
+            if (isTheater) {
+                body.classList.add('ypp-theater-mode-override');
+            }
+        }
+    }
+
+    _handleTheaterModeChange(e) {
+        // Only run if we're dealing with one of our custom layouts
+        const layout = this.settings.sidebarLayout;
+        if (['compact', 'spacious', 'expanded', 'grid'].includes(layout)) {
+            if (document.body.hasAttribute('theater')) {
+                document.body.classList.add('ypp-theater-mode-override');
+            } else {
+                document.body.classList.remove('ypp-theater-mode-override');
+            }
+        }
+    }
+
+    _removeSidebarLayout() {
+        document.body.classList.remove(
+            'ypp-sidebar-compact', 'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
+            'ypp-theater-mode-override'
+        );
+    }
+
     _cleanupDOM() {
         const classesToRemove = [
             // Note: 'ypp-sidebar-spacious' is the current name — 'compact' was the old name
-            'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
-            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode'
+            'ypp-sidebar-compact', 'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
+            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode', 'ypp-theater-mode-override'
         ];
         document.body.classList.remove(...classesToRemove);
     }

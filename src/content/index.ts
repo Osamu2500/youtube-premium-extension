@@ -40,14 +40,12 @@ import './features/global/modifiers/watched-store.js';
 import './features/global/modifiers/mark-watched.js';
 import './features/global/modifiers/multi-select.js';
 import './features/global/modifiers/multi-select.css';
-import './features/global/modifiers/hide-thumbnails.js';
 import './features/global/modifiers/redirect-home.js';
 import './features/global/modifiers/hide-watched.js';
 import './features/global/modifiers/keyboard-shortcuts.js';
 import './features/global/modifiers/duration-filter.js';
 import './features/global/modifiers/blocklist-filter.js';
 import './features/global/modifiers/full-video-titles.js';
-import './features/global/modifiers/square-corners.js';
 
 
 // Layout features
@@ -65,7 +63,6 @@ import './features/shorts/modifiers/redirect-shorts.js';
 import './features/shorts/modifiers/stop-looping.js';
 import './features/shorts/enhancements/auto-scroll.js';
 import './features/shorts/enhancements/volume-normalizer.js';
-import './features/shorts/ui/hide-interaction-bar.js';
 
 // Subscription features
 import './features/pages/subscriptions/folder-storage.js';
@@ -89,9 +86,6 @@ import './features/pages/search/search-view-mode.js';
 import './features/pages/search/search-observer.js';
 import './features/pages/search/search-filter.js';
 import './features/pages/search/search-redesign.js';
-import './features/pages/search/clean-search.js';
-import './features/pages/search/hide-search-shelves.js';
-import './features/pages/search/hide-channel-cards.js';
 
 
 // Library & History features

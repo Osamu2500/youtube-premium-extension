@@ -152,8 +152,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
 
         document.body.classList.remove(
             SearchRedesign.CLASSES.GRID_MODE,
-            SearchRedesign.CLASSES.LIST_MODE,
-            'ypp-search-clean-grid'
+            SearchRedesign.CLASSES.LIST_MODE
         );
         document.body.classList.remove('ypp-filter-pending');
 
@@ -189,18 +188,11 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
                 this._searchObserver.start(SearchRedesign.SELECTORS.SEARCH_CONTAINER);
             }
 
-            if (this._settings.hideSearchShelves) {
-                document.body.classList.add('ypp-search-clean-grid');
-            } else {
-                document.body.classList.remove('ypp-search-clean-grid');
-            }
-
             if (this._settings.autoVideoFilter) {
                 this._searchFilter.checkAndApply();
             }
         } else {
             this._searchObserver.stop();
-            document.body.classList.remove('ypp-search-clean-grid');
             this._removeClasses();
             this._lastQuery = null;
         }

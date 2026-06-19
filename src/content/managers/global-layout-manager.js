@@ -33,9 +33,11 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
             hideFeed:              'ypp-hide-feed',              // Moved from HomePageManager
             aggressiveShortsBlock: 'ypp-nuke-shorts',
             hideSearchShorts:      'ypp-hide-search-shorts',
+            cleanSearch:           'ypp-clean-search',
             // Aesthetic toggles
             customScrollbar:       'ypp-custom-scrollbar',
             grayscaleThumbnails:   'ypp-grayscale-thumbs',
+            useSquareCorners:      'ypp-use-square-corners',
         };
     }
 

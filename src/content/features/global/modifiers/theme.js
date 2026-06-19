@@ -92,9 +92,6 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
             // Apply theme
             this._toggleTheme(this._settings.premiumTheme);
 
-            // Apply visibility settings
-            this._applyVisibilitySettings();
-
             // Apply global customizations (Typography, density, accent color, etc)
             this._applyCustomizationSettings();
 
@@ -255,23 +252,9 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         if (link) link.remove();
     }
 
-
-
-
-
-    /**
-     * Apply visibility settings
-     * @private
-     */
-    _applyVisibilitySettings() {
-        const toggle = (cls, state) => {
-            if (cls) document.body.classList.toggle(cls, !!state);
-        };
-
-        // Search specific
-        toggle('ypp-clean-search', this._settings.cleanSearch);
-        toggle('ypp-search-grid-mode', this._settings.searchGrid);
-    }
+    // =========================================================================
+    // VISIBILITY SETTINGS REMOVED: Now centrally managed by GlobalLayoutManager
+    // =========================================================================
 
     /**
      * Apply extensive UI customization settings (Typography, layout density, colors)
@@ -362,9 +345,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     _cleanupClasses() {
         // Collect all potential classes managed by visibility toggles
         const classes = [
-            this._CSS_CLASSES.THEME_ENABLED,
-            'ypp-clean-search',
-            'ypp-search-grid-mode'
+            this._CSS_CLASSES.THEME_ENABLED
         ].filter(Boolean); // Filter out any undefined constants
 
         // Clean both documentElement and body just in case
