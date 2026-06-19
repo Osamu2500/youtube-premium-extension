@@ -15,16 +15,44 @@ class WatchPageManager extends window.YPP.BasePageManager {
             'ytd-watch-next-secondary-results-renderer ytd-lockup-view-model',
             'ytd-watch-next-secondary-results-renderer ytd-rich-item-renderer'
         ];
+
+        this.injectedButtons = false;
+        this._videoElement = null;
+        
+        // Use timeout to ensure YPP features are loaded before initializing helpers
+        setTimeout(() => {
+            if (window.YPP && window.YPP.features) {
+                if (window.YPP.features.PlayerControls) {
+                    this.controlsHelper = new window.YPP.features.PlayerControls(this);
+                    this.settingsMenuHelper = new window.YPP.features.PlayerSettingsMenu(this);
+                }
+                
+                // Mode features
+                this.features = {
+                    zenMode: window.YPP.features.ZenMode ? new window.YPP.features.ZenMode() : null,
+                    studyMode: window.YPP.features.StudyMode ? new window.YPP.features.StudyMode() : null,
+                    focusMode: window.YPP.features.FocusMode ? new window.YPP.features.FocusMode() : null
+                };
+            }
+        }, 100);
     }
 
     onActivate() {
         this.utils.log('Watch Page Active', 'WATCH_MANAGER', 'info');
         this._cleanUpLegacyStamps();
         this._applyDOM();
+        this._initPlayer();
     }
 
     onDeactivate() {
         this._cleanupDOM();
+        this._cleanupPlayer();
+        
+        if (this.features) {
+            Object.values(this.features).forEach(feature => {
+                if (feature?.disable) feature.disable();
+            });
+        }
     }
 
     applySettings(settings) {
@@ -53,6 +81,18 @@ class WatchPageManager extends window.YPP.BasePageManager {
             viewMode: newMode,
             comments: newComments
         });
+        
+        // Handle specific mode feature JS logic
+        if (this.features) {
+            if (newMode === 'zen') this.features.zenMode?.enable();
+            else this.features.zenMode?.disable();
+            
+            if (newMode === 'study') this.features.studyMode?.enable();
+            else this.features.studyMode?.disable();
+            
+            if (newMode === 'focus') this.features.focusMode?.enable();
+            else this.features.focusMode?.disable();
+        }
     }
 
     setState(newState) {
@@ -168,6 +208,196 @@ class WatchPageManager extends window.YPP.BasePageManager {
                 title.style.removeProperty('overflow');
             }
         });
+    }
+
+    // ==========================================
+    // PLAYER BAR INTEGRATION
+    // ==========================================
+
+    async _initPlayer() {
+        const Utils = this.utils;
+        if (!Utils) return;
+
+        try {
+            const elements = await Utils.pollFor(() => {
+                const isShorts = window.location.pathname.startsWith('/shorts');
+                if (isShorts) {
+                    const video = document.querySelector('ytd-reel-video-renderer[is-active] video');
+                    const controls = document.querySelector('ytd-reel-video-renderer[is-active] .overlay.ytd-reel-video-renderer');
+                    if (video && controls) return { video, controls, isShorts };
+                } else {
+                    const video = document.querySelector('video');
+                    const controls = document.querySelector('.ytp-right-controls');
+                    if (video && controls) return { video, controls, isShorts };
+                }
+                return null;
+            }, 10000, 500);
+
+            if (elements) {
+                const { video, controls, isShorts } = elements;
+                this._videoElement = video;
+                this.injectControls(video, controls, isShorts);
+                this._startMonitoring();
+            }
+        } catch (error) {
+            Utils.log('Player initialization timed out or failed', 'WATCH_MANAGER', 'debug');
+        }
+    }
+
+    _startMonitoring() {
+        if (!window.YPP?.sharedObserver) return;
+        
+        window.YPP.sharedObserver.register('player_shorts', 'ytd-reel-video-renderer[is-active]:not([data-ypp-processed])', (elements) => {
+            if (!this.isActive) return;
+            const activeShort = elements[0];
+            document.querySelectorAll('.ypp-player-controls').forEach(e => e.remove());
+            const video = activeShort.querySelector('video');
+            const controls = activeShort.querySelector('.overlay.ytd-reel-video-renderer');
+            if (video && controls) {
+                this.injectControls(video, controls, true);
+                activeShort.setAttribute('data-ypp-processed', 'true');
+            }
+        }, true);
+        
+        window.YPP.sharedObserver.register('player_watch', '.ytp-right-controls:not([data-ypp-processed])', (elements) => {
+            if (!this.isActive || window.location.pathname.startsWith('/shorts')) return;
+            const controls = elements[0];
+            const video = document.querySelector('video');
+            if (video && controls) {
+                this.injectControls(video, controls, false);
+                controls.setAttribute('data-ypp-processed', 'true');
+            }
+        }, true);
+    }
+
+    injectControls(video, controls, isShorts) {
+        if (isShorts) {
+            const activeShort = video.closest('ytd-reel-video-renderer');
+            if (activeShort && activeShort.querySelector('.ypp-player-controls')) return;
+        } else {
+            if (document.querySelector('.ypp-player-controls')) return;
+        }
+
+        this._applyNativeButtonStyles();
+        if (this.settingsMenuHelper) {
+            this.settingsMenuHelper.setupSettingsObserver(video);
+        }
+        this._applyNativeButtonVisibility();
+
+        const container = document.createElement('div');
+        container.className = 'ypp-player-controls' + (isShorts ? ' ypp-shorts-controls' : '');
+
+        // Use controlsHelper to create core toggles
+        if (this.controlsHelper && this.settings.enableCustomSpeed !== false && (!this.settings.pb_speed || this.settings.pb_speed === 'front')) 
+            container.appendChild(this.controlsHelper.createSpeedControls(video));
+            
+        // Button Feature Registrations (call their createButton methods)
+        const addFeatureButton = (featureKey, pbKey, overrideSettingsKey) => {
+            if (this.settings[overrideSettingsKey] === false) return; // Feature disabled globally
+            if (this.settings[pbKey] && this.settings[pbKey] !== 'front') return; // Hidden from front bar
+            
+            const feature = window.YPP.featureManager && window.YPP.featureManager.getFeature(featureKey);
+            if (feature && feature.createButton) {
+                const btn = feature.createButton(video);
+                if (btn) container.appendChild(btn);
+            }
+        };
+
+        addFeatureButton('snapshotButton', 'pb_snapshot', 'enableSnapshot');
+        addFeatureButton('loopButton', 'pb_loop', 'enableLoop');
+        addFeatureButton('bookmarksManager', 'pb_bookmark', 'enableBookmarks');
+        addFeatureButton('volumeBoost', 'pb_volume', 'enableVolumeBoost');
+        addFeatureButton('videoFilters', 'pb_cinema', 'enableCinemaFilters');
+
+        if (this.controlsHelper && document.pictureInPictureEnabled && this.settings.enablePiP !== false && (!this.settings.pb_pip || this.settings.pb_pip === 'front')) {
+            container.appendChild(this.controlsHelper.createPiPButton(video));
+        }
+
+        if (isShorts) {
+            controls.appendChild(container);
+        } else {
+            controls.insertBefore(container, controls.firstChild);
+        }
+        
+        this.injectedButtons = true;
+    }
+
+    _applyNativeButtonStyles() {
+        let style = document.getElementById('ypp-custom-player-bar-styles');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'ypp-custom-player-bar-styles';
+            document.head.appendChild(style);
+        }
+
+        let css = '';
+        const hideMap = {
+            'pb_native_play': '.ytp-play-button',
+            'pb_native_next': '.ytp-next-button',
+            'pb_native_mute': '.ytp-mute-button',
+            'pb_native_cast': '.ytp-remote-button',
+            'pb_native_autoplay': '.ytp-autonav-button, .ytp-autonav-toggle-button',
+            'pb_native_cc': '.ytp-subtitles-button',
+            'pb_native_miniplayer': '.ytp-miniplayer-button',
+            'pb_native_theater': '.ytp-size-button',
+            'pb_native_fullscreen': '.ytp-fullscreen-button'
+        };
+
+        for (const [key, selector] of Object.entries(hideMap)) {
+            if (this.settings[key] && this.settings[key] !== 'front') {
+                css += `${selector} { display: none !important; }\n`;
+            }
+        }
+        style.textContent = css;
+    }
+
+    _applyNativeButtonVisibility() {
+        let styleNode = document.getElementById('ypp-custom-player-bar-style-vis');
+        if (!styleNode) {
+            styleNode = document.createElement('style');
+            styleNode.id = 'ypp-custom-player-bar-style-vis';
+            document.head.appendChild(styleNode);
+        }
+
+        const hiddenSelectors = [];
+        if (this.settings.pb_native_play === 'hidden') hiddenSelectors.push('.ytp-play-button');
+        if (this.settings.pb_native_next === 'hidden') hiddenSelectors.push('.ytp-next-button');
+        if (this.settings.pb_native_mute === 'hidden') hiddenSelectors.push('.ytp-mute-button', '.ytp-volume-area');
+        if (this.settings.pb_native_cast === 'hidden') hiddenSelectors.push('button[data-tooltip-target-id="ytp-remote-button"]', '.ytp-remote-button');
+        if (this.settings.pb_native_autoplay === 'hidden') hiddenSelectors.push('button[data-tooltip-target-id="ytp-autonav-toggle-button"]', 'button.ytp-button[aria-label*="Autoplay"]', '.ytp-autonav-toggle-button', '.ytp-autonav-button');
+        if (this.settings.pb_native_cc === 'hidden') hiddenSelectors.push('.ytp-subtitles-button');
+        if (this.settings.pb_native_miniplayer === 'hidden') hiddenSelectors.push('.ytp-miniplayer-button');
+        if (this.settings.pb_native_theater === 'hidden') hiddenSelectors.push('.ytp-size-button');
+        if (this.settings.pb_native_fullscreen === 'hidden') hiddenSelectors.push('.ytp-fullscreen-button');
+
+        if (hiddenSelectors.length > 0) {
+            styleNode.textContent = `${hiddenSelectors.join(', ')} { display: none !important; }`;
+        } else {
+            styleNode.textContent = '';
+        }
+    }
+
+    _cleanupPlayer() {
+        const controls = document.querySelector('.ypp-player-controls');
+        if (controls) controls.remove();
+        this.injectedButtons = false;
+
+        if (window.YPP?.sharedObserver) {
+            window.YPP.sharedObserver.unregister('player_shorts');
+            window.YPP.sharedObserver.unregister('player_watch');
+        }
+        document.querySelectorAll('.ytp-right-controls[data-ypp-processed], ytd-reel-video-renderer[data-ypp-processed]').forEach(el => el.removeAttribute('data-ypp-processed'));
+
+        this._videoElement = null;
+        if (this.settingsMenuHelper) {
+            this.settingsMenuHelper.cleanupSettingsObserver();
+        }
+        
+        const styleNode = document.getElementById('ypp-custom-player-bar-styles');
+        if (styleNode) styleNode.remove();
+        
+        const visNode = document.getElementById('ypp-custom-player-bar-style-vis');
+        if (visNode) visNode.remove();
     }
 }
 

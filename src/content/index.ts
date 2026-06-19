@@ -12,8 +12,11 @@ import './core/storage-manager.js';
 
 // Managers (Phase 4.5)
 import './managers/hotkeys-manager.js';
-import './managers/layout-manager.js';
+import './managers/global-layout-manager.js';
 import './managers/base-page-manager.js';
+import './managers/home-page-manager.js';
+import './managers/subs-page-manager.js';
+import './managers/search-page-manager.js';
 import './managers/watch-page-manager.js';
 
 // UI Architecture (Phase 4)
@@ -30,34 +33,7 @@ import './features/player/enhancements/split-scrolling.js';
 import './features/global/modifiers/theme.js';
 import './features/global/modifiers/account-menu/index.js';
 import './features/global/modifiers/grid-animator.js';
-import './features/global/modifiers/toggles/base-toggle-feature.js';
-import './features/global/modifiers/toggles/clean-mix-urls.js';
-import './features/global/modifiers/toggles/hide-comments.js';
-import './features/global/modifiers/toggles/hide-sidebar.js';
-import './features/global/modifiers/toggles/hide-endscreens.js';
-import './features/global/modifiers/toggles/hide-cards.js';
-import './features/global/modifiers/toggles/hide-merch.js';
-import './features/global/modifiers/toggles/hide-promos.js';
-import './features/global/modifiers/toggles/hide-annotations.js';
-import './features/global/modifiers/toggles/hide-related.js';
-import './features/global/modifiers/toggles/hide-feed.js';
-import './features/global/modifiers/toggles/hide-trending.js';
-import './features/global/modifiers/toggles/aggressive-shorts-block.js';
-import './features/global/modifiers/toggles/hide-voice-search.js';
-import './features/global/modifiers/toggles/hide-playlists.js';
-import './features/global/modifiers/toggles/hide-podcasts.js';
-import './features/global/modifiers/toggles/hide-mixes.js';
-import './features/global/modifiers/toggles/hide-posts.js';
-import './features/global/modifiers/toggles/hide-explore-topics.js';
-import './features/global/modifiers/toggles/hide-livechat.js';
-import './features/global/modifiers/toggles/hide-fundraiser.js';
-import './features/global/modifiers/hide-metrics.js';
-import './features/global/modifiers/full-video-titles.js';
-import './features/global/modifiers/square-corners.js';
-import './features/global/modifiers/toggles/animations.js';
-import './features/global/modifiers/toggles/hide-scrollbar.js';
-import './features/global/modifiers/toggles/custom-scrollbar.js';
-import './features/global/modifiers/toggles/grayscale-thumbs.js';
+// Toggles handled by GlobalLayoutManager
 import './features/global/modifiers/screen-filters.js';
 
 import './features/global/modifiers/watched-store.js';
@@ -139,7 +115,6 @@ import './features/player/player-controls.js';
 import './features/player/controls/snapshot-button.js';
 import './features/player/controls/loop-button.js';
 import './features/player/player-settings-menu.js';
-import './features/player/player.js';
 import './features/player/filter-presets.js';
 import './features/player/global-bar-ui.js';
 import './features/player/global-bar.js';
