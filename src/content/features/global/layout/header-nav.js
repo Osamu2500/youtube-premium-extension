@@ -39,7 +39,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const s = this.settings || {};
 
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
-            s.navPlaylists || s.navLibrary || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
 
         if (!shouldRun) return; // No nav items configured — nothing to do
 
@@ -77,7 +77,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         // Feature manager called this because it's enabled and settings updated
         const s = this.settings || {};
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
-            s.navPlaylists || s.navLibrary || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
 
         this._applySidebarState();
 
@@ -144,7 +144,6 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const allButtons = [
             { setting: 'navSubscriptions', label: 'Subscriptions', url: '/feed/subscriptions', icon: HeaderNav.ICONS.Subscriptions },
             { setting: 'navShorts',        label: 'Shorts',        url: '/shorts',             icon: HeaderNav.ICONS.Shorts },
-            { setting: 'navLibrary',       label: 'Library',       url: '/feed/library',       icon: HeaderNav.ICONS.Library },
             { setting: 'navWatchLater',    label: 'Watch Later',   url: '/playlist?list=WL',   icon: HeaderNav.ICONS.WatchLater },
             { setting: 'navPlaylists',     label: 'Playlists',     url: '/feed/playlists',     icon: HeaderNav.ICONS.Playlists },
             { setting: 'navHistory',       label: 'History',       url: '/feed/history',       icon: HeaderNav.ICONS.History }

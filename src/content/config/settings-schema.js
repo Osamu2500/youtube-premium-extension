@@ -274,7 +274,6 @@ window.YPP.SettingsSchema = {
         navTrending:         { type: 'boolean', default: true },
         navShorts:           { type: 'boolean', default: true },
         navSubscriptions:    { type: 'boolean', default: true },
-        navLibrary:          { type: 'boolean', default: true },
         navWatchLater:       { type: 'boolean', default: true },
         navPlaylists:        { type: 'boolean', default: true },
 
