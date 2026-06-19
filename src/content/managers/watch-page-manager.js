@@ -67,15 +67,15 @@ class WatchPageManager extends window.YPP.BasePageManager {
         
         let newSidebar = 'default';
         let newMode = 'default';
-        let newComments = 'default';
 
         if (settings.sidebarLayout) {
             newSidebar = settings.sidebarLayout;
         }
 
         // Evaluate view modes (priority order)
+        // NOTE: key is 'enableFocusMode' not 'focusMode' — must match default-settings.js
         if (settings.studyMode) newMode = 'study';
-        else if (settings.focusMode) newMode = 'focus';
+        else if (settings.enableFocusMode) newMode = 'focus';
         else if (settings.zenMode) newMode = 'zen';
         else if (settings.cinemaMode) newMode = 'cinema';
         else if (settings.minimalMode) newMode = 'minimal';

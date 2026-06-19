@@ -1020,33 +1020,13 @@ body.ypp-floating-guide ytd-page-manager {
 }
 
 
-/* Hide End Screens */
-.ypp-hide-endscreens .ytp-ce-element,
-.ypp-hide-endscreens .ytp-endscreen-content {
-  display: none;
-}
 
-/* Hide Info Cards */
-.ypp-hide-cards .ytp-cards-button,
-.ypp-hide-cards .ytp-cards-teaser {
-  display: none;
-}
 
-/* Hide Merch */
-.ypp-hide-merch #merch-shelf {
-  display: none;
-}
 
-/* Hide Live Chat */
-.ypp-hide-livechat ytd-live-chat-frame,
-.ypp-hide-livechat #chat {
-  display: none !important;
-}
 
-/* Hide Fundraiser */
-.ypp-hide-fundraiser ytd-donation-shelf-renderer {
-  display: none !important;
-}
+
+
+
 
 /* Display Full Video Titles */
 body.ypp-display-full-title #video-title,
