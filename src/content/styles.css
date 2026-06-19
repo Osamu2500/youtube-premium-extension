@@ -6025,13 +6025,28 @@ body.ypp-hide-metrics
 }
 
 /* HIDE THUMBNAILS */
-body.ypp-hide-thumbnails ytd-thumbnail img,
-body.ypp-hide-thumbnails #thumbnail img {
+body.ypp-hide-thumbnails ytd-thumbnail,
+body.ypp-hide-thumbnails ytd-thumbnail-view-model,
+body.ypp-hide-thumbnails .ytThumbnailViewModelSmall,
+body.ypp-hide-thumbnails .ytThumbnailViewModelMedium,
+body.ypp-hide-thumbnails .ytThumbnailViewModelLarge,
+body.ypp-hide-thumbnails ytd-playlist-thumbnail,
+body.ypp-hide-thumbnails #thumbnail,
+body.ypp-hide-thumbnails ytd-reel-video-renderer,
+body.ypp-hide-thumbnails ytd-reel-item-renderer {
     filter: blur(15px) grayscale(100%) opacity(0.3) !important;
-    transition: filter 0.3s ease !important;
+    transition: filter 0.3s ease, opacity 0.3s ease !important;
 }
-body.ypp-hide-thumbnails ytd-thumbnail:hover img,
-body.ypp-hide-thumbnails #thumbnail:hover img {
+
+body.ypp-hide-thumbnails ytd-thumbnail:hover,
+body.ypp-hide-thumbnails ytd-thumbnail-view-model:hover,
+body.ypp-hide-thumbnails .ytThumbnailViewModelSmall:hover,
+body.ypp-hide-thumbnails .ytThumbnailViewModelMedium:hover,
+body.ypp-hide-thumbnails .ytThumbnailViewModelLarge:hover,
+body.ypp-hide-thumbnails ytd-playlist-thumbnail:hover,
+body.ypp-hide-thumbnails #thumbnail:hover,
+body.ypp-hide-thumbnails ytd-reel-video-renderer:hover,
+body.ypp-hide-thumbnails ytd-reel-item-renderer:hover {
     filter: blur(0px) grayscale(0%) opacity(1) !important;
 }
 
@@ -7950,3 +7965,72 @@ body.ypp-grayscale-thumbs ytd-thumbnail:hover img,
 body.ypp-grayscale-thumbs ytd-playlist-thumbnail:hover img {
     filter: grayscale(0%) !important;
 }
+
+/* =========================================================================
+   HOMESCREEN HIDE FEATURES (DOM Stamping & Pure CSS)
+   ========================================================================= */
+
+/* Hide Watched */
+body.ypp-watched-mode-hide [data-ypp-watched="1"] {
+    display: none !important;
+}
+body.ypp-watched-mode-dim [data-ypp-watched="1"] {
+    opacity: 0.25 !important;
+    filter: grayscale(80%) !important;
+    transition: opacity 0.25s ease, filter 0.25s ease !important;
+}
+body.ypp-watched-mode-dim [data-ypp-watched="1"]:hover {
+    opacity: 0.8 !important;
+    filter: grayscale(0%) !important;
+}
+
+/* Hide Mixes */
+body.ypp-hide-mixes ytd-radio-renderer,
+body.ypp-hide-mixes ytd-compact-radio-renderer,
+body.ypp-hide-mixes ytd-rich-item-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+body.ypp-hide-mixes ytd-rich-item-renderer:has(yt-icon[icon-type="MIX"]),
+body.ypp-hide-mixes ytd-rich-item-renderer:has(yt-icon[icon-type="PLAY_ALL"]),
+body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='start_radio']),
+body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='list=RD']),
+body.ypp-hide-mixes ytd-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+body.ypp-hide-mixes ytd-video-renderer:has(yt-icon[icon-type="MIX"]),
+body.ypp-hide-mixes ytd-video-renderer:has(yt-icon[icon-type="PLAY_ALL"]),
+body.ypp-hide-mixes ytd-video-renderer:has(a[href*='start_radio']),
+body.ypp-hide-mixes ytd-video-renderer:has(a[href*='list=RD']),
+body.ypp-hide-mixes ytd-grid-video-renderer:has(a[href*='list=RD']),
+body.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*='list=RD']) {
+    display: none !important;
+}
+
+/* Hide Shorts */
+body.ypp-hide-shorts ytd-rich-section-renderer[is-shorts],
+body.ypp-hide-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-shorts ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-shorts ytd-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-shorts ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-shorts ytd-compact-video-renderer:has(a[href^="/shorts/"]) {
+    display: none !important;
+}
+
+/* Hide Playlists */
+body.ypp-hide-playlists ytd-playlist-renderer,
+body.ypp-hide-playlists ytd-compact-playlist-renderer,
+body.ypp-hide-playlists ytd-grid-playlist-renderer,
+body.ypp-hide-playlists ytd-rich-item-renderer:has(a.ytd-thumbnail[href*='list=PL']),
+body.ypp-hide-playlists ytd-video-renderer:has(a.ytd-thumbnail[href*='list=PL']),
+body.ypp-hide-playlists ytd-grid-video-renderer:has(a.ytd-thumbnail[href*='list=PL']),
+body.ypp-hide-playlists ytd-compact-video-renderer:has(a.ytd-thumbnail[href*='list=PL']) {
+    display: none !important;
+}
+
+/* Hide Feed / Explore / Trending */
+body.ypp-hide-feed ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
+    display: none !important;
+}
+body.ypp-hide-explore-topics ytd-feed-filter-chip-bar-renderer {
+    display: none !important;
+}
+body.ypp-hide-trending ytd-rich-section-renderer:has(a[href*="/trending"]) {
+    display: none !important;
+}
+

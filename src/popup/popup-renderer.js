@@ -69,7 +69,7 @@ function renderToggle(item, state) {
     if (item.desc) {
         const descEl = document.createElement('span');
         descEl.className = 'desc';
-        descEl.textContent = item.desc;
+        descEl.innerHTML = item.desc;
         info.appendChild(descEl);
     }
     card.appendChild(info);
@@ -165,7 +165,7 @@ function renderSelect(item, state) {
     if (item.desc) {
         const d = document.createElement('span');
         d.className = 'desc';
-        d.textContent = item.desc;
+        d.innerHTML = item.desc;
         info.appendChild(d);
     }
     headerRow.appendChild(info);
@@ -344,7 +344,7 @@ function renderInlineToggle(item, state) {
     if (item.desc) {
         const d = document.createElement('span');
         d.className = 'desc';
-        d.textContent = item.desc;
+        d.innerHTML = item.desc;
         info.appendChild(d);
     }
     infoGroup.appendChild(info);
@@ -397,7 +397,7 @@ function renderColor(item, state) {
     if (item.desc) {
         const d = document.createElement('span');
         d.className = 'desc';
-        d.textContent = item.desc;
+        d.innerHTML = item.desc;
         info.appendChild(d);
     }
     infoGroup.appendChild(info);
@@ -456,7 +456,7 @@ function renderButtonGroup(item, state) {
     if (item.desc) {
         const d = document.createElement('span');
         d.className = 'desc';
-        d.textContent = item.desc;
+        d.innerHTML = item.desc;
         info.appendChild(d);
     }
     headerRow.appendChild(info);

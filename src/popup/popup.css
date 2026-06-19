@@ -85,6 +85,135 @@
   100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-primary) 0%, transparent); }
 }
 
+/* ─── Floating Blur Balls ─── */
+@keyframes ball-drift-a {
+  0%   { transform: translate(0px, 0px)    scale(1);    }
+  25%  { transform: translate(18px, -22px) scale(1.06); }
+  50%  { transform: translate(-12px, -38px)scale(0.94); }
+  75%  { transform: translate(24px, -18px) scale(1.04); }
+  100% { transform: translate(0px, 0px)    scale(1);    }
+}
+@keyframes ball-drift-b {
+  0%   { transform: translate(0px, 0px)    scale(1);    }
+  30%  { transform: translate(-20px, 16px) scale(1.08); }
+  60%  { transform: translate(14px, 30px)  scale(0.92); }
+  80%  { transform: translate(-8px, 10px)  scale(1.03); }
+  100% { transform: translate(0px, 0px)    scale(1);    }
+}
+@keyframes ball-drift-c {
+  0%   { transform: translate(0px, 0px)    scale(1);    }
+  20%  { transform: translate(10px, 24px)  scale(1.05); }
+  55%  { transform: translate(-18px, -14px)scale(0.96); }
+  80%  { transform: translate(6px, 18px)   scale(1.02); }
+  100% { transform: translate(0px, 0px)    scale(1);    }
+}
+@keyframes ball-breathe {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.55; }
+}
+@keyframes ball-breathe-slow {
+  0%, 100% { opacity: 0.20; }
+  50%       { opacity: 0.38; }
+}
+
+/* Container — sits behind all content */
+.blur-balls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.blur-ball {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  will-change: transform, opacity;
+}
+
+/* Ball 1 — primary accent, top-left area */
+.blur-ball:nth-child(1) {
+  width: 220px;
+  height: 220px;
+  top: -40px;
+  left: -30px;
+  background: radial-gradient(circle at 40% 40%,
+    color-mix(in srgb, var(--accent-primary) 70%, transparent),
+    color-mix(in srgb, var(--accent-primary) 10%, transparent) 70%,
+    transparent
+  );
+  animation:
+    ball-drift-a 18s ease-in-out infinite,
+    ball-breathe  6s ease-in-out  infinite;
+}
+
+/* Ball 2 — secondary accent, bottom-right */
+.blur-ball:nth-child(2) {
+  width: 260px;
+  height: 260px;
+  bottom: -60px;
+  right: -40px;
+  background: radial-gradient(circle at 60% 60%,
+    color-mix(in srgb, var(--accent-secondary) 65%, transparent),
+    color-mix(in srgb, var(--accent-secondary) 8%, transparent) 70%,
+    transparent
+  );
+  animation:
+    ball-drift-b 24s ease-in-out infinite,
+    ball-breathe-slow 8s ease-in-out infinite;
+}
+
+/* Ball 3 — tertiary/mid blend, center-right */
+.blur-ball:nth-child(3) {
+  width: 160px;
+  height: 160px;
+  top: 35%;
+  right: 5%;
+  background: radial-gradient(circle at 50% 50%,
+    color-mix(in srgb, var(--accent-tertiary) 55%, transparent),
+    color-mix(in srgb, var(--accent-secondary) 15%, transparent) 65%,
+    transparent
+  );
+  animation:
+    ball-drift-c 20s ease-in-out infinite,
+    ball-breathe  9s ease-in-out infinite;
+  animation-delay: -4s, -2s;
+}
+
+/* Ball 4 — primary echo, bottom-left */
+.blur-ball:nth-child(4) {
+  width: 140px;
+  height: 140px;
+  bottom: 10%;
+  left: 8%;
+  background: radial-gradient(circle at 45% 45%,
+    color-mix(in srgb, var(--accent-primary) 45%, transparent),
+    transparent 65%
+  );
+  animation:
+    ball-drift-a 28s ease-in-out infinite reverse,
+    ball-breathe-slow 11s ease-in-out infinite;
+  animation-delay: -10s, -5s;
+}
+
+/* Ball 5 — top-right accent fade */
+.blur-ball:nth-child(5) {
+  width: 180px;
+  height: 180px;
+  top: 5%;
+  right: 12%;
+  background: radial-gradient(circle at 50% 50%,
+    color-mix(in srgb, var(--accent-secondary) 40%, transparent),
+    transparent 65%
+  );
+  animation:
+    ball-drift-b 22s ease-in-out infinite reverse,
+    ball-breathe  7s ease-in-out infinite;
+  animation-delay: -7s, -3s;
+}
+
 /* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; }
 body {

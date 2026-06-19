@@ -115,12 +115,15 @@ class WatchPageManager extends window.YPP.BasePageManager {
     _applyDOM() {
         const body = document.body;
         
-        // 1. Reset all managed classes
+        // 1. Reset all managed classes & Inline Styles
         const classesToRemove = [
             'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
             'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode'
         ];
         body.classList.remove(...classesToRemove);
+        
+        // Clear JS-injected inline styles from 'spacious' observer when switching modes
+        this._cleanUpLegacyStamps();
 
         // 2. Apply Sidebar
         if (this.state.sidebar === 'spacious') body.classList.add('ypp-sidebar-spacious');
@@ -245,6 +248,76 @@ class WatchPageManager extends window.YPP.BasePageManager {
     _startMonitoring() {
         if (!window.YPP?.sharedObserver) return;
         
+        // ── FORCE LAYOUT VIA JS ──
+        // YouTube's A/B tests often use inline Polymer bindings or Shadow DOM that defeat standard CSS.
+        // We MUST use JS to force the inline styles for Spacious mode.
+        window.YPP.sharedObserver.register('watch_layout_spacious', this.ROOT_SELECTORS.join(', '), (elements) => {
+            if (!this.isActive || this.state.sidebar !== 'spacious') {
+                // If not spacious, we don't apply inline styles. The CSS will handle 'expanded'.
+                return;
+            }
+            
+            elements.forEach(node => {
+                if (node.hasAttribute('data-ypp-processed-layout')) return;
+                
+                // Force wrapper
+                node.style.setProperty('display', 'block', 'important');
+                node.style.setProperty('margin-bottom', '8px', 'important');
+                node.style.setProperty('width', '100%', 'important');
+
+                // Force Container (Row)
+                const dismissible = node.querySelector('#dismissible, #content, .yt-lockup-view-model-wiz') || node;
+                if (dismissible) {
+                    dismissible.style.setProperty('display', 'flex', 'important');
+                    dismissible.style.setProperty('flex-direction', 'row', 'important');
+                    dismissible.style.setProperty('width', '100%', 'important');
+                    dismissible.style.setProperty('align-items', 'flex-start', 'important');
+                    dismissible.style.setProperty('gap', '8px', 'important');
+                }
+
+                // Force Thumbnail
+                const thumbnail = node.querySelector('#thumbnail, ytd-thumbnail, a:has(yt-image), a:has(img)');
+                if (thumbnail) {
+                    thumbnail.style.setProperty('display', 'block', 'important');
+                    thumbnail.style.setProperty('width', '168px', 'important');
+                    thumbnail.style.setProperty('min-width', '168px', 'important');
+                    thumbnail.style.setProperty('max-width', '168px', 'important');
+                    thumbnail.style.setProperty('height', 'auto', 'important');
+                    thumbnail.style.setProperty('aspect-ratio', '16 / 9', 'important');
+                    thumbnail.style.setProperty('margin-bottom', '0', 'important');
+                    thumbnail.style.setProperty('margin-right', '0', 'important');
+                    thumbnail.style.setProperty('border-radius', '8px', 'important');
+                    thumbnail.style.setProperty('flex', 'none', 'important');
+                    thumbnail.style.setProperty('overflow', 'hidden', 'important');
+                    thumbnail.style.setProperty('position', 'relative', 'important');
+                }
+
+                // Force Details
+                const details = node.querySelector('#details, .yt-lockup-metadata-view-model-wiz');
+                if (details) {
+                    details.style.setProperty('display', 'flex', 'important');
+                    details.style.setProperty('flex-direction', 'column', 'important');
+                    details.style.setProperty('flex', '1', 'important');
+                    details.style.setProperty('min-width', '0', 'important');
+                    details.style.setProperty('padding', '0', 'important');
+                }
+
+                // Force Title
+                const title = node.querySelector('#video-title, h3');
+                if (title) {
+                    title.style.setProperty('-webkit-line-clamp', '2', 'important');
+                    title.style.setProperty('line-clamp', '2', 'important');
+                    title.style.setProperty('max-height', '3.2rem', 'important');
+                    title.style.setProperty('overflow', 'hidden', 'important');
+                    title.style.setProperty('font-size', '1.4rem', 'important');
+                    title.style.setProperty('line-height', '1.6rem', 'important');
+                }
+                
+                // Mark as processed so we don't spam style updates unless state changes
+                node.setAttribute('data-ypp-processed-layout', 'true');
+            });
+        });
+
         window.YPP.sharedObserver.register('player_shorts', 'ytd-reel-video-renderer[is-active]:not([data-ypp-processed])', (elements) => {
             if (!this.isActive) return;
             const activeShort = elements[0];

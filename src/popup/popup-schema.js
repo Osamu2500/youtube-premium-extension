@@ -49,7 +49,7 @@ export const POPUP_SCHEMA = [
             {
                 title: 'Video Management',
                 items: [
-                    { type:'toggle', id:'multiSelect', label:'Multi-Select Videos', desc:'Hold Shift + click to select multiple videos', icon:P('M9 12l2 2 4-4 M3 3h18v18H3z') }
+                    { type:'toggle', id:'multiSelect', label:'Multi-Select Videos', desc:'<b style="color:#ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.8);">[BROKEN]</b> Hold Shift + click to select multiple videos', icon:P('M9 12l2 2 4-4 M3 3h18v18H3z') }
                 ]
             },
             {
@@ -65,8 +65,8 @@ export const POPUP_SCHEMA = [
                 items: [
                     { type:'toggle', id:'hideMetrics',    label:'Hide Views & Subs',   desc:'Hide views, likes, sub counts', icon:P('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M3 3l18 18') },
                     { type:'toggle', id:'hideThumbnails',    label:'Hide Thumbnails',   desc:'Blur on hover to reveal',  icon:P('M3 3h18v18H3z M8.5 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21') },
-                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'Auto-hide watched videos',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'), slot:'hideWatchedOptions' },
-                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
+                    { type:'toggle', id:'hideWatched',       label:'Hide Watched',      desc:'<b style="color:#ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.8);">[BROKEN]</b> Auto-hide watched videos',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'), slot:'hideWatchedOptions' },
+                    { type:'toggle', id:'enableMarkWatched', label:'Mark as Watched',   desc:'<b style="color:#ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.8);">[BROKEN]</b> Hover icon to mark',       icon:P('M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3') },
                     { type:'toggle', id:'hideMixes',         label:'Hide Mixes',        desc:'Remove infinite mixes',    icon:P('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71') },
                     { type:'toggle', id:'cleanMixUrls',      label:'Clean Mix URLs',    desc:'Prevent Mix Auto-Play',    icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z') },
                     { type:'toggle', id:'hidePlaylists',     label:'Hide Playlists',    desc:'Remove playlist cards',    icon:P('M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01') },

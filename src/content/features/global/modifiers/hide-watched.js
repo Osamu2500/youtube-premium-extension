@@ -40,11 +40,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         this._debounceTimer = null;
         this._pollingInterval = null;
 
-        // Bound references for bus cleanup
         this._boundSchedule = this._scheduleProcess.bind(this);
-
-        // The injected <style> element (created once on enable, destroyed on disable)
-        this._styleEl = null;
         
         this._boundProcessCards = this._processCards.bind(this);
         this._boundProcessProgress = this._processProgressBatch.bind(this);
@@ -59,7 +55,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     async enable() {
         await super.enable();
         
-        this._injectStyle();
+        this._updateBodyClass();
         
         // Initial full page scan
         this._processCards();
@@ -78,7 +74,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             // dom:mutated fires with MutationRecord[] — extract added card nodes
             // directly so we avoid a full querySelectorAll sweep on every mutation.
             this.onBusEvent('dom:mutated', (mutations) => this._processMutatedNodes(mutations));
-            window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer', this._boundProcessProgress, false);
+            window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer, .thumbnail-overlay-resume-playback-progress, .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment', this._boundProcessProgress, false);
         }
     }
 
@@ -95,46 +91,43 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             window.YPP.sharedObserver.unregister('hide-watched-progress');
         }
 
-        // Remove injected style so CSS rules disappear instantly
-        if (this._styleEl) {
-            this._styleEl.remove();
-            this._styleEl = null;
-        }
+        document.body.classList.remove('ypp-watched-mode-hide', 'ypp-watched-mode-dim');
 
         // Restore all hidden/dimmed cards by removing the data attribute
         document.querySelectorAll('[data-ypp-watched]').forEach(card => {
             card.removeAttribute('data-ypp-watched');
         });
+
+        // Clear processing stamps so re-enabling works instantly
+        document.querySelectorAll('[data-ypp-watched-processed]').forEach(card => {
+            delete card.dataset.yppWatchedProcessed;
+        });
     }
 
     async onUpdate() {
-        this._injectStyle();
+        this._updateBodyClass();
         // Re-evaluate every card (mode may have switched dim ↔ hide)
         document.querySelectorAll('[data-ypp-watched]').forEach(card => {
             card.removeAttribute('data-ypp-watched');
+        });
+        document.querySelectorAll('[data-ypp-watched-processed]').forEach(card => {
+            delete card.dataset.yppWatchedProcessed;
         });
         this._processCards();
     }
 
     // =========================================================================
-    // Style injection
+    // Mode toggling
     // =========================================================================
 
-    _injectStyle() {
+    _updateBodyClass() {
         const mode = this.settings?.hideWatchedMode || 'dim';
-        const styleText = mode === 'hide' 
-            ? `\n                [data-ypp-watched="1"] {\n                    display: none !important;\n                }\n            `
-            : `\n                [data-ypp-watched="1"] {\n                    opacity: 0.25 !important;\n                    filter: grayscale(80%) !important;\n                    transition: opacity 0.25s ease, filter 0.25s ease !important;\n                }\n                [data-ypp-watched="1"]:hover {\n                    opacity: 0.8 !important;\n                    filter: grayscale(0%) !important;\n                }\n            `;
-
-        if (!this._styleEl) {
-            this._styleEl = document.createElement('style');
-            this._styleEl.id = 'ypp-hide-watched-style';
-            (document.head || document.documentElement).appendChild(this._styleEl);
-        }
-
-        // Only update DOM if the generated CSS rules actually changed to avoid layout thrashing
-        if (this._styleEl.textContent !== styleText) {
-            this._styleEl.textContent = styleText;
+        if (mode === 'hide') {
+            document.body.classList.add('ypp-watched-mode-hide');
+            document.body.classList.remove('ypp-watched-mode-dim');
+        } else {
+            document.body.classList.add('ypp-watched-mode-dim');
+            document.body.classList.remove('ypp-watched-mode-hide');
         }
     }
 
@@ -217,26 +210,27 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     }
 
     _getWatchProgress(card) {
-        // Optimization: Use querySelector directly with CSS pseudo-class to skip hidden elements
-        const activeRenderer = card.querySelector('ytd-thumbnail-overlay-resume-playback-renderer:not([hidden])');
-        if (!activeRenderer || activeRenderer.style.display === 'none') return null;
+        // Query the main overlay element first (supports legacy and modern view-models)
+        const activeRenderer = card.querySelector('ytd-thumbnail-overlay-resume-playback-renderer, .thumbnail-overlay-resume-playback-progress, .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment');
+        // If it's explicitly hidden by YouTube using inline display:none, skip it.
+        if (!activeRenderer || window.getComputedStyle(activeRenderer).display === 'none') return null;
 
-        const progressBar = activeRenderer.querySelector('#progress') || activeRenderer.querySelector('div[style*="width"]');
-        if (!progressBar) return null;
+        const progressBar = activeRenderer.querySelector('#progress') || 
+                            activeRenderer.querySelector('div[style*="width"]') ||
+                            activeRenderer;
 
         const widthStyle = progressBar.style.width;
-        if (!widthStyle) return null;
+        if (!widthStyle) return 100; // If it exists but we can't parse width, assume 100% watched
         
         const pct = parseFloat(widthStyle);
-        return isNaN(pct) ? null : pct;
+        return isNaN(pct) ? 100 : pct;
     }
 
     _hasWatchedBadge(card) {
-        // Use CSS pseudo-class to pre-filter hidden nodes natively
-        // Note: A card can have multiple badges (e.g., 'CC', '4K', 'WATCHED'). We must iterate.
-        const badges = card.querySelectorAll('ytd-badge-supported-renderer:not([hidden]), ytd-thumbnail-overlay-bottom-panel-renderer:not([hidden]), ytd-thumbnail-overlay-playback-status-renderer:not([hidden])');
+        // Find any badge that could represent "WATCHED"
+        const badges = card.querySelectorAll('ytd-badge-supported-renderer, ytd-thumbnail-overlay-bottom-panel-renderer, ytd-thumbnail-overlay-playback-status-renderer');
         for (const badge of badges) {
-            if (badge.style.display === 'none') continue;
+            if (window.getComputedStyle(badge).display === 'none') continue;
             
             // Text comparison is localization-fragile but preserves original intended behavior
             const text = badge.textContent.trim().toUpperCase();

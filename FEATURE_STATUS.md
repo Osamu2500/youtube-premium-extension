@@ -94,11 +94,6 @@ These features function, but contain architectural violations (leaking event lis
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
 
-### Hide Watched
-*   **File:** `content/features/core/global/hide-watched.js`
-*   **What it does:** HideWatched
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
 
 ### Keyboard Shortcuts
 *   **File:** `content/features/core/global/keyboard-shortcuts.js`
@@ -106,17 +101,7 @@ These features function, but contain architectural violations (leaking event lis
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
 
-### Mark Watched
-*   **File:** `content/features/core/global/mark-watched.js`
-*   **What it does:** Visually badges watched videos, auto-marks videos as watched when they end, and adds a right-click context menu toggle.
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
 
-### Multi Select
-*   **File:** `content/features/core/global/multi-select.js`
-*   **What it does:** Injects checkboxes on thumbnails for multi-selecting videos to perform batch actions (Add to Queue/Watch Later/Playlist).
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
 
 ### Night Mode
 *   **File:** `content/features/core/global/night-mode.js`
@@ -386,8 +371,22 @@ Core logic exists, but there are unhandled edge cases, missing features, or expl
 ---
 
 ## 🔴 Broken / Has Bugs
-Features that are structurally flawed, such as lacking a `disable()` method which guarantees memory leaks and duplicated observers when the feature is toggled off.
+Features that are structurally flawed, such as lacking a `disable()` method which guarantees memory leaks and duplicated observers when the feature is toggled off, or features that no longer function correctly due to YouTube DOM changes.
 
+### Hide Watched
+*   **File:** `src/content/features/global/modifiers/hide-watched.js`
+*   **What it does:** Automatically hides or dims videos on the YouTube homepage, subscriptions feed, and channel pages that you have already watched. Uses a customizable threshold (e.g., 80% watched) to determine if a video should be hidden, relying on the native YouTube progress bar overlay.
+*   **Status:** Broken / Not Working. DOM observer fails to consistently match modern YouTube view models, causing the feature to ignore dynamically loaded videos.
+
+### Mark as Watched
+*   **File:** `src/content/features/global/modifiers/mark-watched.js`
+*   **What it does:** Visually badges watched videos with a clear overlay, auto-marks videos as watched when they end, and adds a hover/context menu toggle to manually mark videos as watched without having to open them.
+*   **Status:** Broken / Not Working. Fails to consistently apply badges to dynamically loaded videos in modern YouTube grids.
+
+### Multi-Select Videos
+*   **File:** `src/content/features/global/modifiers/multi-select.js`
+*   **What it does:** Injects checkboxes on video thumbnails allowing you to hold Shift and click to select multiple videos at once. Once selected, you can perform batch actions like adding them all to a playlist, "Watch Later", or your queue simultaneously.
+*   **Status:** Broken / Not Working. Checkboxes fail to render on new YouTube grid layouts and events are inconsistently captured.
 
 ---
 

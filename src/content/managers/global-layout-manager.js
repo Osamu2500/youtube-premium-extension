@@ -89,7 +89,6 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
             elements.forEach(el => {
                 const tag = el.tagName.toLowerCase();
                 if (tag === 'ytd-compact-radio-renderer' || tag === 'ytd-radio-renderer' || el.querySelector("a[href*='start_radio'], a[href*='list=RD'], ytd-thumbnail-overlay-bottom-panel-renderer")) {
-                    el.style.setProperty('display', 'none', 'important');
                     el.setAttribute('data-ypp-hide-mixes', 'true');
                 }
             });
@@ -100,7 +99,6 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
             if (!this.settings.hideShorts) return;
             elements.forEach(el => {
                 if (el.hasAttribute('is-shorts') || el.querySelector('ytd-reel-item-renderer, ytd-rich-shelf-renderer[is-shorts], a[href^="/shorts/"]')) {
-                    el.style.setProperty('display', 'none', 'important');
                     el.setAttribute('data-ypp-hide-shorts', 'true');
                 }
             });
@@ -111,7 +109,7 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
             if (!this.settings.hidePlaylists) return;
             elements.forEach(el => {
                 if (el.querySelector("ytd-playlist-thumbnail, a.ytd-thumbnail[href*='list=PL']")) {
-                    el.style.setProperty('display', 'none', 'important');
+                    el.setAttribute('data-ypp-hide-playlists', 'true');
                 }
             });
         });
