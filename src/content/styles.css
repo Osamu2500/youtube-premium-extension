@@ -1435,15 +1435,15 @@ ytd-app[is-watch-page] .yt-premium-plus-theme ytd-guide-renderer {
   display: none;
 }
 
-/* Sidebar No-Mini Mode - Full Width without margin gaps */
-ytd-mini-guide-renderer {
+/* Sidebar No-Mini Mode - Full Width without margin gaps (Except Watch Page) */
+ytd-app:not([is-watch-page]) ytd-mini-guide-renderer {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   width: 0 !important;
 }
-ytd-app[mini-guide-visible] ytd-page-manager,
-ytd-app[mini-guide-visible] #content {
+ytd-app[mini-guide-visible]:not([is-watch-page]) ytd-page-manager,
+ytd-app[mini-guide-visible]:not([is-watch-page]) #content {
   margin-left: 0 !important;
   --ytd-mini-guide-width: 0px !important;
 }
@@ -7909,14 +7909,13 @@ body.ypp-dopamine-detox ytd-badge-supported-renderer {
    DISTRACTION FREE BASE LAYOUTS
    ========================================================================= */
 
-/* Base transition for smooth layout changes */
+/* Base transition for smooth layout changes - removed global width/max-width transitions 
+   because they cause YouTube's native resize observers to miscalculate during initial load,
+   forcing the sidebar into secondary-grid-columns="2" (expanded view) inadvertently. */
 ytd-watch-flexy[flexy] #columns,
 ytd-watch-flexy[flexy] #primary,
 ytd-watch-flexy[flexy] #secondary {
-    transition: max-width 0.4s cubic-bezier(0.2, 0, 0, 1), 
-                width 0.4s cubic-bezier(0.2, 0, 0, 1), 
-                opacity 0.3s ease,
-                min-width 0.4s cubic-bezier(0.2, 0, 0, 1) !important;
+    transition: opacity 0.3s ease !important;
 }
 
 body.ypp-sidebar-hidden ytd-watch-flexy:not([theater]) #columns {

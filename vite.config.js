@@ -9,12 +9,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    cssCodeSplit: false,
     rollupOptions: {
       input: {
         content: resolve(__dirname, 'src/content/index.ts')
       },
       output: {
         entryFileNames: '[name].js',
+        assetFileNames: '[name].[ext]',
         format: 'iife'
       }
     },

@@ -6,6 +6,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
         this.state = {
             sidebar: 'default', // 'default', 'compact', 'hidden'
             viewMode: 'default', // 'default', 'cinema', 'minimal', 'zen', 'focus', 'study'
+            enableCustomSidebar: true
         };
 
         this.ROOT_SELECTORS = [
@@ -97,7 +98,6 @@ class WatchPageManager extends window.YPP.BasePageManager {
             else this.features.focusMode?.disable();
         }
     }
-
     setState(newState) {
         let changed = false;
         for (const [key, value] of Object.entries(newState)) {
@@ -105,6 +105,12 @@ class WatchPageManager extends window.YPP.BasePageManager {
                 this.state[key] = value;
                 changed = true;
             }
+        }
+        
+        // Also check if enableCustomSidebar changed
+        if (this.state.enableCustomSidebar !== this.settings.enableCustomSidebar) {
+            this.state.enableCustomSidebar = this.settings.enableCustomSidebar;
+            changed = true;
         }
         
         if (changed && this.isActive) {
@@ -126,10 +132,13 @@ class WatchPageManager extends window.YPP.BasePageManager {
         this._cleanUpLegacyStamps();
 
         // 2. Apply Sidebar
-        if (this.state.sidebar === 'spacious') body.classList.add('ypp-sidebar-spacious');
-        else if (this.state.sidebar === 'expanded') body.classList.add('ypp-sidebar-expanded');
-        else if (this.state.sidebar === 'grid') body.classList.add('ypp-sidebar-grid');
-        else if (this.state.sidebar === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
+        if (this.settings.enableCustomSidebar) {
+            if (this.state.sidebar === 'spacious') body.classList.add('ypp-sidebar-spacious');
+            else if (this.state.sidebar === 'expanded') body.classList.add('ypp-sidebar-expanded');
+            else if (this.state.sidebar === 'grid') body.classList.add('ypp-sidebar-grid');
+        }
+        
+        if (this.state.sidebar === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
             body.classList.add('ypp-sidebar-hidden'); // Force hide sidebar in extreme modes
         }
 
@@ -227,7 +236,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
                     const controls = document.querySelector('ytd-reel-video-renderer[is-active] .overlay.ytd-reel-video-renderer');
                     if (video && controls) return { video, controls, isShorts };
                 } else {
-                    const video = document.querySelector('video');
+                    const video = document.querySelector('video.html5-main-video');
                     const controls = document.querySelector('.ytp-right-controls');
                     if (video && controls) return { video, controls, isShorts };
                 }
@@ -237,6 +246,10 @@ class WatchPageManager extends window.YPP.BasePageManager {
             if (elements) {
                 const { video, controls, isShorts } = elements;
                 this._videoElement = video;
+                
+                // Need to ensure features are initialized before injecting controls!
+                await this._initFeatures();
+                
                 this.injectControls(video, controls, isShorts);
                 this._startMonitoring();
             }
@@ -252,8 +265,8 @@ class WatchPageManager extends window.YPP.BasePageManager {
         // YouTube's A/B tests often use inline Polymer bindings or Shadow DOM that defeat standard CSS.
         // We MUST use JS to force the inline styles for Spacious mode.
         window.YPP.sharedObserver.register('watch_layout_spacious', this.ROOT_SELECTORS.join(', '), (elements) => {
-            if (!this.isActive || this.state.sidebar !== 'spacious') {
-                // If not spacious, we don't apply inline styles. The CSS will handle 'expanded'.
+            if (!this.isActive || !this.settings.enableCustomSidebar || this.state.sidebar !== 'spacious') {
+                // If not spacious or feature is disabled, we don't apply inline styles.
                 return;
             }
             

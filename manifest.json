@@ -41,12 +41,13 @@
                 "*://www.youtube.com/*"
             ],
             "css": [
+                "dist/style.css",
                 "src/content/styles.css",
                 "src/content/features/global/layout/header-nav.css",
                 "src/content/features/pages/home/cards.css",
                 "src/content/features/player/player.css"
             ],
-            "run_at": "document_idle",
+            "run_at": "document_end",
             "all_frames": false,
             "js": [
                 "dist/content.js"

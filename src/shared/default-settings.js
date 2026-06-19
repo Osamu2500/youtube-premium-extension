@@ -77,6 +77,7 @@ export const DEFAULT_SETTINGS = {
     navHistory: true,
     forceHideSidebar: false,
     logoRedirectSub: false,
+    enableCustomSidebar: true,
     sidebarLayout: 'spacious',
     
     // Playlist & History
