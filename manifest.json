@@ -73,7 +73,8 @@
                 "src/assets/*",
                 "src/inject/*",
                 "src/content/themes/*.css",
-                "src/content/features/**/*.css"
+                "src/content/features/**/*.css",
+                "src/content/features/**/*.js"
             ],
             "matches": [
                 "*://www.youtube.com/*",

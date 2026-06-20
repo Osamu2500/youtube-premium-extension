@@ -1,6 +1,5 @@
 // f:\Youtube 2.0\src\content\features\player\enhancements\video-speed-controller.js
 import './video-speed-controller.css';
-import { VideoSpeedHotkeys } from './video-speed-hotkeys.js';
 
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
@@ -23,6 +22,17 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         if (!this.settings || this.settings.enableCustomSpeed === false) return;
         
         this.utils?.log('Enabling Global Video Speed Controller', 'VSC');
+        
+        // Inject page script for forced speed to make sure it always works natively
+        if (this.settings?.vscForceSpeed !== false) {
+            const scriptId = 'ypp-vsc-page-script';
+            if (!document.getElementById(scriptId)) {
+                const script = document.createElement('script');
+                script.id = scriptId;
+                script.src = chrome.runtime.getURL('src/content/features/player/enhancements/vsc-page-script.js');
+                (document.head || document.documentElement).appendChild(script);
+            }
+        }
         
         // Scan and observe using centralized engine
         const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
@@ -132,7 +142,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         const step = this.settings?.vscSpeedStep ?? 0.25;
 
         const getShortcutKey = (action) => {
-            const sc = (this.settings?.vscShortcuts || []).find(s => s.action === action);
+            const sc = this.getShortcuts().find(s => s.action === action);
             return sc ? sc.key : '';
         };
 
@@ -380,7 +390,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         
         // If force speed is enabled, the page script blocks this natively.
         // If we reach here, it means force speed is OFF, or the user interacted.
-        if (!this.settings?.vscForceSpeed) {
+        if (this.settings?.vscForceSpeed === false) {
             state.display.textContent = actualSpeed.toFixed(2);
         }
     }
@@ -421,7 +431,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         this.settings.vscLastSpeed = speed;
         this._debouncedSaveSpeed(speed);
         
-        if (this.settings?.vscForceSpeed) {
+        if (this.settings?.vscForceSpeed !== false) {
             window.dispatchEvent(new CustomEvent('ypp-vsc-force-speed', {
                 detail: { enabled: true, speed: speed }
             }));
@@ -456,8 +466,23 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         }, 500);
     }
 
+    getShortcuts() {
+        let shortcuts = this.settings?.vscShortcuts || [];
+        if (!shortcuts || shortcuts.length === 0) {
+            shortcuts = [
+                { action: 'decrease', key: 'S', value: 0.25 },
+                { action: 'increase', key: 'D', value: 0.25 },
+                { action: 'rewind', key: 'Z', value: 10 },
+                { action: 'advance', key: 'X', value: 10 },
+                { action: 'reset', key: 'R', value: 1.0 },
+                { action: 'showHide', key: 'V', value: 0 }
+            ];
+        }
+        return shortcuts;
+    }
+
     registerShortcuts() {
-        const shortcuts = this.settings?.vscShortcuts || [];
+        const shortcuts = this.getShortcuts();
         if (!shortcuts || shortcuts.length === 0) return;
 
         const bindings = [];

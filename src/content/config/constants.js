@@ -407,6 +407,7 @@ window.YPP.CONSTANTS = {
         ambientMode: 'AmbientMode',
         audioMode: 'AudioMode',
         videoControls: 'VideoControls',
+        videoSpeedController: 'VideoSpeedController',
         returnYouTubeDislike: 'ReturnDislike',
         sponsorBlock: 'SponsorBlock',
         floatingPlayer: 'FloatingPlayer',
