@@ -103,6 +103,11 @@
                         new window.YPP.managers.SearchPageManager(this.Utils, this.settings),
                         new window.YPP.managers.WatchPageManager(this.Utils, this.settings)
                     ];
+                    
+                    if (window.YPP.managers.ThumbnailColorManager) {
+                        this.thumbnailColorManager = new window.YPP.managers.ThumbnailColorManager();
+                        this.thumbnailColorManager.updateSettings(this.settings);
+                    }
                 } else {
                     this.pageManagers = [];
                 }
@@ -358,6 +363,9 @@
                                 if (this.pageManagers) {
                                     this.pageManagers.forEach(m => m.updateSettings(this.settings));
                                 }
+                                if (this.thumbnailColorManager) {
+                                    this.thumbnailColorManager.updateSettings(this.settings);
+                                }
                             }
                         }
                     } catch (error) {
@@ -380,6 +388,9 @@
                     
                     if (this.pageManagers) {
                         this.pageManagers.forEach(m => m.updateSettings(this.settings));
+                    }
+                    if (this.thumbnailColorManager) {
+                        this.thumbnailColorManager.updateSettings(this.settings);
                     }
 
                     sendResponse({ success: true });

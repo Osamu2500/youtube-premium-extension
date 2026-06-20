@@ -18,6 +18,7 @@ import './managers/home-page-manager.js';
 import './managers/subs-page-manager.js';
 import './managers/search-page-manager.js';
 import './managers/watch-page-manager.js';
+import './managers/thumbnail-color-manager.js';
 
 // UI Architecture (Phase 4)
 import './ui/ui-manager.js';
