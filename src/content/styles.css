@@ -3709,7 +3709,7 @@ html[data-ypp-card-style="compact"] .ypp-grid-item #metadata-line {
 
 /* POLAROID ── search */
 html[data-ypp-card-style="polaroid"] .ypp-grid-item {
-  background: transparent !important;
+  background: var(--ypp-thumb-color, transparent) !important;
   border-radius: 4px !important;
   padding: 8px 8px 32px !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3) !important;
