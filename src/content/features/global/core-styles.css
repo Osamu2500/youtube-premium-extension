@@ -1227,39 +1227,6 @@ body.ypp-full-title yt-formatted-string[id="video-title"] {
 /* Show description snippet in list mode */
 
 /* Glass Badges (Duration, Quality) on Thumbnail */
-
-body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer,
-body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-right-renderer {
-  background: rgba(0, 0, 0, 0.8) !important;
-  border-radius: 4px !important;
-  padding: 3px 4px !important;
-  margin: 4px !important;
-}
-
-body.yt-premium-plus-theme span.ytd-thumbnail-overlay-time-status-renderer {
-  font-family: "Inter", "Roboto", sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.5px !important;
-  color: #fff !important;
-  line-height: 1 !important;
-}
-
-body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer .badge-shape-wiz,
-body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-right-renderer .badge-shape-wiz {
-  background: transparent !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-/* Hover-Only Menu Button */
-
-/* Hide Description */
-
-/* Non-Video Elements Span Full Width */
-
-/* Channel Result Card styling deduplicated - moved to line 2628 */
-
 /* Explicit class applied by JS for individual items */
 
 .ypp-hidden-short {
