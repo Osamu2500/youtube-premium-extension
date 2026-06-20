@@ -62,6 +62,16 @@ window.YPP.features.WatchHistoryTracker = class WatchHistoryTracker extends wind
         this._handleStartTracking(videoId);
     }
 
+    onPageChange(url) {
+        if (!this.isEnabled) return;
+        
+        if (this.utils.isWatchPage() || this._isOnShortsPage()) {
+            this._handleStartTracking();
+        } else {
+            this.stopTracking();
+        }
+    }
+
     _isOnShortsPage() {
         return location.pathname.startsWith('/shorts/');
     }

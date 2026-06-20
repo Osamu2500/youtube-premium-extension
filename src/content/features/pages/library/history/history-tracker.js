@@ -109,10 +109,10 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         };
 
         if (window.YPP.sharedObserver) {
-            window.YPP.sharedObserver.register('history-tracker', 'ytd-browse[page-subtype="history"] #primary', handleHeader, true);
+            window.YPP.sharedObserver.register('history-tracker', 'ytd-browse[page-subtype="history"] #secondary-inner, ytd-browse[page-subtype="history"] #secondary', handleHeader, true);
         } else {
             // Fallback
-            const header = document.querySelector('ytd-browse[page-subtype="history"] #primary');
+            const header = document.querySelector('ytd-browse[page-subtype="history"] #secondary-inner') || document.querySelector('ytd-browse[page-subtype="history"] #secondary');
             if (header) handleHeader([header]);
         }
     }
@@ -321,15 +321,16 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
         style.id = 'ypp-tracker-styles';
         style.textContent = `
             #ypp-history-tracker-widget {
-                background: rgba(255, 255, 255, 0.03);
+                background: rgba(25, 25, 25, 0.6);
                 backdrop-filter: blur(16px);
                 -webkit-backdrop-filter: blur(16px);
                 border: 1px solid rgba(255, 255, 255, 0.08);
                 border-radius: 16px;
-                margin: 24px auto 32px auto;
+                margin: 0 0 24px 0;
+                width: 100%;
+                box-sizing: border-box;
                 overflow: hidden;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-                max-width: 1000px;
                 transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
                 color: #fff;
                 font-family: "YouTube Sans", "Inter", sans-serif;
@@ -394,16 +395,16 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             .ypp-tracker-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 16px;
-                padding: 24px;
+                gap: 12px;
+                padding: 16px;
                 transition: all 0.4s ease;
             }
             .ypp-tracker-grid.expanded {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: 1fr 1fr;
             }
             .ypp-stat-card {
                 background: rgba(255,255,255,0.03);
-                padding: 24px 16px;
+                padding: 16px 12px;
                 border-radius: 12px;
                 text-align: center;
                 border: 1px solid rgba(255,255,255,0.05);
@@ -420,10 +421,10 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             }
             .ypp-stat-card.full-width {
                 grid-column: 1 / -1; 
-                flex-direction: row;
-                justify-content: space-between;
+                flex-direction: column;
+                justify-content: center;
                 align-items: center;
-                padding: 16px 32px;
+                padding: 16px;
             }
             .ypp-stat-card.premium-card {
                 background: linear-gradient(135deg, rgba(62,166,255,0.05) 0%, rgba(156,39,176,0.05) 100%);
@@ -441,17 +442,17 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
                 margin-bottom: 0;
             }
             .ypp-stat-card .value {
-                font-size: 32px;
+                font-size: 24px;
                 font-weight: 800;
                 color: #fff;
                 letter-spacing: -1px;
             }
             .ypp-stat-card .value.text-value {
-                font-size: 20px;
+                font-size: 18px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 60%;
+                max-width: 100%;
                 color: #3ea6ff;
             }
             .hidden { display: none !important; }
@@ -486,8 +487,8 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
 
             /* Calendar Styles */
             .ypp-calendar-container {
-                margin-top: 24px;
-                padding: 0 24px 24px 24px;
+                margin-top: 16px;
+                padding: 0 16px 16px 16px;
             }
             .ypp-calendar-header {
                 font-size: 14px;
@@ -499,12 +500,13 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             }
             .ypp-calendar-grid {
                 display: flex;
-                gap: 8px;
+                gap: 4px;
                 flex-wrap: wrap;
+                justify-content: center;
             }
             .ypp-calendar-cell {
-                width: 20px;
-                height: 20px;
+                width: 16px;
+                height: 16px;
                 border-radius: 4px;
                 background: rgba(255, 255, 255, 0.05);
                 transition: transform 0.2s;

@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS = {
     homeColumns: 4,
     searchColumns: 4,
     channelColumns: 4,
+    historyColumns: 4,
     displayFullTitle: false,
 
     // Visibility

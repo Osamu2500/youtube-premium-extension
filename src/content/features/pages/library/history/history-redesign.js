@@ -29,6 +29,24 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
         }
     }
     
+    async onPageChange(url) {
+        if (url.pathname === '/feed/history') {
+            await this.enable();
+            this.applySettings();
+        } else {
+            this.disable();
+        }
+    }
+
+    async onUpdate() {
+        this.applySettings();
+    }
+
+    applySettings() {
+        const cols = this.settings?.historyColumns || 4;
+        document.documentElement.style.setProperty('--ypp-history-columns', cols);
+    }
+    
     async disable() {
         await super.disable();
         if (this.observer) {
@@ -39,6 +57,7 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
             this.styleElement.remove();
             this.styleElement = null;
         }
+        document.documentElement.style.removeProperty('--ypp-history-columns');
     }
 
     apply() {
@@ -83,29 +102,38 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
                 border-bottom: 1px solid rgba(255,255,255,0.1);
             }
 
+            /* 2.5 Layout Constraints for Primary/Secondary */
+            ytd-browse[page-subtype="history"] ytd-two-column-browse-results-renderer {
+                max-width: 1800px !important;
+                width: 100% !important;
+                margin: 0 auto !important;
+            }
+            ytd-browse[page-subtype="history"] ytd-two-column-browse-results-renderer #primary {
+                max-width: none !important;
+                flex: 1 !important;
+                padding-right: 24px !important;
+            }
+            ytd-browse[page-subtype="history"] ytd-two-column-browse-results-renderer #secondary {
+                width: 380px !important;
+                min-width: 380px !important;
+                flex: none !important;
+            }
+
             /* 3. Grid Layout Properties */
             ytd-browse[page-subtype="history"] ytd-item-section-renderer #contents {
                 display: grid !important;
-                /* Exact match to Search Grid columns */
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+                /* Dynamic grid columns based on user settings */
+                grid-template-columns: repeat(var(--ypp-history-columns, 4), minmax(0, 1fr)) !important;
                 gap: 24px 16px !important;
                 padding-top: 8px !important;
+                grid-auto-flow: dense !important;
+                align-items: start !important;
             }
 
-            /* Responsive Breakpoints (matching Search Grid) */
+            /* Optional responsive fallbacks if CSS var is not provided */
             @media (max-width: 1600px) {
                 ytd-browse[page-subtype="history"] ytd-item-section-renderer #contents {
-                    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
-                }
-            }
-            @media (max-width: 1200px) {
-                ytd-browse[page-subtype="history"] ytd-item-section-renderer #contents {
-                    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-                }
-            }
-            @media (max-width: 900px) {
-                ytd-browse[page-subtype="history"] ytd-item-section-renderer #contents {
-                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+                    grid-template-columns: repeat(var(--ypp-history-columns, 4), minmax(0, 1fr)) !important;
                 }
             }
 
@@ -156,8 +184,7 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
                 aspect-ratio: 16/9 !important;
                 flex: none !important;
                 border-radius: 12px; /* var(--ypp-radius-md) */
-                margin-right: 0 !important;
-                margin-bottom: 12px !important;
+                margin: 0 0 12px 0 !important;
                 box-shadow: none !important;
                 overflow: hidden !important;
             }
@@ -263,6 +290,140 @@ window.YPP.features.HistoryRedesign = class HistoryRedesign extends window.YPP.f
             /* Remove old history header positioning */
             ytd-browse[page-subtype="history"] #primary .ypp-history-header-widget {
                 /* ensure new widget flows correctly */
+            }
+
+            /* ==========================================================================
+               SHORTS HORIZONTAL SCROLL
+               ========================================================================== */
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer {
+                grid-column: 1 / -1 !important;
+                width: 100% !important;
+                margin: 0 0 40px 0 !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
+            
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer #items {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                scroll-behavior: smooth !important;
+                gap: 16px !important;
+                padding: 16px 8px 24px 8px !important;
+                margin: 0 !important;
+            }
+            
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer #items::-webkit-scrollbar {
+                height: 8px !important;
+                background: transparent !important;
+            }
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer #items::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2) !important;
+                border-radius: 10px !important;
+            }
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer #items::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.4) !important;
+            }
+
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer ytd-reel-item-renderer {
+                flex: 0 0 auto !important;
+                width: 220px !important;
+                margin: 0 !important;
+                scroll-snap-align: start !important;
+                background: rgba(25, 25, 25, 0.6) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 16px !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+                transition: transform 0.3s ease, border-color 0.3s ease !important;
+                overflow: hidden !important;
+            }
+
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer ytd-reel-item-renderer:hover {
+                transform: translateY(-8px) !important;
+                border-color: rgba(62, 166, 255, 0.4) !important;
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(62, 166, 255, 0.2) !important;
+            }
+            
+            /* Hide shorts layout wrapper styling since we handle it natively */
+            ytd-browse[page-subtype="history"] ytd-reel-shelf-renderer ytd-reel-item-renderer > ytd-shorts-lockup-view-model {
+                border: none !important;
+                background: transparent !important;
+            }
+
+            /* ==========================================================================
+               RIGHT SIDEBAR REDESIGN
+               ========================================================================== */
+            ytd-browse[page-subtype="history"] #secondary {
+                background: rgba(25, 25, 25, 0.6) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 20px !important;
+                padding: 24px !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+                margin-top: 0 !important;
+                position: sticky !important;
+                top: 80px !important;
+                transition: all 0.3s ease !important;
+                overflow: hidden !important;
+            }
+            
+            ytd-browse[page-subtype="history"] #secondary:hover {
+                border-color: rgba(62, 166, 255, 0.3) !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(62, 166, 255, 0.1) !important;
+            }
+
+            /* Style inputs in sidebar */
+            ytd-browse[page-subtype="history"] #secondary input {
+                background: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 8px !important;
+                color: #fff !important;
+                padding: 10px 14px !important;
+            }
+
+            /* Searchbox wrapper in history */
+            ytd-browse[page-subtype="history"] #secondary tp-yt-paper-input {
+                background: rgba(255, 255, 255, 0.05) !important;
+                border-radius: 12px !important;
+                padding: 8px 16px !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                margin-bottom: 24px !important;
+            }
+            ytd-browse[page-subtype="history"] #secondary tp-yt-paper-input:focus-within {
+                border-color: rgba(62, 166, 255, 0.5) !important;
+                background: rgba(255, 255, 255, 0.1) !important;
+            }
+
+            /* Style inputs in sidebar */
+            ytd-browse[page-subtype="history"] #secondary input {
+                background: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 8px !important;
+                color: #fff !important;
+                padding: 10px 14px !important;
+            }
+
+            /* Style buttons/links in sidebar */
+            ytd-browse[page-subtype="history"] #secondary ytd-button-renderer,
+            ytd-browse[page-subtype="history"] #secondary ytd-compact-link-renderer {
+                background: transparent !important;
+                border-radius: 8px !important;
+                transition: all 0.2s ease !important;
+                margin-bottom: 4px !important;
+            }
+            
+            ytd-browse[page-subtype="history"] #secondary ytd-button-renderer:hover,
+            ytd-browse[page-subtype="history"] #secondary ytd-compact-link-renderer:hover {
+                background: rgba(255, 255, 255, 0.08) !important;
+                transform: translateX(4px) !important;
             }
         `;
 

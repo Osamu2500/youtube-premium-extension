@@ -304,9 +304,35 @@ export const POPUP_SCHEMA = [
     },
 
     // ──────────────────────────────────────────────────────────────────
-    // HISTORY (custom — complex widget, keep as custom slot)
+    // HISTORY
     // ──────────────────────────────────────────────────────────────────
-    { id: 'history', label: 'History', icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2'), custom: true, sections: [] },
+    {
+        id: 'history', label: 'History',
+        icon: P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2'),
+        sections: [
+            {
+                title: 'Watch Time',
+                items: [
+                    { type:'custom', id:'historyWidget', slot:'history-widget' }
+                ]
+            },
+            {
+                title: 'Layout & Grid',
+                items: [
+                    { type:'range', id:'historyColumns', label:'Grid Columns', unit:'', min:1, max:8, step:1 }
+                ]
+            },
+            {
+                title: 'Features',
+                items: [
+                    { type:'toggle', id:'historyRedesign', label:'History Redesign', desc:'New history layout', icon:P('M3 3h18v18H3z M14 8h6M14 12h6M14 16h6') },
+                    { type:'toggle', id:'playlistDuration', label:'Duration Calc', desc:'Show total length', icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2') },
+                    { type:'toggle', id:'reversePlaylist', label:'Reverse Playlist', desc:'Toggle direction', icon:P('M15 14l5-5-5-5 M4 20v-7a4 4 0 0 1 4-4h12') },
+                    { type:'toggle', id:'continueWatching', label:'Continue Watching', desc:'Resume from history', icon:P('M5 12h14 M12 5l7 7-7 7') }
+                ]
+            }
+        ]
+    },
 
     // ──────────────────────────────────────────────────────────────────
     // BOOKMARKS (custom — list rendered by popup-extras)
