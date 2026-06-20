@@ -449,15 +449,13 @@ html[data-ypp-card-style="compact"] body:not(.ypp-channel-page) #metadata-line {
 html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page):not(.cinematic-home) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
 ) {
-    background: #f7f6f0 !important;
+    background: transparent !important;
     border-radius: 4px !important;
     padding: 8px 8px 32px !important;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3) !important;
-    border: 1px solid #e2ddc8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     transform: rotate(1deg) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
-    /* subtle paper noise */
-    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E') !important;
 }
 html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page):not(.cinematic-home) :is(
   ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer
@@ -475,7 +473,6 @@ html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) ytd-thumbnail {
     border-radius: 2px !important;
 }
 html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) #video-title {
-    color: #1a1a1a !important;
     font-size: 13px !important;
     font-family: 'Courier New', monospace, serif !important;
     font-weight: 600 !important;
@@ -483,7 +480,6 @@ html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) #video-title {
 }
 html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) #metadata-line span,
 html[data-ypp-card-style="polaroid"] body:not(.ypp-channel-page) yt-formatted-string[id="text"] {
-    color: #555 !important;
     font-family: 'Courier New', monospace, serif !important;
 }
 
@@ -566,7 +562,7 @@ ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer,
   ytd-grid-video-renderer, ytd-grid-channel-renderer,
   ytd-grid-playlist-renderer, ytd-grid-radio-renderer
 ) {
-    background: rgba(20,20,20,0.8) !important;
+    background: transparent !important;
     border-radius: 16px !important;
     padding: var(--ypp-density-pad, 10px) !important;
     margin-bottom: var(--ypp-density-gap, 16px) !important;
@@ -3713,13 +3709,12 @@ html[data-ypp-card-style="compact"] .ypp-grid-item #metadata-line {
 
 /* POLAROID ── search */
 html[data-ypp-card-style="polaroid"] .ypp-grid-item {
-  background: #f7f6f0 !important;
+  background: transparent !important;
   border-radius: 4px !important;
   padding: 8px 8px 32px !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3) !important;
-  border: 1px solid #e2ddc8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   transform: rotate(1deg) !important;
-  background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E') !important;
 }
 html[data-ypp-card-style="polaroid"] .ypp-grid-item:nth-child(even) {
   transform: rotate(-1.5deg) !important;
@@ -3730,7 +3725,6 @@ html[data-ypp-card-style="polaroid"] .ypp-grid-item:hover {
   box-shadow: 0 12px 32px rgba(0,0,0,0.6) !important;
 }
 html[data-ypp-card-style="polaroid"] .ypp-grid-item #video-title {
-  color: #1a1a1a !important;
   font-size: 13px !important;
   font-family: 'Courier New', monospace, serif !important;
   font-weight: 600 !important;
@@ -3738,7 +3732,6 @@ html[data-ypp-card-style="polaroid"] .ypp-grid-item #video-title {
 }
 html[data-ypp-card-style="polaroid"] .ypp-grid-item #metadata-line span,
 html[data-ypp-card-style="polaroid"] .ypp-grid-item yt-formatted-string[id="text"] {
-  color: #555 !important;
   font-family: 'Courier New', monospace, serif !important;
 }
 
@@ -3776,7 +3769,7 @@ html[data-ypp-card-style="cyberpunk"] .ypp-grid-item:hover {
 
 /* HOLOGRAPHIC ── search (NEW) */
 html[data-ypp-card-style="holographic"] .ypp-grid-item {
-  background: rgba(20,20,20,0.8) !important;
+  background: transparent !important;
   border-radius: 16px !important;
   padding: var(--ypp-density-pad, 10px) !important;
   position: relative !important;
