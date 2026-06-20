@@ -437,7 +437,13 @@ window.YPP.CONSTANTS = {
         // --- Missing Toggles & Layouts ---
         autoScaleLayout: 'AutoScaleGrid',
         displayFullTitle: 'FullVideoTitles',
-        useSquareCorners: 'SquareCorners'
+        useSquareCorners: 'SquareCorners',
+        // --- Subscription Hub ---
+        subscriptionFolders: 'SubscriptionFolders',
+        filterBar: 'FilterBar',
+        channelHealth: 'ChannelHealth',
+        groupSidebar: 'GroupSidebar',
+        deckMode: 'DeckMode'
     }
 };
 

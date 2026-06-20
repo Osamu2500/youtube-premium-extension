@@ -3899,7 +3899,6 @@ html[data-ypp-card-style="frosted"] .ypp-grid-item {
   padding: var(--ypp-density-pad, 16px) !important;
   box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(var(--ypp-thumb-rgb, 255,255,255), 0.2) !important;
 }
-}
 
 /* SUMMER ── search (NEW) */
 html[data-ypp-card-style="summer"] .ypp-grid-item {
@@ -4360,6 +4359,7 @@ body.yt-premium-plus-theme ytd-compact-video-renderer:hover {
   border-radius: var(--ypp-radius-lg) !important;
   overflow: hidden !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  margin-top: 12px !important;
 }
 
 #container.ytd-searchbox {
@@ -4881,90 +4881,9 @@ ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
    16. REDESIGNED UI ELEMENTS (PREMIUM GLASSMORPHIC AESTHETIC)
    =================================================================================== */
 
-/* ── 1. Detached Glass Control Bar (ytp-chrome-bottom) ── */
-html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-bottom,
-html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls,
-html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-left-controls,
-html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-right-controls {
-  margin: 0 !important;
-  /* Completely transparent player bar */
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
+/* ── 1. Detached Glass Control Bar (ytp-chrome-bottom) [DISABLED DUE TO RENDERING BUG] ── */
 
-html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-bottom {
-  left: calc(var(--ypp-video-left, 0px) + 24px) !important;
-  right: auto !important;
-  width: calc(var(--ypp-video-width, 100%) - 48px) !important;
-  bottom: 20px !important;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  overflow: visible !important;
-}
-
-html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-bottom:hover {
-  transform: none !important;
-}
-
-/* ── Glowing Progress Bar ── */
-html body.yt-premium-plus-theme .html5-video-player .ytp-progress-bar-container {
-  bottom: calc(100% + 12px) !important; /* Float 12px above the buttons */
-  width: 100% !important; /* Inherits the 100% - 48px from the transparent player bar */
-  height: 6px !important;
-}
-
-html body.yt-premium-plus-theme .html5-video-player .ytp-progress-list {
-  background: rgba(255, 255, 255, 0.15) !important;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3) !important;
-  border-radius: 6px !important;
-  overflow: visible !important;
-  transform: scaleY(1) !important;
-  transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1) !important;
-}
-html body.yt-premium-plus-theme .html5-video-player .ytp-progress-bar-container:hover .ytp-progress-list {
-  transform: scaleY(1.4) !important;
-}
-
-html body.yt-premium-plus-theme .html5-video-player .ytp-load-progress {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-radius: 6px !important;
-}
-
-html body.yt-premium-plus-theme .html5-video-player .ytp-play-progress,
-html body.yt-premium-plus-theme .html5-video-player .ytp-swatch-background-color,
-html body.yt-premium-plus-theme .html5-video-player .ytp-swatch-background-color-secondary {
-  background: #ff0000 !important;
-  background-color: #ff0000 !important;
-  background-image: none !important;
-  border-radius: 6px !important;
-}
-
-html body.yt-premium-plus-theme .html5-video-player .ytp-play-progress {
-  position: relative;
-}
-
-/* Bright leading edge for progress */
-html body.yt-premium-plus-theme .html5-video-player .ytp-play-progress::after {
-  content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
-  background: #fff; border-radius: 2px;
-}
-
-html body.yt-premium-plus-theme .html5-video-player .ytp-scrubber-button {
-  background: #ffffff !important;
-  border: 1px solid rgba(255,255,255,0.8) !important;
-  transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1) !important;
-}
-/* Scrubber Hover Ring */
-html body.yt-premium-plus-theme .html5-video-player .ytp-progress-bar-container:hover .ytp-scrubber-button,
-html body.yt-premium-plus-theme .html5-video-player .ytp-scrubber-button:hover {
-  transform: scale(1.35) !important;
-}
+/* ── Glowing Progress Bar [DISABLED DUE TO RENDERING BUG] ── */
 
 /* ── Player Control Buttons ── */
 html body.yt-premium-plus-theme .html5-video-player .ytp-chrome-controls .ytp-button {
@@ -6968,35 +6887,8 @@ html.yt-premium-plus-theme body {
   overflow-x: hidden !important;
 }
 
-/* Fix white backgrounds on masthead buttons and chips globally */
-html.yt-premium-plus-theme ytd-masthead yt-icon-button,
-html.yt-premium-plus-theme ytd-masthead #buttons yt-icon-button,
-html.yt-premium-plus-theme ytd-masthead #guide-button,
-html.yt-premium-plus-theme ytd-masthead #logo-container,
-html.yt-premium-plus-theme ytd-masthead #logo,
-html.yt-premium-plus-theme ytd-masthead ytd-topbar-logo-renderer,
-html.yt-premium-plus-theme ytd-masthead .yt-spec-button-shape-next,
-html.yt-premium-plus-theme ytd-masthead .yt-spec-button-shape-with-label__button,
-html.yt-premium-plus-theme ytd-masthead yt-button-shape,
-html.yt-premium-plus-theme ytd-masthead button.yt-icon-button {
-  background: transparent !important;
-  background-color: transparent !important;
-  --yt-spec-button-shape-button-filled-background: transparent !important;
-  --yt-spec-static-overlay-background-medium: transparent !important;
-}
-
-html.yt-premium-plus-theme ytd-masthead .yt-spec-button-shape-next:hover,
-html.yt-premium-plus-theme ytd-masthead yt-icon-button:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Fix the filter chips globally */
-html.yt-premium-plus-theme yt-chip-cloud-chip-renderer {
-  --yt-spec-badge-chip-background: transparent !important;
-  --yt-spec-icon-inactive-color: rgba(255,255,255,0.7) !important;
-  border-color: transparent !important;
-  background: transparent !important;
-}
+/* Fix white backgrounds on masthead buttons and chips globally [DISABLED DUE TO INVISIBLE NAVIGATION BUGS] */
+/* Fix the filter chips globally [DISABLED DUE TO INVISIBLE CHIPS BUG] */
 
 html.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected],
 html.yt-premium-plus-theme yt-chip-cloud-chip-renderer.iron-selected {
@@ -7612,6 +7504,19 @@ body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer { z-index: 
    ========================================================================= */
 
 /* Ensure the dropdown host is wide enough and not clipped */
+html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-multi-page-menu-renderer[data-ypp-cloaked]),
+html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-multi-page-menu-renderer[data-ypp-redesigned]),
+html.yt-premium-plus-theme ytd-popup-container:has(ytd-multi-page-menu-renderer[data-ypp-cloaked]),
+html.yt-premium-plus-theme ytd-popup-container:has(ytd-multi-page-menu-renderer[data-ypp-redesigned]) {
+    overflow: visible !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
 tp-yt-iron-dropdown ytd-multi-page-menu-renderer[data-ypp-cloaked],
 tp-yt-iron-dropdown ytd-multi-page-menu-renderer[data-ypp-redesigned],
 ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-cloaked],
