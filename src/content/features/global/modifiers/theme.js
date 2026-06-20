@@ -111,6 +111,7 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         
         // Remove base premium class
         root.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
+        root.classList.toggle('ypp-theme-effects', !!this._settings.enableThemeEffects);
         if (body) body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
 
         this._Utils.log(`Toggling theme: ${enable ? 'ON' : 'OFF'}`, 'THEME');
@@ -345,7 +346,8 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     _cleanupClasses() {
         // Collect all potential classes managed by visibility toggles
         const classes = [
-            this._CSS_CLASSES.THEME_ENABLED
+            this._CSS_CLASSES.THEME_ENABLED,
+            'ypp-theme-effects'
         ].filter(Boolean); // Filter out any undefined constants
 
         // Clean both documentElement and body just in case

@@ -34,7 +34,7 @@ html.yt-premium-plus-theme {
     0% { background-position: 0% 0%; }
     100% { background-position: 0% 1000%; }
 }
-html.yt-premium-plus-theme::before {
+html.yt-premium-plus-theme.ypp-theme-effects::before {
     content: "";
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;

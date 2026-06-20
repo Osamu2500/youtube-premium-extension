@@ -29,3 +29,20 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(248, 248, 242, 0.05);
 }
+
+
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: repeating-linear-gradient(45deg, rgba(189, 147, 249, 0.03) 0px, rgba(189, 147, 249, 0.03) 2px, transparent 2px, transparent 10px),
+                radial-gradient(circle at 20% 80%, rgba(255, 121, 198, 0.08) 0%, transparent 50%);
+    z-index: -1;
+    pointer-events: none;
+    animation: draculaShift 20s linear infinite;
+    background-size: 200% 200%;
+}
+@keyframes draculaShift {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}

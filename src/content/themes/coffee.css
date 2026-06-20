@@ -29,3 +29,19 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(242, 230, 217, 0.05);
 }
+
+
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: radial-gradient(circle at 50% 100%, rgba(212, 163, 115, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 20% 0%, rgba(250, 237, 205, 0.05) 0%, transparent 40%);
+    z-index: -1;
+    pointer-events: none;
+    animation: coffeeSteam 25s ease-in-out infinite alternate;
+}
+@keyframes coffeeSteam {
+    0% { transform: translateY(0) scale(1); opacity: 0.7; }
+    100% { transform: translateY(-5%) scale(1.1); opacity: 1; }
+}

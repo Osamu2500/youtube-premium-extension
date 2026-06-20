@@ -34,7 +34,7 @@ html.yt-premium-plus-theme {
     0% { transform: translateY(0); }
     100% { transform: translateY(-50vh); }
 }
-html.yt-premium-plus-theme::before {
+html.yt-premium-plus-theme.ypp-theme-effects::before {
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 200vh;

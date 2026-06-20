@@ -34,3 +34,19 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05);
 }
+
+
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: radial-gradient(circle at 50% 50%, rgba(62, 166, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
+    z-index: -1;
+    pointer-events: none;
+    animation: defaultPulse 15s ease-in-out infinite alternate;
+}
+@keyframes defaultPulse {
+    0% { transform: scale(1) translateY(0); opacity: 0.6; }
+    100% { transform: scale(1.1) translateY(-2%); opacity: 1; }
+}
