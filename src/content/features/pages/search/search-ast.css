@@ -467,7 +467,6 @@ body.ypp-search-grid-mode ytd-radio-renderer #main-link {
   flex-direction: column !important;
   width: 100% !important;
 }
-}
 body.ypp-search-grid-mode ytd-video-renderer #action-menu,
 body.ypp-search-grid-mode ytd-video-renderer ytd-menu-renderer,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-menu-renderer,
