@@ -7325,6 +7325,23 @@ body.ypp-hide-channel-cards ytd-channel-renderer {
     bottom: 2% !important;
 }
 
+/* Vignette Overlay */
+.ypp-cinema-mode #player-container-outer::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.85) 130%);
+    z-index: 10;
+    opacity: 1;
+    animation: yppFadeInVignette 2s ease forwards;
+}
+
+@keyframes yppFadeInVignette {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
 /* Curtain Animation */
 @keyframes yppOpenCurtains {
     0% { transform: scaleX(1); }
@@ -7410,6 +7427,22 @@ body.ypp-hide-channel-cards ytd-channel-renderer {
 }
 .ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next__icon {
     margin: 0 !important;
+}
+
+/* Hide tooltips on idle/play */
+.ypp-minimal-mode.ypp-cinema-idle .ytp-tooltip {
+    opacity: 0 !important;
+    display: none !important;
+}
+
+/* Maximize Real Estate on Grid */
+body.ypp-minimal-mode ytd-rich-grid-renderer {
+    --ytd-rich-grid-item-margin: 8px !important;
+    --ytd-rich-grid-items-per-row: 5 !important;
+}
+body.ypp-minimal-mode ytd-rich-item-renderer {
+    margin-right: 8px !important;
+    margin-bottom: 24px !important;
 }
 
 /* =========================================================================
@@ -7500,10 +7533,29 @@ body.ypp-focus-mode #primary {
     max-width: 1000px !important;
     margin: 0 auto !important;
 }
-body.ypp-zen-mode #primary,
-body.ypp-study-mode #primary {
+body.ypp-zen-mode #primary {
     max-width: 100% !important;
     margin: 0 auto !important;
+}
+
+/* Completely hide the native sidebar in study mode so our Notes panel can replace it */
+body.ypp-study-mode #secondary {
+    display: none !important;
+}
+
+/* Study Notes Panel styling to mimic the sidebar layout */
+body.ypp-study-mode #ypp-study-notes {
+    width: var(--ytd-watch-flexy-sidebar-width, 402px);
+    margin-left: 24px;
+    flex-shrink: 0;
+    margin-top: 24px;
+}
+
+@media (max-width: 1000px) {
+    body.ypp-study-mode #ypp-study-notes {
+        width: 100%;
+        margin-left: 0;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

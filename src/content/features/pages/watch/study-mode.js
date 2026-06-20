@@ -147,6 +147,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
             }
 
             // Reload notes for new video
+            await this._injectNotePanel();
             if (this.notesPanel) {
                 this._loadNotes();
             }
@@ -194,15 +195,17 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
             position: absolute;
             bottom: 50px;
             right: 20px;
-            background: rgba(28, 28, 28, 0.98);
+            background: rgba(25, 25, 30, 0.7);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 16px;
             z-index: 6000;
             width: 280px;
             color: #fff;
-            font-family: Roboto, sans-serif;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-            backdropFilter: blur(10px);
+            font-family: 'Inter', Roboto, sans-serif;
         `;
 
         // Title Row with Timer
@@ -557,6 +560,8 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
     // =========================================================================
 
     _initSmartCaptions() {
+        this.lastSpeedChangeTime = 0;
+        
         if (window.YPP.sharedObserver) {
             window.YPP.sharedObserver.register('study-mode-captions', '.ytp-caption-segment', () => {
                 if (!this.config.forceSubtitles) return;
@@ -568,6 +573,10 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
                 const video = document.querySelector('video');
                 if (!video) return;
 
+                const now = Date.now();
+                // Debounce speed changes to at most once per 2 seconds
+                if (now - this.lastSpeedChangeTime < 2000) return;
+
                 // Define "dense" as more than 80 characters on screen at once
                 if (text.length > 80) {
                     if (this.originalSpeed === null) {
@@ -575,6 +584,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
                         const newSpeed = Math.max(0.25, this.originalSpeed - 0.15); // Slow down by 0.15x
                         
                         video.playbackRate = newSpeed;
+                        this.lastSpeedChangeTime = now;
                         window.dispatchEvent(new CustomEvent('ypp-vsc-force-speed', {
                             detail: { enabled: true, speed: newSpeed }
                         }));
@@ -582,6 +592,7 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
                 } else {
                     if (this.originalSpeed !== null) {
                         video.playbackRate = this.originalSpeed;
+                        this.lastSpeedChangeTime = now;
                         window.dispatchEvent(new CustomEvent('ypp-vsc-force-speed', {
                             detail: { enabled: true, speed: this.originalSpeed }
                         }));
@@ -596,33 +607,36 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
     // NOTE-TAKING PANEL
     // =========================================================================
 
-    _injectNotePanel() {
-        if (document.getElementById('ypp-study-notes')) return;
+    async _injectNotePanel() {
+        const existing = document.getElementById('ypp-study-notes');
+        if (existing) {
+            existing.remove();
+        }
 
         this.notesPanel = document.createElement('div');
         this.notesPanel.id = 'ypp-study-notes';
         this.notesPanel.style.cssText = `
-            position: fixed;
+            position: sticky;
             top: 80px;
-            right: 24px;
-            width: 320px;
             height: calc(100vh - 120px);
-            background: rgba(28, 28, 28, 0.98);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
+            min-height: 500px;
+            background: rgba(25, 25, 30, 0.7);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             z-index: 5000;
             display: flex;
             flex-direction: column;
             color: #fff;
-            font-family: Roboto, sans-serif;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            backdrop-filter: blur(12px);
+            font-family: 'Inter', Roboto, sans-serif;
             transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s ease;
         `;
 
         // Header
         const header = document.createElement('div');
-        header.style.cssText = 'padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;';
+        header.style.cssText = 'padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); border-radius: 16px 16px 0 0;';
         
         const title = document.createElement('div');
         title.innerHTML = '📝 <b>Study Notes</b>';
@@ -630,7 +644,9 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         
         const exportBtn = document.createElement('button');
         exportBtn.textContent = 'Export';
-        exportBtn.style.cssText = 'background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;';
+        exportBtn.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.2s;';
+        exportBtn.onmouseover = () => exportBtn.style.background = 'rgba(255,255,255,0.2)';
+        exportBtn.onmouseout = () => exportBtn.style.background = 'rgba(255,255,255,0.1)';
         exportBtn.onclick = () => this._exportNotes();
 
         header.appendChild(title);
@@ -642,13 +658,52 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         this.notesList.style.cssText = 'flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth;';
         this.notesPanel.appendChild(this.notesList);
 
+        // Wiki Lookup Area
+        const lookupContainer = document.createElement('div');
+        lookupContainer.style.cssText = 'padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); display: flex; gap: 8px;';
+        
+        const lookupInput = document.createElement('input');
+        lookupInput.placeholder = 'Wikipedia Lookup...';
+        lookupInput.style.cssText = 'flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; padding: 8px 12px; font-size: 13px; outline: none; transition: border-color 0.2s;';
+        lookupInput.onfocus = () => lookupInput.style.borderColor = 'rgba(62,166,255,0.5)';
+        lookupInput.onblur = () => lookupInput.style.borderColor = 'rgba(255,255,255,0.1)';
+        
+        const lookupResult = document.createElement('div');
+        lookupResult.style.cssText = 'display: none; padding: 12px 16px; font-size: 13px; color: #ccc; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); max-height: 150px; overflow-y: auto; line-height: 1.5;';
+        
+        lookupInput.onkeydown = async (e) => {
+            if (e.key === 'Enter') {
+                const query = lookupInput.value.trim();
+                if (!query) return;
+                lookupResult.style.display = 'block';
+                lookupResult.innerHTML = '<span style="color: #3ea6ff;">Searching...</span>';
+                try {
+                    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                    const data = await res.json();
+                    if (data.extract) {
+                        lookupResult.innerHTML = `<b>${data.title}</b><br/>${data.extract}`;
+                    } else {
+                        lookupResult.innerHTML = '<i>No exact match found.</i>';
+                    }
+                } catch (err) {
+                    lookupResult.innerHTML = '<i>Error fetching lookup.</i>';
+                }
+            }
+        };
+
+        lookupContainer.appendChild(lookupInput);
+        this.notesPanel.appendChild(lookupContainer);
+        this.notesPanel.appendChild(lookupResult);
+
         // Input Area
         const inputContainer = document.createElement('div');
-        inputContainer.style.cssText = 'padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); border-radius: 0 0 12px 12px;';
+        inputContainer.style.cssText = 'padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); border-radius: 0 0 16px 16px;';
         
         const input = document.createElement('textarea');
         input.placeholder = 'Type a note and press Enter...';
-        input.style.cssText = 'width: 100%; height: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 8px; resize: none; font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;';
+        input.style.cssText = 'width: 100%; height: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 10px; resize: none; font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box; transition: border-color 0.2s;';
+        input.onfocus = () => input.style.borderColor = 'rgba(62,166,255,0.5)';
+        input.onblur = () => input.style.borderColor = 'rgba(255,255,255,0.1)';
         
         this.addListener(input, 'keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -664,7 +719,23 @@ window.YPP.features.StudyMode = class StudyMode extends window.YPP.features.Base
         inputContainer.appendChild(input);
         this.notesPanel.appendChild(inputContainer);
 
-        document.body.appendChild(this.notesPanel);
+        try {
+            const secondary = await this.waitForElement('#secondary', 5000);
+            if (secondary && secondary.parentNode) {
+                secondary.parentNode.insertBefore(this.notesPanel, secondary.nextSibling);
+            } else {
+                throw new Error('Sidebar container not found');
+            }
+        } catch (error) {
+            // Fallback if layout is completely different
+            this.notesPanel.style.position = 'fixed';
+            this.notesPanel.style.top = '80px';
+            this.notesPanel.style.right = '24px';
+            this.notesPanel.style.width = '340px';
+            this.notesPanel.style.zIndex = '5000';
+            document.body.appendChild(this.notesPanel);
+        }
+
         this._loadNotes();
     }
 

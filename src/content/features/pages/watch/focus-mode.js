@@ -160,13 +160,55 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
             if (this.settings?.hideChat) document.body.classList.add('ypp-hide-chat');
             if (this.settings?.hideLiveChat) document.body.classList.add('ypp-hide-live-chat');
             
+            // Actively eject DOM nodes
+            this._ejectDistractions();
+            
             this.utils.log?.('Focus mode enabled', 'FOCUS');
         } else {
             document.body.classList.remove('ypp-hide-chat');
             document.body.classList.remove('ypp-hide-live-chat');
             
+            // Restore DOM nodes
+            this._restoreDistractions();
+            
             this.utils.log?.('Focus mode disabled', 'FOCUS');
         }
+    }
+
+    // =========================================================================
+    // DOM EJECTION (True Distraction Removal)
+    // =========================================================================
+
+    _ejectDistractions() {
+        if (!this.ejectedNodes) this.ejectedNodes = new Map();
+
+        // Target containers
+        const targets = {
+            'comments': document.querySelector('#comments'),
+            'related': document.querySelector('#secondary #related')
+        };
+
+        for (const [key, container] of Object.entries(targets)) {
+            if (container && container.children.length > 0) {
+                // Save children in a document fragment to preserve Polymer bindings
+                const fragment = document.createDocumentFragment();
+                while (container.firstChild) {
+                    fragment.appendChild(container.firstChild);
+                }
+                this.ejectedNodes.set(key, { container, fragment });
+            }
+        }
+    }
+
+    _restoreDistractions() {
+        if (!this.ejectedNodes) return;
+
+        for (const [key, data] of this.ejectedNodes.entries()) {
+            if (data.container && data.fragment) {
+                data.container.appendChild(data.fragment);
+            }
+        }
+        this.ejectedNodes.clear();
     }
 
     // =========================================================================
@@ -237,42 +279,53 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
         overlay.id = 'ypp-strict-modal';
         overlay.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
             z-index: 999999; display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
         `;
 
         const modal = document.createElement('div');
         modal.style.cssText = `
-            background: rgba(30, 30, 30, 0.9); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px; padding: 32px; width: 340px; text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); font-family: 'Inter', sans-serif;
-            color: #fff; transition: transform 0.2s ease;
+            background: rgba(25, 25, 30, 0.7); backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 40px; width: 380px; text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            font-family: 'Inter', Roboto, sans-serif;
+            color: #fff; transform: scale(0.9) translateY(20px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         `;
 
         modal.innerHTML = `
-            <div style="font-size: 24px; margin-bottom: 8px;">🔒 Strict Mode Active</div>
-            <div style="font-size: 14px; color: #aaa; margin-bottom: 24px;">To unlock, solve the equation:</div>
-            <div style="font-size: 32px; font-weight: bold; margin-bottom: 24px; color: #ff4e45;">${num1} × ${num2}</div>
+            <div style="font-size: 40px; margin-bottom: 16px;">🔒</div>
+            <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Strict Mode Active</div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 32px;">Solve the equation to unlock Focus Mode:</div>
+            <div style="font-size: 36px; font-weight: 800; margin-bottom: 32px; color: #ff4e45; text-shadow: 0 4px 12px rgba(255, 78, 69, 0.3);">${num1} × ${num2}</div>
             <input type="number" id="ypp-strict-input" placeholder="Your Answer" style="
-                width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2);
-                background: rgba(0, 0, 0, 0.5); color: #fff; font-size: 18px; text-align: center;
-                box-sizing: border-box; outline: none; margin-bottom: 16px;
-            " autocomplete="off" />
-            <div style="display: flex; gap: 12px;">
+                width: 100%; padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15);
+                background: rgba(0, 0, 0, 0.3); color: #fff; font-size: 20px; text-align: center;
+                box-sizing: border-box; outline: none; margin-bottom: 20px; transition: border-color 0.2s, box-shadow 0.2s;
+            " autocomplete="off" onfocus="this.style.borderColor='#ff4e45'; this.style.boxShadow='0 0 0 3px rgba(255, 78, 69, 0.2)';" onblur="this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';" />
+            <div style="display: flex; gap: 16px;">
                 <button id="ypp-strict-cancel" style="
-                    flex: 1; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1);
-                    color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
-                ">Cancel</button>
+                    flex: 1; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+                    color: #fff; cursor: pointer; font-size: 15px; font-weight: 600; transition: background 0.2s;
+                " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Cancel</button>
                 <button id="ypp-strict-submit" style="
-                    flex: 1; padding: 12px; border-radius: 8px; border: none; background: #ff4e45;
-                    color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
-                ">Unlock</button>
+                    flex: 1; padding: 14px; border-radius: 12px; border: none; background: #ff4e45;
+                    color: #fff; cursor: pointer; font-size: 15px; font-weight: 600; transition: background 0.2s; box-shadow: 0 4px 12px rgba(255, 78, 69, 0.3);
+                " onmouseover="this.style.background='#ff665e'" onmouseout="this.style.background='#ff4e45'">Unlock</button>
             </div>
-            <div id="ypp-strict-error" style="color: #ff4e45; font-size: 12px; margin-top: 12px; min-height: 15px;"></div>
+            <div id="ypp-strict-error" style="color: #ff4e45; font-size: 13px; margin-top: 16px; min-height: 20px; font-weight: 500;"></div>
         `;
 
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
+        
+        // Trigger entrance animation
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+            modal.style.transform = 'scale(1) translateY(0)';
+        });
 
         const input = document.getElementById('ypp-strict-input');
         const submitBtn = document.getElementById('ypp-strict-submit');
@@ -297,12 +350,28 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
                 input.value = '';
                 input.focus();
                 
-                // Shake animation
-                modal.style.transform = 'translateX(-10px)';
-                setTimeout(() => modal.style.transform = 'translateX(10px)', 50);
-                setTimeout(() => modal.style.transform = 'translateX(-10px)', 100);
-                setTimeout(() => modal.style.transform = 'translateX(10px)', 150);
-                setTimeout(() => modal.style.transform = 'translateX(0)', 200);
+                // Shake animation (Anime.js style via CSS transition manipulation)
+                if (window.anime) {
+                    window.anime({
+                        targets: modal,
+                        translateX: [
+                            { value: -10, duration: 50 },
+                            { value: 10, duration: 50 },
+                            { value: -10, duration: 50 },
+                            { value: 10, duration: 50 },
+                            { value: 0, duration: 50 }
+                        ],
+                        easing: 'easeInOutSine'
+                    });
+                } else {
+                    modal.style.transition = 'transform 0.1s ease';
+                    modal.style.transform = 'scale(1) translateX(-15px)';
+                    setTimeout(() => modal.style.transform = 'scale(1) translateX(15px)', 50);
+                    setTimeout(() => modal.style.transform = 'scale(1) translateX(-15px)', 100);
+                    setTimeout(() => modal.style.transform = 'scale(1) translateX(15px)', 150);
+                    setTimeout(() => modal.style.transform = 'scale(1) translateX(0)', 200);
+                    setTimeout(() => modal.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', 300);
+                }
             }
         };
 

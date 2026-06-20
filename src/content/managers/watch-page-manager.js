@@ -161,7 +161,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
             }
         }
         
-        if (this.state.sidebar === 'hidden' || ['zen', 'focus', 'study'].includes(this.state.viewMode)) {
+        if (this.state.sidebar === 'hidden' || ['zen', 'focus'].includes(this.state.viewMode)) {
             body.classList.add('ypp-sidebar-hidden'); // Force hide sidebar in extreme modes
         }
 
@@ -174,6 +174,16 @@ class WatchPageManager extends window.YPP.BasePageManager {
         window.dispatchEvent(new CustomEvent('ypp-watch-mode-changed', { 
             detail: { mode: this.state.viewMode }
         }));
+
+        // Cinema Mode - Auto scroll to top of player
+        if (this.state.viewMode === 'cinema') {
+            const player = document.querySelector('#player-container-outer') || document.querySelector('ytd-player');
+            if (player) {
+                setTimeout(() => {
+                    player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        }
     }
 
     _applySidebarLayout() {

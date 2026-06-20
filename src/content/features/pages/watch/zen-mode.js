@@ -31,9 +31,9 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
         this.playerElement = null;
 
         // Configuration
-        this.FPS = 2; // Reduced from 15 to 2 to prevent extreme CPU readback lag and paint thrashing
+        this.FPS = 30; // Increased to 30 FPS since we removed CPU readback
         this.FRAME_INTERVAL = 1000 / this.FPS;
-        this.CANVAS_SIZE = 10; // Low res is sufficient for ambient light
+        this.CANVAS_SIZE = 16; // Small resolution for blur base
 
         // Bindings
         this._loop = this._loop.bind(this);
@@ -153,64 +153,56 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
             this.canvas = document.createElement('canvas');
             this.canvas.width = this.CANVAS_SIZE;
             this.canvas.height = this.CANVAS_SIZE;
-            this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+            this.canvas.id = 'ypp-zen-glow-canvas';
+            this.canvas.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                filter: blur(100px);
+                opacity: 0.6;
+                z-index: -1;
+                pointer-events: none;
+                transform: scale(1.1);
+                transition: opacity 0.5s ease;
+            `;
+            this.ctx = this.canvas.getContext('2d', { alpha: false });
+        }
+        
+        // Ensure it's in the DOM behind the player
+        if (this.playerElement && !document.getElementById('ypp-zen-glow-canvas')) {
+            this.playerElement.style.position = 'relative';
+            this.playerElement.style.zIndex = '0';
+            this.playerElement.insertBefore(this.canvas, this.playerElement.firstChild);
         }
     }
 
     _loop(timestamp) {
         if (!this.ambientActive) return;
 
-        // Pause if tab hidden
         if (!document.hidden) {
-            // Throttle to FPS
             if (timestamp - this.lastUpdate > this.FRAME_INTERVAL) {
                 this.lastUpdate = timestamp;
-                this._processFrame();
+                
+                // Ensure canvas is attached
+                this._initCanvas();
+                
+                // Cache Video Element (fallback if poller missed it or it changed)
+                if (!this.videoElement || !this.videoElement.isConnected) {
+                    this.videoElement = document.querySelector('video');
+                }
+
+                const video = this.videoElement;
+                if (video && !video.paused && !video.ended && video.readyState >= 2 && this.ctx) {
+                    try {
+                        this.ctx.drawImage(video, 0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
+                    } catch (e) {}
+                }
             }
         }
 
         this.animationFrame = requestAnimationFrame(this._loop);
-    }
-
-    _processFrame() {
-        if (!this.ctx) return;
-        
-        // Cache Video Element (fallback if poller missed it or it changed)
-        if (!this.videoElement || !this.videoElement.isConnected) {
-            this.videoElement = document.querySelector('video');
-        }
-
-        const video = this.videoElement;
-        
-        if (video && !video.paused && !video.ended && video.readyState >= 2) {
-            try {
-                this.ctx.drawImage(video, 0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
-                // Get center pixel or average
-                const frame = this.ctx.getImageData(0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
-                const [r, g, b] = this._getAverageColor(frame.data);
-                this._updateGlow(`rgba(${r}, ${g}, ${b}, 0.5)`);
-            } catch (e) {
-                // Cross-origin issues or other canvas errors
-            }
-        }
-    }
-
-    _updateGlow(color) {
-        // Fallback if player element not cached
-        if (!this.playerElement || !this.playerElement.isConnected) {
-            this.playerElement = document.querySelector('#ytd-player') || 
-                                 document.querySelector('#player-container-outer') || 
-                                 document.querySelector('.html5-video-player');
-        }
-
-        if (this.playerElement) {
-            // Add marker class once (avoids repeated checks)
-            if (!this.playerElement.classList.contains('ypp-zen-shadow')) {
-                this.playerElement.classList.add('ypp-zen-shadow');
-            }
-            // Hardware-accelerated box-shadow update (GPU composited)
-            this.playerElement.style.boxShadow = `0 0 150px 30px ${color}`;
-        }
     }
 
     _removeAmbientMode() {
@@ -224,32 +216,21 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
             window.YPP.sharedObserver.unregister('zen-mode-player');
         }
 
-        // Clean up styles
-        const player = this.playerElement || document.querySelector('#ytd-player');
-        if (player) {
-            player.classList.remove('ypp-zen-shadow');
-            player.style.boxShadow = '';
+        // Clean up canvas
+        if (this.canvas) {
+            this.canvas.style.opacity = '0';
+            setTimeout(() => {
+                if (this.canvas && this.canvas.parentNode) {
+                    this.canvas.remove();
+                }
+                this.canvas = null;
+                this.ctx = null;
+            }, 500);
         }
         
         // Clear references
         this.videoElement = null;
         this.playerElement = null;
-    }
-
-    _getAverageColor(data) {
-        let r = 0, g = 0, b = 0, count = 0;
-        const length = data.length;
-        const step = 4 * 4; // Sample every 4th pixel 
-
-        for (let i = 0; i < length; i += step) {
-            r += data[i];
-            g += data[i+1];
-            b += data[i+2];
-            count++;
-        }
-
-        if (count === 0) return [0, 0, 0];
-        return [Math.round(r / count), Math.round(g / count), Math.round(b / count)];
     }
 
     // =========================================================================

@@ -35,6 +35,11 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
         
         this.Utils.createToast?.('Audio Mode Disabled');
         
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
+        }
+
         if (window.YPP && window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('audio-mode-player');
         }
@@ -162,8 +167,8 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
                         0%, 100% { height: 15px; opacity: 0.5; }
                         50% { height: 40px; opacity: 1; }
                     }
-                    #ypp-audio-thumb:hover {
-                        transform: scale(1.02);
+                    #ypp-audio-thumb {
+                        transition: transform 0.1s linear, border-radius 0.1s linear;
                     }
                 </style>
             </div>
@@ -199,6 +204,87 @@ window.YPP.features.AudioMode = class AudioMode extends window.YPP.features.Base
 
         player.prepend(overlay);
         this.overlay = overlay;
+        
+        this.startLoop();
+    }
+
+    startLoop() {
+        let lastTime = 0;
+        const fpsInterval = 1000 / 30; // 30 FPS throttle
+
+        const loop = (timestamp) => {
+            if (!this.isEnabled || !this.overlay) return;
+            const elapsed = timestamp - lastTime;
+            if (elapsed > fpsInterval) {
+                lastTime = timestamp - (elapsed % fpsInterval);
+                
+                const video = document.querySelector('video');
+                if (video && !video.paused && !document.hidden) {
+                    this._initAudioContextSafe();
+                    if (this.analyser && this.dataArray) {
+                        this.analyser.getByteFrequencyData(this.dataArray);
+                        
+                        // Calculate Bass (Low freq)
+                        let bassSum = 0;
+                        for (let i = 0; i < 5; i++) bassSum += this.dataArray[i];
+                        const bass = (bassSum / 5) / 255.0; // 0.0 to 1.0
+                        
+                        // Calculate Treble (High freq)
+                        let trebleSum = 0;
+                        for (let i = 25; i < 30; i++) trebleSum += this.dataArray[i];
+                        const treble = (trebleSum / 5) / 255.0; // 0.0 to 1.0
+                        
+                        const thumb = document.getElementById('ypp-audio-thumb');
+                        if (thumb) {
+                            // Scale based on bass: 1.0 to 1.08
+                            const scale = 1.0 + (bass * 0.08);
+                            // Border radius based on treble: 16px to 36px
+                            const radius = 16 + (treble * 20);
+                            
+                            thumb.style.transform = `scale(${scale})`;
+                            thumb.style.borderRadius = `${radius}px`;
+                        }
+                    }
+                }
+            }
+            this.animationFrame = requestAnimationFrame(loop);
+        };
+        this.animationFrame = requestAnimationFrame(loop);
+    }
+
+    _initAudioContextSafe() {
+        const video = document.querySelector('video');
+        if (!video) return;
+        
+        try {
+            window.YPP.audioContext = window.YPP.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+            window.YPP.audioSources = window.YPP.audioSources || new WeakMap();
+            
+            // Only create source if not already created for THIS specific video element
+            if (!window.YPP.audioSources.has(video)) {
+                // IMPORTANT: Some DRM videos block this. We wrap in try-catch.
+                const source = window.YPP.audioContext.createMediaElementSource(video);
+                
+                if (!window.YPP.globalAudioAnalyser) {
+                    window.YPP.globalAudioAnalyser = window.YPP.audioContext.createAnalyser();
+                    window.YPP.globalAudioAnalyser.fftSize = 64; // Small FFT size for fast bass detection
+                    window.YPP.globalAudioAnalyser.connect(window.YPP.audioContext.destination);
+                }
+                
+                source.connect(window.YPP.globalAudioAnalyser);
+                window.YPP.audioSources.set(video, source);
+            }
+            
+            this.audioContext = window.YPP.audioContext;
+            this.analyser = window.YPP.globalAudioAnalyser;
+            this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+            
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+        } catch (e) {
+            this.utils?.log('Failed to init Audio Context (likely DRM/CORS)', 'AUDIO', 'warn');
+        }
     }
 
     /**

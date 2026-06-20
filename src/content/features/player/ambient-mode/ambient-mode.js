@@ -256,8 +256,11 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
         this.uBrightnessBoost = gl.getUniformLocation(this.program, 'uBrightnessBoost');
         this.uBlurIntensity = gl.getUniformLocation(this.program, 'uBlurIntensity');
         
-        gl.uniform1f(this.uSaturationBoost, 2.0);
-        gl.uniform1f(this.uBrightnessBoost, 0.85);
+        const userSat = this.settings?.ambientSaturation || 2.0;
+        const userBright = this.settings?.ambientBrightness || 0.85;
+        
+        gl.uniform1f(this.uSaturationBoost, userSat);
+        gl.uniform1f(this.uBrightnessBoost, userBright);
 
         // Setup geometry (full screen quad)
         const vertices = new Float32Array([
@@ -358,10 +361,13 @@ window.YPP.features.AmbientMode = class AmbientMode extends window.YPP.features.
                     // WebGL Blur Intensity mapping (canvas is tiny, offset should be small)
                     gl.uniform1f(this.uBlurIntensity, this.currentBlur / 1500.0);
                     
-                    // Base sat 2.0, max 3.5 with audio
-                    gl.uniform1f(this.uSaturationBoost, 2.0 + (audioBoost * 1.5));
-                    // Base bright 0.85, max 1.25 with audio
-                    gl.uniform1f(this.uBrightnessBoost, 0.85 + (audioBoost * 0.4));
+                    const userSat = this.settings?.ambientSaturation || 2.0;
+                    const userBright = this.settings?.ambientBrightness || 0.85;
+
+                    // Base sat, max +1.5 with audio
+                    gl.uniform1f(this.uSaturationBoost, userSat + (audioBoost * 1.5));
+                    // Base bright, max +0.4 with audio
+                    gl.uniform1f(this.uBrightnessBoost, userBright + (audioBoost * 0.4));
                     
                     gl.bindTexture(gl.TEXTURE_2D, this.texture);
                     // Upload video frame to GPU
