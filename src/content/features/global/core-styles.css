@@ -1230,12 +1230,10 @@ body.ypp-full-title yt-formatted-string[id="video-title"] {
 
 body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer,
 body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-right-renderer {
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 12px !important; /* Fully rounded pills */
-  padding: 4px 8px !important;
-  margin: 6px !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 4px !important;
+  padding: 3px 4px !important;
+  margin: 4px !important;
 }
 
 body.yt-premium-plus-theme span.ytd-thumbnail-overlay-time-status-renderer {
