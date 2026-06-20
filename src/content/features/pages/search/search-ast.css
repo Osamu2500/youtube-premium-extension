@@ -542,6 +542,11 @@ body.ypp-search-grid-mode ytd-rich-section-renderer {
   width: 100%;
   max-width: 100%;
 }
+
+/* Feature: Hide Channel Cards */
+body.ypp-search-grid-mode.ypp-hide-channel-cards ytd-channel-renderer {
+  display: none !important;
+}
 body.ypp-search-grid-mode ytd-channel-renderer {
   grid-column: span 2;
   width: 100%;
