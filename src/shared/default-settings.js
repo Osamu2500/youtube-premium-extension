@@ -183,6 +183,7 @@ export const DEFAULT_SETTINGS = {
     ambientMode: false,
     audioModeEnabled: false,
     videoControlsEnabled: true,
+    playerActionStyle: 'premium',
     subscriptionFolders: true,
     wheelControls: true,
     audioCompressor: false,

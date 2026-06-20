@@ -6,6 +6,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
         this.state = {
             sidebar: 'default', // 'default', 'compact', 'hidden'
             viewMode: 'default', // 'default', 'cinema', 'minimal', 'zen', 'focus', 'study'
+            playerActionStyle: 'premium',
             enableCustomSidebar: true
         };
 
@@ -88,7 +89,8 @@ class WatchPageManager extends window.YPP.BasePageManager {
 
         this.setState({
             sidebar: newSidebar,
-            viewMode: newMode
+            viewMode: newMode,
+            playerActionStyle: this.settings.playerActionStyle || 'premium'
         });
         
         // Handle specific mode feature JS logic
@@ -131,9 +133,16 @@ class WatchPageManager extends window.YPP.BasePageManager {
         // 1. Reset all managed classes & Inline Styles
         const classesToRemove = [
             'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
-            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode'
+            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode',
+            'ypp-action-style-premium', 'ypp-action-style-minimal', 'ypp-action-style-default'
         ];
         body.classList.remove(...classesToRemove);
+
+        if (this.settings.playerActionStyle) {
+            body.classList.add(`ypp-action-style-${this.settings.playerActionStyle}`);
+        } else {
+            body.classList.add(`ypp-action-style-premium`);
+        }
         
         // Clear JS-injected inline styles from 'spacious' observer when switching modes
         this._cleanUpLegacyStamps();
@@ -223,7 +232,8 @@ class WatchPageManager extends window.YPP.BasePageManager {
         const classesToRemove = [
             // Note: 'ypp-sidebar-spacious' is the current name — 'compact' was the old name
             'ypp-sidebar-compact', 'ypp-sidebar-spacious', 'ypp-sidebar-expanded', 'ypp-sidebar-grid', 'ypp-sidebar-hidden',
-            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode', 'ypp-theater-mode-override'
+            'ypp-cinema-mode', 'ypp-minimal-mode', 'ypp-zen-mode', 'ypp-focus-mode', 'ypp-study-mode', 'ypp-theater-mode-override',
+            'ypp-action-style-premium', 'ypp-action-style-minimal', 'ypp-action-style-default'
         ];
         document.body.classList.remove(...classesToRemove);
     }
