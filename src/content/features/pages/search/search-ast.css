@@ -66,9 +66,7 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
 }
 
 /* Prevent empty sections/headers and hidden continuations from creating empty grid cells */
-body.ypp-search-grid-mode ytd-item-section-renderer > #header:empty,
-body.ypp-search-grid-mode ytd-item-section-renderer > #header[hidden],
-body.ypp-search-grid-mode ytd-item-section-renderer > #header:not(:has(*)),
+body.ypp-search-grid-mode ytd-item-section-renderer > #header,
 body.ypp-search-grid-mode ytd-continuation-item-renderer:empty,
 body.ypp-search-grid-mode ytd-continuation-item-renderer[hidden],
 body.ypp-search-grid-mode ytd-video-renderer:empty,
@@ -84,13 +82,6 @@ body.ypp-search-grid-mode ytd-promoted-video-renderer,
 body.ypp-search-grid-mode ytd-shelf-renderer:not(:has(ytd-video-renderer)):not(:has(ytd-playlist-renderer)):not(:has(ytd-channel-renderer)):not(:has(ytd-grid-video-renderer)),
 body.ypp-search-grid-mode ytd-reel-shelf-renderer:not(:has(ytd-reel-item-renderer)) {
   display: none !important;
-}
-
-/* Ensure headers span full width if they do have content */
-body.ypp-search-grid-mode ytd-item-section-renderer > #header {
-  grid-column: 1 / -1 !important;
-  width: 100% !important;
-  margin: 0 !important;
 }
 
 .ypp-search-page.ypp-search-grid-mode ytd-shelf-renderer,
