@@ -255,17 +255,21 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         const PLAYLIST = window.YPP.CONSTANTS?.SELECTORS?.PLAYLIST || {};
         
         // Hide native playlist layout (not remove — YouTube needs it for data + navigation)
-        // We hide via class so _reset() can restore them on disable/navigate-away
-        // Fallback to generic ytd-browse if page-subtype="playlist" is missing
-        const browseEl = document.querySelector('ytd-browse[page-subtype="playlist"]') || 
-                         document.querySelector('ytd-browse');
-        const nativeTargets = [];
-        if (browseEl) {
-            nativeTargets.push(
-                ...browseEl.querySelectorAll('ytd-two-column-browse-results-renderer, #header, ytd-playlist-header-renderer, ytd-playlist-video-list-renderer, #primary > ytd-section-list-renderer, ytd-item-section-renderer')
-            );
+        if (header) {
+            header.classList.add('ypp-pl-hidden');
+            const headerParent = header.closest('ytd-playlist-header-renderer, #header');
+            if (headerParent) headerParent.classList.add('ypp-pl-hidden');
         }
-        nativeTargets.forEach(el => el.classList.add('ypp-pl-hidden'));
+        
+        if (videoEls && videoEls.length > 0) {
+            // Hide the list container holding the native videos
+            const listContainer = videoEls[0].closest('ytd-playlist-video-list-renderer, ytd-item-section-renderer, ytd-section-list-renderer, ytd-rich-grid-renderer');
+            if (listContainer) listContainer.classList.add('ypp-pl-hidden');
+            
+            // Also hide the two-column wrapper if it exists so it doesn't occupy space
+            const twoColumn = videoEls[0].closest('ytd-two-column-browse-results-renderer');
+            if (twoColumn) twoColumn.classList.add('ypp-pl-hidden');
+        }
 
         // Clean up old event listeners before removing old container
         this.cleanupEvents();
