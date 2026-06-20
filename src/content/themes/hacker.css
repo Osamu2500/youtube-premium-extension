@@ -28,3 +28,22 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: #002200;
 }
+
+/* Animated Matrix Rain Effect */
+@keyframes ypp-matrix-rain {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 0% 1000%; }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    pointer-events: none;
+    opacity: 0.15;
+    background-image: 
+        repeating-linear-gradient(180deg, transparent 0, transparent 20px, rgba(0, 255, 0, 0.2) 21px, transparent 22px),
+        repeating-linear-gradient(90deg, transparent 0, transparent 20px, rgba(0, 255, 0, 0.1) 21px, transparent 22px);
+    background-size: 100% 200%;
+    animation: ypp-matrix-rain 60s linear infinite;
+}

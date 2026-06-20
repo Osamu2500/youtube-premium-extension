@@ -28,3 +28,21 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(255, 0, 0, 0.1);
 }
+
+/* Animated Bloodmoon Pulse Effect */
+@keyframes ypp-bloodmoon-pulse {
+    0% { transform: scale(1) translateX(-50%); opacity: 0.1; }
+    50% { transform: scale(1.2) translateX(-40%); opacity: 0.25; }
+    100% { transform: scale(1) translateX(-50%); opacity: 0.1; }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: -50vh; left: 50%;
+    width: 150vw; height: 150vh;
+    transform: translateX(-50%);
+    z-index: -2;
+    pointer-events: none;
+    background: radial-gradient(circle at center, rgba(255, 0, 0, 0.2) 0%, transparent 60%);
+    animation: ypp-bloodmoon-pulse 10s ease-in-out infinite;
+}

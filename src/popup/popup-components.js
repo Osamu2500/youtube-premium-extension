@@ -34,7 +34,11 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
             { key: 'hacker', label: 'Hacker Green', meta: 'Terminal', color: '#0a140a' },
             { key: 'outrun', label: 'Outrun Synth', meta: '80s Retro', color: '#1a0524' },
             { key: 'bloodmoon', label: 'Blood Moon', meta: 'Crimson', color: '#1a0505' },
-            { key: 'deepspace', label: 'Deep Space', meta: 'Nebula', color: '#020205' }
+            { key: 'deepspace', label: 'Deep Space', meta: 'Nebula', color: '#020205' },
+            { key: 'nebula', label: 'Nebula', meta: 'Purple Space', color: '#0f0518' },
+            { key: 'abyss', label: 'Abyss', meta: 'Deep Sea', color: '#01080a' },
+            { key: 'ember', label: 'Ember', meta: 'Hot Coals', color: '#141414' },
+            { key: 'hologram', label: 'Hologram', meta: 'Sci-Fi Cyan', color: '#e0f7fa' }
         ];
 
         themes.forEach(theme => {

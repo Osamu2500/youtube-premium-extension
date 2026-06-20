@@ -23,7 +23,7 @@ window.YPP.SettingsSchema = {
         schemaVersion:       { type: 'number',  default: 1 },
         // --- Theme ---
         premiumTheme:        { type: 'boolean', default: true },
-        activeTheme:         { type: 'string',  default: 'default', values: ['default','ocean','sunset','dracula','forest','midnight','cherry','system', 'coffee', 'cyberpunk', 'nord', 'discord', 'hacker', 'outrun', 'bloodmoon', 'deepspace'] },
+        activeTheme:         { type: 'string',  default: 'default', values: ['default','ocean','sunset','dracula','forest','midnight','cherry','system', 'coffee', 'cyberpunk', 'nord', 'discord', 'hacker', 'outrun', 'bloodmoon', 'deepspace', 'nebula', 'abyss', 'ember', 'hologram'] },
         trueBlack:           { type: 'boolean', default: false },
         hideScrollbar:       { type: 'boolean', default: false },
 

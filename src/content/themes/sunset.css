@@ -28,3 +28,20 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(255, 240, 245, 0.05);
 }
+
+/* Animated Sunset Gradient Effect */
+@keyframes ypp-sunset-glow {
+    0% { background-position: 50% 0%; }
+    50% { background-position: 50% 100%; }
+    100% { background-position: 50% 0%; }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,107,107,0.15) 0%, rgba(255,200,100,0.1) 50%, transparent 100%);
+    background-size: 100% 200%;
+    animation: ypp-sunset-glow 15s ease-in-out infinite;
+}

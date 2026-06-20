@@ -1,0 +1,50 @@
+html.yt-premium-plus-theme {
+    --ypp-bg-base: #0f0518;
+    --ypp-bg-surface: #1f0b32;
+    --ypp-bg-glass: rgba(15, 5, 24, 0.95);
+    --ypp-glass-border: rgba(255, 105, 180, 0.15);
+    --ypp-glass-highlight: rgba(255, 105, 180, 0.1);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 105, 180, 0.05) 0%, transparent 100%);
+    
+    --ypp-text-primary: #fff0f5;
+    --ypp-text-secondary: #dda0dd;
+    
+    --ypp-accent: #ff69b4;
+    --ypp-accent-hover: #ff1493;
+    --ypp-accent-glow: rgba(255, 105, 180, 0.4);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(255, 105, 180, 0.1);
+    --ypp-shadow-float: 0 16px 48px rgba(138, 43, 226, 0.2);
+    --ypp-shadow-glow: 0 0 24px rgba(255, 105, 180, 0.2);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: rgba(31, 11, 50, 0.8);
+    --ytd-searchbox-text-color: #fff0f5;
+    --ytd-searchbox-border-radius: 20px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 20px 20px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(255, 105, 180, 0.1);
+}
+
+/* Animated Nebula Effect */
+@keyframes ypp-nebula-clouds {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: -50%; left: -50%; right: -50%; bottom: -50%;
+    z-index: -2;
+    pointer-events: none;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255, 105, 180, 0.15) 0%, transparent 50%);
+    background-size: 200% 200%;
+    animation: ypp-nebula-clouds 30s ease-in-out infinite;
+    opacity: 0.6;
+}

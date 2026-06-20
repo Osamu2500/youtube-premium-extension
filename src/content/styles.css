@@ -168,12 +168,18 @@
 }
 
 /* Force YouTube background to respect theme variables */
-html.yt-premium-plus-theme, 
+html.yt-premium-plus-theme {
+  background-color: var(--ypp-bg-base, #0f0f0f) !important;
+  background: var(--ypp-bg-base, #0f0f0f) !important;
+  position: relative;
+}
+
+/* Make inner containers transparent so HTML background and effects show through */
 html.yt-premium-plus-theme body, 
 html.yt-premium-plus-theme ytd-app,
 html.yt-premium-plus-theme #background {
-  background-color: var(--ypp-bg-base, #0f0f0f) !important;
-  background: var(--ypp-bg-base, #0f0f0f) !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* ===================================================================================

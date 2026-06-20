@@ -1,0 +1,48 @@
+html.yt-premium-plus-theme {
+    --ypp-bg-base: #141414;
+    --ypp-bg-surface: #1e1e1e;
+    --ypp-bg-glass: rgba(20, 20, 20, 0.95);
+    --ypp-glass-border: rgba(255, 69, 0, 0.15);
+    --ypp-glass-highlight: rgba(255, 69, 0, 0.05);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 69, 0, 0.05) 0%, transparent 100%);
+    
+    --ypp-text-primary: #fff;
+    --ypp-text-secondary: #ffbba6;
+    
+    --ypp-accent: #ff4500;
+    --ypp-accent-hover: #ff6347;
+    --ypp-accent-glow: rgba(255, 69, 0, 0.4);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.8);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.9);
+    --ypp-shadow-glow: 0 0 24px rgba(255, 69, 0, 0.15);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: rgba(30, 30, 30, 0.8);
+    --ytd-searchbox-text-color: #fff;
+    --ytd-searchbox-border-radius: 12px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 12px 12px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(255, 69, 0, 0.1);
+}
+
+/* Animated Ember Glow Effect */
+@keyframes ypp-ember-glow {
+    0% { opacity: 0.05; transform: scale(1); }
+    50% { opacity: 0.15; transform: scale(1.1); }
+    100% { opacity: 0.05; transform: scale(1); }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    pointer-events: none;
+    background: 
+        radial-gradient(circle at 10% 90%, rgba(255, 69, 0, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 90% 10%, rgba(255, 140, 0, 0.2) 0%, transparent 40%);
+    animation: ypp-ember-glow 8s ease-in-out infinite;
+}

@@ -29,3 +29,22 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-width: 60px;
     --ytd-searchbox-legacy-button-color: rgba(0, 255, 204, 0.1);
 }
+
+/* Animated Cyberpunk Grid Effect */
+@keyframes ypp-cyberpunk-pan {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    pointer-events: none;
+    background-image: 
+        repeating-linear-gradient(45deg, rgba(255, 0, 255, 0.05) 0, rgba(255, 0, 255, 0.05) 2px, transparent 2px, transparent 20px),
+        repeating-linear-gradient(-45deg, rgba(0, 255, 204, 0.05) 0, rgba(0, 255, 204, 0.05) 2px, transparent 2px, transparent 20px);
+    background-size: 28px 28px;
+    animation: ypp-cyberpunk-pan 20s linear infinite;
+    opacity: 0.5;
+}

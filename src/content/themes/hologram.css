@@ -1,0 +1,46 @@
+html.yt-premium-plus-theme {
+    --ypp-bg-base: #f0f8ff;
+    --ypp-bg-surface: #e0f7fa;
+    --ypp-bg-glass: rgba(240, 248, 255, 0.85);
+    --ypp-glass-border: rgba(0, 188, 212, 0.2);
+    --ypp-glass-highlight: rgba(255, 255, 255, 0.4);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
+    
+    --ypp-text-primary: #006064;
+    --ypp-text-secondary: #00838f;
+    
+    --ypp-accent: #00bcd4;
+    --ypp-accent-hover: #00acc1;
+    --ypp-accent-glow: rgba(0, 188, 212, 0.4);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 188, 212, 0.1);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 188, 212, 0.2);
+    --ypp-shadow-glow: 0 0 24px rgba(0, 188, 212, 0.2);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+
+    /* COMPONENT OVERRIDES */
+    --ytd-searchbox-background: rgba(255, 255, 255, 0.6);
+    --ytd-searchbox-text-color: #006064;
+    --ytd-searchbox-border-radius: 8px;
+    --ytd-searchbox-height: 44px;
+    --ytd-searchbox-legacy-button-border-radius: 0 8px 8px 0;
+    --ytd-searchbox-legacy-button-width: 60px;
+    --ytd-searchbox-legacy-button-color: rgba(0, 188, 212, 0.1);
+}
+
+/* Animated Hologram Scanline Effect */
+@keyframes ypp-hologram-scan {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100vh; }
+}
+html.yt-premium-plus-theme::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(0, 188, 212, 0) 0%, rgba(0, 188, 212, 0.05) 50%, rgba(0, 188, 212, 0) 100%);
+    background-size: 100% 20px;
+    animation: ypp-hologram-scan 5s linear infinite;
+}
