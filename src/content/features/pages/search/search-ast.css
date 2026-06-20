@@ -67,13 +67,21 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
 /* Prevent empty sections/headers and hidden continuations from creating empty grid cells */
 body.ypp-search-grid-mode ytd-item-section-renderer > #header:empty,
 body.ypp-search-grid-mode ytd-item-section-renderer > #header[hidden],
+body.ypp-search-grid-mode ytd-item-section-renderer > #header:not(:has(*)),
 body.ypp-search-grid-mode ytd-continuation-item-renderer:empty,
 body.ypp-search-grid-mode ytd-continuation-item-renderer[hidden],
 body.ypp-search-grid-mode ytd-video-renderer:empty,
 body.ypp-search-grid-mode ytd-video-renderer[hidden],
+body.ypp-search-grid-mode ytd-video-renderer:not(:has(ytd-thumbnail)),
+body.ypp-search-grid-mode ytd-video-renderer:has(ytd-ad-slot-renderer),
+body.ypp-search-grid-mode ytd-video-renderer:has(.ytd-ad-slot-renderer),
+body.ypp-search-grid-mode ytd-in-feed-ad-layout-renderer,
+body.ypp-search-grid-mode ytd-ad-slot-renderer,
 body.ypp-search-grid-mode ytd-promoted-sparkles-web-renderer,
 body.ypp-search-grid-mode ytd-search-pyv-renderer,
-body.ypp-search-grid-mode ytd-promoted-video-renderer {
+body.ypp-search-grid-mode ytd-promoted-video-renderer,
+body.ypp-search-grid-mode ytd-shelf-renderer:not(:has(ytd-video-renderer)):not(:has(ytd-playlist-renderer)):not(:has(ytd-channel-renderer)):not(:has(ytd-grid-video-renderer)),
+body.ypp-search-grid-mode ytd-reel-shelf-renderer:not(:has(ytd-reel-item-renderer)) {
   display: none !important;
 }
 
