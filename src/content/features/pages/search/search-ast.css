@@ -41,10 +41,11 @@ body.ypp-search-grid-mode .ypp-flattened-grid {
   gap: 20px !important;
   width: 100% !important;
   max-width: 1800px !important;
-  padding: 0 24px !important;
+  padding: 0 24px 60px 24px !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
   align-items: start !important;
+  position: relative !important;
 }
 body.ypp-search-grid-mode ytd-shelf-renderer #items,
 body.ypp-search-grid-mode ytd-shelf-renderer #contents,
@@ -1041,11 +1042,18 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img {
   border-radius: var(--ypp-radius-md) !important;
 }
 body.ypp-search-grid-mode ytd-continuation-item-renderer {
-  grid-column: 1 / -1 !important;
-  min-height: 0 !important;
-  height: auto !important;
-  padding: 0 !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 60px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   margin: 0 !important;
+  padding: 0 !important;
+  grid-column: auto !important;
 }
 body.ypp-search-grid-mode ytd-playlist-renderer {
   grid-column: span 1 !important;
