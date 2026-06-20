@@ -340,19 +340,16 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail {
   padding: 0 !important;
   align-self: start !important;
   display: flex !important;
-  border-radius: 50% !important;
   overflow: hidden !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img,
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element img {
   width: 36px !important;
   height: 36px !important;
-  border-radius: 50% !important;
   object-fit: cover !important;
   display: block !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer yt-img-shadow {
-  border-radius: 50% !important;
   display: block !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer #title-wrapper {
@@ -370,7 +367,6 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name yt-formatted-strin
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-name a {
   font-size: 1.3rem !important; /* matched to homepage */
   font-weight: 400 !important;
-  color: var(--ypp-text-secondary) !important;
   line-height: 1.5 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -400,7 +396,6 @@ body.ypp-search-grid-mode ytd-radio-renderer #metadata-line span {
   gap: 0 4px !important;
   font-size: 1.3rem !important; /* matched to homepage */
   font-weight: 400 !important;
-  color: var(--ypp-text-secondary) !important;
   line-height: 1.5 !important;
   width: auto !important; /* Allows flex wrapping better */
   margin-top: 0 !important;
@@ -467,16 +462,7 @@ body.ypp-search-grid-mode ytd-radio-renderer #main-link {
   flex-direction: column !important;
   width: 100% !important;
 }
-body.ypp-search-grid-mode ytd-video-renderer #action-menu,
-body.ypp-search-grid-mode ytd-video-renderer .ytd-video-renderer-action-menu {
-  position: absolute !important;
-  top: 6px !important;
-  right: 4px !important;
-  width: auto !important;
-  height: auto !important;
-  min-width: unset !important;
-  z-index: var(--ypp-z-card-hover) !important;
-}
+/* Action menu repositioning removed to sync with homepage styling */
 
 body.ypp-search-grid-mode ytd-video-renderer::after,
 body.ypp-search-grid-mode ytd-video-renderer::before,
@@ -1003,7 +989,6 @@ body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element yt-img-s
 body.ypp-search-grid-mode ytd-video-renderer ytd-channel-avatar-element #img,
 body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail yt-img-shadow,
 body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img {
-  border-radius: 50% !important;
   overflow: hidden !important;
   width: 36px !important;
   height: 36px !important;
