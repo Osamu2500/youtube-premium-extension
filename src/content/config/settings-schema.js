@@ -72,7 +72,7 @@ window.YPP.SettingsSchema = {
         accentColor:         { type: 'string',  default: '#ff4e45' },
         enableAnimations:    { type: 'boolean', default: true },
         reducedMotion:       { type: 'boolean', default: false },
-        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid'] },
+        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid', 'neumorphic', 'cyberpunk', 'holographic', 'minimalist'] },
         thumbRadius:         { type: 'number',  default: 8, min: 0, max: 24 },
         sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 },
         customScrollbar:     { type: 'boolean', default: false },
@@ -293,7 +293,7 @@ window.YPP.SettingsSchema = {
         accentColor:         { type: 'string',  default: '#3ea6ff' },
         thumbRadius:         { type: 'number',  default: 12, min: 0, max: 24 },
         densityMode:         { type: 'string',  default: 'comfortable', values: ['compact', 'comfortable', 'spacious'] },
-        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated'] },
+        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid', 'neumorphic', 'cyberpunk', 'holographic', 'minimalist'] },
         sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 }
     }),
 
