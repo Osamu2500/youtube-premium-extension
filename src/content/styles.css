@@ -3609,12 +3609,12 @@ html[data-ypp-card-style="elevated"] .ypp-grid-item:hover {
 
 /* GLASS ── search */
 html[data-ypp-card-style="glass"] .ypp-grid-item {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  background: linear-gradient(135deg, rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.12), rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.02)) !important;
   backdrop-filter: blur(48px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(48px) saturate(200%) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-top-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 12px rgba(255, 255, 255, 0.03) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 12px rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.1) !important;
   padding: var(--ypp-density-pad, 16px) !important;
   border-radius: var(--ypp-radius-lg, 16px) !important;
   margin-bottom: var(--ypp-density-gap, 0px) !important;
@@ -3622,9 +3622,9 @@ html[data-ypp-card-style="glass"] .ypp-grid-item {
 }
 html[data-ypp-card-style="glass"] .ypp-grid-item:hover {
   transform: translateY(-4px) !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)) !important;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.5) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
+  background: linear-gradient(135deg, rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.18), rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.05)) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 30px rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.1) !important;
+  border-color: rgba(var(--ypp-thumb-rgb, 255, 255, 255), 0.4) !important;
 }
 
 /* FOLDER ── search */
@@ -3672,16 +3672,17 @@ html[data-ypp-card-style="bento"] .ypp-grid-item:hover {
 
 /* NEON ── search */
 html[data-ypp-card-style="neon"] .ypp-grid-item {
-  border: 1px solid rgba(108,99,255,0.4) !important;
+  border: 1px solid rgba(var(--ypp-thumb-rgb, 108,99,255), 0.4) !important;
   border-radius: 12px !important;
   background: rgba(10,10,20,0.9) !important;
-  box-shadow: 0 0 15px rgba(108,99,255,0.2), inset 0 0 10px rgba(108,99,255,0.05) !important;
+  box-shadow: 0 0 15px rgba(var(--ypp-thumb-rgb, 108,99,255), 0.2), inset 0 0 10px rgba(var(--ypp-thumb-rgb, 108,99,255), 0.05) !important;
   transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s !important;
   padding: var(--ypp-density-pad, 8px) !important;
 }
 html[data-ypp-card-style="neon"] .ypp-grid-item:hover {
-  border-color: rgba(108,99,255,0.9) !important;
-  animation: ypp-neon-pulse 2s infinite !important;
+  border-color: rgba(var(--ypp-thumb-rgb, 108,99,255), 0.9) !important;
+  box-shadow: 0 0 25px rgba(var(--ypp-thumb-rgb, 108,99,255), 0.5), inset 0 0 15px rgba(var(--ypp-thumb-rgb, 108,99,255), 0.1) !important;
+  transform: scale(1.02) !important;
 }
 
 /* COMPACT ── search */
@@ -3752,19 +3753,19 @@ html[data-ypp-card-style="neumorphic"] .ypp-grid-item:hover {
 html[data-ypp-card-style="cyberpunk"] .ypp-grid-item {
   background: #000 !important;
   border: none !important;
-  border-left: 4px solid #fce205 !important;
-  border-bottom: 1px solid #00f0ff !important;
+  border-left: 4px solid var(--ypp-thumb-color, #fce205) !important;
+  border-bottom: 1px solid var(--ypp-thumb-color, #00f0ff) !important;
   padding: var(--ypp-density-pad, 12px) !important;
   border-radius: 0 !important;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%) !important;
-  box-shadow: 5px 5px 0px rgba(0, 240, 255, 0.2) !important;
+  box-shadow: 5px 5px 0px rgba(var(--ypp-thumb-rgb, 0, 240, 255), 0.3) !important;
 }
 html[data-ypp-card-style="cyberpunk"] .ypp-grid-item:hover {
   background: #0a0a0a !important;
-  border-left: 4px solid #00f0ff !important;
-  border-bottom: 1px solid #ff003c !important;
+  border-left: 4px solid var(--ypp-thumb-color, #00f0ff) !important;
+  border-bottom: 1px solid var(--ypp-thumb-color, #ff003c) !important;
   transform: translate(-2px, -2px) !important;
-  box-shadow: 7px 7px 0px rgba(255, 0, 60, 0.3) !important;
+  box-shadow: 7px 7px 0px rgba(var(--ypp-thumb-rgb, 255, 0, 60), 0.5) !important;
 }
 
 /* HOLOGRAPHIC ── search (NEW) */
@@ -3804,6 +3805,156 @@ html[data-ypp-card-style="minimalist"] .ypp-grid-item {
 }
 html[data-ypp-card-style="minimalist"] .ypp-grid-item:hover {
   transform: translateY(-2px) !important;
+}
+
+/* RETRO ── search (NEW) */
+html[data-ypp-card-style="retro"] .ypp-grid-item {
+  background: linear-gradient(180deg, #2a0845 0%, #6441A5 100%) !important;
+  border: 2px solid #ff00c8 !important;
+  border-radius: 8px !important;
+  padding: var(--ypp-density-pad, 12px) !important;
+  box-shadow: 4px 4px 0px #00ffd5 !important;
+  image-rendering: pixelated !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+html[data-ypp-card-style="retro"] .ypp-grid-item:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px #00ffd5, 0 0 15px rgba(255,0,200,0.5) !important;
+  border-color: #00ffd5 !important;
+}
+html[data-ypp-card-style="retro"] .ypp-grid-item #video-title {
+  font-family: 'Courier New', monospace !important;
+  color: #fffb00 !important;
+  text-shadow: 1px 1px 0px #ff00c8 !important;
+}
+
+/* BRUTALISM ── search (NEW) */
+html[data-ypp-card-style="brutalism"] .ypp-grid-item {
+  background: #ffffff !important;
+  border: 4px solid #000000 !important;
+  border-radius: 0 !important;
+  padding: var(--ypp-density-pad, 16px) !important;
+  box-shadow: 8px 8px 0px #000000 !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+html[data-ypp-card-style="brutalism"] .ypp-grid-item:hover {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+}
+html[data-ypp-card-style="brutalism"] .ypp-grid-item #video-title,
+html[data-ypp-card-style="brutalism"] .ypp-grid-item #metadata-line span {
+  color: #000000 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px !important;
+}
+html[data-ypp-card-style="brutalism"] .ypp-grid-item ytd-thumbnail {
+  border-bottom: 4px solid #000000 !important;
+  border-radius: 0 !important;
+}
+
+/* SKEUOMORPHIC ── search (NEW) */
+html[data-ypp-card-style="skeuomorphic"] .ypp-grid-item {
+  background: linear-gradient(145deg, #2b2b2b, #1f1f1f) !important;
+  border-radius: 12px !important;
+  border: 1px solid #111 !important;
+  border-top: 1px solid #444 !important;
+  border-left: 1px solid #333 !important;
+  padding: var(--ypp-density-pad, 12px) !important;
+  box-shadow: 5px 5px 15px rgba(0,0,0,0.8), inset 2px 2px 5px rgba(255,255,255,0.05), inset -2px -2px 5px rgba(0,0,0,0.5) !important;
+}
+html[data-ypp-card-style="skeuomorphic"] .ypp-grid-item:hover {
+  background: linear-gradient(145deg, #333333, #222222) !important;
+  box-shadow: 7px 7px 20px rgba(0,0,0,0.9), inset 2px 2px 5px rgba(255,255,255,0.1), inset -2px -2px 5px rgba(0,0,0,0.6) !important;
+}
+html[data-ypp-card-style="skeuomorphic"] .ypp-grid-item ytd-thumbnail {
+  border: 2px solid #000 !important;
+  border-radius: 4px !important;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8) !important;
+}
+
+/* FROSTED ── search (NEW) */
+html[data-ypp-card-style="frosted"] .ypp-grid-item {
+  background: rgba(var(--ypp-thumb-rgb, 255,255,255), 0.1) !important;
+  backdrop-filter: blur(60px) saturate(250%) contrast(120%) brightness(110%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(250%) contrast(120%) brightness(110%) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  border-top: 1px solid rgba(255,255,255,0.4) !important;
+  border-left: 1px solid rgba(255,255,255,0.3) !important;
+  padding: var(--ypp-density-pad, 16px) !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(var(--ypp-thumb-rgb, 255,255,255), 0.2) !important;
+}
+}
+
+/* SUMMER ── search (NEW) */
+html[data-ypp-card-style="summer"] .ypp-grid-item {
+  background: linear-gradient(135deg, rgba(255, 230, 0, 0.1), rgba(255, 120, 0, 0.15)) !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 190, 0, 0.3) !important;
+  padding: var(--ypp-density-pad, 14px) !important;
+  box-shadow: 0 10px 25px rgba(255, 150, 0, 0.1), inset 0 0 15px rgba(255, 200, 0, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+html[data-ypp-card-style="summer"] .ypp-grid-item:hover {
+  background: linear-gradient(135deg, rgba(255, 230, 0, 0.15), rgba(255, 120, 0, 0.25)) !important;
+  transform: translateY(-5px) scale(1.01) !important;
+  box-shadow: 0 15px 35px rgba(255, 150, 0, 0.2), inset 0 0 20px rgba(255, 200, 0, 0.1) !important;
+  border-color: rgba(255, 190, 0, 0.6) !important;
+}
+
+/* WINTER ── search (NEW) */
+html[data-ypp-card-style="winter"] .ypp-grid-item {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(180, 230, 255, 0.05)) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.6) !important;
+  padding: var(--ypp-density-pad, 16px) !important;
+  box-shadow: 0 12px 30px rgba(100, 200, 255, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+html[data-ypp-card-style="winter"] .ypp-grid-item:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(180, 230, 255, 0.1)) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 15px 40px rgba(100, 200, 255, 0.1), inset 0 0 30px rgba(255, 255, 255, 0.2) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+/* SPRING ── search (NEW) */
+html[data-ypp-card-style="spring"] .ypp-grid-item {
+  background: linear-gradient(120deg, rgba(255, 180, 200, 0.08), rgba(255, 220, 230, 0.03)) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 180, 200, 0.2) !important;
+  padding: var(--ypp-density-pad, 14px) !important;
+  box-shadow: 0 8px 24px rgba(255, 150, 180, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.4s ease !important;
+}
+html[data-ypp-card-style="spring"] .ypp-grid-item:hover {
+  background: linear-gradient(120deg, rgba(255, 180, 200, 0.12), rgba(255, 220, 230, 0.08)) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 32px rgba(255, 150, 180, 0.15), 0 0 15px rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 180, 200, 0.5) !important;
+}
+
+/* AUTUMN ── search (NEW) */
+html[data-ypp-card-style="autumn"] .ypp-grid-item {
+  background: linear-gradient(150deg, rgba(160, 60, 20, 0.15), rgba(100, 30, 10, 0.2)) !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(200, 100, 50, 0.2) !important;
+  border-left: 3px solid rgba(220, 120, 40, 0.6) !important;
+  padding: var(--ypp-density-pad, 12px) !important;
+  box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+html[data-ypp-card-style="autumn"] .ypp-grid-item:hover {
+  background: linear-gradient(150deg, rgba(180, 70, 25, 0.2), rgba(120, 40, 15, 0.3)) !important;
+  transform: translateX(4px) translateY(-2px) !important;
+  box-shadow: 6px 8px 20px rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(220, 120, 40, 0.4) !important;
+  border-left: 3px solid rgba(255, 150, 50, 0.9) !important;
 }
 
 

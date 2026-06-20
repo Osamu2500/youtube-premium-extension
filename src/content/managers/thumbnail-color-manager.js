@@ -34,7 +34,14 @@ export class ThumbnailColorManager {
     updateSettings(settings) {
         if (!settings) return;
         this.activeStyle = settings.cardStyle || 'default';
-        const needsExtraction = (this.activeStyle === 'holographic' || this.activeStyle === 'polaroid');
+        const needsExtraction = [
+            'holographic', 
+            'polaroid', 
+            'glass', 
+            'neon', 
+            'cyberpunk', 
+            'frosted'
+        ].includes(this.activeStyle);
         
         if (needsExtraction && !this.enabled) {
             this.start();
@@ -84,7 +91,14 @@ export class ThumbnailColorManager {
         const cleanSrc = src.split('?')[0];
 
         if (this.cache.has(cleanSrc)) {
-            el.style.setProperty('--ypp-thumb-color', this.cache.get(cleanSrc));
+            const cached = this.cache.get(cleanSrc);
+            // Support both old string cache and new object cache during transition
+            if (typeof cached === 'string') {
+                el.style.setProperty('--ypp-thumb-color', cached);
+            } else {
+                el.style.setProperty('--ypp-thumb-color', cached.colorStr);
+                el.style.setProperty('--ypp-thumb-rgb', cached.rgbStr);
+            }
             el.setAttribute('data-ypp-thumb-color', 'true');
             return;
         }
@@ -121,11 +135,13 @@ export class ThumbnailColorManager {
 
                     const enhanced = this.enhanceColorForGlow(r, g, b);
                     const colorStr = `rgb(${enhanced.r}, ${enhanced.g}, ${enhanced.b})`;
+                    const rgbStr = `${enhanced.r}, ${enhanced.g}, ${enhanced.b}`;
 
-                    this.cache.set(cleanSrc, colorStr);
+                    this.cache.set(cleanSrc, { colorStr, rgbStr });
                     
                     if (el.isConnected) {
                         el.style.setProperty('--ypp-thumb-color', colorStr);
+                        el.style.setProperty('--ypp-thumb-rgb', rgbStr);
                         el.setAttribute('data-ypp-thumb-color', 'true');
                     }
                 }
