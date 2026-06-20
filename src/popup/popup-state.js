@@ -171,57 +171,34 @@ function _processWriteQueue() {
     state._settingsWriteQueue = [];
     
     (async () => {
-        const getStorage = async (area) => {
-            if (!area) return {};
-            try {
-                return await new Promise(resolve => {
-                    let isResolved = false;
-                    const cb = (res) => {
-                        if (isResolved) return;
-                        isResolved = true;
-                        resolve(chrome.runtime.lastError ? {} : (res || {}));
-                    };
-                    const result = area.get('settings', cb);
-                    if (result && typeof result.then === 'function') {
-                        result.then(cb).catch(() => cb({}));
-                    }
-                });
-            } catch (e) { return {}; }
-        };
-
-        const [syncData, localData] = await Promise.all([
-            getStorage(chrome.storage.sync),
-            getStorage(chrome.storage.local)
-        ]);
-        
-        const syncSettings = syncData?.settings;
-        const localSettings = localData?.settings;
-        
-        let currentSettings = {};
-        if (syncSettings && localSettings) {
-            const syncTime = syncSettings.lastUpdated || 0;
-            const localTime = localSettings.lastUpdated || 0;
-            currentSettings = syncTime >= localTime ? syncSettings : localSettings;
-        } else {
-            currentSettings = syncSettings || localSettings || {};
-        }
-
+        let delta = {};
         updates.forEach(update => {
             if (update.fullState) {
-                Object.assign(currentSettings, update.fullState);
+                Object.assign(delta, update.fullState);
             } else if (update.key) {
-                currentSettings[update.key] = update.value;
+                delta[update.key] = update.value;
             }
         });
-        
-        currentSettings.lastUpdated = Date.now();
 
+        // Update local state optimistically
+        Object.assign(state.settings, delta);
+        
         try {
-            await chrome.storage.sync.set({ settings: currentSettings });
+            await new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage({
+                    action: 'UPDATE_SETTINGS_DELTA',
+                    delta: delta
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                    } else {
+                        resolve(response);
+                    }
+                });
+            });
         } catch (e) {
-            Utils.log('Sync Save Error: ' + e.message, 'POPUP', 'warn');
+            Utils.log('Delta Save Error: ' + e.message, 'POPUP', 'warn');
         }
-        await chrome.storage.local.set({ settings: currentSettings });
         
         state._isWritingSettings = false;
         if (state._settingsWriteQueue.length > 0) {

@@ -12,6 +12,8 @@ const ALARM_NAME = 'ypp-focus-timer';
 
 import { DEFAULT_SETTINGS } from '../shared/default-settings.js';
 
+const BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 // =========================================================================
 // TIMER LOGIC (Robust End-Time Based)
 // =========================================================================
@@ -95,6 +97,83 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
             })();
             return true; // Indicate async response
+
+        case 'UPDATE_SETTINGS_DELTA':
+            (async () => {
+                try {
+                    // 1. Get current settings
+                    let localData = await chrome.storage.local.get('settings');
+                    let syncData = await chrome.storage.sync.get('settings');
+                    const currentSettings = { ...(localData.settings || {}), ...(syncData.settings || {}) };
+                    
+                    // 2. Merge delta
+                    const newSettings = { ...currentSettings, ...request.delta, lastUpdated: Date.now() };
+
+                    // 3. Save
+                    try {
+                        await chrome.storage.sync.set({ settings: newSettings });
+                    } catch (e) {
+                        console.warn('[YPP] Sync storage full, falling back to local only', e);
+                    }
+                    await chrome.storage.local.set({ settings: newSettings });
+
+                    // 4. Backup check
+                    const backupData = await chrome.storage.local.get('ypp_backup_time');
+                    const now = Date.now();
+                    if (!backupData.ypp_backup_time || (now - backupData.ypp_backup_time > BACKUP_INTERVAL_MS)) {
+                        await chrome.storage.local.set({ 
+                            ypp_settings_backup: currentSettings, // backup the pre-update state
+                            ypp_backup_time: now
+                        });
+                        console.log('[YPP] Automated daily backup created.');
+                    }
+
+                    // 5. Broadcast update to all tabs
+                    const tabs = await chrome.tabs.query({ url: "*://*.youtube.com/*" });
+                    tabs.forEach(tab => {
+                        chrome.tabs.sendMessage(tab.id, {
+                            action: 'UPDATE_SETTINGS',
+                            settings: request.delta // Broadcast the delta or full state
+                        }).catch(() => {}); // Ignore errors for inactive tabs
+                    });
+
+                    sendResponse({ success: true, settings: newSettings });
+                } catch (error) {
+                    console.error('[YPP] Error in UPDATE_SETTINGS_DELTA:', error);
+                    sendResponse({ success: false, error: error.message });
+                }
+            })();
+            return true;
+
+        case 'RESTORE_BACKUP':
+            (async () => {
+                try {
+                    const backupData = await chrome.storage.local.get('ypp_settings_backup');
+                    if (backupData.ypp_settings_backup) {
+                        const restoredSettings = { ...backupData.ypp_settings_backup, lastUpdated: Date.now() };
+                        try {
+                            await chrome.storage.sync.set({ settings: restoredSettings });
+                        } catch (e) {}
+                        await chrome.storage.local.set({ settings: restoredSettings });
+                        
+                        // Broadcast update
+                        const tabs = await chrome.tabs.query({ url: "*://*.youtube.com/*" });
+                        tabs.forEach(tab => {
+                            chrome.tabs.sendMessage(tab.id, {
+                                action: 'UPDATE_SETTINGS',
+                                settings: restoredSettings
+                            }).catch(() => {});
+                        });
+
+                        sendResponse({ success: true });
+                    } else {
+                        sendResponse({ success: false, error: 'No backup found' });
+                    }
+                } catch (error) {
+                    sendResponse({ success: false, error: error.message });
+                }
+            })();
+            return true;
 
         case 'getTimer':
             chrome.storage.local.get('timerState').then((data) => {

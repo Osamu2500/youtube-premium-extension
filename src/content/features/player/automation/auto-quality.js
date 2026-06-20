@@ -68,31 +68,28 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
     }
 
     startEnforcer() {
-        if (this.enforcerInterval) return;
-        
-        // Every 5 seconds, ensure YouTube hasn't auto-downgraded the quality
-        this.enforcerInterval = setInterval(() => {
+        if (this._enforcerBound) return;
+        this._enforcerBound = () => {
             if (document.hidden) return;
-            
-            if (!this.settings?.autoQuality || this.settings.autoQuality === 'off') {
-                this.stopEnforcer();
-                return;
-            }
+            if (!this.settings?.autoQuality || this.settings.autoQuality === 'off') return;
             const player = document.getElementById('movie_player');
-            if (!player || typeof player.getPlaybackQuality !== 'function') return;
-            
-            const currentQuality = player.getPlaybackQuality();
-            if (currentQuality === 'auto' || currentQuality === 'unknown') {
+            if (player && typeof player.getPlaybackQuality === 'function') {
                 this.applyAutoQuality(player);
             }
-        }, 5000);
+        };
+        
+        // Listen to navigation and player updates instead of polling
+        this.addListener(document, 'yt-navigate-finish', this._enforcerBound);
+        this.addListener(document, 'yt-player-updated', this._enforcerBound);
+        
+        // Handle network changes for smart auto-quality
+        if (navigator.connection) {
+            this.addListener(navigator.connection, 'change', this._enforcerBound);
+        }
     }
 
     stopEnforcer() {
-        if (this.enforcerInterval) {
-            clearInterval(this.enforcerInterval);
-            this.enforcerInterval = null;
-        }
+        this._enforcerBound = null;
     }
 
     applyAutoQuality(player) {
@@ -102,8 +99,22 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
         // Full hierarchy of qualities
         const hierarchy = ['highres', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];
         
+        // Smart Auto-Quality: Check bandwidth
+        let targetQuality = this.settings.autoQuality;
+        if (navigator.connection && navigator.connection.downlink) {
+            const downlink = navigator.connection.downlink; // in Mbps
+            // If connection is slow, downgrade target temporarily
+            if (downlink < 1.5 && ['highres', 'hd2160', 'hd1440', 'hd1080', 'hd720'].includes(targetQuality)) {
+                targetQuality = 'large'; // 480p
+                this.utils?.log('Connection is slow (<1.5Mbps), downgrading to 480p', this.name, 'debug');
+            } else if (downlink < 3.0 && ['highres', 'hd2160', 'hd1440', 'hd1080'].includes(targetQuality)) {
+                targetQuality = 'hd720'; // 720p
+                this.utils?.log('Connection is slow (<3.0Mbps), downgrading to 720p', this.name, 'debug');
+            }
+        }
+
         // If user picked a specific target, we start looking from that index downwards
-        let targetIndex = hierarchy.indexOf(this.settings.autoQuality);
+        let targetIndex = hierarchy.indexOf(targetQuality);
         if (targetIndex === -1) targetIndex = 0; // Default to top if something weird happened
         
         const preferred = hierarchy.slice(targetIndex);

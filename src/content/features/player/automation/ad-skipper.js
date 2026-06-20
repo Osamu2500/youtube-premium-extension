@@ -30,19 +30,17 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
                 const player = elements[0];
                 if (player) {
                     this._checkForAds(player);
+                    this._checkPromosAndNext();
                 }
             }, true);
             
-            // Catch dynamically added overlays/promos
-            this.addListener(document.body, 'DOMNodeInserted', this._boundHandleMutations);
+            // Catch dynamically added overlays/promos without deprecated DOMNodeInserted
+            this._promoObserver = new MutationObserver(() => {
+                this._checkPromosAndNext();
+            });
+            this._promoObserver.observe(document.body, { childList: true, subtree: true });
         }
 
-        if (this._interval) clearInterval(this._interval);
-        this._interval = setInterval(() => {
-            if (document.hidden) return;
-            this._checkPromosAndNext();
-        }, 500);
-        
         // Initial check
         this._checkForAds();
         this._checkPromosAndNext();
@@ -53,9 +51,9 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
         if (window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('ad-skipper');
         }
-        if (this._interval) {
-            clearInterval(this._interval);
-            this._interval = null;
+        if (this._promoObserver) {
+            this._promoObserver.disconnect();
+            this._promoObserver = null;
         }
     }
 
@@ -86,12 +84,11 @@ window.YPP.features.AdSkipper = class AdSkipper extends window.YPP.features.Base
         if (player && player.classList.contains('ad-showing')) {
             const video = player.querySelector('video');
             if (video && !video.paused) {
-                // If it's a long ad without skip button, speed it up
-                if (video.playbackRate !== 16) {
-                    video.playbackRate = 16;
-                    // Optional: mute the ad
+                // If it's a long ad without skip button, skip it instantly
+                if (video.duration && video.duration > 0 && video.currentTime < video.duration - 1) {
                     if (!video.muted) video.muted = true;
-                    this.utils?.log?.('Fast-forwarding unskippable ad', 'AD_SKIPPER', 'debug');
+                    video.currentTime = video.duration - 0.1;
+                    this.utils?.log?.('Instantly skipped unskippable ad', 'AD_SKIPPER', 'debug');
                 }
             }
         }

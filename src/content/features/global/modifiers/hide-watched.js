@@ -30,7 +30,9 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         'ytd-grid-video-renderer',
         'ytd-reel-item-renderer',           // Shorts shelf cards
         'ytd-playlist-video-renderer',      // Playlist items
-        'ytd-playlist-panel-video-renderer' // Playlist sidebar items
+        'ytd-playlist-panel-video-renderer', // Playlist sidebar items
+        'yt-lockup-view-model',             // Modern grid cards
+        'ytd-lockup-view-model'             // Modern grid cards
     ].join(',');
 
     constructor() {

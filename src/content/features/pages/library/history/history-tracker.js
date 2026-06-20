@@ -81,6 +81,10 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
             this._boundStorageChangeUnsub = null;
         }
         
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('history-tracker');
+        }
+
         const widget = document.getElementById('ypp-history-tracker-widget');
         if (widget) widget.remove();
         
@@ -94,15 +98,22 @@ window.YPP.features.HistoryTracker = class HistoryTracker extends window.YPP.fea
     }
 
     async mountUI() {
-        // Find the main header on the history page
-        const header = await this.waitForElement('ytd-browse[page-subtype="history"] #primary', 5000);
-        if (!header) return;
+        const handleHeader = (elements) => {
+            const header = elements[0];
+            if (header && !document.getElementById('ypp-history-tracker-widget')) {
+                const widget = this.createWidget();
+                header.insertBefore(widget, header.firstChild);
+                this.injectComponentStyles();
+                this.updateWidgetValues(); 
+            }
+        };
 
-        if (!document.getElementById('ypp-history-tracker-widget')) {
-            const widget = this.createWidget();
-            header.insertBefore(widget, header.firstChild);
-            this.injectComponentStyles();
-            this.updateWidgetValues(); 
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('history-tracker', 'ytd-browse[page-subtype="history"] #primary', handleHeader, true);
+        } else {
+            // Fallback
+            const header = document.querySelector('ytd-browse[page-subtype="history"] #primary');
+            if (header) handleHeader([header]);
         }
     }
 

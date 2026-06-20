@@ -46,6 +46,10 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
         }
 
         document.querySelectorAll('[data-ypp-vcp-processed]').forEach(el => el.removeAttribute('data-ypp-vcp-processed'));
+        
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('video-controls-btn');
+        }
 
         // Clean up audio chain
         this._teardownAudio();
@@ -154,27 +158,36 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
     async injectToggle() {
         if (!this.utils) return;
 
-        try {
-            // Wait for player controls
-            const controls = await this.utils.pollFor(() => document.querySelector('.ytp-right-controls:not([data-ypp-vcp-processed])'), 10000, 500);
-            if (!this.isEnabled || !controls) return;
-            
-            controls.setAttribute('data-ypp-vcp-processed', 'true');
-            if (controls.querySelector('#ypp-vcp-toggle')) return;
+        const handleControls = (elements) => {
+            if (!this.isEnabled) return;
+            const controls = elements[0];
+            if (controls && !controls.hasAttribute('data-ypp-vcp-processed')) {
+                controls.setAttribute('data-ypp-vcp-processed', 'true');
+                if (controls.querySelector('#ypp-vcp-toggle')) return;
 
-            const btn = document.createElement('button');
-            btn.id = 'ypp-vcp-toggle';
-            btn.className = 'ytp-button';
-            btn.title = 'Video Controls';
-            btn.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>`;
-            
-            this.addListener(btn, 'click', () => this.togglePanel());
-            
-            // Insert before settings button
-            const settingsBtn = controls.querySelector('.ytp-settings-button');
-            controls.insertBefore(btn, settingsBtn);
-        } catch (error) {
-            this.utils?.log('Timeout waiting for .ytp-right-controls', 'VideoControls', 'debug');
+                const btn = document.createElement('button');
+                btn.id = 'ypp-vcp-toggle';
+                btn.className = 'ytp-button';
+                btn.title = 'Video Controls';
+                btn.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>`;
+                
+                this.addListener(btn, 'click', () => this.togglePanel());
+                
+                const settingsBtn = controls.querySelector('.ytp-settings-button');
+                if (settingsBtn) {
+                    controls.insertBefore(btn, settingsBtn);
+                } else {
+                    controls.appendChild(btn);
+                }
+            }
+        };
+
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register('video-controls-btn', '.ytp-right-controls', handleControls, true);
+        } else {
+            // fallback
+            const controls = document.querySelector('.ytp-right-controls');
+            if (controls) handleControls([controls]);
         }
     }
 

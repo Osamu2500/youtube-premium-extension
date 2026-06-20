@@ -34,6 +34,7 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
             aggressiveShortsBlock: 'ypp-nuke-shorts',
             hideSearchShorts:      'ypp-hide-search-shorts',
             cleanSearch:           'ypp-clean-search',
+            hideScrollbar:         'ypp-hide-scrollbar',
             // Aesthetic toggles
             customScrollbar:       'ypp-custom-scrollbar',
             grayscaleThumbnails:   'ypp-grayscale-thumbs',

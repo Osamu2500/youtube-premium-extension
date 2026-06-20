@@ -397,12 +397,12 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         btn.title = 'Equalizer';
         btn.className = 'ypp-action-btn';
         btn.id = 'ypp-volume-boost-btn';
-        btn.onclick = (e) => {
+        this.addListener(btn, 'click', (e) => {
             e.stopPropagation();
             if (window.YPP.features.VolumeBoosterUI) {
                 window.YPP.features.VolumeBoosterUI.toggleEQPanel(this, video, btn);
             }
-        };
+        });
         return btn;
     }
 };
