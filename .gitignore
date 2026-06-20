@@ -45,3 +45,4 @@ Temporary/
 *.min.js
 popup.js
 settings.js
+.dependencygraph/
