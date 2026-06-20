@@ -167,6 +167,15 @@
   }
 }
 
+/* Force YouTube background to respect theme variables */
+html.yt-premium-plus-theme, 
+html.yt-premium-plus-theme body, 
+html.yt-premium-plus-theme ytd-app,
+html.yt-premium-plus-theme #background {
+  background-color: var(--ypp-bg-base, #0f0f0f) !important;
+  background: var(--ypp-bg-base, #0f0f0f) !important;
+}
+
 /* ===================================================================================
    2. CUSTOMIZATION FEATURE VARIABLES & OVERRIDES
    =================================================================================== */
