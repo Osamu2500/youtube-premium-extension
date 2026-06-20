@@ -1,4 +1,3 @@
-
 body.ypp-search-page ytd-app[mini-guide-visible] ytd-page-manager,
 body.ypp-search-page ytd-app[mini-guide-visible] #page-manager,
 body.ypp-search-page ytd-app[mini-guide-visible] #content {
@@ -65,8 +64,18 @@ body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
   display: contents !important;
 }
 
-/* Prevent empty sections/headers and hidden continuations from creating empty grid cells */
-body.ypp-search-grid-mode ytd-item-section-renderer > #header,
+/* FORCE AUTO-ADJUST: Aggressive Whitelist to completely destroy any invisible grid blockers */
+/* 1. Destroy any unknown elements inside the grid contents */
+body.ypp-search-grid-mode ytd-item-section-renderer > #contents > *:not(ytd-video-renderer):not(ytd-playlist-renderer):not(ytd-radio-renderer):not(ytd-channel-renderer):not(ytd-shelf-renderer):not(ytd-reel-shelf-renderer):not(ytd-horizontal-card-list-renderer):not(ytd-rich-shelf-renderer):not(ytd-search-sub-menu-renderer):not(ytd-continuation-item-renderer) {
+  display: none !important;
+}
+
+/* 2. Destroy any unknown structural elements (like empty #header) inside the section wrappers */
+body.ypp-search-grid-mode ytd-item-section-renderer > *:not(#contents):not(ytd-continuation-item-renderer) {
+  display: none !important;
+}
+
+/* 3. Destroy specific known ad shells and empty elements */
 body.ypp-search-grid-mode ytd-continuation-item-renderer:empty,
 body.ypp-search-grid-mode ytd-continuation-item-renderer[hidden],
 body.ypp-search-grid-mode ytd-video-renderer:empty,
@@ -89,17 +98,17 @@ body.ypp-search-grid-mode ytd-reel-shelf-renderer:not(:has(ytd-reel-item-rendere
 .ypp-search-page.ypp-search-grid-mode ytd-reel-shelf-renderer,
 .ypp-search-page.ypp-search-grid-mode ytd-horizontal-card-list-renderer,
 .ypp-search-page.ypp-search-grid-mode ytd-background-promo-renderer {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-    margin: 8px 0;
-    box-sizing: border-box;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin: 8px 0;
+  box-sizing: border-box;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-shelf-renderer ytd-vertical-list-renderer > #items {
-    display: grid !important;
-    grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
-    grid-auto-flow: dense !important;
-    gap: 20px !important;
-    width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(var(--ypp-search-columns, 4), minmax(0, 1fr)) !important;
+  grid-auto-flow: dense !important;
+  gap: 20px !important;
+  width: 100% !important;
 }
 body.ypp-clean-search.ypp-search-page ytd-shelf-renderer,
 body.ypp-clean-search.ypp-search-page ytd-rich-shelf-renderer,
@@ -109,7 +118,7 @@ body.ypp-hide-search-shelves.ypp-search-page ytd-shelf-renderer,
 body.ypp-hide-search-shelves.ypp-search-page ytd-rich-shelf-renderer,
 body.ypp-hide-search-shelves.ypp-search-page ytd-reel-shelf-renderer,
 body.ypp-hide-search-shelves.ypp-search-page ytd-horizontal-card-list-renderer {
-    display: none !important;
+  display: none !important;
 }
 body.ypp-search-grid-mode .ypp-full-width-item,
 body.ypp-search-grid-mode ytd-search-sub-menu-renderer {
@@ -155,41 +164,41 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   z-index: var(--ypp-z-content);
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail {
-    width: 100% !important;
-    aspect-ratio: 16/9 !important;
-    overflow: hidden !important;
+  width: 100% !important;
+  aspect-ratio: 16/9 !important;
+  overflow: hidden !important;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail yt-image {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer #dismissible {
-    display: flex !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    flex-direction: column !important;
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer #meta {
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 8px 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 8px 0 !important;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer #channel-info,
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer #metadata-line {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail img,
@@ -205,7 +214,7 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title,
 body.ypp-search-grid-mode ytd-video-renderer #video-title yt-formatted-string,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string,
 body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
-  font-family: "Inter", "Roboto", sans-serif !important;
+  font-family: 'Inter', 'Roboto', sans-serif !important;
   font-size: 1.6rem !important;
   line-height: 2.4rem !important;
   font-weight: 500 !important;
@@ -247,7 +256,7 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title,
 body.ypp-search-grid-mode ytd-video-renderer #video-title yt-formatted-string,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string,
 body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
-  font-family: "Inter", "Roboto", sans-serif !important;
+  font-family: 'Inter', 'Roboto', sans-serif !important;
   font-size: 1.6rem !important;
   line-height: 2.4rem !important;
   font-weight: 500 !important;
@@ -292,7 +301,7 @@ body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
 body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   display: block !important;
   width: 100% !important;
-  min-width: 0 !important;       /* beats YouTube's min-width: 246px */
+  min-width: 0 !important; /* beats YouTube's min-width: 246px */
   max-width: 100% !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
@@ -325,9 +334,9 @@ body.ypp-search-grid-mode ytd-video-renderer .text-wrapper {
   display: grid !important;
   grid-template-columns: 36px 1fr !important;
   grid-template-areas:
-    "avatar title"
-    "avatar channel"
-    "avatar metadata";
+    'avatar title'
+    'avatar channel'
+    'avatar metadata';
   column-gap: 12px !important;
   row-gap: 4px !important; /* Increased from 2px to match spacing */
   margin: 12px 0 0 0 !important;
@@ -475,7 +484,7 @@ body.ypp-search-grid-mode ytd-radio-renderer .text-wrapper {
 }
 body.ypp-search-grid-mode ytd-playlist-renderer yt-collections-stack,
 body.ypp-search-grid-mode ytd-playlist-renderer .yt-collections-stack,
-body.ypp-search-grid-mode ytd-playlist-renderer [class*="stack-"],
+body.ypp-search-grid-mode ytd-playlist-renderer [class*='stack-'],
 body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer::before,
 body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer::after {
   display: none !important;
@@ -537,8 +546,8 @@ body.ypp-search-grid-mode ytd-channel-renderer {
   grid-column: span 2;
   width: 100%;
   max-width: 100%;
-  align-self: start !important;  /* Prevents vertical stretch that causes card overlap */
-  z-index: var(--ypp-z-content);                    /* Sits above video cards in normal state */
+  align-self: start !important; /* Prevents vertical stretch that causes card overlap */
+  z-index: var(--ypp-z-content); /* Sits above video cards in normal state */
 }
 body.ypp-search-grid-mode ytd-channel-renderer {
   background: linear-gradient(
@@ -590,18 +599,14 @@ body.ypp-search-grid-mode ytd-channel-renderer:hover {
   z-index: var(--ypp-z-card-hover);
 }
 body.ypp-search-grid-mode ytd-channel-renderer::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: radial-gradient(
-    circle at 50% 0%,
-    rgba(255, 255, 255, 0.12),
-    transparent 60%
-  );
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.12), transparent 60%);
   opacity: 0;
   transition: opacity 0.4s ease;
   z-index: var(--ypp-z-content);
@@ -670,7 +675,7 @@ body.ypp-search-grid-mode ytd-channel-renderer ytd-channel-name {
 body.ypp-search-grid-mode ytd-channel-renderer #title *,
 body.ypp-search-grid-mode ytd-channel-renderer #channel-title *,
 body.ypp-search-grid-mode ytd-channel-renderer ytd-channel-name * {
-  font-family: "Inter", "Roboto", sans-serif !important;
+  font-family: 'Inter', 'Roboto', sans-serif !important;
   font-size: 22px !important;
   font-weight: 700 !important;
   color: #ffffff !important;
@@ -745,8 +750,8 @@ body.ypp-search-grid-mode ytd-item-section-renderer.ypp-noise-section {
 }
 body.ypp-search-grid-mode ytd-reel-shelf-renderer,
 body.ypp-search-grid-mode ytd-rich-shelf-renderer[is-shorts],
-body.ypp-search-grid-mode ytd-video-renderer:has(a[href*="/shorts/"]),
-body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*="/shorts/"]) {
+body.ypp-search-grid-mode ytd-video-renderer:has(a[href*='/shorts/']),
+body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*='/shorts/']) {
   display: none !important;
 }
 @media (max-width: 1600px) {
@@ -834,7 +839,8 @@ body.ypp-search-grid-mode ytd-rich-section-renderer {
 }
 body.ypp-search-grid-mode ytd-ad-slot-renderer,
 body.yt-premium-plus-theme ytd-ad-slot-renderer,
-body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home)
+  ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
 body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-section-renderer:empty {
   display: none !important;
   margin: 0 !important;
@@ -942,8 +948,7 @@ body.ypp-search-grid-mode ytd-horizontal-card-list-renderer #scroll-container {
 }
 body.ypp-search-grid-mode ytd-reel-shelf-renderer,
 body.ypp-search-grid-mode ytd-horizontal-card-list-renderer[has-shorts],
-body.ypp-search-grid-mode
-  ytd-item-section-renderer.ytd-section-list-renderer[is-empty] {
+body.ypp-search-grid-mode ytd-item-section-renderer.ytd-section-list-renderer[is-empty] {
   display: none !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -990,11 +995,9 @@ body.ypp-search-grid-mode #right-arrow-button {
 body.ypp-search-grid-mode ytd-reel-shelf-renderer,
 body.ypp-search-grid-mode ytd-rich-shelf-renderer[is-shorts],
 body.ypp-search-grid-mode
-  ytd-shelf-renderer:has(
-    ytd-thumbnail-overlay-time-status-renderer[overlay-style="SHORTS"]
-  ),
-body.ypp-search-grid-mode ytd-video-renderer:has(a[href*="/shorts/"]),
-body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*="/shorts/"]) {
+  ytd-shelf-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style='SHORTS']),
+body.ypp-search-grid-mode ytd-video-renderer:has(a[href*='/shorts/']),
+body.ypp-search-grid-mode ytd-grid-video-renderer:has(a[href*='/shorts/']) {
   display: none !important;
 }
 body.ypp-search-grid-mode ytd-rich-section-renderer,
@@ -1003,10 +1006,8 @@ body.ypp-search-grid-mode ytd-horizontal-card-list-renderer {
   width: 100% !important;
   max-width: 100% !important;
 }
-body.ypp-search-grid-mode
-  ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
-body.ypp-search-grid-mode
-  ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]) {
+body.ypp-search-grid-mode ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
+body.ypp-search-grid-mode ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]) {
   display: none !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -1056,7 +1057,7 @@ body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail-overlay-side-panel
   right: 0 !important;
   bottom: 0 !important;
   z-index: var(--ypp-z-card-hover) !important;
-  background: rgba(0,0,0,0.85) !important;
+  background: rgba(0, 0, 0, 0.85) !important;
   border-radius: 4px 0 12px 0 !important;
   padding: 4px 8px !important;
 }
@@ -1116,7 +1117,7 @@ body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer
 }
 body.ypp-search-grid-mode ytd-playlist-renderer yt-collections-stack,
 body.ypp-search-grid-mode ytd-playlist-renderer .yt-collections-stack,
-body.ypp-search-grid-mode ytd-playlist-renderer [class*="stack-"],
+body.ypp-search-grid-mode ytd-playlist-renderer [class*='stack-'],
 body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer::before,
 body.ypp-search-grid-mode ytd-playlist-renderer .ytd-playlist-thumbnail-renderer::after {
   display: none !important;
@@ -1129,9 +1130,9 @@ body.ypp-search-grid-mode ytd-radio-renderer #meta {
   display: grid !important;
   grid-template-columns: 1fr !important;
   grid-template-areas:
-    "title"
-    "channel"
-    "metadata" !important;
+    'title'
+    'channel'
+    'metadata' !important;
   row-gap: 4px !important;
   margin: 12px 0 0 0 !important;
   padding: 0 !important;
@@ -1144,7 +1145,7 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title yt-formatted-string,
 body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
   grid-area: title !important;
-  font-family: "Inter", "Roboto", sans-serif !important;
+  font-family: 'Inter', 'Roboto', sans-serif !important;
   font-size: 1.6rem !important;
   line-height: 2.4rem !important;
   font-weight: 500 !important;
@@ -1222,7 +1223,8 @@ body.ypp-search-grid-mode yt-lockup-view-model a:has(yt-image),
 body.ypp-search-grid-mode yt-lockup-view-model a:has(img),
 body.ypp-search-grid-mode ytd-lockup-view-model a:has(yt-image),
 body.ypp-search-grid-mode ytd-lockup-view-model a:has(img) {
-  margin: calc(var(--ypp-density-pad, 12px) * -1) calc(var(--ypp-density-pad, 12px) * -1) 12px calc(var(--ypp-density-pad, 12px) * -1) !important;
+  margin: calc(var(--ypp-density-pad, 12px) * -1) calc(var(--ypp-density-pad, 12px) * -1) 12px
+    calc(var(--ypp-density-pad, 12px) * -1) !important;
   width: calc(100% + calc(var(--ypp-density-pad, 12px) * 2)) !important;
   max-width: none !important;
   min-width: calc(100% + calc(var(--ypp-density-pad, 12px) * 2)) !important;
@@ -1286,8 +1288,14 @@ body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-w
   line-height: 1.8rem !important;
   margin: 0 !important;
 }
-body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-metadata-view-model-wiz__text-wrapper:nth-of-type(n+3),
-body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-metadata-view-model-wiz__text-wrapper:nth-of-type(n+3) {
+body.ypp-search-grid-mode
+  yt-lockup-view-model
+  .yt-lockup-metadata-view-model-wiz__text-wrapper:nth-of-type(n + 3),
+body.ypp-search-grid-mode
+  ytd-lockup-view-model
+  .yt-lockup-metadata-view-model-wiz__text-wrapper:nth-of-type(n + 3) {
   display: none !important;
 }
-body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer { z-index: var(--ypp-z-content) !important; }
+body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer {
+  z-index: var(--ypp-z-content) !important;
+}
