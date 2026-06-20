@@ -114,15 +114,6 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   align-items: stretch !important;
   overflow: hidden !important;
   position: relative !important;
-  transition:
-    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 0.3s ease,
-    background 0.3s ease !important;
-  transform: translateZ(0); /* Hardware Acceleration */
-  will-change: transform, box-shadow, border-color, background;
-  isolation: isolate !important;
-  background-clip: border-box !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
@@ -132,7 +123,7 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   min-width: 100% !important;
   height: auto !important;
   aspect-ratio: 16/9 !important;
-  border-radius: 12px !important;
+
   overflow: hidden !important;
   position: relative !important;
   background-color: transparent !important;
@@ -227,15 +218,6 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   align-items: stretch !important;
   overflow: hidden !important;
   position: relative !important;
-  transition:
-    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 0.3s ease,
-    background 0.3s ease !important;
-  transform: translateZ(0); /* Hardware Acceleration */
-  will-change: transform, box-shadow, border-color, background;
-  isolation: isolate !important;
-  background-clip: border-box !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer #video-title,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
@@ -292,7 +274,7 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   max-width: 100% !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
-  border-radius: 12px !important;
+
   overflow: hidden !important;
   position: relative !important;
   flex-shrink: 0 !important;
@@ -454,7 +436,7 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
   max-width: 100% !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
-  border-radius: 12px !important;
+
   overflow: hidden !important;
   flex-shrink: 0 !important;
   margin: 0 !important;
@@ -495,29 +477,7 @@ body.ypp-search-grid-mode ytd-video-renderer .ytd-video-renderer-action-menu {
   min-width: unset !important;
   z-index: var(--ypp-z-card-hover) !important;
 }
-body.ypp-search-grid-mode ytd-video-renderer:hover,
-body.ypp-search-grid-mode ytd-playlist-renderer:hover,
-body.ypp-search-grid-mode ytd-radio-renderer:hover,
-body.ypp-search-grid-mode ytd-channel-renderer:hover {
-  transform: translateY(-4px) !important;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.02)
-  ) !important;
-  border-color: rgba(62, 166, 255, 0.4) !important;
-  border-top-color: rgba(62, 166, 255, 0.6) !important;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.65),
-    0 0 28px rgba(62, 166, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-  z-index: var(--ypp-z-card-hover);
-}
-body.ypp-search-grid-mode ytd-video-renderer:hover ytd-thumbnail,
-body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-thumbnail,
-body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-thumbnail {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-}
+
 body.ypp-search-grid-mode ytd-video-renderer::after,
 body.ypp-search-grid-mode ytd-video-renderer::before,
 body.ypp-search-grid-mode ytd-playlist-renderer::after,
