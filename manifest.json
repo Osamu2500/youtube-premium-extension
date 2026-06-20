@@ -41,22 +41,7 @@
                 "*://www.youtube.com/*"
             ],
             "css": [
-                "dist/style.css",
-                "src/content/themes/split/core.css",
-                "src/content/themes/split/grid.css",
-                "src/content/themes/split/player.css",
-                "src/content/themes/split/header.css",
-                "src/content/themes/split/sidebar.css",
-                "src/content/themes/split/comments.css",
-                "src/content/themes/split/search-ast.css",
-                "src/content/themes/split/playlist-ast.css",
-                "src/content/themes/split/history-ast.css",
-                "src/content/themes/split/subscriptions-ast.css",
-                "src/content/themes/split/home-ast.css",
-                "src/content/themes/split/shorts-ast.css",
-                "src/content/features/global/layout/header-nav.css",
-                "src/content/features/pages/home/cards.css",
-                "src/content/features/player/player.css"
+                "dist/style.css"
             ],
             "run_at": "document_end",
             "all_frames": false,
@@ -84,7 +69,6 @@
                 "src/assets/*",
                 "src/inject/*",
                 "src/content/themes/*.css",
-                "src/content/themes/split/*.css",
                 "src/content/features/**/*.css",
                 "src/content/features/**/*.js"
             ],

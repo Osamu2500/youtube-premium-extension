@@ -49,7 +49,7 @@
   margin-left: 16px !important;
   padding: 0 !important;
 }
-.yt-premium-plus-theme ytd-browse[page-subtype="history"]  # {
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] #title.ytd-item-section-renderer {
   font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
   font-size: 1.2rem !important;
   font-weight: 700 !important;

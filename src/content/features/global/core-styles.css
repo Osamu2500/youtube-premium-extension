@@ -446,7 +446,7 @@ body.ypp-hide-voice-search ytm-voice-search-button-renderer {
 
 /* Hide Shorts Interaction Bar */
 
-body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer  # {
+body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer {
   display: none !important;
 }
 
@@ -590,7 +590,7 @@ body.ypp-floating-guide #guide:hover::before {
 
 /* Expand main page content to fill the vacated guide space */
 
-body.ypp-floating-guide  #,
+body.ypp-floating-guide #content.ytd-app,
 body.ypp-floating-guide ytd-page-manager {
   margin-left: 0 !important;
 }
@@ -1946,7 +1946,7 @@ body.yt-premium-plus-theme yt-button-shape:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
-body.yt-premium-plus-theme  # {
+body.yt-premium-plus-theme #container.ytd-searchbox {
   background: rgba(20, 20, 20, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
@@ -1955,7 +1955,7 @@ body.yt-premium-plus-theme  # {
     box-shadow 0.2s ease !important;
 }
 
-body.yt-premium-plus-theme  #[has-focus] {
+body.yt-premium-plus-theme #container.ytd-searchbox[has-focus] {
   border-color: var(--ypp-accent) !important;
   box-shadow:
     0 0 12px var(--ypp-accent-glow),
@@ -1966,11 +1966,11 @@ body.yt-premium-plus-theme  #[has-focus] {
 
 /* 3. Pro Max Rounding for Core Elements */
 
- # {
+#container.ytd-searchbox {
   border-radius: var(--ypp-radius-md) 0 0 var(--ypp-radius-md) !important;
 }
 
- # {
+#search-icon-legacy.ytd-searchbox {
   border-radius: 0 var(--ypp-radius-md) var(--ypp-radius-md) 0 !important;
 }
 
@@ -2445,7 +2445,7 @@ body.yt-premium-plus-theme
 
 /* Container for the entire top row (Channel info + Actions) */
 
-body.yt-premium-plus-theme  # {
+body.yt-premium-plus-theme #top-row.ytd-watch-metadata {
   margin-top: 16px !important;
   display: flex !important;
   align-items: center !important;
@@ -2455,7 +2455,7 @@ body.yt-premium-plus-theme  # {
 
 /* Channel Owner Section Pill */
 
-body.yt-premium-plus-theme  # {
+body.yt-premium-plus-theme #owner.ytd-watch-metadata {
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -2470,7 +2470,7 @@ body.yt-premium-plus-theme  # {
     box-shadow 0.2s ease !important;
 }
 
-body.yt-premium-plus-theme  #:hover {
+body.yt-premium-plus-theme #owner.ytd-watch-metadata:hover {
   background: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
 }
@@ -2563,7 +2563,7 @@ body.yt-premium-plus-theme
 
 /* Actions Menu Container */
 
-body.yt-premium-plus-theme  # {
+body.yt-premium-plus-theme #actions.ytd-watch-metadata {
   display: flex !important;
   gap: 8px !important;
   align-items: center !important;
@@ -3992,7 +3992,7 @@ ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-redesigned] {
 
 /* Hide Shorts Interaction Bar */
 
-body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer  # { display: none !important; }
+body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer #actions.ytd-reel-player-overlay-renderer { display: none !important; }
 
 /* Square Corners */
 

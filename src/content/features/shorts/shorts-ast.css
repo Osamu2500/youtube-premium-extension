@@ -134,7 +134,7 @@ body.ypp-shorts-page .reel-video-in-sequence-thumbnail {
     overflow: hidden !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
-body.ypp-shorts-page  # {
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer {
     background: rgba(255, 255, 255, 0.1) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
@@ -143,25 +143,25 @@ body.ypp-shorts-page  # {
     margin-right: 16px !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
-body.ypp-shorts-page  # ytd-toggle-button-renderer,
-body.ypp-shorts-page  # ytd-button-renderer {
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-toggle-button-renderer,
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-button-renderer {
     margin-bottom: 12px !important;
     transition: transform 0.2s ease !important;
 }
-body.ypp-shorts-page  # ytd-toggle-button-renderer:hover,
-body.ypp-shorts-page  # ytd-button-renderer:hover {
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-toggle-button-renderer:hover,
+body.ypp-shorts-page #actions.ytd-reel-player-overlay-renderer ytd-button-renderer:hover {
     transform: scale(1.1) !important;
 }
 body.ypp-shorts-page .overlay.ytd-reel-video-renderer {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%) !important;
     padding: 24px !important;
 }
-body.ypp-shorts-page  # yt-img-shadow {
+body.ypp-shorts-page #avatar yt-img-shadow {
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 50% !important;
     transition: border-color 0.3s ease !important;
 }
-body.ypp-shorts-page  #:hover yt-img-shadow {
+body.ypp-shorts-page #avatar:hover yt-img-shadow {
     border-color: #fff !important;
 }
 body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button-shape button {
@@ -175,7 +175,7 @@ body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button
 body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button-shape button:hover {
     background: rgba(255, 255, 255, 0.25) !important;
 }
-body.ypp-shorts-page  # {
+body.ypp-shorts-page #progress-bar {
     height: 4px !important;
     border-radius: 2px !important;
     background: rgba(255, 255, 255, 0.2) !important;

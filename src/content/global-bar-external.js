@@ -183,12 +183,12 @@
     await import('./features/player/global-bar.js');
 
     // Load rich features
-    await import('./features/player/volume-booster/volume-booster.js');
-    await import('./features/player/volume-booster/volume-booster-ui.js');
-    await import('./features/player/video-filters/video-filters-presets.js');
-    await import('./features/player/video-filters/video-filters-overlay.js');
-    await import('./features/player/video-filters/video-filters-ui.js');
-    await import('./features/player/video-filters/video-filters.js');
+    await import('./features/player/media-effects/volume-booster/volume-booster.js');
+    await import('./features/player/media-effects/volume-booster/volume-booster-ui.js');
+    await import('./features/player/media-effects/video-filters/video-filters-presets.js');
+    await import('./features/player/media-effects/video-filters/video-filters-overlay.js');
+    await import('./features/player/media-effects/video-filters/video-filters-ui.js');
+    await import('./features/player/media-effects/video-filters/video-filters.js');
     await import('./features/player/enhancements/video-speed-controller.js');
 
     // ── 3. Read user settings ────────────────────────────────────────────────

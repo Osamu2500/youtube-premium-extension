@@ -10,15 +10,31 @@ import './core/dom-api.js';
 import './core/dom-observer.js';
 import './core/storage-manager.js';
 
+// CSS Imports
+import './features/global/core-styles.css';
+import './features/global/layout/grid-layout.css';
+import './features/player/player.css';
+import './features/global/layout/header-ast.css';
+import './features/global/layout/sidebar-ast.css';
+import './features/pages/watch/comments.css';
+import './features/pages/search/search-ast.css';
+import './features/pages/library/playlist/playlist-ast.css';
+import './features/pages/library/history/history-ast.css';
+import './features/pages/subscriptions/subscriptions-ast.css';
+import './features/pages/home/home-ast.css';
+import './features/shorts/shorts-ast.css';
+import './features/global/layout/header-nav.css';
+import './features/pages/home/cards.css';
+
 // Managers (Phase 4.5)
-import './managers/hotkeys-manager.js';
-import './managers/base-page-manager.js';
-import './managers/global-layout-manager.js';
-import './managers/home-page-manager.js';
-import './managers/subs-page-manager.js';
-import './managers/search-page-manager.js';
-import './managers/watch-page-manager.js';
-import './managers/thumbnail-color-manager.js';
+import './core/managers/hotkeys-manager.js';
+import './core/managers/base-page-manager.js';
+import './core/managers/global-layout-manager.js';
+import './core/managers/home-page-manager.js';
+import './core/managers/subs-page-manager.js';
+import './core/managers/search-page-manager.js';
+import './core/managers/watch-page-manager.js';
+import './core/managers/thumbnail-color-manager.js';
 
 // UI Architecture (Phase 4)
 import './ui/ui-manager.js';
@@ -31,22 +47,22 @@ import './features/base-feature.js';
 import './features/player/enhancements/split-scrolling.js';
 
 // Global features
-import './features/global/modifiers/theme.js';
-import './features/global/modifiers/account-menu/index.js';
-import './features/global/modifiers/grid-animator.js';
+import './features/global/ui-tweaks/theme.js';
+import './features/global/account-menu/index.js';
+import './features/global/ui-tweaks/grid-animator.js';
 // Toggles handled by GlobalLayoutManager
-import './features/global/modifiers/screen-filters.js';
+import './features/global/ui-tweaks/screen-filters.js';
 
-import './features/global/modifiers/watched-store.js';
-import './features/global/modifiers/mark-watched.js';
-import './features/global/modifiers/multi-select.js';
-import './features/global/modifiers/multi-select.css';
-import './features/global/modifiers/redirect-home.js';
-import './features/global/modifiers/hide-watched.js';
-import './features/global/modifiers/keyboard-shortcuts.js';
-import './features/global/modifiers/duration-filter.js';
-import './features/global/modifiers/blocklist-filter.js';
-import './features/global/modifiers/full-video-titles.js';
+import './features/global/behavior/watched-store.js';
+import './features/global/behavior/mark-watched.js';
+import './features/global/behavior/multi-select.js';
+import './features/global/ui-tweaks/multi-select.css';
+import './features/global/behavior/redirect-home.js';
+import './features/global/ui-tweaks/hide-watched.js';
+import './features/global/behavior/keyboard-shortcuts.js';
+import './features/global/filters/duration-filter.js';
+import './features/global/filters/blocklist-filter.js';
+import './features/global/ui-tweaks/full-video-titles.js';
 
 
 // Layout features
@@ -122,7 +138,7 @@ import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
 import './features/player/enhancements/sponsor-block.js';
 import './features/player/enhancements/video-speed-controller.js';
-import './features/player/enhancements/audio-eq.js';
+import './features/player/media-effects/audio-eq.js';
 import './features/player/automation/auto-transcript.js';
 import './features/player/automation/stats-for-nerds.js';
 import './features/player/automation/mini-player-scroll.js';
@@ -132,18 +148,18 @@ import './features/player/enhancements/vsc-force-speed.js';
 import './features/player/enhancements/vsc-remember-speed.js';
 
 import './features/player/controls/floating-player.js';
-import './features/player/video-filters/index.js';
-import './features/player/volume-booster/index.js';
+import './features/player/media-effects/video-filters/index.js';
+import './features/player/media-effects/volume-booster/index.js';
 import './features/player/automation/auto-quality.js';
 import './features/player/enhancements/time-display.js';
 import './features/player/automation/sponsor-block.js';
 import './features/player/automation/ad-skipper.js';
-import './features/player/ambient-mode/ambient-mode.js';
-import './features/player/ambient-mode/audio-mode.js';
-import './features/player/video-controls/video-controls.js';
-import './features/player/video-controls/classic-progress-bar.js';
+import './features/player/media-effects/ambient-mode/ambient-mode.js';
+import './features/player/media-effects/ambient-mode/audio-mode.js';
+import './features/player/controls/video-controls.js';
+import './features/player/controls/classic-progress-bar.js';
 import './features/player/controls/wheel-controls.js';
-import './features/player/enhancements/audio-compressor.js';
+import './features/player/media-effects/audio-compressor.js';
 import './features/player/automation/video-resumer.js';
 import './features/player/automation/auto-pause.js';
 import './features/player/automation/auto-cinema.js';

@@ -17,6 +17,6 @@ body.yt-premium-plus-theme
   border-top: 1px solid var(--ypp-glass-border) !important;
 }
 
-body.ypp-hide-metrics  # {
+body.ypp-hide-metrics #count.ytd-comments-header-renderer {
     display: none !important;
 }
