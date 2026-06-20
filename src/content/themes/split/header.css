@@ -1,0 +1,77 @@
+
+.yt-premium-plus-theme #guide-button,
+.yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer,
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:not(:has(#avatar-btn)) {
+  display: none;
+}
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn):not([hidden]) {
+  display: flex;
+}
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer[aria-label*="Create"],
+.yt-premium-plus-theme ytd-button-renderer:has(a[href*="/upload"]),
+.yt-premium-plus-theme ytd-masthead #buttons ytd-topbar-model-builder-renderer,
+.yt-premium-plus-theme
+  ytd-topbar-menu-button-renderer:has([aria-label*="Create"]),
+.yt-premium-plus-theme ytd-masthead #buttons #create-button,
+.yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer:has([aria-label="Create"]),
+.yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer {
+  /* The big pill button for create is often a generic button renderer in #buttons. 
+     Be careful not to hide Sign In if it's there, but we assume signed in. 
+     Better to target by icon or specific attributes if possible. */
+  display: none !important;
+}
+.yt-premium-plus-theme
+  ytd-masthead
+  #end
+  #buttons
+  ytd-button-renderer:has(yt-icon[icon="icons:plus"]),
+.yt-premium-plus-theme
+  ytd-masthead
+  #end
+  #buttons
+  ytd-button-renderer:has(path[d*="M20 12h-8v8h-2v-8H2v-2h8V2h2v8h8v2z"]) {
+  display: none !important;
+}
+.yt-premium-plus-theme ytd-topbar-logo-renderer {
+  padding: 0 16px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  margin-right: 16px;
+}
+body.ypp-zen-mode #masthead-container,
+body.ypp-zen-mode ytd-mini-guide-renderer,
+body.ypp-zen-mode ytd-guide-renderer,
+body.ypp-zen-mode #related,
+body.ypp-zen-mode #comments,
+body.ypp-zen-mode #merch-shelf {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.ypp-cinema-mode ytd-masthead {
+    opacity: 0.4;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.ypp-cinema-idle ytd-masthead {
+    opacity: 0 !important;
+    transform: translateY(-100%);
+    pointer-events: none;
+}
+.ypp-minimal-mode #masthead-container {
+    opacity: 0.15;
+    transition: opacity 0.3s;
+}
+.ypp-minimal-mode #masthead-container:hover {
+    opacity: 1;
+}
+body.ypp-dopamine-detox ytd-topbar-logo-renderer,
+body.ypp-dopamine-detox ytd-subscribe-button-renderer,
+body.ypp-dopamine-detox yt-icon,
+body.ypp-dopamine-detox .yt-spec-button-shape-next,
+body.ypp-dopamine-detox ytd-badge-supported-renderer {
+    filter: grayscale(100%) !important;
+}

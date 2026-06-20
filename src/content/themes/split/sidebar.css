@@ -1,0 +1,85 @@
+
+html.yt-premium-plus-theme #guide-wrapper {
+  opacity: var(--ypp-sidebar-opacity, 1) !important;
+}
+body.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/trending"]),
+body.ypp-hide-trending ytd-mini-guide-entry-renderer:has(a[href*="/feed/trending"]),
+body.ypp-hide-trending ytd-guide-entry-renderer:has(a[href*="/feed/explore"]) {
+  display: none !important;
+}
+body.ypp-floating-guide ytd-guide-renderer {
+  background: rgba(12, 12, 18, 0.82) !important;
+  backdrop-filter: blur(32px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.4) !important;
+  border-radius: 0 18px 18px 0 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-left: none !important; /* flush against left edge */
+  border-right-color: rgba(255,255,255,0.12) !important;
+  border-top-color: rgba(255,255,255,0.12) !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.35) !important;
+  overflow: hidden !important;
+  height: calc(100vh - var(--ytd-masthead-height, 56px) - 24px) !important;
+  overflow-y: auto !important;
+}
+body.ypp-floating-guide ytd-guide-renderer::-webkit-scrollbar {
+  width: 4px !important;
+}
+body.ypp-floating-guide ytd-guide-renderer::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+body.ypp-floating-guide ytd-guide-renderer::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15) !important;
+  border-radius: 4px !important;
+}
+body.ypp-floating-guide ytd-guide-entry-renderer {
+  border-radius: 10px !important;
+  transition: background 0.15s ease !important;
+}
+body.ypp-floating-guide ytd-guide-entry-renderer:hover {
+  background: rgba(255,255,255,0.07) !important;
+}
+body.ypp-floating-guide ytd-guide-entry-renderer[active] {
+  background: rgba(62,166,255,0.15) !important;
+  border-left: 2px solid rgba(62,166,255,0.7) !important;
+}
+body.ypp-floating-guide ytd-guide-section-renderer > h3 {
+  color: rgba(255,255,255,0.35) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+.yt-premium-plus-theme #guide-inner-content {
+  scrollbar-width: none;
+}
+.yt-premium-plus-theme #guide-inner-content:hover {
+  scrollbar-width: thin;
+}
+ytd-app[is-watch-page] .yt-premium-plus-theme ytd-guide-renderer {
+  display: none;
+}
+ytd-app:not([is-watch-page]) ytd-mini-guide-renderer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+}
+body.yt-premium-plus-theme #guide-inner-content {
+  background: var(--ypp-bg-surface) !important;
+  backdrop-filter: var(--ypp-blur-high) !important;
+  border-right: 1px solid var(--ypp-glass-border) !important;
+}
+body.yt-premium-plus-theme ytd-guide-entry-renderer {
+  border-radius: var(--ypp-radius-md) !important;
+  margin: 2px 12px !important;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease !important;
+}
+body.yt-premium-plus-theme ytd-guide-entry-renderer:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  transform: translateX(4px) !important;
+}
+body.yt-premium-plus-theme ytd-guide-entry-renderer[active] {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-left: 3px solid var(--ypp-accent) !important;
+}

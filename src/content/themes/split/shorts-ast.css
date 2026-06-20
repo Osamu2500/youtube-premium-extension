@@ -1,0 +1,261 @@
+
+body.ypp-hide-search-shorts ytd-search ytd-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-search-shorts ytd-search ytd-reel-shelf-renderer,
+body.ypp-hide-search-shorts ytd-item-section-renderer:has(ytd-reel-shelf-renderer) {
+  display: none !important;
+}
+body.ypp-nuke-shorts ytd-rich-section-renderer[is-shorts],
+body.ypp-nuke-shorts ytd-rich-item-renderer:has(ytd-reel-item-renderer),
+body.ypp-nuke-shorts ytd-reel-shelf-renderer,
+body.ypp-nuke-shorts ytd-guide-entry-renderer:has(a[href^="/shorts"]),
+body.ypp-nuke-shorts ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
+body.ypp-nuke-shorts [is-shorts],
+body.ypp-nuke-shorts ytd-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-nuke-shorts ytd-compact-video-renderer:has(a[href^="/shorts/"]) {
+  display: none !important;
+}
+body.ypp-hide-promos ytd-rich-shelf-renderer:not([is-shorts]),
+body.ypp-hide-promos ytd-rich-section-renderer:not([is-shorts]) {
+  display: none !important;
+}
+.ypp-aggressive-shorts-block ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-compact-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-playlist-video-renderer:has(a[href^="/shorts/"]),
+.ypp-aggressive-shorts-block ytd-reel-shelf-renderer,
+.ypp-aggressive-shorts-block ytd-rich-shelf-renderer[is-shorts],
+.ypp-aggressive-shorts-block ytm-reel-shelf-renderer,
+.ypp-aggressive-shorts-block ytd-guide-entry-renderer:has(a[title="Shorts"]),
+.ypp-aggressive-shorts-block ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
+.ypp-aggressive-shorts-block yt-tab-shape[tab-title="Shorts"] {
+  display: none !important;
+}
+body.ypp-hide-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-shorts ytd-rich-shelf-renderer[is-shorts],
+body.ypp-hide-shorts ytd-rich-section-renderer[is-shorts],
+body.ypp-hide-shorts ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+body.ypp-hide-shorts ytd-shelf-renderer[is-shorts],
+body.ypp-hide-shorts [is-shorts],
+body.ypp-hide-shorts ytm-reel-shelf-renderer,
+
+/* --- New Renderer Types (2024+) --- */
+body.ypp-hide-shorts reels-video-with-pill-title-renderer,
+body.ypp-hide-shorts ytd-reel-video-renderer,
+body.ypp-hide-shorts grid-shelf-view-model,
+body.ypp-hide-shorts ytd-reel-item-renderer,
+body.ypp-hide-shorts ytd-shorts,
+
+/* --- Individual Shorts Videos (URL Match) --- */
+/* Note: Using :has() is expensive but necessary for URL matching on parent containers */
+body:not(.cinematic-home).ypp-hide-shorts ytd-rich-item-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-grid-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-compact-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-playlist-video-renderer:has(a[href*="/shorts/"]),
+
+/* --- Shorts Badge/Label Detection --- */
+body.ypp-hide-shorts ytd-grid-video-renderer:has(span#text[aria-label="Shorts"]),
+body.ypp-hide-shorts ytd-compact-video-renderer:has(span[aria-label="Shorts"]),
+body.ypp-hide-shorts ytd-video-renderer:has(span[aria-label="Shorts"]),
+body.ypp-hide-shorts ytd-video-renderer:has(ytd-badge-supported-renderer[aria-label="Shorts"]),
+body:not(.cinematic-home).ypp-hide-shorts ytd-rich-item-renderer:has(ytd-badge-supported-renderer[aria-label="Shorts"]),
+
+/* --- Navigation (Sidebar & Guide) --- */
+body.ypp-hide-shorts ytd-guide-entry-renderer:has(a[title="Shorts"]),
+body.ypp-hide-shorts ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
+
+/* --- Channel Page Tabs --- */
+body.ypp-hide-shorts tp-yt-paper-tab[aria-label="Shorts"],
+body.ypp-hide-shorts tp-yt-paper-tab[tab-title="Shorts"],
+body.ypp-hide-shorts yt-tab-shape[tab-title="Shorts"],
+
+/* --- Search & Chip Filters --- */
+body.ypp-hide-shorts yt-chip-cloud-chip-renderer:has(a[href*="/shorts"]),
+
+/* --- Shelf Title Detection --- */
+body.ypp-hide-shorts ytd-shelf-renderer:has(span#title[aria-label*="Shorts"]),
+body.ypp-hide-shorts ytd-shelf-renderer:has(div#title-container h2 span[aria-label*="Shorts"]),
+body.ypp-hide-shorts ytd-shelf-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-shelf-renderer:has(ytd-icon-button-renderer[aria-label="Shorts"]),
+
+/* --- Watch Page (Secondary Results) --- */
+body.ypp-hide-shorts #related ytd-reel-shelf-renderer,
+body.ypp-hide-shorts #related ytd-compact-video-renderer:has(a[href*="/shorts/"]),
+body.ypp-hide-shorts ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer,
+
+/* --- Subscription Feed --- */
+body.ypp-hide-shorts ytd-rich-section-renderer:has([is-shorts]),
+body:not(.cinematic-home).ypp-hide-shorts #grid-container ytd-rich-item-renderer:has(a[href*="/shorts/"]),
+
+/* --- Stamped Heuristic Shorts --- */
+body.ypp-hide-shorts [data-ypp-is-short="true"] {
+  display: none !important;
+}
+body.ypp-hide-shorts
+  ytd-item-section-renderer:has(ytd-reel-shelf-renderer):not(
+    :has(*:not(ytd-reel-shelf-renderer))
+  ),
+body.ypp-hide-shorts
+  ytd-item-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]):not(
+    :has(*:not(ytd-rich-shelf-renderer[is-shorts]))
+  ),
+body.ypp-hide-shorts
+  ytd-section-list-renderer:has([is-shorts]):not(:has(*:not([is-shorts]))) {
+  display: none !important;
+}
+body.ypp-hide-shorts ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
+body.ypp-hide-shorts
+  ytd-item-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+body.ypp-hide-shorts
+  ytd-item-section-renderer:has(ytd-shelf-renderer[is-shorts]),
+body.ypp-hide-shorts
+  ytd-item-section-renderer:has(
+    ytd-shelf-renderer span#title[aria-label*="Shorts"]
+  ) {
+  display: none !important;
+}
+.ypp-cinematic-mode ytd-rich-grid-renderer,
+.ypp-cinematic-mode ytd-rich-section-renderer[is-shorts],
+.ypp-cinematic-mode #chips-wrapper {
+    display: none !important;
+}
+body.ypp-shorts-page #cinematic-shorts-scrim,
+body.yt-premium-plus-theme #cinematic-shorts-scrim {
+    display: none !important;
+}
+body.ypp-shorts-page ytd-shorts,
+body.ypp-shorts-page #shorts-container {
+    background: #0f0f0f !important;
+}
+body.ypp-shorts-page ytd-reel-video-renderer,
+body.ypp-shorts-page .reel-video-in-sequence-thumbnail {
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+body.ypp-shorts-page  # {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 20px !important;
+    padding: 12px 8px !important;
+    margin-right: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+body.ypp-shorts-page  # ytd-toggle-button-renderer,
+body.ypp-shorts-page  # ytd-button-renderer {
+    margin-bottom: 12px !important;
+    transition: transform 0.2s ease !important;
+}
+body.ypp-shorts-page  # ytd-toggle-button-renderer:hover,
+body.ypp-shorts-page  # ytd-button-renderer:hover {
+    transform: scale(1.1) !important;
+}
+body.ypp-shorts-page .overlay.ytd-reel-video-renderer {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%) !important;
+    padding: 24px !important;
+}
+body.ypp-shorts-page  # yt-img-shadow {
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    transition: border-color 0.3s ease !important;
+}
+body.ypp-shorts-page  #:hover yt-img-shadow {
+    border-color: #fff !important;
+}
+body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button-shape button {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    color: #fff !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    transition: background 0.2s ease !important;
+}
+body.ypp-shorts-page ytd-reel-player-header-renderer #subscribe-button yt-button-shape button:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+body.ypp-shorts-page  # {
+    height: 4px !important;
+    border-radius: 2px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+body.ypp-shorts-page .ypp-shorts-controls {
+    position: absolute;
+    bottom: 80px; /* Above the title/channel overlay */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 20px !important;
+    padding: 8px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    z-index: var(--ypp-z-card-hover);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    opacity: 0.2;
+    transition: opacity 0.3s ease;
+}
+body.ypp-shorts-page ytd-reel-video-renderer[is-active]:hover .ypp-shorts-controls,
+body.ypp-shorts-page .ypp-shorts-controls:hover {
+    opacity: 1;
+}
+body.ypp-shorts-page .ypp-shorts-controls .ypp-action-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px !important;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+body.ypp-shorts-page .ypp-shorts-controls .ypp-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1);
+}
+body.ypp-shorts-page .ypp-shorts-controls svg {
+    width: 20px !important;
+    height: 20px !important;
+    fill: currentColor;
+}
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-controls {
+    display: flex;
+    gap: 4px;
+    margin-right: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    padding-right: 8px;
+}
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn {
+    background: transparent;
+    color: #ccc;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+body.ypp-shorts-page .ypp-shorts-controls .ypp-speed-btn.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+body.ypp-hide-shorts ytd-rich-section-renderer[is-shorts],
+body.ypp-hide-shorts ytd-reel-shelf-renderer,
+body.ypp-hide-shorts ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-shorts ytd-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-shorts ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+body.ypp-hide-shorts ytd-compact-video-renderer:has(a[href^="/shorts/"]) {
+    display: none !important;
+}

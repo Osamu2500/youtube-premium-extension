@@ -1,0 +1,4316 @@
+/* 
+=======================================================================================
+   YOUTUBE PREMIUM PLUS - Glassmorphism Redesign
+=======================================================================================
+   A complete visual overhaul for YouTube with premium glassmorphic aesthetics
+   
+   TABLE OF CONTENTS
+   -----------------
+   1. CSS Variables & Theme Base .................................. Line 30
+   2. Feature Toggle Classes ...................................... Line 110
+   3. Global UI Elements .......................................... Line 180
+   4. Header & Navigation ......................................... Line 350
+   5. Video Grid & Cards .......................................... Line 650
+   6. Search Redesign ............................................. Line 900
+   7. Player Enhancements ......................................... Line 1100
+   8. Zen Mode & Focus Features ................................... Line 1250
+   9. Utility Classes & Animations ................................ Line 1350
+=======================================================================================
+*/
+
+/* ===================================================================================
+   1. CSS VARIABLES & THEME BASE
+   =================================================================================== */
+
+.yt-premium-plus-theme {
+  /* 
+     NOTE: COLOR VARIABLES ARE NOW HANDLED BY THEME FILES (default.css, ocean.css, etc.)
+     DO NOT ADD COLORS HERE TO AVOID SPECIFICITY CONFLICTS.
+  */
+
+  /* Dimensions & Spacing */
+  --ypp-header-height: 60px;
+  --ypp-header-margin: 16px;
+  --ypp-sidebar-width: 240px;
+  --ypp-sidebar-mini-width: 72px;
+  --ypp-sidebar-gap: 16px;
+  --ypp-sidebar-top-gap: 16px;
+  --ypp-content-gap: 32px;
+  --ypp-grid-gap: 24px;
+
+  /* Shape & Motion */
+  --ypp-radius-lg: 20px;
+  --ypp-radius-md: 14px;
+  --ypp-radius-sm: 8px;
+  --ypp-radius-pill: 100px;
+  --ypp-blur-subtle: blur(8px);
+  --ypp-blur-med: blur(20px);
+  --ypp-blur-high: blur(32px);
+  --ypp-transition-fast: 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ypp-transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ypp-transition-slow: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Z-Index Layers */
+  --ypp-z-background: -1;
+  --ypp-z-content: 1;
+  --ypp-z-card-hover: 100;
+  --ypp-z-chips: 2100;
+  --ypp-z-header: 2200;
+  --ypp-z-popup: 2400;
+
+  /* Backgrounds */
+  --yt-spec-base-background: var(--ypp-bg-base) !important;
+  --yt-spec-raised-background: var(--ypp-bg-surface) !important;
+  --yt-spec-menu-background: var(--ypp-bg-surface) !important;
+  --yt-spec-inverted-background: var(--ypp-text-primary) !important;
+  --yt-spec-additive-background: var(--ypp-glass-highlight) !important;
+
+  /* Text */
+  --yt-spec-text-primary: var(--ypp-text-primary) !important;
+  --yt-spec-text-primary-inverse: var(--ypp-bg-base) !important;
+  --yt-spec-text-secondary: var(--ypp-text-secondary) !important;
+  --yt-spec-text-disabled: rgba(255, 255, 255, 0.3) !important;
+
+  /* Icons */
+  --yt-spec-icon-active-other: var(--ypp-accent) !important;
+  --yt-spec-icon-inactive: var(--ypp-text-secondary) !important;
+  --yt-spec-icon-disabled: rgba(255, 255, 255, 0.3) !important;
+  --yt-spec-brand-icon-active: var(--ypp-accent) !important;
+  --yt-spec-brand-icon-inactive: var(--ypp-text-secondary) !important;
+
+  /* General Layers */
+  --yt-spec-general-background-a: var(--ypp-bg-base) !important;
+  --yt-spec-general-background-b: var(--ypp-bg-surface) !important;
+  --yt-spec-general-background-c: var(--ypp-bg-base) !important;
+
+  /* Chips & Badges */
+  --yt-spec-10-percent-layer: var(--ypp-glass-highlight) !important;
+  --yt-spec-badge-chip-background: var(--ypp-glass-highlight) !important;
+  --yt-spec-verified-badge-background: var(--ypp-accent) !important;
+  --yt-spec-button-chip-background-hover: var(--ypp-glass-highlight) !important;
+
+  /* Paper Elements (Legacy) */
+  --paper-toggle-button-checked-bar-color: var(--ypp-accent) !important;
+  --paper-toggle-button-checked-button-color: var(--ypp-accent) !important;
+  --paper-dialog-background-color: var(--ypp-bg-surface) !important;
+  --paper-listbox-background-color: var(--ypp-bg-surface) !important;
+  --paper-menu-background-color: var(--ypp-bg-surface) !important;
+
+  /* Searchbox Overrides (Mapped to YPP vars) */
+  --ytd-searchbox-background: transparent !important;
+  --ytd-searchbox-text-color: var(--ypp-text-primary) !important;
+  --ytd-searchbox-legacy-button-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/**
+ * YouTube Premium Plus - Global Styles
+ * Core variables and overrides injected into the YouTube page
+ */
+
+:root {
+  /* UI Architecture Core Variables */
+  --ypp-bg-surface: var(--ypp-glass-tint, rgba(20, 20, 20, 0.85));
+  --ypp-bg-hover: rgba(255, 255, 255, 0.1);
+  --ypp-bg-active: rgba(255, 255, 255, 0.2);
+  --ypp-glass-blur-default: blur(16px);
+  --ypp-glass-border-default: 1px solid rgba(255, 255, 255, 0.08);
+  --ypp-glass-blur-active: var(--ypp-glass-blur, var(--ypp-glass-blur-default));
+  --ypp-glass-border-active: 1px solid rgba(255, 255, 255, var(--ypp-border-opacity, 0.08));
+  
+  --ypp-radius-sm: 6px;
+  --ypp-radius-md: 10px;
+  --ypp-radius-lg: 14px;
+  --ypp-radius-xl: 18px;
+  --ypp-accent: #3ea6ff;
+  --ypp-accent-hover: #65b8ff;
+
+  /* Variables for original theme features */
+  --ypp-player-radius: 12px;
+  --ypp-thumbnail-radius: 12px;
+}
+
+/* Responsive Grid Variables */
+
+:root {
+  --ypp-grid-column-min: 280px;
+  --ypp-card-padding: 12px;
+  --ypp-card-radius: 12px;
+}
+
+@media (max-width: 1600px) {
+  :root {
+    --ypp-grid-column-min: 260px;
+    --ypp-grid-gap: 18px;
+  }
+}
+
+@media (max-width: 1200px) {
+  :root {
+    --ypp-grid-column-min: 240px;
+    --ypp-grid-gap: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --ypp-grid-column-min: 220px;
+    --ypp-grid-gap: 12px;
+    --ypp-header-height: 56px;
+    --ypp-radius-lg: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --ypp-grid-column-min: 100%;
+    --ypp-card-padding: 10px;
+    --ypp-radius-lg: 12px;
+    --ypp-radius-md: 10px;
+  }
+}
+
+/* Force YouTube background to respect theme variables */
+
+html.yt-premium-plus-theme {
+  background-color: var(--ypp-bg-base, #0f0f0f) !important;
+  background: var(--ypp-bg-base, #0f0f0f) !important;
+  position: relative;
+}
+
+/* Make inner containers transparent so HTML background and effects show through */
+
+html.yt-premium-plus-theme body, 
+html.yt-premium-plus-theme ytd-app,
+html.yt-premium-plus-theme #background {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* ===================================================================================
+   2. CUSTOMIZATION FEATURE VARIABLES & OVERRIDES
+   =================================================================================== */
+
+/* Typography */
+
+html.yt-premium-plus-theme, 
+html.yt-premium-plus-theme body, 
+html.yt-premium-plus-theme ytd-app,
+html.yt-premium-plus-theme #content-text {
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+}
+
+html.yt-premium-plus-theme {
+    --yt-spec-font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+}
+
+html.yt-premium-plus-theme tp-yt-paper-button,
+html.yt-premium-plus-theme ytd-button-renderer {
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+}
+
+/* Animations & Reduced Motion */
+
+html.ypp-no-animations *,
+html.ypp-no-animations *::before,
+html.ypp-no-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.ypp-reduced-motion *,
+html.ypp-reduced-motion *::before,
+html.ypp-reduced-motion *::after {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+  transition-timing-function: linear !important;
+}
+
+/* Accent Color Overrides via injected variables */
+
+html.yt-premium-plus-theme {
+  --ypp-accent: var(--ypp-accent-primary, #3ea6ff) !important;
+  --ypp-accent-hover: var(--ypp-accent-glow, #65b8ff) !important;
+  --yt-spec-static-brand-red: var(--ypp-accent-primary, #f00) !important;
+  --yt-spec-icon-active-other: var(--ypp-accent-primary, #3ea6ff) !important;
+  --yt-spec-brand-icon-active: var(--ypp-accent-primary, #3ea6ff) !important;
+  --paper-toggle-button-checked-bar-color: var(--ypp-accent-primary, #3ea6ff) !important;
+  --paper-toggle-button-checked-button-color: var(--ypp-accent-primary, #3ea6ff) !important;
+}
+
+/* Thumbnail Radius */
+
+html.yt-premium-plus-theme {
+  --ypp-player-radius: var(--ypp-thumb-radius, 12px);
+  --ypp-thumbnail-radius: var(--ypp-thumb-radius, 12px);
+}
+
+html.yt-premium-plus-theme ytd-thumbnail, 
+html.yt-premium-plus-theme ytd-thumbnail::before, 
+html.yt-premium-plus-theme ytd-thumbnail a, 
+html.yt-premium-plus-theme yt-image, 
+html.yt-premium-plus-theme .ytd-thumbnail {
+  border-radius: var(--ypp-thumbnail-radius, 12px) !important;
+}
+
+/* Card Styles - Optimized with :is() pseudo-class */
+
+/* Base transition for all supported renderers */
+
+/* Flat Cards */
+
+/* Elevated Cards */
+
+/* Glass Cards */
+
+/* ── FOLDER STYLE ── */
+
+/* Cycle folder tab colors */
+
+/* ── BENTO STYLE ── */
+
+/* ── NEON STYLE ── */
+
+@keyframes ypp-neon-pulse {
+  0% { box-shadow: 0 0 10px rgba(108,99,255,0.2), inset 0 0 10px rgba(108,99,255,0.05); }
+  50% { box-shadow: 0 0 25px rgba(108,99,255,0.5), inset 0 0 15px rgba(108,99,255,0.1); }
+  100% { box-shadow: 0 0 10px rgba(108,99,255,0.2), inset 0 0 10px rgba(108,99,255,0.05); }
+}
+
+/* ── COMPACT STYLE ── */
+
+/* ── POLAROID STYLE ── */
+
+/* ── NEUMORPHIC STYLE (NEW) ── */
+
+/* ── CYBERPUNK STYLE (NEW) ── */
+
+/* ── HOLOGRAPHIC STYLE (NEW) ── */
+
+@keyframes ypp-holo-sweep {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── MINIMALIST STYLE (NEW) ── */
+
+/* YouTube Dropdowns & Custom Popups */
+
+/* tp-yt-iron-dropdown: must NOT have overflow:hidden — YouTube positions it via JS
+   in the next tick; overflow:hidden before positioning causes content clipping.
+   Also needs border-radius applied to inner content, not the wrapper. */
+
+html.yt-premium-plus-theme tp-yt-iron-dropdown {
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, var(--ypp-border-opacity, 0.08)) !important;
+  backdrop-filter: var(--ypp-glass-blur-active) saturate(1.5) !important;
+  -webkit-backdrop-filter: var(--ypp-glass-blur-active) saturate(1.5) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0,0,0,0.6) !important;
+}
+
+html.yt-premium-plus-theme tp-yt-paper-listbox,
+html.yt-premium-plus-theme ytd-active-account-header-renderer {
+  background: transparent !important;
+}
+
+/* Popup Inner Structure Overrides */
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer {
+  padding: 8px 0 !important;
+}
+
+html.yt-premium-plus-theme ytd-active-account-header-renderer {
+  padding: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Hide native bottom borders inside header */
+
+html.yt-premium-plus-theme ytd-active-account-header-renderer #header {
+  border-bottom: none !important;
+}
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer #separator,
+html.yt-premium-plus-theme ytd-menu-popup-renderer ytd-menu-service-item-renderer[has-separator] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  margin: 4px 16px !important;
+  height: 1px !important;
+}
+
+/* Popup Menu Items Hover & Aesthetics */
+
+/* Popup Icon Interactions */
+
+/* Phase 3: Ultra-Premium Popup Polish */
+
+/* Popup Typography Hierarchy */
+
+html.yt-premium-plus-theme ytd-active-account-header-renderer #account-name {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  margin-bottom: 2px !important;
+  color: #fff !important;
+}
+
+html.yt-premium-plus-theme ytd-active-account-header-renderer #account-byline,
+html.yt-premium-plus-theme ytd-active-account-header-renderer #channel-handle {
+  opacity: 0.65 !important;
+  font-weight: 400 !important;
+  font-size: 1.3rem !important;
+}
+
+/* Entry Animation */
+
+@keyframes ypp-popup-enter {
+  0% { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Non-iron-dropdown popups animate immediately — their position is already known */
+
+/* tp-yt-iron-dropdown: YouTube positions it via JS (iron-overlay) AFTER the element
+   is added to DOM. Without a delay, the animation starts at left:0/top:0 causing
+   the visible 'jump from left' bug. The 80ms delay lets YouTube place it first. */
+
+html.yt-premium-plus-theme tp-yt-iron-dropdown {
+  animation: ypp-popup-enter 0.22s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  animation-delay: 80ms !important;
+  animation-fill-mode: both !important; /* stays opacity:0 during the delay */
+  transform-origin: top right !important;
+}
+
+/* Custom Themed Scrollbar for Popups */
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar {
+  width: 4px !important;
+  background: transparent !important;
+}
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar-track,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar-thumb,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px !important;
+}
+
+html.yt-premium-plus-theme ytd-multi-page-menu-renderer ::-webkit-scrollbar-thumb:hover,
+html.yt-premium-plus-theme tp-yt-iron-dropdown ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Sidebar Opacity */
+
+/* Layout Density Grid Gap Override */
+
+html.yt-premium-plus-theme {
+  --ytd-rich-grid-item-margin: var(--ypp-density-gap, 16px) !important;
+}
+
+/* ===================================================================================
+   3. FEATURE TOGGLE CLASSES
+   =================================================================================== */
+
+/* Theme Base */
+
+html.yt-premium-plus-theme body {
+  background-color: var(--ypp-bg-base);
+  overflow-x: hidden;
+}
+
+/* Hide Explore Topics */
+
+/* Ensure frosted glass doesn't show up as a white bar when scrolling */
+
+body.ypp-hide-explore-topics #frosted-glass.with-chipbar,
+#frosted-glass {
+  display: none !important;
+}
+
+body.ypp-hide-explore-topics ytd-page-manager {
+  margin-top: var(--ytd-masthead-height, 56px) !important;
+}
+
+/* Hide Voice Search */
+
+body.ypp-hide-voice-search #voice-search-button,
+body.ypp-hide-voice-search ytm-voice-search-button-renderer {
+  display: none !important;
+}
+
+/* Hide Shorts Interaction Bar */
+
+body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer  # {
+  display: none !important;
+}
+
+/* Hide Shorts in Search Results */
+
+/* Nuke Shorts — Aggressive removal from all pages */
+
+/* ==========================================================================
+   UNHOOK & FOCUS MODE FEATURES — Core Feature Selectors
+   All rules use body. prefix for reliability in YouTube's SPA
+   ========================================================================== */
+
+/* Hide Comments */
+
+body.ypp-hide-comments #comments {
+  display: none !important;
+}
+
+/* Hide Live Chat */
+
+body.ypp-hide-live-chat ytd-live-chat-frame,
+body.ypp-hide-live-chat #chat {
+  display: none !important;
+}
+
+/* Hide Related Feed (Watch Page Sidebar) */
+
+body.ypp-hide-related #related,
+body.ypp-hide-related ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+/* Hide Annotations (on-screen overlays on player) */
+
+/* Hide Video Cards (player pop-up cards only) */
+
+/* Hide Promo/Game Shelves */
+
+/* Hide Homepage Feed */
+
+/* Hide Trending / Explore — global (guide sidebar + page) */
+
+/* Hide Merch Shelf */
+
+body.ypp-hide-merch #merch-shelf,
+body.ypp-hide-merch ytd-merch-shelf-renderer {
+  display: none !important;
+}
+
+/* Hide Fundraiser / Donations */
+
+body.ypp-hide-fundraiser ytd-donation-shelf-renderer {
+  display: none !important;
+}
+
+/* Hide End Screens */
+
+/* ========================================================================== */
+
+/* Hide Mixes & Playlists */
+
+/* Aggressive Shorts Block (CSS) */
+
+/* Duration Filter */
+
+.ypp-hidden-duration {
+  display: none !important;
+}
+
+/* ==========================================================================
+   FLOATING GLASSMORPHIC GUIDE DOCK
+   body.ypp-floating-guide — floats the left nav as a peekable glass panel.
+   ========================================================================== */
+
+/* Break YouTube's normal layout so the guide can float freely */
+
+body.ypp-floating-guide ytd-app {
+  --ytd-nav-drawer-width: 0px !important; /* collapse the space the guide would normally take */
+}
+
+/* Float the guide container */
+
+body.ypp-floating-guide #guide {
+  position: fixed !important;
+  top: calc(var(--ytd-masthead-height, 56px) + 12px) !important;
+  left: 0 !important;
+  z-index: var(--ypp-z-popup) !important;
+  pointer-events: all !important;
+  transform: translateX(calc(-100% + 8px)) !important; /* 8px peeks out so you can hover */
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease,
+    opacity 0.32s ease !important;
+  opacity: 0.85 !important;
+  will-change: transform !important;
+}
+
+/* Slide fully open on hover */
+
+body.ypp-floating-guide #guide:hover {
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.6),
+    0 2px 12px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+/* Glass panel on the guide renderer */
+
+/* Peek strip — the 8px visible sliver on the left edge */
+
+body.ypp-floating-guide #guide::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; right: 0 !important;
+  width: 8px !important;
+  height: 100% !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(255,255,255,0.18) 100%
+  ) !important;
+  border-radius: 0 4px 4px 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease !important;
+}
+
+/* Hide the peek strip once fully open */
+
+body.ypp-floating-guide #guide:hover::before {
+  opacity: 0 !important;
+}
+
+/* Custom scrollbar inside the floating guide */
+
+/* Guide entry items — glass-friendly */
+
+/* Section dividers inside the guide */
+
+/* Expand main page content to fill the vacated guide space */
+
+body.ypp-floating-guide  #,
+body.ypp-floating-guide ytd-page-manager {
+  margin-left: 0 !important;
+}
+
+/* ==========================================================================
+   YPP UI Component Frame (Phase 6 UI Consistency)
+   ========================================================================== */
+
+/* Button Components */
+
+.ypp-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--ypp-radius-full, 50%);
+  color: var(--yt-spec-text-primary, #fff);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ypp-btn:hover {
+  background-color: var(--ypp-bg-hover);
+}
+
+/* Nav buttons manage their own hover — don't let base .ypp-btn:hover override */
+
+.ypp-nav-btn.ypp-btn:hover {
+  background-color: transparent;
+}
+
+.ypp-btn:active {
+  background-color: var(--ypp-bg-active);
+}
+
+.ypp-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.ypp-btn-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+/* Header Navigation Group */
+
+.ypp-nav-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 16px 0 8px;
+}
+
+.ypp-nav-btn {
+  opacity: 0.8;
+  position: relative;
+}
+
+.ypp-nav-btn:hover {
+  opacity: 1;
+}
+
+.ypp-nav-btn.active {
+  color: var(--ypp-accent) !important;
+  opacity: 1;
+  /* No background — the ::after dot indicator below shows active state */
+}
+
+.ypp-nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 3px;
+  background-color: var(--ypp-accent);
+  border-radius: 2px;
+}
+
+/* Specific component tweaks */
+
+.ypp-speed-input {
+  width: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: var(--ypp-radius-sm);
+  padding: 4px 6px;
+  margin-right: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  font-family: inherit;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ypp-speed-input:focus {
+  outline: none;
+  border-color: var(--ypp-accent);
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
+}
+
+/* Hide arrows on number input */
+
+.ypp-speed-input::-webkit-outer-spin-button,
+.ypp-speed-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Display Full Video Titles */
+
+/* Hide Scrollbar */
+
+body.ypp-hide-scrollbar,
+body.ypp-hide-scrollbar *,
+html:has(body.ypp-hide-scrollbar),
+html:has(body.ypp-hide-scrollbar) body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body.ypp-hide-scrollbar::-webkit-scrollbar,
+body.ypp-hide-scrollbar *::-webkit-scrollbar,
+html:has(body.ypp-hide-scrollbar)::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* ===================================================================================
+   SHORTS & MIXES HIDING (Global Coverage)
+   =================================================================================== */
+
+/* --- Primary Shorts Shelves & Global Renderers --- */
+
+/* Pure CSS Hiding Rules for Content Control */
+
+/* Mixes */
+
+/* Playlists */
+
+/* Podcasts */
+
+/* Posts (Community Posts) */
+
+/* Container Cleanup - Sections that only contain Shorts */
+
+/* Watched Badge */
+
+.ypp-watched-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    background: rgba(16, 185, 129, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--ypp-z-card-hover);
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    animation: ypp-pulse-badge 2s infinite ease-in-out;
+}
+
+@keyframes ypp-pulse-badge {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Dim mode for watched videos */
+
+[data-ypp-hidden="watched"] {
+    transition: opacity 0.2s ease, filter 0.2s ease;
+    filter: grayscale(0.85) opacity(0.4) !important;
+}
+
+/* ===================================================================================
+   MARK AS WATCHED (MANUAL)
+   =================================================================================== */
+
+.ypp-watched-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: var(--ypp-z-content);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+ytd-thumbnail:hover .ypp-watched-icon {
+  opacity: 0.8;
+}
+
+.ypp-watched-icon:hover {
+  opacity: 1 !important;
+  transform: scale(1.1);
+  background: var(--ypp-accent, #3ea6ff);
+}
+
+.ypp-watched-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Visually indicate manually watched videos */
+
+.ypp-manually-watched::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background-color: var(--ypp-accent, #f00);
+  z-index: var(--ypp-z-content);
+}
+
+.ypp-manually-watched img {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+
+/* Advanced Filter Hidden Items */
+
+.ypp-filter-hidden {
+  display: none;
+}
+
+/* ===================================================================================
+   3. GLOBAL UI ELEMENTS
+   =================================================================================== */
+
+/* Custom Scrollbar */
+
+body.ypp-custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+body.ypp-custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Hide Default Elements */
+
+/* Ensure Profile Button Visible */
+
+/* Hide Create Button */
+
+/* Hide Create Button (All variants) */
+
+/* Specific targetting for the "Pill" styled Create button */
+
+/* Topbar Polish (Dynamic Injection from HeaderNav) */
+
+/* Center Mic Icon */
+
+.yt-premium-plus-theme #voice-search-button {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border-radius: 50% !important;
+}
+
+/* Profile Icon Squircle */
+
+.yt-premium-plus-theme #avatar-btn,
+.yt-premium-plus-theme #avatar-btn yt-img-shadow,
+.yt-premium-plus-theme #avatar-btn img {
+  border-radius: 12px !important;
+}
+
+body.ypp-hide-sidebar #content {
+  margin-left: 0 !important;
+}
+
+/* Header Navigation Group (Header Nav Feature) */
+
+.ypp-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  margin-right: 16px;
+  height: 40px;
+  order: -1;
+}
+
+.ypp-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px !important; /* Premium Squircle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--yt-spec-text-primary);
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1) !important;
+  position: relative;
+}
+
+.ypp-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 4px 12px rgba(0,0,0,0.3) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+
+.ypp-nav-btn.active {
+  /* Active = accent-coloured icon + underline dot only — no background fill */
+  color: var(--ypp-accent, #fff) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+}
+
+.ypp-nav-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1);
+}
+
+.ypp-nav-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Tooltip integration (simple title for now) */
+
+.ypp-nav-btn::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.2,0.8,0.2,1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: var(--ypp-z-popup);
+}
+
+.ypp-nav-btn:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Logo Area */
+
+/* Sidebar Scrolling */
+
+/* Watch Page: Hide Sidebar by Default */
+
+/* Sidebar No-Mini Mode - Full Width without margin gaps (Except Watch Page) */
+
+ytd-app[mini-guide-visible]:not([is-watch-page]) ytd-page-manager,
+ytd-app[mini-guide-visible]:not([is-watch-page]) #content {
+  margin-left: 0 !important;
+  --ytd-mini-guide-width: 0px !important;
+}
+
+/* Auto Scale Grid */
+
+/* Full Video Titles */
+
+body.ypp-full-title #video-title,
+body.ypp-full-title yt-formatted-string[id="video-title"] {
+  display: block !important;
+  max-height: none !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  white-space: normal !important;
+}
+
+/* ===================================================================================
+   6. SEARCH REDESIGN
+   =================================================================================== */
+
+/* ── 0. SEARCH PAGE: MINI-GUIDE & LAYOUT MARGIN FIX ──────────────── */
+
+/* Reinforces the global mini-guide rule with a search-scoped, higher-specificity
+   selector. This prevents the blank left gutter that appears on /results when
+   YouTube's own search-page stylesheet overrides the generic rule. */
+
+/* Stretch the search container edge-to-edge (applied for ALL search page
+   layouts, not just grid mode, so the fix survives a grid toggle). */
+
+/* Hide the secondary sidebar column (watch-next / ads) on the search page —
+   keeps the layout single-column and prevents a gap on the right. */
+
+/* ── 1. CONTAINER RESETS ──────────────────────────────────────────── */
+
+/* ── 2. MASTER GRID — lives on the section-list, not the item section ─── */
+
+/* Architecture:
+     ytd-section-list-renderer > #contents   ← CSS GRID (this rule)
+       ytd-item-section-renderer             ← display:contents (transparent)
+         ytd-item-section-renderer > #contents ← display:contents (transparent)
+           ytd-video-renderer                ← GRID CELL
+*/
+
+/* Bulletproof shelf grids in case JS fallback misses the container */
+
+/* Flatten item-section wrappers so video cards land directly in master grid */
+
+/* BUG 3: Staggered/misaligned middle cards (Image 3) */
+
+/* BUG 4 & OPTION B: Force full width for shelf renderers */
+
+/* FIX 4c: Convert shelf inner lists to grids so items inside them (like playlists) form grid cards! */
+
+/* OPTION A: Hide completely if clean search or hide search shelves is on */
+
+/* ── 4. FULL-WIDTH ITEMS (ads, continuation, non-card types) ─────── */
+
+/* ============================================================
+   VIDEO CARDS IN GRID — Mirrored from homepage ytd-rich-item-renderer
+   ============================================================ */
+
+/* Card shell: identical glassmorphic style to homepage cards */
+
+/* Thumbnails - identical to homepage card thumbnails */
+
+/* Thumbnails - identical to homepage card thumbnails */
+
+/* BUG 2: Cards overlapping and bleeding into each other */
+
+/* Video Title - identical to homepage card title */
+
+/* ── 2. MASTER GRID — lives on the section-list, not the item section ─── */
+
+/* Architecture:
+     ytd-section-list-renderer > #contents   ← CSS GRID (this rule)
+       ytd-item-section-renderer             ← display:contents (transparent)
+         ytd-item-section-renderer > #contents ← display:contents (transparent)
+           ytd-video-renderer                ← GRID CELL
+*/
+
+/* Flatten item-section wrappers so video cards land directly in master grid */
+
+/* BUG 3: Staggered/misaligned middle cards (Image 3) */
+
+/* BUG 4 & OPTION B: Force full width for shelf renderers */
+
+/* OPTION A: Hide completely if clean search or hide search shelves is on */
+
+/* ── 4. FULL-WIDTH ITEMS (ads, continuation, non-card types) ─────── */
+
+/* ============================================================
+   VIDEO CARDS IN GRID — Mirrored from homepage ytd-rich-item-renderer
+   ============================================================ */
+
+/* Card shell: identical glassmorphic style to homepage cards */
+
+/* Video Title - identical to homepage card title */
+
+/* =====================================================================
+   SEARCH GRID: INTERNAL CARD LAYOUT — VERTICAL STACK (matches homepage)
+   =====================================================================
+   The native ytd-video-renderer has a HORIZONTAL layout:
+     • ytd-thumbnail   → fixed width ~246px, floated/positioned left
+     • .text-wrapper   → margin-left ~246px to sit beside the thumbnail
+   We MUST override both CSS AND inline styles (the JS _cleanInlineStyles
+   method clears the inline values; these rules cover any stragglers).
+   ===================================================================== */
+
+/* ── 1. #dismissible or #content: primary inner wrapper → column stack ────────── */
+
+/* ── 1b. Brute-force any inner links to column stack (sometimes YouTube wraps the whole thing in <a>) ────────── */
+
+/* ── 2. Thumbnail: override the inline width YouTube's Polymer injects ─ */
+
+/* ── 3. Thumbnail inner elements ─────────────────────────────────── */
+
+/* ── 4. .text-wrapper: CRITICAL — zero out the side-offset margin ─── */
+
+/* ── 4. .text-wrapper: Grid layout to mimic Homepage ─── */
+
+/* Maintain flex column behavior for Playlists and Radios since they lack avatars */
+
+/* Flatten the internal wrappers to participate in grid */
+
+/* Avatar to grid area */
+
+/* Title wrapper to grid area */
+
+/* Channel name to grid area */
+
+/* Metadata (views/time) to grid area */
+
+/* Hide description text and badges for unified look */
+
+/* ── 9. Playlist / radio internal wrappers ───────────────────────── */
+
+/* Brute force all wrappers into flex columns */
+
+/* Hide YouTube's native 'stacked folder' backdrops for playlists */
+
+/* Ensure inner links don't inherit weird margins */
+
+/* ── 10. Action menu: pin to top-right corner of card ───────────── */
+
+/* Hover: identical float-and-glow to homepage cards */
+
+/* Strip the YouTube-native search-specific skew/arrow */
+
+/* Fix prominent-thumb variants: force correct aspect ratio */
+
+/* Hide description snippet in grid mode (too cluttered) */
+
+/* Hide inline badge labels in grid mode */
+
+/* Hide chapter bars (too cluttered in grid) */
+
+/* Non-Video Elements Span Full Width (shelves, promos) */
+
+/* Channel card: spans 2 columns, not full row */
+
+/* Channel Result Card — glassmorphic square card spanning 2 grid columns */
+
+/* Force intermediate wrappers to be columns so text isn't clipped out of view */
+
+/* Force channel name alignment and visibility */
+
+/* Subscribe Button centered at bottom */
+
+/* Noise Section Hiding */
+
+/* Continuation item MUST remain visible — it is YouTube's scroll sentinel.
+   When it enters the viewport, YouTube's IntersectionObserver loads the next
+   page of results. Hiding it with display:none breaks infinite scroll entirely.
+   We just make it span the full row and keep it at the bottom of the grid. */
+
+/* Section separator spacing – works because item-section is display:contents,
+   these are effectively no-ops on layout but prevent flash of spacing during load */
+
+/* Strict Shorts Suppression on Search */
+
+/* Responsive Search Grid — matches homepage responsive breakpoints */
+
+/* ==========================================================================
+   VIEW MODE TOGGLE BUTTON STYLES
+   ========================================================================== */
+
+.ypp-view-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ypp-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.ypp-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ypp-toggle-btn.active {
+  background: rgba(62, 166, 255, 0.2);
+  color: #3ea6ff;
+  border: 1px solid rgba(62, 166, 255, 0.3);
+}
+
+/* ==========================================================================
+   LIST MODE — Restore YouTube's native horizontal card layout
+   ========================================================================== */
+
+/* Show description snippet in list mode */
+
+/* Glass Badges (Duration, Quality) on Thumbnail */
+
+body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer,
+body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-right-renderer {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important; /* Fully rounded pills */
+  padding: 4px 8px !important;
+  margin: 6px !important;
+}
+
+body.yt-premium-plus-theme span.ytd-thumbnail-overlay-time-status-renderer {
+  font-family: "Inter", "Roboto", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  color: #fff !important;
+  line-height: 1 !important;
+}
+
+/* Hover-Only Menu Button */
+
+/* Hide Description */
+
+/* Non-Video Elements Span Full Width */
+
+/* Channel Result Card styling deduplicated - moved to line 2628 */
+
+/* Explicit class applied by JS for individual items */
+
+.ypp-hidden-short {
+  display: none !important;
+}
+
+/* CHIPS REDESIGN (GLOBAL) - Removed per user request */
+
+/* (Responsive search grid breakpoints consolidated at line 1924 above) */
+
+/* ===================================================================================
+   8. ZEN MODE & FOCUS FEATURES
+   =================================================================================== */
+
+/* Zen Mode */
+
+body.ypp-zen-mode #secondary {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  width: 0 !important;
+  overflow: hidden !important;
+  flex: 0 !important;
+  min-width: 0 !important;
+}
+
+/* Collapse the grid sidebar width in Zen Mode so the player expands */
+
+/* Zen Mode Title Enhancement */
+
+body.ypp-zen-mode ytd-watch-metadata #title h1 {
+  font-size: 2.6rem;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+  text-align: left;
+}
+
+body.ypp-zen-mode ytd-watch-metadata #top-row {
+  justify-content: space-between;
+}
+
+body.ypp-zen-mode #columns {
+  max-width: 1400px;
+}
+
+/* ===================================================================================
+   9. UTILITY CLASSES & ANIMATIONS
+   =================================================================================== */
+
+/* Fade Up Animation */
+
+@keyframes ypp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hidden Short Class */
+
+.ypp-hidden-short {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  pointer-events: none !important;
+}
+
+/* [Legacy Search Grid Styles Removed - Consolidated into Section 6] */
+
+/* --- 6. View Toggle Button --- */
+
+#ypp-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ypp-toggle-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateZ(0); /* Hardware Acceleration */
+  will-change: transform, box-shadow, background-color, color;
+}
+
+.ypp-toggle-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ypp-toggle-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.yt-premium-plus-theme ytd-multi-page-menu-renderer,
+.yt-premium-plus-theme ytd-simple-menu-header-renderer,
+.yt-premium-plus-theme ytd-active-account-header-renderer,
+.yt-premium-plus-theme ytd-voice-search-dialog-renderer {
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  box-shadow: var(--ypp-shadow-float);
+}
+
+.yt-premium-plus-theme ytd-popup-container {
+  z-index: var(--ypp-z-popup);
+}
+
+/* [Unused Filter Drawer Styles Removed] */
+
+/* Ad Hiding & Grid Protection */
+
+/* ===================================================================================
+   ENHANCED HOVER EFFECTS
+   =================================================================================== */
+
+/* Unified Card Hover Effect */
+
+/* Button Hover Pattern */
+
+.ypp-nav-btn,
+.ypp-player-controls button {
+  transition:
+    background-color var(--ypp-transition-fast),
+    transform var(--ypp-transition-fast);
+  transform: translateZ(0); /* Hardware Acceleration */
+  
+}
+
+.ypp-nav-btn:hover,
+.ypp-player-controls button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.ypp-nav-btn:active,
+.ypp-player-controls button:active {
+  transform: scale(0.98);
+}
+
+/* Active Navigation Item with Accent */
+
+.ypp-nav-btn.active {
+  /* Active = accent-coloured icon + underline dot only — no background fill */
+  color: var(--ypp-accent, #fff) !important;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+}
+
+/* Smooth Focus Indicators for Accessibility */
+
+.ypp-nav-btn:focus-visible,
+.ypp-player-controls button:focus-visible,
+ytd-searchbox input:focus-visible {
+  outline: 2px solid var(--ypp-accent-blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(62, 166, 255, 0.2);
+}
+
+/* Hide 'Top Recommendations' Heading */
+
+body.yt-premium-plus-theme:not(.ypp-channel-page) ytd-rich-section-renderer #title-container,
+body.yt-premium-plus-theme ytd-feed-nudge-renderer {
+  display: none !important;
+}
+
+/* ===================================================================================
+   4X4 GRID LAYOUT - ENHANCED STYLING
+   =================================================================================== */
+
+/* Force 4-column CSS Grid on home feed */
+
+/* Hide row wrappers to allow direct grid children */
+
+/* Style individual video cards for grid */
+
+/* Hide parent section of Shorts shelves to prevent gaps */
+
+/* Ensure video thumbnails scale properly */
+
+/* Video metadata styling */
+
+/* Card hover effects for grid items */
+
+/* -----------------------------------------------------------------------------------
+   CHANNEL TAGS (Injected by Home Organizer)
+   ----------------------------------------------------------------------------------- */
+
+.ypp-tag-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-md);
+  color: var(--ypp-text-secondary);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-sm);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: var(--ypp-z-card-hover);
+  opacity: 0;
+  transition: var(--ypp-transition);
+  box-shadow: var(--ypp-shadow-card);
+  text-transform: uppercase;
+}
+
+.ypp-tag-btn:hover {
+  background: var(--ypp-glass-highlight);
+  color: var(--ypp-text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ypp-tag-btn.tagged {
+  opacity: 1;
+  background: rgba(62, 166, 255, 0.15);
+  color: var(--ypp-accent-blue);
+  border-color: rgba(62, 166, 255, 0.3);
+}
+
+.ypp-tag-popover {
+  position: absolute;
+  background: var(--ypp-bg-glass);
+  backdrop-filter: var(--ypp-blur-lg);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-md);
+  box-shadow: var(--ypp-shadow-float);
+  padding: 8px 0;
+  z-index: var(--ypp-z-popup);
+  min-width: 140px;
+  overflow: hidden;
+  animation: ypp-fade-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ypp-tag-option {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--ypp-text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ypp-tag-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===================================================================================
+   6b. SEARCH REDESIGN — Supplement (Playlist Wrappers & Misc)
+   Grid flattening is handled in section 6 above.
+   =================================================================================== */
+
+/* Playlist Specific Badge Overlays */
+
+body.yt-premium-plus-theme ytd-playlist-thumbnail {
+  border-radius: var(--ypp-radius-md) !important;
+  overflow: hidden !important;
+  margin-bottom: 12px !important;
+  position: relative !important;
+}
+
+/* Premium Playlist Side Panel Overlay */
+
+body.yt-premium-plus-theme ytd-thumbnail-overlay-side-panel-renderer {
+  background: rgba(10, 10, 15, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  width: 35% !important;
+  max-width: 100% !important; /* Fixed: was 100px */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.yt-premium-plus-theme ytd-thumbnail-overlay-side-panel-renderer yt-formatted-string {
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Mix/Radio Premium Overlay */
+
+body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-panel-renderer {
+  background: linear-gradient(to top, rgba(10, 10, 15, 0.95), transparent) !important;
+  padding: 16px 8px 8px 8px !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  height: 40% !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Premium Playlist "View Full Playlist" Label */
+
+/* Uniform metadata line colour across all card types */
+
+/* Hover-Only Menu Button */
+
+/* Non-Video Elements Span Full Width (Except Channels) */
+
+/* Shelf Internal Grid (e.g. "From related searches") */
+
+/* Annihilate Horizontal Scroll Containers */
+
+/* Gap Annihilation: Nuke Hidden Shorts and Spacers */
+
+/* Channel search renderer height fix merged into the primary rules at line 2628 */
+
+/* Chips rule deleted due to deduplication */
+
+/* Next/Prev Buttons */
+
+/* Responsive Search Grid - Forcing specific column counts for perfect cards */
+
+/* Responsive breakpoints for grid */
+
+/* Ensure chip bar doesn't interfere with grid */
+
+body.yt-premium-plus-theme ytd-feed-filter-chip-bar-renderer {
+  margin-bottom: 24px;
+}
+
+/* ===================================================================================
+   11. SEARCH GRID - STRICT SHORTS SUPPRESSION & LAYOUT HARDENING
+   =================================================================================== */
+
+/* --- 1. Global Shorts Kill Switch --- */
+
+/* Strictly hide any container that looks like a Shorts shelf or contains Shorts metadata */
+
+/* --- 2. Force Full Width for Non-Card Elements --- */
+
+/*
+   Any renderer that is NOT a card must span the full grid width.
+   We explicitly exclude known card types (.ypp-grid-item targets them in JS).
+*/
+
+/* --- 3. Gap Cleanup --- */
+
+/* Hide entire section wrappers that contain hidden Shorts shelves to prevent empty grid gaps */
+
+/* ===================================================================================
+   10. JS-INJECTED UTILITIES (Performance Optimization)
+   =================================================================================== */
+
+/* Grid Layout (Replaces inline styles in layout-manager.js) */
+
+/* Flatten Row Wrappers globally (Massive performance boost vs JS mutation) */
+
+/* Grid Item Reset */
+
+/* ── Card Style: Search Results Sync ───────────────────────────────────────
+   The .ypp-grid-item reset uses !important which would override the card
+   style selectors. These rules re-apply each card style specifically for
+   .ypp-grid-item so search results stay in sync with the home/feed cards.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* FLAT ── search */
+
+/* ELEVATED ── search */
+
+/* GLASS ── search */
+
+/* FOLDER ── search */
+
+/* BENTO ── search */
+
+/* NEON ── search */
+
+/* COMPACT ── search */
+
+/* POLAROID ── search */
+
+/* NEUMORPHIC ── search (NEW) */
+
+/* CYBERPUNK ── search (NEW) */
+
+/* HOLOGRAPHIC ── search (NEW) */
+
+/* MINIMALIST ── search (NEW) */
+
+/* RETRO ── search (NEW) */
+
+/* BRUTALISM ── search (NEW) */
+
+/* SKEUOMORPHIC ── search (NEW) */
+
+/* FROSTED ── search (NEW) */
+
+/* SUMMER ── search (NEW) */
+
+@keyframes ypp-summer-heat {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes ypp-sun-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 1; }
+}
+
+/* WINTER ── search (NEW) */
+
+@keyframes ypp-winter-shimmer {
+  0% { transform: rotate(45deg) translateY(-200%); }
+  20% { transform: rotate(45deg) translateY(200%); }
+  100% { transform: rotate(45deg) translateY(200%); }
+}
+
+/* SPRING ── search (NEW) */
+
+@keyframes ypp-spring-bloom {
+  0% { box-shadow: 0 8px 24px rgba(255, 150, 180, 0.1), inset 0 0 10px rgba(255, 180, 200, 0); }
+  100% { box-shadow: 0 8px 24px rgba(255, 150, 180, 0.2), inset 0 0 20px rgba(255, 180, 200, 0.2); }
+}
+
+/* AUTUMN ── search (NEW) */
+
+@keyframes ypp-autumn-leaves {
+  0% { background-position: 0% 0%; border-left-color: rgba(220, 120, 40, 0.7); }
+  50% { background-position: 100% 50%; border-left-color: rgba(200, 60, 20, 0.8); }
+  100% { background-position: 0% 100%; border-left-color: rgba(180, 140, 30, 0.7); }
+}
+
+/* Zen Mode Shadow */
+
+.ypp-zen-shadow {
+  transition: box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* Toast Notification (Moved from player-tools.js) */
+
+.ypp-toast-mini {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: var(--ypp-z-popup);
+  animation: ypp-fade-in-out 2s forwards;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes ypp-fade-in-out {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+}
+
+/* ===================================================================================
+   11. HOME ORGANIZER & TAGGING
+   =================================================================================== */
+
+.ypp-feed-separator {
+  grid-column: 1 / -1; /* Span full width of grid */
+  padding: 24px 0 12px 0;
+  margin-top: 24px;
+  border-bottom: 1px solid var(--ypp-glass-border);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ypp-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.ypp-feed-separator:hover {
+  color: var(--ypp-accent);
+}
+
+.ypp-feed-separator::after {
+  content: "";
+  display: block;
+  margin-left: 12px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.3s;
+}
+
+.ypp-feed-separator.collapsed::after {
+  transform: rotate(-45deg);
+}
+
+.ypp-section-hidden {
+  display: none !important;
+}
+
+/* Tag Button on Thumbnail */
+
+.yt-premium-plus-theme ytd-thumbnail .ypp-tag-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px; /* Squircle */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-4px) translateZ(0); /* Hardware Acceleration */
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  will-change: opacity, transform, background-color, box-shadow;
+  z-index: var(--ypp-z-card-hover);
+}
+
+.ypp-tag-btn:hover {
+  background: var(--ypp-accent);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ypp-tag-btn.tagged {
+  background: var(--ypp-accent-glow);
+  color: var(--ypp-accent);
+  border-color: var(--ypp-accent);
+}
+
+/* Tag Popover */
+
+.ypp-tag-popover {
+  position: absolute;
+  background: var(--ypp-bg-surface);
+  /* backdrop-filter: blur(16px); */
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: var(--ypp-shadow-float);
+  z-index: var(--ypp-z-popup);
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: ypp-fade-in 0.15s ease-out;
+  transform: translateZ(0); /* Hardware Acceleration */
+  will-change: transform, opacity;
+}
+
+.ypp-tag-option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--ypp-text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+  
+}
+
+.ypp-tag-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ypp-text-primary);
+}
+
+@keyframes ypp-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================================================================
+   13. PLAYLIST PAGE NATIVE OVERRIDES
+   Note: Custom playlist UI is handled by PlaylistRedesign JS. 
+   These legacy CSS rules were breaking the native layout and have been removed.
+   =================================================================================== */
+
+/* Playlist Panel on Watch Page (Queue) */
+
+body.yt-premium-plus-theme ytd-playlist-panel-video-renderer {
+  margin: 8px;
+  border-radius: var(--ypp-radius-sm);
+  padding: 8px;
+  transition: background-color 0.15s;
+}
+
+body.yt-premium-plus-theme ytd-playlist-panel-video-renderer:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.yt-premium-plus-theme ytd-playlist-panel-video-renderer[selected] {
+  background-color: rgba(62, 166, 255, 0.1);
+  border-left: 3px solid var(--ypp-accent-blue);
+}
+
+/* ===================================================================================
+   12. YOUTUBE REFINED ENHANCEMENTS (PHASE 10)
+   =================================================================================== */
+
+/* 1. Continue Watching UI */
+
+/* ===================================================================================
+   14. PRO MAX UI ENHANCEMENTS (Left Guide, Buttons, Inputs)
+   =================================================================================== */
+
+/* Left Sidebar (Guide) Glassmorphism */
+
+/* Global Buttons & Searchbox Tactile Enhancements */
+
+body.yt-premium-plus-theme yt-button-shape {
+  transition:
+    transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme yt-button-shape:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.yt-premium-plus-theme  # {
+  background: rgba(20, 20, 20, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme  #[has-focus] {
+  border-color: var(--ypp-accent) !important;
+  box-shadow:
+    0 0 12px var(--ypp-accent-glow),
+    inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 2. Slide-out Hover Animation for Related Videos */
+
+/* 3. Pro Max Rounding for Core Elements */
+
+ # {
+  border-radius: var(--ypp-radius-md) 0 0 var(--ypp-radius-md) !important;
+}
+
+ # {
+  border-radius: 0 var(--ypp-radius-md) var(--ypp-radius-md) 0 !important;
+}
+
+/* 4. Segmented Comments Cards */
+
+/* 5. Live Badge Red Voids */
+
+body.yt-premium-plus-theme
+  .badge-style-type-live-now.ytd-badge-supported-renderer,
+body.yt-premium-plus-theme
+  .badge-style-type-starting-soon.ytd-badge-supported-renderer {
+  padding: 4px 6px !important;
+  background-color: #cc0000 !important;
+  color: white !important;
+  border-radius: var(--ypp-radius-sm) !important;
+  font-weight: bold !important;
+}
+
+/* ===================================================================================
+   15. SUBSCRIPTION FOLDERS (PocketTube Replacement)
+   =================================================================================== */
+
+/* Sidebar Folder List Header */
+
+.ypp-sub-folders {
+  margin: 12px 0 12px 12px;
+  padding: 16px;
+  background: var(--ypp-bg-surface);
+  backdrop-filter: var(--ypp-blur-lg);
+  -webkit-backdrop-filter: var(--ypp-blur-lg);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ypp-folder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ypp-folder-header h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ypp-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.ypp-icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ypp-text-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ypp-icon-btn:hover {
+  background: var(--ypp-accent-blue);
+  color: #fff;
+  border-color: rgba(62, 166, 255, 0.5);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 0 12px rgba(62, 166, 255, 0.4);
+}
+
+/* Sidebar Folder Item */
+
+.ypp-folder-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: var(--ypp-radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: 6px;
+}
+
+.ypp-folder-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.ypp-folder-item.active {
+  background: linear-gradient(
+    90deg,
+    rgba(62, 166, 255, 0.15) 0%,
+    rgba(62, 166, 255, 0.05) 100%
+  );
+  border: 1px solid rgba(62, 166, 255, 0.2);
+  border-left: 3px solid var(--ypp-accent-blue);
+  box-shadow: inset 0 0 12px rgba(62, 166, 255, 0.05);
+}
+
+.ypp-folder-icon {
+  margin-right: 12px;
+  font-size: 1.5rem;
+  color: var(--ypp-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.ypp-folder-item.active .ypp-folder-icon {
+  color: var(--ypp-accent-blue);
+}
+
+.ypp-folder-name {
+  flex: 1;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--ypp-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.ypp-folder-item:hover .ypp-folder-name {
+  color: #fff;
+}
+
+.ypp-folder-item.active .ypp-folder-name {
+  color: var(--ypp-text-primary);
+  font-weight: 600;
+}
+
+.ypp-folder-count {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 12px;
+  min-width: 24px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.ypp-folder-item.active .ypp-folder-count {
+  background: rgba(62, 166, 255, 0.2);
+  color: #fff;
+  border-color: rgba(62, 166, 255, 0.4);
+}
+
+/* Feed Filter Chips */
+
+.ypp-folder-chips-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  background: var(--ypp-bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: 12px;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.ypp-folder-chips-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ypp-folder-chips-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.ypp-filter-separator {
+  width: 1px;
+  height: 24px;
+  background: var(--ypp-glass-border);
+  margin: 0 4px;
+}
+
+.ypp-filter-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #aaa;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.ypp-filter-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.ypp-filter-chip.active {
+  background: var(--ypp-accent-blue);
+  border-color: var(--ypp-accent-blue);
+  color: #fff;
+  font-weight: 600;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(62, 166, 255, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Feature Parity Toggle Chips */
+
+.ypp-toggle-chip {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: transparent;
+}
+
+.ypp-toggle-chip:hover {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ypp-toggle-chip.active {
+  background: #ff4e45;
+  border: 1px solid #ff4e45;
+  color: #fff;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(255, 78, 69, 0.3);
+}
+
+/* Channel Page Popover button */
+
+.ypp-tactile-btn {
+  background: var(--ypp-bg-glass);
+  border: 1px solid var(--ypp-glass-border);
+  color: var(--ypp-text-primary);
+  border-radius: var(--ypp-radius-pill);
+  padding: 0 16px;
+  height: 36px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  backdrop-filter: var(--ypp-blur-md);
+  margin-right: 8px;
+  transition:
+    transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.2s ease;
+}
+
+.ypp-tactile-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Channel Badges on Thumbnails */
+
+.ypp-folder-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(18, 18, 26, 0.85);
+  backdrop-filter: var(--ypp-blur-md);
+  -webkit-backdrop-filter: var(--ypp-blur-md);
+  color: var(--ypp-text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--ypp-radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: var(--ypp-z-card-hover);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Popover Menu */
+
+.ypp-glass-popover {
+  position: absolute;
+  background: var(--ypp-bg-elevated);
+  backdrop-filter: var(--ypp-blur-high);
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: var(--ypp-radius-lg);
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: var(--ypp-shadow-float);
+  z-index: var(--ypp-z-popup);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s;
+}
+
+.ypp-glass-popover.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.ypp-popover-header {
+  font-size: 1.4rem;
+  color: var(--ypp-text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ypp-glass-border);
+}
+
+.ypp-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ypp-folder-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.ypp-folder-checkbox:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ypp-folder-checkbox input[type="checkbox"] {
+  margin-right: 12px;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--ypp-glass-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  position: relative;
+  cursor: pointer;
+}
+
+.ypp-folder-checkbox input[type="checkbox"]:checked {
+  background: var(--ypp-accent);
+  border-color: var(--ypp-accent);
+}
+
+.ypp-folder-checkbox input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ypp-folder-checkbox span {
+  font-size: 1.4rem;
+  color: var(--ypp-text-secondary);
+}
+
+.ypp-folder-checkbox:hover span,
+.ypp-folder-checkbox input[type="checkbox"]:checked + span {
+  color: white;
+}
+
+/* ==========================================================================
+   KEYBOARD SHORTCUT TOAST
+   Small action label that fades in at the bottom of the screen on keypress.
+   ========================================================================== */
+
+.ypp-shortcut-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(20, 20, 30, 0.88);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  color: #fff;
+  font-family: "Roboto", "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  z-index: var(--ypp-z-popup);
+  white-space: nowrap;
+}
+
+.ypp-shortcut-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   WATCH TIME ALERT OVERLAY
+   Dismissible reminder banner that slides in from the top-right.
+   ========================================================================== */
+
+/* ===================================================================================
+   16. SUBSCRIPTIONS FEED TWEAKS
+   =================================================================================== */
+
+/* Completely hide horizontal shelves (Shorts, Continuations, Community Posts) on Subscriptions */
+
+/* ===================================================================================
+   16. REDESIGNED UI ELEMENTS (PREMIUM GLASSMORPHIC AESTHETIC)
+   =================================================================================== */
+
+/* ── 1. Detached Glass Control Bar (ytp-chrome-bottom) [DISABLED DUE TO RENDERING BUG] ── */
+
+/* ── Glowing Progress Bar [DISABLED DUE TO RENDERING BUG] ── */
+
+/* ── Player Control Buttons ── */
+
+/* Remove default gradients to ensure pure transparency */
+
+/* ── 8. Settings / quality popup ── */
+
+/* --- Unified Speed-Aware Time Dashboard --- */
+
+.ypp-time-dashboard {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-left: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  height: 24px !important;
+  font-family: var(--ypp-font-family, "Inter", sans-serif) !important;
+}
+
+.ypp-time-dashboard.active {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 2. Action Buttons Redesign (Beneath Video Title) */
+
+/* Container for the entire top row (Channel info + Actions) */
+
+body.yt-premium-plus-theme  # {
+  margin-top: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+
+/* Channel Owner Section Pill */
+
+body.yt-premium-plus-theme  # {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 100px !important;
+  padding: 4px 16px 4px 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme  #:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Subscribe Button Container & Positioning */
+
+body.yt-premium-plus-theme ytd-watch-metadata #owner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+body.yt-premium-plus-theme ytd-watch-metadata #subscribe-button {
+  margin-left: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Subscribe Button */
+
+body.yt-premium-plus-theme
+  #subscribe-button
+  > ytd-subscribe-button-renderer
+  > yt-smartimation
+  > div
+  > yt-button-shape
+  > button,
+body.yt-premium-plus-theme
+  #subscribe-button
+  ytd-button-renderer
+  yt-button-shape
+  > button {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+  color: var(--yt-spec-text-primary, #fff) !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  padding: 0 20px !important;
+  height: 40px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+body.yt-premium-plus-theme
+  #subscribe-button
+  > ytd-subscribe-button-renderer
+  > yt-smartimation
+  > div
+  > yt-button-shape
+  > button:hover,
+body.yt-premium-plus-theme
+  #subscribe-button
+  ytd-button-renderer
+  yt-button-shape
+  > button:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1)) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Subscribed State */
+
+body.yt-premium-plus-theme #subscribe-button ytd-subscribe-button-renderer[subscribed] yt-button-shape > button,
+body.yt-premium-plus-theme #subscribe-button ytd-button-renderer.style-text yt-button-shape > button {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--ypp-text-secondary, #aaa) !important;
+  box-shadow: none !important;
+}
+
+body.yt-premium-plus-theme #subscribe-button ytd-subscribe-button-renderer[subscribed] yt-button-shape > button:hover,
+body.yt-premium-plus-theme #subscribe-button ytd-button-renderer.style-text yt-button-shape > button:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--ypp-text-primary, #fff) !important;
+}
+
+body.yt-premium-plus-theme
+  #subscribe-button
+  yt-button-shape
+  button
+  .yt-spec-button-shape-next__button-text-content {
+  color: inherit !important;
+}
+
+/* Actions Menu Container */
+
+body.yt-premium-plus-theme  # {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* Base button container fixes (remove native YouTube backgrounds that cause double layering) */
+
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-button-renderer
+  yt-button-shape
+  button,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-download-button-renderer
+  yt-button-shape
+  button,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-menu-renderer
+  yt-button-shape
+  button,
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button {
+  border: none !important; /* Will be overridden by above specific rules if subscribe */
+}
+
+/* Hide native ripple and dark mode overlay pseudo-elements responsible for the "double view" */
+
+body.yt-premium-plus-theme #actions-inner yt-button-shape button::before,
+body.yt-premium-plus-theme #actions-inner yt-button-shape button::after,
+body.yt-premium-plus-theme #actions-inner yt-touch-feedback-shape,
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button::before,
+body.yt-premium-plus-theme #subscribe-button yt-button-shape button::after,
+body.yt-premium-plus-theme #subscribe-button yt-touch-feedback-shape {
+  display: none !important;
+}
+
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-button-renderer
+  yt-button-shape
+  button
+  .yt-spec-button-shape-next__button-text-content,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-download-button-renderer
+  yt-button-shape
+  button
+  .yt-spec-button-shape-next__button-text-content,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-menu-renderer
+  yt-button-shape
+  button
+  .yt-spec-button-shape-next__button-text-content {
+  margin: 0 !important;
+}
+
+/* Individual Action Pills (Share, Download, Save, etc.) applying glassmorphism to the outer button structure */
+
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-button-renderer
+  yt-button-shape
+  > button,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-download-button-renderer
+  yt-button-shape
+  > button,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-menu-renderer
+  yt-button-shape
+  > button {
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-weight: 500 !important;
+  color: var(--ypp-text-primary, #fff) !important;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-button-renderer
+  yt-button-shape
+  > button:hover,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-download-button-renderer
+  yt-button-shape
+  > button:hover,
+body.yt-premium-plus-theme
+  #actions-inner
+  ytd-menu-renderer
+  yt-button-shape
+  button:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Segmented Like/Dislike Button Fixes */
+
+/* Reset background on the container so we can style the inner buttons */
+
+body.yt-premium-plus-theme #segmented-like-button yt-button-shape button,
+body.yt-premium-plus-theme #segmented-dislike-button yt-button-shape button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.yt-premium-plus-theme ytd-segmented-like-dislike-button-renderer {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 100px !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 36px !important;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme ytd-segmented-like-dislike-button-renderer:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Like button side */
+
+body.yt-premium-plus-theme
+  ytd-segmented-like-dislike-button-renderer
+  yt-button-shape:first-child
+  button {
+  border-radius: 100px 0 0 100px !important;
+  padding: 0 16px !important;
+  height: 100% !important;
+}
+
+/* Dislike button side */
+
+body.yt-premium-plus-theme
+  ytd-segmented-like-dislike-button-renderer
+  yt-button-shape:last-child
+  button {
+  border-radius: 0 100px 100px 0 !important;
+  padding: 0 16px !important;
+  height: 100% !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Adjust icons inside buttons */
+
+body.yt-premium-plus-theme #actions-inner yt-icon {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 3. Pop-up Menus Redesign (3-dot menus) */
+
+body.yt-premium-plus-theme tp-yt-paper-listbox {
+  border-radius: 16px !important;
+  background: rgba(25, 25, 25, 0.8) !important;
+  backdrop-filter: blur(24px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Added micro-animations on hovering menu items */
+
+body.yt-premium-plus-theme ytd-menu-service-item-renderer,
+body.yt-premium-plus-theme ytd-menu-navigation-item-renderer {
+  border-radius: 8px !important;
+  margin: 4px 8px !important;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+body.yt-premium-plus-theme ytd-menu-service-item-renderer:hover,
+body.yt-premium-plus-theme ytd-menu-navigation-item-renderer:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  transform: translateX(4px) !important;
+}
+
+/* 4. Search Results Chapters Redesign */
+
+/* The cleanest approach for a grid layout is to remove this element. */
+
+/* Also hide any accompanying chapter expanding teasers inside search video cards */
+
+/* ===================================================================================
+   17. DYNAMIC GRID LAYOUT (Home, Subscriptions, Channels)
+   =================================================================================== */
+
+/* Ensure individual items fill the grid cell and override YouTube's flex-basis constraints */
+
+/* ===================================================================================
+   XX. HISTORY PAGE REDESIGN
+   =================================================================================== */
+
+/* --- History Page Items (Horizontal Glass Cards) --- */
+
+/* Target History Analytics Dashboard */
+
+/* History Analytics Inner Cards */
+
+/* History List Items */
+
+/* Realign thumbnail and content in history cards */
+
+/* History Subheadings (Dates like "Today", "Yesterday") */
+
+/* ══════════════════════════════════════════════════════════════
+   PLAYLIST REDESIGN — Custom UI Component Styles
+   All scoped to #ypp-pl-root to avoid leaking to native YouTube
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hide native playlist elements dynamically without removing them from DOM */
+
+/* Aggressively strip YouTube's native page-manager margins so we span full width */
+
+/* Remove centering cap on browse wrapper */
+
+/* Root wrapper */
+
+/* Layout container: sidebar is fixed so layout is just a block context */
+
+/* Ensure YouTube masthead always sits above our fixed sidebar */
+
+/* Ambient background */
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+
+/* Cover image */
+
+/* Meta text */
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+
+/* Tools Grid */
+
+/* Remove Watched button */
+
+/* ── Duration card ────────────────────────────────────────────────── */
+
+/* ── Main content area ────────────────────────────────────────────── */
+
+/* ── Toolbar ──────────────────────────────────────────────────────── */
+
+/* Column switcher pill */
+
+/* Filter input */
+
+/* ── Grid ─────────────────────────────────────────────────────────── */
+
+/* ── Video card ───────────────────────────────────────────────────── */
+
+/* Thumbnail area */
+
+/* Index badge */
+
+/* Duration badge */
+
+/* Progress bar */
+
+/* Card info */
+
+/* Card Menu Button */
+
+/* Context Menu */
+
+.ypp-ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.ypp-ctx-item:hover {
+    background: rgba(255,255,255,0.07);
+    color: white;
+}
+
+.ypp-ctx-danger {
+    color: rgba(255,90,80,0.8);
+}
+
+.ypp-ctx-danger:hover {
+    background: rgba(255,78,69,0.1);
+    color: #ff6b6b;
+}
+
+/* ── 1-col horizontal card override ──────────────────────────────── */
+
+/* Placeholder thumbnail */
+
+/* ═══════════════════════════════════════════════
+   ACCOUNT MENU REDESIGN — Orbital Layout
+   ═══════════════════════════════════════════════ */
+
+/* Ensure the YouTube dropdown doesn't clip our wider menu */
+
+tp-yt-iron-dropdown ytd-multi-page-menu-renderer,
+ytd-popup-container ytd-multi-page-menu-renderer {
+    overflow: visible !important;
+    min-width: 310px !important;
+}
+
+.ypp-account-menu {
+    width: 310px;
+    background: rgba(18, 18, 18, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden;
+    font-family: Roboto, Arial, sans-serif;
+    color: white;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+/* ── Satellite hover ──────────────────────────── */
+
+.ypp-satellite {
+    transition: opacity 0.2s ease;
+    opacity: 0.75;
+}
+
+.ypp-satellite:hover {
+    opacity: 1 !important;
+    z-index: var(--ypp-z-card-hover);
+}
+
+.ypp-satellite:hover .ypp-letter-avatar {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.5) !important;
+    transform: scale(1.18);
+}
+
+.ypp-letter-avatar {
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+}
+
+/* ── Header text ──────────────────────────────── */
+
+.ypp-active-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: white;
+}
+
+.ypp-active-handle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+}
+
+.ypp-channel-link {
+    display: inline-block;
+    font-size: 12px;
+    color: #3ea6ff;
+    text-decoration: none;
+    margin-top: 8px;
+}
+
+.ypp-channel-link:hover { text-decoration: underline; }
+
+/* ── Menu items ──────────────────────────────── */
+
+.ypp-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s;
+    font-family: Roboto, Arial, sans-serif;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.ypp-menu-item:hover {
+    background: rgba(255,255,255,0.07);
+    color: white;
+}
+
+.ypp-more-toggle { color: rgba(255,255,255,0.5); font-size: 13px; }
+
+.ypp-chevron { margin-left: auto; transition: transform 0.2s ease; flex-shrink: 0; }
+
+.ypp-more-items {
+    display: none;
+    flex-direction: column;
+    border-left: 2px solid rgba(255,255,255,0.08);
+    margin-left: 16px;
+    padding-left: 8px;
+}
+
+.ypp-more-items.open { display: flex; }
+
+.ypp-more-item { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+/* ── Footer / Sign out ──────────────────────── */
+
+.ypp-menu-footer {
+    padding: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.ypp-signout { color: rgba(255,100,100,0.8); }
+
+.ypp-signout:hover { background: rgba(255,78,69,0.08); color: #ff4e45; }
+
+/* ── Sign out confirmation overlay ─────────── */
+
+.ypp-signout-confirm {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    z-index: var(--ypp-z-content);
+}
+
+.ypp-confirm-box {
+    background: rgba(28,28,28,0.98);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 22px 20px 18px;
+    text-align: center;
+    width: 210px;
+}
+
+.ypp-confirm-box p { color: white; font-size: 14px; margin: 0 0 16px; }
+
+.ypp-confirm-actions { display: flex; gap: 8px; }
+
+.ypp-confirm-actions button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: Roboto, Arial, sans-serif;
+}
+
+.ypp-confirm-actions button:hover { background: rgba(255,255,255,0.12); }
+
+.ypp-confirm-actions button.danger {
+    background: rgba(255,78,69,0.15);
+    border-color: rgba(255,78,69,0.3);
+    color: #ff4e45;
+}
+
+.ypp-confirm-actions button.danger:hover { background: rgba(255,78,69,0.25); }
+
+/* CONTENT FILTERS */
+
+/* ── Hide Playlists ── */
+
+/* ── Hide Podcasts ── */
+
+body.ypp-hide-podcasts
+tp-yt-paper-tab:has([title*="Podcast"]),
+body.ypp-hide-podcasts
+tp-yt-paper-tab:has([title*="podcast"]) {
+    display: none !important;
+}
+
+/* MULTI-SELECT */
+
+.ypp-ms-checkbox {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 6px !important;
+    border: 2px solid rgba(255,255,255,0.7) !important;
+    background: rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: var(--ypp-z-card-hover) !important;
+    opacity: 0 !important;
+    transition: opacity 0.15s, background 0.15s !important;
+}
+
+.ypp-ms-check-icon {
+    opacity: 0 !important;
+    color: white !important;
+    transition: opacity 0.1s !important;
+}
+
+.ypp-ms-checkbox.ypp-ms-checked {
+    background: #6C63FF !important;
+    border-color: #6C63FF !important;
+    opacity: 1 !important;
+}
+
+.ypp-ms-checkbox.ypp-ms-checked .ypp-ms-check-icon {
+    opacity: 1 !important;
+}
+
+.ypp-ms-selected {
+    outline: 2px solid #6C63FF !important;
+    outline-offset: 2px !important;
+    border-radius: 10px !important;
+}
+
+.ypp-ms-bar {
+    position: fixed !important;
+    bottom: 24px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: var(--ypp-z-popup) !important;
+    background: rgba(18,18,18,0.97) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 14px !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    animation: ypp-ms-bar-in 0.2s cubic-bezier(0.34,1.56,0.64,1) !important;
+    white-space: nowrap !important;
+}
+
+@keyframes ypp-ms-bar-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.ypp-ms-bar-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding-right: 16px !important;
+    border-right: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.ypp-ms-count {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #6C63FF !important;
+    font-family: Roboto, sans-serif !important;
+}
+
+.ypp-ms-label {
+    font-size: 13px !important;
+    color: rgba(255,255,255,0.6) !important;
+    font-family: Roboto, sans-serif !important;
+}
+
+.ypp-ms-bar-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.ypp-ms-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 8px 14px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 13px !important;
+    font-family: Roboto, sans-serif !important;
+    cursor: pointer !important;
+    transition: background 0.12s, color 0.12s !important;
+    white-space: nowrap !important;
+}
+
+.ypp-ms-btn:hover {
+    background: rgba(255,255,255,0.12) !important;
+    color: white !important;
+}
+
+.ypp-ms-btn-clear {
+    color: rgba(255,90,80,0.8) !important;
+    border-color: rgba(255,78,69,0.2) !important;
+}
+
+.ypp-ms-btn-clear:hover {
+    background: rgba(255,78,69,0.1) !important;
+    color: #ff6b6b !important;
+}
+
+/* HIDE METRICS */
+
+body.ypp-hide-metrics #metadata-line,
+body.ypp-hide-metrics ytd-video-meta-block,
+body.ypp-hide-metrics #info-strings,
+body.ypp-hide-metrics .ytd-video-meta-block {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #count,
+body.ypp-hide-metrics ytd-video-view-count-renderer,
+body.ypp-hide-metrics .view-count,
+body.ypp-hide-metrics #info .style-scope:first-child {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #segmented-like-button 
+    .yt-spec-button-shape-next__button-text-content,
+body.ypp-hide-metrics like-button-view-model 
+    .yt-spec-button-shape-next__button-text-content,
+body.ypp-hide-metrics 
+    ytd-toggle-button-renderer .ytd-toggle-button-renderer {
+    display: none !important;
+}
+
+body.ypp-hide-metrics #owner-sub-count,
+body.ypp-hide-metrics ytd-channel-name + *,
+body.ypp-hide-metrics #subscribers,
+body.ypp-hide-metrics 
+    ytd-subscription-notification-toggle-button-renderer-next,
+body.ypp-hide-metrics 
+    ytd-video-owner-renderer #subscriber-count {
+    display: none !important;
+}
+
+body.ypp-hide-metrics 
+    ytd-channel-tagline-renderer,
+body.ypp-hide-metrics 
+    #channel-header-container #subscribers {
+    display: none !important;
+}
+
+body.ypp-hide-metrics 
+    ytd-playlist-thumbnail .playlist-items-count {
+    display: none !important;
+}
+
+/* HIDE THUMBNAILS */
+
+body.ypp-hide-thumbnails ytd-thumbnail,
+body.ypp-hide-thumbnails ytd-thumbnail-view-model,
+body.ypp-hide-thumbnails .ytThumbnailViewModelSmall,
+body.ypp-hide-thumbnails .ytThumbnailViewModelMedium,
+body.ypp-hide-thumbnails .ytThumbnailViewModelLarge,
+body.ypp-hide-thumbnails ytd-playlist-thumbnail,
+body.ypp-hide-thumbnails #thumbnail,
+body.ypp-hide-thumbnails ytd-reel-video-renderer,
+body.ypp-hide-thumbnails ytd-reel-item-renderer {
+    filter: blur(15px) grayscale(100%) opacity(0.3) !important;
+    transition: filter 0.3s ease, opacity 0.3s ease !important;
+}
+
+body.ypp-hide-thumbnails ytd-thumbnail:hover,
+body.ypp-hide-thumbnails ytd-thumbnail-view-model:hover,
+body.ypp-hide-thumbnails .ytThumbnailViewModelSmall:hover,
+body.ypp-hide-thumbnails .ytThumbnailViewModelMedium:hover,
+body.ypp-hide-thumbnails .ytThumbnailViewModelLarge:hover,
+body.ypp-hide-thumbnails ytd-playlist-thumbnail:hover,
+body.ypp-hide-thumbnails #thumbnail:hover,
+body.ypp-hide-thumbnails ytd-reel-video-renderer:hover,
+body.ypp-hide-thumbnails ytd-reel-item-renderer:hover {
+    filter: blur(0px) grayscale(0%) opacity(1) !important;
+}
+
+/* INTENTIONAL DELAY */
+
+.ypp-intentional-delay-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(10, 10, 10, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    z-index: var(--ypp-z-popup) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    color: white !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+.ypp-id-content h2 { font-size: 36px !important; margin-bottom: 12px !important; font-weight: 300 !important; }
+
+.ypp-id-content p { font-size: 18px !important; opacity: 0.7 !important; margin-bottom: 32px !important; }
+
+.ypp-id-timer { font-size: 64px !important; font-weight: 700 !important; color: #6C63FF !important; }
+
+.ypp-id-skip {
+    background: #6C63FF !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 32px !important;
+    font-size: 16px !important;
+    border-radius: 24px !important;
+    cursor: pointer !important;
+    margin: 0 auto !important;
+    transition: transform 0.2s, background 0.2s !important;
+}
+
+.ypp-id-skip:hover { background: #817aff !important; transform: scale(1.05) !important; }
+
+/* --- Custom Scrollbar --- */
+
+body.ypp-custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+body.ypp-custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--ypp-accent-glow, rgba(255, 255, 255, 0.2));
+    border-radius: 10px;
+}
+
+body.ypp-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ypp-accent, rgba(255, 255, 255, 0.5));
+}
+
+body.ypp-custom-scrollbar *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body.ypp-custom-scrollbar *::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body.ypp-custom-scrollbar *::-webkit-scrollbar-thumb {
+    background-color: var(--ypp-accent-glow, rgba(255, 255, 255, 0.2));
+    border-radius: 8px;
+}
+
+body.ypp-custom-scrollbar *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ypp-accent, rgba(255, 255, 255, 0.5));
+}
+
+/* --- Grayscale Thumbnails --- */
+
+body.ypp-grayscale-thumbnails ytd-thumbnail img {
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+}
+
+body.ypp-grayscale-thumbnails ytd-thumbnail:hover img {
+    filter: grayscale(0%);
+}
+
+/* Cinematic Mode (Netflix Style) */
+
+/* Hide native elements when active */
+
+/* Toggle Button in the YouTube Header */
+
+.ypp-cinematic-toggle-btn {
+    background: #e50914; /* Netflix Red */
+    color: white;
+    border: none;
+    border-radius: 18px;
+    padding: 6px 16px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 12px;
+    transition: transform 0.2s, background 0.2s;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.ypp-cinematic-toggle-btn:hover {
+    background: #f40612;
+    transform: scale(1.05);
+}
+
+/* Base App Container */
+
+#ypp-cinematic-app {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0f0f0f; /* YouTube Dark Theme Base */
+    color: #fff;
+    font-family: "YouTube Noto", Roboto, Arial, sans-serif;
+    position: relative;
+    z-index: var(--ypp-z-content);
+    overflow-x: hidden;
+}
+
+/* Hero Section */
+
+.ypp-cinematic-hero {
+    position: relative;
+    width: 100%;
+    height: 75vh;
+    min-height: 500px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 4% 10% 4%;
+    box-sizing: border-box;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Gradient overlay to blend hero into the rest of the page */
+
+.ypp-cinematic-hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, #0f0f0f 0%, transparent 40%, rgba(15, 15, 15, 0.4) 100%);
+    z-index: var(--ypp-z-content);
+    pointer-events: none;
+}
+
+/* Background video for Hero */
+
+.ypp-cinematic-hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1; /* Behind the gradient and content */
+    pointer-events: none; /* Let clicks pass through */
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+
+.ypp-cinematic-hero-video.playing {
+    opacity: 1;
+}
+
+/* Hero Content (Title, Channel, Buttons) */
+
+.ypp-cinematic-hero-content {
+    position: relative;
+    z-index: var(--ypp-z-content);
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: yppFadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.ypp-cinematic-hero-channel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.ypp-cinematic-hero-channel img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.ypp-cinematic-hero-title {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ypp-cinematic-hero-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.ypp-cinematic-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.ypp-cinematic-btn:hover {
+    transform: scale(1.05);
+}
+
+.ypp-cinematic-btn-play {
+    background-color: white;
+    color: black;
+}
+
+.ypp-cinematic-btn-mute {
+    background-color: rgba(109, 109, 110, 0.7);
+    color: white;
+}
+
+/* Rows Section */
+
+.ypp-cinematic-rows {
+    position: relative;
+    z-index: var(--ypp-z-content);
+    margin-top: -60px; /* Pull rows up over the bottom of the hero gradient */
+    padding-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.ypp-cinematic-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ypp-cinematic-row-title {
+    padding: 0 4%;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: #e5e5e5;
+}
+
+/* Horizontal Scroll Container */
+
+.ypp-cinematic-row-cards {
+    display: flex;
+    gap: 8px;
+    padding: 0 4%;
+    overflow-x: auto;
+    overflow-y: visible; /* Needed for hover scale */
+    scroll-behavior: smooth;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.ypp-cinematic-row-cards::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+}
+
+/* Video Card */
+
+.ypp-cinematic-card {
+    flex: 0 0 calc(20% - 8px); /* 5 cards per row */
+    min-width: 250px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+    background: #202020;
+    transform-origin: center center;
+}
+
+/* Hover Scaling Effect */
+
+.ypp-cinematic-card:hover {
+    transform: scale(1.15);
+    z-index: var(--ypp-z-card-hover);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+/* First and last child need specific transform origins so they don't clip off screen */
+
+.ypp-cinematic-row-cards > .ypp-cinematic-card:first-child:hover {
+    transform-origin: left center;
+}
+
+.ypp-cinematic-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+}
+
+.ypp-cinematic-card-duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 2px 4px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Card Info - Appears on Hover */
+
+.ypp-cinematic-card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 12px 12px 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 60%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+}
+
+.ypp-cinematic-card:hover .ypp-cinematic-card-info {
+    opacity: 1;
+}
+
+.ypp-cinematic-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ypp-cinematic-card-meta {
+    font-size: 0.8rem;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Animations */
+
+@keyframes yppFadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Skeleton */
+
+.ypp-cinematic-skeleton .ypp-cinematic-hero {
+    background: #202020;
+    animation: yppPulse 1.5s infinite ease-in-out;
+}
+
+.ypp-cinematic-skeleton .ypp-cinematic-card {
+    background: #202020;
+    animation: yppPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes yppPulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.6; }
+}
+
+/* ===========================================================================
+   CINEMATIC MODE — CONFLICT RESOLUTION OVERRIDES
+   Overrides the extension's own YPP theme variables that fight cinematic mode.
+   Must live in styles.css so they load AFTER the main theme and win specificity.
+   =========================================================================== */
+
+/* Reset chip CSS variables that the YPP theme sets with !important on .yt-premium-plus-theme.
+   Our cinematic selectors are more specific (element + attribute selector) so they win. */
+
+/* Clear button-shape backgrounds — YPP theme adds a subtle fill to .yt-spec-button-shape-next
+   which creates the white circle effect on masthead icon buttons in cinematic mode. */
+
+/* Reset all masthead button visual layers so no white blobs appear */
+
+/* Ensure the YPP pill header does not render on cinematic home */
+
+/* ===========================================================================
+   GLOBAL UI FIXES (All Pages)
+   Fixes white glowing backgrounds on masthead icons, logos, and chips,
+   and prevents horizontal scrollbar on the body.
+   =========================================================================== */
+
+/* Global overflow fix to prevent bottom slidebar */
+
+html.yt-premium-plus-theme body {
+  overflow-x: hidden !important;
+}
+
+/* Fix white backgrounds on masthead buttons and chips globally [DISABLED DUE TO INVISIBLE NAVIGATION BUGS] */
+
+/* Fix the filter chips globally [DISABLED DUE TO INVISIBLE CHIPS BUG] */
+
+html.yt-premium-plus-theme yt-chip-cloud-chip-renderer[selected],
+html.yt-premium-plus-theme yt-chip-cloud-chip-renderer.iron-selected {
+  --yt-spec-badge-chip-background: rgba(255, 255, 255, 0.15) !important;
+  --yt-spec-button-chip-background-hover: rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   SEARCH GRID — TARGETED BUG FIXES
+   ============================================================ */
+
+/* FIX 1: Circular avatar in search results — match homepage style */
+
+/* FIX 2: Duration badge visible in search grid */
+
+/* FIX 3: Remove gap caused by continuation loader spanning a full tall row */
+
+/* FIX 4: Playlist cards in grid — treat same as video cards, not full-width */
+
+/* FIX 4b: Playlist thumbnail overlay — video count badge */
+
+/* FIX 5: Mix/radio cards — same grid treatment as videos */
+
+/* FIX 6: Remove the large left gap on first load (image 2) —
+   caused by YouTube injecting a wide promo in column 1-2 before results load */
+
+/* FIX 7: Bracket/bracket artifacts (image 3 purple markers) —
+   these are ytd-search-refinement-card-renderer elements leaking into grid */
+
+/* ============================================================
+   PLAYLIST & RADIO CARDS - UNIFIED SQUARE GRID DESIGN
+   ============================================================ */
+
+/* Ensure the outer wrapper acts as a flex column card */
+
+/* Force internal structural wrappers to also be column flex containers using bulletproof :has selector */
+
+/* -------------------------------------------------------------------------
+** GLOBALS FOR VIDEO PREVIEWS
+** Ensures native hover previews always sit on top of custom thumbnail z-indexes
+--------------------------------------------------------------------------- */
+
+body.yt-premium-plus-theme #video-preview,
+body.yt-premium-plus-theme ytd-video-preview,
+body.yt-premium-plus-theme #inline-preview-player {
+  z-index: var(--ypp-z-card-hover) !important;
+}
+
+/* Thumbnail wrapper must maintain 16:9 and span full width */
+
+/* Hide native stacked background graphics for playlists to match flat video cards */
+
+/* Structure the text-wrapper into a grid layout (without avatar column) */
+
+/* Title */
+
+/* Channel Name */
+
+/* Metadata / Video Count */
+
+/* Hide clutter */
+
+/* ============================================================
+   LOCKUP VIEW MODEL (NEW YOUTUBE PLAYLIST/MIX ARCHITECTURE)
+   ============================================================ */
+
+/* 1. Force the main card and its direct child (the internal wrapper) to be a vertical column */
+
+/* 2. Target the clickable thumbnail (anchor containing yt-image or img) perfectly, ignoring all class names */
+
+/* 3. Ensure the image inside stretches to fill the 16:9 box completely */
+
+/* 4. METADATA BLOCK */
+
+/* Format the title properly */
+
+/* Format the channel/metadata secondary text */
+
+/* Hide tertiary text to keep the card square (e.g., list of songs) */
+
+/**
+ * Floating Player Styles
+ * Applied when the user scrolls past the video player and the `floatingPlayer` setting is active.
+ */
+
+body.ypp-floating-player-active #ytd-player,
+body.ypp-floating-player-active ytd-player[id="ytd-player"] {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 400px !important;
+    height: 225px !important; /* 16:9 ratio */
+    z-index: var(--ypp-z-popup) !important; /* Highest possible */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ypp-thumb-radius, 12px) !important;
+    overflow: hidden !important;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transform: translateZ(0) !important; /* Force hardware acceleration */
+}
+
+/* Ensure the video itself fills the new container */
+
+body.ypp-floating-player-active video.html5-main-video {
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* Ensure the controls adapt to the small size */
+
+/* Hide some unnecessary controls in mini mode */
+
+/* Ensure background of player is dark */
+
+/* Show a small placeholder where the video used to be so layout doesn't jump */
+
+/* ytd-watch-flexy handles the placeholder space automatically in most cases, 
+   but we can ensure #player-container-outer maintains aspect ratio */
+
+body.ypp-floating-player-active #player-container-outer {
+    /* The outer container stays in the DOM, so it acts as a placeholder */
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--ypp-thumb-radius, 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.ypp-floating-player-active #player-container-outer::after {
+    content: "Video is floating";
+    color: var(--yt-spec-text-secondary, #aaa);
+    font-size: 1.2rem;
+    font-family: var(--ypp-font-family, inherit);
+}
+
+/* =========================================================================
+   SHORTS PAGE PREMIUM STYLING (FULL-BLEED EDGE-TO-EDGE)
+   ========================================================================= */
+
+/* Remove the black bar scrim (cinematic scrim) */
+
+/* Shorts Container background */
+
+/* Make the video player and its thumbnail background look elegant */
+
+/* Floating Action Bar (Like/Dislike/Share) */
+
+/* Adjust Action Buttons */
+
+/* Video Information Overlay (Title, Channel) */
+
+/* Channel Avatar */
+
+/* Subscribe Button */
+
+/* Progress bar redesign */
+
+/* =========================================================================
+   SHORTS PLAYER CONTROLS (Floating Bottom Bar)
+   ========================================================================= */
+
+/* Speed Controls inside Shorts Bar */
+
+/* FIX for Duration Badge missing z-index */
+
+/* =========================================================================
+   ACCOUNT MENU REDESIGN — Orbital Layout
+   Declared in styles.css (manifest content_script) so these rules have
+   the highest cascade priority and can safely override YouTube's native
+   tp-yt-iron-dropdown and ytd-multi-page-menu-renderer styles.
+   ========================================================================= */
+
+/* Ensure the dropdown host is wide enough and not clipped */
+
+html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-multi-page-menu-renderer[data-ypp-cloaked]),
+html.yt-premium-plus-theme tp-yt-iron-dropdown:has(ytd-multi-page-menu-renderer[data-ypp-redesigned]),
+html.yt-premium-plus-theme ytd-popup-container:has(ytd-multi-page-menu-renderer[data-ypp-cloaked]),
+html.yt-premium-plus-theme ytd-popup-container:has(ytd-multi-page-menu-renderer[data-ypp-redesigned]) {
+    overflow: visible !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+tp-yt-iron-dropdown ytd-multi-page-menu-renderer[data-ypp-cloaked],
+tp-yt-iron-dropdown ytd-multi-page-menu-renderer[data-ypp-redesigned],
+ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-cloaked],
+ytd-popup-container ytd-multi-page-menu-renderer[data-ypp-redesigned] {
+    overflow: visible !important;
+    min-width: 320px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* The custom panel itself */
+
+.ypp-account-menu {
+    width: 320px;
+    background: linear-gradient(135deg, rgba(22, 22, 26, 0.72), rgba(14, 14, 18, 0.82));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    font-family: 'Roboto', Arial, sans-serif;
+    color: rgba(255, 255, 255, 0.92);
+    position: relative;
+}
+
+/* Pop-in animation */
+
+@keyframes ypp-menu-pop {
+    0%   { opacity: 0; transform: scale(0.92) translateY(-10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Satellite hover interaction */
+
+.ypp-satellite {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.ypp-satellite:hover {
+    opacity: 1;
+    z-index: 10;
+}
+
+.ypp-satellite:hover .ypp-letter-avatar {
+    box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.55) !important;
+    transform: scale(1.15);
+}
+
+/* Letter avatar transition */
+
+.ypp-letter-avatar {
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+/* Active account name / handle */
+
+.ypp-active-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.ypp-active-handle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 3px;
+}
+
+.ypp-channel-link {
+    display: inline-block;
+    font-size: 13px;
+    color: #3ea6ff;
+    text-decoration: none;
+    margin-top: 10px;
+    padding: 5px 16px;
+    background: rgba(62, 166, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(62, 166, 255, 0.2);
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.ypp-channel-link:hover {
+    background: rgba(62, 166, 255, 0.18);
+    border-color: rgba(62, 166, 255, 0.35);
+    text-decoration: none;
+}
+
+/* Hide Shorts Interaction Bar */
+
+body.ypp-hide-shorts-interaction ytd-reel-player-overlay-renderer  # { display: none !important; }
+
+/* Square Corners */
+
+/* Revert Progress Bar (Remove Pink Gradient) */
+
+/* Feature: Hide Search Shelves */
+
+body.ypp-hide-search-shelves .ypp-noise-section {
+    display: none !important;
+}
+
+/* Feature: Hide Channel Cards */
+
+body.ypp-hide-channel-cards ytd-channel-renderer {
+    display: none !important;
+}
+
+/* =========================================================================
+   CINEMA MODE & MINIMAL MODE (Migrated from modes-manager.js)
+   ========================================================================= */
+
+/* Cinema Mode — focus on the player */
+
+/* Dim sidebar on watch page */
+
+.ypp-cinema-mode #secondary {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    width: 0 !important;
+    overflow: hidden !important;
+    flex: 0 !important;
+    min-width: 0 !important;
+}
+
+.ypp-cinema-mode #secondary:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Expand primary column */
+
+.ypp-cinema-mode #primary {
+    max-width: 100% !important;
+}
+
+/* Darken the page background for immersion */
+
+.ypp-cinema-mode ytd-page-manager {
+    background: #050505 !important;
+}
+
+/* Dim masthead by default, hide completely on idle */
+
+/* Ultra-Dark Contrast for Video */
+
+.ypp-cinema-mode video {
+    filter: contrast(1.1) brightness(0.95) !important;
+}
+
+/* Letterbox Subtitle Repositioning */
+
+/* Vignette Overlay */
+
+.ypp-cinema-mode #player-container-outer::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.85) 130%);
+    z-index: 10;
+    opacity: 1;
+    animation: yppFadeInVignette 2s ease forwards;
+}
+
+@keyframes yppFadeInVignette {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Curtain Animation */
+
+@keyframes yppOpenCurtains {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+}
+
+.ypp-cinema-mode::before, .ypp-cinema-mode::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
+    background: #000;
+    z-index: 9999;
+    pointer-events: none;
+    animation: yppOpenCurtains 1.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+.ypp-cinema-mode::before {
+    left: 0;
+    transform-origin: left;
+    box-shadow: inset -10px 0 30px rgba(0,0,0,0.8);
+}
+
+.ypp-cinema-mode::after {
+    right: 0;
+    transform-origin: right;
+    box-shadow: inset 10px 0 30px rgba(0,0,0,0.8);
+}
+
+/* Minimal Mode — strip non-essentials */
+
+/* Hide action buttons row (Like/Share/Save/…) */
+
+.ypp-minimal-mode ytd-watch-metadata #top-level-buttons-computed,
+.ypp-minimal-mode ytd-watch-metadata #flexible-item-buttons {
+    opacity: 0.2;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.ypp-minimal-mode ytd-watch-metadata #top-level-buttons-computed:hover,
+.ypp-minimal-mode ytd-watch-metadata #flexible-item-buttons:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Fade subscriptions/channel row */
+
+.ypp-minimal-mode #owner {
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+
+.ypp-minimal-mode #owner:hover { opacity: 1; }
+
+/* Collapse comments section */
+
+.ypp-minimal-mode #comments {
+    opacity: 0.08;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    max-height: 60px;
+    overflow: hidden;
+}
+
+.ypp-minimal-mode #comments:hover {
+    opacity: 1;
+    pointer-events: auto;
+    max-height: none;
+}
+
+/* Dim sidebar recommendations */
+
+.ypp-minimal-mode #secondary {
+    opacity: 0.15;
+    transition: opacity 0.3s;
+}
+
+.ypp-minimal-mode #secondary:hover { opacity: 1; }
+
+/* V2: Icon-Only Mode (Hide text labels on actions) */
+
+.ypp-minimal-mode ytd-menu-renderer .yt-core-attributed-string,
+.ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next--button-text-content {
+    display: none !important;
+}
+
+.ypp-minimal-mode ytd-menu-renderer .yt-spec-button-shape-next__icon {
+    margin: 0 !important;
+}
+
+/* Hide tooltips on idle/play */
+
+/* Maximize Real Estate on Grid */
+
+/* =========================================================================
+   ZEN MODE
+   ========================================================================= */
+
+/* True Invisible UI: Hide controls entirely when playing */
+
+/* Reveal on pause */
+
+/* Breathing Visualizer */
+
+@keyframes zenBreathing {
+    0% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
+    50% { box-shadow: 0 0 100px 20px rgba(255,255,255,0.25); transform: scale(1.01); }
+    100% { box-shadow: 0 0 10px 5px rgba(255,255,255,0.05); transform: scale(0.98); }
+}
+
+/* Breathing Transitions: Scale and dim video on pause */
+
+body.ypp-zen-mode video {
+    transition: filter 1.5s ease-in-out, transform 1.5s ease-in-out !important;
+    transform-origin: center center !important;
+}
+
+/* =========================================================================
+   FOCUS MODE / DOPAMINE DETOX
+   ========================================================================= */
+
+/* V2: Thumbnail Eraser - completely hide images and show gray box */
+
+body.ypp-dopamine-detox ytd-thumbnail img,
+body.ypp-dopamine-detox ytd-grid-thumbnail img,
+body.ypp-dopamine-detox #thumbnail img {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+body.ypp-dopamine-detox ytd-thumbnail,
+body.ypp-dopamine-detox ytd-grid-thumbnail {
+    background-color: #222 !important;
+    border: 1px solid #333 !important;
+}
+
+/* V2: Grayscale UI Enforcement - mute logos and buttons */
+
+/* =========================================================================
+   DISTRACTION FREE BASE LAYOUTS
+   ========================================================================= */
+
+body.ypp-sidebar-hidden #secondary {
+    opacity: 0;
+    pointer-events: none;
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    flex: 0 !important;
+}
+
+body.ypp-focus-mode #primary {
+    max-width: 1000px !important;
+    margin: 0 auto !important;
+}
+
+body.ypp-zen-mode #primary {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+}
+
+/* Completely hide the native sidebar in study mode so our Notes panel can replace it */
+
+body.ypp-study-mode #secondary {
+    display: none !important;
+}
+
+/* Study Notes Panel styling to mimic the sidebar layout */
+
+body.ypp-study-mode #ypp-study-notes {
+    width: var(--ytd-watch-flexy-sidebar-width, 402px);
+    margin-left: 24px;
+    flex-shrink: 0;
+    margin-top: 24px;
+}
+
+@media (max-width: 1000px) {
+    body.ypp-study-mode #ypp-study-notes {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * YOUTUBE UI AESTHETIC SYNC
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+/* =========================================================================
+   GRAYSCALE THUMBNAILS (Re-implemented via Global Layout)
+   ========================================================================= */
+
+body.ypp-grayscale-thumbs ytd-thumbnail img,
+body.ypp-grayscale-thumbs ytd-playlist-thumbnail img {
+    filter: grayscale(100%) !important;
+    transition: filter 0.3s ease !important;
+}
+
+body.ypp-grayscale-thumbs ytd-thumbnail:hover img,
+body.ypp-grayscale-thumbs ytd-playlist-thumbnail:hover img {
+    filter: grayscale(0%) !important;
+}
+
+/* =========================================================================
+   HOMESCREEN HIDE FEATURES (DOM Stamping & Pure CSS)
+   ========================================================================= */
+
+/* Hide Watched */
+
+body.ypp-watched-mode-hide [data-ypp-watched="1"] {
+    display: none !important;
+}
+
+body.ypp-watched-mode-dim [data-ypp-watched="1"] {
+    opacity: 0.25 !important;
+    filter: grayscale(80%) !important;
+    transition: opacity 0.25s ease, filter 0.25s ease !important;
+}
+
+body.ypp-watched-mode-dim [data-ypp-watched="1"]:hover {
+    opacity: 0.8 !important;
+    filter: grayscale(0%) !important;
+}
+
+/* Hide Mixes */
+
+/* Hide Shorts */
+
+/* Hide Playlists */
+
+/* Hide Feed / Explore / Trending */
+
+body.ypp-hide-explore-topics ytd-feed-filter-chip-bar-renderer {
+    display: none !important;
+}
+
+body.ypp-hide-trending ytd-rich-section-renderer:has(a[href*="/trending"]) {
+    display: none !important;
+}

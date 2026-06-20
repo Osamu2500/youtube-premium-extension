@@ -130,6 +130,9 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         
         try {
             this._isEnabled = true;
+            
+            // Fix: Sync classes for search view mode, since init() is bypassed by BaseFeature update()
+            this._searchViewMode.sync(SearchRedesign.CLASSES, this._log.bind(this));
 
             this.addListener(window, 'yt-navigate-finish', this._handleNavigation);
 

@@ -29,56 +29,17 @@ window.YPP.features.SearchViewMode = class SearchViewMode {
         this._logFn = logFn || ((msg, level) => console[level]?.(`[SearchViewMode] ${msg}`));
     }
 
-    async init() {
-        try {
-            const savedMode = await window.YPP?.Utils?.getSetting('searchViewMode');
-            this._viewMode = savedMode || SearchViewMode.MODES.GRID;
-        } catch (_) {
-            this._logFn('Failed to load view preference', 'warn');
-        }
-    }
-
-    run() {
-        // Restore persisted view mode
-        window.YPP.StorageManager.get('searchViewMode').then((val) => {
-            const mode = val
-                      || localStorage.getItem('ypp_searchViewMode')
-                      || 'grid';
-            if (mode !== this._viewMode) {
-                this._viewMode = mode;
-                this.applyViewMode();
-            }
-        });
-    }
-
-    enable() {
-        if (!this._boundMessageListener) {
-            this._boundMessageListener = (msg) => {
-                if (msg.type === 'YPP_SET_SEARCH_VIEW_MODE' && msg.mode) {
-                    this._viewMode = msg.mode;
-                    this.applyViewMode();
-                    try { localStorage.setItem('ypp_searchViewMode', msg.mode); } catch (_) {}
-                }
-            };
-            chrome.runtime.onMessage.addListener(this._boundMessageListener);
-        }
-        this.applyViewMode();
-    }
-
+    async init() {}
+    run() {}
+    enable() { this.applyViewMode(); }
+    
     disable() {
-        if (this._boundMessageListener) {
-            chrome.runtime.onMessage.removeListener(this._boundMessageListener);
-            this._boundMessageListener = null;
-        }
-        document.body.classList.remove(
-            this._classes.GRID_MODE,
-            this._classes.LIST_MODE
-        );
+        document.body.classList.remove(this._classes.GRID_MODE, this._classes.LIST_MODE);
     }
 
     applyViewMode() {
         const body = document.body;
-        if (!this._classes.GRID_MODE || !this._classes.LIST_MODE) return;
+        if (!this._classes.GRID_MODE) return;
 
         const isSearch = window.location.pathname === '/results';
 
@@ -87,26 +48,7 @@ window.YPP.features.SearchViewMode = class SearchViewMode {
             return;
         }
 
-        if (this._viewMode === SearchViewMode.MODES.GRID) {
-            body.classList.add(this._classes.GRID_MODE);
-            body.classList.remove(this._classes.LIST_MODE);
-        } else {
-            body.classList.add(this._classes.LIST_MODE);
-            body.classList.remove(this._classes.GRID_MODE);
-        }
-    }
-
-    async setViewMode(mode) {
-        if (!Object.values(SearchViewMode.MODES).includes(mode)) return;
-
-        this._viewMode = mode;
-        this.applyViewMode();
-
-        try {
-            localStorage.setItem('ypp_searchViewMode', mode);
-            window.YPP.StorageManager.set('searchViewMode', mode);
-        } catch (_) {
-            this._logFn('Failed to save view mode preference', 'warn');
-        }
+        body.classList.add(this._classes.GRID_MODE);
+        body.classList.remove(this._classes.LIST_MODE);
     }
 };

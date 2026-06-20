@@ -1,0 +1,61 @@
+
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-two-column-browse-results-renderer #secondary,
+.yt-premium-plus-theme #history-analytics-renderer {
+  background: rgba(20, 20, 20, 0.4) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--ypp-radius-lg, 16px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+  padding: 16px !important;
+}
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] .analytics-card,
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] .stat-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--ypp-radius-sm, 8px) !important;
+}
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.01)
+  ) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: var(--ypp-radius-md, 12px) !important;
+  padding: 12px 16px !important;
+  margin-bottom: 12px !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  min-height: unset !important; /* Overcome rigid history spacing */
+  align-items: center !important;
+}
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer:hover {
+  transform: translateX(4px) !important; /* History items hover effect - gentle slide */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer ytd-thumbnail {
+  border-radius: var(--ypp-thumbnail-radius, 12px) !important;
+  overflow: hidden !important;
+}
+.yt-premium-plus-theme ytd-browse[page-subtype="history"] ytd-video-renderer #content {
+  margin-left: 16px !important;
+  padding: 0 !important;
+}
+.yt-premium-plus-theme ytd-browse[page-subtype="history"]  # {
+  font-family: var(--ypp-font-family, "Inter", system-ui, sans-serif) !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  color: var(--yt-spec-text-primary) !important;
+  margin-top: 24px !important;
+  margin-bottom: 16px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: capitalize !important;
+}
