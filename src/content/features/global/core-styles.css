@@ -1245,6 +1245,13 @@ body.yt-premium-plus-theme span.ytd-thumbnail-overlay-time-status-renderer {
   line-height: 1 !important;
 }
 
+body.yt-premium-plus-theme ytd-thumbnail-overlay-time-status-renderer .badge-shape-wiz,
+body.yt-premium-plus-theme ytd-thumbnail-overlay-bottom-right-renderer .badge-shape-wiz {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 /* Hover-Only Menu Button */
 
 /* Hide Description */
