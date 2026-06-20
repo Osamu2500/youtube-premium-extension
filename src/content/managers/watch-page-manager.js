@@ -19,6 +19,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
         this.injectedButtons = false;
         this._videoElement = null;
         this._featuresInitialized = false;
+        this.eventListeners = [];
     }
 
     onActivate() {
@@ -530,6 +531,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
         const controls = document.querySelector('.ypp-player-controls');
         if (controls) controls.remove();
         this.injectedButtons = false;
+        this._cleanupEvents();
 
         if (window.YPP?.sharedObserver) {
             window.YPP.sharedObserver.unregister('player_shorts');
@@ -547,6 +549,23 @@ class WatchPageManager extends window.YPP.BasePageManager {
         
         const visNode = document.getElementById('ypp-custom-player-bar-style-vis');
         if (visNode) visNode.remove();
+    }
+
+    addListener(target, event, handler, options = false) {
+        if (!target || !target.addEventListener) return;
+        target.addEventListener(event, handler, options);
+        if (!this.eventListeners) this.eventListeners = [];
+        this.eventListeners.push({ target, event, handler, options });
+    }
+
+    _cleanupEvents() {
+        if (!this.eventListeners) return;
+        this.eventListeners.forEach(({ target, event, handler, options }) => {
+            try {
+                if (target.removeEventListener) target.removeEventListener(event, handler, options);
+            } catch (e) {}
+        });
+        this.eventListeners = [];
     }
 }
 

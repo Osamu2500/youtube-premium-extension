@@ -12,9 +12,9 @@
   width: 100%;
 }
 
-/* Push Page Content Down */
+/* Push Page Content Down (64px header + 12px gap) */
 .yt-premium-plus-theme ytd-page-manager#page-manager {
-  margin-top: 100px;
+  margin-top: 76px;
 }
 
 /* Inner Masthead - The Floating Pill */

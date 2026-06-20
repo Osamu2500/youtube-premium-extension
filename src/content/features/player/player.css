@@ -2,8 +2,18 @@
    7. PLAYER ENHANCEMENTS
    =================================================================================== */
 
+/* Adjust Top Gap for Player Page (Thin Gap) */
+.yt-premium-plus-theme ytd-watch-flexy {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.yt-premium-plus-theme ytd-watch-flexy #primary {
+  padding-top: 0 !important;
+}
+
 /* Premium Glassmorphic Player Container */
-.yt-premium-plus-theme ytd-watch-flexy #ytd-player {
+.yt-premium-plus-theme ytd-watch-flexy .html5-video-player {
   border-radius: var(--ypp-radius-lg) !important;
   overflow: hidden !important;
   box-shadow:
@@ -15,8 +25,30 @@
   transform: translateZ(0); /* Hardware Acceleration */
 }
 
+/* Ensure outer container is transparent so gaps aren't visible as black borders */
+.yt-premium-plus-theme ytd-watch-flexy #ytd-player {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+/* Force video to exactly fill the rounded player, overriding YouTube JS resizing gaps */
+.yt-premium-plus-theme .html5-video-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.yt-premium-plus-theme .html5-video-player video {
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+  object-fit: contain !important;
+}
+
 /* Edge Glow effect on player hover */
-.yt-premium-plus-theme ytd-watch-flexy #ytd-player:hover {
+.yt-premium-plus-theme ytd-watch-flexy .html5-video-player:hover {
   box-shadow:
     0 16px 64px rgba(0, 0, 0, 0.6),
     0 0 24px rgba(62, 166, 255, 0.3),

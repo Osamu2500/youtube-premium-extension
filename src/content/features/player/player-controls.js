@@ -20,7 +20,7 @@ window.YPP.features.PlayerControls = class PlayerControls {
             btn.textContent = rate + 'x';
             btn.dataset.speed = rate;
             if (video.playbackRate === parseFloat(rate)) btn.classList.add('active');
-            this.player.addListener(btn, 'click', (e) => {
+            btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
@@ -54,8 +54,8 @@ window.YPP.features.PlayerControls = class PlayerControls {
                 this.utils?.log?.('[YPP:PLAYER] PiP failed: ' + e.message, 'PLAYER', 'error');
             }
         });
-        this.player.addListener(video, 'enterpictureinpicture', () => btn.classList.add('active'));
-        this.player.addListener(video, 'leavepictureinpicture', () => btn.classList.remove('active'));
+        video.addEventListener('enterpictureinpicture', () => btn.classList.add('active'));
+        video.addEventListener('leavepictureinpicture', () => btn.classList.remove('active'));
         return btn;
     }
 
@@ -64,7 +64,7 @@ window.YPP.features.PlayerControls = class PlayerControls {
         btn.innerHTML = svgContent;
         btn.title = title;
         btn.className = 'ypp-action-btn';
-        this.player.addListener(btn, 'click', (e) => {
+        btn.addEventListener('click', (e) => {
             e.stopPropagation();
             onClick(e);
         });

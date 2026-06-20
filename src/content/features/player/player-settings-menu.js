@@ -46,7 +46,7 @@ window.YPP.features.PlayerSettingsMenu = class PlayerSettingsMenu {
         item.appendChild(iconDiv);
         item.appendChild(labelDiv);
         
-        this.player.addListener(item, 'click', (e) => {
+        item.addEventListener('click', (e) => {
             // Click natively, then optionally close settings menu
             onClick(e);
             const closeBtn = document.querySelector('.ytp-settings-button');
@@ -81,7 +81,7 @@ window.YPP.features.PlayerSettingsMenu = class PlayerSettingsMenu {
         item.appendChild(labelDiv);
         item.appendChild(contentDiv);
         
-        this.player.addListener(item, 'click', (e) => {
+        item.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             const isChecked = item.getAttribute('aria-checked') === 'true';
