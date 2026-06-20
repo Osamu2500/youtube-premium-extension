@@ -3888,19 +3888,42 @@ html[data-ypp-card-style="frosted"] .ypp-grid-item {
 
 /* SUMMER ── search (NEW) */
 html[data-ypp-card-style="summer"] .ypp-grid-item {
-  background: linear-gradient(135deg, rgba(255, 230, 0, 0.1), rgba(255, 120, 0, 0.15)) !important;
+  background: linear-gradient(135deg, rgba(255, 230, 0, 0.15), rgba(255, 100, 0, 0.2), rgba(255, 230, 0, 0.15)) !important;
+  background-size: 200% 200% !important;
+  animation: ypp-summer-heat 8s ease infinite !important;
   border-radius: 18px !important;
-  border: 1px solid rgba(255, 190, 0, 0.3) !important;
+  border: 1px solid rgba(255, 190, 0, 0.4) !important;
   padding: var(--ypp-density-pad, 14px) !important;
-  box-shadow: 0 10px 25px rgba(255, 150, 0, 0.1), inset 0 0 15px rgba(255, 200, 0, 0.05) !important;
+  box-shadow: 0 10px 25px rgba(255, 150, 0, 0.15), inset 0 0 15px rgba(255, 200, 0, 0.1) !important;
   backdrop-filter: blur(12px) !important;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+html[data-ypp-card-style="summer"] .ypp-grid-item::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -50px; right: -50px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, rgba(255,255,0,0.8) 0%, rgba(255,150,0,0) 70%) !important;
+  filter: blur(20px);
+  animation: ypp-sun-pulse 4s infinite alternate !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
 }
 html[data-ypp-card-style="summer"] .ypp-grid-item:hover {
-  background: linear-gradient(135deg, rgba(255, 230, 0, 0.15), rgba(255, 120, 0, 0.25)) !important;
   transform: translateY(-5px) scale(1.01) !important;
-  box-shadow: 0 15px 35px rgba(255, 150, 0, 0.2), inset 0 0 20px rgba(255, 200, 0, 0.1) !important;
-  border-color: rgba(255, 190, 0, 0.6) !important;
+  box-shadow: 0 15px 35px rgba(255, 150, 0, 0.3), inset 0 0 20px rgba(255, 200, 0, 0.2) !important;
+  border-color: rgba(255, 190, 0, 0.8) !important;
+}
+@keyframes ypp-summer-heat {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes ypp-sun-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 1; }
 }
 
 /* WINTER ── search (NEW) */
@@ -3909,52 +3932,81 @@ html[data-ypp-card-style="winter"] .ypp-grid-item {
   backdrop-filter: blur(24px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
   border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-top: 2px solid rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.8) !important;
   padding: var(--ypp-density-pad, 16px) !important;
-  box-shadow: 0 12px 30px rgba(100, 200, 255, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 12px 30px rgba(100, 200, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.2) !important;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+html[data-ypp-card-style="winter"] .ypp-grid-item::after {
+  content: "" !important;
+  position: absolute !important;
+  top: -50%; left: -50%; right: -50%; bottom: -50%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%) !important;
+  transform: rotate(45deg) translateY(-100%) !important;
+  animation: ypp-winter-shimmer 6s infinite linear !important;
+  pointer-events: none !important;
 }
 html[data-ypp-card-style="winter"] .ypp-grid-item:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(180, 230, 255, 0.1)) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(180, 230, 255, 0.15)) !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 15px 40px rgba(100, 200, 255, 0.1), inset 0 0 30px rgba(255, 255, 255, 0.2) !important;
-  border-top: 2px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 15px 40px rgba(100, 200, 255, 0.2), inset 0 0 30px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255,255,255,0.4) !important;
+  border-top: 2px solid #ffffff !important;
+}
+@keyframes ypp-winter-shimmer {
+  0% { transform: rotate(45deg) translateY(-200%); }
+  20% { transform: rotate(45deg) translateY(200%); }
+  100% { transform: rotate(45deg) translateY(200%); }
 }
 
 /* SPRING ── search (NEW) */
 html[data-ypp-card-style="spring"] .ypp-grid-item {
-  background: linear-gradient(120deg, rgba(255, 180, 200, 0.08), rgba(255, 220, 230, 0.03)) !important;
+  background: linear-gradient(120deg, rgba(255, 180, 200, 0.1), rgba(255, 220, 230, 0.05)) !important;
   border-radius: 24px !important;
-  border: 1px solid rgba(255, 180, 200, 0.2) !important;
+  border: 1px solid rgba(255, 180, 200, 0.3) !important;
   padding: var(--ypp-density-pad, 14px) !important;
-  box-shadow: 0 8px 24px rgba(255, 150, 180, 0.05) !important;
+  box-shadow: 0 8px 24px rgba(255, 150, 180, 0.1) !important;
   backdrop-filter: blur(10px) !important;
   transition: all 0.4s ease !important;
+  animation: ypp-spring-bloom 6s infinite alternate ease-in-out !important;
 }
 html[data-ypp-card-style="spring"] .ypp-grid-item:hover {
-  background: linear-gradient(120deg, rgba(255, 180, 200, 0.12), rgba(255, 220, 230, 0.08)) !important;
+  background: linear-gradient(120deg, rgba(255, 180, 200, 0.15), rgba(255, 220, 230, 0.1)) !important;
   transform: translateY(-4px) !important;
-  box-shadow: 0 12px 32px rgba(255, 150, 180, 0.15), 0 0 15px rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 180, 200, 0.5) !important;
+  box-shadow: 0 12px 32px rgba(255, 150, 180, 0.25), 0 0 20px rgba(255, 180, 200, 0.4) !important;
+  border-color: rgba(255, 180, 200, 0.7) !important;
+}
+@keyframes ypp-spring-bloom {
+  0% { box-shadow: 0 8px 24px rgba(255, 150, 180, 0.1), inset 0 0 10px rgba(255, 180, 200, 0); }
+  100% { box-shadow: 0 8px 24px rgba(255, 150, 180, 0.2), inset 0 0 20px rgba(255, 180, 200, 0.2); }
 }
 
 /* AUTUMN ── search (NEW) */
 html[data-ypp-card-style="autumn"] .ypp-grid-item {
   background: linear-gradient(150deg, rgba(160, 60, 20, 0.15), rgba(100, 30, 10, 0.2)) !important;
+  background-size: 200% 200% !important;
+  animation: ypp-autumn-leaves 6s infinite alternate ease-in-out !important;
   border-radius: 8px !important;
-  border: 1px solid rgba(200, 100, 50, 0.2) !important;
-  border-left: 3px solid rgba(220, 120, 40, 0.6) !important;
+  border: 1px solid rgba(200, 100, 50, 0.3) !important;
+  border-left: 4px solid rgba(220, 120, 40, 0.7) !important;
   padding: var(--ypp-density-pad, 12px) !important;
   box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.4) !important;
   transition: all 0.3s ease !important;
 }
 html[data-ypp-card-style="autumn"] .ypp-grid-item:hover {
   background: linear-gradient(150deg, rgba(180, 70, 25, 0.2), rgba(120, 40, 15, 0.3)) !important;
+  background-size: 200% 200% !important;
   transform: translateX(4px) translateY(-2px) !important;
-  box-shadow: 6px 8px 20px rgba(0, 0, 0, 0.5) !important;
-  border-color: rgba(220, 120, 40, 0.4) !important;
-  border-left: 3px solid rgba(255, 150, 50, 0.9) !important;
+  box-shadow: 6px 8px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(200, 100, 50, 0.2) !important;
+  border-color: rgba(220, 120, 40, 0.6) !important;
+  border-left: 4px solid rgba(255, 150, 50, 1) !important;
+}
+@keyframes ypp-autumn-leaves {
+  0% { background-position: 0% 0%; border-left-color: rgba(220, 120, 40, 0.7); }
+  50% { background-position: 100% 50%; border-left-color: rgba(200, 60, 20, 0.8); }
+  100% { background-position: 0% 100%; border-left-color: rgba(180, 140, 30, 0.7); }
 }
 
 
