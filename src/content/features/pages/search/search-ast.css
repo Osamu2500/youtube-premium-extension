@@ -1012,22 +1012,6 @@ body.ypp-search-grid-mode ytd-video-renderer #channel-thumbnail img {
   display: block !important;
   border-radius: var(--ypp-radius-md) !important;
 }
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail-overlay-time-status-renderer,
-body.ypp-search-grid-mode ytd-playlist-renderer ytd-thumbnail-overlay-time-status-renderer {
-  position: absolute !important;
-  bottom: 8px !important;
-  right: 8px !important;
-  z-index: var(--ypp-z-chips, 2100) !important;
-  background: rgba(0, 0, 0, 0.85) !important;
-  border-radius: 4px !important;
-  padding: 2px 4px !important;
-}
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail-overlay-time-status-renderer span,
-body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail-overlay-time-status-renderer .ytd-thumbnail-overlay-time-status-renderer {
-  color: #fff !important;
-  font-size: 1.2rem !important;
-  font-weight: 500 !important;
-}
 body.ypp-search-grid-mode ytd-continuation-item-renderer {
   grid-column: 1 / -1 !important;
   min-height: 0 !important;
