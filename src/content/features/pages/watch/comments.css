@@ -1,11 +1,13 @@
 
-body.yt-premium-plus-theme ytd-comment-thread-renderer {
+body.yt-premium-plus-theme ytd-comment-thread-renderer,
+body.yt-premium-plus-theme ytd-comment-simplebox-renderer {
   padding: 16px !important;
   border-radius: var(--ypp-radius-md) !important;
   border: 1px solid var(--ypp-glass-border) !important;
   background: var(--ypp-bg-surface) !important;
   margin-bottom: 16px !important;
   box-shadow: var(--ypp-shadow-card) !important;
+  backdrop-filter: var(--ypp-glass-blur-active) saturate(1.2);
 }
 
 body.yt-premium-plus-theme
