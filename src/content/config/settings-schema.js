@@ -249,6 +249,14 @@ window.YPP.SettingsSchema = {
 
         // --- Global Player Bar ---
         globalPlayerBarPosition: { type: 'string', default: 'right', values: ['right', 'left', 'top'] },
+        gpb_showPlay:          { type: 'boolean', default: true },
+        gpb_showTime:          { type: 'boolean', default: true },
+        gpb_showVolume:        { type: 'boolean', default: true },
+        gpb_showVolumeBoost:   { type: 'boolean', default: true },
+        gpb_showFilters:       { type: 'boolean', default: true },
+        gpb_showLoop:          { type: 'boolean', default: true },
+        gpb_showPip:           { type: 'boolean', default: true },
+        gpb_showFullscreen:    { type: 'boolean', default: true },
 
         // --- Custom Player Bar (Placements) ---
         pb_snapshot:         { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
@@ -276,6 +284,7 @@ window.YPP.SettingsSchema = {
         navTrending:         { type: 'boolean', default: true },
         navShorts:           { type: 'boolean', default: true },
         navSubscriptions:    { type: 'boolean', default: true },
+        navLibrary:          { type: 'boolean', default: true },
         navWatchLater:       { type: 'boolean', default: true },
         navPlaylists:        { type: 'boolean', default: true },
 
