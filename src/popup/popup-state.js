@@ -103,6 +103,13 @@ export function loadSettings(updateUICallbacks) {
                                 c.style.background = isActive ? 'rgba(62,166,255,0.05)' : 'rgba(255,255,255,0.04)';
                             });
                         }
+                        if (key === 'cardStyle') {
+                            const styleVal = el.value || 'glass';
+                            document.querySelectorAll('.card-style-btn').forEach(b => {
+                                const isActive = b.dataset.style === styleVal;
+                                b.classList.toggle('active', isActive);
+                            });
+                        }
                     }
                 }
             });

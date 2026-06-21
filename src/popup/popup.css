@@ -1153,3 +1153,28 @@ kbd {
 }
 .ypp-onboarding-close:hover { background: rgba(255,255,255,.18); color: #fff; }
 
+.card-style-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.card-style-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid transparent;
+    color: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.card-style-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+.card-style-btn.active {
+    background: var(--accent-primary, #3ea6ff);
+    color: #fff;
+    border-color: rgba(255,255,255,0.1);
+}
+

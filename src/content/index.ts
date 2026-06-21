@@ -57,7 +57,7 @@ import './features/global/behavior/watched-store.js';
 import './features/global/behavior/mark-watched.js';
 import './features/global/behavior/multi-select.js';
 import './features/global/ui-tweaks/multi-select.css';
-import './features/global/behavior/redirect-home.js';
+
 import './features/global/ui-tweaks/hide-watched.js';
 import './features/global/behavior/keyboard-shortcuts.js';
 import './features/global/filters/duration-filter.js';

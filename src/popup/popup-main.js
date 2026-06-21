@@ -317,6 +317,7 @@ const initApp = () => {
     components.initPremiumAccentDropdown();
     components.initSearchViewMode();
     components.initHideWatchedModePill();
+    components.initCardStyleGrid();
     components.initAccentColorSwatches();
 
     // 5. Wire Universal Event Listeners

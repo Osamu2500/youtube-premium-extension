@@ -177,6 +177,33 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
         });
     }
 
+    function initCardStyleGrid() {
+        const btns = document.querySelectorAll('.card-style-btn');
+        const hiddenInput = document.getElementById('cardStyle');
+        if (!btns.length || !hiddenInput) return;
+
+        const applyStyle = (styleVal) => {
+            hiddenInput.value = styleVal;
+            btns.forEach(b => {
+                const isActive = b.dataset.style === styleVal;
+                b.classList.toggle('active', isActive);
+            });
+        };
+
+        chrome.storage.local.get('settings', (data) => {
+            const styleVal = data.settings?.cardStyle || 'glass';
+            applyStyle(styleVal);
+        });
+
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyStyle(btn.dataset.style);
+                const event = new Event('change', { bubbles: true });
+                hiddenInput.dispatchEvent(event);
+            });
+        });
+    }
+
     function initAccentColorSwatches() {
         const swatches = document.querySelectorAll('.color-swatch[data-color]');
         const customInput = document.getElementById('accentColor');
@@ -223,6 +250,7 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
         initPremiumAccentDropdown,
         initSearchViewMode,
         initHideWatchedModePill,
+        initCardStyleGrid,
         initAccentColorSwatches,
         applyThemeToPopup
     };
