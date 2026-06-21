@@ -74,7 +74,6 @@ export const DEFAULT_SETTINGS = {
     navWatchLater: true,
     navPlaylists: true,
     navHistory: true,
-    logoRedirectSub: false,
     enableCustomSidebar: true,
     sidebarLayout: 'spacious',
     
@@ -175,7 +174,6 @@ export const DEFAULT_SETTINGS = {
     multiSelect: true,
     hideMetrics: false,
     hideThumbnails: false,
-    redirectHome: false,
     intentionalDelay: false,
     intentionalDelayTime: 3,
     ambientMode: false,

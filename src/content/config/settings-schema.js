@@ -104,7 +104,6 @@ window.YPP.SettingsSchema = {
         sponsorBlock:        { type: 'boolean', default: true },
         autoPlayNext:        { type: 'boolean', default: false },
         navHistory:          { type: 'boolean', default: true },
-        logoRedirectSub:     { type: 'boolean', default: false },
 
         // --- Shorts Tools ---
         shortsAutoScroll:    { type: 'boolean', default: false },
@@ -221,7 +220,6 @@ window.YPP.SettingsSchema = {
         hideThumbnails:      { type: 'boolean', default: false },
         hideCards:           { type: 'boolean', default: false },
         hideMetrics:         { type: 'boolean', default: false },
-        redirectHome:        { type: 'boolean', default: false },
         multiSelect:         { type: 'boolean', default: true  },
         autoLike:            { type: 'boolean', default: false },
         autoQuality:         { type: 'boolean', default: false },

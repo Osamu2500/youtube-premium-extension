@@ -395,7 +395,6 @@ window.YPP.CONSTANTS = {
         multiSelect: 'MultiSelect',
         hideMetrics: 'HideMetrics',
         hideThumbnails: 'HideThumbnails',
-        redirectHome: 'RedirectHome',
         intentionalDelay: 'IntentionalDelay',
         playlistDuration: 'PlaylistDuration',
         watchHistory: 'WatchHistoryTracker',

@@ -39,7 +39,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const s = this.settings || {};
 
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater || s.navLibrary ||
-            s.navPlaylists || s.navHistory || s.logoRedirectSub;
+            s.navPlaylists || s.navHistory;
 
         if (!shouldRun) return; // No nav items configured — nothing to do
 
@@ -75,7 +75,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         // Feature manager called this because it's enabled and settings updated
         const s = this.settings || {};
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater || s.navLibrary ||
-            s.navPlaylists || s.navHistory || s.logoRedirectSub;
+            s.navPlaylists || s.navHistory;
 
 
         if (window.YPP.ui?.manager) {
