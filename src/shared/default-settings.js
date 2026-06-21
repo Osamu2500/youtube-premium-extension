@@ -12,9 +12,6 @@ export const DEFAULT_SETTINGS = {
     grayscaleThumbnails: false,
     
     // Advanced Theming
-    glassBlur: 16,
-    glassTintOpacity: 85,
-    borderOpacity: 8,
 
     // Layout
     grid4x4: false,
@@ -77,7 +74,6 @@ export const DEFAULT_SETTINGS = {
     navWatchLater: true,
     navPlaylists: true,
     navHistory: true,
-    forceHideSidebar: false,
     logoRedirectSub: false,
     enableCustomSidebar: true,
     sidebarLayout: 'spacious',
@@ -246,3 +242,4 @@ export const DEFAULT_SETTINGS = {
     // Onboarding
     hasSeenOnboarding: false,
 };
+

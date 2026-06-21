@@ -39,7 +39,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const s = this.settings || {};
 
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater || s.navLibrary ||
-            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+            s.navPlaylists || s.navHistory || s.logoRedirectSub;
 
         if (!shouldRun) return; // No nav items configured — nothing to do
 
@@ -75,9 +75,8 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         // Feature manager called this because it's enabled and settings updated
         const s = this.settings || {};
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater || s.navLibrary ||
-            s.navPlaylists || s.navHistory || s.forceHideSidebar || s.logoRedirectSub;
+            s.navPlaylists || s.navHistory || s.logoRedirectSub;
 
-        this._applySidebarState();
 
         if (window.YPP.ui?.manager) {
             window.YPP.ui.manager.remove('header-nav-group');
@@ -91,10 +90,6 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
     // =========================================================================
     // INTERNAL
     // =========================================================================
-
-    _applySidebarState() {
-        document.body.classList.toggle('ypp-hide-sidebar', !!(this.settings?.forceHideSidebar));
-    }
 
     _observeHeader() {
         if (!this._domObserver) return;

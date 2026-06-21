@@ -377,9 +377,9 @@ const initApp = () => {
         }
     });
 
-    ['fontScale', 'thumbRadius', 'sidebarOpacity', 'glassBlur', 'glassTintOpacity', 'borderOpacity'].forEach(id => {
+    ['fontScale'].forEach(id => {
         const el = document.getElementById(id);
-        const suffix = (id === 'fontScale' || id === 'sidebarOpacity' || id === 'glassTintOpacity' || id === 'borderOpacity') ? '%' : 'px';
+        const suffix = '%';
         const disp = document.getElementById(id + 'Value');
         if (el) {
             el.addEventListener('input', () => {

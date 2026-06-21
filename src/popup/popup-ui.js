@@ -177,26 +177,6 @@ export function updateDependencyUI(document) {
     }
 }
 
-export function applyFontFamily(document, family) {
-    const fontMap = {
-        inter: '"Inter", system-ui, sans-serif',
-        system: 'system-ui, -apple-system, sans-serif',
-        mono: '"Courier New", monospace'
-    };
-    document.body.style.fontFamily = fontMap[family] || fontMap.inter;
-}
-
-export function applyDensity(document, density) {
-    const densityMap = {
-        compact: { pad: '5px', gap: '4px' },
-        comfortable: { pad: '8px', gap: '6px' },
-        spacious: { pad: '14px', gap: '12px' }
-    };
-    const d = densityMap[density] || densityMap.comfortable;
-    document.documentElement.style.setProperty('--density-pad', d.pad);
-    document.documentElement.style.setProperty('--density-gap', d.gap);
-}
-
 export function applyAccentColor(document, hex) {
     if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
     const root = document.documentElement.style;
@@ -214,8 +194,6 @@ export function applyAccentColor(document, hex) {
 }
 
 export function updateCustomizationPreview(document, state) {
-    if (state.elements['fontFamily']) applyFontFamily(document, state.elements['fontFamily'].value);
-    if (state.elements['densityMode']) applyDensity(document, state.elements['densityMode'].value);
     if (state.elements['cardStyle']) document.documentElement.setAttribute('data-card-style', state.elements['cardStyle'].value);
     if (state.elements['accentColor']) applyAccentColor(document, state.elements['accentColor'].value);
 }
@@ -234,3 +212,5 @@ export function syncModeCards(document) {
         }
     });
 }
+
+

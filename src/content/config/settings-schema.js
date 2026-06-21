@@ -66,16 +66,12 @@ window.YPP.SettingsSchema = {
         minVideoDuration:    { type: 'number',  default: 5, min: 0, max: 60 },
 
         // --- Customization ---
-        fontFamily:          { type: 'string',  default: 'inter', values: ['inter', 'system', 'mono'] },
         fontScale:           { type: 'number',  default: 100, min: 80, max: 130 },
-        densityMode:         { type: 'string',  default: 'comfortable', values: ['comfortable', 'compact', 'spacious'] },
         accentColor:         { type: 'string',  default: '#ff4e45' },
         enableAnimations:    { type: 'boolean', default: true },
         enableThemeEffects:  { type: 'boolean', default: true },
         reducedMotion:       { type: 'boolean', default: false },
         cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid', 'neumorphic', 'cyberpunk', 'holographic', 'minimalist', 'retro', 'brutalism', 'skeuomorphic', 'frosted', 'summer', 'winter', 'spring', 'autumn'] },
-        thumbRadius:         { type: 'number',  default: 8, min: 0, max: 24 },
-        sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 },
         customScrollbar:     { type: 'boolean', default: false },
         grayscaleThumbnails: { type: 'boolean', default: false },
         homeColumns:         { type: 'number',  default: 0, min: 0, max: 10 }, // 0 = Auto
@@ -108,8 +104,6 @@ window.YPP.SettingsSchema = {
         sponsorBlock:        { type: 'boolean', default: true },
         autoPlayNext:        { type: 'boolean', default: false },
         navHistory:          { type: 'boolean', default: true },
-        forceHideSidebar:    { type: 'boolean', default: false },
-        floatingGuide:       { type: 'boolean', default: false },
         logoRedirectSub:     { type: 'boolean', default: false },
 
         // --- Shorts Tools ---
@@ -295,18 +289,11 @@ window.YPP.SettingsSchema = {
         // --- UI Redesigns (popup Customization tab) ---
 
         // --- New Customization Engine Variables ---
-        glassBlur:           { type: 'number',  default: 120, min: 0, max: 200 },
-        glassTintOpacity:    { type: 'number',  default: 50,  min: 0, max: 100 },
-        borderOpacity:       { type: 'number',  default: 8,   min: 0, max: 100 },
-        fontFamily:          { type: 'string',  default: 'inter', values: ['inter', 'system', 'mono'] },
         enableAnimations:    { type: 'boolean', default: true },
         enableThemeEffects:  { type: 'boolean', default: true },
         reducedMotion:       { type: 'boolean', default: false },
         accentColor:         { type: 'string',  default: '#3ea6ff' },
-        thumbRadius:         { type: 'number',  default: 12, min: 0, max: 24 },
-        densityMode:         { type: 'string',  default: 'comfortable', values: ['compact', 'comfortable', 'spacious'] },
         cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid', 'neumorphic', 'cyberpunk', 'holographic', 'minimalist', 'retro', 'brutalism', 'skeuomorphic', 'frosted', 'summer', 'winter', 'spring', 'autumn'] },
-        sidebarOpacity:      { type: 'number',  default: 100, min: 50, max: 100 }
     }),
 
     // =========================================================================
@@ -429,3 +416,4 @@ window.YPP.SettingsSchema = {
         return out;
     }
 };
+
