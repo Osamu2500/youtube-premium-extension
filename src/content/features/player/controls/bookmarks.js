@@ -20,16 +20,18 @@ window.YPP.features.BookmarksManager = class BookmarksManager extends window.YPP
         this._SELECTORS = this._CONSTANTS.SELECTORS || {};
     }
 
-    onUpdate() {
-        if (!this._isActive) return;
-        
-        const placement = this.settings?.pb_bookmark || 'front';
-        if (placement !== 'front') {
-            this._removeControls();
-        } else {
-            this._checkForPlayer();
-        }
+    async disable() {
+        this._removeControls();
+        super.disable();
     }
+
+
+
+    _removeControls() {
+        document.querySelectorAll('.ypp-capture-btn').forEach(btn => btn.remove());
+    }
+
+
 
     createButton(video) {
         const placement = this.settings?.pb_bookmark || 'front';

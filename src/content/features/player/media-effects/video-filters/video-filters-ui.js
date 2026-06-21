@@ -108,13 +108,13 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             .ypp-filter-cat-details[open] summary::after { transform: rotate(180deg); }
             
             .ypp-filter-card-grid { 
-                display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px 20px; 
+                display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; 
             }
             .ypp-filter-card {
                 background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: row;
+                border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column;
                 align-items: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.2,0,0,1);
-                text-align: left; position: relative; gap: 10px; overflow: hidden;
+                text-align: center; position: relative; gap: 6px; overflow: hidden;
             }
             .ypp-filter-card:hover {
                 background: rgba(255,255,255,0.08); transform: translateY(-2px);
@@ -139,7 +139,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 50%       { opacity: 1; }
             }
             .ypp-filter-lut-preview {
-                width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+                width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
                 background: linear-gradient(135deg, #ff4b4b, #4b6fff, #4bff8b);
                 border: 1px solid rgba(255,255,255,0.2);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -150,20 +150,20 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             }
             
             .ypp-adjust-grid {
-                display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 20px;
+                display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px;
             }
             .ypp-adjust-card {
                 background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+                border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
             }
             .ypp-adjust-card-header {
                 display: flex; justify-content: space-between; align-items: center;
             }
             .ypp-adjust-card-title {
-                display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+                display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9);
             }
             .ypp-adjust-card-val {
-                font-size: 13px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 12px;
+                font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 10px;
             }
             
             .ypp-vcp-slider {

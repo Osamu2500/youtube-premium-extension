@@ -25,6 +25,9 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     }
 
     static toggleEQPanel(ctx, video, anchorBtn) {
+        // ALWAYS fetch the active video, overriding any stale reference from UI closures
+        video = document.querySelector('.html5-main-video') || document.querySelector('video');
+
         if (ctx._volumePopup) {
             ctx._volumePopup.remove();
             ctx._volumePopup = null;
@@ -369,12 +372,15 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         resetBtn.className = 'ypp-eq-reset-btn';
         resetBtn.textContent = 'Reset All';
         resetBtn.onclick = () => {
-            ctx._eqGains.fill(0);
-            ctx._eqNodes.forEach(n => { if (n) n.gain.value = 0; });
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            for (let i = 0; i < 10; i++) {
+                ctx._setEQBand(i, 0);
+            }
             this.syncBandUI(ctx, panel, canvasEl);
             if (activePresetBtn) activePresetBtn.classList.remove('active');
-            presetsRow.querySelector('.ypp-eq-preset-btn').classList.add('active');
-            activePresetBtn = presetsRow.querySelector('.ypp-eq-preset-btn');
+            const flatPreset = presetsRow.querySelector('.ypp-eq-preset-btn');
+            if (flatPreset) flatPreset.classList.add('active');
+            activePresetBtn = flatPreset;
             VolumeBoosterUI.saveVolumeSettings(ctx);
         };
 

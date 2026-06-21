@@ -336,6 +336,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             if (video) this.initAudioContext(video);
         }
         if (this.gainNode && this.ctx) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
             // Ramp gracefully to avoid audio clipping/clicks
             this.gainNode.gain.setTargetAtTime(multiplier, this.ctx.currentTime, 0.05);
         }
@@ -348,6 +349,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             if (video) this.initAudioContext(video);
         }
         if (this.pannerNode && this.ctx) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
             this.pannerNode.pan.setTargetAtTime(value, this.ctx.currentTime, 0.05);
         }
     }
@@ -377,6 +379,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             if (video) this.initAudioContext(video);
         }
         if (this._eqNodes[index] && this.ctx) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
             this._eqNodes[index].gain.setTargetAtTime(db, this.ctx.currentTime, 0.05);
         }
     }
@@ -388,7 +391,7 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         gains.forEach((db, i) => this._setEQBand(i, db));
     }
 
-    createButton(video) {
+    createButton(initialVideo) {
         const icon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#fff">
             <path d="M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z"/>
         </svg>`;
@@ -400,7 +403,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.addListener(btn, 'click', (e) => {
             e.stopPropagation();
             if (window.YPP.features.VolumeBoosterUI) {
-                window.YPP.features.VolumeBoosterUI.toggleEQPanel(this, video, btn);
+                const activeVideo = document.querySelector('.html5-main-video') || document.querySelector('video');
+                window.YPP.features.VolumeBoosterUI.toggleEQPanel(this, activeVideo, btn);
             }
         });
         return btn;

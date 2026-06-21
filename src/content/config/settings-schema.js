@@ -252,6 +252,7 @@ window.YPP.SettingsSchema = {
 
         // --- Custom Player Bar (Placements) ---
         pb_snapshot:         { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
+        pb_bookmark:         { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
         pb_loop:             { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
         pb_speed:            { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },
         pb_pip:              { type: 'string', default: 'front', values: ['front', 'back', 'hidden'] },

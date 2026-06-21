@@ -170,6 +170,14 @@ window.YPP.features.VideoFiltersPresets = {
         { category: 'Cinematic Worlds', name: 'Marvel Studios',
           // MCU bright blockbuster: punchy primaries, slightly teal shadows, vivid highlights
           css: 'saturate(175%) contrast(120%) brightness(108%) hue-rotate(185deg)',
-          overlay: null }
+          overlay: null },
+
+        // ── Nature & Documentary ──
+        { category: 'Nature & Documentary', name: 'National Geographic', css: 'sepia(15%) saturate(140%) contrast(115%) brightness(105%) hue-rotate(5deg)', overlay: null },
+        { category: 'Nature & Documentary', name: 'Planet Earth', css: 'saturate(180%) contrast(120%) brightness(108%) hue-rotate(350deg)', overlay: null },
+        { category: 'Nature & Documentary', name: 'Deep Ocean', css: 'hue-rotate(190deg) saturate(160%) contrast(115%) brightness(95%)', overlay: null },
+        { category: 'Nature & Documentary', name: 'Safari', css: 'sepia(40%) saturate(150%) contrast(125%) hue-rotate(345deg)', overlay: null },
+        { category: 'Nature & Documentary', name: 'Rainforest', css: 'hue-rotate(120deg) saturate(150%) contrast(120%) brightness(90%)', overlay: null },
+        { category: 'Nature & Documentary', name: 'Arctic Frost', css: 'hue-rotate(210deg) saturate(70%) contrast(110%) brightness(115%)', overlay: null }
     ]
 };
