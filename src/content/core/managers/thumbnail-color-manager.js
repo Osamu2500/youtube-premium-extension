@@ -77,15 +77,57 @@ export class ThumbnailColorManager {
         }
     }
 
+    getImage(el) {
+        let img = el.querySelector('yt-image img, ytd-thumbnail img');
+        if (!img) {
+            const ytImage = el.querySelector('yt-image');
+            if (ytImage && ytImage.shadowRoot) {
+                img = ytImage.shadowRoot.querySelector('img');
+            }
+        }
+        return img;
+    }
+
     processElement(el) {
         if (el.hasAttribute('data-ypp-thumb-color')) return;
 
-        // Only process if the image actually has a source
-        const img = el.querySelector('yt-image img, ytd-thumbnail img');
-        if (!img) return;
+        const img = this.getImage(el);
+        
+        if (!img) {
+            if (!el.hasAttribute('data-ypp-color-wait-img')) {
+                el.setAttribute('data-ypp-color-wait-img', 'true');
+                const imgObserver = new MutationObserver((mutations, obs) => {
+                    if (this.getImage(el)) {
+                        obs.disconnect();
+                        el.removeAttribute('data-ypp-color-wait-img');
+                        this.processElement(el);
+                    }
+                });
+                imgObserver.observe(el, { childList: true, subtree: true });
+            }
+            return;
+        }
 
         const src = img.src;
-        if (!src || src.includes('data:image')) return;
+        if (!src || src.includes('data:image') || src.includes('hqdefault')) {
+            if (!img.hasAttribute('data-ypp-color-wait')) {
+                img.setAttribute('data-ypp-color-wait', 'true');
+                const mo = new MutationObserver((mutations) => {
+                    for (let mut of mutations) {
+                        if (mut.attributeName === 'src') {
+                            const newSrc = img.src;
+                            if (newSrc && !newSrc.includes('data:image') && !newSrc.includes('hqdefault')) {
+                                mo.disconnect();
+                                img.removeAttribute('data-ypp-color-wait');
+                                this.processElement(el);
+                            }
+                        }
+                    }
+                });
+                mo.observe(img, { attributes: true, attributeFilter: ['src'] });
+            }
+            return;
+        }
 
         // Clean up URL parameters that might cause cache misses
         const cleanSrc = src.split('?')[0];
