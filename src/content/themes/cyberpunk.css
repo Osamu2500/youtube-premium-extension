@@ -30,21 +30,20 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-color: rgba(0, 255, 204, 0.1);
 }
 
-/* Animated Cyberpunk Grid Effect */
+/* Animated Cyberpunk Vector Grid Effect */
 @keyframes ypp-cyberpunk-pan {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 100%; }
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50px); }
 }
 html.yt-premium-plus-theme.ypp-theme-effects::before {
     content: "";
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: -50px; left: -50px; right: -50px; bottom: -100px;
     z-index: -2;
     pointer-events: none;
-    background-image: 
-        repeating-linear-gradient(45deg, rgba(255, 0, 255, 0.05) 0, rgba(255, 0, 255, 0.05) 2px, transparent 2px, transparent 20px),
-        repeating-linear-gradient(-45deg, rgba(0, 255, 204, 0.05) 0, rgba(0, 255, 204, 0.05) 2px, transparent 2px, transparent 20px);
-    background-size: 28px 28px;
-    animation: ypp-cyberpunk-pan 20s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg width='50' height='50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50L50 0M50 50L0 0' stroke='rgba(255,0,255,0.05)' stroke-width='2'/%3E%3Cpath d='M25 0L25 50M0 25L50 25' stroke='rgba(0,255,204,0.05)' stroke-width='1'/%3E%3Ccircle cx='25' cy='25' r='3' fill='rgba(0,255,204,0.1)'/%3E%3C/svg%3E");
+    background-size: 50px 50px;
+    will-change: transform;
+    animation: ypp-cyberpunk-pan 2s linear infinite;
     opacity: 0.5;
 }

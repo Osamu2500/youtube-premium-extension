@@ -29,20 +29,31 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-color: rgba(255, 69, 0, 0.1);
 }
 
-/* Animated Ember Glow Effect */
-@keyframes ypp-ember-glow {
-    0% { opacity: 0.05; transform: scale(1); }
-    50% { opacity: 0.15; transform: scale(1.1); }
-    100% { opacity: 0.05; transform: scale(1); }
+/* Animated Ember Layered Glow Effect */
+@keyframes ypp-ember-glow-bg {
+    0% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.2); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 0.3; }
 }
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+@keyframes ypp-ember-glow-fg {
+    0% { transform: scale(1.1) rotate(5deg); opacity: 0.4; }
+    50% { transform: scale(0.9) rotate(-5deg); opacity: 0.2; }
+    100% { transform: scale(1.1) rotate(5deg); opacity: 0.4; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: "";
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: -50vh; left: -50vw; width: 200vw; height: 200vh;
     z-index: -2;
     pointer-events: none;
-    background: 
-        radial-gradient(circle at 10% 90%, rgba(255, 69, 0, 0.3) 0%, transparent 40%),
-        radial-gradient(circle at 90% 10%, rgba(255, 140, 0, 0.2) 0%, transparent 40%);
-    animation: ypp-ember-glow 8s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: radial-gradient(circle at 30% 80%, rgba(255, 69, 0, 0.15) 0%, transparent 40%);
+    animation: ypp-ember-glow-bg 10s ease-in-out infinite;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(circle at 70% 20%, rgba(255, 140, 0, 0.1) 0%, transparent 40%);
+    animation: ypp-ember-glow-fg 14s ease-in-out infinite;
 }

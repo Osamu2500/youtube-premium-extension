@@ -31,18 +31,19 @@ html.yt-premium-plus-theme {
 }
 
 
+/* Dracula Isometric Vector Effect */
+@keyframes draculaShift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-40px, -40px); }
+}
 html.yt-premium-plus-theme.ypp-theme-effects::before {
     content: '';
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: repeating-linear-gradient(45deg, rgba(189, 147, 249, 0.03) 0px, rgba(189, 147, 249, 0.03) 2px, transparent 2px, transparent 10px),
-                radial-gradient(circle at 20% 80%, rgba(255, 121, 198, 0.08) 0%, transparent 50%);
+    top: -40px; left: -40px; right: -40px; bottom: -40px;
     z-index: -1;
     pointer-events: none;
-    animation: draculaShift 20s linear infinite;
-    background-size: 200% 200%;
-}
-@keyframes draculaShift {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 100%; }
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0' stroke='rgba(189,147,249,0.05)' stroke-width='2'/%3E%3Cpath d='M0 20L20 0M20 40L40 20' stroke='rgba(255,121,198,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 40px 40px;
+    will-change: transform;
+    animation: draculaShift 5s linear infinite;
 }

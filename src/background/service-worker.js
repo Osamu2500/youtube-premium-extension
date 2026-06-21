@@ -256,6 +256,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return true;
         }
 
+        case 'EXTRACT_COLOR': {
+            (async () => {
+                try {
+                    const response = await fetch(request.url, { mode: 'cors', credentials: 'omit' });
+                    if (!response.ok) throw new Error('Fetch failed');
+                    
+                    const blob = await response.blob();
+                    const bitmap = await createImageBitmap(blob);
+                    
+                    const size = 16;
+                    const canvas = new OffscreenCanvas(size, size);
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(bitmap, 0, 0, size, size);
+                    
+                    const imageData = ctx.getImageData(0, 0, size, size).data;
+                    let r = 0, g = 0, b = 0, count = 0;
+                    const skip = 4 * 3; // Sample every 3rd pixel
+                    
+                    for (let i = 0; i < imageData.length; i += skip) {
+                        // Ignore pixels that are too dark (letterboxing)
+                        if (imageData[i] > 15 || imageData[i + 1] > 15 || imageData[i + 2] > 15) {
+                            r += imageData[i];
+                            g += imageData[i + 1];
+                            b += imageData[i + 2];
+                            count++;
+                        }
+                    }
+                    
+                    bitmap.close();
+                    
+                    if (count > 0) {
+                        r = Math.floor(r / count);
+                        g = Math.floor(g / count);
+                        b = Math.floor(b / count);
+                        sendResponse({ success: true, r, g, b });
+                    } else {
+                        sendResponse({ success: false, error: 'No valid pixels' });
+                    }
+                } catch (error) {
+                    sendResponse({ success: false, error: error.message });
+                }
+            })();
+            return true; // Keep message channel open for async response
+        }
+
         default:
             // Unhandled actions can be ignored or logged
             return false;

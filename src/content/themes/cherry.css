@@ -31,17 +31,29 @@ html.yt-premium-plus-theme {
 }
 
 
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+/* Animated Cherry Blossom Float Effect */
+@keyframes cherryFloatBg {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+    100% { transform: translate(-20px, -20px) scale(1.1); opacity: 0.9; }
+}
+@keyframes cherryFloatFg {
+    0% { transform: translate(0, 0) scale(1.1); opacity: 0.8; }
+    100% { transform: translate(20px, 20px) scale(1); opacity: 0.5; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: '';
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: radial-gradient(circle at 80% 20%, rgba(253, 164, 175, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 20% 80%, rgba(253, 164, 175, 0.1) 0%, transparent 50%);
-    z-index: -1;
+    top: -10vh; left: -10vw; width: 120vw; height: 120vh;
+    z-index: -2;
     pointer-events: none;
-    animation: cherryFloat 20s ease-in-out infinite alternate;
+    will-change: transform, opacity;
 }
-@keyframes cherryFloat {
-    0% { transform: translateY(0) scale(1); opacity: 0.8; }
-    100% { transform: translateY(5%) scale(1.1); opacity: 1; }
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: radial-gradient(circle at 80% 20%, rgba(253, 164, 175, 0.15) 0%, transparent 50%);
+    animation: cherryFloatBg 20s ease-in-out infinite alternate;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(circle at 20% 80%, rgba(253, 164, 175, 0.1) 0%, transparent 40%);
+    animation: cherryFloatFg 25s ease-in-out infinite alternate;
 }

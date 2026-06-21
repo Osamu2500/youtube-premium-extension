@@ -29,20 +29,32 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-color: rgba(255, 0, 0, 0.1);
 }
 
-/* Animated Bloodmoon Pulse Effect */
-@keyframes ypp-bloodmoon-pulse {
-    0% { transform: scale(1) translateX(-50%); opacity: 0.1; }
-    50% { transform: scale(1.2) translateX(-40%); opacity: 0.25; }
-    100% { transform: scale(1) translateX(-50%); opacity: 0.1; }
+/* Animated Bloodmoon Layered Pulse Effect */
+@keyframes ypp-bloodmoon-pulse-bg {
+    0% { transform: translate(-50%, 0) scale(1); opacity: 0.1; }
+    50% { transform: translate(-50%, 0) scale(1.3); opacity: 0.25; }
+    100% { transform: translate(-50%, 0) scale(1); opacity: 0.1; }
 }
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+@keyframes ypp-bloodmoon-pulse-fg {
+    0% { transform: translate(-50%, 0) scale(1.2); opacity: 0.2; }
+    50% { transform: translate(-50%, 0) scale(0.9); opacity: 0.1; }
+    100% { transform: translate(-50%, 0) scale(1.2); opacity: 0.2; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: "";
     position: fixed;
     top: -50vh; left: 50%;
     width: 150vw; height: 150vh;
-    transform: translateX(-50%);
     z-index: -2;
     pointer-events: none;
+    will-change: transform, opacity;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
     background: radial-gradient(circle at center, rgba(255, 0, 0, 0.2) 0%, transparent 60%);
-    animation: ypp-bloodmoon-pulse 10s ease-in-out infinite;
+    animation: ypp-bloodmoon-pulse-bg 12s ease-in-out infinite;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(circle at center, rgba(255, 0, 0, 0.15) 0%, transparent 40%);
+    animation: ypp-bloodmoon-pulse-fg 8s ease-in-out infinite;
 }

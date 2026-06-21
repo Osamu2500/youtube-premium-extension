@@ -29,18 +29,31 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-color: rgba(0, 150, 136, 0.1);
 }
 
-/* Animated Abyss Effect */
-@keyframes ypp-abyss-glow {
-    0% { transform: scale(1) translateY(0); opacity: 0.1; }
-    50% { transform: scale(1.1) translateY(-20px); opacity: 0.3; }
-    100% { transform: scale(1) translateY(0); opacity: 0.1; }
+/* Animated Abyss Layered Glow */
+@keyframes ypp-abyss-glow-bg {
+    0% { transform: scale(1) translateY(0); opacity: 0.2; }
+    50% { transform: scale(1.1) translateY(-30px); opacity: 0.4; }
+    100% { transform: scale(1) translateY(0); opacity: 0.2; }
 }
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+@keyframes ypp-abyss-glow-fg {
+    0% { transform: scale(1.1) translateY(-20px); opacity: 0.3; }
+    50% { transform: scale(1) translateY(10px); opacity: 0.1; }
+    100% { transform: scale(1.1) translateY(-20px); opacity: 0.3; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: "";
     position: fixed;
-    bottom: -20vh; left: 0; right: 0; height: 100vh;
+    bottom: -20vh; left: -20vw; right: -20vw; height: 120vh;
     z-index: -2;
     pointer-events: none;
-    background: radial-gradient(ellipse at bottom center, rgba(0, 150, 136, 0.3) 0%, transparent 70%);
-    animation: ypp-abyss-glow 15s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: radial-gradient(ellipse at bottom center, rgba(0, 150, 136, 0.4) 0%, transparent 60%);
+    animation: ypp-abyss-glow-bg 18s ease-in-out infinite;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(ellipse at bottom 30% center, rgba(0, 150, 136, 0.2) 0%, transparent 70%);
+    animation: ypp-abyss-glow-fg 25s ease-in-out infinite;
 }

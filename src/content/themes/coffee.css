@@ -31,17 +31,29 @@ html.yt-premium-plus-theme {
 }
 
 
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+/* Animated Coffee Steam Effect */
+@keyframes coffeeSteamBg {
+    0% { transform: translateY(0) scale(1); opacity: 0.5; }
+    100% { transform: translateY(-50px) scale(1.1); opacity: 0.8; }
+}
+@keyframes coffeeSteamFg {
+    0% { transform: translateY(0) scale(1.1); opacity: 0.7; }
+    100% { transform: translateY(-30px) scale(1); opacity: 0.4; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: '';
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: radial-gradient(circle at 50% 100%, rgba(212, 163, 115, 0.12) 0%, transparent 60%),
-                radial-gradient(circle at 20% 0%, rgba(250, 237, 205, 0.05) 0%, transparent 40%);
-    z-index: -1;
+    top: -10vh; left: -10vw; width: 120vw; height: 120vh;
+    z-index: -2;
     pointer-events: none;
-    animation: coffeeSteam 25s ease-in-out infinite alternate;
+    will-change: transform, opacity;
 }
-@keyframes coffeeSteam {
-    0% { transform: translateY(0) scale(1); opacity: 0.7; }
-    100% { transform: translateY(-5%) scale(1.1); opacity: 1; }
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: radial-gradient(ellipse at 50% 100%, rgba(212, 163, 115, 0.15) 0%, transparent 60%);
+    animation: coffeeSteamBg 25s ease-in-out infinite alternate;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(ellipse at 30% 90%, rgba(250, 237, 205, 0.1) 0%, transparent 50%);
+    animation: coffeeSteamFg 30s ease-in-out infinite alternate;
 }

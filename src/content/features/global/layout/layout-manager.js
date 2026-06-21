@@ -3,6 +3,8 @@
  * Enforces a 4x4 grid layout on the YouTube Home and Channel pages.
  * Optimized for performance using requestAnimationFrame and CSS classes.
  */
+import './grid-layout.css';
+
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 

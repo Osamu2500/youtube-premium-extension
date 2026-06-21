@@ -29,18 +29,27 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-color: rgba(0, 188, 212, 0.1);
 }
 
-/* Animated Hologram Scanline Effect */
+/* Hologram Vector Scan Effect */
 @keyframes ypp-hologram-scan {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 100vh; }
+    0% { transform: translateY(-100vh); }
+    100% { transform: translateY(100vh); }
 }
 html.yt-premium-plus-theme.ypp-theme-effects::before {
     content: "";
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0; left: 0; right: 0; height: 20vh;
     z-index: -2;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(0, 188, 212, 0) 0%, rgba(0, 188, 212, 0.05) 50%, rgba(0, 188, 212, 0) 100%);
-    background-size: 100% 20px;
-    animation: ypp-hologram-scan 5s linear infinite;
+    background: linear-gradient(to bottom, rgba(0, 188, 212, 0), rgba(0, 188, 212, 0.1) 50%, rgba(0, 188, 212, 0));
+    will-change: transform;
+    animation: ypp-hologram-scan 4s linear infinite;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -3;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='18' fill='none' stroke='rgba(0,188,212,0.03)' stroke-width='1' stroke-dasharray='4 4'/%3E%3Ccircle cx='20' cy='20' r='4' fill='rgba(0,188,212,0.05)'/%3E%3C/svg%3E");
+    background-size: 40px 40px;
 }

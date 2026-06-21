@@ -36,17 +36,29 @@ html.yt-premium-plus-theme {
 }
 
 
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+/* Animated Default Pulse Effect */
+@keyframes defaultPulseBg {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+    100% { transform: scale(1.1) translate(-10px, -10px); opacity: 0.8; }
+}
+@keyframes defaultPulseFg {
+    0% { transform: scale(1.1) translate(10px, 10px); opacity: 0.7; }
+    100% { transform: scale(1) translate(0, 0); opacity: 0.4; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: '';
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: radial-gradient(circle at 50% 50%, rgba(62, 166, 255, 0.08) 0%, transparent 60%),
-                radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
-    z-index: -1;
+    top: -10vh; left: -10vw; width: 120vw; height: 120vh;
+    z-index: -2;
     pointer-events: none;
-    animation: defaultPulse 15s ease-in-out infinite alternate;
+    will-change: transform, opacity;
 }
-@keyframes defaultPulse {
-    0% { transform: scale(1) translateY(0); opacity: 0.6; }
-    100% { transform: scale(1.1) translateY(-2%); opacity: 1; }
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: radial-gradient(circle at 50% 50%, rgba(62, 166, 255, 0.1) 0%, transparent 60%);
+    animation: defaultPulseBg 15s ease-in-out infinite alternate;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+    animation: defaultPulseFg 20s ease-in-out infinite alternate;
 }

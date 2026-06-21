@@ -35,16 +35,31 @@ html.yt-premium-plus-theme {
     50% { background-position: 100% 100%; }
     100% { background-position: 0% 0%; }
 }
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+/* Animated Layered Nebula Clouds */
+@keyframes ypp-nebula-clouds-bg {
+    0% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+    50% { transform: scale(1.1) rotate(2deg); opacity: 0.7; }
+    100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+}
+@keyframes ypp-nebula-clouds-fg {
+    0% { transform: scale(1.1) rotate(0deg); opacity: 0.4; }
+    50% { transform: scale(1) rotate(-2deg); opacity: 0.6; }
+    100% { transform: scale(1.1) rotate(0deg); opacity: 0.4; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: "";
     position: fixed;
-    top: -50%; left: -50%; right: -50%; bottom: -50%;
+    top: -50vh; left: -50vw; right: -50vw; bottom: -50vh;
     z-index: -2;
     pointer-events: none;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.2) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(255, 105, 180, 0.15) 0%, transparent 50%);
-    background-size: 200% 200%;
-    animation: ypp-nebula-clouds 30s ease-in-out infinite;
-    opacity: 0.6;
+    will-change: transform, opacity;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: radial-gradient(ellipse at 30% 30%, rgba(138, 43, 226, 0.25) 0%, transparent 50%);
+    animation: ypp-nebula-clouds-bg 30s ease-in-out infinite;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: radial-gradient(ellipse at 70% 70%, rgba(255, 105, 180, 0.2) 0%, transparent 60%);
+    animation: ypp-nebula-clouds-fg 40s ease-in-out infinite;
 }

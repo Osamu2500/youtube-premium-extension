@@ -29,19 +29,31 @@ html.yt-premium-plus-theme {
     --ytd-searchbox-legacy-button-color: rgba(216, 222, 233, 0.1);
 }
 
-/* Animated Aurora Background Effect */
-@keyframes ypp-nord-aurora {
-    0% { background-position: 0% 50%; opacity: 0.1; }
-    50% { background-position: 100% 50%; opacity: 0.25; }
-    100% { background-position: 0% 50%; opacity: 0.1; }
+/* Animated Nord Aurora Background Effect */
+@keyframes ypp-nord-aurora-bg {
+    0% { transform: translateX(0) scale(1); opacity: 0.4; }
+    50% { transform: translateX(-50px) scale(1.05); opacity: 0.6; }
+    100% { transform: translateX(0) scale(1); opacity: 0.4; }
 }
-html.yt-premium-plus-theme.ypp-theme-effects::before {
+@keyframes ypp-nord-aurora-fg {
+    0% { transform: translateX(0) scale(1.05); opacity: 0.5; }
+    50% { transform: translateX(30px) scale(1); opacity: 0.3; }
+    100% { transform: translateX(0) scale(1.05); opacity: 0.5; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before,
+html.yt-premium-plus-theme.ypp-theme-effects::after {
     content: "";
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: -10vh; left: -10vw; right: -10vw; bottom: -10vh;
     z-index: -2;
     pointer-events: none;
-    background: linear-gradient(120deg, transparent 20%, rgba(136, 192, 208, 0.4) 40%, rgba(163, 190, 140, 0.4) 60%, transparent 80%);
-    background-size: 300% 300%;
-    animation: ypp-nord-aurora 15s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    background: linear-gradient(120deg, transparent 20%, rgba(136, 192, 208, 0.5) 40%, transparent 70%);
+    animation: ypp-nord-aurora-bg 20s ease-in-out infinite;
+}
+html.yt-premium-plus-theme.ypp-theme-effects::after {
+    background: linear-gradient(60deg, transparent 30%, rgba(163, 190, 140, 0.4) 60%, transparent 90%);
+    animation: ypp-nord-aurora-fg 25s ease-in-out infinite;
 }

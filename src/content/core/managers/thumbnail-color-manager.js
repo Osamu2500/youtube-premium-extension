@@ -92,45 +92,34 @@ export class ThumbnailColorManager {
         if (el.hasAttribute('data-ypp-thumb-color')) return;
 
         const img = this.getImage(el);
+        const src = img ? img.src : null;
         
-        if (!img) {
-            if (!el.hasAttribute('data-ypp-color-wait-img')) {
-                el.setAttribute('data-ypp-color-wait-img', 'true');
-                const imgObserver = new MutationObserver((mutations, obs) => {
-                    if (this.getImage(el)) {
-                        obs.disconnect();
-                        el.removeAttribute('data-ypp-color-wait-img');
+        const isReady = src && !src.includes('data:image') && !src.includes('hqdefault');
+
+        if (!isReady) {
+            if (!el.hasAttribute('data-ypp-color-wait')) {
+                el.setAttribute('data-ypp-color-wait', 'true');
+                const mo = new MutationObserver(() => {
+                    const currentImg = this.getImage(el);
+                    const currentSrc = currentImg ? currentImg.src : null;
+                    if (currentSrc && !currentSrc.includes('data:image') && !currentSrc.includes('hqdefault')) {
+                        mo.disconnect();
+                        el.removeAttribute('data-ypp-color-wait');
                         this.processElement(el);
                     }
                 });
-                imgObserver.observe(el, { childList: true, subtree: true });
-            }
-            return;
-        }
-
-        const src = img.src;
-        if (!src || src.includes('data:image') || src.includes('hqdefault')) {
-            if (!img.hasAttribute('data-ypp-color-wait')) {
-                img.setAttribute('data-ypp-color-wait', 'true');
-                const mo = new MutationObserver((mutations) => {
-                    for (let mut of mutations) {
-                        if (mut.attributeName === 'src') {
-                            const newSrc = img.src;
-                            if (newSrc && !newSrc.includes('data:image') && !newSrc.includes('hqdefault')) {
-                                mo.disconnect();
-                                img.removeAttribute('data-ypp-color-wait');
-                                this.processElement(el);
-                            }
-                        }
-                    }
+                // Observe the entire element for both DOM swaps and attribute changes
+                mo.observe(el, { 
+                    childList: true, 
+                    subtree: true, 
+                    attributes: true, 
+                    attributeFilter: ['src'] 
                 });
-                mo.observe(img, { attributes: true, attributeFilter: ['src'] });
             }
             return;
         }
 
-        // Clean up URL parameters that might cause cache misses
-        const cleanSrc = src.split('?')[0];
+        const cleanSrc = src;
 
         if (this.cache.has(cleanSrc)) {
             const cached = this.cache.get(cleanSrc);
@@ -145,59 +134,39 @@ export class ThumbnailColorManager {
             return;
         }
 
-        const tempImg = new Image();
-        tempImg.crossOrigin = "Anonymous"; // Crucial for canvas pixel reading
-        
-        tempImg.onload = () => {
-            try {
-                this.ctx.clearRect(0, 0, 10, 10);
-                this.ctx.drawImage(tempImg, 0, 0, 10, 10);
-                
-                const data = this.ctx.getImageData(0, 0, 10, 10).data;
-                let r = 0, g = 0, b = 0, count = 0;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    const alpha = data[i + 3];
-                    if (alpha < 255) continue; 
-                    
-                    // Exclude pure black (often letterboxes) and pure white
-                    if (data[i] < 15 && data[i+1] < 15 && data[i+2] < 15) continue;
-                    if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) continue;
-
-                    r += data[i];
-                    g += data[i+1];
-                    b += data[i+2];
-                    count++;
+        // The Ultimate Fix: Offload extraction to the Background Service Worker
+        // The background script has <all_urls> permission, completely bypassing
+        // CORS, Tainted Canvas errors, and URL signature issues. It also frees up
+        // the main thread, greatly improving the homepage scrolling performance!
+        chrome.runtime.sendMessage({
+            action: 'EXTRACT_COLOR',
+            url: cleanSrc
+        }, (response) => {
+            if (chrome.runtime.lastError || !response || !response.success) {
+                // Fallback error handler (if background script fails or is asleep)
+                const colorStr = 'rgb(40, 40, 40)';
+                const rgbStr = '40, 40, 40';
+                this.cache.set(cleanSrc, { colorStr, rgbStr });
+                if (el.isConnected) {
+                    el.style.setProperty('--ypp-thumb-color', colorStr);
+                    el.style.setProperty('--ypp-thumb-rgb', rgbStr);
+                    el.setAttribute('data-ypp-thumb-color', 'true');
                 }
-
-                if (count > 0) {
-                    r = Math.floor(r / count);
-                    g = Math.floor(g / count);
-                    b = Math.floor(b / count);
-
-                    const enhanced = this.enhanceColorForGlow(r, g, b);
-                    const colorStr = `rgb(${enhanced.r}, ${enhanced.g}, ${enhanced.b})`;
-                    const rgbStr = `${enhanced.r}, ${enhanced.g}, ${enhanced.b}`;
-
-                    this.cache.set(cleanSrc, { colorStr, rgbStr });
-                    
-                    if (el.isConnected) {
-                        el.style.setProperty('--ypp-thumb-color', colorStr);
-                        el.style.setProperty('--ypp-thumb-rgb', rgbStr);
-                        el.setAttribute('data-ypp-thumb-color', 'true');
-                    }
-                }
-            } catch (e) {
-                // Ignore CORS tainted canvas errors
+                return;
             }
-        };
 
-        // Fallback error handler
-        tempImg.onerror = () => {
-            // Some images might strictly reject CORS, skip them silently
-        };
+            const enhanced = this.enhanceColorForGlow(response.r, response.g, response.b);
+            const colorStr = `rgb(${enhanced.r}, ${enhanced.g}, ${enhanced.b})`;
+            const rgbStr = `${enhanced.r}, ${enhanced.g}, ${enhanced.b}`;
 
-        tempImg.src = cleanSrc;
+            this.cache.set(cleanSrc, { colorStr, rgbStr });
+            
+            if (el.isConnected) {
+                el.style.setProperty('--ypp-thumb-color', colorStr);
+                el.style.setProperty('--ypp-thumb-rgb', rgbStr);
+                el.setAttribute('data-ypp-thumb-color', 'true');
+            }
+        });
     }
 
     enhanceColorForGlow(r, g, b) {
