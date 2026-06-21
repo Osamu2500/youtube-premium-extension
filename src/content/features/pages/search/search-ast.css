@@ -1,3 +1,35 @@
+/* =========================================================================
+   SEARCH GRID: INSTANT CARD ENTRANCE (CSS-native, no JS overhead)
+   Applied by the browser compositor — zero scheduling delay.
+   ========================================================================= */
+@keyframes ypp-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ypp-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Apply to all cards as soon as they enter the grid.
+   animation-fill-mode: backwards means they start hidden until the
+   animation fires, preventing a FOUC flash. */
+body.ypp-search-grid-mode .ypp-grid-item {
+  animation: ypp-card-in 0.18s ease-out both;
+  
+  /* PERFORMANCE VIRUALIZATION: 
+     Skip rendering off-screen cards to maintain 60FPS on infinite scroll */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
 body.ypp-search-page ytd-app[mini-guide-visible] ytd-page-manager,
 body.ypp-search-page ytd-app[mini-guide-visible] #page-manager,
 body.ypp-search-page ytd-app[mini-guide-visible] #content {
@@ -57,21 +89,30 @@ body.ypp-search-grid-mode ytd-vertical-list-renderer #items {
   box-sizing: border-box !important;
   align-items: start !important;
 }
-body.ypp-search-grid-mode ytd-item-section-renderer {
+body.ypp-search-grid-mode ytd-item-section-renderer:not([hidden]) {
   display: contents !important;
 }
-body.ypp-search-grid-mode ytd-item-section-renderer > #contents {
+body.ypp-search-grid-mode ytd-item-section-renderer:not([hidden]) > #contents {
   display: contents !important;
 }
 
 /* FORCE AUTO-ADJUST: Aggressive Whitelist to completely destroy any invisible grid blockers */
 /* 1. Destroy any unknown elements inside the grid contents */
-body.ypp-search-grid-mode ytd-item-section-renderer > #contents > *:not(ytd-video-renderer):not(ytd-playlist-renderer):not(ytd-radio-renderer):not(ytd-channel-renderer):not(ytd-shelf-renderer):not(ytd-reel-shelf-renderer):not(ytd-horizontal-card-list-renderer):not(ytd-rich-shelf-renderer):not(ytd-search-sub-menu-renderer):not(ytd-continuation-item-renderer) {
+body.ypp-search-grid-mode
+  ytd-item-section-renderer
+  > #contents
+  > *:not(ytd-video-renderer):not(ytd-playlist-renderer):not(ytd-radio-renderer):not(
+    ytd-channel-renderer
+  ):not(ytd-shelf-renderer):not(ytd-reel-shelf-renderer):not(ytd-horizontal-card-list-renderer):not(
+    ytd-rich-shelf-renderer
+  ):not(ytd-search-sub-menu-renderer):not(ytd-continuation-item-renderer) {
   display: none !important;
 }
 
 /* 2. Destroy any unknown structural elements (like empty #header) inside the section wrappers */
-body.ypp-search-grid-mode ytd-item-section-renderer > *:not(#contents):not(ytd-continuation-item-renderer) {
+body.ypp-search-grid-mode
+  ytd-item-section-renderer
+  > *:not(#contents):not(ytd-continuation-item-renderer) {
   display: none !important;
 }
 
@@ -88,7 +129,10 @@ body.ypp-search-grid-mode ytd-ad-slot-renderer,
 body.ypp-search-grid-mode ytd-promoted-sparkles-web-renderer,
 body.ypp-search-grid-mode ytd-search-pyv-renderer,
 body.ypp-search-grid-mode ytd-promoted-video-renderer,
-body.ypp-search-grid-mode ytd-shelf-renderer:not(:has(ytd-video-renderer)):not(:has(ytd-playlist-renderer)):not(:has(ytd-channel-renderer)):not(:has(ytd-grid-video-renderer)),
+body.ypp-search-grid-mode
+  ytd-shelf-renderer:not(:has(ytd-video-renderer)):not(:has(ytd-playlist-renderer)):not(
+    :has(ytd-channel-renderer)
+  ):not(:has(ytd-grid-video-renderer)),
 body.ypp-search-grid-mode ytd-reel-shelf-renderer:not(:has(ytd-reel-item-renderer)) {
   display: none !important;
 }
@@ -144,6 +188,51 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   overflow: hidden !important;
   position: relative !important;
 }
+
+/* PREMIUM POLISH: Channel Card Grid Layout */
+body.ypp-search-grid-mode ytd-channel-renderer {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  flex: none !important;
+  align-self: stretch !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 24px 16px !important;
+  border-radius: 12px !important;
+  background-color: var(--yt-spec-badge-chip-background, rgba(255, 255, 255, 0.05)) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #avatar {
+  width: 136px !important;
+  height: 136px !important;
+  margin: 0 auto 16px auto !important;
+  border-radius: 50% !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #info-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #subscribers {
+  margin: 4px 0 !important;
+}
+
+body.ypp-search-grid-mode ytd-channel-renderer #buttons {
+  margin-top: 16px !important;
+  display: flex !important;
+  justify-content: center !important;
+}
 body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail,
 body.ypp-search-grid-mode ytd-playlist-renderer ytd-playlist-thumbnail,
 body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
@@ -155,13 +244,29 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail {
 
   overflow: hidden !important;
   position: relative !important;
-  background-color: transparent !important;
+  
+  /* PERCEIVED SPEED: Skeleton shimmer background while image loads */
+  background: linear-gradient(90deg, var(--yt-spec-badge-chip-background, rgba(255,255,255,0.03)) 25%, rgba(255,255,255,0.08) 50%, var(--yt-spec-badge-chip-background, rgba(255,255,255,0.03)) 75%) !important;
+  background-size: 200% 100% !important;
+  animation: ypp-skeleton-shimmer 2s infinite linear !important;
+  
   margin-right: 0 !important;
   margin-bottom: 0 !important; /* Spacing handled by title margin-top */
   grid-column: 1 / -1 !important;
   grid-row: 1 / 2 !important;
   flex: none !important;
   z-index: var(--ypp-z-content);
+  
+  /* PREMIUM POLISH: Rounded corners and smooth hover transition */
+  border-radius: 12px !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease !important;
+}
+
+/* PREMIUM POLISH: Subtle hover lift and shadow for the entire card */
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-thumbnail,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-playlist-thumbnail,
+body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-thumbnail {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
 }
 .ypp-search-page.ypp-search-grid-mode ytd-video-renderer {
   width: 100% !important;
@@ -207,6 +312,16 @@ body.ypp-search-grid-mode ytd-radio-renderer ytd-thumbnail img {
   height: 100% !important;
   object-fit: cover !important;
   background-color: transparent !important;
+  
+  /* PREMIUM POLISH: Smooth scale transition for the image */
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease-in !important;
+}
+
+/* PREMIUM POLISH: Scale up image inside the rounded thumbnail container */
+body.ypp-search-grid-mode ytd-video-renderer:hover ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover ytd-thumbnail img,
+body.ypp-search-grid-mode ytd-radio-renderer:hover ytd-thumbnail img {
+  transform: scale(1.04) !important;
 }
 body.ypp-search-grid-mode ytd-video-renderer #video-title,
 body.ypp-search-grid-mode ytd-playlist-renderer #video-title,
@@ -223,6 +338,15 @@ body.ypp-search-grid-mode ytd-radio-renderer #video-title yt-formatted-string {
   line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
+  transition: color 0.2s ease !important;
+}
+
+/* PREMIUM POLISH: Highlight title on card hover */
+body.ypp-search-grid-mode ytd-video-renderer:hover #video-title,
+body.ypp-search-grid-mode ytd-playlist-renderer:hover #video-title,
+body.ypp-search-grid-mode ytd-radio-renderer:hover #video-title {
+  color: var(--yt-spec-text-primary) !important;
+  text-decoration: none !important;
 }
 
 body.ypp-search-grid-mode .ypp-full-width-item,
@@ -1303,4 +1427,17 @@ body.ypp-search-grid-mode
 }
 body.ypp-search-grid-mode ytd-thumbnail-overlay-time-status-renderer {
   z-index: var(--ypp-z-content) !important;
+}
+
+/* =========================================================================
+   SPA NAVIGATION SAFEGUARDS
+   ========================================================================= */
+/* NEVER force display an element that YouTube has explicitly hidden */
+body.ypp-search-grid-mode [hidden],
+body.ypp-search-grid-mode [hidden] *,
+body.ypp-search-grid-mode #contents [hidden],
+body.ypp-search-grid-mode ytd-item-section-renderer[hidden] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

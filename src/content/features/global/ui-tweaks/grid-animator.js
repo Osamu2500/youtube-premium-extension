@@ -35,7 +35,7 @@ window.YPP.features.GridAnimator = class GridAnimator extends window.YPP.feature
     disable() {
         this.observer.unregister('grid-animator');
         if (this._batchTimeout) {
-            clearTimeout(this._batchTimeout);
+            cancelAnimationFrame(this._batchTimeout);
             this._batchTimeout = null;
         }
         this._batch = [];
@@ -49,28 +49,34 @@ window.YPP.features.GridAnimator = class GridAnimator extends window.YPP.feature
     }
 
     _queueElementsForAnimation(elements) {
+        // Skip JS animation entirely on search pages.
+        // The search grid uses CSS keyframe animations instead (defined in
+        // search-ast.css) which are handled natively by the browser with
+        // zero scheduling overhead and no opacity:0 flash.
+        if (window.location.pathname === '/results') return;
+
         // Filter out elements that have already been animated
         const newElements = elements.filter(el => !el.hasAttribute('data-ypp-animated'));
         
         if (newElements.length === 0) return;
 
-        // Immediately hide them so they don't flash before animating
+        // Mark immediately but don't set opacity:0 here — the CSS handles the
+        // initial invisible state via the @keyframes, avoiding the flash-of-invisible
         newElements.forEach(el => {
             el.setAttribute('data-ypp-animated', 'true');
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
         });
 
         this._batch.push(...newElements);
 
         if (this._batchTimeout) {
-            clearTimeout(this._batchTimeout);
+            cancelAnimationFrame(this._batchTimeout);
         }
 
-        // Wait a tick to batch multiple elements inserted at once (e.g., initial page load)
-        this._batchTimeout = setTimeout(() => {
+        // Use requestAnimationFrame for zero artificial delay — fires as soon as
+        // the browser is ready to paint, instead of an arbitrary 50ms wait.
+        this._batchTimeout = requestAnimationFrame(() => {
             this._flushBatch();
-        }, 50);
+        });
     }
 
     _flushBatch() {
@@ -83,17 +89,10 @@ window.YPP.features.GridAnimator = class GridAnimator extends window.YPP.feature
         anime({
             targets: elementsToAnimate,
             opacity: [0, 1],
-            translateY: [30, 0],
-            delay: anime.stagger(60, { start: 100 }), // 100ms initial delay, 60ms between each
-            duration: 800,
+            translateY: [12, 0],
+            delay: anime.stagger(20, { start: 0 }),
+            duration: 350,
             easing: 'easeOutQuart',
-            complete: (anim) => {
-                // Clean up inline styles after animation to avoid conflicts with CSS hover effects
-                anim.animatables.forEach(a => {
-                    a.target.style.opacity = '';
-                    a.target.style.transform = '';
-                });
-            }
         });
     }
 };

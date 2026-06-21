@@ -75,7 +75,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
             // Debounce: batches rapid mutations (20 items loading at once) into a
             // single _processMatches call rather than firing 20 separate times.
             const debouncedProcess = window.YPP.Utils?.debounce
-                ? window.YPP.Utils.debounce((matches) => this._processMatches(matches), 150)
+                ? window.YPP.Utils.debounce((matches) => this._processMatches(matches), 30)
                 : (matches) => this._processMatches(matches);
 
             window.YPP.sharedObserver.register(
@@ -145,22 +145,143 @@ window.YPP.features.SearchObserver = class SearchObserver {
     }
 
     _processSection(section) {
+        const contents = section.querySelector('#contents');
+        if (!contents) return;
+
+        const children = Array.from(contents.children);
+        if (children.length === 0) return;
+
+        // Use fastdom pattern to strictly separate DOM reads and writes.
+        // Interleaving them (e.g. read `querySelector` then write `classList.add`)
+        // inside a loop causes synchronous Layout Thrashing and extreme lag.
         window.YPP.Utils.batch.read(() => {
-            const contents = section.querySelector('#contents');
-            if (!contents) return;
-
-            const children = Array.from(contents.children);
-            if (children.length === 0) return;
-
             const stats = this._analyzeSectionChildren(children);
+            const operations = [];
 
-            window.YPP.Utils.batch.write(() => {
-                if (this._handleNoiseSection(section, stats, children.length)) {
-                    return;
+            const CLASSES = this._classes;
+            const isGridContainer = contents.classList.contains(CLASSES.GRID_CONTAINER);
+
+            // Phase 1: DOM Reads (Gather all necessary state)
+            for (let i = 0; i < children.length; i++) {
+                const node = children[i];
+                if (node.nodeType !== Node.ELEMENT_NODE) continue;
+                if (this._processedNodes.has(node)) continue;
+
+                const tag = node.tagName.toLowerCase();
+                const isFlattenable = this._isFlattenableShelf(node);
+                const isShorts = this._isShorts(node);
+
+                let flattenData = null;
+                if (isFlattenable) {
+                    const vertical = node.querySelector('ytd-vertical-list-renderer #items');
+                    const horizontal = node.querySelector('ytd-horizontal-card-list-renderer #scroll-container')
+                                    || node.querySelector('ytd-horizontal-card-list-renderer #items');
+                    const generic = node.querySelector('#items')
+                                    || node.querySelector('#scroll-container')
+                                    || node.querySelector('#contents');
+                    const shelfContainer = vertical || horizontal || generic;
+                    let cards = [];
+                    let cardsCleanData = [];
+                    if (shelfContainer) {
+                        cards = Array.from(shelfContainer.querySelectorAll(
+                            'ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer, ytd-channel-renderer'
+                        ));
+                        cardsCleanData = cards.map(c => {
+                            const thumb = c.querySelector('ytd-thumbnail, ytd-playlist-thumbnail');
+                            return {
+                                dismissible: c.querySelector('#dismissible'),
+                                thumb: thumb,
+                                innerThumb: thumb ? thumb.querySelector('a, yt-image') : null,
+                                textWrapper: c.querySelector('.text-wrapper'),
+                                actionMenu: c.querySelector('#action-menu, .action-menu')
+                            };
+                        });
+                    }
+                    flattenData = { shelfContainer, cards, cardsCleanData };
                 }
 
-                if (stats.hasVideos) {
-                    this._applyGridSystem(contents, children);
+                let cleanData = null;
+                if (stats.hasVideos || isGridContainer) {
+                    if (
+                        tag === 'ytd-video-renderer'    ||
+                        tag === 'ytd-radio-renderer'    ||
+                        tag === 'ytd-playlist-renderer' ||
+                        tag === 'ytd-channel-renderer'  ||
+                        tag === 'yt-lockup-view-model'  ||
+                        tag === 'ytd-lockup-view-model'
+                    ) {
+                        const thumb = node.querySelector('ytd-thumbnail, ytd-playlist-thumbnail');
+                        cleanData = {
+                            dismissible: node.querySelector('#dismissible'),
+                            thumb: thumb,
+                            innerThumb: thumb ? thumb.querySelector('a, yt-image') : null,
+                            textWrapper: node.querySelector('.text-wrapper'),
+                            actionMenu: node.querySelector('#action-menu, .action-menu')
+                        };
+                    }
+                }
+
+                operations.push({ node, tag, isFlattenable, isShorts, flattenData, cleanData });
+            }
+
+            // Phase 2: DOM Writes (Apply all mutations in one frame)
+            window.YPP.Utils.batch.write(() => {
+                const { NOISE_TAGS } = SearchObserver;
+
+                this._handleNoiseSection(section, stats, children.length);
+
+                if (stats.hasVideos && !isGridContainer) {
+                    contents.classList.add(CLASSES.GRID_CONTAINER);
+                }
+
+                for (let op of operations) {
+                    this._processedNodes.add(op.node);
+
+                    if (NOISE_TAGS.has(op.tag)) {
+                        if (op.isFlattenable && op.flattenData) {
+                            op.node.dataset.yppFlattened = 'true';
+                            op.node.classList.add('ypp-flattened-container');
+                            if (op.flattenData.shelfContainer) {
+                                op.flattenData.shelfContainer.classList.add('ypp-flattened-grid');
+                            }
+                            for (let j = 0; j < op.flattenData.cards.length; j++) {
+                                const card = op.flattenData.cards[j];
+                                card.classList.add(CLASSES.GRID_ITEM);
+                                this._cleanInlineStyles(card, op.flattenData.cardsCleanData[j]);
+                            }
+                            continue;
+                        }
+                        if (this._settings.hideSearchShelves) {
+                            op.node.style.setProperty('display', 'none', 'important');
+                        }
+                        continue;
+                    }
+
+                    if (op.isShorts) {
+                        op.node.style.setProperty('display', 'none', 'important');
+                        continue;
+                    }
+
+                    if (stats.hasVideos || isGridContainer) {
+                        if (
+                            op.tag === 'ytd-video-renderer'    ||
+                            op.tag === 'ytd-radio-renderer'    ||
+                            op.tag === 'ytd-playlist-renderer' ||
+                            op.tag === 'ytd-channel-renderer'  ||
+                            op.tag === 'yt-lockup-view-model'  ||
+                            op.tag === 'ytd-lockup-view-model'
+                        ) {
+                            op.node.classList.add(CLASSES.GRID_ITEM);
+                            this._cleanInlineStyles(op.node, op.cleanData);
+                        } else if (
+                            op.tag === 'ytd-ad-slot-renderer' ||
+                            op.tag === 'ytd-promoted-sparkles-web-renderer'
+                        ) {
+                            op.node.style.setProperty('display', 'none', 'important');
+                        } else if (!op.node.classList.contains('ypp-flattened-container')) {
+                            op.node.classList.add(CLASSES.FULL_WIDTH);
+                        }
+                    }
                 }
             });
         });
@@ -199,77 +320,6 @@ window.YPP.features.SearchObserver = class SearchObserver {
             section.classList.remove('ypp-noise-section');
         }
         return false;
-    }
-
-    _applyGridSystem(contents, children) {
-        const CLASSES = this._classes;
-        if (!contents.classList.contains(CLASSES.GRID_CONTAINER)) {
-            contents.classList.add(CLASSES.GRID_CONTAINER);
-        }
-        for (let i = 0; i < children.length; i++) {
-            this.processNode(children[i], contents);
-        }
-    }
-
-    processNode(node, gridContainer) {
-        if (node.nodeType !== Node.ELEMENT_NODE)  return;
-        if (this._processedNodes.has(node))        return;
-
-        window.YPP.Utils.batch.read(() => {
-            const tag = node.tagName.toLowerCase();
-            const isFlattenable = this._isFlattenableShelf(node);
-            const isShorts = this._isShorts(node);
-            const container = gridContainer || node.parentElement;
-            const isGridContainer = container?.classList.contains(this._classes.GRID_CONTAINER);
-
-            window.YPP.Utils.batch.write(() => {
-                this._processedNodes.add(node);
-                const CLASSES = this._classes;
-                const { NOISE_TAGS } = SearchObserver;
-
-                // ── A. Noise node ─────────────────────────────────────────────────────
-                if (NOISE_TAGS.has(tag)) {
-                    if (isFlattenable) {
-                        this._flattenShelf(node);
-                        return;
-                    }
-                    if (this._settings.hideSearchShelves) {
-                        node.style.setProperty('display', 'none', 'important');
-                    }
-                    return;
-                }
-
-
-
-                // ── B. Shorts ─────────────────────────────────────────────────────────
-                if (isShorts) {
-                    node.style.setProperty('display', 'none', 'important');
-                    return;
-                }
-
-                // ── C. Grid layout ────────────────────────────────────────────────────
-                if (isGridContainer) {
-                    if (
-                        tag === 'ytd-video-renderer'    ||
-                        tag === 'ytd-radio-renderer'    ||
-                        tag === 'ytd-playlist-renderer' ||
-                        tag === 'ytd-channel-renderer'  ||
-                        tag === 'yt-lockup-view-model'  ||
-                        tag === 'ytd-lockup-view-model'
-                    ) {
-                        node.classList.add(CLASSES.GRID_ITEM);
-                        this._cleanInlineStyles(node);
-                    } else if (
-                        tag === 'ytd-ad-slot-renderer' ||
-                        tag === 'ytd-promoted-sparkles-web-renderer'
-                    ) {
-                        node.style.setProperty('display', 'none', 'important');
-                    } else if (!node.classList.contains('ypp-flattened-container')) {
-                        node.classList.add(CLASSES.FULL_WIDTH);
-                    }
-                }
-            });
-        });
     }
 
     // -------------------------------------------------------------------------
@@ -318,87 +368,57 @@ window.YPP.features.SearchObserver = class SearchObserver {
         return false;
     }
 
-    _flattenShelf(node) {
-        if (node.dataset.yppFlattened === 'true') return;
-        node.dataset.yppFlattened = 'true';
-        node.classList.add('ypp-flattened-container');
 
-        const CLASSES = this._classes;
-
-        const vertical   = node.querySelector('ytd-vertical-list-renderer #items');
-        const horizontal = node.querySelector('ytd-horizontal-card-list-renderer #scroll-container')
-                        || node.querySelector('ytd-horizontal-card-list-renderer #items');
-        const generic    = node.querySelector('#items')
-                        || node.querySelector('#scroll-container')
-                        || node.querySelector('#contents');
-
-        const container = vertical || horizontal || generic;
-        if (!container) return;
-
-        container.classList.add('ypp-flattened-grid');
-
-        const cards = container.querySelectorAll(
-            'ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer, ytd-channel-renderer'
-        );
-        for (let i = 0; i < cards.length; i++) {
-            const card = cards[i];
-            card.classList.add(CLASSES.GRID_ITEM);
-            this._cleanInlineStyles(card);
-        }
-    }
 
     // -------------------------------------------------------------------------
     // Inline style cleanup
     // -------------------------------------------------------------------------
 
-    _cleanInlineStyles(node) {
+    _cleanInlineStyles(node, data) {
         if (node.style.width)    node.style.width    = '';
         if (node.style.maxWidth) node.style.maxWidth = '';
         if (node.style.minWidth) node.style.minWidth = '';
         if (node.style.height)   node.style.height   = '';
         if (node.style.margin)   node.style.margin   = '';
 
-        const dismissible = node.querySelector('#dismissible');
-        if (dismissible) {
-            dismissible.style.display       = '';
-            dismissible.style.flexDirection = '';
-            dismissible.style.width         = '';
-            dismissible.style.height        = '';
+        if (!data) return;
+
+        if (data.dismissible) {
+            data.dismissible.style.display       = '';
+            data.dismissible.style.flexDirection = '';
+            data.dismissible.style.width         = '';
+            data.dismissible.style.height        = '';
         }
 
-        const thumb = node.querySelector('ytd-thumbnail, ytd-playlist-thumbnail');
-        if (thumb) {
-            thumb.style.width       = '';
-            thumb.style.minWidth    = '';
-            thumb.style.maxWidth    = '';
-            thumb.style.height      = '';
-            thumb.style.margin      = '';
-            thumb.style.marginRight = '';
-            thumb.style.flexBasis   = '';
-            thumb.style.flexShrink  = '';
+        if (data.thumb) {
+            data.thumb.style.width       = '';
+            data.thumb.style.minWidth    = '';
+            data.thumb.style.maxWidth    = '';
+            data.thumb.style.height      = '';
+            data.thumb.style.margin      = '';
+            data.thumb.style.marginRight = '';
+            data.thumb.style.flexBasis   = '';
+            data.thumb.style.flexShrink  = '';
 
-            const inner = thumb.querySelector('a, yt-image');
-            if (inner) {
-                inner.style.width    = '';
-                inner.style.height   = '';
-                inner.style.maxWidth = '';
+            if (data.innerThumb) {
+                data.innerThumb.style.width    = '';
+                data.innerThumb.style.height   = '';
+                data.innerThumb.style.maxWidth = '';
             }
         }
 
-        const textWrapper = node.querySelector('.text-wrapper');
-        if (textWrapper) {
-            textWrapper.style.marginLeft  = '';
-            textWrapper.style.marginRight = '';
-            textWrapper.style.marginTop   = '';
-            textWrapper.style.width       = '';
-            textWrapper.style.maxWidth    = '';
+        if (data.textWrapper) {
+            data.textWrapper.style.marginLeft  = '';
+            data.textWrapper.style.marginRight = '';
+            data.textWrapper.style.marginTop   = '';
+            data.textWrapper.style.width       = '';
+            data.textWrapper.style.maxWidth    = '';
         }
 
-        const actionMenu = node.querySelector('#action-menu, .action-menu');
-        if (actionMenu) {
-            actionMenu.style.width    = '';
-            actionMenu.style.height   = '';
-            actionMenu.style.position = '';
+        if (data.actionMenu) {
+            data.actionMenu.style.width    = '';
+            data.actionMenu.style.height   = '';
+            data.actionMenu.style.position = '';
         }
     }
 

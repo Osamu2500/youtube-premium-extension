@@ -176,6 +176,15 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         const isSearch = window.location.pathname === '/results';
 
         if (isSearch) {
+            // ── STALE CARD FIX: Wipe all our old CSS classes from DOM before
+            //    re-processing. YouTube reuses the same ytd-item-section-renderer
+            //    nodes across SPA navigations, so without this, old cards from the
+            //    previous query stay "processed" and new cards never get classified.
+            this._purgeStaleClasses();
+
+            // Reset processed-node WeakSet so every node is treated as new
+            this._searchObserver.resetProcessedNodes();
+
             // Push fresh state into sub-modules before they act
             this._searchObserver.sync(
                 this._settings,
@@ -199,6 +208,26 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
             this._removeClasses();
             this._lastQuery = null;
         }
+    }
+
+    /**
+     * Remove all our injected classes from the live DOM so that when YouTube
+     * reuses the same elements for a new query they start completely clean.
+     * @private
+     */
+    _purgeStaleClasses() {
+        const { GRID_CONTAINER, GRID_ITEM, FULL_WIDTH, HIDDEN_SHORT } = SearchRedesign.CLASSES;
+        const staleClasses = [GRID_CONTAINER, GRID_ITEM, FULL_WIDTH, HIDDEN_SHORT,
+                              'ypp-noise-section', 'ypp-flattened-container', 'ypp-flattened-grid'];
+
+        staleClasses.forEach(cls => {
+            document.querySelectorAll(`.${cls}`).forEach(el => el.classList.remove(cls));
+        });
+
+        // Also remove any inline display:none we set directly on nodes
+        document.querySelectorAll('ytd-item-section-renderer, ytd-shelf-renderer').forEach(el => {
+            if (el.style.display === 'none') el.style.display = '';
+        });
     }
 
     // =========================================================================
