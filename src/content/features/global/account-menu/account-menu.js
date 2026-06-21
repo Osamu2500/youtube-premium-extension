@@ -176,6 +176,12 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         });
     }
 
+    _clearPollTimer() {
+        if (this._pollTimer === true) {
+            this._pollTimer = null;
+        }
+    }
+
     _clearAvatarPollTimer() {
         clearTimeout(this._avatarPollTimer);
         this._avatarPollTimer = null;

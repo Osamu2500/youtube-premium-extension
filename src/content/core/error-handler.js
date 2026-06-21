@@ -23,7 +23,11 @@ class ErrorHandler {
     logError(error) {
         const msg = error instanceof Error ? error.message : String(error);
         this.errors.push(msg);
-        console.error('[YPP:ErrorHandler]', msg);
+        if (window.YPP.Utils && typeof window.YPP.Utils.log === 'function') {
+            window.YPP.Utils.log(msg, 'ErrorHandler', 'error');
+        } else {
+            window.dispatchEvent(new CustomEvent('ypp-log', {detail: {msg, level: 'error'}}));
+        }
     }
 
     /**

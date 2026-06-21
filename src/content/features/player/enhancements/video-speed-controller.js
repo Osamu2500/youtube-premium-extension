@@ -101,6 +101,27 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         // Nothing needed here for now
     }
 
+    onVideoChange(videoId) {
+        if (!this.isEnabled) return;
+        
+        // Re-apply speed upon SPA navigation when video element is reused and its src changes
+        const savedSpeed = (this.settings?.vscRememberSpeed !== false && this.settings?.vscLastSpeed) ? this.settings.vscLastSpeed : 1.0;
+        if (savedSpeed !== 1.0) {
+            const selector = this.settings?.vscAudioSupport ? 'video, audio' : 'video';
+            document.querySelectorAll(selector).forEach(video => {
+                if (video.readyState >= 1) {
+                    this.setSpeed(video, savedSpeed);
+                } else {
+                    const onLoadedMeta = () => {
+                        this.setSpeed(video, savedSpeed);
+                        video.removeEventListener('loadedmetadata', onLoadedMeta);
+                    };
+                    video.addEventListener('loadedmetadata', onLoadedMeta);
+                }
+            });
+        }
+    }
+
     attachToVideo(video) {
         if (this.controllers.has(video)) return;
         if (!video.isConnected) return;
@@ -381,16 +402,21 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
 
         const timeSinceUser = Date.now() - state.lastInteraction;
         if (timeSinceUser < 300) {
-            // User did this (via native UI)
+            // User did this (via native UI, though usually blocked by vscForceSpeed, 
+            // or our UI but without origin set for some reason)
             this._debouncedSaveSpeed(actualSpeed);
             this.settings.vscLastSpeed = actualSpeed;
             state.display.textContent = actualSpeed.toFixed(2);
             return;
         }
         
-        // If force speed is enabled, the page script blocks this natively.
-        // If we reach here, it means force speed is OFF, or the user interacted.
-        if (this.settings?.vscForceSpeed === false) {
+        // If force speed is enabled, the browser must have reset it (e.g., src change)
+        // because the page script blocks JS setters. We must re-apply the target speed.
+        if (this.settings?.vscForceSpeed !== false) {
+            this.setSpeed(video, targetSpeed);
+            e.stopImmediatePropagation();
+        } else {
+            // If we aren't forcing speed, just accept the external change
             state.display.textContent = actualSpeed.toFixed(2);
         }
     }

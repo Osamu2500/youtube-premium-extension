@@ -9,6 +9,15 @@
 window.YPP = window.YPP || {};
 
 window.YPP.StorageManager = class StorageManager {
+    static CONFIG = {
+        STORAGE_AREA: 'local',
+        LOG_CATEGORY: 'STORAGE',
+        EVENTS: {
+            CHANGED: 'storage:changed',
+            CHANGED_KEY: 'storage:changed:'
+        }
+    };
+
     static _writeQueue = Promise.resolve();
     static _quotaWarningCallbacks = new Set();
     static _MAX_BYTES = 5242880; 
@@ -20,7 +29,7 @@ window.YPP.StorageManager = class StorageManager {
         if (this._cacheInitialized) return;
         this._cacheInitialized = true;
         chrome.storage.onChanged.addListener((changes, area) => {
-            if (area !== 'local') return;
+            if (area !== StorageManager.CONFIG.STORAGE_AREA) return;
             for (const [key, { newValue }] of Object.entries(changes)) {
                 let payloadData = newValue;
                 if (newValue === undefined) {
@@ -38,40 +47,47 @@ window.YPP.StorageManager = class StorageManager {
                 }
                 
                 if (window.YPP.events) {
-                    window.YPP.events.emit(`storage:changed:${key}`, payloadData);
-                    window.YPP.events.emit('storage:changed', { key, newValue: payloadData });
+                    window.YPP.events.emit(`${StorageManager.CONFIG.EVENTS.CHANGED_KEY}${key}`, payloadData);
+                    window.YPP.events.emit(StorageManager.CONFIG.EVENTS.CHANGED, { key, newValue: payloadData });
                 }
             }
         });
     }
 
     static async set(key, value, ttlDays = null) {
-        return new Promise((resolve, reject) => {
-            this._writeQueue = this._writeQueue.then(async () => {
-                try {
-                    let payload = { data: value };
-                    if (ttlDays) {
-                        payload.expiresAt = Date.now() + (ttlDays * 24 * 60 * 60 * 1000);
-                    }
+        const previousQueue = this._writeQueue;
+        let resolveQueue;
+        this._writeQueue = new Promise(res => { resolveQueue = res; });
 
-                    const compressedStr = JSON.stringify(payload, (k, v) => v ?? undefined);
-                    const bytes = new TextEncoder().encode(compressedStr).length;
-                    const usage = await this.getBytesUsed();
-                    
-                    if (usage + bytes > this._MAX_BYTES * 0.9) {
-                        this._notifyQuotaWarning();
-                        window.YPP.Utils?.log(`[YPP Storage] Quota almost exceeded! Skipping write for ${key}.`, 'STORAGE', 'warn');
-                        return resolve(false);
-                    }
+        try {
+            await previousQueue;
+        } catch (e) {} // ignore previous errors to not stall queue
 
-                    await chrome.storage.local.set({ [key]: compressedStr });
-                    this._cache.set(key, payload);
-                    resolve(true);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        });
+        try {
+            let payload = { data: value };
+            if (ttlDays) {
+                payload.expiresAt = Date.now() + (ttlDays * 24 * 60 * 60 * 1000);
+            }
+
+            const compressedStr = JSON.stringify(payload, (k, v) => v ?? undefined);
+            const bytes = new TextEncoder().encode(compressedStr).length;
+            const usage = await this.getBytesUsed();
+            
+            if (usage + bytes > this._MAX_BYTES * 0.9) {
+                this._notifyQuotaWarning();
+                window.YPP.Utils?.log(`[YPP Storage] Quota almost exceeded! Skipping write for ${key}.`, StorageManager.CONFIG.LOG_CATEGORY, 'warn');
+                return false;
+            }
+
+            await chrome.storage.local.set({ [key]: compressedStr });
+            this._cache.set(key, payload);
+            return true;
+        } catch (e) {
+            window.YPP.Utils?.log(`Set error: ${e.message}`, StorageManager.CONFIG.LOG_CATEGORY, 'error');
+            throw e;
+        } finally {
+            resolveQueue();
+        }
     }
 
     static async get(key) {
@@ -92,7 +108,13 @@ window.YPP.StorageManager = class StorageManager {
         }
 
         const promise = (async () => {
-            const result = await chrome.storage.local.get(key);
+            let result;
+            try {
+                result = await chrome.storage.local.get(key);
+            } catch (e) {
+                window.YPP.Utils?.log(`Get error: ${e.message}`, StorageManager.CONFIG.LOG_CATEGORY, 'error');
+                return null;
+            }
             if (!result[key]) return null;
 
             try {
@@ -120,7 +142,13 @@ window.YPP.StorageManager = class StorageManager {
     }
 
     static async purgeExpired() {
-        const allData = await chrome.storage.local.get(null);
+        let allData;
+        try {
+            allData = await chrome.storage.local.get(null);
+        } catch (e) {
+            window.YPP.Utils?.log(`Purge error: ${e.message}`, StorageManager.CONFIG.LOG_CATEGORY, 'error');
+            return;
+        }
         const keysToRemove = [];
         let bytesFreed = 0;
         
@@ -138,13 +166,22 @@ window.YPP.StorageManager = class StorageManager {
         }
         
         if (keysToRemove.length > 0) {
-            await chrome.storage.local.remove(keysToRemove);
-            window.YPP.Utils?.log(`[YPP Storage] Purged ${keysToRemove.length} expired keys. Freed ~${(bytesFreed/1024).toFixed(2)} KB.`, 'STORAGE', 'info');
+            try {
+                await chrome.storage.local.remove(keysToRemove);
+                window.YPP.Utils?.log(`[YPP Storage] Purged ${keysToRemove.length} expired keys. Freed ~${(bytesFreed/1024).toFixed(2)} KB.`, StorageManager.CONFIG.LOG_CATEGORY, 'info');
+            } catch (e) {
+                window.YPP.Utils?.log(`Purge remove error: ${e.message}`, StorageManager.CONFIG.LOG_CATEGORY, 'error');
+            }
         }
     }
 
     static async getBytesUsed() {
-        return await chrome.storage.local.getBytesInUse(null);
+        try {
+            return await chrome.storage.local.getBytesInUse(null);
+        } catch (e) {
+            window.YPP.Utils?.log(`GetBytesUsed error: ${e.message}`, StorageManager.CONFIG.LOG_CATEGORY, 'error');
+            return 0;
+        }
     }
 
     static onQuotaWarning(callback) {

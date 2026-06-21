@@ -7,7 +7,12 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
             'ytd-rich-item-renderer',
             'ytd-video-renderer',
             'ytd-compact-video-renderer',
-            'ytd-grid-video-renderer'
+            'ytd-grid-video-renderer',
+            'ytd-reel-item-renderer',
+            'ytd-playlist-video-renderer',
+            'ytd-playlist-panel-video-renderer',
+            'yt-lockup-view-model',
+            'ytd-lockup-view-model'
         ],
         THUMBNAIL_ANCHOR: 'a#thumbnail, a.ytd-thumbnail',
         THUMBNAIL_CONTAINER: 'ytd-thumbnail',

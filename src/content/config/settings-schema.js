@@ -285,6 +285,7 @@ window.YPP.SettingsSchema = {
         // --- Subscription Manager extras ---
         enableFilterBar:     { type: 'boolean', default: false },
         enableChannelHealth: { type: 'boolean', default: false },
+        enableDeckMode:      { type: 'boolean', default: false },
 
         // --- UI Redesigns (popup Customization tab) ---
 

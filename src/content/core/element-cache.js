@@ -136,10 +136,16 @@ class ElementCache {
             for (const mutation of mutations) {
                 if (mutation.removedNodes.length > 0) {
                     mutation.removedNodes.forEach(node => {
-                        if (node === element || node.contains(element)) {
-                            this.remove(key);
-                            observer.disconnect();
-                            this._observers.delete(key);
+                        try {
+                            if (node === element || (node.contains && node.contains(element))) {
+                                this.remove(key);
+                                observer.disconnect();
+                                this._observers.delete(key);
+                            }
+                        } catch (e) {
+                            if (window.YPP?.errorHandler) {
+                                window.YPP.errorHandler.handleError(e, 'ElementCache Watch');
+                            }
                         }
                     });
                 }

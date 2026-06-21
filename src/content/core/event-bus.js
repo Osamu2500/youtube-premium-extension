@@ -6,12 +6,17 @@ window.YPP = window.YPP || {};
 window.YPP.core = window.YPP.core || {};
 
 window.YPP.core.EventBus = class EventBus {
+    static EVENTS = {
+        DOM_MUTATED: 'dom:mutated'
+    };
+
     constructor() {
         this.listeners = {};
     }
 
     /**
      * Subscribe to an event
+     * @listens EventBus#event
      * @param {string} event - The event name to listen for
      * @param {Function} handler - The callback function
      * @returns {Function} An unsubscribe function
@@ -25,7 +30,7 @@ window.YPP.core.EventBus = class EventBus {
         // Notify the DOMObserver when 'dom:mutated' gets its first subscriber
         // so it can enable the raw mutation emit path (which is otherwise suppressed
         // for performance when nothing is listening).
-        if (event === 'dom:mutated') {
+        if (event === EventBus.EVENTS.DOM_MUTATED) {
             window.YPP?.sharedObserver?.setHasMutatedListeners(true);
         }
 
@@ -33,7 +38,7 @@ window.YPP.core.EventBus = class EventBus {
         return () => {
             this.listeners[event] = this.listeners[event].filter(h => h !== handler);
             // Update listener flag when the last 'dom:mutated' subscriber unsubscribes
-            if (event === 'dom:mutated') {
+            if (event === EventBus.EVENTS.DOM_MUTATED) {
                 const remaining = (this.listeners[event] || []).length;
                 window.YPP?.sharedObserver?.setHasMutatedListeners(remaining > 0);
             }
@@ -54,6 +59,7 @@ window.YPP.core.EventBus = class EventBus {
 
     /**
      * Emit an event to all subscribers
+     * @fires EventBus#event
      * @param {string} event - The event name
      * @param {any} data - Data to pass to handlers
      */
@@ -80,7 +86,7 @@ window.YPP.core.EventBus = class EventBus {
     clear(event) {
         if (event) {
             delete this.listeners[event];
-            if (event === 'dom:mutated') {
+            if (event === EventBus.EVENTS.DOM_MUTATED) {
                 window.YPP?.sharedObserver?.setHasMutatedListeners(false);
             }
         } else {

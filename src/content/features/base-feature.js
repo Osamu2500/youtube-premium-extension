@@ -6,6 +6,11 @@ window.YPP.features = window.YPP.features || {};
  * Enforces a standard lifecycle: init -> enable/disable -> update -> destroy
  */
 window.YPP.features.BaseFeature = class BaseFeature {
+    static CONFIG = {
+        LOG_CATEGORY: 'MAIN',
+        LOG_LEVEL: 'debug'
+    };
+
     constructor(name) {
         this.name = name || this.constructor.name;
         this.isEnabled = false;
@@ -41,15 +46,15 @@ window.YPP.features.BaseFeature = class BaseFeature {
         }
 
         if (shouldBeEnabled && !this.isEnabled) {
-            this.utils?.log(`Enabling feature: ${this.name}`, 'MAIN', 'debug');
-            this.abortController = new AbortController();
+            this.utils?.log(`Enabling feature: ${this.name}`, BaseFeature.CONFIG.LOG_CATEGORY, BaseFeature.CONFIG.LOG_LEVEL);
+            this._abortController = new AbortController();
             await this.enable();
             this.isEnabled = true;
         } else if (!shouldBeEnabled && this.isEnabled) {
-            this.utils?.log(`Disabling feature: ${this.name}`, 'MAIN', 'debug');
-            if (this.abortController) {
-                this.abortController.abort();
-                this.abortController = null;
+            this.utils?.log(`Disabling feature: ${this.name}`, BaseFeature.CONFIG.LOG_CATEGORY, BaseFeature.CONFIG.LOG_LEVEL);
+            if (this._abortController) {
+                this._abortController.abort();
+                this._abortController = null;
             }
             await this.disable();
             this.isEnabled = false;
@@ -85,20 +90,31 @@ window.YPP.features.BaseFeature = class BaseFeature {
 
     /**
      * Wait for element, bound to feature's lifecycle (aborts if feature disabled)
+     * @param {string} selector - CSS selector
+     * @param {number} timeout - Timeout in ms
+     * @returns {Promise<Element>}
      */
     waitForElement(selector, timeout) {
-        return this.utils.waitForElement(selector, timeout, this.abortController?.signal);
+        return this.utils.waitForElement(selector, timeout, this._abortController?.signal);
     }
 
     /**
      * Poll for condition, bound to feature's lifecycle (aborts if feature disabled)
+     * @param {Function} conditionFn - Function returning truthy value
+     * @param {number} timeout - Timeout in ms
+     * @param {number} intervalMs - Polling interval in ms
+     * @returns {Promise<any>}
      */
     pollFor(conditionFn, timeout, intervalMs) {
-        return this.utils.pollFor(conditionFn, timeout, intervalMs, this.abortController?.signal);
+        return this.utils.pollFor(conditionFn, timeout, intervalMs, this._abortController?.signal);
     }
 
     /**
      * Safely add an event listener and track it for automatic cleanup
+     * @param {EventTarget} target - Target element
+     * @param {string} event - Event name
+     * @param {Function} handler - Event handler
+     * @param {boolean|Object} options - Event listener options
      */
     addListener(target, event, handler, options = false) {
         if (!target || !target.addEventListener) return;
@@ -108,6 +124,10 @@ window.YPP.features.BaseFeature = class BaseFeature {
 
     /**
      * Safely remove an event listener and untrack it
+     * @param {EventTarget} target - Target element
+     * @param {string} event - Event name
+     * @param {Function} handler - Event handler
+     * @param {boolean|Object} options - Event listener options
      */
     removeListener(target, event, handler, options = false) {
         if (!target || !target.removeEventListener) return;
@@ -128,20 +148,24 @@ window.YPP.features.BaseFeature = class BaseFeature {
                     target.removeEventListener(event, handler, options);
                 }
             } catch (e) {
-                // Ignore cleanup errors
+                this.utils?.log(`Cleanup error: ${e.message}`, BaseFeature.CONFIG.LOG_CATEGORY, 'error');
             }
         });
         this.eventListeners = [];
         
         // EventBus listeners
         this.busListeners.forEach(unsub => {
-            try { unsub(); } catch (e) {}
+            try { unsub(); } catch (e) {
+                this.utils?.log(`Bus cleanup error: ${e.message}`, BaseFeature.CONFIG.LOG_CATEGORY, 'error');
+            }
         });
         this.busListeners = [];
     }
 
     /**
      * Safely subscribe to the EventBus and track it for cleanup
+     * @param {string} event - Event name
+     * @param {Function} handler - Event handler
      */
     onBusEvent(event, handler) {
         if (!this.events) return;

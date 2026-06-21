@@ -88,7 +88,11 @@ window.YPP.features.MultiSelect = class MultiSelect
             'ytd-video-renderer, ' +
             'ytd-compact-video-renderer, ' +
             'ytd-playlist-video-renderer, ' +
-            'ytd-grid-video-renderer'
+            'ytd-grid-video-renderer, ' +
+            'ytd-reel-item-renderer, ' +
+            'ytd-playlist-panel-video-renderer, ' +
+            'yt-lockup-view-model, ' +
+            'ytd-lockup-view-model'
         );
     }
 
