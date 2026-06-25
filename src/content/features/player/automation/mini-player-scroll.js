@@ -9,7 +9,7 @@ window.YPP.features.MiniPlayerScroll = class MiniPlayerScroll extends window.YPP
     }
 
     getConfigKey() {
-        return 'miniPlayer';
+        return 'enableMiniPlayer';
     }
 
     async enable() {

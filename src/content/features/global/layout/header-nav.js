@@ -52,6 +52,8 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
     }
 
     async disable() {
+        document.body.classList.remove('ypp-header-nav-active');
+
         if (this._domObserver) {
             this._domObserver.unregister('header-nav-end');
         }
@@ -77,10 +79,12 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater || s.navLibrary ||
             s.navPlaylists || s.navHistory;
 
-
         if (window.YPP.ui?.manager) {
             window.YPP.ui.manager.remove('header-nav-group');
         }
+        
+        // CRITICAL: Clear cached reference since element is now orphaned
+        this.navGroup = null;
 
         if (shouldRun) {
             this._scheduleInjection();
@@ -90,6 +94,11 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
     // =========================================================================
     // INTERNAL
     // =========================================================================
+
+    _applySidebarState() {
+        // Add class to body to hide the native Library icon from sidebar
+        document.body.classList.add('ypp-header-nav-active');
+    }
 
     _observeHeader() {
         if (!this._domObserver) return;
@@ -149,7 +158,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
 
         // If already mounted and still in DOM, just update active states
         const existing = document.querySelector('[data-ypp-id="header-nav-group"]');
-        if (existing) {
+        if (existing && document.contains(existing)) {
             this._updateActiveStates();
             return true; // already injected
         }
@@ -159,20 +168,22 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
             return false; // signal to caller: retry needed
         }
 
-        if (!this.navGroup) {
-            this.navGroup = document.createElement('div');
-            this.navGroup.className = 'ypp-nav-group';
-        } else {
-            this.navGroup.innerHTML = '';
-        }
+        // ALWAYS create fresh — don't cache orphaned elements
+        const navGroup = document.createElement('div');
+        navGroup.className = 'ypp-nav-group';
+        navGroup.dataset.yppId = 'header-nav-group';
+        this.navGroup = navGroup;
 
         activeButtons.forEach(cfg => {
             this._createButton(this.navGroup, cfg.label, cfg.url, cfg.icon, cfg.setting);
         });
 
-        window.YPP.ui.manager.mount('headerRight', { id: 'header-nav-group', el: this.navGroup });
+        const mounted = window.YPP.ui.manager.mount('headerRight', { 
+            id: 'header-nav-group', 
+            el: this.navGroup 
+        });
 
-        if (!document.contains(this.navGroup)) {
+        if (!mounted || !document.contains(this.navGroup)) {
             // Target was not ready or mount failed, retry needed
             return false;
         }
@@ -232,12 +243,15 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
     }
 
     _navigateTo(url) {
-        const link = document.createElement('a');
-        link.href = url;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => link.remove(), 100);
+        // Use YouTube's native SPA navigation
+        const ytApp = document.querySelector('ytd-app');
+        if (ytApp && typeof ytApp.fire === 'function') {
+            ytApp.fire('yt-navigate', { url });
+        } else {
+            history.pushState(null, '', url);
+            window.dispatchEvent(new CustomEvent('yt-navigate-start', { detail: { url } }));
+            window.dispatchEvent(new CustomEvent('yt-navigate-finish', { detail: { pageType: 'browse' } }));
+        }
     }
 
     _updateActiveStates() {

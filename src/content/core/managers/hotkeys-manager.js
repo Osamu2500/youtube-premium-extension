@@ -55,9 +55,18 @@ export class HotkeysManager {
     handleKeyDown(e) {
         // 1. Skip if typing in an input field or contenteditable
         const target = e.target;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-            return;
-        }
+        if (!target) return;
+        
+        const isInput = target.tagName === 'INPUT' || 
+                        target.tagName === 'TEXTAREA' || 
+                        target.isContentEditable ||
+                        target.closest('ytd-searchbox') ||
+                        target.closest('paper-input') ||
+                        target.closest('iron-input') ||
+                        target.closest('[contenteditable="true"]') ||
+                        target.getAttribute('role') === 'textbox';
+        
+        if (isInput) return;
 
         // 2. Parse the pressed key combo
         const combo = this._comboFromEvent(e);

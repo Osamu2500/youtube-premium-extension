@@ -486,25 +486,28 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
     _debouncedSaveSpeed(speed) {
         if (this._saveSpeedTimeout) clearTimeout(this._saveSpeedTimeout);
         this._saveSpeedTimeout = setTimeout(() => {
-            if (this.settings?.vscRememberSpeed !== false && window.YPP.Utils?.saveSettings) {
-                window.YPP.Utils.saveSettings({ vscLastSpeed: speed });
+            if (this.settings?.vscRememberSpeed !== false && window.YPP.StorageManager) {
+                window.YPP.StorageManager.get('settings').then(settings => {
+                    const newSettings = { ...(settings || {}), vscLastSpeed: speed };
+                    window.YPP.StorageManager.set('settings', newSettings);
+                });
             }
         }, 500);
     }
 
     getShortcuts() {
-        let shortcuts = this.settings?.vscShortcuts || [];
-        if (!shortcuts || shortcuts.length === 0) {
-            shortcuts = [
-                { action: 'decrease', key: 'S', value: 0.25 },
-                { action: 'increase', key: 'D', value: 0.25 },
-                { action: 'rewind', key: 'Z', value: 10 },
-                { action: 'advance', key: 'X', value: 10 },
+        if (!this.settings) return [];
+        if (this.settings.vscShortcuts === undefined) {
+            return [
+                { action: 'decrease', key: 'Z', value: 0.25 },
+                { action: 'increase', key: 'X', value: 0.25 },
+                { action: 'rewind', key: 'A', value: 10 },
+                { action: 'advance', key: 'D', value: 10 },
                 { action: 'reset', key: 'R', value: 1.0 },
                 { action: 'showHide', key: 'V', value: 0 }
             ];
         }
-        return shortcuts;
+        return this.settings.vscShortcuts || [];
     }
 
     registerShortcuts() {

@@ -95,21 +95,53 @@ class KeyboardShortcuts extends window.YPP.features.BaseFeature {
         // Notify the feature manager to re-apply
         window.YPP.events?.emit('settings:changed', settings);
 
-        // Re-run the feature manager
-        window.YPP.featureManager?.init(settings);
+        // Only update the specific feature, not all features
+        const featureMap = {
+            zenMode: 'zenMode',
+            enableFocusMode: 'focusMode',
+            ambientMode: 'ambientMode'
+        };
+        const featureKey = featureMap[key];
+        if (featureKey && window.YPP.featureManager?.features?.[featureKey]) {
+            window.YPP.featureManager.features[featureKey].update(settings);
+        }
     }
 
     _toggleCinema() {
-        const btn = document.querySelector('.ytp-size-button');
-        if (btn) btn.click();
+        const selectors = [
+            '.ytp-size-button',
+            'button[data-tooltip-target-id="ytp-size-button"]',
+            '.ytp-button[data-tooltip-target-id="ytp-size-button"]',
+        ];
+        for (const sel of selectors) {
+            const btn = document.querySelector(sel);
+            if (btn) { btn.click(); return; }
+        }
+        // Final fallback: toggle theater attribute
+        const watchFlexy = document.querySelector('ytd-watch-flexy');
+        if (watchFlexy) {
+            watchFlexy.toggleAttribute('theater');
+        }
     }
 
     _triggerSnapshot() {
-        const player = window.YPP.featureManager?.features?.player;
         const video = document.querySelector('video');
-        if (player && video) {
-            player.takeSnapshot(video);
-        }
+        if (!video) return;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `snapshot-${Date.now()}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
     }
 
     _toggleLoop() {
