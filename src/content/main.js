@@ -526,9 +526,16 @@
                     
                     const classes = new Set(document.body.classList);
                     
-                    // Remove old YPP context classes
+                    // Only remove old YPP context classes, preserving theme and feature state classes
+                    const CONTEXT_CLASSES = [
+                        'ypp-watch-page', 'ypp-shorts-page', 'ypp-home-page',
+                        'ypp-search-page', 'ypp-channel-page', 'ypp-playlist-page',
+                        'ypp-library-page', 'ypp-history-page', 'ypp-subscriptions-page',
+                        'ypp-feed-page'
+                    ];
+
                     for (const cls of classes) {
-                        if (cls.startsWith('ypp-') && !['ypp-loaded', 'ypp-custom-scrollbar', 'ypp-animating'].includes(cls)) {
+                        if (CONTEXT_CLASSES.includes(cls)) {
                             classes.delete(cls);
                         }
                     }
