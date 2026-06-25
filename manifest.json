@@ -54,7 +54,8 @@
                 "<all_urls>"
             ],
             "exclude_matches": [
-                "*://www.youtube.com/*"
+                "*://*.youtube.com/*",
+                "*://youtube.com/*"
             ],
             "run_at": "document_idle",
             "all_frames": true,

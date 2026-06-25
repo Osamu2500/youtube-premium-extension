@@ -36,7 +36,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         };
     }
 
-    getConfigKey() { return null; }
+    getConfigKey() { return 'playlistRedesign'; }
 
     // ─── Feature lifecycle ───────────────────────────────────────────────────
 
@@ -69,8 +69,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
     // ─── Internal helpers ────────────────────────────────────────────────────
 
     _isPlaylistPage() {
-        return location.pathname.startsWith('/playlist') ||
-               location.search.includes('list=');
+        return location.pathname.startsWith('/playlist');
     }
 
     _reset() {
@@ -106,14 +105,14 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         // Do NOT add body class yet — only apply it once we have confirmed data,
         // preventing the native layout from being hidden on a page where we can't render.
         const isReady = await window.YPP.Utils.pollFor(() => {
-            const header = document.querySelector('ytd-playlist-header-renderer, ytd-browse[page-subtype="playlist"] #header');
+            const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
             return header && document.querySelectorAll('ytd-playlist-video-renderer').length > 0;
         }, 10000);
 
         // Check isEnabled (BaseFeature flag) — feature may have been disabled while waiting
         if (isReady && this.isEnabled) {
             document.body.classList.add('ypp-playlist-redesign');
-            const header = document.querySelector('ytd-playlist-header-renderer, ytd-browse[page-subtype="playlist"] #header');
+            const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
             const videos = document.querySelectorAll('ytd-playlist-video-renderer');
             this._build(header, videos);
             this._watchForChanges();
@@ -124,13 +123,13 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
 
     _watchForChanges() {
         const listContainer = document.querySelector(
-            'ytd-browse[page-subtype="playlist"] #contents'
+            'ytd-browse[page-subtype="playlist"] #contents, ytd-browse #contents'
         );
         if (!listContainer) return;
 
         if (window.YPP?.sharedObserver) {
             const debouncedBuild = this.utils.debounce(() => {
-                const header = document.querySelector('ytd-playlist-header-renderer, ytd-browse[page-subtype="playlist"] #header');
+                const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
                 const videos = document.querySelectorAll('ytd-playlist-video-renderer');
                 // Only rebuild if we still have valid data
                 if (header && videos.length > 0 && this.isEnabled) {
