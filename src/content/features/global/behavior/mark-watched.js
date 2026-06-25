@@ -89,7 +89,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
      */
     async _saveWatchedIds() {
         try {
-            await window.YPP.StorageManager.set(this._storageKey, [...this._watchedIds], 365 * 24 * 60 * 60); // 1 year TTL
+            await window.YPP.StorageManager.set(this._storageKey, [...this._watchedIds], 365); // 1 year TTL
         } catch (e) {
             this.utils.log?.(`Storage save error: ${e.message}`, 'MarkWatched', 'error');
         }

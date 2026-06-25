@@ -31,9 +31,9 @@ window.YPP.SettingsSchema = {
         autoScaleLayout:     { type: 'boolean', default: true },
         useSquareCorners:    { type: 'boolean', default: false },
         grid4x4:             { type: 'boolean', default: false },
-        homeColumns:         { type: 'number',  default: 4, min: 1, max: 8 },
+        homeColumns:         { type: 'number',  default: 4, min: 0, max: 10 },
         searchColumns:       { type: 'number',  default: 4, min: 1, max: 8 },
-        channelColumns:      { type: 'number',  default: 4, min: 1, max: 8 },
+        channelColumns:      { type: 'number',  default: 4, min: 0, max: 10 },
         subscriptionsColumns:{ type: 'number',  default: 4, min: 1, max: 8 },
         displayFullTitle:    { type: 'boolean', default: false },
 
@@ -74,8 +74,6 @@ window.YPP.SettingsSchema = {
         cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid', 'neumorphic', 'cyberpunk', 'holographic', 'minimalist', 'retro', 'brutalism', 'skeuomorphic', 'frosted', 'summer', 'winter', 'spring', 'autumn'] },
         customScrollbar:     { type: 'boolean', default: false },
         grayscaleThumbnails: { type: 'boolean', default: false },
-        homeColumns:         { type: 'number',  default: 0, min: 0, max: 10 }, // 0 = Auto
-        channelColumns:      { type: 'number',  default: 0, min: 0, max: 10 }, // 0 = Auto
 
         // --- Player ---
         autoCinema:          { type: 'boolean', default: false },
@@ -163,7 +161,6 @@ window.YPP.SettingsSchema = {
         audioModeEnabled:    { type: 'boolean', default: false },
         videoControlsEnabled:{ type: 'boolean', default: true },
         subscriptionFolders: { type: 'boolean', default: true },
-        sponsorBlock:        { type: 'boolean', default: false },
         returnYouTubeDislike:{ type: 'boolean', default: false },
         wheelControls:       { type: 'boolean', default: true },
         enableBookmarks:     { type: 'boolean', default: true },
@@ -286,13 +283,6 @@ window.YPP.SettingsSchema = {
         enableDeckMode:      { type: 'boolean', default: false },
 
         // --- UI Redesigns (popup Customization tab) ---
-
-        // --- New Customization Engine Variables ---
-        enableAnimations:    { type: 'boolean', default: true },
-        enableThemeEffects:  { type: 'boolean', default: true },
-        reducedMotion:       { type: 'boolean', default: false },
-        accentColor:         { type: 'string',  default: '#3ea6ff' },
-        cardStyle:           { type: 'string',  default: 'glass', values: ['glass', 'flat', 'elevated', 'folder', 'bento', 'neon', 'compact', 'polaroid', 'neumorphic', 'cyberpunk', 'holographic', 'minimalist', 'retro', 'brutalism', 'skeuomorphic', 'frosted', 'summer', 'winter', 'spring', 'autumn'] },
     }),
 
     // =========================================================================

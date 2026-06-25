@@ -152,53 +152,60 @@ window.YPP.FeatureManager = class FeatureManager {
      * @returns {Promise<void>}
      */
     async applyFeatures() {
-        const applyId = ++this._currentApplyId;
-        const entries = Object.entries(this.features);
-        
-        // Phase 5: Chunk processing to avoid blocking main thread on boot
-        // Processes 4 features per event loop tick to maintain 60fps responsiveness
-        const CHUNK_SIZE = 4;
-        
-        for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
-            if (this._currentApplyId !== applyId) return; // Cancelled by newer run
+        if (this._applying) return;
+        this._applying = true;
 
-            const chunk = entries.slice(i, i + CHUNK_SIZE);
-            const chunkPromises = chunk.map(([name, instance]) => {
-                if (this.errorCounts[name] >= this.MAX_ERRORS) {
-                    return Promise.resolve();
-                }
+        try {
+            const applyId = ++this._currentApplyId;
+            const entries = Object.entries(this.features);
+            
+            // Phase 5: Chunk processing to avoid blocking main thread on boot
+            // Processes 4 features per event loop tick to maintain 60fps responsiveness
+            const CHUNK_SIZE = 4;
+            
+            for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
+                if (this._currentApplyId !== applyId) return; // Cancelled by newer run
 
-                return this.safeRun(name, async () => {
-                    // Standard: check for enable/disable methods and update logic
-                    if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
-                        // Method 1: Feature has strict 'update' method (Preferred)
-                        if (typeof instance.update === 'function') {
-                            await instance.update(this.settings);
+                const chunk = entries.slice(i, i + CHUNK_SIZE);
+                const chunkPromises = chunk.map(([name, instance]) => {
+                    if (this.errorCounts[name] >= this.MAX_ERRORS) {
+                        return Promise.resolve();
+                    }
+
+                    return this.safeRun(name, async () => {
+                        // Standard: check for enable/disable methods and update logic
+                        if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
+                            // Method 1: Feature has strict 'update' method (Preferred)
+                            if (typeof instance.update === 'function') {
+                                await instance.update(this.settings);
+                            }
+                            // Method 2: Fallback to 'run' method for simple features
+                            else if (typeof instance.run === 'function') {
+                                await instance.run(this.settings);
+                            }
                         }
-                        // Method 2: Fallback to 'run' method for simple features
+                        // Legacy support for older features
                         else if (typeof instance.run === 'function') {
                             await instance.run(this.settings);
                         }
-                    }
-                    // Legacy support for older features
-                    else if (typeof instance.run === 'function') {
-                        await instance.run(this.settings);
-                    }
+                    });
                 });
-            });
 
-            // Await this chunk concurrently
-            await Promise.allSettled(chunkPromises);
+                // Await this chunk concurrently
+                await Promise.allSettled(chunkPromises);
 
-            // Yield to browser paint cycle if there are more chunks
-            if (i + CHUNK_SIZE < entries.length) {
-                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+                // Yield to browser paint cycle if there are more chunks
+                if (i + CHUNK_SIZE < entries.length) {
+                    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+                }
             }
-        }
 
-        // Notify system that all features have been applied/updated
-        if (window.YPP.events) {
-            window.YPP.events.emit('features:updated', this.settings);
+            // Notify system that all features have been applied/updated
+            if (window.YPP.events) {
+                window.YPP.events.emit('features:updated', this.settings);
+            }
+        } finally {
+            this._applying = false;
         }
     }
 
