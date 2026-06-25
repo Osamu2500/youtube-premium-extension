@@ -18,7 +18,7 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
             <span style="width:24px"></span>
         </div>
         <div id="vsc-shortcuts-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
-        <button id="vsc-add-shortcut" class="ypp-btn" style="width:100%; padding:8px; border-radius:8px; background:var(--bg-card); color:var(--text-primary); border:1px solid rgba(255,255,255,0.1); cursor:pointer;">+ Add Shortcut</button>
+        <button id="vsc-add-shortcut" class="action-btn" style="width:100%;">+ Add Shortcut</button>
     `;
 
     const listContainer = container.querySelector('#vsc-shortcuts-list');
@@ -45,16 +45,14 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
         shortcuts.forEach((sc, index) => {
             const row = document.createElement('div');
             row.className = 'vsc-shortcut-row';
-            row.style.cssText = 'display:flex; gap:8px; align-items:center; background:rgba(0,0,0,0.2); padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);';
 
             const select = document.createElement('select');
-            select.className = 'theme-select'; // inherit option dark background from CSS
-            select.style.cssText = 'flex:2; background:var(--bg-dark); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px; font-size:12px; outline:none;';
+            select.className = 'vsc-select';
             for (const [val, label] of Object.entries(ACTIONS)) {
                 const opt = document.createElement('option');
                 opt.value = val;
                 opt.textContent = label;
-                opt.style.background = '#1a1a1a'; // Force dark background as fallback
+                opt.style.background = '#1a1a1a';
                 opt.style.color = '#ffffff';
                 if (sc.action === val) opt.selected = true;
                 select.appendChild(opt);
@@ -64,10 +62,10 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
             keyInput.type = 'text';
             keyInput.value = sc.key || '';
             keyInput.placeholder = 'None';
-            keyInput.style.cssText = 'flex:1; width:10px; background:var(--bg-dark); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px; font-size:12px; text-align:center; text-transform:uppercase; outline:none;';
+            keyInput.className = 'vsc-key-input';
             
             keyInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab') return; // Let tab navigate naturally
+                if (e.key === 'Tab') return;
                 e.preventDefault();
                 
                 const keys = [];
@@ -85,7 +83,7 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
                 
                 if (['Control', 'Shift', 'Alt', 'Meta'].includes(keyName)) {
                     keyInput.value = keys.join('+') + '+...';
-                    return; // Wait for the actual key
+                    return;
                 }
                 
                 keyName = keyName.length === 1 ? keyName.toUpperCase() : keyName;
@@ -102,7 +100,7 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
             valInput.step = 'any';
             valInput.value = sc.value === null ? '' : sc.value;
             valInput.placeholder = 'N/A';
-            valInput.style.cssText = 'flex:1; width:10px; background:var(--bg-dark); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px; font-size:12px; outline:none;';
+            valInput.className = 'vsc-val-input';
             
             const updateValDisabled = () => {
                 const needsValue = ['decrease', 'increase', 'rewind', 'advance', 'reset', 'preferred'].includes(sc.action);
@@ -125,7 +123,7 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
 
             const rmBtn = document.createElement('button');
             rmBtn.innerHTML = '✕';
-            rmBtn.style.cssText = 'width:24px; height:24px; background:transparent; color:#ff4e45; border:none; border-radius:4px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;';
+            rmBtn.className = 'vsc-rm-btn';
             rmBtn.addEventListener('click', () => {
                 shortcuts.splice(index, 1);
                 save();
@@ -145,7 +143,6 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
             const settings = data.settings || {};
             settings.vscShortcuts = currentShortcuts;
             chrome.storage.local.set({ settings });
-            // Immediately notify the active tab so hotkeys update without reload
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs[0]?.id) {
                     chrome.tabs.sendMessage(tabs[0].id, {
@@ -201,17 +198,17 @@ registerSlot('shortcutsPanel', (container, state) => {
 
     shortcuts.forEach(sc => {
         const row = document.createElement('div');
-        row.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start; gap:6px; background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);';
+        row.className = 'shortcut-panel-row';
         const labelWrap = document.createElement('div');
-        labelWrap.style.cssText = 'display:flex; align-items:center; gap:6px; margin-bottom: 2px;';
+        labelWrap.className = 'shortcut-panel-label-wrap';
         
         const iconWrap = document.createElement('div');
-        iconWrap.style.cssText = 'display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.6);';
+        iconWrap.className = 'shortcut-panel-icon-wrap';
         iconWrap.innerHTML = sc.icon || '';
         
         const label = document.createElement('span');
         label.textContent = sc.label;
-        label.style.cssText = 'font-size:11px; font-weight:500; color:rgba(255,255,255,0.8);';
+        label.className = 'shortcut-panel-label';
         
         labelWrap.appendChild(iconWrap);
         labelWrap.appendChild(label);
@@ -219,20 +216,16 @@ registerSlot('shortcutsPanel', (container, state) => {
         input.type = 'text';
         input.id = sc.id;
         input.readOnly = true;
-        input.style.cssText = 'background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); border-radius:6px; color:var(--text-1, #fff); font-family:monospace; font-size:11px; padding:4px 8px; width:100%; box-sizing:border-box; text-align:left; cursor:pointer; outline:none; transition:all 0.2s;';
+        input.className = 'shortcut-panel-input';
         
-        // Add to state so it saves automatically
         state.elements[sc.id] = input;
         if (!state.settingKeys.includes(sc.id)) state.settingKeys.push(sc.id);
 
         input.addEventListener('focus', () => {
-            input.style.borderColor = 'var(--accent-primary, #3ea6ff)';
             input.value = 'Press key...';
         });
 
         input.addEventListener('blur', () => {
-            input.style.borderColor = 'rgba(255,255,255,0.1)';
-            // Reload value if canceled
             chrome.storage.local.get('settings', (res) => {
                 input.value = res.settings?.[sc.id] || input.dataset.default || '';
             });
@@ -264,7 +257,6 @@ registerSlot('shortcutsPanel', (container, state) => {
             }
             if (keyName === ' ') keyName = 'Space';
             
-            // Ignore if ONLY a modifier is pressed
             if (['Control','Shift','Alt','Meta'].includes(keyName)) return;
             
             keyName = keyName.length === 1 ? keyName.toUpperCase() : keyName;
@@ -282,45 +274,7 @@ registerSlot('shortcutsPanel', (container, state) => {
     });
 });
 
-const initApp = () => {
-    try {
-        // 0. i18n Initialization
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n'));
-            if (msg) el.textContent = msg;
-        });
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n-placeholder'));
-            if (msg) el.setAttribute('placeholder', msg);
-        });
-
-        // 1. v3.1: Render schema-driven tabs before settings hydration
-    renderSchema(document, state);
-
-    // 1.5 Initialize State (cache DOM elements)
-    initStorage(document);
-
-    // 2. Initialize Core UI (Tabs, Modals, Global Search)
-    UI.initUI(document);
-
-    // 3. Setup Components
-    const components = initComponents(document, state, UI, updateSetting, notifyThemeChange, () => saveSettings(() => UI.showSaveIndicator(document)));
-
-    // 4. Load Settings & Update UI
-    loadSettings([
-        (settings) => components.initThemeSelector(settings.activeTheme),
-        (settings) => UI.updateDependencyUI(document),
-        (settings) => UI.updateCustomizationPreview(document, state),
-        (settings) => UI.syncModeCards(document)
-    ]);
-
-    components.initPremiumAccentDropdown();
-    components.initSearchViewMode();
-    components.initHideWatchedModePill();
-    components.initCardStyleGrid();
-    components.initAccentColorSwatches();
-
-    // 5. Wire Universal Event Listeners
+const initUniversalListeners = (document, state, UI, saveSettings) => {
     state.settingKeys.forEach(key => {
         const el = state.elements[key];
         if (el) {
@@ -366,10 +320,7 @@ const initApp = () => {
         const display = document.getElementById(key + 'Value');
         if (slider) {
             slider.addEventListener('input', () => {
-                if (display) {
-                     display.textContent = slider.value;
-                }
-                
+                if (display) display.textContent = slider.value;
                 if (key.includes('Columns') && state.elements['autoScaleLayout'] && state.elements['autoScaleLayout'].checked) {
                     state.elements['autoScaleLayout'].checked = false;
                 }
@@ -392,7 +343,9 @@ const initApp = () => {
             });
         }
     });
+};
 
+const initMiscButtons = (document, saveSettings, loadSettings) => {
     const enableAnimationsEl = document.getElementById('enableAnimations');
     if (enableAnimationsEl) {
         enableAnimationsEl.addEventListener('change', () => {
@@ -426,7 +379,9 @@ const initApp = () => {
             }
         });
     }
+};
 
+const initPresets = (document, saveSettings, UI) => {
     const applyPresetFromUI = (updates) => {
         Object.keys(updates).forEach(key => {
             const el = document.getElementById(key);
@@ -450,13 +405,9 @@ const initApp = () => {
         e.stopPropagation();
         applyPresetFromUI({ minimalMode: true, enableFocusMode: false, cinemaMode: false, zenMode: false });
     });
+};
 
-    // 6. Remaining Sub-systems
-    initHistoryWidget();
-    initBackupTools();
-    initBookmarksManager();
-
-    // ── 4.2: SponsorBlock per-category panel wiring ──────────────────────
+const initSponsorBlockSettings = (document, saveSettings, UI) => {
     const sbToggle  = document.getElementById('sponsorBlock');
     const sbPanel   = document.getElementById('sponsorBlockCategories');
     const sbCatIds  = ['sb_sponsor','sb_intro','sb_selfpromo','sb_interaction','sb_music_offtopic','sb_preview'];
@@ -468,42 +419,90 @@ const initApp = () => {
             _syncPanel();
             saveSettings(() => UI.showSaveIndicator(document));
         });
-        _syncPanel(); // run once after initial load
+        _syncPanel();
         sbCatIds.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', () => saveSettings(() => UI.showSaveIndicator(document)));
         });
     }
+};
 
-    // ── 5.2: Skeleton — remove popup-loading once settings are hydrated ──
-    document.body.classList.add('popup-loading');
-    const _removeSkeleton = () => {
-        document.body.classList.remove('popup-loading');
-        
-        // Spring stagger intro animations
-        if (window.anime) {
-            window.anime.animate({
-                targets: '.nav-item',
-                translateX: [-20, 0],
-                opacity: [0, 1],
-                delay: window.anime.stagger(40),
-                duration: 800,
-                easing: 'easeOutElastic(1, .6)'
-            });
+const initApp = () => {
+    try {
+        // 0. i18n Initialization
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n'));
+            if (msg) el.textContent = msg;
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n-placeholder'));
+            if (msg) el.setAttribute('placeholder', msg);
+        });
+
+        // 1. v3.1: Render schema-driven tabs before settings hydration
+        renderSchema(document, state);
+
+        // 1.5 Initialize State (cache DOM elements)
+        initStorage(document);
+
+        // 2. Initialize Core UI (Tabs, Modals, Global Search)
+        UI.initUI(document);
+
+        // 3. Setup Components
+        const components = initComponents(document, state, UI, updateSetting, notifyThemeChange, () => saveSettings(() => UI.showSaveIndicator(document)));
+
+        // 4. Load Settings & Update UI
+        loadSettings([
+            (settings) => components.initThemeSelector(settings.activeTheme),
+            (settings) => UI.updateDependencyUI(document),
+            (settings) => UI.updateCustomizationPreview(document, state),
+            (settings) => UI.syncModeCards(document)
+        ]);
+
+        components.initPremiumAccentDropdown();
+        components.initSearchViewMode();
+        components.initHideWatchedModePill();
+        components.initCardStyleGrid();
+        components.initAccentColorSwatches();
+
+        // 5. Wire Universal Event Listeners
+        initUniversalListeners(document, state, UI, saveSettings);
+        initMiscButtons(document, saveSettings, loadSettings);
+        initPresets(document, saveSettings, UI);
+
+        // 6. Remaining Sub-systems
+        initHistoryWidget();
+        initBackupTools();
+        initBookmarksManager();
+        initSponsorBlockSettings(document, saveSettings, UI);
+
+        // 7. Skeleton — remove popup-loading once settings are hydrated
+        document.body.classList.add('popup-loading');
+        const _removeSkeleton = () => {
+            document.body.classList.remove('popup-loading');
             
-            window.anime.animate({
-                targets: '.tab-content.active .card-group, .tab-content.active .feature-grid > div',
-                translateY: [20, 0],
-                opacity: [0, 1],
-                delay: window.anime.stagger(60, {start: 100}),
-                duration: 800,
-                easing: 'easeOutElastic(1, .7)'
-            });
-        }
-    };
-    // Remove after settings load (loadSettings triggers callbacks synchronously via chrome.storage)
-    // We hook into it by appending our callback after the first loadSettings call above
-    loadSettings([_removeSkeleton]);
+            // Spring stagger intro animations
+            if (window.anime) {
+                window.anime.animate({
+                    targets: '.nav-item',
+                    translateX: [-20, 0],
+                    opacity: [0, 1],
+                    delay: window.anime.stagger(40),
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .6)'
+                });
+                
+                window.anime.animate({
+                    targets: '.tab-content.active .card-group, .tab-content.active .feature-grid > div',
+                    translateY: [20, 0],
+                    opacity: [0, 1],
+                    delay: window.anime.stagger(60, {start: 100}),
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .7)'
+                });
+            }
+        };
+        loadSettings([_removeSkeleton]);
 
 
     } catch (e) {

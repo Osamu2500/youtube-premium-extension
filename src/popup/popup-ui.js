@@ -1,90 +1,89 @@
-export function initUI(document) {
+const TITLES = {
+    'home': 'Home & Feed',
+    'shorts': 'Shorts Tools',
+    'player': 'Player Features',
+    'search': 'Search Settings',
+    'subscriptions': 'Subscriptions',
+    'history': 'History & Watch Time',
+    'customization': 'Appearance & UI',
+    'advanced': 'Advanced & System',
+    'global': 'Global Configuration'
+};
+
+function switchTab(document, tabId) {
     const navItems = document.querySelectorAll('.nav-item[data-tab]');
     const tabs = document.querySelectorAll('.tab-content');
     const pageTitle = document.getElementById('page-title');
 
-    const titles = {
-        'home': 'Home & Feed',
-        'shorts': 'Shorts Tools',
-        'player': 'Player Features',
-        'search': 'Search Settings',
-        'subscriptions': 'Subscriptions',
-        'history': 'History & Watch Time',
-        'customization': 'Appearance & UI',
-        'advanced': 'Advanced & System',
-        'global': 'Global Configuration'
-    };
+    requestAnimationFrame(() => {
+        navItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.tab === tabId);
+        });
 
-    function switchTab(tabId) {
-        requestAnimationFrame(() => {
-            navItems.forEach(item => {
-                item.classList.toggle('active', item.dataset.tab === tabId);
-            });
-
-            tabs.forEach(tab => {
-                const isActive = tab.id === `tab-${tabId}`;
-                tab.classList.toggle('active', isActive);
-                
-                if (isActive && window.anime) {
-                    const animatableItems = tab.querySelectorAll('.toggle-card, .setting-item, .mode-card');
-                    if (animatableItems.length > 0) {
-                        try {
-                            animatableItems.forEach(el => {
-                                el.style.transform = 'translateX(-12px)';
-                                el.style.opacity = '0';
-                            });
-                            
-                            window.anime.animate({
-                                targets: animatableItems,
-                                translateX: [ -12, 0 ],
-                                opacity: [ 0, 1 ],
-                                delay: function(el, i) { return 50 + (i * 30); },
-                                easing: 'easeOutElastic(1, .6)',
-                                duration: 500,
-                            });
-                        } catch (e) {
-                            console.error('Animation error:', e);
-                            animatableItems.forEach(el => {
-                                el.style.transform = '';
-                                el.style.opacity = '1';
-                            });
-                        }
+        tabs.forEach(tab => {
+            const isActive = tab.id === `tab-${tabId}`;
+            tab.classList.toggle('active', isActive);
+            
+            if (isActive && window.anime) {
+                const animatableItems = tab.querySelectorAll('.toggle-card, .setting-item, .mode-card');
+                if (animatableItems.length > 0) {
+                    try {
+                        animatableItems.forEach(el => {
+                            el.style.transform = 'translateX(-12px)';
+                            el.style.opacity = '0';
+                        });
+                        
+                        window.anime.animate({
+                            targets: animatableItems,
+                            translateX: [ -12, 0 ],
+                            opacity: [ 0, 1 ],
+                            delay: window.anime.stagger(40, { start: 100 }),
+                            easing: 'spring(1, 80, 10, 0)',
+                            duration: 600,
+                        });
+                    } catch (e) {
+                        console.error('Animation error:', e);
+                        animatableItems.forEach(el => {
+                            el.style.transform = '';
+                            el.style.opacity = '1';
+                        });
                     }
                 }
-            });
-
-            if (pageTitle) {
-                pageTitle.textContent = titles[tabId] || 'Settings';
             }
-            
-            localStorage.setItem('ypp-last-tab', tabId);
         });
-    }
 
+        if (pageTitle) {
+            pageTitle.textContent = TITLES[tabId] || 'Settings';
+        }
+        
+        localStorage.setItem('ypp-last-tab', tabId);
+    });
+}
+
+function initTabs(document) {
+    const navItems = document.querySelectorAll('.nav-item[data-tab]');
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const tab = item.dataset.tab;
-            if (tab) switchTab(tab);
+            if (tab) switchTab(document, tab);
         });
     });
 
     const lastTab = localStorage.getItem('ypp-last-tab');
     if (lastTab && document.getElementById(`tab-${lastTab}`)) {
-        switchTab(lastTab);
+        switchTab(document, lastTab);
     }
+}
 
+function initCollapsibleSections(document) {
     const sections = document.querySelectorAll('.settings-section');
     sections.forEach(section => {
-        // The .section-content and .section-content-inner wrappers are now correctly built by popup-renderer.js
-
-        // 2. Add click listener to header
         const header = section.querySelector('.section-header');
         if (header) {
             header.style.cursor = 'pointer';
             const titleEl = header.querySelector('.section-title');
             const title = titleEl ? titleEl.textContent : 'section';
             
-            // Restore state
             const isCollapsed = localStorage.getItem('ypp_collapse_' + title) === 'true';
             if (isCollapsed) {
                 section.classList.add('collapsed');
@@ -96,54 +95,54 @@ export function initUI(document) {
             });
         }
     });
+}
 
+function initSearch(document) {
     const featureSearchInput = document.getElementById('featureSearch');
-    if (featureSearchInput) {
-        featureSearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            const allCards = document.querySelectorAll('.toggle-card, .setting-item');
-            const allSections = document.querySelectorAll('.settings-section');
-            const allTabs = document.querySelectorAll('.tab-content');
-            
-            if (!query) {
-                allCards.forEach(card => card.style.display = '');
-                allSections.forEach(sec => sec.style.display = '');
-                allTabs.forEach(tab => tab.style.display = ''); 
-                return;
-            }
+    if (!featureSearchInput) return;
 
-            allTabs.forEach(tab => {
-                const cards = tab.querySelectorAll('.toggle-card, .setting-item, .mode-card');
-                let tabHasMatches = false;
+    featureSearchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const allCards = document.querySelectorAll('.toggle-card, .setting-item');
+        const allSections = document.querySelectorAll('.settings-section');
+        const allTabs = document.querySelectorAll('.tab-content');
+        
+        if (!query) {
+            allCards.forEach(card => card.style.display = '');
+            allSections.forEach(sec => sec.style.display = '');
+            allTabs.forEach(tab => tab.style.display = ''); 
+            return;
+        }
 
-                cards.forEach(card => {
-                    const text = card.textContent.toLowerCase();
-                    if (text.includes(query)) {
-                        card.style.display = '';
-                        tabHasMatches = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+        allTabs.forEach(tab => {
+            const cards = tab.querySelectorAll('.toggle-card, .setting-item, .mode-card');
+            let tabHasMatches = false;
 
-                const sections = tab.querySelectorAll('.settings-section');
-                sections.forEach(sec => {
-                    const visibleCards = Array.from(sec.querySelectorAll('.toggle-card, .setting-item, .mode-card')).filter(c => c.style.display !== 'none');
-                    if (visibleCards.length === 0) {
-                        sec.style.display = 'none';
-                    } else {
-                        sec.style.display = '';
-                    }
-                });
-
-                if (tabHasMatches) {
-                    tab.style.display = 'block'; 
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    card.style.display = '';
+                    tabHasMatches = true;
                 } else {
-                    tab.style.display = 'none';  
+                    card.style.display = 'none';
                 }
             });
+
+            const sections = tab.querySelectorAll('.settings-section');
+            sections.forEach(sec => {
+                const visibleCards = Array.from(sec.querySelectorAll('.toggle-card, .setting-item, .mode-card')).filter(c => c.style.display !== 'none');
+                sec.style.display = visibleCards.length === 0 ? 'none' : '';
+            });
+
+            tab.style.display = tabHasMatches ? 'block' : 'none';
         });
-    }
+    });
+}
+
+export function initUI(document) {
+    initTabs(document);
+    initCollapsibleSections(document);
+    initSearch(document);
 }
 
 export function showSaveIndicator(document) {
