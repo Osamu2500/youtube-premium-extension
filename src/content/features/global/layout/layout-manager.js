@@ -27,9 +27,9 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      */
     static SELECTORS = {
         APP_CONTAINER: 'ytd-app',
-        GRID_RENDERER: 'ytd-rich-grid-renderer',
+        GRID_RENDERER: 'ytd-rich-grid-renderer, yt-rich-grid-renderer, yt-rich-grid-view-model',
         GRID_CONTENTS: '#contents',
-        GRID_ITEMS: 'ytd-rich-item-renderer, ytd-rich-grid-media, yt-lockup-view-model',
+        GRID_ITEMS: 'ytd-rich-item-renderer, ytd-rich-grid-media, yt-lockup-view-model, yt-rich-item-view-model',
         GRID_ROWS: 'ytd-rich-grid-row'
     };
 
