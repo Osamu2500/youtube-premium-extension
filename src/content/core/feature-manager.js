@@ -153,45 +153,60 @@ window.YPP.FeatureManager = class FeatureManager {
      */
     async applyFeatures() {
         const applyId = ++this._currentApplyId;
-        const entries = Object.entries(this.features);
         
-        // Phase 5: Chunk processing to avoid blocking main thread on boot
-        // Processes 4 features per event loop tick to maintain 60fps responsiveness
-        const CHUNK_SIZE = 4;
-        
-        for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
-            if (this._currentApplyId !== applyId) return; // Cancelled by newer run
+        const PRIORITY_ORDER = [
+            'theme', 'headerNav', 'sidebarLayout', 'layout', 'autoScaleLayout',
+            'keyboardShortcuts', 'videoSpeedController',
+            'playlistRedesign', 'gridAnimator', 'ambientMode'
+        ];
 
-            const chunk = entries.slice(i, i + CHUNK_SIZE);
-            const chunkPromises = chunk.map(([name, instance]) => {
-                if (this.errorCounts[name] >= this.MAX_ERRORS) {
-                    return Promise.resolve();
-                }
+        const sorted = Object.entries(this.features).sort((a, b) => {
+            const idxA = PRIORITY_ORDER.indexOf(a[0]);
+            const idxB = PRIORITY_ORDER.indexOf(b[0]);
+            return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+        });
 
-                return this.safeRun(name, async () => {
-                    // Standard: check for enable/disable methods and update logic
-                    if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
-                        // Method 1: Feature has strict 'update' method (Preferred)
-                        if (typeof instance.update === 'function') {
-                            await instance.update(this.settings);
-                        }
-                        // Method 2: Fallback to 'run' method for simple features
-                        else if (typeof instance.run === 'function') {
-                            await instance.run(this.settings);
-                        }
-                    }
-                    // Legacy support for older features
-                    else if (typeof instance.run === 'function') {
+        const runFeature = async (name, instance) => {
+            if (this._currentApplyId !== applyId) return;
+            if (this.errorCounts[name] >= this.MAX_ERRORS) return;
+
+            return this.safeRun(name, async () => {
+                if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
+                    if (typeof instance.update === 'function') {
+                        await instance.update(this.settings);
+                    } else if (typeof instance.run === 'function') {
                         await instance.run(this.settings);
                     }
-                });
+                } else if (typeof instance.run === 'function') {
+                    await instance.run(this.settings);
+                }
             });
+        };
 
-            // Await this chunk concurrently
-            await Promise.allSettled(chunkPromises);
+        const SEQUENTIAL_UI = ['theme', 'headerNav', 'sidebarLayout', 'layout'];
+        const AFTER_LAYOUT  = ['autoScaleLayout'];
+        
+        const uiFeatures    = sorted.filter(([name]) => SEQUENTIAL_UI.includes(name));
+        const postLayout    = sorted.filter(([name]) => AFTER_LAYOUT.includes(name));
+        const ALL_UI        = new Set([...SEQUENTIAL_UI, ...AFTER_LAYOUT]);
+        const heavyFeatures = sorted.filter(([name]) => !ALL_UI.has(name));
+
+        // 1. Layout-critical UI features
+        await Promise.allSettled(uiFeatures.map(([name, instance]) => runFeature(name, instance)));
+        
+        // 2. autoScaleLayout runs after layout to avoid CSS var race conditions
+        await Promise.allSettled(postLayout.map(([name, instance]) => runFeature(name, instance)));
+
+        // Phase 5: Chunk processing for heavy features to avoid blocking main thread
+        const CHUNK_SIZE = 4;
+        for (let i = 0; i < heavyFeatures.length; i += CHUNK_SIZE) {
+            if (this._currentApplyId !== applyId) return;
+
+            const chunk = heavyFeatures.slice(i, i + CHUNK_SIZE);
+            await Promise.allSettled(chunk.map(([name, instance]) => runFeature(name, instance)));
 
             // Yield to browser paint cycle if there are more chunks
-            if (i + CHUNK_SIZE < entries.length) {
+            if (i + CHUNK_SIZE < heavyFeatures.length) {
                 await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
             }
         }

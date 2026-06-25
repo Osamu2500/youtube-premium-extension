@@ -108,6 +108,15 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         if (this.settings) {
             this.utils.log?.('GridLayoutManager onUpdate triggered. Settings homeColumns: ' + this.settings.homeColumns, 'LAYOUT');
             this.updateSettings(this.settings);
+            
+            // Proactively write --ypp-active-columns NOW (synchronous) so any code
+            // that reads this CSS variable immediately gets the correct manual value.
+            const manualCols = Number(this.settings.homeColumns || 0);
+            if (manualCols > 0) {
+                document.documentElement.style.setProperty('--ypp-active-columns', manualCols);
+                document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+            }
+
             // Force re-apply of grid structural styles when settings change
             this._processedContainers = new WeakSet();
             this._debouncedApply();
@@ -123,8 +132,13 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         
         const root = document.documentElement;
         
-        if (settings.homeColumns) {
-            root.style.setProperty('--ypp-home-columns', settings.homeColumns);
+        if (settings.homeColumns !== undefined && settings.homeColumns !== null) {
+            // homeColumns === 0 means "auto"
+            if (Number(settings.homeColumns) > 0) {
+                root.style.setProperty('--ypp-home-columns', settings.homeColumns);
+            } else {
+                root.style.removeProperty('--ypp-home-columns');
+            }
         } else {
             root.style.removeProperty('--ypp-home-columns');
         }
@@ -204,7 +218,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             if (!contents) return;
 
             // Determine column count from user settings per page type
-            let cols = this.settings?.homeColumns ?? 4;
+            let cols = Number(this.settings?.homeColumns || 0);
             const path = window.location.pathname;
             if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
                 cols = this.settings?.channelColumns ?? 4;
@@ -216,18 +230,20 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
 
             // Apply auto-scale grid logic if enabled via AutoScaleGrid
             const isHome = path === '/' || path === '/index';
-            if (isHome) {
+            if (isHome && cols === 0) {
                 const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
                 if (dynamicCols) {
                     cols = parseInt(dynamicCols, 10);
                     this.utils.log?.('dynamicCols found: ' + dynamicCols + ', overriding cols to ' + cols, 'LAYOUT');
+                } else {
+                    cols = 4;
                 }
             }
             
             this.utils.log?.('applyGridLayout cols evaluated to: ' + cols + ' for path: ' + path, 'LAYOUT');
 
             // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
-            if (cols === 0 || cols === '0') {
+            if (cols === 0) {
                 contents.classList.remove('ypp-grid-container');
                 contents.style.removeProperty('grid-template-columns');
                 contents.style.removeProperty('grid-auto-flow');

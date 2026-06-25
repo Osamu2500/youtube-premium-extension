@@ -21,16 +21,15 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
         // Use debounce for resize listener
         const resizeListener = this.utils.debounce(this._boundApplyScale, 150);
         this.addListener(window, 'resize', resizeListener);
-        // Force layout-manager to update instantly
-        window.dispatchEvent(new Event('resize'));
     }
 
     async disable() {
         document.documentElement.style.setProperty('--ypp-auto-scale', 1);
         document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+        // When disabling auto-scale, clear --ypp-active-columns so layout-manager
+        // re-evaluates from the current homeColumns setting (avoids stale value).
+        document.documentElement.style.removeProperty('--ypp-active-columns');
         this.cleanupEvents();
-        // Force layout-manager to update instantly
-        window.dispatchEvent(new Event('resize'));
     }
     
     async onUpdate() {
@@ -43,6 +42,21 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
 
     _applyScale() {
         if (!this.settings || !this.settings.autoScaleLayout) return;
+
+        // ✅ RESPECT MANUAL OVERRIDE: homeColumns === 0 means "auto" (use window-width calc).
+        // homeColumns >= 1 means the user has picked a manual count — bail out and let
+        // layout-manager read homeColumns directly; don't touch --ypp-dynamic-cols.
+        const manualCols = Number(this.settings?.homeColumns || 0);
+        if (manualCols > 0) {
+            // Set --ypp-active-columns so the CSS :root selector has a value to match
+            document.documentElement.style.setProperty('--ypp-active-columns', manualCols);
+            // Clear any stale dynamic-cols so CSS doesn't fight the manual value
+            document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+            // Still apply UI scale factor for spacing/fonts
+            const uiScale = Math.max(0.7, Math.min(1.3, window.innerWidth / 1280));
+            document.documentElement.style.setProperty('--ypp-auto-scale', uiScale);
+            return;
+        }
 
         const path = window.location.pathname;
         const isHome = path === '/' || path === '/index';
@@ -74,6 +88,11 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
     }
     
     onPageChange() {
-        this._applyScale();
+        // Re-run in auto mode (homeColumns === 0) on every navigation.
+        // In manual mode layout-manager already has the correct value — skip.
+        const manualCols = this.settings?.homeColumns ?? 0;
+        if (manualCols === 0) {
+            this._applyScale();
+        }
     }
 };
