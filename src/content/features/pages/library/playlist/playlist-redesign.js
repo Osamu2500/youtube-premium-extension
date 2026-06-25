@@ -270,6 +270,11 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             }
         });
 
+        // Fallback: If banner image is missing or lazy-loading, use the first video's thumbnail
+        if (!coverUrl && videos.length > 0 && videos[0].thumb) {
+            coverUrl = videos[0].thumb.replace(/hqdefault|mqdefault|default/, 'maxresdefault');
+        }
+
         return { title, owner, ownerHref, stats, coverUrl, videos, totalSecs };
     }
 

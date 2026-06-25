@@ -57,8 +57,8 @@ window.YPP.features.AccountMenuData = class AccountMenuData {
             const headerImg = document.querySelector(
                 '#masthead #avatar-btn img,' +
                 '#avatar-btn yt-img-shadow img,' +
-                '#avatar-btn yt-image img,' +
-                '#avatar-btn img'
+                '#masthead ytd-topbar-menu-button-renderer img,' +
+                '#masthead ytd-topbar-menu-button-renderer .yt-core-image'
             );
             const hSrc = headerImg?.getAttribute('src') || headerImg?.src || '';
             if (hSrc && !hSrc.startsWith('data:') && hSrc !== window.location.href) {

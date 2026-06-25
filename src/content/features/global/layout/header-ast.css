@@ -1,10 +1,10 @@
 
 .yt-premium-plus-theme #guide-button,
 .yt-premium-plus-theme ytd-masthead #buttons ytd-button-renderer,
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer:not(:has(#avatar-btn)) {
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:not(:has(#avatar-btn, yt-img-shadow, yt-image, img)) {
   display: none;
 }
-.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn):not([hidden]) {
+.yt-premium-plus-theme ytd-topbar-menu-button-renderer:has(#avatar-btn, yt-img-shadow, yt-image, img):not([hidden]) {
   display: flex;
 }
 .yt-premium-plus-theme ytd-topbar-menu-button-renderer[aria-label*="Create"],
