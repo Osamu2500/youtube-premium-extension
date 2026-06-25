@@ -127,9 +127,12 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             return header && browse.querySelectorAll(ITEM_SEL).length > 0;
         }, 10000);
 
-        // Check isEnabled (BaseFeature flag) — feature may have been disabled while waiting
-        // Check currentInitId to prevent race conditions during SPA navigation
-        if (isReady && this.isEnabled && this._initId === currentInitId && this._isPlaylistPage()) {
+        // Check _initId to prevent stale builds from SPA navigations.
+        // NOTE: We intentionally do NOT check this.isEnabled here — BaseFeature sets
+        // isEnabled=true only AFTER enable() resolves, so during the pollFor() wait
+        // isEnabled is still false even though the feature is actively being enabled.
+        // The _initId increment in _reset() is the correct cancellation mechanism.
+        if (isReady && this._initId === currentInitId && this._isPlaylistPage()) {
             document.body.classList.add('ypp-playlist-redesign');
             const browse = this._getActiveBrowse();
             if (!browse) return;
