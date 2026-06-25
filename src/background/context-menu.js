@@ -6,6 +6,7 @@
 const CONTEXT_MENU_ID = 'ypp-add-to-group';
 
 export function initContextMenu() {
+    if (!chrome.contextMenus) return;
     chrome.contextMenus.removeAll(() => {
         chrome.contextMenus.create({
             id: CONTEXT_MENU_ID,
@@ -16,7 +17,8 @@ export function initContextMenu() {
     });
 }
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+if (chrome.contextMenus) {
+    chrome.contextMenus.onClicked.addListener((info, tab) => {
         if (info.menuItemId === CONTEXT_MENU_ID) {
             // Determine the target URL from either the clicked link or the page itself
             const url = info.linkUrl || info.pageUrl;
@@ -45,3 +47,4 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             });
         }
     });
+}

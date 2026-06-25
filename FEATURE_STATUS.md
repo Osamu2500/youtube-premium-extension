@@ -14,14 +14,8 @@ These features perfectly adhere to the extension's architecture, including exten
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
 
 ### Redirect Shorts
-*   **File:** `content/features/pages/home/redirect-shorts.js`
+*   **File:** `src/content/features/shorts/modifiers/redirect-shorts.js`
 *   **What it does:** Automatically redirects Shorts URLs (`/shorts/`) to the regular YouTube video player.
-*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
-*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
-
-### Shorts Tools
-*   **File:** `content/features/pages/home/shorts-tools.js`
-*   **What it does:** Shorts Tools (Auto-Scroll)
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
 
@@ -59,91 +53,42 @@ These features perfectly adhere to the extension's architecture, including exten
 These features function, but contain architectural violations (leaking event listeners, raw chrome.storage, missing DOM stamps, etc.) that need to be refactored before they are considered fully stable.
 
 ### Account Menu
-*   **File:** `content/features/core/global/account-menu/account-menu.js`
+*   **File:** `src/content/features/global/account-menu/account-menu.js`
 *   **What it does:** AccountMenu — replaces YouTube's native account dropdown with an
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Content Control
-*   **File:** `content/features/core/global/content-control.js`
-*   **What it does:** Content Control Module
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Data Api
-*   **File:** `content/features/core/global/data-api.js`
-*   **What it does:** Feature: Data API Extractor
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Hide Metrics
-*   **File:** `content/features/core/global/hide-metrics.js`
+*   **File:** `src/content/features/global/ui-tweaks/hide-metrics.js`
 *   **What it does:** Hides view counts and likes globally by applying a CSS class to the body.
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Hide Playlists Podcasts
-*   **File:** `content/features/core/global/hide-playlists-podcasts.js`
-*   **What it does:** Hides Playlists, Podcasts, and Mixes from video feeds (Home, Search, Subs) to clean up recommendations.
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Hide Thumbnails
-*   **File:** `content/features/core/global/hide-thumbnails.js`
-*   **What it does:** Hides video thumbnails globally by applying a CSS class, reducing visual clutter.
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Keyboard Shortcuts
-*   **File:** `content/features/core/global/keyboard-shortcuts.js`
+*   **File:** `src/content/features/global/behavior/keyboard-shortcuts.js`
 *   **What it does:** Keyboard Shortcuts Feature
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 
-
-### Night Mode
-*   **File:** `content/features/core/global/night-mode.js`
-*   **What it does:** Night Mode Manager
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Redirect Home
-*   **File:** `content/features/core/global/redirect-home.js`
-*   **What it does:** Redirects the main YouTube homepage directly to the Subscriptions feed.
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Stats Visualizer
-*   **File:** `content/features/core/global/stats/stats-visualizer.js`
-*   **What it does:** StatsVisualizer
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
 
 ### Theme
-*   **File:** `content/features/core/global/theme.js`
+*   **File:** `src/content/features/global/ui-tweaks/theme.js`
 *   **What it does:** Theme Manager - Handles visual theming and content visibility features
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Header Nav
-*   **File:** `content/features/core/layout/header-nav.js`
+*   **File:** `src/content/features/global/layout/header-nav.js`
 *   **What it does:** Header Navigation Manager - Creates custom navigation buttons in the header
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Layout Manager
-*   **File:** `content/features/core/layout/layout-manager.js`
+*   **File:** `src/content/features/global/layout/layout-manager.js`
 *   **What it does:** Layout Manager (Grid)
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Sidebar
-*   **File:** `content/features/core/layout/sidebar.js`
-*   **What it does:** Sidebar Manager
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Home Organizer
 *   **File:** `content/features/pages/home/home-organizer.js`
@@ -168,12 +113,6 @@ These features function, but contain architectural violations (leaking event lis
 *   **What it does:** Feature: Playlist Page Redesign (Full UI Override)
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, Raw chrome.storage, console.* usage, Raw setTimeout polling, Missing DOM stamp guards
-
-### Advanced Filter
-*   **File:** `content/features/pages/search/advanced-filter.js`
-*   **What it does:** Advanced filtering system for the home page (sub/unsub, time, duration) with a visual chips bar UI.
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, console.* usage, Missing DOM stamp guards
 
 ### Context Menu
 *   **File:** `content/features/pages/subscriptions/context-menu.js`
@@ -205,12 +144,6 @@ These features function, but contain architectural violations (leaking event lis
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw setTimeout polling
 
-### Modes Manager
-*   **File:** `content/features/pages/watch/modes-manager.js`
-*   **What it does:** Modes Manager — YouTube Premium Plus
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, Raw setTimeout polling
-
 ### Study Mode
 *   **File:** `content/features/pages/watch/study-mode.js`
 *   **What it does:** Study Mode Feature - Optimized playback for learning
@@ -230,46 +163,46 @@ These features function, but contain architectural violations (leaking event lis
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, console.* usage
 
 ### Ambient Mode
-*   **File:** `content/features/player/ambient-mode/ambient-mode.js`
+*   **File:** `src/content/features/player/media-effects/ambient-mode/ambient-mode.js`
 *   **What it does:** Adds a custom massive blurred ambient lighting effect around the video player by rendering the video frame at 5fps to a canvas behind the player.
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw chrome.storage
 
 ### Audio Mode
-*   **File:** `content/features/player/ambient-mode/audio-mode.js`
+*   **File:** `src/content/features/player/media-effects/ambient-mode/audio-mode.js`
 *   **What it does:** Audio Mode - Hide video, show audio with thumbnail overlay
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: console.* usage
 
 ### Audio Compressor
-*   **File:** `content/features/player/audio-compressor.js`
+*   **File:** `src/content/features/player/media-effects/audio-compressor.js`
 *   **What it does:** Feature: Audio Compressor
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Auto Like
-*   **File:** `content/features/player/auto-like.js`
+*   **File:** `src/content/features/player/automation/auto-like.js`
 *   **What it does:** Automatically likes a video once you have watched at least 50% or reached the end.
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Auto Pause
-*   **File:** `content/features/player/auto-pause.js`
+*   **File:** `src/content/features/player/automation/auto-pause.js`
 *   **What it does:** Auto Pause Feature
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Auto Quality
-*   **File:** `content/features/player/auto-quality.js`
+*   **File:** `src/content/features/player/automation/auto-quality.js`
 *   **What it does:** Auto Quality & Theater feature
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Bookmarks
-*   **File:** `content/features/player/bookmarks.js`
+*   **File:** `src/content/features/player/controls/bookmarks.js`
 *   **What it does:** Bookmarks Manager
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Global Bar
 *   **File:** `content/features/player/global-bar.js`
@@ -278,40 +211,22 @@ These features function, but contain architectural violations (leaking event lis
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, Raw setTimeout polling, Missing DOM stamp guards
 
 ### Intentional Delay
-*   **File:** `content/features/player/intentional-delay.js`
+*   **File:** `src/content/features/player/enhancements/intentional-delay.js`
 *   **What it does:** Adds a 3-second mandatory "Take a breath" overlay before playing any video to prevent impulsive watching.
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Mini Player
-*   **File:** `content/features/player/mini-player.js`
-*   **What it does:** Mini Player Feature
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Player Tools
-*   **File:** `content/features/player/player-tools.js`
+*   **File:** `src/content/features/player/controls/player-tools.js`
 *   **What it does:** Player Tools
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Player
-*   **File:** `content/features/player/player.js`
-*   **What it does:** Player Enhancements Module
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw MutationObserver, Raw addEventListener, console.* usage, Missing DOM stamp guards
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Return Dislike
-*   **File:** `content/features/player/return-dislike.js`
+*   **File:** `src/content/features/player/enhancements/return-dislike.js`
 *   **What it does:** Feature: Return YouTube Dislike
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
-
-### Sidebar Layout
-*   **File:** `content/features/player/controls/sidebar-layout.js`
-*   **What it does:** SidebarLayout Feature
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: console.* usage
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Split Scrolling
 *   **File:** `content/features/player/enhancements/split-scrolling.js`
@@ -320,46 +235,46 @@ These features function, but contain architectural violations (leaking event lis
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw chrome.storage
 
 ### Sponsor Block
-*   **File:** `content/features/player/sponsor-block.js`
+*   **File:** `src/content/features/player/automation/sponsor-block.js`
 *   **What it does:** Feature: SponsorBlock Integration
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Time Display
-*   **File:** `content/features/player/time-display.js`
+*   **File:** `src/content/features/player/enhancements/time-display.js`
 *   **What it does:** Time Display Feature
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Video Controls
-*   **File:** `content/features/player/video-controls/video-controls.js`
+*   **File:** `src/content/features/player/controls/video-controls.js`
 *   **What it does:** Comprehensive draggable control panel for adjusting playback speed, cinematic CSS filters (brightness, etc.), and advanced audio processing (volume boost, EQ).
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Missing DOM stamp guards
 
 ### Video Filters
-*   **File:** `content/features/player/video-filters/video-filters.js`
+*   **File:** `src/content/features/player/media-effects/video-filters/video-filters.js`
 *   **What it does:** Video Filters Feature Orchestrator
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: console.* usage, Raw setTimeout polling
 
 ### Video Resumer
-*   **File:** `content/features/player/video-resumer.js`
+*   **File:** `src/content/features/player/automation/video-resumer.js`
 *   **What it does:** Feature: Smart Video Resumer
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 ### Volume Booster
-*   **File:** `content/features/player/volume-booster/volume-booster.js`
+*   **File:** `src/content/features/player/media-effects/volume-booster/volume-booster.js`
 *   **What it does:** Volume Booster / 10-Band Graphic Equalizer Orchestrator
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, console.* usage
 
 ### Wheel Controls
-*   **File:** `content/features/player/wheel-controls.js`
+*   **File:** `src/content/features/player/controls/wheel-controls.js`
 *   **What it does:** Feature: Mouse Wheel Controls
 *   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: File not found
+*   **Architecture Notes:** Extends BaseFeature: Yes
 
 
 ---
@@ -374,17 +289,17 @@ Core logic exists, but there are unhandled edge cases, missing features, or expl
 Features that are structurally flawed, such as lacking a `disable()` method which guarantees memory leaks and duplicated observers when the feature is toggled off, or features that no longer function correctly due to YouTube DOM changes.
 
 ### Hide Watched
-*   **File:** `src/content/features/global/modifiers/hide-watched.js`
+*   **File:** `src/content/features/global/ui-tweaks/hide-watched.js`
 *   **What it does:** Automatically hides or dims videos on the YouTube homepage, subscriptions feed, and channel pages that you have already watched. Uses a customizable threshold (e.g., 80% watched) to determine if a video should be hidden, relying on the native YouTube progress bar overlay.
 *   **Status:** Broken / Not Working. DOM observer fails to consistently match modern YouTube view models, causing the feature to ignore dynamically loaded videos.
 
 ### Mark as Watched
-*   **File:** `src/content/features/global/modifiers/mark-watched.js`
+*   **File:** `src/content/features/global/behavior/mark-watched.js`
 *   **What it does:** Visually badges watched videos with a clear overlay, auto-marks videos as watched when they end, and adds a hover/context menu toggle to manually mark videos as watched without having to open them.
 *   **Status:** Broken / Not Working. Fails to consistently apply badges to dynamically loaded videos in modern YouTube grids.
 
 ### Multi-Select Videos
-*   **File:** `src/content/features/global/modifiers/multi-select.js`
+*   **File:** `src/content/features/global/behavior/multi-select.js`
 *   **What it does:** Injects checkboxes on video thumbnails allowing you to hold Shift and click to select multiple videos at once. Once selected, you can perform batch actions like adding them all to a playlist, "Watch Later", or your queue simultaneously.
 *   **Status:** Broken / Not Working. Checkboxes fail to render on new YouTube grid layouts and events are inconsistently captured.
 

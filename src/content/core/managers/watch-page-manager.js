@@ -41,6 +41,8 @@ class WatchPageManager extends window.YPP.BasePageManager {
             if (window.YPP?.features?.PlayerControls) {
                 this.controlsHelper = new window.YPP.features.PlayerControls(this);
                 this.settingsMenuHelper = new window.YPP.features.PlayerSettingsMenu(this);
+            } else {
+                this.utils.log('PlayerControls feature unavailable — core player features may not load', 'WATCH_MANAGER', 'error');
             }
             this.features = {
                 zenMode:    window.YPP.features.ZenMode    ? new window.YPP.features.ZenMode()    : null,
