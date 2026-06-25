@@ -98,7 +98,7 @@
                 await this.loadSettings();
                 this.initFeatureManager();
                 
-                // Initial feature application
+                // Initial feature application BEFORE page managers
                 if (this.featureManager) {
                     this.featureManager.init(this.settings);
                 }
@@ -184,29 +184,26 @@
                     return;
                 }
 
-                let resolved = false;
                 let startTime = performance.now();
-                let rafId = null;
+                let delay = 16;
+                let timerId = null;
 
                 const check = () => {
-                    if (resolved) return;
-                    
                     if (condition()) {
-                        resolved = true;
                         resolve(true);
                         return;
                     }
 
                     if (performance.now() - startTime > timeout) {
-                        resolved = true;
                         resolve(false);
                         return;
                     }
 
-                    rafId = requestAnimationFrame(check);
+                    delay = Math.min(delay * 1.5, 500); // Exponential backoff max 500ms
+                    timerId = setTimeout(check, delay);
                 };
 
-                rafId = requestAnimationFrame(check);
+                timerId = setTimeout(check, delay);
             });
         },
 
@@ -281,12 +278,20 @@
          * @param {Object} newSettings - Settings to save
          */
         async saveSettings(newSettings) {
+            this.settings = { ...this.settings, ...newSettings };
             try {
-                this.settings = { ...this.settings, ...newSettings };
-                await chrome.storage.local.set({ settings: this.settings });
-                this.Utils?.log('Settings saved', 'MAIN', 'debug');
+                if (chrome.runtime?.id) {
+                    await chrome.runtime.sendMessage({
+                        action: 'UPDATE_SETTINGS_DELTA',
+                        delta: newSettings
+                    });
+                    this.Utils?.log('Settings delta sent to Service Worker', 'MAIN', 'debug');
+                } else {
+                    throw new Error('No chrome runtime context');
+                }
             } catch (error) {
-                this.Utils?.log(`Error saving settings: ${error.message}`, 'MAIN', 'error');
+                this.Utils?.log(`Error communicating with Service Worker: ${error.message}. Falling back to local storage.`, 'MAIN', 'warn');
+                await chrome.storage.local.set({ settings: this.settings });
             }
         },
 
@@ -301,15 +306,10 @@
         setupEvents() {
             // Clean up existing listeners first
             this.removeEventListeners();
+            
+            // Track Chrome API listeners separately
+            this._chromeListeners = [];
 
-            // Handle YouTube SPA navigation
-            // Uses a 50ms setTimeout debounce to coalesce duplicate events:
-            // both yt-navigate-finish and yt-page-data-updated can fire for
-            // the same navigation. The previous RAF + _initPending approach
-            // was fragile on slow connections where events fire across
-            // multiple frames, causing featureManager.init() to run twice.
-            // A time-based debounce reliably collapses both events regardless
-            // of frame timing.
             const NAV_DEBOUNCE_MS = 50;
             const handleNavigation = () => {
                 if (this._navTimeout) clearTimeout(this._navTimeout);
@@ -319,7 +319,6 @@
                     this.Utils?.log('Navigation detected', 'MAIN', 'debug');
                     this.updateContext();
 
-                    // Fire next-gen EventBus lifecycle hooks
                     if (window.YPP.events) {
                         const url = window.location.href;
                         window.YPP.events.emit('app:pageChange', url);
@@ -382,40 +381,42 @@
                     }
                 };
                 chrome.storage.onChanged.addListener(storageHandler);
-                this.eventListeners.push({ target: chrome.storage.onChanged, event: 'storage', handler: storageHandler });
+                this._chromeListeners.push({ api: chrome.storage.onChanged, handler: storageHandler });
             } else {
                 this.Utils?.log('chrome.storage.onChanged API not available', 'MAIN', 'warn');
             }
 
             // Listen for direct messages for instant updates
-            const messageHandler = (request, sender, sendResponse) => {
-                if (request.action === 'UPDATE_SETTINGS' && request.settings) {
-                    // Merge incoming settings over current state
-                    this.settings = { ...this.settings, ...request.settings };
-                    this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
-                    this._queueSettingsUpdate();
-                    
-                    if (this.pageManagers) {
-                        this.pageManagers.forEach(m => m.updateSettings(this.settings));
-                    }
-                    if (this.thumbnailColorManager) {
-                        this.thumbnailColorManager.updateSettings(this.settings);
-                    }
+            if (chrome?.runtime?.onMessage) {
+                const messageHandler = (request, sender, sendResponse) => {
+                    if (request.action === 'UPDATE_SETTINGS' && request.settings) {
+                        // Merge incoming settings over current state
+                        this.settings = { ...this.settings, ...request.settings };
+                        this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
+                        this._queueSettingsUpdate();
+                        
+                        if (this.pageManagers) {
+                            this.pageManagers.forEach(m => m.updateSettings(this.settings));
+                        }
+                        if (this.thumbnailColorManager) {
+                            this.thumbnailColorManager.updateSettings(this.settings);
+                        }
 
-                    sendResponse({ success: true });
-                }
-                
-                if (request.action === 'FORCE_THEME_UPDATE') {
-                    this.Utils?.log('Force theme update received', 'MAIN', 'info');
-                    const themeManager = this.featureManager?.getFeature('theme');
-                    if (themeManager && typeof themeManager.forceReload === 'function') {
-                        themeManager.forceReload();
+                        sendResponse({ success: true });
                     }
-                    sendResponse({ success: true });
-                }
-            };
-            chrome.runtime.onMessage.addListener(messageHandler);
-            this.eventListeners.push({ target: chrome.runtime.onMessage, event: 'message', handler: messageHandler });
+                    
+                    if (request.action === 'FORCE_THEME_UPDATE') {
+                        this.Utils?.log('Force theme update received', 'MAIN', 'info');
+                        const themeManager = this.featureManager?.getFeature('theme');
+                        if (themeManager && typeof themeManager.forceReload === 'function') {
+                            themeManager.forceReload();
+                        }
+                        sendResponse({ success: true });
+                    }
+                };
+                chrome.runtime.onMessage.addListener(messageHandler);
+                this._chromeListeners.push({ api: chrome.runtime.onMessage, handler: messageHandler });
+            }
         },
 
         /**
@@ -441,20 +442,29 @@
          * @private
          */
         removeEventListeners() {
+            // Remove DOM listeners
             this.eventListeners.forEach(({ target, event, handler }) => {
                 try {
                     if (target && typeof target.removeEventListener === 'function') {
                         target.removeEventListener(event, handler);
-                    } else if (target && typeof target.removeListener === 'function') {
-                        target.removeListener(handler);
-                    } else if (target && typeof target.off === 'function') {
-                        target.off(event, handler);
                     }
                 } catch (error) {
-                    // Ignore cleanup errors to ensure loop completes
+                    // Ignore cleanup errors
                 }
             });
             this.eventListeners = [];
+
+            // Remove Chrome API listeners
+            if (this._chromeListeners) {
+                this._chromeListeners.forEach(({ api, handler }) => {
+                    try {
+                        if (api && typeof api.removeListener === 'function') {
+                            api.removeListener(handler);
+                        }
+                    } catch (e) {}
+                });
+                this._chromeListeners = [];
+            }
         },
 
         // =========================================================================
@@ -493,8 +503,16 @@
                     isHistory: pathname === '/feed/history'
                 };
 
-                // Cache comparison to avoid unnecessary DOM classList writes
-                const contextId = `${pathname}-${this.settings?.premiumTheme}`;
+                const contextHashObj = {
+                    theme: this.settings?.premiumTheme,
+                    zen: this.settings?.zenMode,
+                    focus: this.settings?.enableFocusMode,
+                    cinema: this.settings?.cinemaMode,
+                    minimal: this.settings?.minimalMode,
+                    detox: this.settings?.dopamineDetox
+                };
+                const contextId = `${pathname}-${JSON.stringify(contextHashObj)}`;
+                
                 if (this._lastContextId === contextId) {
                     // No context or theme change occurred; bypass heavy DOM updates
                     return;
@@ -505,34 +523,48 @@
                 // Apply context classes to body in a single paint frame
                 requestAnimationFrame(() => {
                     if (!document.body) return;
-                    document.body.classList.toggle('ypp-watch-page', this.context.isWatch);
-                    document.body.classList.toggle('ypp-shorts-page', this.context.isShortsPage);
-                    document.body.classList.toggle('ypp-home-page', this.context.isHome);
-                    document.body.classList.toggle('ypp-search-page', this.context.isSearch);
-                    document.body.classList.toggle('ypp-channel-page', this.context.isChannel);
-                    document.body.classList.toggle('ypp-playlist-page', this.context.isPlaylist);
-                    document.body.classList.toggle('ypp-library-page', this.context.isLibrary);
-                    document.body.classList.toggle('ypp-history-page', this.context.isHistory);
-                    document.body.classList.toggle('ypp-subscriptions-page', this.context.isSubscriptions);
-
-                    // Re-apply premium theme class (critical for layout)
-                    if (this.settings?.premiumTheme) {
-                        document.body.classList.add('yt-premium-plus-theme');
-                    } else {
-                        document.body.classList.remove('yt-premium-plus-theme');
+                    
+                    const classes = new Set(document.body.classList);
+                    
+                    // Remove old YPP context classes
+                    for (const cls of classes) {
+                        if (cls.startsWith('ypp-') && !['ypp-loaded', 'ypp-custom-scrollbar', 'ypp-animating'].includes(cls)) {
+                            classes.delete(cls);
+                        }
                     }
+
+                    if (this.context.isWatch) classes.add('ypp-watch-page');
+                    if (this.context.isShortsPage) classes.add('ypp-shorts-page');
+                    if (this.context.isHome) classes.add('ypp-home-page');
+                    if (this.context.isSearch) classes.add('ypp-search-page');
+                    if (this.context.isChannel) classes.add('ypp-channel-page');
+                    if (this.context.isPlaylist) classes.add('ypp-playlist-page');
+                    if (this.context.isLibrary) classes.add('ypp-library-page');
+                    if (this.context.isHistory) classes.add('ypp-history-page');
+                    if (this.context.isSubscriptions) classes.add('ypp-subscriptions-page');
+
+                    if (this.settings?.premiumTheme) {
+                        classes.add('yt-premium-plus-theme');
+                    } else {
+                        classes.delete('yt-premium-plus-theme');
+                    }
+                    
+                    document.body.className = Array.from(classes).join(' ');
                 });
 
-                // Route to appropriate page managers
+                // Route to appropriate page managers cleanly
                 const currentUrl = window.location.href;
                 if (this.pageManagers) {
-                    this.pageManagers.forEach(manager => {
-                        if (manager.matches(currentUrl)) {
-                            manager.activate(currentUrl);
-                        } else {
-                            manager.deactivate();
-                        }
-                    });
+                    const newManager = this.pageManagers.find(m => m.matches(currentUrl));
+                    
+                    if (newManager !== this._activeManager) {
+                        if (this._activeManager) this._activeManager.deactivate();
+                        if (newManager) newManager.activate(currentUrl);
+                        this._activeManager = newManager;
+                    } else if (newManager) {
+                        // Keep the active manager updated without deactivating it
+                        newManager.activate(currentUrl);
+                    }
                 }
 
 
@@ -655,6 +687,9 @@
          */
         cleanup() {
             this.Utils?.log('Cleaning up...', 'MAIN');
+            
+            if (this._navTimeout) clearTimeout(this._navTimeout);
+            if (this._settingsUpdateTimeout) clearTimeout(this._settingsUpdateTimeout);
 
             // Remove event listeners
             this.removeEventListeners();

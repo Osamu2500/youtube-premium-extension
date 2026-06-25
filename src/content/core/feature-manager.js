@@ -22,6 +22,14 @@ window.YPP.FeatureManager = class FeatureManager {
         this.MAX_ERRORS = 3;
         /** @type {number} Track execution loops to cancel stale ones */
         this._currentApplyId = 0;
+        
+        // --- Queue state for applyFeatures ---
+        this._applyQueue = [];
+        this._processingQueue = false;
+
+        // --- Error logging rate limits ---
+        this._errorLogTimestamps = {};
+        this._errorLogRateLimit = 5000;
     }
 
     /**
@@ -105,6 +113,23 @@ window.YPP.FeatureManager = class FeatureManager {
         let successCount = 0;
         let failCount = 0;
         const totalFeatures = Object.keys(featureMap).length;
+        
+        // Clean up stale features that were removed from FEATURE_MAP
+        const currentKeys = new Set(Object.keys(featureMap));
+        for (const key of Object.keys(this.features)) {
+            if (!currentKeys.has(key)) {
+                try {
+                    if (typeof this.features[key].disable === 'function') {
+                        this.features[key].disable();
+                    }
+                } catch (e) {
+                    // Ignore error on cleanup
+                }
+                delete this.features[key];
+            }
+        }
+
+        const missing = [];
 
         for (const [key, className] of Object.entries(featureMap)) {
             try {
@@ -121,12 +146,16 @@ window.YPP.FeatureManager = class FeatureManager {
                     successCount++;
                 } else {
                     failCount++;
-                    // Silently track missing features (they might not be loaded yet)
+                    missing.push(`${key} → ${className}`);
                 }
             } catch (e) {
                 failCount++;
                 window.YPP.Utils.log(`Failed to instantiate '${className}': ${e?.message || 'Unknown error'}`, 'MANAGER', 'error');
             }
+        }
+
+        if (failCount > 0 && missing.length > 0) {
+            window.YPP.Utils.log(`Missing features: ${missing.join(', ')}`, 'MANAGER', 'warn');
         }
 
         window.YPP.Utils.log(
@@ -152,61 +181,100 @@ window.YPP.FeatureManager = class FeatureManager {
      * @returns {Promise<void>}
      */
     async applyFeatures() {
-        if (this._applying) return;
-        this._applying = true;
+        this._applyQueue.push(++this._currentApplyId);
+        if (this._processingQueue) return;
 
+        this._processingQueue = true;
         try {
-            const applyId = ++this._currentApplyId;
-            const entries = Object.entries(this.features);
-            
-            // Phase 5: Chunk processing to avoid blocking main thread on boot
-            // Processes 4 features per event loop tick to maintain 60fps responsiveness
-            const CHUNK_SIZE = 4;
-            
-            for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
-                if (this._currentApplyId !== applyId) return; // Cancelled by newer run
-
-                const chunk = entries.slice(i, i + CHUNK_SIZE);
-                const chunkPromises = chunk.map(([name, instance]) => {
-                    if (this.errorCounts[name] >= this.MAX_ERRORS) {
-                        return Promise.resolve();
-                    }
-
-                    return this.safeRun(name, async () => {
-                        // Standard: check for enable/disable methods and update logic
-                        if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
-                            // Method 1: Feature has strict 'update' method (Preferred)
-                            if (typeof instance.update === 'function') {
-                                await instance.update(this.settings);
-                            }
-                            // Method 2: Fallback to 'run' method for simple features
-                            else if (typeof instance.run === 'function') {
-                                await instance.run(this.settings);
-                            }
-                        }
-                        // Legacy support for older features
-                        else if (typeof instance.run === 'function') {
-                            await instance.run(this.settings);
-                        }
-                    });
-                });
-
-                // Await this chunk concurrently
-                await Promise.allSettled(chunkPromises);
-
-                // Yield to browser paint cycle if there are more chunks
-                if (i + CHUNK_SIZE < entries.length) {
-                    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
-                }
-            }
-
-            // Notify system that all features have been applied/updated
-            if (window.YPP.events) {
-                window.YPP.events.emit('features:updated', this.settings);
+            while (this._applyQueue.length > 0) {
+                const applyId = this._applyQueue.shift();
+                await this._executeApply(applyId);
             }
         } finally {
-            this._applying = false;
+            this._processingQueue = false;
         }
+    }
+
+    /**
+     * Internal executor for feature application with priority sorting
+     * @param {number} applyId 
+     * @private
+     */
+    async _executeApply(applyId) {
+        if (this._currentApplyId !== applyId) return; // Cancelled by newer run
+
+        const PRIORITY_ORDER = [
+            'theme', 'headerNav', 'sidebarLayout',
+            'keyboardShortcuts', 'videoSpeedController',
+            'playlistRedesign', 'gridAnimator', 'ambientMode'
+        ];
+
+        const sorted = Object.entries(this.features).sort((a, b) => {
+            const idxA = PRIORITY_ORDER.indexOf(a[0]);
+            const idxB = PRIORITY_ORDER.indexOf(b[0]);
+            return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+        });
+
+        // 1. Apply UI features immediately
+        const uiFeatures = sorted.filter(([name]) => 
+            ['theme', 'headerNav', 'sidebarLayout'].includes(name)
+        );
+        
+        await Promise.all(uiFeatures.map(([name, instance]) => 
+            this._runFeatureUpdate(name, instance, applyId)
+        ));
+
+        // 2. Apply the rest of the features in background or later frames
+        const heavyFeatures = sorted.filter(([name]) => 
+            !['theme', 'headerNav', 'sidebarLayout'].includes(name)
+        );
+
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(() => {
+                if (this._currentApplyId !== applyId) return;
+                heavyFeatures.forEach(([name, instance]) => {
+                    this._runFeatureUpdate(name, instance, applyId);
+                });
+                
+                // Notify system after heavy features
+                if (window.YPP.events) {
+                    window.YPP.events.emit('features:updated', this.settings);
+                }
+            }, { timeout: 2000 });
+        } else {
+            // Fallback for browsers without requestIdleCallback
+            setTimeout(() => {
+                if (this._currentApplyId !== applyId) return;
+                heavyFeatures.forEach(([name, instance]) => {
+                    this._runFeatureUpdate(name, instance, applyId);
+                });
+                
+                if (window.YPP.events) {
+                    window.YPP.events.emit('features:updated', this.settings);
+                }
+            }, 0);
+        }
+    }
+
+    /**
+     * Executes the update logic for a single feature instance
+     * @private
+     */
+    async _runFeatureUpdate(name, instance, applyId) {
+        if (this._currentApplyId !== applyId) return;
+        if (this.errorCounts[name] >= this.MAX_ERRORS) return;
+
+        return this.safeRun(name, async () => {
+            if (typeof instance.enable === 'function' && typeof instance.disable === 'function') {
+                if (typeof instance.update === 'function') {
+                    await instance.update(this.settings);
+                } else if (typeof instance.run === 'function') {
+                    await instance.run(this.settings);
+                }
+            } else if (typeof instance.run === 'function') {
+                await instance.run(this.settings);
+            }
+        });
     }
 
     /**
@@ -233,8 +301,11 @@ window.YPP.FeatureManager = class FeatureManager {
             this.errorCounts[name] = (this.errorCounts[name] || 0) + 1;
             window.YPP.Utils.log(`Error in feature '${name}' (${this.errorCounts[name]}/${this.MAX_ERRORS}): ${e.message}`, 'MANAGER', 'error');
             
-            // Preserve stack trace in console for debugging
-            console.error(`[YPP:${name}]`, e);
+            const now = Date.now();
+            if (now - (this._errorLogTimestamps[name] || 0) > this._errorLogRateLimit) {
+                console.error(`[YPP:${name}]`, e.message); // Log message, avoid full stack trace flood
+                this._errorLogTimestamps[name] = now;
+            }
 
             if (this.errorCounts[name] >= this.MAX_ERRORS) {
                 window.YPP.Utils.log(`Feature '${name}' disabled due to excessive errors. Attempting cleanup...`, 'MANAGER', 'warn');

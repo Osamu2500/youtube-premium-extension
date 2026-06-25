@@ -22,6 +22,7 @@ window.YPP.core.DOMObserver = class DOMObserver {
         // --- Coalescing state ---
         /** @type {Element[]} Accumulated added element nodes not yet processed */
         this._pendingNodes = [];
+        this._maxPendingNodes = 100;
         /** @type {boolean} Whether a rAF flush is already scheduled */
         this._rafPending = false;
         /** @type {boolean} Whether dom:mutated has any subscribers (lazy-checked) */
@@ -129,6 +130,9 @@ window.YPP.core.DOMObserver = class DOMObserver {
             for (let j = 0; j < added.length; j++) {
                 const node = added[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (this._pendingNodes.length >= this._maxPendingNodes) {
+                        this._flush(); // Force immediate flush if buffer is full
+                    }
                     this._pendingNodes.push(node);
                 }
             }
@@ -154,12 +158,28 @@ window.YPP.core.DOMObserver = class DOMObserver {
 
         if (nodesToProcess.length === 0 || this.registry.size === 0) return;
 
-        // 1. Combine all registered selectors into one massive query (cached)
-        let combinedSelector = this._cachedSelector;
-        if (!combinedSelector) {
+        // 1. Combine all registered selectors into an array of chunks (max ~4000 chars)
+        let selectorChunks = this._cachedSelector;
+        if (!selectorChunks) {
             const uniqueSelectors = Array.from(new Set(Array.from(this.registry.values()).map(d => d.selector)));
-            combinedSelector = uniqueSelectors.join(',');
-            this._cachedSelector = combinedSelector;
+            selectorChunks = [];
+            let currentChunk = [];
+            let currentLength = 0;
+
+            for (const selector of uniqueSelectors) {
+                if (currentLength + selector.length + 1 > 4000) {
+                    selectorChunks.push(currentChunk.join(','));
+                    currentChunk = [selector];
+                    currentLength = selector.length;
+                } else {
+                    currentChunk.push(selector);
+                    currentLength += selector.length + 1;
+                }
+            }
+            if (currentChunk.length > 0) {
+                selectorChunks.push(currentChunk.join(','));
+            }
+            this._cachedSelector = selectorChunks;
         }
 
         // 2. Extract valid nodes to process.
@@ -174,43 +194,34 @@ window.YPP.core.DOMObserver = class DOMObserver {
             }
         }
 
-        // 3. Find all matching elements across all root newly added nodes in a single pass
-        const matchedElements = new Set();
-        for (const node of rootNodes) {
-            
-            // Check node itself
-            if (node.matches && node.matches(combinedSelector)) {
-                matchedElements.add(node);
-            }
-            
-            // Check descendants
-            if (node.querySelectorAll) {
-                try {
-                    const children = node.querySelectorAll(combinedSelector);
-                    for (let c = 0; c < children.length; c++) {
-                        matchedElements.add(children[c]);
-                    }
-                } catch(e) {
-                    // Ignore bad queries
-                }
-            }
-        }
-
-        // 4. Distribute matched elements to their respective listeners
+        // 3. Find all matching elements using native querySelectorAll per registered listener
+        // This avoids O(n^2) JS loops comparing every element against every selector
         const matchedBuckets = new Map();
-        if (matchedElements.size > 0) {
-            for (const el of matchedElements) {
-                if (!el.matches) continue;
-                for (const [id, { selector }] of this.registry.entries()) {
-                    if (el.matches(selector)) {
-                        let matches = matchedBuckets.get(id);
-                        if (!matches) {
-                            matches = [];
-                            matchedBuckets.set(id, matches);
+        
+        for (const [id, { selector }] of this.registry.entries()) {
+            const matches = [];
+            
+            for (const node of rootNodes) {
+                // Check if the root node itself matches
+                if (node.matches && node.matches(selector)) {
+                    matches.push(node);
+                }
+                
+                // Check all descendants using native querySelectorAll
+                if (node.querySelectorAll) {
+                    try {
+                        const children = node.querySelectorAll(selector);
+                        for (let c = 0; c < children.length; c++) {
+                            matches.push(children[c]);
                         }
-                        matches.push(el);
+                    } catch(e) {
+                        // Ignore bad queries silently to avoid log spam
                     }
                 }
+            }
+            
+            if (matches.length > 0) {
+                matchedBuckets.set(id, matches);
             }
         }
 
