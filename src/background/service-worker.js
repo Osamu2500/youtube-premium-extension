@@ -5,7 +5,6 @@
 import { initContextMenu } from './context-menu.js';
 import { syncUp, syncDown } from './drive-sync.js';
 
-// Legacy onInstalled listener removed to prevent unwanted tab opening and sync storage abuse.
 
 const ALARM_NAME = 'ypp-focus-timer';
 
@@ -46,7 +45,7 @@ async function stopTimer() {
         await chrome.storage.local.set({
             timerState: { isRunning: false, endTime: null, duration: 25 }
         });
-        chrome.alarms.clear(ALARM_NAME);
+        await chrome.alarms.clear(ALARM_NAME);
     } catch (error) {
         console.error('[YPP] Error stopping timer:', error);
     }
@@ -228,8 +227,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ error: 'Invalid URL' });
                 return true; // Keep channel open so sendResponse can fire
             }
-            if (fetchUrl.protocol !== 'https:' && fetchUrl.protocol !== 'http:') {
-                sendResponse({ error: `Disallowed URL scheme: ${fetchUrl.protocol}` });
+            if (fetchUrl.protocol !== 'https:') {
+                sendResponse({ error: `Disallowed URL scheme: ${fetchUrl.protocol}. Only HTTPS is permitted.` });
                 return true; // Keep channel open so sendResponse can fire
             }
             

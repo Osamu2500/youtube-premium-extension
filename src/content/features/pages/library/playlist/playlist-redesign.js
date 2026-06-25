@@ -16,6 +16,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         this._buildTimer     = null;
         this._retryTimer     = null;
         this._retryCount     = 0;
+        this._initId         = 0;      // Prevent race conditions with SPA navigation
         this._currentCols    = '3';    // Cache column preference to prevent async thrashing
         this._menuCloseFn    = null;   // Track global click listener for memory safety
         this.MAX_RETRIES     = 12;
@@ -72,7 +73,19 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         return location.pathname.startsWith('/playlist');
     }
 
+    _getActiveBrowse() {
+        // Find the active ytd-browse (YouTube hides cached pages via the 'hidden' attribute)
+        let browses = Array.from(document.querySelectorAll('ytd-browse[page-subtype="playlist"]'));
+        if (!browses.length) {
+            browses = Array.from(document.querySelectorAll('ytd-browse')).filter(b => 
+                b.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, #header')
+            );
+        }
+        return browses.find(el => !el.hasAttribute('hidden')) || browses[0];
+    }
+
     _reset() {
+        this._initId++; // Invalidate any pending initializations
         clearTimeout(this._buildTimer);
         clearTimeout(this._retryTimer);
         this._retryCount = 0;
@@ -100,42 +113,49 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
 
     async _tryInit() {
         if (!this._isPlaylistPage()) return;
+        
+        const currentInitId = ++this._initId;
 
         // Wait up to 10 seconds for the native playlist DOM to load
         // Do NOT add body class yet — only apply it once we have confirmed data,
         // preventing the native layout from being hidden on a page where we can't render.
         const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
         const isReady = await window.YPP.Utils.pollFor(() => {
-            const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
-            return header && document.querySelectorAll(ITEM_SEL).length > 0;
+            const browse = this._getActiveBrowse();
+            if (!browse) return false;
+            const header = browse.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, #header');
+            return header && browse.querySelectorAll(ITEM_SEL).length > 0;
         }, 10000);
 
         // Check isEnabled (BaseFeature flag) — feature may have been disabled while waiting
-        if (isReady && this.isEnabled) {
+        // Check currentInitId to prevent race conditions during SPA navigation
+        if (isReady && this.isEnabled && this._initId === currentInitId && this._isPlaylistPage()) {
             document.body.classList.add('ypp-playlist-redesign');
-            const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
-            const videos = document.querySelectorAll(ITEM_SEL);
-            this._build(header, videos);
-            this._watchForChanges();
+            const browse = this._getActiveBrowse();
+            if (!browse) return;
+            const header = browse.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, #header');
+            const videos = browse.querySelectorAll(ITEM_SEL);
+            this._build(browse, header, videos);
+            this._watchForChanges(browse);
         }
     }
 
     // ─── MutationObserver — rebuild if native list grows ────────────────────
 
-    _watchForChanges() {
-        const listContainer = document.querySelector(
-            'ytd-browse[page-subtype="playlist"] #contents, ytd-browse #contents'
-        );
+    _watchForChanges(browse) {
+        const listContainer = browse.querySelector('#contents');
         if (!listContainer) return;
 
         if (window.YPP?.sharedObserver) {
             const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
             const debouncedBuild = this.utils.debounce(() => {
-                const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
-                const videos = document.querySelectorAll(ITEM_SEL);
+                const activeBrowse = this._getActiveBrowse();
+                if (!activeBrowse) return;
+                const header = activeBrowse.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, #header');
+                const videos = activeBrowse.querySelectorAll(ITEM_SEL);
                 // Only rebuild if we still have valid data
                 if (header && videos.length > 0 && this.isEnabled) {
-                    this._build(header, videos);
+                    this._build(activeBrowse, header, videos);
                 }
             }, 600);
             window.YPP.sharedObserver.register('playlist-redesign-scanner', ITEM_SEL, debouncedBuild, false);
@@ -263,7 +283,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
 
     // ─── UI Build ────────────────────────────────────────────────────────────
 
-    _build(header, videoEls) {
+    _build(browse, header, videoEls) {
         const data = this._extractPlaylistData(header, videoEls);
 
         const PLAYLIST = window.YPP.CONSTANTS?.SELECTORS?.PLAYLIST || {};
@@ -297,14 +317,13 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         this.container.innerHTML = this._renderHTML(data);
 
         // Inject after masthead / inside ytd-browse
-        const browse = document.querySelector('ytd-browse[page-subtype="playlist"]') || document.querySelector('ytd-browse');
         if (browse) {
             browse.insertBefore(this.container, browse.firstChild);
         } else {
             document.body.appendChild(this.container);
         }
 
-        this._wireEvents(data);
+        this._wireEvents(browse, data);
     }
 
     // ─── HTML rendering ──────────────────────────────────────────────────────
@@ -554,7 +573,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
 
     // ─── Events ──────────────────────────────────────────────────────────────
 
-    _wireEvents(data) {
+    _wireEvents(browse, data) {
         const root = this.container;
 
         // ── Play all ─────────────────────────────────────────────────────
@@ -627,7 +646,7 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             // Build watched list: check our custom cards AND also scan native DOM for
             // progress bars that may not have been picked up during initial build
             const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
-            const nativeItems = Array.from(document.querySelectorAll(ITEM_SEL));
+            const nativeItems = browse ? Array.from(browse.querySelectorAll(ITEM_SEL)) : [];
             const threshold = this.settings?.hideWatchedThreshold ?? 10; // Default: any progress counts
             
             // Find which native item indices have progress

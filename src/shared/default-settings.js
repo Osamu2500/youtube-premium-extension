@@ -71,7 +71,6 @@ export const DEFAULT_SETTINGS = {
     navTrending: true,
     navShorts: true,
     navSubscriptions: true,
-    navLibrary: true,
     navWatchLater: true,
     navPlaylists: true,
     navHistory: true,

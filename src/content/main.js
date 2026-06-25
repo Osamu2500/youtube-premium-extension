@@ -105,8 +105,10 @@
 
                 // Initialize Page Managers
                 if (window.YPP.managers) {
+                    this.globalLayoutManager = new window.YPP.managers.GlobalLayoutManager(this.Utils, this.settings);
+                    this.globalLayoutManager.activate(window.location.href);
+
                     this.pageManagers = [
-                        new window.YPP.managers.GlobalLayoutManager(this.Utils, this.settings),
                         new window.YPP.managers.HomePageManager(this.Utils, this.settings),
                         new window.YPP.managers.SubscriptionsPageManager(this.Utils, this.settings),
                         new window.YPP.managers.SearchPageManager(this.Utils, this.settings),
@@ -368,6 +370,9 @@
                                 this.Utils?.log('Settings updated from storage event', 'MAIN', 'debug');
                                 this._queueSettingsUpdate();
                                 
+                                if (this.globalLayoutManager) {
+                                    this.globalLayoutManager.updateSettings(this.settings);
+                                }
                                 if (this.pageManagers) {
                                     this.pageManagers.forEach(m => m.updateSettings(this.settings));
                                 }
@@ -395,6 +400,9 @@
                         this.Utils?.log('Instant settings update received', 'MAIN', 'debug');
                         this._queueSettingsUpdate();
                         
+                        if (this.globalLayoutManager) {
+                            this.globalLayoutManager.updateSettings(this.settings);
+                        }
                         if (this.pageManagers) {
                             this.pageManagers.forEach(m => m.updateSettings(this.settings));
                         }
@@ -561,6 +569,11 @@
 
                 // Route to appropriate page managers cleanly
                 const currentUrl = window.location.href;
+                
+                if (this.globalLayoutManager) {
+                    this.globalLayoutManager.activate(currentUrl);
+                }
+
                 if (this.pageManagers) {
                     const newManager = this.pageManagers.find(m => m.matches(currentUrl));
                     

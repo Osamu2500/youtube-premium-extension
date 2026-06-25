@@ -76,7 +76,8 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         if (!this.isActive) return;
         this.isActive = false;
         
-        this.domObserver.stop();
+        // Only unregister our slot — never call stop() on the shared observer
+        // as it is used by every other feature (SponsorBlock, HeaderNav, etc.)
         this.domObserver.unregister('home-grid');
 
         document.querySelectorAll('.ypp-tag-btn').forEach(el => el.remove());

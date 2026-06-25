@@ -283,6 +283,7 @@ window.YPP.features.ZenMode = class ZenMode extends window.YPP.features.BaseFeat
             } catch (e) {}
             this.delayNode = null;
             this.gainNode = null;
+            window.YPP.zenAudioInitialized = false;
         }
         
         if (this.audioContext && this.audioContext.state !== 'closed') {

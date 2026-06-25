@@ -33,12 +33,12 @@ window.YPP.features.ReversePlaylist = class ReversePlaylist extends window.YPP.f
     }
 
     async disable() {
-        await super.disable();
         if (window.YPP && window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('reverse-playlist-header');
         }
         this.removeUI();
         this.isReversed = false;
+        await super.disable();
     }
 
     initUI() {

@@ -136,7 +136,7 @@ import './features/player/automation/auto-like.js';
 import './features/player/controls/bookmarks.js';
 import './features/player/enhancements/intentional-delay.js';
 import './features/player/enhancements/return-dislike.js';
-import './features/player/enhancements/sponsor-block.js';
+
 import './features/player/enhancements/video-speed-controller.js';
 import './features/player/media-effects/audio-eq.js';
 import './features/player/automation/auto-transcript.js';

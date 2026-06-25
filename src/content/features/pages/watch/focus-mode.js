@@ -240,10 +240,10 @@ window.YPP.features.FocusMode = class FocusMode extends window.YPP.features.Base
                 this._toggleFocus(enable);
                 break;
             case 'cinemaMode':
-                this._toggleCinemaMode(enable);
+                // this._toggleCinemaMode(enable);
                 break;
             case 'minimalMode':
-                this._toggleMinimalMode(enable);
+                // this._toggleMinimalMode(enable);
                 break;
         }
     }

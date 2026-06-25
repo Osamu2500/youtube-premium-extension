@@ -65,19 +65,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     // LIFECYCLE
     // =========================================================================
 
-    /**
-     * Abort-aware initializer called by LifecycleManager.
-     * Wraps the existing enable() call.
-     * @param {AbortSignal} [signal]
-     */
-    async init(signal) {
-        if (signal?.aborted) return;
-        this._injectNetworkInterceptor();
-        await this.enable();
-        if (signal?.aborted) {
-            this._teardown();
-        }
-    }
+
 
     async enable() {
         this.enabled = this.settings.subscriptionFolders !== false || 

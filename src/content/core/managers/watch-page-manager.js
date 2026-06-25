@@ -34,7 +34,8 @@ class WatchPageManager extends window.YPP.BasePageManager {
     }
 
     async _initFeatures() {
-        if (this._featuresInitialized) return;
+        if (this._featuresInitialized || this._featuresInitializing) return;
+        this._featuresInitializing = true;
         // Use pollFor instead of setTimeout — reliable across fast and slow machines
         try {
             await this.utils.pollFor(() => window.YPP?.features?.PlayerControls, 5000, 100);
@@ -50,10 +51,12 @@ class WatchPageManager extends window.YPP.BasePageManager {
                 focusMode:  window.YPP.features.FocusMode  ? new window.YPP.features.FocusMode()  : null,
             };
             this._featuresInitialized = true;
+            this._featuresInitializing = false;
             // Re-apply settings now that mode features are loaded and can be enabled/disabled
             if (this.isActive) this.applySettings(this.settings);
         } catch (e) {
             this.utils.log('Feature init timed out', 'WATCH_MANAGER', 'warn');
+            this._featuresInitializing = false;
         }
     }
 

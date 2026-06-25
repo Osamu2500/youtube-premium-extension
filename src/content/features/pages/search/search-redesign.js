@@ -158,6 +158,8 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
             SearchRedesign.CLASSES.LIST_MODE
         );
         document.body.classList.remove('ypp-filter-pending');
+        
+        this._purgeStaleClasses();
 
         super.disable();
     }

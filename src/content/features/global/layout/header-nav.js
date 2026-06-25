@@ -38,7 +38,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
         // this.settings is already set by BaseFeature.update() before enable() is called
         const s = this.settings || {};
 
-        const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater || s.navLibrary ||
+        const shouldRun = s.navShorts || s.navSubscriptions || s.navWatchLater ||
             s.navPlaylists || s.navHistory;
 
         if (!shouldRun) return; // No nav items configured — nothing to do
