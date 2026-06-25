@@ -104,9 +104,14 @@ body.yt-premium-plus-theme ytd-radio-renderer:hover ytd-thumbnail-overlay-bottom
   flex-wrap: nowrap !important;
   box-sizing: border-box !important;
 }
-.ypp-grid-item {
-  width: auto !important;
-  max-width: none !important;
+.ypp-grid-item,
+.ypp-grid-container ytd-rich-item-renderer,
+.ypp-grid-container ytd-video-renderer,
+.ypp-grid-container ytd-compact-video-renderer,
+.ypp-grid-container ytd-grid-video-renderer,
+.ypp-grid-container yt-lockup-view-model {
+  width: 100% !important;
+  max-width: 100% !important;
   min-width: auto !important;
   flex: none !important;
   margin: 0 !important;
