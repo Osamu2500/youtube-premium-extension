@@ -487,10 +487,7 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
         if (this._saveSpeedTimeout) clearTimeout(this._saveSpeedTimeout);
         this._saveSpeedTimeout = setTimeout(() => {
             if (this.settings?.vscRememberSpeed !== false && window.YPP.StorageManager) {
-                window.YPP.StorageManager.get('settings').then(settings => {
-                    const newSettings = { ...(settings || {}), vscLastSpeed: speed };
-                    window.YPP.StorageManager.set('settings', newSettings);
-                });
+                chrome.runtime.sendMessage({ action: 'UPDATE_SETTINGS_DELTA', delta: { vscLastSpeed: speed } }, () => {});
             }
         }, 500);
     }

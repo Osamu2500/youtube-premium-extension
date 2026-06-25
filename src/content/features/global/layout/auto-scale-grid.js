@@ -47,7 +47,7 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
         // ✅ RESPECT MANUAL OVERRIDE: homeColumns === 0 means "auto" (use window-width calc).
         // homeColumns >= 1 means the user has picked a manual count — bail out and let
         // layout-manager read homeColumns directly; don't touch --ypp-dynamic-cols.
-        const manualCols = this.settings?.homeColumns ?? 0;
+        const manualCols = Number(this.settings?.homeColumns || 0);
         if (manualCols > 0) {
             // Clear any stale dynamic-cols so CSS doesn't fight the manual value
             document.documentElement.style.removeProperty('--ypp-dynamic-cols');

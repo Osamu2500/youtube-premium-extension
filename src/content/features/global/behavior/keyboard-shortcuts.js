@@ -87,24 +87,26 @@ class KeyboardShortcuts extends window.YPP.features.BaseFeature {
      * Toggle a boolean setting and broadcast the change
      */
     async _toggleSetting(key) {
-        const data = await window.YPP.StorageManager.get('settings');
-        const settings = data || {};
-        settings[key] = !settings[key];
-        await window.YPP.StorageManager.set('settings', settings);
-
-        // Notify the feature manager to re-apply
-        window.YPP.events?.emit('settings:changed', settings);
-
-        // Only update the specific feature, not all features
-        const featureMap = {
-            zenMode: 'zenMode',
-            enableFocusMode: 'focusMode',
-            ambientMode: 'ambientMode'
-        };
-        const featureKey = featureMap[key];
-        if (featureKey && window.YPP.featureManager?.features?.[featureKey]) {
-            window.YPP.featureManager.features[featureKey].update(settings);
-        }
+        // Toggle based on current state (default false if undefined)
+        const currentVal = this.settings?.[key] || false;
+        const delta = { [key]: !currentVal };
+        
+        // Broadcast the update via Service Worker
+        chrome.runtime.sendMessage({ action: 'UPDATE_SETTINGS_DELTA', delta }, () => {
+            // Predictively update local instance state for immediate feedback
+            this.settings = { ...this.settings, ...delta };
+            
+            // Only update the specific feature, not all features
+            const featureMap = {
+                zenMode: 'zenMode',
+                enableFocusMode: 'focusMode',
+                ambientMode: 'ambientMode'
+            };
+            const featureKey = featureMap[key];
+            if (featureKey && window.YPP.featureManager?.features?.[featureKey]) {
+                window.YPP.featureManager.features[featureKey].update(this.settings);
+            }
+        });
     }
 
     _toggleCinema() {

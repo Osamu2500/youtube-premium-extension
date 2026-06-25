@@ -110,7 +110,8 @@ function renderRange(item, state) {
     info.className = 'info';
     const valueId = item.id + 'Value';
     const unit = item.unit != null ? item.unit : '%';
-    info.innerHTML = `<span class="name">${item.label}</span><span class="desc"><span id="${valueId}">${item.min ?? 0}</span>${unit}</span>`;
+    const initialValue = (state?.settings && state.settings[item.id] !== undefined) ? state.settings[item.id] : (item.default ?? item.min ?? 0);
+    info.innerHTML = `<span class="name">${item.label}</span><span class="desc"><span id="${valueId}">${initialValue}</span>${unit}</span>`;
     headerRow.appendChild(info);
     wrap.appendChild(headerRow);
 
@@ -122,7 +123,7 @@ function renderRange(item, state) {
     input.min = item.min ?? 0;
     input.max = item.max ?? 100;
     input.step = item.step ?? 1;
-    input.value = item.min ?? 0;
+    input.value = initialValue;
     // Update displayed value live as user drags the slider
     input.addEventListener('input', () => {
         const display = document.getElementById(valueId);
@@ -130,6 +131,17 @@ function renderRange(item, state) {
     });
     rangeWrap.appendChild(input);
     wrap.appendChild(rangeWrap);
+
+    // Make programmatic value updates sync with label
+    const originalValueDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    Object.defineProperty(input, 'value', {
+        get: function() { return originalValueDesc.get.call(this); },
+        set: function(val) {
+            originalValueDesc.set.call(this, val);
+            const display = document.getElementById(valueId);
+            if (display) display.textContent = val;
+        }
+    });
 
     _registerInput(input, state);
     return wrap;
@@ -230,10 +242,12 @@ function renderLayoutToggle(item, state) {
     toggleWrap.style.borderRadius = '8px';
     toggleWrap.style.border = '1px solid rgba(255,255,255,0.08)';
 
-    const svgCompact = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="6" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><rect x="3" y="13" width="6" height="4" rx="1"/><line x1="11" y1="15" x2="21" y2="15"/></svg>`;
-    const svgSpacious = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="8" height="6" rx="1"/><line x1="13" y1="6" x2="21" y2="6"/><rect x="3" y="14" width="8" height="6" rx="1"/><line x1="13" y1="16" x2="21" y2="16"/></svg>`;
-    const svgExpanded = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="11" rx="2"/><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="21" x2="15" y2="21"/></svg>`;
-    const svgGrid = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
+    const svgCompactStr = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="6" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><rect x="3" y="13" width="6" height="4" rx="1"/><line x1="11" y1="15" x2="21" y2="15"/></svg>`;
+    const svgSpaciousStr = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="8" height="6" rx="1"/><line x1="13" y1="6" x2="21" y2="6"/><rect x="3" y="14" width="8" height="6" rx="1"/><line x1="13" y1="16" x2="21" y2="16"/></svg>`;
+    const svgExpandedStr = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="11" rx="2"/><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="21" x2="15" y2="21"/></svg>`;
+    const svgGridStr = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
+
+    const parseSVG = (str) => new DOMParser().parseFromString(str, 'image/svg+xml').documentElement;
 
     const btnStyle = 'display:flex; align-items:center; justify-content:center; flex:1; gap:4px; font-size:11px; padding:5px 8px; border:none; cursor:pointer; transition:all 0.2s; font-weight:500; border-radius:6px; background:transparent; color:rgba(255,255,255,0.5);';
 
@@ -242,28 +256,32 @@ function renderLayoutToggle(item, state) {
     btnCompact.className = 'sidebar-layout-btn';
     btnCompact.dataset.layout = 'compact';
     btnCompact.style.cssText = btnStyle;
-    btnCompact.innerHTML = `${svgCompact} Compact`;
+    btnCompact.appendChild(parseSVG(svgCompactStr));
+    btnCompact.appendChild(document.createTextNode(' Compact'));
 
     const btnSpacious = document.createElement('button');
     btnSpacious.type = 'button';
     btnSpacious.className = 'sidebar-layout-btn';
     btnSpacious.dataset.layout = 'spacious';
     btnSpacious.style.cssText = btnStyle;
-    btnSpacious.innerHTML = `${svgSpacious} Spacious`;
+    btnSpacious.appendChild(parseSVG(svgSpaciousStr));
+    btnSpacious.appendChild(document.createTextNode(' Spacious'));
 
     const btnExpanded = document.createElement('button');
     btnExpanded.type = 'button';
     btnExpanded.className = 'sidebar-layout-btn';
     btnExpanded.dataset.layout = 'expanded';
     btnExpanded.style.cssText = btnStyle;
-    btnExpanded.innerHTML = `${svgExpanded} Expanded`;
+    btnExpanded.appendChild(parseSVG(svgExpandedStr));
+    btnExpanded.appendChild(document.createTextNode(' Expanded'));
 
     const btnGrid = document.createElement('button');
     btnGrid.type = 'button';
     btnGrid.className = 'sidebar-layout-btn';
     btnGrid.dataset.layout = 'grid';
     btnGrid.style.cssText = btnStyle;
-    btnGrid.innerHTML = `${svgGrid} Grid`;
+    btnGrid.appendChild(parseSVG(svgGridStr));
+    btnGrid.appendChild(document.createTextNode(' Grid'));
 
     toggleWrap.appendChild(btnCompact);
     toggleWrap.appendChild(btnSpacious);

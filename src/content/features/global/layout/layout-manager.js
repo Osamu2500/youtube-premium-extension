@@ -123,8 +123,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         
         const root = document.documentElement;
         
-        if (settings.homeColumns) {
-            root.style.setProperty('--ypp-home-columns', settings.homeColumns);
+        if (settings.homeColumns !== undefined && settings.homeColumns !== null) {
+            // Only publish a concrete CSS var when a manual count is chosen (> 0).
+            // homeColumns === 0 means "auto" — AutoScaleGrid will set --ypp-dynamic-cols instead.
+            if (settings.homeColumns > 0) {
+                root.style.setProperty('--ypp-home-columns', settings.homeColumns);
+            } else {
+                root.style.removeProperty('--ypp-home-columns');
+            }
         } else {
             root.style.removeProperty('--ypp-home-columns');
         }
@@ -204,7 +210,8 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             if (!contents) return;
 
             // Determine column count from user settings per page type
-            let cols = this.settings?.homeColumns ?? 4;
+            // homeColumns === 0 means "auto" — defer to --ypp-dynamic-cols set by AutoScaleGrid
+            let cols = this.settings?.homeColumns ?? 0;
             const path = window.location.pathname;
             if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
                 cols = this.settings?.channelColumns ?? 4;
@@ -215,19 +222,17 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             }
 
             // Apply auto-scale grid logic if enabled via AutoScaleGrid
-            // ONLY use auto-scale (--ypp-dynamic-cols) if the user hasn't explicitly set homeColumns.
-            // homeColumns defaults to 4, so treat 4 as "not set" only when autoScaleLayout is enabled
-            // and no user interaction has happened. The real gate is: if AutoScaleGrid removed
-            // --ypp-dynamic-cols (because homeColumns is set), we should NOT fall back to it.
             const isHome = path === '/' || path === '/index';
-            if (isHome) {
-                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols').trim();
-                const userSetManually = this.settings?.homeColumns && this.settings.homeColumns !== 4;
-                // Only use dynamic cols if autoScale is on, user hasn't manually changed columns,
-                // and the AutoScaleGrid actually set the var (didn't remove it due to manual override)
-                if (dynamicCols && !userSetManually && this.settings?.autoScaleLayout) {
+            if (isHome && cols === 0) {
+                // Auto mode: read the value published by AutoScaleGrid
+                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
+                if (dynamicCols) {
                     cols = parseInt(dynamicCols, 10);
-                    this.utils.log?.('dynamicCols found: ' + dynamicCols + ', overriding cols to ' + cols, 'LAYOUT');
+                    this.utils.log?.('Auto mode: using --ypp-dynamic-cols=' + cols, 'LAYOUT');
+                } else {
+                    // AutoScaleGrid hasn't run yet; use a safe default
+                    cols = 4;
+                    this.utils.log?.('Auto mode: --ypp-dynamic-cols not set yet, defaulting to 4', 'LAYOUT');
                 }
             }
             
@@ -244,11 +249,24 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                 return;
             }
 
-            // Apply ypp-grid-item to any newly loaded items immediately
+            // Apply ypp-grid-item to any newly loaded items immediately, but ONLY to the top-level cards
             const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
             items.forEach(item => {
+                // Skip if it's a nested renderer (e.g. lockup inside rich-item)
+                if (item.parentElement && item.parentElement.closest('.ypp-grid-item')) {
+                    item.classList.remove('ypp-grid-item');
+                    return;
+                }
                 if (!item.classList.contains('ypp-grid-item')) {
                     item.classList.add('ypp-grid-item');
+                }
+            });
+
+            // Cleanup any nested .ypp-grid-items that might have sneaked in
+            const allGridItems = contents.querySelectorAll('.ypp-grid-item');
+            allGridItems.forEach(item => {
+                if (item.parentElement && item.parentElement.closest('.ypp-grid-item')) {
+                    item.classList.remove('ypp-grid-item');
                 }
             });
 
