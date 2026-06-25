@@ -204,7 +204,7 @@ window.YPP.FeatureManager = class FeatureManager {
         if (this._currentApplyId !== applyId) return; // Cancelled by newer run
 
         const PRIORITY_ORDER = [
-            'theme', 'headerNav', 'sidebarLayout',
+            'theme', 'headerNav', 'sidebarLayout', 'layout', 'autoScaleLayout',
             'keyboardShortcuts', 'videoSpeedController',
             'playlistRedesign', 'gridAnimator', 'ambientMode'
         ];
@@ -215,19 +215,16 @@ window.YPP.FeatureManager = class FeatureManager {
             return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
         });
 
-        // 1. Apply UI features immediately
-        const uiFeatures = sorted.filter(([name]) => 
-            ['theme', 'headerNav', 'sidebarLayout'].includes(name)
-        );
+        // 1. Apply UI features immediately (theme, nav, grid layout)
+        const UI_PRIORITY = ['theme', 'headerNav', 'sidebarLayout', 'layout', 'autoScaleLayout'];
+        const uiFeatures = sorted.filter(([name]) => UI_PRIORITY.includes(name));
         
         await Promise.all(uiFeatures.map(([name, instance]) => 
             this._runFeatureUpdate(name, instance, applyId)
         ));
 
         // 2. Apply the rest of the features in background or later frames
-        const heavyFeatures = sorted.filter(([name]) => 
-            !['theme', 'headerNav', 'sidebarLayout'].includes(name)
-        );
+        const heavyFeatures = sorted.filter(([name]) => !UI_PRIORITY.includes(name));
 
         if (window.requestIdleCallback) {
             window.requestIdleCallback(() => {
@@ -380,27 +377,32 @@ window.YPP.FeatureManager = class FeatureManager {
             }
         });
 
-        // Global Sanitize: Remove orphaned injected classes, variables, and attributes
+        // Only remove page-context classes — NOT theme/state classes added by features.
+        // Removing all ypp- classes wipes theme variables and leaves the page black on re-init.
+        const CONTEXT_CLASSES = [
+            'ypp-watch-page', 'ypp-shorts-page', 'ypp-home-page', 'ypp-search-page',
+            'ypp-channel-page', 'ypp-playlist-page', 'ypp-library-page',
+            'ypp-history-page', 'ypp-subscriptions-page', 'ypp-feed-page',
+        ];
+
         ['body', 'documentElement'].forEach(elName => {
             const el = document[elName];
             if (!el) return;
-            
-            // Remove classes
-            const yppClasses = Array.from(el.classList).filter(c => c.startsWith('ypp-') || c === 'yt-premium-plus-theme');
-            yppClasses.forEach(c => el.classList.remove(c));
-            
-            // Remove inline variables
-            for (let i = el.style.length - 1; i >= 0; i--) {
-                const prop = el.style[i];
-                if (prop && prop.startsWith('--ypp-')) {
-                    el.style.removeProperty(prop);
-                }
-            }
-            
-            // Remove data attributes
+
+            // Only remove context classes, not all ypp- classes
+            CONTEXT_CLASSES.forEach(c => el.classList.remove(c));
+
+            // Remove inline CSS variables that are grid/layout runtime values (not theme tokens)
+            const LAYOUT_VARS = [
+                '--ypp-active-columns', '--ypp-dynamic-cols', '--ypp-auto-scale',
+                '--ypp-home-columns', '--ypp-search-columns', '--ypp-grid-column-min',
+            ];
+            LAYOUT_VARS.forEach(v => el.style.removeProperty(v));
+
+            // Remove data attributes added at runtime (not theme data-attrs)
             const attrs = Array.from(el.attributes);
             attrs.forEach(attr => {
-                if (attr.name.startsWith('data-ypp-')) {
+                if (attr.name.startsWith('data-ypp-page') || attr.name === 'data-ypp-cols') {
                     el.removeAttribute(attr.name);
                 }
             });

@@ -19,8 +19,8 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
     async enable() {
         this._applyScale();
         // Use debounce for resize listener
-        const resizeListener = this.utils.debounce(this._boundApplyScale, 150);
-        this.addListener(window, 'resize', resizeListener);
+        this._resizeListener = this.utils.debounce(this._boundApplyScale, 150);
+        this.addListener(window, 'resize', this._resizeListener);
         // Force layout-manager to update instantly
         window.dispatchEvent(new Event('resize'));
     }
@@ -29,13 +29,19 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
         document.documentElement.style.setProperty('--ypp-auto-scale', 1);
         document.documentElement.style.removeProperty('--ypp-dynamic-cols');
         this.cleanupEvents();
+        this._resizeListener = null;
         // Force layout-manager to update instantly
         window.dispatchEvent(new Event('resize'));
     }
     
     async onUpdate() {
         if (this.settings && this.settings.autoScaleLayout) {
-            this._applyScale();
+            if (!this._resizeListener) {
+                // If it was disabled, we need to fully re-enable it
+                this.enable();
+            } else {
+                this._applyScale();
+            }
         } else {
             this.disable(); // Need to disable to reset values
         }
@@ -49,6 +55,8 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
         // layout-manager read homeColumns directly; don't touch --ypp-dynamic-cols.
         const manualCols = Number(this.settings?.homeColumns || 0);
         if (manualCols > 0) {
+            // Set --ypp-active-columns so the CSS :root selector has a value to match
+            document.documentElement.style.setProperty('--ypp-active-columns', manualCols);
             // Clear any stale dynamic-cols so CSS doesn't fight the manual value
             document.documentElement.style.removeProperty('--ypp-dynamic-cols');
             // Still apply UI scale factor for spacing/fonts

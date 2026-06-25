@@ -78,10 +78,10 @@ html[style*="--ypp-dynamic-cols"] yt-rich-grid-view-model {
   --ytd-rich-grid-items-per-row: var(--ypp-dynamic-cols) !important;
 }
 /* --ypp-active-columns (set by the user's slider via layout-manager) MUST override --ypp-dynamic-cols
-   (set by auto-scale-grid). Achieve this with a more specific compound selector. */
-html[style*="--ypp-active-columns"][style*="--ypp-active-columns"] ytd-rich-grid-renderer,
-html[style*="--ypp-active-columns"][style*="--ypp-active-columns"] yt-rich-grid-renderer,
-html[style*="--ypp-active-columns"][style*="--ypp-active-columns"] yt-rich-grid-view-model {
+   (set by auto-scale-grid). Use :root for higher specificity than the html[] rule above. */
+:root[style*="--ypp-active-columns"] ytd-rich-grid-renderer,
+:root[style*="--ypp-active-columns"] yt-rich-grid-renderer,
+:root[style*="--ypp-active-columns"] yt-rich-grid-view-model {
   --ytd-rich-grid-items-per-row: var(--ypp-active-columns) !important;
 }
 body.yt-premium-plus-theme ytd-playlist-renderer:hover ytd-thumbnail-overlay-side-panel-renderer {
