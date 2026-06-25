@@ -215,16 +215,28 @@ window.YPP.FeatureManager = class FeatureManager {
             return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
         });
 
-        // 1. Apply UI features immediately (theme, nav, grid layout)
-        const UI_PRIORITY = ['theme', 'headerNav', 'sidebarLayout', 'layout', 'autoScaleLayout'];
-        const uiFeatures = sorted.filter(([name]) => UI_PRIORITY.includes(name));
-        
-        await Promise.all(uiFeatures.map(([name, instance]) => 
+        // 1. Apply layout-critical UI features in strict order to avoid race conditions:
+        //    - layout MUST run before autoScaleLayout because AutoScaleGrid.disable() clears
+        //      --ypp-active-columns, and GridLayoutManager.onUpdate() must re-set it last.
+        const SEQUENTIAL_UI = ['theme', 'headerNav', 'sidebarLayout', 'layout'];
+        const AFTER_LAYOUT  = ['autoScaleLayout'];
+        const uiFeatures    = sorted.filter(([name]) => SEQUENTIAL_UI.includes(name));
+        const postLayout    = sorted.filter(([name]) => AFTER_LAYOUT.includes(name));
+
+        await Promise.all(uiFeatures.map(([name, instance]) =>
             this._runFeatureUpdate(name, instance, applyId)
         ));
 
+        // autoScaleLayout runs after layout so its side-effects don't clobber layout's CSS vars
+        await Promise.all(postLayout.map(([name, instance]) =>
+            this._runFeatureUpdate(name, instance, applyId)
+        ));
+
+
         // 2. Apply the rest of the features in background or later frames
-        const heavyFeatures = sorted.filter(([name]) => !UI_PRIORITY.includes(name));
+        const ALL_UI = new Set([...SEQUENTIAL_UI, ...AFTER_LAYOUT]);
+        const heavyFeatures = sorted.filter(([name]) => !ALL_UI.has(name));
+
 
         if (window.requestIdleCallback) {
             window.requestIdleCallback(() => {

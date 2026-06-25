@@ -108,6 +108,16 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         if (this.settings) {
             this.utils.log?.('GridLayoutManager onUpdate triggered. Settings homeColumns: ' + this.settings.homeColumns, 'LAYOUT');
             this.updateSettings(this.settings);
+
+            // Proactively write --ypp-active-columns NOW (synchronous) so any code
+            // that reads this CSS variable immediately (e.g. after AutoScaleGrid clears it)
+            // gets the correct manual value — not a stale/missing one.
+            const manualCols = Number(this.settings.homeColumns || 0);
+            if (manualCols > 0) {
+                document.documentElement.style.setProperty('--ypp-active-columns', manualCols);
+                document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+            }
+
             // Force re-apply of grid structural styles when settings change
             this._processedContainers = new WeakSet();
             this._debouncedApply();
