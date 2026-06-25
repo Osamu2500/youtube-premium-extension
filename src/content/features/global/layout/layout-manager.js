@@ -215,10 +215,17 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             }
 
             // Apply auto-scale grid logic if enabled via AutoScaleGrid
+            // ONLY use auto-scale (--ypp-dynamic-cols) if the user hasn't explicitly set homeColumns.
+            // homeColumns defaults to 4, so treat 4 as "not set" only when autoScaleLayout is enabled
+            // and no user interaction has happened. The real gate is: if AutoScaleGrid removed
+            // --ypp-dynamic-cols (because homeColumns is set), we should NOT fall back to it.
             const isHome = path === '/' || path === '/index';
             if (isHome) {
-                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
-                if (dynamicCols) {
+                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols').trim();
+                const userSetManually = this.settings?.homeColumns && this.settings.homeColumns !== 4;
+                // Only use dynamic cols if autoScale is on, user hasn't manually changed columns,
+                // and the AutoScaleGrid actually set the var (didn't remove it due to manual override)
+                if (dynamicCols && !userSetManually && this.settings?.autoScaleLayout) {
                     cols = parseInt(dynamicCols, 10);
                     this.utils.log?.('dynamicCols found: ' + dynamicCols + ', overriding cols to ' + cols, 'LAYOUT');
                 }

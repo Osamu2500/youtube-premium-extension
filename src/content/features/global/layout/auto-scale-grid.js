@@ -44,6 +44,20 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
     _applyScale() {
         if (!this.settings || !this.settings.autoScaleLayout) return;
 
+        // ✅ RESPECT MANUAL OVERRIDE: homeColumns === 0 means "auto" (use window-width calc).
+        // homeColumns >= 1 means the user has picked a manual count — bail out and let
+        // layout-manager read homeColumns directly; don't touch --ypp-dynamic-cols.
+        const manualCols = this.settings?.homeColumns ?? 0;
+        if (manualCols > 0) {
+            // Clear any stale dynamic-cols so CSS doesn't fight the manual value
+            document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+            // Still apply UI scale factor for spacing/fonts
+            const uiScale = Math.max(0.7, Math.min(1.3, window.innerWidth / 1280));
+            document.documentElement.style.setProperty('--ypp-auto-scale', uiScale);
+            return;
+        }
+
+        // Auto mode: calculate columns from window width
         const path = window.location.pathname;
         const isHome = path === '/' || path === '/index';
 
@@ -57,7 +71,7 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
             if (gridRenderer && gridRenderer.clientWidth > 0) {
                 width = gridRenderer.clientWidth;
             }
-            
+
             let cols = 4;
             if (width >= 2100) cols = 6;
             else if (width >= 1800) cols = 5;
@@ -65,15 +79,20 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
             else if (width >= 1000) cols = 3;
             else if (width >= 600) cols = 2;
             else cols = 1;
-            
-            // Set dynamic column override for layout-manager to read
+
+            // Publish for layout-manager to consume
             document.documentElement.style.setProperty('--ypp-dynamic-cols', cols);
         } else {
             document.documentElement.style.removeProperty('--ypp-dynamic-cols');
         }
     }
-    
+
     onPageChange() {
-        this._applyScale();
+        // Re-run in auto mode (homeColumns === 0) on every navigation.
+        // In manual mode layout-manager already has the correct value — skip.
+        const manualCols = this.settings?.homeColumns ?? 0;
+        if (manualCols === 0) {
+            this._applyScale();
+        }
     }
 };
