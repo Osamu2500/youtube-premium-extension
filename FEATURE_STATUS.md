@@ -49,6 +49,30 @@ These features perfectly adhere to the extension's architecture, including exten
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
 
+### Hide Watched
+*   **File:** `src/content/features/global/ui-tweaks/hide-watched.js`
+*   **What it does:** Automatically hides or dims videos on the YouTube homepage, subscriptions feed, and channel pages that you have already watched. Uses a customizable threshold (e.g., 80% watched) to determine if a video should be hidden.
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes | Uses SharedObserver
+
+### Mark as Watched
+*   **File:** `src/content/features/global/behavior/mark-watched.js`
+*   **What it does:** Visually badges watched videos with a clear overlay, auto-marks videos as watched when they end, and adds a hover/context menu toggle to manually mark videos as watched without having to open them.
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes | Uses SharedObserver
+
+### Multi-Select Videos
+*   **File:** `src/content/features/global/behavior/multi-select.js`
+*   **What it does:** Injects checkboxes on video thumbnails allowing you to hold Shift and click to select multiple videos at once. Once selected, you can perform batch actions like adding them all to a playlist, "Watch Later", or your queue simultaneously.
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes | Uses SharedObserver
+
+### Hide Mixes
+*   **File:** `src/content/features/global/ui-tweaks/hide-mixes.js`
+*   **What it does:** Completely removes dynamically generated "Mix" playlists and shelves from search results, sidebar, and home feed.
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses SharedObserver
+
 ## 🔧 Needs Improvement / Architectural Violations
 These features function, but contain architectural violations (leaking event listeners, raw chrome.storage, missing DOM stamps, etc.) that need to be refactored before they are considered fully stable.
 
@@ -288,20 +312,7 @@ Core logic exists, but there are unhandled edge cases, missing features, or expl
 ## 🔴 Broken / Has Bugs
 Features that are structurally flawed, such as lacking a `disable()` method which guarantees memory leaks and duplicated observers when the feature is toggled off, or features that no longer function correctly due to YouTube DOM changes.
 
-### Hide Watched
-*   **File:** `src/content/features/global/ui-tweaks/hide-watched.js`
-*   **What it does:** Automatically hides or dims videos on the YouTube homepage, subscriptions feed, and channel pages that you have already watched. Uses a customizable threshold (e.g., 80% watched) to determine if a video should be hidden, relying on the native YouTube progress bar overlay.
-*   **Status:** Broken / Not Working. DOM observer fails to consistently match modern YouTube view models, causing the feature to ignore dynamically loaded videos.
-
-### Mark as Watched
-*   **File:** `src/content/features/global/behavior/mark-watched.js`
-*   **What it does:** Visually badges watched videos with a clear overlay, auto-marks videos as watched when they end, and adds a hover/context menu toggle to manually mark videos as watched without having to open them.
-*   **Status:** Broken / Not Working. Fails to consistently apply badges to dynamically loaded videos in modern YouTube grids.
-
-### Multi-Select Videos
-*   **File:** `src/content/features/global/behavior/multi-select.js`
-*   **What it does:** Injects checkboxes on video thumbnails allowing you to hold Shift and click to select multiple videos at once. Once selected, you can perform batch actions like adding them all to a playlist, "Watch Later", or your queue simultaneously.
-*   **Status:** Broken / Not Working. Checkboxes fail to render on new YouTube grid layouts and events are inconsistently captured.
+*(No broken features currently)*
 
 ---
 

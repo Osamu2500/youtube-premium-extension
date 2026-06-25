@@ -379,22 +379,18 @@ window.YPP.CONSTANTS = {
     // =========================================================================
     FEATURE_MAP: {
         theme: 'Theme',
-        layout: 'Layout',
         subsOrganizer: 'SubscriptionsOrganizer',
         // NOTE: modesManager is handled by WatchPageManager — not a standalone feature
         accountMenu: 'AccountMenu',
         // NOTE: 'SidebarManager' class does not exist; sidebar is managed by WatchPageManager via SidebarLayout CSS
         headerNav: 'HeaderNav',
-        shortsTools: 'ShortsTools',
         redirectShorts: 'RedirectShorts',
-        shortsOptimizer: 'ShortsOptimizer',
         playerTools: 'PlayerTools',
         // New Features
         autoLike: 'AutoLike',
         gridAnimator: 'GridAnimator',
         multiSelect: 'MultiSelect',
         hideMetrics: 'HideMetrics',
-        hideThumbnails: 'HideThumbnails',
         intentionalDelay: 'IntentionalDelay',
         playlistDuration: 'PlaylistDuration',
         watchHistory: 'WatchHistoryTracker',
@@ -427,7 +423,6 @@ window.YPP.CONSTANTS = {
         volumeBoost: 'VolumeBooster',
         autoQuality: 'AutoQuality',
         timeDisplay: 'TimeDisplay',
-        sidebarLayout: 'SidebarLayout',
         watchRedesign: 'WatchRedesign',
         bookmarksManager: 'BookmarksManager',
         classicProgressBar: 'ClassicProgressBar',
@@ -437,7 +432,6 @@ window.YPP.CONSTANTS = {
         // --- Missing Toggles & Layouts ---
         autoScaleLayout: 'AutoScaleGrid',
         displayFullTitle: 'FullVideoTitles',
-        useSquareCorners: 'SquareCorners',
         // --- Subscription Hub ---
         subscriptionFolders: 'SubscriptionFolders',
         filterBar: 'FilterBar',
