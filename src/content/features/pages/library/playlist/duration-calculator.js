@@ -21,11 +21,13 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
 
         this._debouncedCalculate = this.utils.debounce(this._boundCalculate, 1000);
         this.observer.start();
-        this.observer.register('playlist-duration', 'ytd-app', () => {
-             if (location.pathname.includes('/playlist')) {
-                 this._debouncedCalculate();
-             }
-        }, false);
+        this.observer.register('playlist-duration', 
+            'ytd-playlist-video-renderer, yt-lockup-view-model',
+            () => {
+                if (location.pathname.includes('/playlist')) {
+                    this._debouncedCalculate();
+                }
+            }, false);
     }
 
     async disable() {
@@ -150,30 +152,51 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
     }
 
     fallbackCalculate() {
-        const timeElements = document.querySelectorAll('ytd-playlist-video-renderer ytd-thumbnail-overlay-time-status-renderer, ytd-playlist-video-renderer badge-shape[class*="time-status"]');
-        const allItems = document.querySelectorAll('ytd-playlist-video-renderer');
+        // Support both old (ytd-playlist-video-renderer) and new (yt-lockup-view-model) YouTube DOM
+        const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
+        const TIME_SELECTORS = [
+            'ytd-thumbnail-overlay-time-status-renderer',
+            'badge-shape[class*="time-status"]',
+            '.yt-lockup-view-model-wiz__badge .badge-shape',
+            'yt-formatted-string[class*="time"]'
+        ];
+        const allItems = document.querySelectorAll(ITEM_SEL);
         
         let totalSeconds = 0;
         let validCount = 0;
 
-        timeElements.forEach(el => {
-            const timeText = el.textContent.trim();
-            if (timeText && timeText.includes(':')) {
-                const cleanTime = timeText.replace(/[^0-9:]/g, '');
-                const s = this.parseTime(cleanTime);
-                if (s > 0) {
-                    totalSeconds += s;
-                    validCount++;
+        allItems.forEach(item => {
+            for (const sel of TIME_SELECTORS) {
+                const el = item.querySelector(sel);
+                if (!el) continue;
+                const timeText = (el.getAttribute('aria-label') || el.textContent || '').trim();
+                if (timeText && timeText.includes(':')) {
+                    const cleanTime = timeText.replace(/[^0-9:]/g, '');
+                    const s = this.parseTime(cleanTime);
+                    if (s > 0) {
+                        totalSeconds += s;
+                        validCount++;
+                        break;
+                    }
                 }
             }
         });
 
         let totalPlaylistVideos = allItems.length;
-        const statsEl = document.querySelector('.metadata-stats, ytd-playlist-byline-renderer');
-        if (statsEl) {
-            const match = statsEl.textContent.match(/([\d,]+)\s+videos/i);
-            if (match) {
-                totalPlaylistVideos = parseInt(match[1].replace(/,/g, ''), 10);
+        const statsSelectors = [
+            '.metadata-stats',
+            'ytd-playlist-byline-renderer',
+            'yt-content-metadata-view-model-wiz__metadata-row span',
+            'yt-formatted-string[id="stats"]'
+        ];
+        for (const sel of statsSelectors) {
+            const statsEl = document.querySelector(sel);
+            if (statsEl) {
+                const match = statsEl.textContent.match(/([\d,]+)\s+videos?/i);
+                if (match) {
+                    totalPlaylistVideos = parseInt(match[1].replace(/,/g, ''), 10);
+                    break;
+                }
             }
         }
 
@@ -213,7 +236,11 @@ window.YPP.features.PlaylistDuration = class PlaylistDuration extends window.YPP
     }
 
     renderCard(totalSeconds, videoCount, notCounted, totalPlaylistVideos) {
-        const container = document.querySelector('ytd-playlist-header-renderer');
+        // Try multiple header selectors for old and new YouTube DOM
+        const container = 
+            document.querySelector('ytd-playlist-header-renderer') ||
+            document.querySelector('yt-playlist-header-view-model') ||
+            document.querySelector('ytd-browse[page-subtype="playlist"] #header');
         if (!container) return;
 
         if (!this.card) {

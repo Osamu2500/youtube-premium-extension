@@ -29,7 +29,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         APP_CONTAINER: 'ytd-app',
         GRID_RENDERER: 'ytd-rich-grid-renderer',
         GRID_CONTENTS: '#contents',
-        GRID_ITEMS: 'ytd-rich-item-renderer, ytd-rich-grid-media',
+        GRID_ITEMS: 'ytd-rich-item-renderer, ytd-rich-grid-media, yt-lockup-view-model',
         GRID_ROWS: 'ytd-rich-grid-row'
     };
 
