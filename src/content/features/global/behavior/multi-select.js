@@ -20,14 +20,25 @@ window.YPP.features.MultiSelect = class MultiSelect
         this._debouncedBound = window.YPP.Utils?.debounce
             ? window.YPP.Utils.debounce(this._bound, 200)
             : this._bound;
-        window.YPP.events?.on('page:changed', this._bound);
-        window.YPP.events?.on('dom:nodes-added', this._debouncedBound);
+        window.YPP.events?.on('app:pageChange', this._bound);
+        
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.register(
+                'multi-select',
+                'ytd-rich-item-renderer, ytd-video-renderer, ytd-compact-video-renderer, ytd-playlist-video-renderer, ytd-grid-video-renderer',
+                () => this._debouncedBound()
+            );
+        }
     }
 
     async disable() {
         await super.disable();
-        window.YPP.events?.off('page:changed', this._bound);
-        if (this._debouncedBound) window.YPP.events?.off('dom:nodes-added', this._debouncedBound);
+        window.YPP.events?.off('app:pageChange', this._bound);
+        
+        if (window.YPP.sharedObserver) {
+            window.YPP.sharedObserver.unregister('multi-select');
+        }
+        
         this._clearAll();
         this._actionBar?.remove();
         this._actionBar = null;

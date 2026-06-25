@@ -38,9 +38,17 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         try {
             await this._loadWatchedIds();
             this._processCards();
-            window.YPP.events?.on('dom:nodes-added', this._boundProcess);
-            window.YPP.events?.on('page:changed', this._boundProcess);
+            window.YPP.events?.on('app:pageChange', this._boundProcess);
+            window.YPP.events?.on('app:videoChange', this._boundProcess);
             this.addListener(window, 'yt-navigate-finish', this._boundNavigate);
+            
+            if (window.YPP.sharedObserver) {
+                window.YPP.sharedObserver.register(
+                    'mark-watched',
+                    MarkWatched.SELECTORS.CARDS.join(', '),
+                    (nodes) => this._processCards()
+                );
+            }
         } catch (e) {
             this.utils.log?.(`Enable error: ${e.message}`, 'MarkWatched', 'error');
         }
@@ -49,8 +57,12 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
     async disable() {
         await super.disable();
         try {
-            window.YPP.events?.off('dom:nodes-added', this._boundProcess);
-            window.YPP.events?.off('page:changed', this._boundProcess);
+            window.YPP.events?.off('app:pageChange', this._boundProcess);
+            window.YPP.events?.off('app:videoChange', this._boundProcess);
+            
+            if (window.YPP.sharedObserver) {
+                window.YPP.sharedObserver.unregister('mark-watched');
+            }
             
             document.querySelectorAll('.ypp-watched-badge').forEach(e => e.remove());
             document.querySelectorAll('.ypp-watch-context-menu').forEach(e => e.remove());
@@ -149,8 +161,8 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         const anchor = card.querySelector(MarkWatched.SELECTORS.THUMBNAIL_ANCHOR);
         if (anchor) {
             const href = anchor.href || anchor.getAttribute('href') || '';
-            const match = href.match(/[?&]v=([^&]+)/);
-            if (match) return match[1];
+            const match = href.match(/[?&]v=([^&]+)|\/shorts\/([^/?]+)/);
+            if (match) return match[1] || match[2];
         }
         const videoId = card.dataset.videoId || card.dataset.ytVideoId;
         if (videoId) return videoId;
@@ -349,10 +361,10 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
 
     _onNavigate() {
         const url = window.location.href;
-        const match = url.match(/[?&]v=([^&]+)/);
+        const match = url.match(/[?&]v=([^&]+)|\/shorts\/([^/?]+)/);
         if (!match) return;
 
-        const videoId = match[1];
+        const videoId = match[1] || match[2];
 
         // Ensure cleanup of previous listener across SPA navigations
         if (this._activeVideoEl && this._onTimeUpdateBinded) {

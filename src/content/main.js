@@ -85,6 +85,15 @@
                 // Wait for core dependencies before proceeding
                 await this.waitForDependencies();
                 
+                // Initialize Shared Stores
+                try {
+                    if (window.YPP.WatchedStore && typeof window.YPP.WatchedStore.load === 'function') {
+                        await window.YPP.WatchedStore.load();
+                    }
+                } catch (e) {
+                    this.Utils?.log('Failed to load WatchedStore', 'MAIN', 'warn');
+                }
+                
                 // Load settings and initialize features
                 await this.loadSettings();
                 this.initFeatureManager();

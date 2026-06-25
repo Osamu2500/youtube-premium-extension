@@ -416,6 +416,7 @@ window.YPP.CONSTANTS = {
         contextMenu: 'ContextMenu',
         markWatched: 'MarkWatched',
         hideWatched: 'HideWatched',
+        hideMixes: 'HideMixes',
         keyboardShortcuts: 'KeyboardShortcuts',
         wheelControls: 'WheelControls',
         audioCompressor: 'AudioCompressor',

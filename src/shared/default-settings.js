@@ -81,6 +81,7 @@ export const DEFAULT_SETTINGS = {
     continueWatching: true,
     reversePlaylist: false,
     historyRedesign: true,
+    playlistRedesign: true,
 
     // Shorts Tools
     shortsAutoScroll: false,
