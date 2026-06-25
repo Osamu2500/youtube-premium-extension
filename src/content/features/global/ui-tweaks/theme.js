@@ -109,9 +109,10 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         const root = document.documentElement;
         const body = document.body;
         
-        // Remove base premium class
+        // Toggle base premium class
         root.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
-        root.classList.toggle('ypp-theme-effects', !!this._settings.enableThemeEffects);
+        const enableEffects = this._settings.enableThemeEffects !== false;
+        root.classList.toggle('ypp-theme-effects', enableEffects && enable);
         if (body) body.classList.toggle(this._CSS_CLASSES.THEME_ENABLED, enable);
 
         this._Utils.log(`Toggling theme: ${enable ? 'ON' : 'OFF'}`, 'THEME');

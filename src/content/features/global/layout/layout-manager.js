@@ -126,7 +126,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         if (settings.homeColumns !== undefined && settings.homeColumns !== null) {
             // Only publish a concrete CSS var when a manual count is chosen (> 0).
             // homeColumns === 0 means "auto" — AutoScaleGrid will set --ypp-dynamic-cols instead.
-            if (settings.homeColumns > 0) {
+            if (Number(settings.homeColumns) > 0) {
                 root.style.setProperty('--ypp-home-columns', settings.homeColumns);
             } else {
                 root.style.removeProperty('--ypp-home-columns');
@@ -211,14 +211,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
 
             // Determine column count from user settings per page type
             // homeColumns === 0 means "auto" — defer to --ypp-dynamic-cols set by AutoScaleGrid
-            let cols = this.settings?.homeColumns ?? 0;
+            let cols = Number(this.settings?.homeColumns || 0);
             const path = window.location.pathname;
             if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
-                cols = this.settings?.channelColumns ?? 4;
+                cols = Number(this.settings?.channelColumns || 4);
             } else if (path.startsWith('/results')) {
-                cols = this.settings?.searchColumns ?? 4;
+                cols = Number(this.settings?.searchColumns || 4);
             } else if (path === '/feed/subscriptions') {
-                cols = this.settings?.subscriptionsColumns ?? 4;
+                cols = Number(this.settings?.subscriptionsColumns || 4);
             }
 
             // Apply auto-scale grid logic if enabled via AutoScaleGrid
@@ -239,7 +239,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             this.utils.log?.('applyGridLayout cols evaluated to: ' + cols + ' for path: ' + path, 'LAYOUT');
 
             // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
-            if (cols === 0 || cols === '0') {
+            if (cols === 0) {
                 contents.classList.remove('ypp-grid-container');
                 contents.style.removeProperty('grid-template-columns');
                 contents.style.removeProperty('grid-auto-flow');
