@@ -123,6 +123,11 @@ function renderRange(item, state) {
     input.max = item.max ?? 100;
     input.step = item.step ?? 1;
     input.value = item.min ?? 0;
+    // Update displayed value live as user drags the slider
+    input.addEventListener('input', () => {
+        const display = document.getElementById(valueId);
+        if (display) display.textContent = input.value;
+    });
     rangeWrap.appendChild(input);
     wrap.appendChild(rangeWrap);
 

@@ -198,7 +198,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case 'startTimer':
         case 'stopTimer':
         case 'resetTimer': {
-            const timerAction = action === 'startTimer' ? startTimer() : stopTimer();
+            let timerAction;
+            if (action === 'startTimer') {
+                timerAction = startTimer(request.duration);
+            } else if (action === 'resetTimer') {
+                // Reset: stop current timer, then restart with the requested duration
+                timerAction = stopTimer().then(() => startTimer(request.duration || 25));
+            } else {
+                timerAction = stopTimer();
+            }
             
             timerAction
                 .then(() => sendResponse({ success: true }))
@@ -218,11 +226,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 fetchUrl = new URL(request.url);
             } catch (_) {
                 sendResponse({ error: 'Invalid URL' });
-                return false;
+                return true; // Keep channel open so sendResponse can fire
             }
             if (fetchUrl.protocol !== 'https:' && fetchUrl.protocol !== 'http:') {
                 sendResponse({ error: `Disallowed URL scheme: ${fetchUrl.protocol}` });
-                return false;
+                return true; // Keep channel open so sendResponse can fire
             }
             
             // Apply a 15-second timeout to prevent hanging promises

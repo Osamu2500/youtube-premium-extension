@@ -29,15 +29,20 @@ export function loadSettings(updateUICallbacks) {
                 try {
                     return await new Promise(resolve => {
                         let isResolved = false;
+                        // 2-second safety timeout: if context is dead, the callback
+                        // may never fire — this prevents the Promise hanging forever.
+                        const timeoutId = setTimeout(() => {
+                            if (isResolved) return;
+                            isResolved = true;
+                            resolve({});
+                        }, 2000);
                         const cb = (res) => {
                             if (isResolved) return;
                             isResolved = true;
+                            clearTimeout(timeoutId);
                             resolve(chrome.runtime.lastError ? {} : (res || {}));
                         };
-                        const result = area.get('settings', cb);
-                        if (result && typeof result.then === 'function') {
-                            result.then(cb).catch(() => cb({}));
-                        }
+                        area.get('settings', cb);
                     });
                 } catch (e) { return {}; }
             };
@@ -157,7 +162,9 @@ const sendPreviewUpdate = (() => {
         if (timer) clearTimeout(timer);
         timer = setTimeout(() => {
             const s = gatherSettings();
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            // Filter to YouTube-only: prevents sending settings to whatever
+            // non-YouTube tab happens to be active in the current window.
+            chrome.tabs.query({ active: true, currentWindow: true, url: '*://*.youtube.com/*' }, (tabs) => {
                 if (tabs[0] && tabs[0].id) {
                     chrome.tabs.sendMessage(tabs[0].id, {
                         action: 'UPDATE_SETTINGS',

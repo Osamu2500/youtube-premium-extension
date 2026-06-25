@@ -9,7 +9,8 @@
         "alarms",
         "tabs",
         "identity",
-        "contextMenus"
+        "contextMenus",
+        "notifications"
     ],
     "host_permissions": [
         "*://www.youtube.com/*",
@@ -66,6 +67,7 @@
         {
             "resources": [
                 "src/assets/*",
+                "src/assets/icon.svg",
                 "src/inject/*",
                 "src/content/themes/*.css",
                 "src/content/features/**/*.css",

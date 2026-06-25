@@ -526,8 +526,6 @@
                     });
                 }
 
-                // Inject strictly isolated AST CSS chunks
-                this.injectContextCSS();
 
                 this.Utils?.log('Context updated', 'MAIN', 'debug', this.context);
 
@@ -546,14 +544,6 @@
             }
         },
 
-        /**
-         * Dynamically inject perfectly isolated AST CSS chunks
-         * @private
-         */
-        injectContextCSS() {
-            // CSS is now fully statically loaded via manifest.json
-            // All rules are safely scoped to body classes (e.g., .ypp-search-grid-mode, .ypp-playlist-redesign)
-        },
 
         // =========================================================================
         // NOTIFICATIONS
