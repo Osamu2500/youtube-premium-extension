@@ -156,14 +156,13 @@ registerSlot('vsc_shortcuts_manager', (container, state) => {
 
     let currentShortcuts = [];
     chrome.storage.local.get('settings', (data) => {
-        currentShortcuts = data.settings?.vscShortcuts || [
-            { action: 'showHide', key: 'V', value: null },
+        currentShortcuts = data.settings?.vscShortcuts !== undefined ? data.settings.vscShortcuts : [
             { action: 'decrease', key: 'Z', value: 0.25 },
             { action: 'increase', key: 'X', value: 0.25 },
-            { action: 'rewind', key: 'W', value: 10 },
-            { action: 'advance', key: 'E', value: 10 },
-            { action: 'reset', key: 'A', value: 1.0 },
-            { action: 'preferred', key: 'Q', value: 2.0 }
+            { action: 'rewind', key: 'S', value: 10 },
+            { action: 'advance', key: 'D', value: 10 },
+            { action: 'reset', key: 'R', value: 1.0 },
+            { action: 'showHide', key: 'V', value: 0 }
         ];
         renderList(currentShortcuts);
     });

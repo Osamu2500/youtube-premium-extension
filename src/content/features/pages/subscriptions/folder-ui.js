@@ -2021,9 +2021,17 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     if (btn) break;
                 }
                 if (!btn) continue;
+                
                 const text = (btn.textContent || btn.getAttribute('aria-label') || '').toLowerCase().trim();
+                
                 // Only click if the user is subscribed (button says Subscribed/Unsubscribe)
-                if (text === 'subscribed' || text === 'unsubscribe' || text.includes('subscribed')) {
+                // New YouTube UI sometimes hides text in a tooltip or a deeply nested span
+                const innerSpan = btn.querySelector('.yt-core-attributed-string');
+                const innerText = innerSpan ? innerSpan.textContent.toLowerCase().trim() : '';
+
+                if (text === 'subscribed' || text === 'unsubscribe' || text.includes('subscribed') || 
+                    innerText === 'subscribed' || innerText === 'unsubscribe' || innerText.includes('subscribed')) {
+                    
                     btn.click();
                     // Wait for YouTube's confirm dialog to appear
                     await new Promise(r => setTimeout(r, 800));
@@ -2035,8 +2043,10 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                         'yt-confirm-dialog-renderer [dialog-confirm] button',
                         'yt-confirm-dialog-renderer button',
                         'tp-yt-paper-dialog .buttons tp-yt-paper-button:last-of-type',
-                        '[aria-label="Unsubscribe"]'
+                        '[aria-label="Unsubscribe"]',
+                        'yt-button-shape button[aria-label="Unsubscribe"]'
                     ];
+                    
                     for (const sel of CONFIRM_SELECTORS) {
                         const confirmBtn = document.querySelector(sel);
                         if (confirmBtn) {

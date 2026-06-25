@@ -497,11 +497,13 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
 
     getShortcuts() {
         if (!this.settings) return [];
+        // Only return defaults if the user has literally NEVER touched the settings (undefined).
+        // If it's an empty array `[]`, it means they explicitly deleted all shortcuts, so respect that.
         if (this.settings.vscShortcuts === undefined) {
             return [
                 { action: 'decrease', key: 'Z', value: 0.25 },
                 { action: 'increase', key: 'X', value: 0.25 },
-                { action: 'rewind', key: 'A', value: 10 },
+                { action: 'rewind', key: 'S', value: 10 },
                 { action: 'advance', key: 'D', value: 10 },
                 { action: 'reset', key: 'R', value: 1.0 },
                 { action: 'showHide', key: 'V', value: 0 }

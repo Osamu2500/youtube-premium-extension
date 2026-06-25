@@ -893,13 +893,23 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                 'yt-button-shape button[aria-label="Action menu"]',
                 'button[aria-label="Action menu"]',
                 '[aria-label="More actions"]',
-                'yt-icon-button button'
+                'yt-icon-button button',
+                'yt-button-shape button' // very generic fallback
             ];
+            
             let menuBtn = null;
             for (const sel of MENU_SELECTORS) {
-                menuBtn = nativeVideo.querySelector(sel);
-                if (menuBtn) break;
+                // To avoid clicking the wrong button (like 'play all'), make sure it's inside the action menu container
+                const btn = nativeVideo.querySelector(`ytd-menu-renderer ${sel}, .ytd-menu-renderer ${sel}, ${sel}`);
+                if (btn && (btn.getAttribute('aria-label') || '').toLowerCase().includes('action')) {
+                    menuBtn = btn;
+                    break;
+                } else if (btn && !menuBtn) {
+                    // Save first match as fallback
+                    menuBtn = btn;
+                }
             }
+            
             if (!menuBtn) return resolve(false);
 
             // Trigger the menu open
@@ -910,16 +920,16 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                 // Poll for the popup
                 this.utils.pollFor(() => {
                     const popup = document.querySelector(
-                        'ytd-menu-popup-renderer, tp-yt-iron-dropdown[aria-expanded="true"]'
+                        'ytd-menu-popup-renderer, tp-yt-iron-dropdown[aria-expanded="true"], .yt-core-popup'
                     );
                     if (popup) {
                         const items = popup.querySelectorAll(
-                            'ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer, [role="menuitem"]'
+                            'ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer, [role="menuitem"], .yt-core-attributed-string'
                         );
                         for (const item of items) {
                             const text = (item.textContent || '').toLowerCase();
                             // Match 'remove from playlist', 'remove from watch later', 'delete', etc.
-                            if (text.includes('remove') || text.includes('delete from')) {
+                            if (text.includes('remove from') || text.includes('delete from') || text.includes('remove from watch later')) {
                                 return item;
                             }
                         }
@@ -927,7 +937,9 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                     return null;
                 }, 2500, 80).then(item => {
                     if (item) {
-                        item.click();
+                        // For yt-core-attributed-string, we might need to click the parent wrapper
+                        const clickTarget = item.closest('[role="menuitem"]') || item.closest('ytd-menu-service-item-renderer') || item;
+                        clickTarget.click();
                         setTimeout(() => document.body.click(), 50);
                         resolve(true);
                     } else {
@@ -935,7 +947,10 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                         document.body.click();
                         resolve(false);
                     }
-                }).catch(() => resolve(false));
+                }).catch(() => {
+                    document.body.click();
+                    resolve(false);
+                });
             }, 80);
         });
     }
