@@ -2000,30 +2000,50 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
      */
     static async _tryNativeDomUnsubscribe(channelId) {
         try {
-            // Find all subscribe button renderers that match this channel
+            // Find subscribe button renderers that match this channel
             const candidates = document.querySelectorAll(
                 `ytd-subscribe-button-renderer[channel-id="${channelId}"], ` +
                 `[channel-id="${channelId}"] ytd-subscribe-button-renderer`
             );
 
+            // Expanded selectors for both old (paper-button) and new (yt-button-shape) YouTube UI
+            const SUB_BTN_SELECTORS = [
+                'yt-button-shape button',
+                '.yt-spec-button-shape-next',
+                'tp-yt-paper-button',
+                'button'
+            ];
+
             for (const renderer of candidates) {
-                const btn = renderer.querySelector('tp-yt-paper-button, yt-button-shape button, button');
+                let btn = null;
+                for (const sel of SUB_BTN_SELECTORS) {
+                    btn = renderer.querySelector(sel);
+                    if (btn) break;
+                }
                 if (!btn) continue;
                 const text = (btn.textContent || btn.getAttribute('aria-label') || '').toLowerCase().trim();
                 // Only click if the user is subscribed (button says Subscribed/Unsubscribe)
                 if (text === 'subscribed' || text === 'unsubscribe' || text.includes('subscribed')) {
                     btn.click();
                     // Wait for YouTube's confirm dialog to appear
-                    await new Promise(r => setTimeout(r, 700));
-                    // Confirm unsubscription in YouTube's native dialog
-                    const confirmBtn = document.querySelector(
-                        'yt-confirm-dialog-renderer #confirm-button button, ' +
-                        'tp-yt-paper-dialog .buttons tp-yt-paper-button:last-of-type'
-                    );
-                    if (confirmBtn) {
-                        confirmBtn.click();
-                        window.YPP.Utils?.log(`Native DOM unsubscribe succeeded for ${channelId}`, 'CHANNEL-HEALTH', 'debug');
-                        return true;
+                    await new Promise(r => setTimeout(r, 800));
+                    
+                    // Try all confirmation dialog selectors — new UI uses yt-button-shape inside dialog
+                    const CONFIRM_SELECTORS = [
+                        'yt-confirm-dialog-renderer #confirm-button button',
+                        'yt-confirm-dialog-renderer yt-button-shape button',
+                        'yt-confirm-dialog-renderer [dialog-confirm] button',
+                        'yt-confirm-dialog-renderer button',
+                        'tp-yt-paper-dialog .buttons tp-yt-paper-button:last-of-type',
+                        '[aria-label="Unsubscribe"]'
+                    ];
+                    for (const sel of CONFIRM_SELECTORS) {
+                        const confirmBtn = document.querySelector(sel);
+                        if (confirmBtn) {
+                            confirmBtn.click();
+                            window.YPP.Utils?.log(`Native DOM unsubscribe succeeded for ${channelId}`, 'CHANNEL-HEALTH', 'debug');
+                            return true;
+                        }
                     }
                 }
             }
@@ -2038,29 +2058,38 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
      * Dynamically loads channel page, extracts fresh unsubParams, and executes API.
      */
     static async _tryFreshApiUnsubscribe(channelId, config) {
-        try {
-            const res = await fetch(`/channel/${channelId}`);
-            const text = await res.text();
-            const data = this._extractYtInitialData(text);
-            if (data) {
-                let freshParams = null;
-                const walk = (o) => {
-                    if (freshParams) return;
-                    if (!o || typeof o !== 'object') return;
-                    if (o.unsubscribeEndpoint?.params) {
-                        freshParams = o.unsubscribeEndpoint.params;
-                        return;
+        // Try /channel/ URL first, then /@handle fallback
+        const urlsToTry = [
+            `/channel/${channelId}`,
+            `/@${channelId}` // In case channelId is actually a handle
+        ];
+        
+        for (const url of urlsToTry) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) continue;
+                const text = await res.text();
+                const data = this._extractYtInitialData(text);
+                if (data) {
+                    let freshParams = null;
+                    const walk = (o) => {
+                        if (freshParams) return;
+                        if (!o || typeof o !== 'object') return;
+                        if (o.unsubscribeEndpoint?.params) {
+                            freshParams = o.unsubscribeEndpoint.params;
+                            return;
+                        }
+                        Object.values(o).forEach(walk);
+                    };
+                    walk(data);
+                        
+                    if (freshParams) {
+                        return await this._tryApiUnsubscribe({ id: channelId, params: freshParams }, config);
                     }
-                    Object.values(o).forEach(walk);
-                };
-                walk(data);
-                    
-                if (freshParams) {
-                    return await this._tryApiUnsubscribe({ id: channelId, params: freshParams }, config);
                 }
+            } catch(e) {
+                window.YPP.utils?.log(`Fresh API unsub error for ${url}`, 'CHANNEL-HEALTH', 'warn', e);
             }
-        } catch(e) {
-            window.YPP.utils?.log('Fresh API unsub error', 'CHANNEL-HEALTH', 'warn', e);
         }
         return false;
     }

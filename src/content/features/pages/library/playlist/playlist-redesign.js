@@ -104,16 +104,17 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         // Wait up to 10 seconds for the native playlist DOM to load
         // Do NOT add body class yet — only apply it once we have confirmed data,
         // preventing the native layout from being hidden on a page where we can't render.
+        const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
         const isReady = await window.YPP.Utils.pollFor(() => {
             const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
-            return header && document.querySelectorAll('ytd-playlist-video-renderer').length > 0;
+            return header && document.querySelectorAll(ITEM_SEL).length > 0;
         }, 10000);
 
         // Check isEnabled (BaseFeature flag) — feature may have been disabled while waiting
         if (isReady && this.isEnabled) {
             document.body.classList.add('ypp-playlist-redesign');
             const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
-            const videos = document.querySelectorAll('ytd-playlist-video-renderer');
+            const videos = document.querySelectorAll(ITEM_SEL);
             this._build(header, videos);
             this._watchForChanges();
         }
@@ -128,15 +129,16 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         if (!listContainer) return;
 
         if (window.YPP?.sharedObserver) {
+            const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
             const debouncedBuild = this.utils.debounce(() => {
                 const header = document.querySelector('ytd-playlist-header-renderer, yt-playlist-header-view-model, ytd-browse[page-subtype="playlist"] #header');
-                const videos = document.querySelectorAll('ytd-playlist-video-renderer');
+                const videos = document.querySelectorAll(ITEM_SEL);
                 // Only rebuild if we still have valid data
                 if (header && videos.length > 0 && this.isEnabled) {
                     this._build(header, videos);
                 }
             }, 600);
-            window.YPP.sharedObserver.register('playlist-redesign-scanner', 'ytd-playlist-video-renderer', debouncedBuild, false);
+            window.YPP.sharedObserver.register('playlist-redesign-scanner', ITEM_SEL, debouncedBuild, false);
         }
     }
 
@@ -211,13 +213,26 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
             // Index number
             const videoIndex = videoElement.querySelector(this.SELECTORS.INDEX)?.textContent?.trim() || String(idx + 1);
 
-            // Watched progress
-            const prog = videoElement.querySelector(
-                window.YPP.CONSTANTS?.SELECTORS?.WATCHED_OVERLAY || 'ytd-thumbnail-overlay-resume-playback-renderer #progress'
-            );
-            const progressPct = prog
-                ? parseInt(prog.style.width, 10) || 0
-                : 0;
+            // Watched progress — try multiple selectors for old and new YouTube DOM
+            let progressPct = 0;
+            const progressSelectors = [
+                'ytd-thumbnail-overlay-resume-playback-renderer #progress',
+                'ytd-thumbnail-overlay-resume-playback-renderer',
+                '[overlay-style="DEFAULT"] #progress',
+                '#progress[style*="width"]'
+            ];
+            for (const psel of progressSelectors) {
+                const prog = videoElement.querySelector(psel);
+                if (prog) {
+                    const w = parseInt(prog.style.width, 10);
+                    if (!isNaN(w) && w > 0) { progressPct = w; break; }
+                    // If element exists but no style width, it's still partially watched
+                    if (prog.tagName === 'YTD-THUMBNAIL-OVERLAY-RESUME-PLAYBACK-RENDERER') {
+                        progressPct = 50; // Unknown amount, treat as watched
+                        break;
+                    }
+                }
+            }
 
             videos.push({ title: videoTitle, href: videoUrl, channel: videoChannel,
                           duration: videoDuration, thumb: videoThumb,
@@ -608,37 +623,73 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
         // ── Remove Watched Videos ──────────────────────────────────────────
         this.addListener(root.querySelector('#ypp-pl-remove-watched'), 'click', async (e) => {
             const btn = e.currentTarget;
+            
+            // Build watched list: check our custom cards AND also scan native DOM for
+            // progress bars that may not have been picked up during initial build
+            const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
+            const nativeItems = Array.from(document.querySelectorAll(ITEM_SEL));
+            const threshold = this.settings?.hideWatchedThreshold ?? 10; // Default: any progress counts
+            
+            // Find which native item indices have progress
+            const watchedIndices = new Set();
+            nativeItems.forEach((item, idx) => {
+                const progressSelectors = [
+                    'ytd-thumbnail-overlay-resume-playback-renderer #progress',
+                    'ytd-thumbnail-overlay-resume-playback-renderer',
+                    '[overlay-style="DEFAULT"] #progress',
+                    '#progress[style*="width"]'
+                ];
+                for (const psel of progressSelectors) {
+                    const prog = item.querySelector(psel);
+                    if (prog) {
+                        const w = parseInt(prog.style.width, 10);
+                        if (!isNaN(w) && w >= threshold) { watchedIndices.add(idx); break; }
+                        if (prog.tagName === 'YTD-THUMBNAIL-OVERLAY-RESUME-PLAYBACK-RENDERER') {
+                            watchedIndices.add(idx); break;
+                        }
+                    }
+                }
+            });
+            
+            // Also include cards that already have progress data from the build phase
             const watchedCards = Array.from(root.querySelectorAll('.ypp-pl-card[data-progress]'))
-                .filter(c => parseInt(c.dataset.progress, 10) > 0);
+                .filter(c => parseInt(c.dataset.progress, 10) >= threshold);
+            watchedCards.forEach(c => watchedIndices.add(parseInt(c.dataset.index, 10)));
+            
+            // Convert to sorted descending array (remove from end first to preserve indices)
+            const sortedIndices = Array.from(watchedIndices).sort((a, b) => b - a);
 
-            if (!watchedCards.length) {
-                btn.textContent = 'No watched videos found';
-                setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Remove Watched Videos'; }, 2000);
+            if (!sortedIndices.length) {
+                btn.innerHTML = '<span>No watched videos found</span>';
+                setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg><span>Clean</span>'; }, 2000);
                 return;
             }
 
             btn.disabled = true;
-            btn.textContent = `Removing 0 / ${watchedCards.length}…`;
+            btn.textContent = `Removing 0 / ${sortedIndices.length}…`;
 
             let removed = 0;
-            for (const card of watchedCards) {
+            for (const idx of sortedIndices) {
                 // Abort if user navigated away or feature was disabled during async loop
-                if (!this.isActive || !document.body.classList.contains('ypp-playlist-redesign')) {
+                if (!this.isEnabled || !document.body.classList.contains('ypp-playlist-redesign')) {
                     break;
                 }
 
-                const idx = parseInt(card.dataset.index, 10);
                 const success = await this._removeNativeVideo(idx);
                 if (success) {
-                    card.style.transition = 'opacity 0.3s, transform 0.3s';
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.95)';
-                    setTimeout(() => card.remove(), 320);
+                    // Find and remove our custom card by index
+                    const card = root.querySelector(`.ypp-pl-card[data-index="${idx}"]`);
+                    if (card) {
+                        card.style.transition = 'opacity 0.3s, transform 0.3s';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => card.remove(), 320);
+                    }
                     removed++;
-                    btn.textContent = `Removing ${removed} / ${watchedCards.length}…`;
+                    btn.textContent = `Removing ${removed} / ${sortedIndices.length}…`;
                 }
-                // Small gap between each removal so YouTube can process
-                await new Promise(r => setTimeout(r, 800));
+                // Gap between each removal so YouTube can process
+                await new Promise(r => setTimeout(r, 900));
             }
 
             btn.disabled = false;
@@ -830,11 +881,25 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
      */
     _removeNativeVideo(nativeIndex) {
         return new Promise(resolve => {
-            const nativeVideos = document.querySelectorAll('ytd-playlist-video-renderer');
+            const ITEM_SEL = 'ytd-playlist-video-renderer, yt-lockup-view-model';
+            const nativeVideos = document.querySelectorAll(ITEM_SEL);
             const nativeVideo  = nativeVideos[nativeIndex];
             if (!nativeVideo) return resolve(false);
 
-            const menuBtn = nativeVideo.querySelector('ytd-menu-renderer button');
+            // Try multiple action menu selectors (new yt-button-shape + old ytd-menu-renderer)
+            const MENU_SELECTORS = [
+                'ytd-menu-renderer yt-button-shape button',
+                'ytd-menu-renderer button',
+                'yt-button-shape button[aria-label="Action menu"]',
+                'button[aria-label="Action menu"]',
+                '[aria-label="More actions"]',
+                'yt-icon-button button'
+            ];
+            let menuBtn = null;
+            for (const sel of MENU_SELECTORS) {
+                menuBtn = nativeVideo.querySelector(sel);
+                if (menuBtn) break;
+            }
             if (!menuBtn) return resolve(false);
 
             // Trigger the menu open
@@ -844,27 +909,34 @@ window.YPP.features.PlaylistRedesign = class PlaylistRedesign extends window.YPP
                 
                 // Poll for the popup
                 this.utils.pollFor(() => {
-                    const popup = document.querySelector('ytd-menu-popup-renderer');
+                    const popup = document.querySelector(
+                        'ytd-menu-popup-renderer, tp-yt-iron-dropdown[aria-expanded="true"]'
+                    );
                     if (popup) {
-                        const items = popup.querySelectorAll('ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer');
+                        const items = popup.querySelectorAll(
+                            'ytd-menu-service-item-renderer, ytd-menu-navigation-item-renderer, [role="menuitem"]'
+                        );
                         for (const item of items) {
                             const text = (item.textContent || '').toLowerCase();
-                            if (text.includes('remove from')) {
+                            // Match 'remove from playlist', 'remove from watch later', 'delete', etc.
+                            if (text.includes('remove') || text.includes('delete from')) {
                                 return item;
                             }
                         }
                     }
                     return null;
-                }, 2000, 100).then(item => {
+                }, 2500, 80).then(item => {
                     if (item) {
                         item.click();
                         setTimeout(() => document.body.click(), 50);
                         resolve(true);
                     } else {
+                        // As a last resort: try native three-dot button via keyboard shortcut approach
+                        document.body.click();
                         resolve(false);
                     }
                 }).catch(() => resolve(false));
-            }, 50);
+            }, 80);
         });
     }
 
