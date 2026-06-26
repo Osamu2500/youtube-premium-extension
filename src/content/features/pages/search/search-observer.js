@@ -185,7 +185,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
                     let cardsCleanData = [];
                     if (shelfContainer) {
                         cards = Array.from(shelfContainer.querySelectorAll(
-                            'ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer, ytd-channel-renderer'
+                            'ytd-video-renderer, ytd-compact-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer, ytd-channel-renderer'
                         ));
                         cardsCleanData = cards.map(c => {
                             const thumb = c.querySelector('ytd-thumbnail, ytd-playlist-thumbnail');
@@ -364,7 +364,9 @@ window.YPP.features.SearchObserver = class SearchObserver {
         ) {
             if (!this._isShortsShelf(node)) {
                 return !!node.querySelector(
-                    'ytd-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer'
+                    // ytd-compact-video-renderer covers music/song results in shelves —
+                    // without it, music shelves are never flattenable and get hidden.
+                    'ytd-video-renderer, ytd-compact-video-renderer, ytd-playlist-renderer, ytd-radio-renderer, ytd-rich-item-renderer'
                 );
             }
         }

@@ -134,23 +134,43 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         if (!settings) return;
         
         const root = document.documentElement;
-        
-        if (settings.homeColumns !== undefined && settings.homeColumns !== null) {
-            // Only publish a concrete CSS var when a manual count is chosen (> 0).
-            // homeColumns === 0 means "auto" — AutoScaleGrid will set --ypp-dynamic-cols instead.
-            if (Number(settings.homeColumns) > 0) {
-                root.style.setProperty('--ypp-home-columns', settings.homeColumns);
-            } else {
-                root.style.removeProperty('--ypp-home-columns');
-            }
+
+        // Write CSS vars for ALL page types immediately.
+        // CSS vars on :root survive YouTube's Polymer property resets (unlike inline styles on #contents).
+        // Each page-type grid's CSS uses its own var as the column count.
+
+        // Home page
+        const homeCols = Number(settings.homeColumns || 0);
+        if (homeCols > 0) {
+            root.style.setProperty('--ypp-home-columns', homeCols);
+            root.style.setProperty('--ypp-active-columns', homeCols); // drives --ytd-rich-grid-items-per-row via CSS
         } else {
             root.style.removeProperty('--ypp-home-columns');
+            // Auto mode: do NOT touch --ypp-active-columns here — AutoScaleGrid owns it in auto mode.
         }
-        
-        if (settings.searchColumns) {
-            root.style.setProperty('--ypp-search-columns', settings.searchColumns);
+
+        // Search page
+        const searchCols = Number(settings.searchColumns || 0);
+        if (searchCols > 0) {
+            root.style.setProperty('--ypp-search-columns', searchCols);
         } else {
             root.style.removeProperty('--ypp-search-columns');
+        }
+
+        // Subscriptions page
+        const subsCols = Number(settings.subscriptionsColumns || 0);
+        if (subsCols > 0) {
+            root.style.setProperty('--ypp-subscriptions-columns', subsCols);
+        } else {
+            root.style.removeProperty('--ypp-subscriptions-columns');
+        }
+
+        // Channel / @handle pages
+        const channelCols = Number(settings.channelColumns || 0);
+        if (channelCols > 0) {
+            root.style.setProperty('--ypp-channel-columns', channelCols);
+        } else {
+            root.style.removeProperty('--ypp-channel-columns');
         }
     }
 
@@ -221,8 +241,9 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
             if (!contents) return;
 
-            // Determine column count from user settings per page type
-            // homeColumns === 0 means "auto" — defer to --ypp-dynamic-cols set by AutoScaleGrid
+            // Determine column count from user settings per page type.
+            // homeColumns === 0 means "auto" — use AutoScaleGrid.calculateColumns().
+            // homeColumns >= 1 means manual slider — use that value directly, no AutoScaleGrid involved.
             let cols = Number(this.settings?.homeColumns || 0);
             const path = window.location.pathname;
             if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
@@ -233,20 +254,20 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                 cols = Number(this.settings?.subscriptionsColumns || 4);
             }
 
-            // Apply auto-scale grid logic if enabled via AutoScaleGrid
+            // Auto mode on home page: call AutoScaleGrid directly (no CSS var middleman).
+            // This eliminates any race condition — the calculation is synchronous and pure.
             const isHome = path === '/' || path === '/index';
             if (isHome && cols === 0) {
-                // Auto mode: read the value published by AutoScaleGrid
-                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
-                if (dynamicCols) {
-                    cols = parseInt(dynamicCols, 10);
-                    this.utils.log?.('Auto mode: using --ypp-dynamic-cols=' + cols, 'LAYOUT');
+                if (this.settings?.autoScaleLayout &&
+                    typeof window.YPP?.features?.AutoScaleGrid?.calculateColumns === 'function') {
+                    cols = window.YPP.features.AutoScaleGrid.calculateColumns();
+                    this.utils.log?.('Auto mode: AutoScaleGrid.calculateColumns()=' + cols, 'LAYOUT');
                 } else {
-                    // AutoScaleGrid hasn't run yet; use a safe default
-                    cols = 4;
-                    this.utils.log?.('Auto mode: --ypp-dynamic-cols not set yet, defaulting to 4', 'LAYOUT');
+                    cols = 4; // AutoScaleGrid off + no manual value → safe default
+                    this.utils.log?.('Auto mode: AutoScaleGrid disabled, defaulting to 4', 'LAYOUT');
                 }
             }
+
             
             this.utils.log?.('applyGridLayout cols evaluated to: ' + cols + ' for path: ' + path, 'LAYOUT');
 

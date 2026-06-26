@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS = {
     homeColumns: 0,  // 0 = auto (driven by AutoScaleGrid), 1–10 = manual override
     searchColumns: 4,
     channelColumns: 4,
+    subscriptionsColumns: 4,
     historyColumns: 4,
     displayFullTitle: false,
 

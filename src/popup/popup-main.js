@@ -320,16 +320,6 @@ const initUniversalListeners = (document, state, UI, saveSettings) => {
         if (slider) {
             slider.addEventListener('input', () => {
                 if (display) display.textContent = slider.value;
-                // When the user manually picks a column count, disable AutoScaleGrid
-                // so it doesn't immediately override the manual value.
-                // We must fire 'change' on the checkbox so saveSettings() persists it.
-                if (key.includes('Columns')) {
-                    const autoScaleEl = state.elements['autoScaleLayout'];
-                    if (autoScaleEl && autoScaleEl.checked) {
-                        autoScaleEl.checked = false;
-                        autoScaleEl.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                }
                 saveSettings(() => UI.showSaveIndicator(document));
             });
         }
