@@ -26,9 +26,15 @@ window.YPP.features.AutoScaleGrid = class AutoScaleGrid extends window.YPP.featu
     async disable() {
         document.documentElement.style.setProperty('--ypp-auto-scale', 1);
         document.documentElement.style.removeProperty('--ypp-dynamic-cols');
-        // Let LayoutManager handle --ypp-active-columns based on homeColumns setting.
         this.cleanupEvents();
         this._resizeListener = null;
+
+        // Signal the Layout feature to immediately re-apply its own column settings
+        // now that we've cleared --ypp-dynamic-cols.
+        const layoutFeature = window.YPP?.featureManager?.getFeature?.('layout');
+        if (layoutFeature && typeof layoutFeature.onUpdate === 'function' && layoutFeature.settings) {
+            layoutFeature.onUpdate();
+        }
     }
     
     async onUpdate() {

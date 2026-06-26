@@ -118,9 +118,11 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                 document.documentElement.style.removeProperty('--ypp-dynamic-cols');
             }
 
-            // Force re-apply of grid structural styles when settings change
+            // Apply instantly (synchronous) so the column change is visible
+            // in the same animation frame as the slider input event —
+            // don't wait for the RAF debounce or featureManager.init() chain.
             this._processedContainers = new WeakSet();
-            this._debouncedApply();
+            this.applyGridLayout();
         }
     }
 
