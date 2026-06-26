@@ -101,11 +101,13 @@ body.ypp-search-grid-mode ytd-item-section-renderer:not([hidden]) > #contents {
 body.ypp-search-grid-mode
   ytd-item-section-renderer
   > #contents
-  > *:not(ytd-video-renderer):not(ytd-playlist-renderer):not(ytd-radio-renderer):not(
+  > *:not(ytd-video-renderer):not(ytd-compact-video-renderer):not(ytd-playlist-renderer):not(ytd-radio-renderer):not(
     ytd-channel-renderer
   ):not(ytd-shelf-renderer):not(ytd-reel-shelf-renderer):not(ytd-horizontal-card-list-renderer):not(
     ytd-rich-shelf-renderer
-  ):not(ytd-search-sub-menu-renderer):not(ytd-continuation-item-renderer) {
+  ):not(ytd-search-sub-menu-renderer):not(ytd-continuation-item-renderer):not(
+    yt-lockup-view-model
+  ):not(ytd-lockup-view-model) {
   display: none !important;
 }
 
@@ -187,6 +189,52 @@ body.ypp-search-grid-mode ytd-radio-renderer {
   grid-template-rows: auto 1fr !important;
   overflow: hidden !important;
   position: relative !important;
+}
+
+/* Grid layout for song/compact results and newer lockup card types */
+body.ypp-search-grid-mode ytd-compact-video-renderer,
+body.ypp-search-grid-mode yt-lockup-view-model,
+body.ypp-search-grid-mode ytd-lockup-view-model {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  flex: none !important;
+  align-self: stretch !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+body.ypp-search-grid-mode ytd-compact-video-renderer ytd-thumbnail,
+body.ypp-search-grid-mode yt-lockup-view-model ytd-thumbnail,
+body.ypp-search-grid-mode yt-lockup-view-model .yt-lockup-view-model-wiz__image,
+body.ypp-search-grid-mode ytd-lockup-view-model ytd-thumbnail,
+body.ypp-search-grid-mode ytd-lockup-view-model .yt-lockup-view-model-wiz__image {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+body.ypp-search-grid-mode ytd-compact-video-renderer #dismissible {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+body.ypp-search-grid-mode ytd-compact-video-renderer .text-wrapper,
+body.ypp-search-grid-mode ytd-compact-video-renderer #meta {
+  margin-left: 0 !important;
+  margin-top: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 !important;
 }
 
 /* PREMIUM POLISH: Channel Card Grid Layout */

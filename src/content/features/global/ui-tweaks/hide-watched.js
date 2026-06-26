@@ -76,8 +76,38 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             // dom:mutated fires with MutationRecord[] — extract added card nodes
             // directly so we avoid a full querySelectorAll sweep on every mutation.
             this.onBusEvent('dom:mutated', (mutations) => this._processMutatedNodes(mutations));
-            window.YPP.sharedObserver.register('hide-watched-progress', 'ytd-thumbnail-overlay-resume-playback-renderer, .thumbnail-overlay-resume-playback-progress, .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment', this._boundProcessProgress, false);
+            // Register direct card selector so newly added cards (infinite scroll)
+            // are caught immediately without waiting for a full page sweep.
+            window.YPP.sharedObserver.register(
+                'hide-watched-cards',
+                HideWatched.CARD_SELECTORS,
+                (nodes) => {
+                    if (!this.isEnabled) return;
+                    const watchedIds = this._getWatchedIds();
+                    const threshold  = this.settings?.hideWatchedThreshold ?? 80;
+                    nodes.forEach(card => this._evaluateCard(card, watchedIds, threshold));
+                }
+            );
+            window.YPP.sharedObserver.register(
+                'hide-watched-progress',
+                'ytd-thumbnail-overlay-resume-playback-renderer, .thumbnail-overlay-resume-playback-progress, .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment',
+                this._boundProcessProgress,
+                false
+            );
         }
+
+        // IntersectionObserver: catch cards that scroll into view after initial page load.
+        // YouTube defers hydrating off-screen cards, so their progress bar / video-id
+        // may not be set until the card is near the viewport.
+        this._setupScrollDetection();
+
+        // Re-process all cards on SPA navigation (clears stamps so recycled DOM is re-checked)
+        this.addListener(window, 'yt-navigate-finish', () => {
+            document.querySelectorAll('[data-ypp-watched-processed]').forEach(card => {
+                delete card.dataset.yppWatchedProcessed;
+            });
+            this._scheduleProcess();
+        });
     }
 
     async disable() {
@@ -86,6 +116,12 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         if (this._debounceTimer) {
             clearTimeout(this._debounceTimer);
             this._debounceTimer = null;
+        }
+
+        // Tear down IntersectionObserver
+        if (this._scrollObserver) {
+            this._scrollObserver.disconnect();
+            this._scrollObserver = null;
         }
         
         if (window.YPP && window.YPP.sharedObserver) {
@@ -103,6 +139,11 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         // Clear processing stamps so re-enabling works instantly
         document.querySelectorAll('[data-ypp-watched-processed]').forEach(card => {
             delete card.dataset.yppWatchedProcessed;
+        });
+
+        // Clear scroll-observed stamps
+        document.querySelectorAll('[data-ypp-scroll-observed]').forEach(card => {
+            delete card.dataset.yppScrollObserved;
         });
     }
 
@@ -288,6 +329,9 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         cardsToProcess.forEach(card => {
             this._evaluateCard(card, watchedIds, threshold);
         });
+
+        // Register any newly found cards with the scroll observer
+        this._observeExistingCards();
     }
     
     _evaluateCard(card, watchedIds, threshold) {
@@ -319,4 +363,50 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             this.utils.log(err.message, 'HIDE_WATCHED', 'debug');
         }
     }
+
+    /**
+     * Set up an IntersectionObserver to detect cards scrolling into view.
+     * YouTube defers setting progress bars / data attributes on off-screen cards,
+     * so we must re-evaluate each card the first time it becomes visible.
+     */
+    _setupScrollDetection() {
+        if (this._scrollObserver) {
+            this._scrollObserver.disconnect();
+        }
+
+        this._scrollObserver = new IntersectionObserver((entries) => {
+            if (!this.isEnabled) return;
+            const watchedIds = this._getWatchedIds();
+            const threshold  = this.settings?.hideWatchedThreshold ?? 80;
+
+            for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                const card = entry.target;
+                // Clear the stamp so we force re-evaluation now that it's visible
+                // (the card may have had its progress bar set after initial processing)
+                delete card.dataset.yppWatchedProcessed;
+                this._evaluateCard(card, watchedIds, threshold);
+                // Once seen, stop observing — it will be re-checked by sharedObserver on future mutations
+                this._scrollObserver?.unobserve(card);
+            }
+        }, {
+            rootMargin: '200px 0px',  // start processing 200px before card enters viewport
+            threshold: 0
+        });
+
+        // Observe all currently unprocessed cards
+        this._observeExistingCards();
+    }
+
+    /** Start observing all current cards that haven't been scroll-detected yet. */
+    _observeExistingCards() {
+        if (!this._scrollObserver) return;
+        document.querySelectorAll(HideWatched.CARD_SELECTORS).forEach(card => {
+            if (!card.dataset.yppScrollObserved) {
+                card.dataset.yppScrollObserved = '1';
+                this._scrollObserver.observe(card);
+            }
+        });
+    }
 };
+

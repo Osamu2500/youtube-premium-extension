@@ -93,16 +93,21 @@ body.yt-premium-plus-theme ytd-radio-renderer:hover ytd-thumbnail-overlay-bottom
 }
 .ypp-grid-container {
   display: grid !important;
+  /* Fallback chain: manual columns → auto-scale columns → default 4 */
   grid-template-columns: repeat(
-    var(--ypp-active-columns, 4),
+    var(--ypp-active-columns, var(--ypp-dynamic-cols, 4)),
     minmax(0, 1fr)
   ) !important;
+  /* dense: when cards are hidden (watched, filtered) subsequent cards fill the gaps
+     automatically without leaving empty column cells */
+  grid-auto-flow: dense !important;
   gap: 24px 16px !important;
   width: 100% !important;
   padding: 0 !important;
   margin: 0 !important;
   flex-wrap: nowrap !important;
   box-sizing: border-box !important;
+  align-items: start !important;
 }
 .ypp-grid-item,
 .ypp-grid-container ytd-rich-item-renderer,
@@ -531,16 +536,6 @@ body.yt-premium-plus-theme ytd-compact-video-renderer:hover {
   transform: translateX(8px) !important;
   background-color: rgba(255, 255, 255, 0.05) !important;
 }
-.ypp-grid-container {
-  display: grid !important;
-  gap: 16px !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 auto !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  align-items: start !important;
-}
 .ypp-grid-item {
   width: 100% !important;
   max-width: 100% !important;
@@ -605,4 +600,8 @@ body.ypp-hide-playlists ytd-compact-video-renderer:has(a.ytd-thumbnail[href*='li
     display: none !important;
 }
 
+/* ytd-rich-grid-row uses display:contents to flatten row wrappers.
+   This makes individual ytd-rich-item-renderer cards direct children of the
+   #contents CSS grid, so grid-template-columns controls per-card column widths.
+   Without this, grid-template-columns only places row-wrapper blocks in columns. */
 ytd-rich-grid-row, #contents > ytd-rich-grid-row, ytd-rich-grid-row > #contents { display: contents !important; }

@@ -305,7 +305,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             // Also set dense auto-flow so hidden items (Shorts, watched, filtered) don't leave blank cells
             contents.style.setProperty('grid-auto-flow', 'dense', 'important');
 
-            // Ensure CSS knows the active column count
+            // Ensure CSS knows the active column count (drives --ytd-rich-grid-items-per-row via CSS rule)
             document.documentElement.style.setProperty('--ypp-active-columns', cols);
 
             // Update the CSS min-column variable so responsive breakpoints in styles.css stay consistent

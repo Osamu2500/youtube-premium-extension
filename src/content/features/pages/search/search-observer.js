@@ -25,6 +25,7 @@ window.YPP.features.SearchObserver = class SearchObserver {
 
     static VIDEO_TAGS = new Set([
         'ytd-video-renderer',
+        'ytd-compact-video-renderer', // used by music/song results and some compact search layouts
         'ytd-playlist-renderer',
         'ytd-radio-renderer',
         'ytd-channel-renderer',
@@ -203,11 +204,12 @@ window.YPP.features.SearchObserver = class SearchObserver {
                 let cleanData = null;
                 if (stats.hasVideos || isGridContainer) {
                     if (
-                        tag === 'ytd-video-renderer'    ||
-                        tag === 'ytd-radio-renderer'    ||
-                        tag === 'ytd-playlist-renderer' ||
-                        tag === 'ytd-channel-renderer'  ||
-                        tag === 'yt-lockup-view-model'  ||
+                        tag === 'ytd-video-renderer'         ||
+                        tag === 'ytd-compact-video-renderer' ||  // music/song cards
+                        tag === 'ytd-radio-renderer'         ||
+                        tag === 'ytd-playlist-renderer'      ||
+                        tag === 'ytd-channel-renderer'       ||
+                        tag === 'yt-lockup-view-model'       ||
                         tag === 'ytd-lockup-view-model'
                     ) {
                         const thumb = node.querySelector('ytd-thumbnail, ytd-playlist-thumbnail');
@@ -264,11 +266,12 @@ window.YPP.features.SearchObserver = class SearchObserver {
 
                     if (stats.hasVideos || isGridContainer) {
                         if (
-                            op.tag === 'ytd-video-renderer'    ||
-                            op.tag === 'ytd-radio-renderer'    ||
-                            op.tag === 'ytd-playlist-renderer' ||
-                            op.tag === 'ytd-channel-renderer'  ||
-                            op.tag === 'yt-lockup-view-model'  ||
+                            op.tag === 'ytd-video-renderer'         ||
+                            op.tag === 'ytd-compact-video-renderer' ||  // music/song results
+                            op.tag === 'ytd-radio-renderer'         ||
+                            op.tag === 'ytd-playlist-renderer'      ||
+                            op.tag === 'ytd-channel-renderer'       ||
+                            op.tag === 'yt-lockup-view-model'       ||
                             op.tag === 'ytd-lockup-view-model'
                         ) {
                             op.node.classList.add(CLASSES.GRID_ITEM);

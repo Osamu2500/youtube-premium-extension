@@ -222,7 +222,7 @@ window.YPP.features.MultiSelect = class MultiSelect
                             <line x1="3" y1="12" x2="3.01" y2="12"/>
                             <line x1="3" y1="18" x2="3.01" y2="18"/>
                         </svg>
-                        Add to Queue
+                        Open First
                     </button>
                     <button class="ypp-ms-btn" id="ypp-ms-playlist">
                         <svg viewBox="0 0 24 24" width="15" height="15" 
@@ -249,6 +249,14 @@ window.YPP.features.MultiSelect = class MultiSelect
                         </svg>
                         Not Interested
                     </button>
+                    <button class="ypp-ms-btn" id="ypp-ms-watched">
+                        <svg viewBox="0 0 24 24" width="15" height="15"
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Mark Watched
+                    </button>
                     <button class="ypp-ms-btn ypp-ms-btn-clear" 
                         id="ypp-ms-clear">
                         ✕ Clear
@@ -269,6 +277,9 @@ window.YPP.features.MultiSelect = class MultiSelect
             const niBtn = this._actionBar.querySelector('#ypp-ms-not-interested');
             if (niBtn) this.addListener(niBtn, 'click', () => this._markNotInterested());
 
+            const watchedBtn = this._actionBar.querySelector('#ypp-ms-watched');
+            if (watchedBtn) this.addListener(watchedBtn, 'click', () => this._markSelectedWatched());
+
             const clearBtn = this._actionBar.querySelector('#ypp-ms-clear');
             if (clearBtn) this.addListener(clearBtn, 'click', () => this._clearAll());
         }
@@ -282,17 +293,24 @@ window.YPP.features.MultiSelect = class MultiSelect
 
     _addToQueue() {
         const videos = [...this._selected.values()];
-        // Open each video URL — YouTube adds to queue when navigating
-        // with a video already playing
-        videos.forEach(({ href }, i) => {
-            setTimeout(() => {
-                // Trigger YouTube's native "Add to queue" by navigating
-                // with &list= parameter or using the internal API
-                window.open(href, '_blank');
-            }, i * 200);
-        });
+        if (!videos.length) return;
 
-        this._showToast(`${videos.length} videos added to queue`);
+        // YouTube has no public extension API for batch-queuing.
+        // Best approach: navigate to the first video via SPA nav.
+        // The user can then use YouTube's native queue for additional videos.
+        const first = videos[0];
+        const ytApp = document.querySelector('ytd-app');
+        if (ytApp && typeof ytApp.fire === 'function') {
+            ytApp.fire('yt-navigate', { url: first.href });
+        } else {
+            window.location.href = first.href;
+        }
+
+        if (videos.length > 1) {
+            this._showToast(`Navigated to first video. Use YouTube's queue (⋮ menu) to add the other ${videos.length - 1}.`);
+        } else {
+            this._showToast('Navigated to video.');
+        }
         this._clearAll();
     }
 
@@ -402,6 +420,33 @@ window.YPP.features.MultiSelect = class MultiSelect
     _showToast(message) {
         window.YPP.Utils?.showToast?.(message) ||
         this._log(message);
+    }
+
+    /** 
+     * Marks all selected videos as watched via the MarkWatched feature.
+     * Requires the MarkWatched feature to be enabled.
+     */
+    _markSelectedWatched() {
+        const markWatched = window.YPP.featureManager?.getFeature?.('MarkWatched')
+            || window.YPP.featureManager?.features?.['MarkWatched'];
+
+        if (!markWatched) {
+            this._showToast('Enable "Mark as Watched" feature first');
+            return;
+        }
+
+        let count = 0;
+        for (const { href } of this._selected.values()) {
+            const match = href.match(/[?&]v=([^&]+)|\/shorts\/([^/?]+)/);
+            const videoId = match?.[1] || match?.[2];
+            if (videoId) {
+                markWatched.markAsWatched(videoId);
+                count++;
+            }
+        }
+
+        this._showToast(`${count} video${count !== 1 ? 's' : ''} marked as watched`);
+        this._clearAll();
     }
 
     /** @param {string} message */

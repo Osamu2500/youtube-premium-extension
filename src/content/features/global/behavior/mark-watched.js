@@ -28,7 +28,7 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
         this._boundNavigate = this._onNavigate.bind(this);
         this._activeVideoEl = null;
         this._onTimeUpdateBinded = null;
-        this._clickCloseListeners = [];
+        // Note: context menu close listener is tracked via this.addListener() — no separate array needed
     }
 
     getConfigKey() { return 'enableMarkWatched'; }
@@ -200,9 +200,20 @@ window.YPP.features.MarkWatched = class MarkWatched extends window.YPP.features.
 
             const progress = card.querySelector(MarkWatched.SELECTORS.PROGRESS);
             if (progress) {
-                const width = parseFloat(progress.style.width) || 0;
+                // Primary: inline style.width (e.g. style="width: 75%")
+                let watchedPercent = parseFloat(progress.style.width) || 0;
+
+                // Fallback: computed width vs parent width (handles CSS-var or class-based width)
+                if (!watchedPercent) {
+                    const parentWidth = progress.parentElement?.getBoundingClientRect().width;
+                    const computedWidth = parseFloat(getComputedStyle(progress).width);
+                    if (parentWidth && computedWidth) {
+                        watchedPercent = (computedWidth / parentWidth) * 100;
+                    }
+                }
+
                 const threshold = this.settings?.hideWatchedThreshold || 80;
-                if (width >= threshold && !this._watchedIds.has(videoId)) {
+                if (watchedPercent >= threshold && !this._watchedIds.has(videoId)) {
                     this.markAsWatched(videoId);
                 }
             }
