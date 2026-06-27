@@ -1,0 +1,37 @@
+html.yt-premium-plus-theme {
+    --ypp-bg-base: #0a0604;
+    --ypp-bg-surface: #140b08;
+    --ypp-bg-glass: rgba(10, 6, 4, 0.95);
+    --ypp-glass-border: rgba(255, 102, 0, 0.15); /* Orange */
+    --ypp-glass-highlight: rgba(255, 102, 0, 0.2);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(255, 102, 0, 0.1) 0%, transparent 100%);
+    
+    --ypp-text-primary: #fff0e5;
+    --ypp-text-secondary: #ffb380;
+    
+    --ypp-accent: #0088cc; /* Chakra Blue */
+    --ypp-accent-hover: #00aaee;
+    --ypp-accent-glow: rgba(0, 136, 204, 0.4);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.9);
+    --ypp-shadow-glow: 0 0 24px rgba(255, 102, 0, 0.2);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+}
+
+@keyframes ypp-naruto-swirl {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    content: "";
+    position: fixed;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    z-index: -2;
+    pointer-events: none;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(0,136,204,0.05) 90deg, transparent 180deg, rgba(255,102,0,0.05) 270deg, transparent 360deg);
+    animation: ypp-naruto-swirl 30s linear infinite;
+    opacity: 0.8;
+}

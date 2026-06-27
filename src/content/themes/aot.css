@@ -1,0 +1,38 @@
+html.yt-premium-plus-theme {
+    --ypp-bg-base: #120e0a;
+    --ypp-bg-surface: #1e1711;
+    --ypp-bg-glass: rgba(18, 14, 10, 0.95);
+    --ypp-glass-border: rgba(139, 69, 19, 0.15); /* Scout Brown */
+    --ypp-glass-highlight: rgba(139, 69, 19, 0.2);
+    --ypp-glass-shine: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, transparent 100%);
+    
+    --ypp-text-primary: #e6dfd8;
+    --ypp-text-secondary: #b3a594;
+    
+    --ypp-accent: #8b4513;
+    --ypp-accent-hover: #a0522d;
+    --ypp-accent-glow: rgba(139, 69, 19, 0.5);
+
+    /* SHADOWS */
+    --ypp-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.7);
+    --ypp-shadow-float: 0 16px 48px rgba(0, 0, 0, 0.9);
+    --ypp-shadow-glow: 0 0 24px rgba(139, 69, 19, 0.2);
+    --ypp-shadow-accent-glow: 0 0 32px var(--ypp-accent-glow);
+}
+
+@keyframes ypp-aot-steam {
+    0% { transform: translateY(0) scale(1); opacity: 0.2; }
+    50% { transform: translateY(-50px) scale(1.1); opacity: 0.5; }
+    100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+}
+html.yt-premium-plus-theme.ypp-theme-effects::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    pointer-events: none;
+    background: radial-gradient(circle at bottom, rgba(200,50,50,0.05), transparent 50%),
+                radial-gradient(circle at center, rgba(100,50,20,0.05), transparent 70%);
+    animation: ypp-aot-steam 10s ease-out infinite;
+    opacity: 0.8;
+}
