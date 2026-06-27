@@ -352,30 +352,39 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         this._observeExistingCards();
     }
     
+    _getOutermostCard(card) {
+        if (!card) return null;
+        // If the card is an inner view model, try to find its parent rich-item-renderer
+        if (card.tagName.toLowerCase().includes('lockup-view-model')) {
+            const parentCard = card.closest('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer');
+            if (parentCard) return parentCard;
+        }
+        return card;
+    }
+
     _evaluateCard(card, watchedIds, threshold) {
         try {
             // Ignore fully hidden cards to skip wasteful processing
             if (card.hasAttribute('hidden') || card.style.display === 'none') return;
 
             const videoId = this._getVideoId(card);
-            // PERFORMANCE: Remove the DOM Stamping early-return guard entirely.
-            // Virtual DOM recycling causes videos to falsely appear hidden if a card's ID
-            // fails to parse quickly enough and we rely on a stale stamp. Always re-evaluate!
-
             const watched = this._isWatched(card, videoId, watchedIds, threshold);
 
-            const currentlyMarked = card.getAttribute('data-ypp-watched') === '1' || card.classList.contains('ypp-is-watched');
+            // Always target the outermost container so CSS Grid can collapse the cell
+            const targetCard = this._getOutermostCard(card);
+            if (!targetCard) return;
+
+            const currentlyMarked = targetCard.getAttribute('data-ypp-watched') === '1' || targetCard.classList.contains('ypp-is-watched');
 
             if (watched && !currentlyMarked) {
-                card.setAttribute('data-ypp-watched', '1');
-                card.classList.add('ypp-is-watched');
+                targetCard.setAttribute('data-ypp-watched', '1');
+                targetCard.classList.add('ypp-is-watched');
             } else if (!watched && currentlyMarked) {
-                card.removeAttribute('data-ypp-watched');
-                card.classList.remove('ypp-is-watched');
+                targetCard.removeAttribute('data-ypp-watched');
+                targetCard.classList.remove('ypp-is-watched');
             }
         } catch (err) {
             // Silently trap and ignore individual card processing errors
-            // This ensures a single malformed DOM node doesn't break the entire sweep
             this.utils.log(err.message, 'HIDE_WATCHED', 'debug');
         }
     }
@@ -425,7 +434,8 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     _markCardWatched(videoId) {
         if (!videoId) return;
         document.querySelectorAll(`[data-video-id="${videoId}"], [video-id="${videoId}"]`).forEach(el => {
-            const card = el.closest(HideWatched.CARD_SELECTORS);
+            let card = el.closest(HideWatched.CARD_SELECTORS);
+            card = this._getOutermostCard(card);
             if (card) {
                 card.setAttribute('data-ypp-watched', '1');
                 card.classList.add('ypp-is-watched');
@@ -436,7 +446,8 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     _unmarkCardWatched(videoId) {
         if (!videoId) return;
         document.querySelectorAll(`[data-video-id="${videoId}"], [video-id="${videoId}"]`).forEach(el => {
-            const card = el.closest(HideWatched.CARD_SELECTORS);
+            let card = el.closest(HideWatched.CARD_SELECTORS);
+            card = this._getOutermostCard(card);
             if (card) {
                 card.removeAttribute('data-ypp-watched');
                 card.classList.remove('ypp-is-watched');

@@ -279,17 +279,15 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
   }
 
   _navigateTo(url) {
-    // Use YouTube's native SPA navigation
-    const ytApp = document.querySelector('ytd-app');
-    if (ytApp && typeof ytApp.fire === 'function') {
-      ytApp.fire('yt-navigate', { url });
-    } else {
-      history.pushState(null, '', url);
-      window.dispatchEvent(new CustomEvent('yt-navigate-start', { detail: { url } }));
-      window.dispatchEvent(
-        new CustomEvent('yt-navigate-finish', { detail: { pageType: 'browse' } })
-      );
-    }
+    // Modern YouTube SPA routing:
+    // Create an invisible anchor tag and click it so YouTube's global 
+    // click listeners naturally intercept and route the navigation.
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   _updateActiveStates() {
