@@ -201,7 +201,8 @@ body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-
 }
 
 /* Consolidate Duplicate Hover Effects into One Premium Animation */
-body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover {
+html[data-ypp-card-style="default"] body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover,
+html:not([data-ypp-card-style]) body.yt-premium-plus-theme:not(.ypp-channel-page):not(.cinematic-home) ytd-rich-item-renderer:hover {
   /* Use only translateY — scale() can cause sub-pixel rendering gaps on edges causing artifact */
   transform: translateY(-6px) !important;
   background: linear-gradient(

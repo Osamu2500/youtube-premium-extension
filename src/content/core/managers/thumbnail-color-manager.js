@@ -78,7 +78,7 @@ export class ThumbnailColorManager {
     }
 
     getImage(el) {
-        let img = el.querySelector('yt-image img, ytd-thumbnail img');
+        let img = el.querySelector('yt-image img, ytd-thumbnail img, yt-lockup-view-model img, .yt-core-image');
         if (!img) {
             const ytImage = el.querySelector('yt-image');
             if (ytImage && ytImage.shadowRoot) {
@@ -94,7 +94,7 @@ export class ThumbnailColorManager {
         const img = this.getImage(el);
         const src = img ? img.src : null;
         
-        const isReady = src && !src.includes('data:image') && !src.includes('hqdefault');
+        const isReady = src && !src.includes('data:image');
 
         if (!isReady) {
             if (!el.hasAttribute('data-ypp-color-wait')) {
@@ -102,7 +102,7 @@ export class ThumbnailColorManager {
                 const mo = new MutationObserver(() => {
                     const currentImg = this.getImage(el);
                     const currentSrc = currentImg ? currentImg.src : null;
-                    if (currentSrc && !currentSrc.includes('data:image') && !currentSrc.includes('hqdefault')) {
+                    if (currentSrc && !currentSrc.includes('data:image')) {
                         mo.disconnect();
                         el.removeAttribute('data-ypp-color-wait');
                         this.processElement(el);
