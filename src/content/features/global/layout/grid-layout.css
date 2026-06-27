@@ -615,9 +615,3 @@ body.ypp-hide-playlists ytd-grid-video-renderer:has(a.ytd-thumbnail[href*='list=
 body.ypp-hide-playlists ytd-compact-video-renderer:has(a.ytd-thumbnail[href*='list=PL']) {
     display: none !important;
 }
-
-/* ytd-rich-grid-row uses display:contents to flatten row wrappers.
-   This makes individual ytd-rich-item-renderer cards direct children of the
-   #contents CSS grid, so grid-template-columns controls per-card column widths.
-   Without this, grid-template-columns only places row-wrapper blocks in columns. */
-ytd-rich-grid-row, #contents > ytd-rich-grid-row, ytd-rich-grid-row > #contents { display: contents !important; }

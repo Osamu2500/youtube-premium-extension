@@ -230,6 +230,12 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
         document.querySelectorAll('ytd-item-section-renderer, ytd-shelf-renderer').forEach(el => {
             if (el.style.display === 'none') el.style.display = '';
         });
+
+        // Ensure body classes do not leak to non-search pages
+        document.body.classList.remove(
+            SearchRedesign.CLASSES.GRID_MODE,
+            SearchRedesign.CLASSES.LIST_MODE
+        );
     }
 
     // =========================================================================

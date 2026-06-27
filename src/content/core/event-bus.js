@@ -36,13 +36,24 @@ window.YPP.core.EventBus = class EventBus {
 
         // Return unsubscribe mechanism
         return () => {
-            this.listeners[event] = this.listeners[event].filter(h => h !== handler);
-            // Update listener flag when the last 'dom:mutated' subscriber unsubscribes
-            if (event === EventBus.EVENTS.DOM_MUTATED) {
-                const remaining = (this.listeners[event] || []).length;
-                window.YPP?.sharedObserver?.setHasMutatedListeners(remaining > 0);
-            }
+            this.off(event, handler);
         };
+    }
+
+    /**
+     * Unsubscribe from an event
+     * @param {string} event - The event name
+     * @param {Function} handler - The callback function
+     */
+    off(event, handler) {
+        if (!this.listeners[event]) return;
+        this.listeners[event] = this.listeners[event].filter(h => h !== handler);
+        
+        // Update listener flag when the last 'dom:mutated' subscriber unsubscribes
+        if (event === EventBus.EVENTS.DOM_MUTATED) {
+            const remaining = (this.listeners[event] || []).length;
+            window.YPP?.sharedObserver?.setHasMutatedListeners(remaining > 0);
+        }
     }
 
     /**

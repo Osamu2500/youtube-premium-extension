@@ -39,6 +39,7 @@ export const DEFAULT_SETTINGS = {
     hideComments: false,
     hideLiveChat: false,
     hideFundraiser: false,
+    headerNavEnabled: true,
     hideEndScreens: false,
     hideSearchShelves: true,
     hideChannelCards: false,

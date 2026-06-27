@@ -90,7 +90,7 @@ window.YPP.Utils = Object.assign(window.YPP.Utils || {}, {
      */
     isHome: () => {
         const path = window.location.pathname;
-        return path === '/' || path === '/index' || path === '/feed/subscriptions';
+        return path === '/' || path === '/index';
     },
 
     /**
