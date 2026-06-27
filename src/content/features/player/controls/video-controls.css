@@ -37,11 +37,13 @@
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--ypp-radius);
     padding: 0;
-    z-index: 999999;
+    z-index: 9999;
     box-shadow: var(--ypp-shadow);
     transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.25s step-end;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     transform: translateY(-8px) scale(calc(0.97 * var(--ypp-auto-scale, 1)));
     display: flex;
@@ -54,7 +56,15 @@
 #ypp-video-control-panel.visible {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0s step-start;
     transform: translateY(0) scale(var(--ypp-auto-scale, 1));
+}
+
+#ypp-video-control-panel:not(.visible) * {
+    pointer-events: none !important;
 }
 
 #ypp-video-control-panel.dragging {

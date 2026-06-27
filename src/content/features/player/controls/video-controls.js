@@ -54,6 +54,13 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
         // Clean up audio chain
         this._teardownAudio();
 
+        // Clean up video inline styles to prevent breaking YouTube controls
+        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
+        if (video) {
+            video.style.filter = '';
+            video.style.transform = '';
+        }
+
         // Remove CSS
         this.utils?.removeStyle('ypp-video-controls-css');
     }
@@ -377,11 +384,21 @@ window.YPP.features.VideoControls = class VideoControls extends window.YPP.featu
             const gray = grayBtn.classList.contains('active') ? 'grayscale(100%)' : '';
             const flip = flipBtn.classList.contains('active');
             
-            let filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg) ${sepia} ${gray}`.trim();
-            let transform = flip ? 'scaleX(-1)' : 'none';
+            let filterParts = [
+                `brightness(${b}%)`,
+                `contrast(${c}%)`,
+                `saturate(${s}%)`,
+                `hue-rotate(${h}deg)`,
+                sepia,
+                gray
+            ];
             
-            video.style.filter = filter;
-            video.style.transform = transform;
+            if (flip) {
+                filterParts.push('scaleX(-1)');
+            }
+            
+            video.style.filter = filterParts.filter(Boolean).join(' ').trim();
+            video.style.transform = ''; // Ensure no transform interferes with YouTube controls
             
             this.panel.querySelector('#ypp-bright-val').textContent = b + '%';
             this.panel.querySelector('#ypp-contrast-val').textContent = c + '%';

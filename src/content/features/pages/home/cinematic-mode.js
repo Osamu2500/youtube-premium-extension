@@ -302,26 +302,47 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         this._syncMuteState();
     }
 
-    async _waitForPreview(videoElement, retries = 3) {
-        for (let i = 0; i < retries; i++) {
-            await this._simulateHover(videoElement);
-            const preview = videoElement.querySelector('ytd-video-preview');
-            if (preview) return preview;
-            await new Promise(r => setTimeout(r, 500));
+    _injectHeroVideo(videoId) {
+        if (!this._heroState.heroElement) return;
+        
+        let iframe = this._heroState.heroElement.querySelector('.netflix-hero-iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.className = 'netflix-hero-iframe';
+            iframe.allow = "autoplay; encrypted-media";
+            iframe.style.cssText = 'position: absolute; top: -50%; left: 0; width: 100vw; height: 200vh; pointer-events: none; z-index: 1; border: none; opacity: 0; transition: opacity 1s ease-in-out; transform: scale(1.1);';
+            this._heroState.heroElement.insertBefore(iframe, this._heroState.heroElement.querySelector('.netflix-hero-gradient') || this._heroState.heroElement.firstChild);
+
+            // Lazy loading via IntersectionObserver
+            this._heroObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        iframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                    } else {
+                        iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                    }
+                });
+            }, { threshold: 0.1 });
+            this._heroObserver.observe(this._heroState.heroElement);
         }
-        return null;
+        
+        iframe.style.opacity = '0';
+        // Muted autoplaying YouTube embed with JS API enabled
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&playsinline=1&rel=0&showinfo=0&disablekb=1&fs=0&iv_load_policy=3&enablejsapi=1`;
+        
+        iframe.onload = () => {
+            iframe.style.opacity = '1';
+        };
     }
 
-    _projectPreview(preview) {
-        if (!preview) return;
-        preview.classList.add('ypp-projected-preview');
-        this._heroState.projectedPreview = preview;
-    }
-
-    _releaseProjectedPreview() {
-        if (this._heroState.projectedPreview) {
-            this._heroState.projectedPreview.classList.remove('ypp-projected-preview');
-            this._heroState.projectedPreview = null;
+    _releaseHeroVideo() {
+        if (this._heroObserver && this._heroState.heroElement) {
+            this._heroObserver.disconnect();
+            this._heroObserver = null;
+        }
+        const iframe = this._heroState.heroElement?.querySelector('.netflix-hero-iframe');
+        if (iframe) {
+            iframe.remove();
         }
     }
 
@@ -348,29 +369,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                     this._heroState.heroElement.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
                 }
 
-                this._waitForPreview(videoElement).then(async preview => {
-                    if (!preview && this._videoQueue.length > 1) {
-                        this.utils.log("Native preview failed for first video, retrying next video...", "CINEMATIC", "warn");
-                        this._currentVideoIndex = (this._currentVideoIndex + 1) % this._videoQueue.length;
-                        const nextVideo = this._videoQueue[this._currentVideoIndex];
-                        preview = await this._waitForPreview(nextVideo);
-                        if (preview && this._heroState.heroElement) {
-                            this._heroState.currentVideo = nextVideo;
-                            this._updateHeroContent(nextVideo);
-                        }
-                    }
-                    
-                    if (preview && this._heroState.heroElement) {
-                        this._heroState.heroElement.classList.remove('netflix-hero-ken-burns');
-                        this._heroState.heroElement.style.backgroundImage = 'none';
-                        this._releaseProjectedPreview();
-                        this._projectPreview(preview);
-                    } else if (!preview) {
-                        this.utils.log("All native preview attempts failed, sticking with Ken Burns fallback", "CINEMATIC", "warn");
-                    }
-                }).catch(e => {
-                    this.utils.log(e.message, "CINEMATIC", "error");
-                });
+                this._injectHeroVideo(videoId);
+                this._heroState.heroElement.classList.remove('netflix-hero-ken-burns');
+                // Keep the background image as a fallback behind the iframe while it loads
+
                 return;
             }
 
@@ -422,29 +424,8 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 }
             });
 
-            this._waitForPreview(videoElement).then(async preview => {
-                if (!preview && this._videoQueue.length > 1) {
-                    this.utils.log("Native preview failed for first video, retrying next video...", "CINEMATIC", "warn");
-                    this._currentVideoIndex = (this._currentVideoIndex + 1) % this._videoQueue.length;
-                    const nextVideo = this._videoQueue[this._currentVideoIndex];
-                    preview = await this._waitForPreview(nextVideo);
-                    if (preview && this._heroState.heroElement === heroWrapper) {
-                        this._heroState.currentVideo = nextVideo;
-                        this._updateHeroContent(nextVideo);
-                    }
-                }
-                
-                if (preview && this._heroState.heroElement === heroWrapper) {
-                    heroWrapper.classList.remove('netflix-hero-ken-burns');
-                    heroWrapper.style.backgroundImage = 'none';
-                    this._releaseProjectedPreview();
-                    this._projectPreview(preview);
-                } else if (!preview) {
-                    this.utils.log("All native preview attempts failed, sticking with Ken Burns fallback", "CINEMATIC", "warn");
-                }
-            }).catch(e => {
-                this.utils.log(e.message, "CINEMATIC", "error");
-            });
+            this._injectHeroVideo(videoId);
+            this._heroState.heroElement.classList.remove('netflix-hero-ken-burns');
 
         } catch (e) {
             this.utils.log(e.message, "CINEMATIC", "error");
@@ -630,15 +611,10 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
 
     _syncMuteState() {
-        // Native YouTube preview handles mute toggle via DOM
-        const preview = document.querySelector(CinematicMode.SELECTORS.YTD_VIDEO_PREVIEW);
-        const muteButton = preview?.querySelector('yt-mute-toggle-button button');
-        
-        if (muteButton) {
-            const isMutedNow = muteButton.getAttribute('aria-label')?.toLowerCase().includes('unmute');
-            if (isMutedNow !== this._isMuted) {
-                muteButton.click();
-            }
+        const iframe = this._heroState.heroElement?.querySelector('.netflix-hero-iframe');
+        if (iframe) {
+            const command = this._isMuted ? 'mute' : 'unMute';
+            iframe.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*');
         }
     }
 
@@ -835,6 +811,12 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                         requestAnimationFrame(() => {
                             if (this._cachedContents) {
                                 this._cachedContents.scrollLeft += _wheelDelta;
+                                
+                                // Parallax Effect
+                                const iframe = this._heroState.heroElement?.querySelector('.netflix-hero-iframe');
+                                if (iframe) {
+                                    iframe.style.transform = `scale(1.1) translateX(${-(this._cachedContents.scrollLeft * 0.05)}px)`;
+                                }
                             }
                             _wheelDelta = 0;
                             _isWheelTicking = false;
@@ -878,14 +860,23 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 case 'Space':
                     e.preventDefault();
                     contents.scrollLeft += this.CONFIG.SCROLL_AMOUNT;
+                    this._applyParallax(contents);
                     break;
                 case 'ArrowUp':
                 case 'PageUp':
                     e.preventDefault();
                     contents.scrollLeft -= this.CONFIG.SCROLL_AMOUNT;
+                    this._applyParallax(contents);
                     break;
             }
         }, { signal: this._abortController.signal });
+    }
+
+    _applyParallax(contents) {
+        const iframe = this._heroState.heroElement?.querySelector('.netflix-hero-iframe');
+        if (iframe) {
+            iframe.style.transform = `scale(1.1) translateX(${-(contents.scrollLeft * 0.05)}px)`;
+        }
     }
 
     _onNavigateFinish() {
@@ -900,11 +891,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 const c = document.querySelector('#content');
                 if (c) c.style.visibility = 'hidden';
             }
-            this.onPageChange();
-        } else {
-            const isHomePage = (newPathname === '/' || newPathname.includes('/feed/subscriptions'));
-            document.body.classList.toggle(CinematicMode.CLASSES.CINEMATIC_HOME, isHomePage);
         }
+        
+        this.onPageChange();
         this._lastPathname = newPathname;
     }
 
@@ -952,7 +941,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 video.classList.remove(CinematicMode.CLASSES.FADING_PREVIEW);
             });
             
-            this._releaseProjectedPreview();
+            this._releaseHeroVideo();
 
             if (!this._cinematicActive || this._heroState.status !== 'ready') return;
             
@@ -966,15 +955,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             if (videoId) {
                 heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
                 heroWrapper.classList.add('netflix-hero-ken-burns');
+                this._injectHeroVideo(videoId);
+                heroWrapper.classList.remove('netflix-hero-ken-burns');
             }
-            
-            this._waitForPreview(nextVideo).then(preview => {
-                if (preview && this._heroState.heroElement === heroWrapper && this._heroState.currentVideo === nextVideo) {
-                    heroWrapper.classList.remove('netflix-hero-ken-burns');
-                    heroWrapper.style.backgroundImage = 'none';
-                    this._projectPreview(preview);
-                }
-            });
 
             heroWrapper.classList.remove(CinematicMode.CLASSES.FADING);
             this._updateMuteButtonVisibility();
@@ -990,7 +973,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         if (this._heroState.status === 'inactive') return;
         this._heroState.status = 'destroying';
         
-        this._releaseProjectedPreview();
+        this._releaseHeroVideo();
         
         this._heroState.observers.forEach(obs => obs.disconnect());
         this._heroState.observers.clear();

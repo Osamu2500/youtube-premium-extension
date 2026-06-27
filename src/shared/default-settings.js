@@ -63,6 +63,8 @@ export const DEFAULT_SETTINGS = {
     enableRemainingTime: true,
     enableVolumeBoost: true,
     volumeLevel: 1,
+    volumeWidener: false,
+    volumeWarmth: 0,
     volumeBoostBass: 0,
     volumeBoostTreble: 0,
 

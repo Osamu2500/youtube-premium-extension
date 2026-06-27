@@ -17,6 +17,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                     volumeBalance: ctxArg._balance,
                     volumeCompressor: ctxArg._compressorEnabled,
                     volumeMono: ctxArg._monoEnabled,
+                    volumeWidener: ctxArg._widenerEnabled,
+                    volumeWarmth: ctxArg._warmthLevel,
                     volumeEqBands: JSON.stringify(ctxArg._eqGains)
                 });
             }, 300);
@@ -292,6 +294,10 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             dynPanel.appendChild(mkDynRow('Attack', 0, 1, 0.01, 0.003, 's', v => { ctx.compressorNode.attack.value = v; }));
             dynPanel.appendChild(mkDynRow('Release', 0, 1, 0.01, 0.25, 's', v => { ctx.compressorNode.release.value = v; }));
             dynPanel.appendChild(mkDynRow('Knee', 0, 40, 1, 30, 'dB', v => { ctx.compressorNode.knee.value = v; }));
+            dynPanel.appendChild(mkDynRow('Tube Warmth', 0, 100, 1, ctx._warmthLevel || 0, '%', v => { 
+                if (ctx.setWarmth) ctx.setWarmth(v); 
+                VolumeBoosterUI.saveVolumeSettings(ctx);
+            }));
         } else {
             dynPanel.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:12px;">Compressor unavailable — audio not initialised yet.</div>';
         }
@@ -301,8 +307,11 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         const spaPanel = document.createElement('div');
         spaPanel.id = 'ypp-eq-tab-spa';
         spaPanel.style.cssText = 'padding:16px 18px;display:none;';
-        const stereoRow = mkDynRow('Stereo Width', 0, 200, 1, 100, '%', v => {
-            if (ctx.setWidth) ctx.setWidth(v / 100);
+        const stereoRow = mkDynRow('Stereo Width', 0, 100, 1, ctx._widenerEnabled ? 100 : 0, '%', v => {
+            if (ctx.setWidener) {
+                ctx.setWidener(v > 50);
+                VolumeBoosterUI.saveVolumeSettings(ctx);
+            }
         });
         spaPanel.appendChild(stereoRow);
         const monoRow2 = mkDynRow('Mono Mix', 0, 100, 1, 0, '%', v => {

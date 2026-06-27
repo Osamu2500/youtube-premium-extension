@@ -19,6 +19,11 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.compressorNode = null;
         this.pannerNode = null;
         this.analyserNode = null;
+        this.waveShaperNode = null;
+        this.widenerSplitter = null;
+        this.widenerMerger = null;
+        this.widenerDelay = null;
+        this.widenerGain = null;
         this._eqNodes = [];          // 10 BiquadFilterNodes
         
         // State
@@ -27,6 +32,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this._eqGains = new Array(10).fill(0);   // current dB per band
         this._volumeGain = 1.0;                  // 1.0 = 100%
         this._balance = 0.0;                     // -1.0 (Left) to 1.0 (Right)
+        this._widenerEnabled = false;
+        this._warmthLevel = 0;                   // 0 to 100
 
         // DOM refs
         this._volumePopup = null;
@@ -74,6 +81,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         if (settings.volumeBalance !== undefined) this._balance = settings.volumeBalance;
         if (settings.volumeCompressor !== undefined) this._compressorEnabled = settings.volumeCompressor;
         if (settings.volumeMono !== undefined) this._monoEnabled = settings.volumeMono;
+        if (settings.volumeWidener !== undefined) this._widenerEnabled = settings.volumeWidener;
+        if (settings.volumeWarmth !== undefined) this._warmthLevel = settings.volumeWarmth;
         if (settings.volumeEqBands) {
             try {
                 const bands = JSON.parse(settings.volumeEqBands);
@@ -143,6 +152,12 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
                 this.source.channelCount = 2;
                 this.source.channelCountMode = 'max';
             }
+            if (this.widenerGain) {
+                this.widenerGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+            }
+            if (this.waveShaperNode) {
+                this.waveShaperNode.curve = this._makeDistortionCurve(0);
+            }
         }
     }
 
@@ -188,6 +203,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         if (this._volumeGain !== 1.0) return true;
         if (this._balance !== 0.0) return true;
         if (this._monoEnabled) return true;
+        if (this._widenerEnabled) return true;
+        if (this._warmthLevel > 0) return true;
         if (this._eqGains && this._eqGains.some(g => g !== 0)) return true;
         return false;
     }
@@ -259,6 +276,11 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             return f;
         });
 
+        // 1.5 Harmonic Saturation (Tube Warmth)
+        this.waveShaperNode = this.ctx.createWaveShaper();
+        this.waveShaperNode.curve = this._makeDistortionCurve(this._warmthLevel);
+        this.waveShaperNode.oversample = '4x';
+
         // 2. Panner Node for Balance
         this.pannerNode = this.ctx.createStereoPanner();
         this.pannerNode.pan.value = this._balance;
@@ -271,6 +293,21 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.gainNode = this.ctx.createGain();
         this.gainNode.gain.value = this._volumeGain;
 
+        // 4.5 Stereo Widener (Haas effect)
+        this.widenerSplitter = this.ctx.createChannelSplitter(2);
+        this.widenerMerger = this.ctx.createChannelMerger(2);
+        this.widenerDelay = this.ctx.createDelay();
+        this.widenerDelay.delayTime.value = 0.02; // 20ms
+        this.widenerGain = this.ctx.createGain();
+        this.widenerGain.gain.value = this._widenerEnabled ? 0.3 : 0;
+        
+        // Wire widener: Left -> Delay -> Merge Right
+        this.widenerSplitter.connect(this.widenerDelay, 0); // Left channel
+        this.widenerSplitter.connect(this.widenerMerger, 0, 0); // L -> L
+        this.widenerSplitter.connect(this.widenerMerger, 1, 1); // R -> R
+        this.widenerDelay.connect(this.widenerGain);
+        this.widenerGain.connect(this.widenerMerger, 0, 1); // Delayed L -> R
+
         // 5. Analyser for Visualization
         this.analyserNode = this.ctx.createAnalyser();
         this.analyserNode.fftSize = 128; // 64 bins, smooth enough for mini spectrum
@@ -278,6 +315,9 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
 
         // Chain the nodes sequentially
         let node = this.source;
+        node.connect(this.waveShaperNode);
+        node = this.waveShaperNode;
+
         this._eqNodes.forEach(eq => { 
             node.connect(eq); 
             node = eq; 
@@ -286,7 +326,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         node.connect(this.pannerNode);
         this.pannerNode.connect(this.compressorNode);
         this.compressorNode.connect(this.gainNode);
-        this.gainNode.connect(this.analyserNode);
+        this.gainNode.connect(this.widenerSplitter);
+        this.widenerMerger.connect(this.analyserNode);
 
         // Chain to AudioCompressor if it is active, otherwise go straight to destination
         const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
@@ -306,6 +347,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.setVolume(this._volumeGain);
         this.setBalance(this._balance);
         this.setMono(this._monoEnabled);
+        this.setWidener(this._widenerEnabled);
+        this.setWarmth(this._warmthLevel);
         this._applyCompressorState();
         
         // Restore EQ gains safely
@@ -370,6 +413,43 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
                 this.source.channelCountMode = enabled ? 'explicit' : 'max';
             }
         }
+    }
+
+    setWidener(enabled) {
+        this._widenerEnabled = enabled;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
+        if (this.widenerGain && this.ctx) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            this.widenerGain.gain.setTargetAtTime(enabled ? 0.3 : 0, this.ctx.currentTime, 0.05);
+        }
+    }
+
+    setWarmth(level) {
+        this._warmthLevel = level;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
+        if (this.waveShaperNode && this.ctx) {
+            this.waveShaperNode.curve = this._makeDistortionCurve(level);
+        }
+    }
+
+    _makeDistortionCurve(amount) {
+        if (amount <= 0) return new Float32Array(2);
+        // Normalize 0-100 to a sensible range for the algorithm
+        const k = typeof amount === 'number' ? amount * 4 : 50;
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < n_samples; ++i) {
+            const x = i * 2 / n_samples - 1;
+            curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+        }
+        return curve;
     }
 
     _setEQBand(index, db) {

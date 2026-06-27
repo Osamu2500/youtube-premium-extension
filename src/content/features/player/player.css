@@ -10,6 +10,12 @@
 
 .yt-premium-plus-theme ytd-watch-flexy #primary {
   padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.yt-premium-plus-theme ytd-watch-flexy #columns {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 /* Premium Glassmorphic Player Container */
@@ -22,7 +28,7 @@
   transition:
     box-shadow 0.4s ease,
     transform 0.4s ease;
-  transform: translateZ(0); /* Hardware Acceleration */
+  /* Removed transform: translateZ(0) because it breaks YouTube's native controls hit testing */
 }
 
 /* Ensure outer container is transparent so gaps aren't visible as black borders */
@@ -32,6 +38,8 @@
   box-shadow: none !important;
   overflow: visible !important;
 }
+
+
 
 /* Force video to exactly fill the rounded player, overriding YouTube JS resizing gaps */
 .yt-premium-plus-theme .html5-video-container {
@@ -261,10 +269,11 @@ html.yt-premium-plus-theme ytd-watch-metadata .yt-spec-button-shape-next--segmen
 }
 
 /* ── Player Container Query Setup ── */
-.html5-video-player {
+/* Removed container-type to fix rendering bugs with native controls (ytp-chrome-bottom disappearing) */
+/* .html5-video-player {
   container-type: inline-size;
   container-name: ytp-player;
-}
+} */
 
 .ypp-player-controls {
   display: flex;
@@ -284,7 +293,7 @@ html.yt-premium-plus-theme ytd-watch-metadata .yt-spec-button-shape-next--segmen
 }
 
 /* ── Responsive Adaptation for Player Controls ── */
-@container ytp-player (max-width: 860px) {
+@media (max-width: 860px) {
   /* At smaller sizes, pop the custom controls above the bottom bar to prevent overlap with time display */
   .ypp-player-controls {
     position: absolute;
@@ -301,7 +310,7 @@ html.yt-premium-plus-theme ytd-watch-metadata .yt-spec-button-shape-next--segmen
   }
 }
 
-@container ytp-player (max-width: 500px) {
+@media (max-width: 500px) {
   /* Ultra-compact mode for very small windows/zoom */
   .ypp-player-controls {
     gap: 4px;
