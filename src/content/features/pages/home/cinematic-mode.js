@@ -182,7 +182,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         document.body.classList.add(CinematicMode.CLASSES.CINEMATIC);
         document.body.classList.add(CinematicMode.CLASSES.CINEMATIC_HOME);
 
-        const contents = document.querySelector('#contents');
+        const contents = document.querySelector('ytd-rich-grid-renderer > #contents, ytd-rich-grid-renderer');
         if (contents) contents.classList.add('ypp-grid-container');
 
         // Drawer hide retries
@@ -249,34 +249,51 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     // ─── Hero Manager ─────────────────────────────────────────────────────────
 
     async _simulateHover(element) {
-        if (!element) return;
+        console.log('[CinematicMode] _simulateHover called', element);
+        if (!element) {
+            console.error('[CinematicMode] element is null!');
+            return;
+        }
         
         const thumbnailContainer = element.querySelector('#thumbnail');
-        if (!thumbnailContainer) return;
+        console.log('[CinematicMode] thumbnailContainer:', thumbnailContainer);
+        
+        if (!thumbnailContainer) {
+            console.error('[CinematicMode] #thumbnail not found in element');
+            return;
+        }
 
         // Block mouseleave to keep preview alive
-        const blockLeave = (e) => {
-            if (element._isNetflixHeroPreview) {
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-            }
-        };
-        
-        this.addListener(element, 'mouseleave', blockLeave, true);
-        this.addListener(element, 'mouseout', blockLeave, true);
-        this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
-        this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
-        element._hoverLock = true;
+        if (!element._hoverLock) {
+            const blockLeave = (e) => {
+                if (element._isNetflixHeroPreview) {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                }
+            };
+            
+            this.addListener(element, 'mouseleave', blockLeave, true);
+            this.addListener(element, 'mouseout', blockLeave, true);
+            this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
+            this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
+            element._hoverLock = true;
+            console.log('[CinematicMode] Hover lock installed');
+        }
         element._isNetflixHeroPreview = true;
+
+        // Mute before dispatching
+        this._syncMuteState();
+        console.log('[CinematicMode] Mute state synced:', this._isMuted);
 
         // Actually hover the element using native mouse events with real coordinates
         const rect = thumbnailContainer.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
+        console.log('[CinematicMode] Dispatching events at', centerX, centerY);
 
         // Dispatch events in sequence
-        const events = ['pointerenter', 'pointerover', 'mouseenter', 'mouseover'];
-        for (const eventType of events) {
+        const FULL_HOVER_EVENTS = ['pointerenter', 'pointerover', 'mouseenter', 'mouseover', 'pointermove', 'mousemove'];
+        for (const eventType of FULL_HOVER_EVENTS) {
             const event = new MouseEvent(eventType, {
                 bubbles: true,
                 cancelable: true,
@@ -286,10 +303,18 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 relatedTarget: document.body
             });
             thumbnailContainer.dispatchEvent(event);
+            console.log(`[CinematicMode] Dispatched ${eventType}`);
         }
 
         // Wait for preview to appear
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 500));
+        const preview = element.querySelector('ytd-video-preview');
+        console.log('[CinematicMode] Preview found after hover:', !!preview, preview);
+        
+        if (!preview) {
+            console.warn('[CinematicMode] Preview did NOT appear after hover simulation');
+            console.log('[CinematicMode] Element innerHTML:', element.innerHTML.substring(0, 500));
+        }
         
         // Mute the video
         this._syncMuteState();
@@ -303,6 +328,40 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             await new Promise(r => setTimeout(r, 500));
         }
         return null;
+    }
+
+    /**
+     * Physically moves ytd-video-preview into the hero wrapper div.
+     * This is the original cinematic temp approach and is more reliable than
+     * remotely forcing CSS overrides from outside the element's stacking context.
+     */
+    _movePreviewIntoHero(preview) {
+        const heroWrapper = this._heroState.heroElement;
+        if (!heroWrapper || !preview) return;
+        
+        // Only move if not already inside the hero
+        if (preview.parentNode === heroWrapper) return;
+        
+        // Insert hero before the preview's current position, then move preview into it
+        if (preview.parentNode && preview.parentNode !== heroWrapper) {
+            heroWrapper.insertBefore(preview, heroWrapper.querySelector('.netflix-hero-gradient') || null);
+        }
+        
+        // Reset any inline styles the previous approach may have applied
+        const toReset = [preview, ...Array.from(preview.querySelectorAll(
+            '#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'
+        ))];
+        toReset.forEach(el => {
+            if (el && el.style) {
+                el.style.removeProperty('position');
+                el.style.removeProperty('top');
+                el.style.removeProperty('left');
+                el.style.removeProperty('width');
+                el.style.removeProperty('height');
+                el.style.removeProperty('z-index');
+                el.style.removeProperty('max-width');
+            }
+        });
     }
 
     async _makeHeroPreview(videoElement) {
@@ -331,7 +390,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 }
 
                 this._waitForPreview(videoElement).then(preview => {
-                    // Do nothing here, CSS position: fixed handles the positioning!
+                    if (preview) {
+                        heroWrapper.classList.remove('netflix-hero-ken-burns');
+                        heroWrapper.style.backgroundImage = 'none';
+                        this._movePreviewIntoHero(preview);
+                    } else {
+                        this.utils.log("Native preview failed, using Ken Burns fallback", "CINEMATIC", "warn");
+                    }
                 }).catch(e => {
                     this.utils.log(e.message, "CINEMATIC", "error");
                 });
@@ -350,6 +415,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
             heroWrapper.style.backgroundSize = 'cover';
             heroWrapper.style.backgroundPosition = 'center';
+            heroWrapper.classList.add('netflix-hero-ken-burns');
 
             const navHTML = `
               <div class="netflix-hero-nav">
@@ -391,7 +457,13 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
             // Wait for YouTube to create the preview element
             this._waitForPreview(videoElement).then(preview => {
-                // Do nothing here, CSS position: fixed handles the positioning!
+                if (preview && this._heroState.heroElement === heroWrapper && this._heroState.currentVideo === videoElement) {
+                    heroWrapper.classList.remove('netflix-hero-ken-burns');
+                    heroWrapper.style.backgroundImage = 'none';
+                    this._movePreviewIntoHero(preview);
+                } else if (!preview) {
+                    this.utils.log("Native preview failed, using Ken Burns fallback", "CINEMATIC", "warn");
+                }
             }).catch(e => {
                 this.utils.log(e.message, "CINEMATIC", "error");
             });
@@ -906,14 +978,21 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             nextVideo.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
             this._updateHeroContent(nextVideo);
             
-            // Update the background image to the new video's thumbnail
+            // Update the background image to the new video's thumbnail and add Ken Burns
             const videoId = this._extractVideoId(nextVideo.querySelector('a#video-title-link, a#video-title, a#thumbnail')?.href);
             if (videoId) {
                 heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
+                heroWrapper.classList.add('netflix-hero-ken-burns');
             }
             
-            // Simulate hover on the new video to seamlessly trigger YouTube's native preview player
-            this._simulateHover(nextVideo);
+            // Wait for preview to load to remove fallback
+            this._waitForPreview(nextVideo).then(preview => {
+                if (preview && this._heroState.heroElement === heroWrapper && this._heroState.currentVideo === nextVideo) {
+                    heroWrapper.classList.remove('netflix-hero-ken-burns');
+                    heroWrapper.style.backgroundImage = 'none';
+                    this._movePreviewIntoHero(preview);
+                }
+            });
 
             heroWrapper.classList.remove(CinematicMode.CLASSES.FADING);
             this._updateMuteButtonVisibility();
@@ -968,7 +1047,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         document.body.classList.remove(CinematicMode.CLASSES.CINEMATIC);
         document.documentElement.removeAttribute('dark');
         
-        const contents = document.querySelector('#contents');
+        const contents = document.querySelector('ytd-rich-grid-renderer > #contents, ytd-rich-grid-renderer');
         if (contents) contents.classList.remove('ypp-grid-container');
         
         const style = document.getElementById('ypp-cinematic-style');

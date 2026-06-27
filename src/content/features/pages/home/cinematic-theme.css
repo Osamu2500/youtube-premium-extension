@@ -280,6 +280,17 @@ body.cinematic-home .netflix-hero ytd-video-preview {
   pointer-events: none !important;
 }
 
+@keyframes kenBurnsZoom {
+    0% { transform: scale(1) translate(0, 0); }
+    50% { transform: scale(1.08) translate(-1%, -0.5%); }
+    100% { transform: scale(1) translate(0.5%, 0.5%); }
+}
+
+body.cinematic-home .netflix-hero-ken-burns {
+    animation: kenBurnsZoom 20s ease-in-out infinite;
+    transform-origin: center center;
+}
+
 /* Ensure masthead stays visually on top of the hero */
 body.cinematic-home #masthead-container {
   z-index: 2201 !important;
@@ -522,54 +533,6 @@ body.cinematic-home .netflix-nav-button {
   animation: fadeInNav 0.3s ease;
 }
 
-/* ============================================================================
-** Hero Iframe Styles (current approach — replaces old ytd-video-preview rules)
-============================================================================ */
-/* CSS class mirrors the inline cssText but allows transitions and animations */
-body.cinematic-home .netflix-hero-iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  pointer-events: none;
-  z-index: 0;
-  object-fit: cover;
-  opacity: 1;
-  transition: opacity 1.25s ease-in-out;
-  /* Subtle scale-in to mask the initial black frame flash */
-  animation: iframeReveal 2s ease-out forwards;
-}
-
-@keyframes iframeReveal {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Ken Burns slow zoom applied to the hero wrapper so it works regardless of iframe rendering */
-@keyframes heroKenBurns {
-  0%   { transform: scale(1.05) translate(0, 0); }
-  50%  { transform: scale(1.10) translate(-1%, -0.5%); }
-  100% { transform: scale(1.05) translate(0.5%, 0.5%); }
-}
-
-/* CRITICAL: Fading state was completely missing from migrated CSS.
-   Without this the video transition between cards is an instant hard cut.
-   In the old code this targeted ytd-video-preview — now targets iframe. */
-body.cinematic-home .netflix-hero.fading .netflix-hero-iframe,
-body.cinematic-home .netflix-hero.fading .netflix-hero-content {
-  opacity: 0 !important;
-  transition: opacity 1.25s ease-in-out !important;
-}
-
-/* Thumbnail fallback: if iframe fails to load, show the thumbnail as a blurred BG */
-body.cinematic-home .netflix-hero[data-thumb] {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
 
 /* ============================================================================
 ** Filter Chips Styling
@@ -685,6 +648,12 @@ body.cinematic-home ytd-rich-grid-renderer #contents:not(:has(ytd-background-pro
   overflow-y: hidden !important;
   /* Subtle background fade so cards sit over the hero naturally */
   background: linear-gradient(to top, rgba(15,15,15,0.98) 60%, transparent 100%) !important;
+}
+
+/* Flatten the rows so individual items form a single horizontal line */
+body.cinematic-home ytd-rich-grid-row,
+body.cinematic-home ytd-rich-grid-row > #contents {
+    display: contents !important;
 }
 
 /* Add fade gradients */
