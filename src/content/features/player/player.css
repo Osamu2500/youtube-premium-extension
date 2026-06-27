@@ -703,9 +703,18 @@ body.ypp-sidebar-hidden ytd-watch-flexy:not([theater]) #columns {
 }
 
 /* Bug Fix: Prevent background thumbnail from blocking player clicks due to global thumbnail styles */
-ytd-thumbnail.player-container-background-image,
 .player-container-background ytd-thumbnail,
-#player-full-bleed-container ytd-thumbnail {
+ytd-thumbnail.player-container-background-image,
+#player-full-bleed-container ytd-thumbnail,
+#player-container ytd-thumbnail {
+    display: none !important;
     pointer-events: none !important;
+}
+
+/* Ensure the actual video element remains fully interactive */
+.html5-video-player video,
+video.html5-main-video,
+#movie_player video {
+    pointer-events: auto !important;
 }
 
