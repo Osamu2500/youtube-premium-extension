@@ -128,11 +128,9 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         const homeCols = Number(settings.homeColumns || 0);
         if (homeCols > 0) {
             root.style.setProperty('--ypp-home-columns', homeCols);
-            // Also set --ypp-active-columns immediately so CSS drives --ytd-rich-grid-items-per-row
             root.style.setProperty('--ypp-active-columns', homeCols);
         } else {
             root.style.removeProperty('--ypp-home-columns');
-            // Auto mode: AutoScaleGrid owns --ypp-active-columns via --ypp-dynamic-cols
             root.style.removeProperty('--ypp-active-columns');
         }
 
@@ -158,6 +156,14 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             root.style.setProperty('--ypp-channel-columns', channelCols);
         } else {
             root.style.removeProperty('--ypp-channel-columns');
+        }
+
+        // History page
+        const historyCols = Number(settings.historyColumns || 0);
+        if (historyCols > 0) {
+            root.style.setProperty('--ypp-history-columns', historyCols);
+        } else {
+            root.style.removeProperty('--ypp-history-columns');
         }
     }
 
@@ -223,14 +229,17 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         let cols;
 
         if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
-            // Channel page — always use channelColumns (never falls to homeColumns)
+            // Channel page
             cols = Number(this.settings?.channelColumns || 4);
         } else if (path.startsWith('/results')) {
-            // Search page — always use searchColumns
+            // Search page
             cols = Number(this.settings?.searchColumns || 4);
         } else if (path === '/feed/subscriptions') {
-            // Subscriptions page — always use subscriptionsColumns
+            // Subscriptions page
             cols = Number(this.settings?.subscriptionsColumns || 4);
+        } else if (path === '/feed/history') {
+            // History page
+            cols = Number(this.settings?.historyColumns || 4);
         } else {
             // Home page
             const manualCols = Number(this.settings?.homeColumns || 0);
@@ -307,6 +316,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                path.startsWith('/c/') || 
                path.startsWith('/@') ||
                path === '/feed/subscriptions' ||
+               path === '/feed/history' ||
                path.startsWith('/results');
     }
 

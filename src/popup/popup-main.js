@@ -314,7 +314,7 @@ const initUniversalListeners = (document, state, UI, saveSettings) => {
         }
     });
 
-    ['ambientIntensity', 'ambientBlur', 'blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'watchTimeAlertHours', 'hideWatchedThreshold', 'autoLikeThreshold', 'intentionalDelayTime'].forEach(key => {
+    ['ambientIntensity', 'ambientBlur', 'blueLight', 'dim', 'homeColumns', 'searchColumns', 'channelColumns', 'subscriptionsColumns', 'historyColumns', 'minVideoDuration', 'watchTimeAlertHours', 'hideWatchedThreshold', 'autoLikeThreshold', 'intentionalDelayTime'].forEach(key => {
         const slider = state.elements[key];
         const display = document.getElementById(key + 'Value');
         if (slider) {

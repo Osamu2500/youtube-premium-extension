@@ -408,6 +408,7 @@ window.YPP.FeatureManager = class FeatureManager {
             const LAYOUT_VARS = [
                 '--ypp-active-columns', '--ypp-dynamic-cols', '--ypp-auto-scale',
                 '--ypp-home-columns', '--ypp-search-columns', '--ypp-grid-column-min',
+                '--ypp-subscriptions-columns', '--ypp-channel-columns', '--ypp-history-columns',
             ];
             LAYOUT_VARS.forEach(v => el.style.removeProperty(v));
 

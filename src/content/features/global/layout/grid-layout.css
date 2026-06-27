@@ -93,6 +93,12 @@ html[style*="--ypp-dynamic-cols"] yt-rich-grid-view-model {
 :root[style*="--ypp-channel-columns"] yt-rich-grid-renderer {
   --ytd-rich-grid-items-per-row: var(--ypp-channel-columns) !important;
 }
+/* History page columns */
+:root[style*="--ypp-history-columns"] ytd-rich-grid-renderer,
+:root[style*="--ypp-history-columns"] yt-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: var(--ypp-history-columns) !important;
+}
+
 
 body.yt-premium-plus-theme ytd-playlist-renderer:hover ytd-thumbnail-overlay-side-panel-renderer {
   background: rgba(99, 102, 241, 0.75) !important;
