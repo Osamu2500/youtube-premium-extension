@@ -617,11 +617,8 @@ body.cinematic-home ytd-rich-grid-renderer > * {
   pointer-events: auto !important;
 }
 
-body.cinematic-home ytd-rich-grid-renderer #contents:last-child {
-  margin-right: 5000px !important;
-}
 
-body.cinematic-home ytd-rich-grid-renderer #contents:not(:has(ytd-background-promo-renderer)) {
+body.cinematic-home ytd-rich-grid-renderer > #contents {
   z-index: 9 !important;
   /* Use absolute instead of fixed to avoid creating a small containing block for the hero video */
   position: absolute !important;
@@ -657,8 +654,8 @@ body.cinematic-home ytd-rich-grid-row > #contents {
 }
 
 /* Add fade gradients */
-body.cinematic-home ytd-rich-grid-renderer #contents::before,
-body.cinematic-home ytd-rich-grid-renderer #contents::after {
+body.cinematic-home ytd-rich-grid-renderer > #contents::before,
+body.cinematic-home ytd-rich-grid-renderer > #contents::after {
   content: '';
   position: absolute;
   top: 0;
