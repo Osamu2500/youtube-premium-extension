@@ -1,7 +1,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.HideMixes = class HideMixes extends window.YPP.features.BaseFeature {
+window.YPP.features.HideMixes = class HideMixes extends window.YPP.features.BaseFilterFeature {
     constructor() {
         super('HideMixes');
         this._boundProcess = this._processNodes.bind(this);
@@ -41,11 +41,15 @@ window.YPP.features.HideMixes = class HideMixes extends window.YPP.features.Base
             window.YPP.sharedObserver.unregister('hide-mixes');
         }
         
-        // Un-hide all previously hidden mixes
+        // Un-hide all previously hidden mixes, also clears any leftover data-ypp-mix
         const hiddenMixes = document.querySelectorAll('[data-ypp-mix="true"]');
         hiddenMixes.forEach(el => {
             el.removeAttribute('data-ypp-mix');
-            el.style.display = '';
+            if (!el.classList.contains('ypp-is-watched') && 
+                !el.classList.contains('ypp-hidden-duration') &&
+                !el.hasAttribute('data-ypp-blocked')) {
+                el.style.display = '';
+            }
         });
     }
 
@@ -54,7 +58,7 @@ window.YPP.features.HideMixes = class HideMixes extends window.YPP.features.Base
      * @param {Element[]} nodes 
      */
     _processNodes(nodes) {
-        if (!this.isEnabled) return;
+        if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
         
         nodes.forEach(node => {
             if (node.hasAttribute('data-ypp-mix-processed')) return;
@@ -70,25 +74,18 @@ window.YPP.features.HideMixes = class HideMixes extends window.YPP.features.Base
             const titleElement = node.querySelector('#title');
             if (titleElement && titleElement.textContent) {
                 const titleText = titleElement.textContent.trim().toLowerCase();
-                if (titleText.includes('mix')) {
-                    this._hideElement(node);
+                const isMixShelf = (
+                    titleText === 'mix' ||
+                    titleText.startsWith('mix -') ||
+                    titleText.includes('mix for you') ||
+                    titleText.includes('your mix') ||
+                    node.querySelector('ytd-radio-renderer') !== null
+                );
+                
+                if (isMixShelf) {
+                    this._hideElement(node, 'mix');
                 }
             }
         });
-    }
-    
-    _hideElement(el) {
-        el.setAttribute('data-ypp-mix', 'true');
-        el.style.display = 'none';
-        
-        // Special case for rich grid: also hide the parent row if it becomes empty
-        const parentRow = el.closest('ytd-rich-grid-row, ytd-rich-section-renderer');
-        if (parentRow) {
-            // Very basic heuristic: if it's a section renderer for a mix, hide the whole section
-            if (parentRow.tagName.toLowerCase() === 'ytd-rich-section-renderer') {
-                parentRow.style.display = 'none';
-                parentRow.setAttribute('data-ypp-mix', 'true');
-            }
-        }
     }
 };

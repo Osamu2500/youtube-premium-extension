@@ -43,6 +43,7 @@ import './ui/components/panel.js';
 
 // Base feature class
 import './features/base-feature.js';
+import './features/global/filters/base-filter-feature.js';
 
 import './features/player/enhancements/split-scrolling.js';
 
@@ -59,6 +60,8 @@ import './features/global/behavior/multi-select.js';
 import './features/global/ui-tweaks/multi-select.css';
 
 import './features/global/ui-tweaks/hide-watched.js';
+import './features/global/ui-tweaks/hide-mixes.js';
+import './features/global/ui-tweaks/hide-metrics.js';
 import './features/global/behavior/keyboard-shortcuts.js';
 import './features/global/filters/duration-filter.js';
 import './features/global/filters/blocklist-filter.js';

@@ -21,6 +21,9 @@ window.YPP.features.SearchObserver = class SearchObserver {
         'ytd-search-refinement-card-renderer',
         'ytd-reel-shelf-renderer',
         'ytd-rich-shelf-renderer',
+        'ytd-rich-section-renderer',
+        'yt-horizontal-list-renderer',
+        'yt-collection-shelf-view-model'
     ]);
 
     static VIDEO_TAGS = new Set([
@@ -240,6 +243,11 @@ window.YPP.features.SearchObserver = class SearchObserver {
                     this._processedNodes.add(op.node);
 
                     if (NOISE_TAGS.has(op.tag)) {
+                        if (this._settings.hideSearchShelves) {
+                            op.node.style.setProperty('display', 'none', 'important');
+                            op.node.classList.add('ypp-hidden-shelf');
+                            continue;
+                        }
                         if (op.isFlattenable && op.flattenData) {
                             op.node.dataset.yppFlattened = 'true';
                             op.node.classList.add('ypp-flattened-container');
@@ -252,9 +260,6 @@ window.YPP.features.SearchObserver = class SearchObserver {
                                 this._cleanInlineStyles(card, op.flattenData.cardsCleanData[j]);
                             }
                             continue;
-                        }
-                        if (this._settings.hideSearchShelves) {
-                            op.node.style.setProperty('display', 'none', 'important');
                         }
                         continue;
                     }

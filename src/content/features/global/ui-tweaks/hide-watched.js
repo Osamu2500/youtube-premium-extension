@@ -17,7 +17,7 @@ window.YPP.features = window.YPP.features || {};
  *
  * Processing is debounced (100 ms) to batch rapid-fire dom:nodes-added events.
  */
-window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.BaseFeature {
+window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.BaseFilterFeature {
     // Compiled Regular Expressions for performance
     static WATCH_URL_REGEX = /[?&]v=([^&]+)/;
     static SHORTS_URL_REGEX = /\/shorts\/([A-Za-z0-9_-]{11})/;
@@ -63,13 +63,23 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         this._processCards();
 
         // React to SPA navigation (clear cache + re-process whole page)
-        this.onBusEvent('page:changed', () => {
+        this.onBusEvent('app:pageChange', () => {
             this._processCards();
         });
         
         // React to user manually marking/unmarking from MarkWatched
         this.onBusEvent('watched:updated', () => {
             this._processCards();
+        });
+
+        // Subscribing directly to the WatchedStore to ensure immediate visual updates
+        this._unsubscribeStore = window.YPP.WatchedStore?.onChange?.((change) => {
+            if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
+            if (change.type === 'add') {
+                this._markCardWatched(change.id);
+            } else if (change.type === 'remove') {
+                this._unmarkCardWatched(change.id);
+            }
         });
         
         if (window.YPP && window.YPP.sharedObserver) {
@@ -82,7 +92,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
                 'hide-watched-cards',
                 HideWatched.CARD_SELECTORS,
                 (nodes) => {
-                    if (!this.isEnabled) return;
+                    if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
                     const watchedIds = this._getWatchedIds();
                     const threshold  = this.settings?.hideWatchedThreshold ?? 80;
                     nodes.forEach(card => this._evaluateCard(card, watchedIds, threshold));
@@ -118,6 +128,11 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             this._debounceTimer = null;
         }
 
+        if (this._unsubscribeStore) {
+            this._unsubscribeStore();
+            this._unsubscribeStore = null;
+        }
+
         // Tear down IntersectionObserver
         if (this._scrollObserver) {
             this._scrollObserver.disconnect();
@@ -140,6 +155,9 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         document.querySelectorAll('[data-ypp-watched-processed]').forEach(card => {
             delete card.dataset.yppWatchedProcessed;
         });
+
+        // Remove any dynamically added classes the user report complained about
+        document.querySelectorAll('.ypp-is-watched').forEach(el => el.classList.remove('ypp-is-watched'));
 
         // Clear scroll-observed stamps
         document.querySelectorAll('[data-ypp-scroll-observed]').forEach(card => {
@@ -179,7 +197,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     // =========================================================================
 
     _scheduleProcess() {
-        if (!this.isEnabled) return;
+        if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
         if (this._debounceTimer) clearTimeout(this._debounceTimer);
         this._debounceTimer = setTimeout(() => {
             this._debounceTimer = null;
@@ -193,7 +211,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
      * @param {MutationRecord[]} mutations
      */
     _processMutatedNodes(mutations) {
-        if (!this.isEnabled || !Array.isArray(mutations)) return;
+        if (!this.isEnabled || !this._shouldRunOnCurrentPage() || !Array.isArray(mutations)) return;
         const watchedIds = this._getWatchedIds();
         const threshold  = this.settings?.hideWatchedThreshold ?? 80;
 
@@ -305,7 +323,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     // =========================================================================
 
     _processProgressBatch(progressBars) {
-        if (!this.isEnabled) return;
+        if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
         
         const watchedIds = this._getWatchedIds();
         const threshold = this.settings?.hideWatchedThreshold ?? 80;
@@ -319,7 +337,7 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
     }
 
     _processCards(elements = null) {
-        if (!this.isEnabled) return;
+        if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
 
         const watchedIds = this._getWatchedIds();
         const threshold = this.settings?.hideWatchedThreshold ?? 80;
@@ -340,22 +358,20 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             if (card.hasAttribute('hidden') || card.style.display === 'none') return;
 
             const videoId = this._getVideoId(card);
-            const progress = this._getWatchProgress(card);
-            
-            // PERFORMANCE: DOM Stamping to prevent re-evaluating the exact same state
-            // YouTube recycles DOM nodes, so we must include the videoId and progress in the stamp
-            const stampKey = `${videoId || 'unknown'}-${threshold}-${progress || 0}`;
-            if (card.dataset.yppWatchedProcessed === stampKey) return;
-            card.dataset.yppWatchedProcessed = stampKey;
+            // PERFORMANCE: Remove the DOM Stamping early-return guard entirely.
+            // Virtual DOM recycling causes videos to falsely appear hidden if a card's ID
+            // fails to parse quickly enough and we rely on a stale stamp. Always re-evaluate!
 
             const watched = this._isWatched(card, videoId, watchedIds, threshold);
 
-            const currentlyMarked = card.getAttribute('data-ypp-watched') === '1';
+            const currentlyMarked = card.getAttribute('data-ypp-watched') === '1' || card.classList.contains('ypp-is-watched');
 
             if (watched && !currentlyMarked) {
                 card.setAttribute('data-ypp-watched', '1');
+                card.classList.add('ypp-is-watched');
             } else if (!watched && currentlyMarked) {
                 card.removeAttribute('data-ypp-watched');
+                card.classList.remove('ypp-is-watched');
             }
         } catch (err) {
             // Silently trap and ignore individual card processing errors
@@ -375,16 +391,13 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
         }
 
         this._scrollObserver = new IntersectionObserver((entries) => {
-            if (!this.isEnabled) return;
+            if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
             const watchedIds = this._getWatchedIds();
             const threshold  = this.settings?.hideWatchedThreshold ?? 80;
 
             for (const entry of entries) {
                 if (!entry.isIntersecting) continue;
                 const card = entry.target;
-                // Clear the stamp so we force re-evaluation now that it's visible
-                // (the card may have had its progress bar set after initial processing)
-                delete card.dataset.yppWatchedProcessed;
                 this._evaluateCard(card, watchedIds, threshold);
                 // Once seen, stop observing — it will be re-checked by sharedObserver on future mutations
                 this._scrollObserver?.unobserve(card);
@@ -405,6 +418,28 @@ window.YPP.features.HideWatched = class HideWatched extends window.YPP.features.
             if (!card.dataset.yppScrollObserved) {
                 card.dataset.yppScrollObserved = '1';
                 this._scrollObserver.observe(card);
+            }
+        });
+    }
+
+    _markCardWatched(videoId) {
+        if (!videoId) return;
+        document.querySelectorAll(`[data-video-id="${videoId}"], [video-id="${videoId}"]`).forEach(el => {
+            const card = el.closest(HideWatched.CARD_SELECTORS);
+            if (card) {
+                card.setAttribute('data-ypp-watched', '1');
+                card.classList.add('ypp-is-watched');
+            }
+        });
+    }
+
+    _unmarkCardWatched(videoId) {
+        if (!videoId) return;
+        document.querySelectorAll(`[data-video-id="${videoId}"], [video-id="${videoId}"]`).forEach(el => {
+            const card = el.closest(HideWatched.CARD_SELECTORS);
+            if (card) {
+                card.removeAttribute('data-ypp-watched');
+                card.classList.remove('ypp-is-watched');
             }
         });
     }

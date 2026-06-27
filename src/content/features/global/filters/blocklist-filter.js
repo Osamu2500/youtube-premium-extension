@@ -1,7 +1,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.features.BaseFeature {
+window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.features.BaseFilterFeature {
     constructor() {
         super('BlocklistFilter');
         this.blockedChannels = [];
@@ -38,17 +38,12 @@ window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.f
     }
 
     async disable() {
+        await super.disable();
         if (window.YPP.sharedObserver) {
             window.YPP.sharedObserver.unregister('blocklist-home');
             window.YPP.sharedObserver.unregister('blocklist-search');
             window.YPP.sharedObserver.unregister('blocklist-related');
         }
-        
-        // Unhide everything we hid
-        document.querySelectorAll('[data-ypp-blocked="true"]').forEach(el => {
-            el.removeAttribute('data-ypp-blocked');
-            el.style.display = '';
-        });
     }
 
     _parseList(str) {
@@ -59,8 +54,12 @@ window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.f
     }
 
     _processItems(elements) {
+        if (!this.isEnabled || !this._shouldRunOnCurrentPage()) return;
+        
+        let blockedCount = 0;
+
         for (const el of elements) {
-            if (el.hasAttribute('data-ypp-blocked')) continue;
+            if (el.hasAttribute('data-ypp-blocked') || el.classList.contains('ypp-hidden')) continue;
 
             const titleEl = el.querySelector('#video-title');
             const channelEl = el.querySelector('#channel-name .yt-simple-endpoint, #text-container.ytd-channel-name');
@@ -72,7 +71,9 @@ window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.f
 
             // Check Keywords
             for (const keyword of this.blockedKeywords) {
-                if (title.includes(keyword)) {
+                // Use exact word boundary matching instead of fuzzy includes
+                const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\b`, 'i');
+                if (regex.test(title)) {
                     shouldBlock = true;
                     break;
                 }
@@ -81,7 +82,7 @@ window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.f
             // Check Channels
             if (!shouldBlock) {
                 for (const ch of this.blockedChannels) {
-                    if (channel === ch || channel.includes(ch)) {
+                    if (channel === ch || channel === `@${ch}`) {
                         shouldBlock = true;
                         break;
                     }
@@ -89,10 +90,15 @@ window.YPP.features.BlocklistFilter = class BlocklistFilter extends window.YPP.f
             }
 
             if (shouldBlock) {
-                el.style.display = 'none';
                 el.setAttribute('data-ypp-blocked', 'true');
+                this._hideElement(el, 'blocklist');
+                blockedCount++;
                 this.utils?.log(`Blocked video: "${title}" by "${channel}"`, 'BLOCKLIST', 'debug');
             }
+        }
+        
+        if (blockedCount > 0 && this.settings?.showBlocklistFeedback !== false) {
+            this.utils?.createToast?.(`${blockedCount} video(s) hidden by blocklist`);
         }
     }
 };

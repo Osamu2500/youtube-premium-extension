@@ -1489,3 +1489,10 @@ body.ypp-search-grid-mode ytd-item-section-renderer[hidden] {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+body.ypp-hide-search-shelves.ypp-search-page .ypp-hidden-shelf,
+body.ypp-hide-search-shelves.ypp-search-page ytd-rich-section-renderer,
+body.ypp-hide-search-shelves.ypp-search-page yt-horizontal-list-renderer,
+body.ypp-hide-search-shelves.ypp-search-page yt-collection-shelf-view-model {
+  display: none !important;
+}

@@ -5,7 +5,7 @@
 window.YPP = window.YPP || {};
 window.YPP.features = window.YPP.features || {};
 
-window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.features.BaseFeature {
+window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.features.BaseFilterFeature {
     static SELECTORS = {
         CARDS: 'ytd-rich-item-renderer, ytd-grid-video-renderer, ytd-video-renderer, ytd-compact-video-renderer',
         SHORTS_LINK: 'a[href*="/shorts/"]',
@@ -16,6 +16,9 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
         super('DurationFilter');
         this._boundProcessVideos = this._processVideos.bind(this);
         this._startPump = this.utils.debounce(this._startPump.bind(this), 500);
+        this._pumpCount = 0;
+        this._maxPumps = 5;
+        this._pumpResetTimer = null;
     }
 
     getConfigKey() { return 'hideShortVideos'; }
@@ -55,8 +58,8 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
      * @private
      */
     _cleanupDOM() {
-        document.querySelectorAll('.ypp-hidden-duration').forEach(el => {
-            el.classList.remove('ypp-hidden-duration');
+        this._unhideAll();
+        document.querySelectorAll('[data-ypp-duration-filtered]').forEach(el => {
             delete el.dataset.yppDurationFiltered;
         });
     }
@@ -87,7 +90,15 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
      */
     _parseMinutes(text) {
         if (!text) return 0;
+        
+        // Skip live streams and premieres
+        if (/\b(live|premiere|upcoming|scheduled)\b/i.test(text)) {
+            return Infinity; // Never hide live/premiere videos
+        }
+        
         const parts = text.trim().split(':').reverse();
+        if (parts.length < 2) return 0; // Not a valid duration format
+        
         let totalMinutes = 0;
         
         // parts[0] = seconds
@@ -110,7 +121,7 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
      * @private
      */
     _processVideos(elements) {
-        if (!this.settings?.hideShortVideos) return;
+        if (!this.isEnabled || !this.settings?.hideShortVideos || !this._shouldRunOnCurrentPage()) return;
         
         const minDuration = parseInt(this.settings?.minVideoDuration || 5, 10);
         const minDurationStr = String(minDuration);
@@ -129,7 +140,13 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
                 video.dataset.yppDurationFiltered = minDurationStr;
                 
                 // Skip Shorts completely (handled by Shorts blocker)
-                if (video.querySelector(DurationFilter.SELECTORS.SHORTS_LINK)) return;
+                const isShorts = (
+                    video.querySelector(DurationFilter.SELECTORS.SHORTS_LINK) ||
+                    video.tagName.toLowerCase() === 'ytd-reel-item-renderer' ||
+                    video.closest('ytd-reel-shelf-renderer') !== null ||
+                    video.closest('ytd-shorts') !== null
+                );
+                if (isShorts) return;
 
                 // Find duration badge
                 const badge = video.querySelector(DurationFilter.SELECTORS.DURATION_BADGE);
@@ -141,12 +158,12 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
                 const minutes = this._parseMinutes(durationText);
                 
                 if (minutes < minDuration) {
-                    if (!video.classList.contains('ypp-hidden-duration')) {
-                        video.classList.add('ypp-hidden-duration');
+                    if (!video.classList.contains('ypp-hidden')) {
+                        this._hideElement(video, 'duration');
                         hiddenCount++;
                     }
                 } else {
-                    video.classList.remove('ypp-hidden-duration');
+                    this._unhideElement(video);
                 }
             } catch (err) {
                 this.utils.log(err.message, 'DURATION', 'error');
@@ -166,7 +183,18 @@ window.YPP.features.DurationFilter = class DurationFilter extends window.YPP.fea
      */
     _startPump() {
         if (!this.settings?.hideShortVideos) return;
+        
+        if (this._pumpCount >= this._maxPumps) {
+            this.utils.log('Max scroll pumps reached. Stopping to prevent loop.', 'DURATION', 'warn');
+            return;
+        }
+        
+        this._pumpCount++;
         window.dispatchEvent(new Event('scroll'));
         this.utils.log('Triggered scroll pump to load more videos.', 'DURATION', 'debug');
+        
+        // Reset pump count after 5 seconds of no activity
+        clearTimeout(this._pumpResetTimer);
+        this._pumpResetTimer = setTimeout(() => { this._pumpCount = 0; }, 5000);
     }
 };

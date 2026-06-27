@@ -8,6 +8,10 @@ class SearchPageManager extends window.YPP.BasePageManager {
             searchRedesign: window.YPP.features.SearchRedesign ? new window.YPP.features.SearchRedesign() : null,
             searchObserver: window.YPP.features.SearchObserver ? new window.YPP.features.SearchObserver() : null
         };
+
+        if (this.features.searchRedesign) {
+            this.features.searchRedesign.init(this.settings);
+        }
     }
 
     onActivate() {
@@ -30,7 +34,9 @@ class SearchPageManager extends window.YPP.BasePageManager {
 
     applySettings(settings) {
         this.settings = { ...this.settings, ...settings };
-        if (!this.isActive) return;
+        if (this.features.searchRedesign) {
+            this.features.searchRedesign.run(this.settings);
+        }
     }
 }
 

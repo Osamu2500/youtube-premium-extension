@@ -43,26 +43,26 @@ html[data-ypp-card-style="cyberpunk"] body:not(.ypp-channel-page) #video-title {
 html[data-ypp-card-style="minimalist"] body:not(.ypp-channel-page) :is(ytd-thumbnail, .yt-lockup-view-model-wiz__image, yt-image) {
     border-radius: 0 !important;
 }
-body.ypp-hide-explore-topics ytd-feed-filter-chip-bar-renderer,
-body.ypp-hide-explore-topics yt-chip-cloud-renderer,
-body.ypp-hide-explore-topics yt-related-chip-cloud-renderer,
-body.ypp-hide-explore-topics #chips-wrapper,
-body.ypp-hide-explore-topics ytd-rich-grid-renderer > #header {
+body.ypp-home-page.ypp-hide-explore-topics ytd-feed-filter-chip-bar-renderer,
+body.ypp-home-page.ypp-hide-explore-topics yt-chip-cloud-renderer,
+body.ypp-home-page.ypp-hide-explore-topics yt-related-chip-cloud-renderer,
+body.ypp-home-page.ypp-hide-explore-topics #chips-wrapper,
+body.ypp-home-page.ypp-hide-explore-topics ytd-rich-grid-renderer > #header {
   display: none !important;
 }
-body.ypp-hide-mixes ytd-rich-item-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
-body.ypp-hide-mixes ytd-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
-body.ypp-hide-mixes ytd-grid-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
-body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*="list="]),
-body.ypp-hide-mixes ytd-video-renderer:has(a[href*="list="]),
-body.ypp-hide-mixes ytd-grid-video-renderer:has(a[href*="list="]),
-body.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*="list="]),
-body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*="start_radio=1"]),
-body.ypp-hide-mixes ytd-video-renderer:has(a[href*="start_radio=1"]),
-body.ypp-hide-mixes ytd-grid-video-renderer:has(a[href*="start_radio=1"]),
-body.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*="start_radio=1"]),
-body.ypp-hide-mixes ytd-compact-radio-renderer,
-body.ypp-hide-mixes ytd-radio-renderer {
+body.ypp-home-page.ypp-hide-mixes ytd-rich-item-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+body.ypp-home-page.ypp-hide-mixes ytd-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+body.ypp-home-page.ypp-hide-mixes ytd-grid-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
+body.ypp-home-page.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*="list="]),
+body.ypp-home-page.ypp-hide-mixes ytd-video-renderer:has(a[href*="list="]),
+body.ypp-home-page.ypp-hide-mixes ytd-grid-video-renderer:has(a[href*="list="]),
+body.ypp-home-page.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*="list="]),
+body.ypp-home-page.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*="start_radio=1"]),
+body.ypp-home-page.ypp-hide-mixes ytd-video-renderer:has(a[href*="start_radio=1"]),
+body.ypp-home-page.ypp-hide-mixes ytd-grid-video-renderer:has(a[href*="start_radio=1"]),
+body.ypp-home-page.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*="start_radio=1"]),
+body.ypp-home-page.ypp-hide-mixes ytd-compact-radio-renderer,
+body.ypp-home-page.ypp-hide-mixes ytd-radio-renderer {
   display: none !important;
 }
 body.ypp-display-full-title #video-title,
@@ -590,28 +590,14 @@ body.ypp-minimal-mode ytd-rich-item-renderer {
     margin-right: 8px !important;
     margin-bottom: 24px !important;
 }
-body.ypp-hide-mixes ytd-radio-renderer,
-body.ypp-hide-mixes ytd-compact-radio-renderer,
-body.ypp-hide-mixes ytd-rich-item-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
-body.ypp-hide-mixes ytd-rich-item-renderer:has(yt-icon[icon-type="MIX"]),
-body.ypp-hide-mixes ytd-rich-item-renderer:has(yt-icon[icon-type="PLAY_ALL"]),
-body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='start_radio']),
-body.ypp-hide-mixes ytd-rich-item-renderer:has(a[href*='list=RD']),
-body.ypp-hide-mixes ytd-video-renderer:has(ytd-thumbnail-overlay-bottom-panel-renderer),
-body.ypp-hide-mixes ytd-video-renderer:has(yt-icon[icon-type="MIX"]),
-body.ypp-hide-mixes ytd-video-renderer:has(yt-icon[icon-type="PLAY_ALL"]),
-body.ypp-hide-mixes ytd-video-renderer:has(a[href*='start_radio']),
-body.ypp-hide-mixes ytd-video-renderer:has(a[href*='list=RD']),
-body.ypp-hide-mixes ytd-grid-video-renderer:has(a[href*='list=RD']),
-body.ypp-hide-mixes ytd-compact-video-renderer:has(a[href*='list=RD']) {
+body.ypp-home-page.ypp-hide-mixes ytd-radio-renderer,
+body.ypp-home-page.ypp-hide-mixes ytd-compact-radio-renderer {
     display: none !important;
 }
+
 body.ypp-hide-playlists ytd-playlist-renderer,
 body.ypp-hide-playlists ytd-compact-playlist-renderer,
 body.ypp-hide-playlists ytd-grid-playlist-renderer,
-body.ypp-hide-playlists ytd-rich-item-renderer:has(a.ytd-thumbnail[href*='list=PL']),
-body.ypp-hide-playlists ytd-video-renderer:has(a.ytd-thumbnail[href*='list=PL']),
-body.ypp-hide-playlists ytd-grid-video-renderer:has(a.ytd-thumbnail[href*='list=PL']),
-body.ypp-hide-playlists ytd-compact-video-renderer:has(a.ytd-thumbnail[href*='list=PL']) {
+body.ypp-hide-playlists ytd-rich-item-renderer:has(ytd-playlist-thumbnail) {
     display: none !important;
 }

@@ -86,36 +86,10 @@ class GlobalLayoutManager extends window.YPP.BasePageManager {
     _startMonitoring() {
         if (!window.YPP?.sharedObserver) return;
         
-        // Complex DOM filtering (Mixes)
-        window.YPP.sharedObserver.register('global_mixes', 'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer, ytd-compact-radio-renderer, ytd-radio-renderer', (elements) => {
-            if (!this.settings.hideMixes) return;
-            elements.forEach(el => {
-                const tag = el.tagName.toLowerCase();
-                if (tag === 'ytd-compact-radio-renderer' || tag === 'ytd-radio-renderer' || el.querySelector("a[href*='start_radio'], a[href*='list=RD'], ytd-thumbnail-overlay-bottom-panel-renderer")) {
-                    el.setAttribute('data-ypp-hide-mixes', 'true');
-                }
-            });
-        });
-
-        // Complex DOM filtering (Shorts)
-        window.YPP.sharedObserver.register('global_shorts', 'ytd-rich-section-renderer, ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer', (elements) => {
-            if (!this.settings.hideShorts) return;
-            elements.forEach(el => {
-                if (el.hasAttribute('is-shorts') || el.querySelector('ytd-reel-item-renderer, ytd-rich-shelf-renderer[is-shorts], a[href^="/shorts/"]')) {
-                    el.setAttribute('data-ypp-hide-shorts', 'true');
-                }
-            });
-        });
-        
-        // Complex DOM filtering (Playlists)
-        window.YPP.sharedObserver.register('global_playlists', 'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer', (elements) => {
-            if (!this.settings.hidePlaylists) return;
-            elements.forEach(el => {
-                if (el.querySelector("ytd-playlist-thumbnail, a.ytd-thumbnail[href*='list=PL']")) {
-                    el.setAttribute('data-ypp-hide-playlists', 'true');
-                }
-            });
-        });
+        // Observers for Mixes, Shorts, and Playlists were removed because they were setting 
+        // useless data attributes that were never used by CSS or JS. 
+        // HideShorts and HideMixes have their own dedicated JS files now, and HidePlaylists 
+        // uses safe CSS rules.
     }
 
     // --- Clean Mix URLs ---

@@ -100,7 +100,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
 
         // Reset processed-node cache so a fresh page starts clean
         this._searchObserver.resetProcessedNodes();
-        this._searchFilter.updateSettings(this._settings);
+        this._searchFilter.update(this._settings);
         
         this._searchViewMode.run();
 
@@ -193,7 +193,7 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
                 () => this._isEnabled,
                 SearchRedesign.CLASSES
             );
-            this._searchFilter.updateSettings(this._settings);
+            this._searchFilter.update(this._settings);
 
             if (this._settings.searchGrid || this._settings.hideSearchShelves || this._settings.hideChannelCards || this._settings.cleanSearch) {
                 if (this._settings.searchGrid) {
@@ -202,9 +202,6 @@ class SearchRedesign extends window.YPP.features.BaseFeature {
                 this._searchObserver.start(SearchRedesign.SELECTORS.SEARCH_CONTAINER);
             }
 
-            if (this._settings.autoVideoFilter) {
-                this._searchFilter.checkAndApply();
-            }
         } else {
             this._searchObserver.stop();
             this._removeClasses();
