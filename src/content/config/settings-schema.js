@@ -66,6 +66,7 @@ window.YPP.SettingsSchema = {
         minVideoDuration:    { type: 'number',  default: 5, min: 0, max: 60 },
 
         // --- Customization ---
+        customThemes:        { type: 'object',  default: {} },
         fontScale:           { type: 'number',  default: 100, min: 80, max: 130 },
         accentColor:         { type: 'string',  default: '#ff4e45' },
         enableAnimations:    { type: 'boolean', default: true },
@@ -330,10 +331,18 @@ window.YPP.SettingsSchema = {
             // String enum validation (defensive against Array mutation/injection)
             if (rule.type === 'string' && Array.isArray(rule.values) && rule.values.length > 0) {
                 // Ensure value is a primitive string before using .includes()
-                if (typeof value !== 'string' || !rule.values.includes(value)) {
+                if (typeof value !== 'string' || (!rule.values.includes(value) && !value.startsWith('custom_'))) {
                     window.YPP.Utils?.log(`Settings: "${key}" value "${value}" not in allowed list. Resetting.`, 'SCHEMA', 'warn');
                     out[key] = rule.default;
                     warnings++;
+                    continue;
+                }
+            }
+            
+            // Object validation
+            if (rule.type === 'object') {
+                if (value === null || Array.isArray(value)) {
+                    out[key] = rule.default;
                     continue;
                 }
             }

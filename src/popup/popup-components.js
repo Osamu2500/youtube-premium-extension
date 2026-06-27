@@ -2,7 +2,7 @@
 
 export function initComponents(document, state, ui, updateSetting, notifyThemeChange, saveSettings) {
     
-    function applyThemeToPopup(themeKey) {
+    function applyThemeToPopup(themeKey, customThemesObj = null) {
         if (themeKey === 'system') {
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             themeKey = isDark ? 'midnight' : 'default';
@@ -11,76 +11,335 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
         document.documentElement.classList.add('yt-premium-plus-theme');
         const link = document.getElementById('ypp-active-theme-css');
         if (link) link.remove();
+        
+        const applyCustom = (themes) => {
+            let style = document.getElementById('ypp-custom-theme-style');
+            if (style) style.remove();
+            
+            if (themeKey.startsWith('custom_') && themes && themes[themeKey]) {
+                const theme = themes[themeKey];
+                style = document.createElement('style');
+                style.id = 'ypp-custom-theme-style';
+                const cssVars = Object.entries(theme.variables || {})
+                    .map(([k, v]) => `${k}: ${v} !important;`)
+                    .join('\n');
+                style.textContent = `:root {\n${cssVars}\n}`;
+                document.head.appendChild(style);
+            }
+        };
+
+        if (customThemesObj) {
+            applyCustom(customThemesObj);
+        } else if (themeKey.startsWith('custom_')) {
+            chrome.storage.local.get('settings', (data) => {
+                applyCustom(data.settings?.customThemes);
+            });
+        } else {
+            applyCustom({});
+        }
     }
 
     function initThemeSelector(currentTheme) {
         const themeGrid = document.getElementById('themeGrid');
         if (!themeGrid) return;
-        themeGrid.innerHTML = '';
 
-        const themes = [
-            { key: 'system', label: 'System Auto', meta: 'Follows OS', color: 'split' },
-            { key: 'default', label: 'YouTube Dark', meta: 'Default', color: '#0f0f0f' },
-            { key: 'ocean', label: 'Ocean Blue', meta: 'Deep Blue', color: '#051421' },
-            { key: 'sunset', label: 'Sunset Glow', meta: 'Warm', color: '#1a0b1a' },
-            { key: 'dracula', label: 'Dracula', meta: 'High Contrast', color: '#282a36' },
-            { key: 'midnight', label: 'Midnight', meta: 'OLED Black', color: '#000000' },
-            { key: 'forest', label: 'Forest', meta: 'Green', color: '#0f1c15' },
-            { key: 'cherry', label: 'Cherry', meta: 'Pink', color: '#26181b' },
-            { key: 'coffee', label: 'Coffee', meta: 'Latte', color: '#2a201c' },
-            { key: 'cyberpunk', label: 'Cyberpunk', meta: 'Neon', color: '#0a0a0f' },
-            { key: 'nord', label: 'Nord', meta: 'Frost', color: '#2e3440' },
-            { key: 'discord', label: 'Discord Dark', meta: 'Chat', color: '#36393f' },
-            { key: 'hacker', label: 'Hacker Green', meta: 'Terminal', color: '#0a140a' },
-            { key: 'outrun', label: 'Outrun Synth', meta: '80s Retro', color: '#1a0524' },
-            { key: 'bloodmoon', label: 'Blood Moon', meta: 'Crimson', color: '#1a0505' },
-            { key: 'deepspace', label: 'Deep Space', meta: 'Nebula', color: '#020205' },
-            { key: 'nebula', label: 'Nebula', meta: 'Purple Space', color: '#0f0518' },
-            { key: 'abyss', label: 'Abyss', meta: 'Deep Sea', color: '#01080a' },
-            { key: 'ember', label: 'Ember', meta: 'Hot Coals', color: '#141414' },
-            { key: 'hologram', label: 'Hologram', meta: 'Sci-Fi Cyan', color: '#e0f7fa' },
-            { key: 'onepiece', label: 'One Piece', meta: 'Pirate King', color: '#0055a4' },
-            { key: 'naruto', label: 'Naruto', meta: 'Shinobi', color: '#ff6600' },
-            { key: 'bleach', label: 'Bleach', meta: 'Soul Reaper', color: '#cc0000' },
-            { key: 'drstone', label: 'Dr. Stone', meta: 'Science', color: '#00cc66' },
-            { key: 'gurrenlagann', label: 'Gurren Lagann', meta: 'Spiral Power', color: '#ff0033' },
-            { key: 'sao', label: 'SAO', meta: 'Link Start', color: '#00bfff' },
-            { key: 'zatchbell', label: 'Zatch Bell', meta: 'Spellbook', color: '#ffd700' },
-            { key: 'aot', label: 'AOT', meta: 'Scout Regiment', color: '#8b4513' }
+        const themeCategories = [
+            {
+                name: 'System',
+                themes: [
+                    { key: 'system', label: 'System Auto', meta: 'Follows OS', color: 'split' },
+                    { key: 'default', label: 'YouTube Dark', meta: 'Default', color: '#0f0f0f' },
+                    { key: 'midnight', label: 'Midnight', meta: 'OLED Black', color: '#000000' }
+                ]
+            },
+            {
+                name: 'Colors',
+                themes: [
+                    { key: 'ocean', label: 'Ocean Blue', meta: 'Deep Blue', color: '#051421' },
+                    { key: 'sunset', label: 'Sunset Glow', meta: 'Warm', color: '#1a0b1a' },
+                    { key: 'forest', label: 'Forest', meta: 'Green', color: '#0f1c15' },
+                    { key: 'cherry', label: 'Cherry', meta: 'Pink', color: '#26181b' },
+                    { key: 'coffee', label: 'Coffee', meta: 'Latte', color: '#2a201c' }
+                ]
+            },
+            {
+                name: 'Dark & Moody',
+                themes: [
+                    { key: 'dracula', label: 'Dracula', meta: 'High Contrast', color: '#282a36' },
+                    { key: 'nord', label: 'Nord', meta: 'Frost', color: '#2e3440' },
+                    { key: 'discord', label: 'Discord Dark', meta: 'Chat', color: '#36393f' },
+                    { key: 'hacker', label: 'Hacker Green', meta: 'Terminal', color: '#0a140a' },
+                    { key: 'bloodmoon', label: 'Blood Moon', meta: 'Crimson', color: '#1a0505' },
+                    { key: 'abyss', label: 'Abyss', meta: 'Deep Sea', color: '#01080a' },
+                    { key: 'ember', label: 'Ember', meta: 'Hot Coals', color: '#141414' }
+                ]
+            },
+            {
+                name: 'Sci-Fi & Retro',
+                themes: [
+                    { key: 'cyberpunk', label: 'Cyberpunk', meta: 'Neon', color: '#0a0a0f' },
+                    { key: 'outrun', label: 'Outrun Synth', meta: '80s Retro', color: '#1a0524' },
+                    { key: 'deepspace', label: 'Deep Space', meta: 'Nebula', color: '#020205' },
+                    { key: 'nebula', label: 'Nebula', meta: 'Purple Space', color: '#0f0518' },
+                    { key: 'hologram', label: 'Hologram', meta: 'Sci-Fi Cyan', color: '#e0f7fa' }
+                ]
+            },
+            {
+                name: 'Anime',
+                themes: [
+                    { key: 'onepiece', label: 'One Piece', meta: 'Pirate King', color: '#0055a4' },
+                    { key: 'naruto', label: 'Naruto', meta: 'Shinobi', color: '#ff6600' },
+                    { key: 'bleach', label: 'Bleach', meta: 'Soul Reaper', color: '#cc0000' },
+                    { key: 'drstone', label: 'Dr. Stone', meta: 'Science', color: '#00cc66' },
+                    { key: 'gurrenlagann', label: 'Gurren Lagann', meta: 'Spiral Power', color: '#ff0033' },
+                    { key: 'sao', label: 'SAO', meta: 'Link Start', color: '#00bfff' },
+                    { key: 'zatchbell', label: 'Zatch Bell', meta: 'Spellbook', color: '#ffd700' },
+                    { key: 'aot', label: 'AOT', meta: 'Scout Regiment', color: '#8b4513' }
+                ]
+            }
         ];
 
-        themes.forEach(theme => {
-            const btn = document.createElement('div');
-            btn.className = `theme-btn ${theme.key === currentTheme ? 'active' : ''}`;
-            btn.dataset.theme = theme.key;
-            
-            const preview = document.createElement('div');
-            preview.className = `theme-preview ${theme.key === 'system' ? 'split' : ''}`;
-            if (theme.key !== 'system') preview.style.backgroundColor = theme.color;
-            
-            const info = document.createElement('div');
-            info.className = 'theme-info';
-            info.innerHTML = `
-                <span class="theme-name">${theme.label}</span>
-                <span class="theme-meta">${theme.meta}</span>
-            `;
+        chrome.storage.local.get('settings', (data) => {
+            const customThemesObj = data.settings?.customThemes || {};
+            const customThemes = Object.keys(customThemesObj).map(k => ({
+                key: k,
+                label: customThemesObj[k].name || 'Custom Theme',
+                meta: 'Custom',
+                color: customThemesObj[k].variables['--ypp-bg-base'] || '#000000',
+                isCustom: true
+            }));
 
-            btn.appendChild(preview);
-            btn.appendChild(info);
+            if (customThemes.length > 0) {
+                themeCategories.unshift({
+                    name: 'Custom Themes',
+                    themes: customThemes
+                });
+            }
 
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const newTheme = theme.key;
-                updateSetting('activeTheme', newTheme);
-                applyThemeToPopup(newTheme);
-                notifyThemeChange(newTheme);
+            themeGrid.innerHTML = '';
+            themeGrid.style.display = 'flex';
+            themeGrid.style.flexDirection = 'column';
+            themeGrid.style.gap = '16px';
+            
+            themeCategories.forEach(category => {
+                const categoryWrapper = document.createElement('div');
+                categoryWrapper.className = 'theme-category-wrapper';
+                
+                const groupLabel = document.createElement('div');
+                groupLabel.className = 'theme-group-label';
+                groupLabel.textContent = category.name;
+                groupLabel.style.width = '100%';
+                groupLabel.style.fontSize = '11px';
+                groupLabel.style.color = 'rgba(255,255,255,0.4)';
+                groupLabel.style.textTransform = 'uppercase';
+                groupLabel.style.letterSpacing = '0.05em';
+                groupLabel.style.marginBottom = '8px';
+                groupLabel.style.fontWeight = '600';
+                categoryWrapper.appendChild(groupLabel);
+
+                const innerGrid = document.createElement('div');
+                innerGrid.className = 'theme-grid-inner';
+                innerGrid.style.display = 'grid';
+                innerGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                innerGrid.style.gap = '8px';
+                innerGrid.style.width = '100%';
+                
+                category.themes.forEach(theme => {
+                    const btn = document.createElement('div');
+                    btn.className = `theme-btn ${theme.key === currentTheme ? 'active' : ''}`;
+                    btn.dataset.theme = theme.key;
+                    
+                    const preview = document.createElement('div');
+                    preview.className = `theme-preview ${theme.key === 'system' ? 'split' : ''}`;
+                    if (theme.key !== 'system') preview.style.backgroundColor = theme.color;
+                    
+                    const info = document.createElement('div');
+                    info.className = 'theme-info';
+                    info.innerHTML = `
+                        <span class="theme-name">${theme.label}</span>
+                        <span class="theme-meta">${theme.meta}</span>
+                    `;
+
+                    btn.appendChild(preview);
+                    btn.appendChild(info);
+
+                    if (theme.isCustom) {
+                        const delBtn = document.createElement('button');
+                        delBtn.innerHTML = '✕';
+                        delBtn.style.position = 'absolute';
+                        delBtn.style.top = '4px';
+                        delBtn.style.right = '4px';
+                        delBtn.style.background = 'rgba(0,0,0,0.5)';
+                        delBtn.style.border = 'none';
+                        delBtn.style.color = '#fff';
+                        delBtn.style.borderRadius = '50%';
+                        delBtn.style.width = '16px';
+                        delBtn.style.height = '16px';
+                        delBtn.style.fontSize = '10px';
+                        delBtn.style.cursor = 'pointer';
+                        delBtn.style.display = 'none';
+                        
+                        btn.style.position = 'relative';
+                        btn.addEventListener('mouseenter', () => delBtn.style.display = 'block');
+                        btn.addEventListener('mouseleave', () => delBtn.style.display = 'none');
+                        
+                        delBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('Delete this custom theme?')) {
+                                chrome.storage.local.get('settings', (d) => {
+                                    const st = d.settings || {};
+                                    if (st.customThemes) {
+                                        delete st.customThemes[theme.key];
+                                    }
+                                    if (st.activeTheme === theme.key) {
+                                        st.activeTheme = 'default';
+                                    }
+                                    chrome.storage.local.set({ settings: st }, () => {
+                                        initThemeSelector(st.activeTheme);
+                                        applyThemeToPopup(st.activeTheme, st.customThemes);
+                                        notifyThemeChange(st.activeTheme);
+                                        chrome.tabs.query({active: true}, (tabs) => {
+                                            chrome.tabs.sendMessage(tabs[0].id, {
+                                                type: 'UPDATE_SETTINGS',
+                                                settings: st
+                                            }).catch(() => {});
+                                        });
+                                    });
+                                });
+                            }
+                        });
+                        btn.appendChild(delBtn);
+                    }
+
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        const newTheme = theme.key;
+                        updateSetting('activeTheme', newTheme);
+                        applyThemeToPopup(newTheme, customThemesObj);
+                        notifyThemeChange(newTheme);
+                    });
+
+                    innerGrid.appendChild(btn);
+                });
+                
+                categoryWrapper.appendChild(innerGrid);
+                themeGrid.appendChild(categoryWrapper);
             });
 
-            themeGrid.appendChild(btn);
+            applyThemeToPopup(currentTheme, customThemesObj);
         });
+    }
+
+    function initCustomThemeBuilder() {
+        const saveBtn = document.getElementById('saveCustomThemeBtn');
+        const exportBtn = document.getElementById('exportCustomThemeBtn');
+        const importBtn = document.getElementById('importCustomThemeBtn');
+        const importFile = document.getElementById('importCustomThemeFile');
         
-        applyThemeToPopup(currentTheme);
+        if (!saveBtn) return;
+        
+        saveBtn.addEventListener('click', () => {
+            const nameInput = document.getElementById('customThemeName');
+            const bgBase = document.getElementById('customThemeBgBase').value;
+            const bgSurface = document.getElementById('customThemeBgSurface').value;
+            const accent = document.getElementById('customThemeAccent').value;
+            const text = document.getElementById('customThemeText').value;
+            
+            let name = nameInput.value.trim();
+            if (!name) name = 'My Custom Theme';
+            
+            const themeKey = 'custom_' + Date.now();
+            
+            chrome.storage.local.get('settings', (data) => {
+                const settings = data.settings || {};
+                if (!settings.customThemes) settings.customThemes = {};
+                
+                settings.customThemes[themeKey] = {
+                    name: name,
+                    variables: {
+                        '--ypp-bg-base': bgBase,
+                        '--ypp-bg-surface': bgSurface,
+                        '--ypp-accent-primary': accent,
+                        '--ypp-text-primary': text,
+                        '--ypp-bg-card': bgSurface,
+                        '--ypp-text-secondary': text + 'b3', // slightly transparent text
+                    }
+                };
+                
+                settings.activeTheme = themeKey;
+                
+                chrome.storage.local.set({ settings }, () => {
+                    initThemeSelector(themeKey);
+                    applyThemeToPopup(themeKey, settings.customThemes);
+                    notifyThemeChange(themeKey);
+                    nameInput.value = '';
+                    
+                    if (ui && ui.showSaveIndicator) ui.showSaveIndicator(document);
+                    
+                    chrome.tabs.query({active: true}, (tabs) => {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            type: 'UPDATE_SETTINGS',
+                            settings
+                        }).catch(() => {});
+                    });
+                });
+            });
+        });
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                chrome.storage.local.get('settings', (data) => {
+                    const customThemes = data.settings?.customThemes || {};
+                    if (Object.keys(customThemes).length === 0) {
+                        alert('No custom themes to export.');
+                        return;
+                    }
+                    const blob = new Blob([JSON.stringify(customThemes, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ypp-custom-themes.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            });
+        }
+
+        if (importBtn && importFile) {
+            importBtn.addEventListener('click', () => importFile.click());
+            importFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        chrome.storage.local.get('settings', (data) => {
+                            const settings = data.settings || {};
+                            if (!settings.customThemes) settings.customThemes = {};
+                            
+                            // Merge
+                            for (const [key, theme] of Object.entries(imported)) {
+                                if (key.startsWith('custom_') && theme.variables) {
+                                    settings.customThemes[key] = theme;
+                                }
+                            }
+                            
+                            chrome.storage.local.set({ settings }, () => {
+                                initThemeSelector(settings.activeTheme || 'default');
+                                alert('Themes imported successfully!');
+                                if (ui && ui.showSaveIndicator) ui.showSaveIndicator(document);
+                            });
+                        });
+                    } catch (err) {
+                        alert('Invalid theme file.');
+                    }
+                };
+                reader.readAsText(file);
+                importFile.value = ''; // Reset
+            });
+        }
     }
 
     function initPremiumAccentDropdown() {
@@ -260,6 +519,7 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
         initHideWatchedModePill,
         initCardStyleGrid,
         initAccentColorSwatches,
+        initCustomThemeBuilder,
         applyThemeToPopup
     };
 }

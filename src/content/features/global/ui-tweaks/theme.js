@@ -198,7 +198,13 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
         // Optimization: Only inject if theme changed or not yet injected
         if (themeKey !== this._currentThemeKey || !document.getElementById('ypp-active-theme-css')) {
             this._Utils.log(`Theme changed (${this._currentThemeKey} -> ${themeKey}), injecting...`, 'THEME');
-            this._injectThemeFile(themeKey);
+            
+            if (themeKey.startsWith('custom_')) {
+                this._injectCustomTheme(themeKey);
+            } else {
+                this._injectThemeFile(themeKey);
+            }
+            
             this._currentThemeKey = themeKey;
         } else {
              this._Utils.log(`Theme '${themeKey}' already active, skipping injection.`, 'THEME', 'debug');
@@ -211,11 +217,53 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     forceReload() {
         if (this._currentThemeKey) {
             this._Utils.log('Force reloading theme...', 'THEME');
-            this._injectThemeFile(this._currentThemeKey, true);
+            if (this._currentThemeKey.startsWith('custom_')) {
+                this._injectCustomTheme(this._currentThemeKey);
+            } else {
+                this._injectThemeFile(this._currentThemeKey, true);
+            }
         } else {
              // If no theme active, maybe try to enable based on settings?
              this._run(this._settings);
         }
+    }
+
+    /**
+     * Inject custom theme CSS variables
+     * @param {string} themeKey 
+     */
+    _injectCustomTheme(themeKey) {
+        const customThemes = this._settings.customThemes || {};
+        const theme = customThemes[themeKey];
+        
+        if (!theme) {
+            this._Utils.log(`Custom theme ${themeKey} not found, falling back to default.`, 'THEME', 'warn');
+            this._injectThemeFile('default');
+            return;
+        }
+
+        const id = 'ypp-active-theme-css';
+        let style = document.getElementById(id);
+        
+        // If the element exists but is a <link> (from previous built-in theme), replace it
+        if (style && style.tagName.toLowerCase() !== 'style') {
+            style.remove();
+            style = null;
+        }
+
+        if (!style) {
+            style = document.createElement('style');
+            style.id = id;
+            style.className = 'ypp-theme-style';
+            document.head.appendChild(style);
+        }
+
+        const cssVars = Object.entries(theme.variables || {})
+            .map(([k, v]) => `${k}: ${v} !important;`)
+            .join('\n');
+
+        style.textContent = `:root.ypp-premium-plus-theme, :root.yt-premium-plus-theme, html[data-ypp-theme="${themeKey}"] {\n${cssVars}\n}`;
+        this._Utils.log(`Injecting Custom Theme: ${themeKey}`, 'THEME');
     }
 
     /**
@@ -226,6 +274,12 @@ window.YPP.features.Theme = class ThemeManager extends window.YPP.features.BaseF
     _injectThemeFile(themeKey, force = false) {
         const id = 'ypp-active-theme-css';
         let link = document.getElementById(id);
+        
+        // If the element exists but is a <style> (from previous custom theme), replace it
+        if (link && link.tagName.toLowerCase() !== 'link') {
+            link.remove();
+            link = null;
+        }
 
         const cssUrl = chrome.runtime.getURL(`src/content/themes/${themeKey}.css`);
         const fullUrl = force ? `${cssUrl}?t=${Date.now()}` : cssUrl;

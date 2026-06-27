@@ -460,6 +460,7 @@ const initApp = () => {
         components.initHideWatchedModePill();
         components.initCardStyleGrid();
         components.initAccentColorSwatches();
+        components.initCustomThemeBuilder();
 
         // 5. Wire Universal Event Listeners
         initUniversalListeners(document, state, UI, saveSettings);
