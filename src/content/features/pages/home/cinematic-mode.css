@@ -1,13 +1,50 @@
 /* Cinematic Mode (Netflix Style) */
 
-/* Hide native elements when active */
-.ypp-cinematic-mode ytd-rich-grid-renderer,
+/* Hide native chips/shorts, but KEEP the main grid for horizontal rows */
 .ypp-cinematic-mode ytd-rich-section-renderer[is-shorts],
 .ypp-cinematic-mode #chips-wrapper {
     display: none !important;
 }
 
-/* Toggle Button in the YouTube Header */
+/* ─── HORIZONTAL GRID RESTORATION ─── */
+/* Force the YouTube grid to become a horizontal scrolling row */
+html body.ypp-cinematic-mode ytd-rich-grid-renderer,
+html body.ypp-cinematic-mode #contents.ytd-rich-grid-renderer,
+html body.ypp-cinematic-mode #contents.ypp-grid-container,
+html body.ypp-cinematic-mode #contents[data-ypp-cols] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 40px !important;
+    gap: 16px !important;
+    scroll-snap-type: x mandatory;
+    /* Hide scrollbar */
+    scrollbar-width: none; 
+}
+html body.ypp-cinematic-mode #contents::-webkit-scrollbar {
+    display: none;
+}
+
+/* Fix individual video cards to fit the horizontal row */
+html body.ypp-cinematic-mode ytd-rich-item-renderer {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    flex: 0 0 320px !important;
+    display: block !important;
+    scroll-snap-align: start;
+    transform: none !important;
+}
+html body.ypp-cinematic-mode ytd-rich-item-renderer ytd-thumbnail {
+    width: 100% !important;
+    height: 180px !important;
+}
+html body.ypp-cinematic-mode ytd-rich-grid-row {
+    display: contents !important;
+}
 .ypp-cinematic-toggle-btn {
     background: #e50914; /* Netflix Red */
     color: white;
