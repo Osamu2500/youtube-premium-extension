@@ -127,22 +127,19 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     /**
      * Called when extension settings update, allowing dynamic syncing of the mute state.
      */
-    async update(settings) {
-        if (settings) {
-            this.settings = { ...this.settings, ...settings };
-            const previousMuteState = this._isMuted;
-            this._isMuted = this.settings.cinematicMuted !== undefined ? this.settings.cinematicMuted : this._isFirefox;
-            
-            // Sync UI if mute state changed from popup
-            if (previousMuteState !== this._isMuted && this._cinematicActive) {
-                const heroButton = document.querySelector(CinematicMode.SELECTORS.HERO_BUTTON);
-                if (heroButton) {
-                    heroButton.classList.toggle('muted', this._isMuted);
-                    const html = this._generateMuteButtonHTML(this._isMuted);
-                    heroButton.innerHTML = html;
-                }
-                this._syncMuteState();
+    async onUpdate() {
+        const previousMuteState = this._isMuted;
+        this._isMuted = this.settings.cinematicMuted !== undefined ? this.settings.cinematicMuted : this._isFirefox;
+        
+        // Sync UI if mute state changed from popup
+        if (previousMuteState !== this._isMuted && this._cinematicActive) {
+            const heroButton = document.querySelector(CinematicMode.SELECTORS.HERO_BUTTON);
+            if (heroButton) {
+                heroButton.classList.toggle('muted', this._isMuted);
+                const html = this._generateMuteButtonHTML(this._isMuted);
+                heroButton.innerHTML = html;
             }
+            this._syncMuteState();
         }
     }
 
