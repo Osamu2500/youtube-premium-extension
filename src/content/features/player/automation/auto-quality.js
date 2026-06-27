@@ -94,7 +94,15 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
 
     applyAutoQuality(player) {
         if (typeof player.getAvailableQualityLevels !== 'function') return;
+
+        // Skip applying auto-quality to Shorts and Live streams
+        if (window.location.pathname.startsWith('/shorts/')) return;
+        try {
+            if (player.getVideoData && player.getVideoData().isLive) return;
+        } catch (e) {}
+
         const available = player.getAvailableQualityLevels();
+        if (!available || available.length === 0) return;
         
         // Full hierarchy of qualities
         const hierarchy = ['highres', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];

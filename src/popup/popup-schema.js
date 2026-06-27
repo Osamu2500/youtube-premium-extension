@@ -39,7 +39,6 @@ export const POPUP_SCHEMA = [
             {
                 title: 'Feed Layout',
                 items: [
-                    { type:'toggle', id:'cinematicMode',    label:'Cinematic Mode',   desc:'Netflix-style immersive UI', icon:P('M2 7h20v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z M17 2l5 5M7 2L2 7'), style:'border:1px solid var(--accent-primary)' },
                     { type:'toggle', id:'displayFullTitle', label:'Full Video Titles', desc:'Prevent truncation',        icon:P('M4 6h16M4 12h16M4 18h16') },
                     { type:'toggle', id:'autoScaleLayout',  label:'Auto-Scale Grid',  desc:'Adapt to zoom/window size', icon:P('M15 3l6 6M15 3h6v6M9 21l-6-6M9 21H3v-6') },
                     { type:'range', id:'homeColumns', label:'Grid Columns', desc:'0 = auto-scale', unit:'', min:0, max:10, step:1 },

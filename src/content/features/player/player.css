@@ -701,3 +701,11 @@ body.ypp-sidebar-hidden ytd-watch-flexy:not([theater]) #columns {
   border-radius: inherit;
   overflow: hidden;
 }
+
+/* Bug Fix: Prevent background thumbnail from blocking player clicks due to global thumbnail styles */
+ytd-thumbnail.player-container-background-image,
+.player-container-background ytd-thumbnail,
+#player-full-bleed-container ytd-thumbnail {
+    pointer-events: none !important;
+}
+

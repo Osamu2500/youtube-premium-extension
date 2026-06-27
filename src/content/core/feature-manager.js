@@ -205,7 +205,7 @@ window.YPP.FeatureManager = class FeatureManager {
 
         const PRIORITY_ORDER = [
             'theme', 'headerNav', 'sidebarLayout', 'layout', 'autoScaleLayout',
-            'cinematicMode', 'keyboardShortcuts', 'videoSpeedController',
+            'keyboardShortcuts', 'videoSpeedController',
             'markWatched', 'hideWatched', 'multiSelect',
             'playlistRedesign', 'gridAnimator', 'ambientMode'
         ];

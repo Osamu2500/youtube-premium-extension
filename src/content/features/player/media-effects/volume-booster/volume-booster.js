@@ -114,6 +114,13 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         // Call super to run cleanupEvents and remove all tracked listeners
         await super.disable();
 
+        if (this._resumeAudioContextBound) {
+            document.removeEventListener('click', this._resumeAudioContextBound);
+            document.removeEventListener('keydown', this._resumeAudioContextBound);
+            document.removeEventListener('pointerdown', this._resumeAudioContextBound);
+            this._resumeAudioContextBound = null;
+        }
+
         // Bug fix: scope button removal to this feature instance's video context,
         // not a global querySelector that could remove buttons on other instances.
         const btn = this._boundVideo?.closest?.('body')?.querySelector?.('#ypp-volume-boost-btn[data-vb-id="' + this._id + '"]')
@@ -249,6 +256,10 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
                 this._audioConnected = true;
                 this._restoreAudioState();
 
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+
             } catch (e) {
                 this.utils?.log?.('[YPP:VolumeBooster] Audio engine init failed: ' + e.message, 'VolumeBooster', 'warn');
                 this._audioConnected = false;
@@ -258,6 +269,19 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         // Attempt immediate init if already playing, otherwise wait for interaction
         this.addListener(video, 'play', this._initHandler, { once: true });
         this.addListener(video, 'volumechange', this._initHandler, { once: true });
+        
+        // Ensure AudioContext resumes on user interaction to fix autoplay policy violations
+        if (!this._resumeAudioContextBound) {
+            this._resumeAudioContextBound = () => {
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            };
+            document.addEventListener('click', this._resumeAudioContextBound);
+            document.addEventListener('keydown', this._resumeAudioContextBound);
+            document.addEventListener('pointerdown', this._resumeAudioContextBound);
+        }
+
         if (!video.paused) this._initHandler();
     }
 

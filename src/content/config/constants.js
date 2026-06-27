@@ -221,7 +221,6 @@ window.YPP.CONSTANTS = {
         GRID_ITEM: 'ypp-grid-item',
         FULL_WIDTH: 'ypp-full-width-item',
         HIDDEN_SHORT: 'ypp-hidden-short',
-        CINEMATIC_MODE: 'ypp-cinematic-mode',
 
         // View Toggle
         VIEW_TOGGLE: 'ypp-view-mode-toggle',
@@ -230,7 +229,6 @@ window.YPP.CONSTANTS = {
         // Focus / View Modes
         FOCUS_MODE: 'ypp-focus-mode',
         CINEMA_MODE: 'ypp-cinema-mode',
-        CINEMATIC_MODE: 'ypp-cinematic-mode',
         MINIMAL_MODE: 'ypp-minimal-mode',
         DOPAMINE_DETOX_STYLE: 'ypp-detox-style',
         CINEMA_STYLE: 'ypp-cinema-style',
@@ -429,7 +427,6 @@ window.YPP.CONSTANTS = {
         snapshotButton: 'SnapshotButton',
         loopButton: 'LoopButton',
         splitScrolling: 'SplitScrolling',
-        cinematicMode: 'CinematicMode',
         // --- Missing Toggles & Layouts ---
         layout: 'Layout',
         autoScaleLayout: 'AutoScaleGrid',

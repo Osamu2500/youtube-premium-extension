@@ -19,6 +19,9 @@ window.YPP.features.AutoPiP = class AutoPiP extends window.YPP.features.BaseFeat
         if (this._boundAutoPiP) return; // Already enabled
         
         this._boundAutoPiP = async () => {
+            // Ignore PiP attempts on Shorts players to prevent crashes
+            if (window.location.pathname.startsWith('/shorts/')) return;
+
             const video = document.querySelector('video');
             if (!video) return;
             

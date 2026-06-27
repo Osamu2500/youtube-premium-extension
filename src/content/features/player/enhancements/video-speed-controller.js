@@ -519,6 +519,20 @@ window.YPP.features.VideoSpeedController = class VideoSpeedController extends wi
             bindings.push({
                 combo: sc.key,
                 callback: (e) => {
+                    // Prevent hijacking shortcuts when typing in search box or comments (Shadow DOM support)
+                    const path = e.composedPath ? e.composedPath() : (e.path || [e.target]);
+                    for (const node of path) {
+                        if (node && node.tagName) {
+                            const tag = node.tagName.toUpperCase();
+                            if (tag === 'INPUT' || tag === 'TEXTAREA' || node.isContentEditable) {
+                                return;
+                            }
+                        }
+                    }
+                    if (window.YPP.utils?.isInputFocused?.()) {
+                        return;
+                    }
+
                     let video = this._lastActiveVideo;
                     if (!video || !video.isConnected) {
                         video = this.findLargestVideo();

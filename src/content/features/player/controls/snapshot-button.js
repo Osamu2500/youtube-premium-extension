@@ -33,15 +33,29 @@ window.YPP.features.SnapshotButton = class SnapshotButton extends window.YPP.fea
             video.pause();
         }
 
+        // Limit max dimensions to 1920x1080 to prevent memory spikes on 4K/8K videos
+        const MAX_WIDTH = 1920;
+        const MAX_HEIGHT = 1080;
+        let targetWidth = video.videoWidth;
+        let targetHeight = video.videoHeight;
+        
+        if (targetWidth > MAX_WIDTH || targetHeight > MAX_HEIGHT) {
+            const ratio = Math.min(MAX_WIDTH / targetWidth, MAX_HEIGHT / targetHeight);
+            targetWidth = targetWidth * ratio;
+            targetHeight = targetHeight * ratio;
+        }
+
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
         const ctx = canvas.getContext('2d');
         
         try {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Verify if canvas is tainted due to CORS/DRM by attempting to read 1 pixel
+            ctx.getImageData(0, 0, 1, 1);
         } catch (e) {
-            alert('Cannot capture snapshot (Content might be DRM protected or not fully loaded).');
+            this._showErrorToast('Cannot capture snapshot. Video is restricted by cross-origin (CORS) rules or DRM protection.');
             return;
         }
 
@@ -84,15 +98,19 @@ window.YPP.features.SnapshotButton = class SnapshotButton extends window.YPP.fea
         copyBtn.onmouseout = () => copyBtn.style.transform = 'translateY(0)';
         
         copyBtn.onclick = () => {
-            canvas.toBlob(blob => {
-                if (blob) {
-                    const item = new window.ClipboardItem({ 'image/png': blob });
-                    navigator.clipboard.write([item]).then(() => {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => closeOverlay(), 1000);
-                    }).catch(err => alert('Failed to copy: ' + err));
-                }
-            }, 'image/png');
+            try {
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        const item = new window.ClipboardItem({ 'image/png': blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => closeOverlay(), 1000);
+                        }).catch(err => this._showErrorToast('Failed to copy: ' + err));
+                    }
+                }, 'image/png');
+            } catch (e) {
+                this._showErrorToast('Security error: Cannot copy restricted content.');
+            }
         };
 
         const downloadBtn = document.createElement('button');
@@ -102,15 +120,19 @@ window.YPP.features.SnapshotButton = class SnapshotButton extends window.YPP.fea
         downloadBtn.onmouseout = () => { downloadBtn.style.transform = 'translateY(0)'; downloadBtn.style.background = 'rgba(255,255,255,0.1)'; };
 
         downloadBtn.onclick = () => {
-            let title = document.title.replace(/ - YouTube$/, '').trim();
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
-            const timeStr = `${timestamp[0]}_${timestamp[1].substring(0,6)}`;
+            try {
+                let title = document.title.replace(/ - YouTube$/, '').trim();
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
+                const timeStr = `${timestamp[0]}_${timestamp[1].substring(0,6)}`;
 
-            const link = document.createElement('a');
-            link.download = `YPP_Snapshot_${title}_${timeStr}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            closeOverlay();
+                const link = document.createElement('a');
+                link.download = `YPP_Snapshot_${title}_${timeStr}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                closeOverlay();
+            } catch (e) {
+                this._showErrorToast('Security error: Cannot download restricted content.');
+            }
         };
 
         const closeBtn = document.createElement('button');
@@ -146,6 +168,22 @@ window.YPP.features.SnapshotButton = class SnapshotButton extends window.YPP.fea
                 document.head.appendChild(style);
             }
             playerContainer.appendChild(overlay);
+        }
+    }
+
+    _showErrorToast(msg) {
+        if (window.YPP.utils?.showToast) {
+            window.YPP.utils.showToast(msg);
+        } else {
+            const toast = document.createElement('div');
+            toast.className = 'ypp-toast show';
+            toast.textContent = msg;
+            toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(220, 38, 38, 0.9); color: white; padding: 12px 24px; border-radius: 8px; z-index: 999999; font-family: sans-serif; font-weight: 500; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); pointer-events: none; transition: opacity 0.5s;';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
         }
     }
 };

@@ -75,7 +75,6 @@ import './features/global/layout/layout-manager.js';
 
 // Home page features
 import './features/pages/home/home-organizer.js';
-import './features/pages/home/cinematic-mode.js';
 
 // Shorts features
 import './features/shorts/modifiers/hide-shorts.js';

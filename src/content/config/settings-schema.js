@@ -154,8 +154,7 @@ window.YPP.SettingsSchema = {
         floatingPlayer:      { type: 'boolean', default: false },
 
         // --- New Features ---
-        cinematicMode:       { type: 'boolean', default: false },
-        cinematicMuted:      { type: 'boolean', default: true },
+
         ambientMode:         { type: 'boolean', default: false },
         ambientIntensity:    { type: 'number',  default: 0.6, min: 0.1, max: 1.0 },
         ambientBlur:         { type: 'number',  default: 120, min: 20, max: 200 },

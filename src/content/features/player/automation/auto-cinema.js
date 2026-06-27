@@ -17,6 +17,17 @@ window.YPP.features.AutoCinema = class AutoCinema extends window.YPP.features.Ba
     }
 
     enable() {
+        this._userOverridden = false;
+        
+        // Listen to manual button clicks to respect user override
+        this._buttonClickListener = (e) => {
+            const btn = e.target.closest('.ytp-size-button');
+            if (btn && e.isTrusted) {
+                this._userOverridden = true;
+            }
+        };
+        document.addEventListener('click', this._buttonClickListener, true);
+
         // Run immediately if we're on a watch page
         if (location.pathname === '/watch') {
             this._clickTheaterButton();
@@ -30,9 +41,13 @@ window.YPP.features.AutoCinema = class AutoCinema extends window.YPP.features.Ba
     }
 
     disable() {
+        if (this._buttonClickListener) {
+            document.removeEventListener('click', this._buttonClickListener, true);
+        }
         window.removeEventListener('yt-navigate-finish', this._navHandler);
         window.removeEventListener('resize', this._resizeHandler);
         if (this._resizeTimeout) clearTimeout(this._resizeTimeout);
+        if (this._clickTimeout) clearTimeout(this._clickTimeout);
         this.utils?.log?.('Auto Cinema disabled', 'AUTO_CINEMA');
     }
 
@@ -53,14 +68,26 @@ window.YPP.features.AutoCinema = class AutoCinema extends window.YPP.features.Ba
     }
 
     async _clickTheaterButton() {
+        if (this._userOverridden) return;
+        if (this.settings?.zenMode) return; // Prevent conflict with Zen Mode
+        
         try {
             const btn = await this.utils?.pollFor?.(
                 () => document.querySelector('.ytp-size-button'),
                 6000, 400
             );
             if (!btn) return;
-            const isTheater = !!document.querySelector('ytd-watch-flexy[theater]');
-            if (!isTheater) btn.click();
+            
+            // Debounce the click to prevent UI flickering
+            if (this._clickTimeout) clearTimeout(this._clickTimeout);
+            this._clickTimeout = setTimeout(() => {
+                const flexy = document.querySelector('ytd-watch-flexy');
+                // Check if theater mode is already active
+                const isTheater = flexy && flexy.hasAttribute('theater');
+                if (!isTheater && !this._userOverridden) {
+                    btn.click();
+                }
+            }, 300); // Wait 300ms for YouTube's own layout calculation to settle
         } catch (_) { /* silent fail */ }
     }
 };

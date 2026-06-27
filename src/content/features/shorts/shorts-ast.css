@@ -115,11 +115,7 @@ body.ypp-hide-shorts
   ) {
   display: none !important;
 }
-.ypp-cinematic-mode ytd-rich-grid-renderer,
-.ypp-cinematic-mode ytd-rich-section-renderer[is-shorts],
-.ypp-cinematic-mode #chips-wrapper {
-    display: none !important;
-}
+
 body.ypp-shorts-page #cinematic-shorts-scrim,
 body.yt-premium-plus-theme #cinematic-shorts-scrim {
     display: none !important;
