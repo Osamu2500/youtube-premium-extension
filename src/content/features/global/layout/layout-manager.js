@@ -286,7 +286,15 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
                 contents.setAttribute('data-ypp-cols', cols);
                 contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
                 contents.style.setProperty('grid-auto-flow', 'dense', 'important');
-                document.documentElement.style.setProperty('--ypp-active-columns', cols);
+                
+                const manualCols = Number(this.settings?.homeColumns || 0);
+                if (manualCols > 0) {
+                    document.documentElement.style.setProperty('--ypp-active-columns', cols);
+                    document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+                } else {
+                    document.documentElement.style.removeProperty('--ypp-active-columns');
+                }
+                
                 document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
             }
             return true;
@@ -297,7 +305,15 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         contents.setAttribute('data-ypp-cols', cols);
         contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
         contents.style.setProperty('grid-auto-flow', 'dense', 'important');
-        document.documentElement.style.setProperty('--ypp-active-columns', cols);
+        
+        const manualColsFirstTime = Number(this.settings?.homeColumns || 0);
+        if (manualColsFirstTime > 0) {
+            document.documentElement.style.setProperty('--ypp-active-columns', cols);
+            document.documentElement.style.removeProperty('--ypp-dynamic-cols');
+        } else {
+            document.documentElement.style.removeProperty('--ypp-active-columns');
+        }
+        
         document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
 
         this._processedContainers.add(contents);

@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS = {
     // Advanced Theming
 
     // Layout
+    layout: true,
     grid4x4: false,
     autoScaleLayout: true,
     homeColumns: 0,  // 0 = auto (driven by AutoScaleGrid), 1–10 = manual override
