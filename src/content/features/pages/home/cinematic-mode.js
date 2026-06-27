@@ -245,144 +245,61 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
 
     // ─── Hero Manager ─────────────────────────────────────────────────────────
 
-    async _simulateHover(element) {
-        console.log('[CinematicMode] _simulateHover called', element);
-        if (!element) {
-            console.error('[CinematicMode] element is null!');
-            return;
-        }
-        
-        const thumbnailContainer = element.querySelector('#thumbnail');
-        console.log('[CinematicMode] thumbnailContainer:', thumbnailContainer);
-        
-        if (!thumbnailContainer) {
-            console.error('[CinematicMode] #thumbnail not found in element');
+    _loadIframeAPI(videoId) {
+        if (window.YT && window.YT.Player) {
+            this._initHeroPlayer(videoId);
             return;
         }
 
-        // Block mouseleave to keep preview alive
-        if (!element._hoverLock) {
-            const blockLeave = (e) => {
-                if (element._isNetflixHeroPreview) {
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
+        if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+        }
+
+        const originalCallback = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+            if (originalCallback) originalCallback();
+            this._initHeroPlayer(videoId);
+        };
+    }
+
+    _initHeroPlayer(videoId) {
+        if (this._heroPlayer) {
+            this._heroPlayer.destroy();
+            this._heroPlayer = null;
+        }
+
+        this._heroPlayer = new YT.Player('ypp-hero-player', {
+            videoId: videoId,
+            playerVars: {
+                autoplay: 1,
+                mute: this._isMuted ? 1 : 0,
+                controls: 0,
+                loop: 1,
+                playlist: videoId, // Required for loop to work
+                start: 0,
+                modestbranding: 1,
+                rel: 0,
+                showinfo: 0,
+                iv_load_policy: 3,
+                disablekb: 1,
+                fs: 0
+            },
+            events: {
+                onReady: (e) => {
+                    this.utils.log("Iframe player ready", "CINEMATIC", "info");
+                    e.target.playVideo();
+                    if (this._heroState.heroElement) {
+                        this._heroState.heroElement.classList.remove('netflix-hero-ken-burns');
+                    }
+                },
+                onError: (e) => {
+                    this.utils.log(`Iframe player error: ${e.data}`, "CINEMATIC", "warn");
+                    if (this._heroState.heroElement) {
+                        this._heroState.heroElement.classList.add('netflix-hero-ken-burns');
+                    }
                 }
-            };
-            
-            this.addListener(element, 'mouseleave', blockLeave, true);
-            this.addListener(element, 'mouseout', blockLeave, true);
-            this.addListener(thumbnailContainer, 'mouseleave', blockLeave, true);
-            this.addListener(thumbnailContainer, 'mouseout', blockLeave, true);
-            element._hoverLock = true;
-            console.log('[CinematicMode] Hover lock installed');
-        }
-        element._isNetflixHeroPreview = true;
-
-        // Mute before dispatching
-        this._syncMuteState();
-        console.log('[CinematicMode] Mute state synced:', this._isMuted);
-
-        // Actually hover the element using native mouse events with real coordinates
-        const rect = thumbnailContainer.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        console.log('[CinematicMode] Dispatching events at', centerX, centerY);
-
-        // Dispatch events in sequence
-        const FULL_HOVER_EVENTS = ['pointerenter', 'pointerover', 'mouseenter', 'mouseover', 'pointermove', 'mousemove'];
-        for (const eventType of FULL_HOVER_EVENTS) {
-            const event = new MouseEvent(eventType, {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                clientX: centerX,
-                clientY: centerY,
-                relatedTarget: document.body
-            });
-            thumbnailContainer.dispatchEvent(event);
-            console.log(`[CinematicMode] Dispatched ${eventType}`);
-        }
-
-        // CRITICAL: Keep "moving" the mouse to simulate sustained hover
-        // YouTube may check for continuous pointer presence
-        const moveInterval = setInterval(() => {
-            thumbnailContainer.dispatchEvent(new MouseEvent('pointermove', {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                clientX: centerX + (Math.random() * 4 - 2), // tiny jitter
-                clientY: centerY + (Math.random() * 4 - 2)
-            }));
-        }, 100);
-
-        // Wait for preview to appear
-        await new Promise(r => setTimeout(r, 1000));
-        clearInterval(moveInterval);
-
-        const preview = element.querySelector('ytd-video-preview');
-        console.log('[CinematicMode] Preview found after hover:', !!preview, preview);
-        
-        if (!preview) {
-            console.warn('[CinematicMode] Preview did NOT appear after hover simulation');
-            console.log('[CinematicMode] Element innerHTML:', element.innerHTML.substring(0, 500));
-        }
-        
-        // Mute the video
-        this._syncMuteState();
-    }
-
-    async _waitForPreview(videoElement, retries = 3) {
-        for (let i = 0; i < retries; i++) {
-            await this._simulateHover(videoElement);
-            const preview = videoElement.querySelector('ytd-video-preview');
-            if (preview) return preview;
-            await new Promise(r => setTimeout(r, 500));
-        }
-        return null;
-    }
-
-    /**
-     * Physically moves ytd-video-preview into the hero wrapper div.
-     * This is the original cinematic temp approach and is more reliable than
-     * remotely forcing CSS overrides from outside the element's stacking context.
-     */
-    _movePreviewIntoHero(preview) {
-        const heroWrapper = this._heroState.heroElement;
-        if (!heroWrapper || !preview) return;
-        
-        // Only move if not already inside the hero
-        if (preview.parentNode === heroWrapper) return;
-        
-        // Save original parent for potential teardown/restore
-        if (!this._heroState.originalPreviewParent) {
-            this._heroState.originalPreviewParent = preview.parentNode;
-        }
-        
-        // Insert hero before the preview's current position, then move preview into it
-        if (preview.parentNode && preview.parentNode !== heroWrapper) {
-            heroWrapper.insertBefore(preview, heroWrapper.querySelector('.netflix-hero-gradient') || null);
-        }
-        
-        // Verify it moved
-        if (!heroWrapper.contains(preview)) {
-            console.error('[CinematicMode] Preview move failed!');
-        } else {
-            console.log('[CinematicMode] Preview successfully moved to hero');
-        }
-        
-        // Reset any inline styles the previous approach may have applied
-        const toReset = [preview, ...Array.from(preview.querySelectorAll(
-            '#video-preview-container, #player-container, ytd-player, #container.ytd-player, .html5-video-player, .html5-video-container'
-        ))];
-        toReset.forEach(el => {
-            if (el && el.style) {
-                el.style.removeProperty('position');
-                el.style.removeProperty('top');
-                el.style.removeProperty('left');
-                el.style.removeProperty('width');
-                el.style.removeProperty('height');
-                el.style.removeProperty('z-index');
-                el.style.removeProperty('max-width');
             }
         });
     }
@@ -406,23 +323,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 this._heroState.currentVideo = videoElement;
                 videoElement.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
                 this._updateHeroContent(videoElement);
-
-                // Update thumbnail fallback immediately
-                if (this._heroState.heroElement) {
-                    this._heroState.heroElement.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
-                }
-
-                this._waitForPreview(videoElement).then(preview => {
-                    if (preview) {
-                        heroWrapper.classList.remove('netflix-hero-ken-burns');
-                        heroWrapper.style.backgroundImage = 'none';
-                        this._movePreviewIntoHero(preview);
-                    } else {
-                        this.utils.log("Native preview failed, using Ken Burns fallback", "CINEMATIC", "warn");
-                    }
-                }).catch(e => {
-                    this.utils.log(e.message, "CINEMATIC", "error");
-                });
                 return;
             }
 
@@ -439,6 +339,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             heroWrapper.style.backgroundSize = 'cover';
             heroWrapper.style.backgroundPosition = 'center';
             heroWrapper.classList.add('netflix-hero-ken-burns');
+            
+            // Add iframe container
+            const playerDiv = document.createElement('div');
+            playerDiv.id = 'ypp-hero-player';
+            heroWrapper.appendChild(playerDiv);
 
             const navHTML = `
               <div class="netflix-hero-nav">
@@ -460,7 +365,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             contentOverlay.className = 'netflix-hero-content';
             heroWrapper.appendChild(contentOverlay);
 
-            // Append hero to body BEFORE waiting for preview, so UI shows immediately
+            // Append hero to body BEFORE initializing API, so UI shows immediately
             document.body.appendChild(heroWrapper);
 
             // Hide native YouTube volume buttons
@@ -478,29 +383,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
                 }
             });
 
-            // Wait for YouTube to create the preview element
-            this._waitForPreview(videoElement).then(async preview => {
-                if (!preview && this._videoQueue.length > 1) {
-                    this.utils.log("Native preview failed for first video, retrying next video...", "CINEMATIC", "warn");
-                    this._currentVideoIndex = (this._currentVideoIndex + 1) % this._videoQueue.length;
-                    const nextVideo = this._videoQueue[this._currentVideoIndex];
-                    preview = await this._waitForPreview(nextVideo);
-                    if (preview && this._heroState.heroElement === heroWrapper) {
-                        this._heroState.currentVideo = nextVideo;
-                        this._updateHeroContent(nextVideo);
-                    }
-                }
-                
-                if (preview && this._heroState.heroElement === heroWrapper) {
-                    heroWrapper.classList.remove('netflix-hero-ken-burns');
-                    heroWrapper.style.backgroundImage = 'none';
-                    this._movePreviewIntoHero(preview);
-                } else if (!preview) {
-                    this.utils.log("All native preview attempts failed, sticking with Ken Burns fallback", "CINEMATIC", "warn");
-                }
-            }).catch(e => {
-                this.utils.log(e.message, "CINEMATIC", "error");
-            });
+            this._loadIframeAPI(videoId);
 
         } catch (e) {
             this.utils.log(e.message, "CINEMATIC", "error");
@@ -527,6 +410,9 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         const videoId = this._extractVideoId(videoElement.querySelector(CinematicMode.SELECTORS.VIDEO_LINK)?.href);
         if (videoId) {
             this._heroState.heroElement.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
+            if (this._heroPlayer && typeof this._heroPlayer.loadVideoById === 'function') {
+                this._heroPlayer.loadVideoById(videoId);
+            }
         }
 
         // Direct extraction — no caching
@@ -991,14 +877,6 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         activeVideos.forEach(video => {
             video.classList.remove(CinematicMode.CLASSES.ACTIVE_PREVIEW);
             video.classList.add(CinematicMode.CLASSES.FADING_PREVIEW);
-            
-            // Release the simulated hover lock so YouTube can cleanly move the preview
-            if (video._isNetflixHeroPreview) {
-                video._isNetflixHeroPreview = false;
-                video.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true, cancelable: true, view: window }));
-                const thumb = video.querySelector(CinematicMode.SELECTORS.THUMBNAIL);
-                if (thumb) thumb.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true, cancelable: true, view: window }));
-            }
         });
 
         heroWrapper.classList.add(CinematicMode.CLASSES.FADING); 
@@ -1017,21 +895,8 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             nextVideo.classList.add(CinematicMode.CLASSES.ACTIVE_PREVIEW);
             this._updateHeroContent(nextVideo);
             
-            // Update the background image to the new video's thumbnail and add Ken Burns
-            const videoId = this._extractVideoId(nextVideo.querySelector('a#video-title-link, a#video-title, a#thumbnail')?.href);
-            if (videoId) {
-                heroWrapper.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
-                heroWrapper.classList.add('netflix-hero-ken-burns');
-            }
-            
-            // Wait for preview to load to remove fallback
-            this._waitForPreview(nextVideo).then(preview => {
-                if (preview && this._heroState.heroElement === heroWrapper && this._heroState.currentVideo === nextVideo) {
-                    heroWrapper.classList.remove('netflix-hero-ken-burns');
-                    heroWrapper.style.backgroundImage = 'none';
-                    this._movePreviewIntoHero(preview);
-                }
-            });
+            // Re-apply Ken Burns fallback initially until player starts
+            heroWrapper.classList.add('netflix-hero-ken-burns');
 
             heroWrapper.classList.remove(CinematicMode.CLASSES.FADING);
             this._updateMuteButtonVisibility();
@@ -1046,6 +911,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
     _teardownHero() {
         if (this._heroState.status === 'inactive') return;
         this._heroState.status = 'destroying';
+        
+        if (this._heroPlayer) {
+            this._heroPlayer.destroy();
+            this._heroPlayer = null;
+        }
         
         this._heroState.observers.forEach(obs => obs.disconnect());
         this._heroState.observers.clear();
