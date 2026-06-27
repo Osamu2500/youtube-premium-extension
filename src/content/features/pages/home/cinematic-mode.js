@@ -303,8 +303,22 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             console.log(`[CinematicMode] Dispatched ${eventType}`);
         }
 
+        // CRITICAL: Keep "moving" the mouse to simulate sustained hover
+        // YouTube may check for continuous pointer presence
+        const moveInterval = setInterval(() => {
+            thumbnailContainer.dispatchEvent(new MouseEvent('pointermove', {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                clientX: centerX + (Math.random() * 4 - 2), // tiny jitter
+                clientY: centerY + (Math.random() * 4 - 2)
+            }));
+        }, 100);
+
         // Wait for preview to appear
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 1000));
+        clearInterval(moveInterval);
+
         const preview = element.querySelector('ytd-video-preview');
         console.log('[CinematicMode] Preview found after hover:', !!preview, preview);
         
@@ -339,9 +353,21 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         // Only move if not already inside the hero
         if (preview.parentNode === heroWrapper) return;
         
+        // Save original parent for potential teardown/restore
+        if (!this._heroState.originalPreviewParent) {
+            this._heroState.originalPreviewParent = preview.parentNode;
+        }
+        
         // Insert hero before the preview's current position, then move preview into it
         if (preview.parentNode && preview.parentNode !== heroWrapper) {
             heroWrapper.insertBefore(preview, heroWrapper.querySelector('.netflix-hero-gradient') || null);
+        }
+        
+        // Verify it moved
+        if (!heroWrapper.contains(preview)) {
+            console.error('[CinematicMode] Preview move failed!');
+        } else {
+            console.log('[CinematicMode] Preview successfully moved to hero');
         }
         
         // Reset any inline styles the previous approach may have applied
@@ -453,13 +479,24 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
             });
 
             // Wait for YouTube to create the preview element
-            this._waitForPreview(videoElement).then(preview => {
-                if (preview && this._heroState.heroElement === heroWrapper && this._heroState.currentVideo === videoElement) {
+            this._waitForPreview(videoElement).then(async preview => {
+                if (!preview && this._videoQueue.length > 1) {
+                    this.utils.log("Native preview failed for first video, retrying next video...", "CINEMATIC", "warn");
+                    this._currentVideoIndex = (this._currentVideoIndex + 1) % this._videoQueue.length;
+                    const nextVideo = this._videoQueue[this._currentVideoIndex];
+                    preview = await this._waitForPreview(nextVideo);
+                    if (preview && this._heroState.heroElement === heroWrapper) {
+                        this._heroState.currentVideo = nextVideo;
+                        this._updateHeroContent(nextVideo);
+                    }
+                }
+                
+                if (preview && this._heroState.heroElement === heroWrapper) {
                     heroWrapper.classList.remove('netflix-hero-ken-burns');
                     heroWrapper.style.backgroundImage = 'none';
                     this._movePreviewIntoHero(preview);
                 } else if (!preview) {
-                    this.utils.log("Native preview failed, using Ken Burns fallback", "CINEMATIC", "warn");
+                    this.utils.log("All native preview attempts failed, sticking with Ken Burns fallback", "CINEMATIC", "warn");
                 }
             }).catch(e => {
                 this.utils.log(e.message, "CINEMATIC", "error");
@@ -486,6 +523,11 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         const existingContent = this._heroState.heroElement.querySelector('.netflix-hero-content');
         if (!existingContent) return;
+
+        const videoId = this._extractVideoId(videoElement.querySelector(CinematicMode.SELECTORS.VIDEO_LINK)?.href);
+        if (videoId) {
+            this._heroState.heroElement.style.backgroundImage = `url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')`;
+        }
 
         // Direct extraction — no caching
         const getText = (el) => el?.textContent?.trim() || el?.getAttribute('title')?.trim() || null;
