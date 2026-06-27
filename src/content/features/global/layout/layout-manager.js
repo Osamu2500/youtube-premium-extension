@@ -1,6 +1,7 @@
 /**
  * Layout Manager (Grid)
- * Enforces a 4x4 grid layout on the YouTube Home and Channel pages.
+ * Enforces a configurable grid layout on the YouTube Home, Search, Channel,
+ * and Subscriptions pages.
  * Optimized for performance using requestAnimationFrame and CSS classes.
  */
 import './grid-layout.css';
@@ -59,7 +60,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
     }
 
     /**
-     * Feature configuration key
+     * Feature configuration key — layout is always active (no toggle)
      */
     getConfigKey() {
         return null;
@@ -77,7 +78,7 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
             }
             
             this._retryCount = 0;
-            this.utils.log?.('Initializing 4x4 grid...', 'LAYOUT');
+            this.utils.log?.('Initializing grid layout...', 'LAYOUT');
 
             // Wait for grid to exist before applying
             const grid = await this.waitForElement(GridLayoutManager.SELECTORS.GRID_RENDERER, 10000);
@@ -102,32 +103,20 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
     }
 
     /**
-     * Handle settings updates
+     * Handle settings updates — debounced via RAF for smooth instant feedback
      */
     async onUpdate() {
         if (this.settings) {
-            this.utils.log?.('GridLayoutManager onUpdate triggered. Settings homeColumns: ' + this.settings.homeColumns, 'LAYOUT');
             this.updateSettings(this.settings);
-
-            // Proactively write --ypp-active-columns NOW (synchronous) so any code
-            // that reads this CSS variable immediately (e.g. after AutoScaleGrid clears it)
-            // gets the correct manual value — not a stale/missing one.
-            const manualCols = Number(this.settings.homeColumns || 0);
-            if (manualCols > 0) {
-                document.documentElement.style.setProperty('--ypp-active-columns', manualCols);
-                document.documentElement.style.removeProperty('--ypp-dynamic-cols');
-            }
-
-            // Apply instantly (synchronous) so the column change is visible
-            // in the same animation frame as the slider input event —
-            // don't wait for the RAF debounce or featureManager.init() chain.
+            // Force re-apply of grid structural styles when settings change
             this._processedContainers = new WeakSet();
-            this.applyGridLayout();
+            this._debouncedApply();
         }
     }
 
     /**
-     * Update CSS custom properties based on settings
+     * Update CSS custom properties based on settings.
+     * These vars drive the CSS rules — they survive YouTube's Polymer property resets.
      * @param {Object} settings - User settings
      */
     updateSettings(settings) {
@@ -135,18 +124,16 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         
         const root = document.documentElement;
 
-        // Write CSS vars for ALL page types immediately.
-        // CSS vars on :root survive YouTube's Polymer property resets (unlike inline styles on #contents).
-        // Each page-type grid's CSS uses its own var as the column count.
-
-        // Home page
+        // Home page manual column count
         const homeCols = Number(settings.homeColumns || 0);
         if (homeCols > 0) {
             root.style.setProperty('--ypp-home-columns', homeCols);
-            root.style.setProperty('--ypp-active-columns', homeCols); // drives --ytd-rich-grid-items-per-row via CSS
+            // Also set --ypp-active-columns immediately so CSS drives --ytd-rich-grid-items-per-row
+            root.style.setProperty('--ypp-active-columns', homeCols);
         } else {
             root.style.removeProperty('--ypp-home-columns');
-            // Auto mode: do NOT touch --ypp-active-columns here — AutoScaleGrid owns it in auto mode.
+            // Auto mode: AutoScaleGrid owns --ypp-active-columns via --ypp-dynamic-cols
+            root.style.removeProperty('--ypp-active-columns');
         }
 
         // Search page
@@ -178,12 +165,11 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * Start central DOMObserver to watch for grid changes
      */
     startObserver() {
-        // Register observer for targeted grid container changes to avoid high-frequency callbacks
         this.observer.register(
             'layout-manager',
             'ytd-rich-grid-renderer, ytd-rich-item-renderer, ytd-continuation-item-renderer',
             () => this._debouncedApply(),
-            false // Process handled by init()'s applyWithRetry
+            false
         );
 
         this.utils.log?.('Observer started via DOMObserver', 'LAYOUT', 'debug');
@@ -194,7 +180,6 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * @private
      */
     _debouncedApply() {
-        // Cancel pending RAF to avoid duplicate calls
         if (this._rafId) {
             cancelAnimationFrame(this._rafId);
         }
@@ -209,145 +194,111 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * Add window resize listener with debouncing
      */
     addResizeListener() {
-        // Use shared utils.debounce
         const applyFn = () => this.applyGridLayout();
-        
         const resizeListener = this.utils.debounce(applyFn, GridLayoutManager.CONFIG.DEBOUNCE_DELAY);
-            
         this.addListener(window, 'resize', resizeListener);
     }
 
-
-
     /**
-     * Apply grid layout classes to DOM elements
+     * Apply grid layout to the current page's grid renderer.
      * @returns {boolean} True if layout was successfully applied
      */
     applyGridLayout() {
         if (!this._isValidPage(window.location.pathname)) return false;
 
-        // Skip layout manager entirely if cinematic mode is active
+        // Skip if cinematic mode is active
         if (document.body.classList.contains('cinematic-home') || document.body.classList.contains('cinematic')) {
             this._cleanup();
             return false;
         }
 
-        const gridRenderers = document.querySelectorAll(GridLayoutManager.SELECTORS.GRID_RENDERER);
-        if (!gridRenderers || gridRenderers.length === 0) return false;
-        
-        let applied = false;
+        const gridRenderer = document.querySelector(GridLayoutManager.SELECTORS.GRID_RENDERER);
+        if (!gridRenderer) return false;
 
-        gridRenderers.forEach(gridRenderer => {
-            const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
-            if (!contents) return;
+        const contents = gridRenderer.querySelector(GridLayoutManager.SELECTORS.GRID_CONTENTS);
+        if (!contents) return false;
 
-            // Determine column count from user settings per page type.
-            // homeColumns === 0 means "auto" — use AutoScaleGrid.calculateColumns().
-            // homeColumns >= 1 means manual slider — use that value directly, no AutoScaleGrid involved.
-            let cols = Number(this.settings?.homeColumns || 0);
-            const path = window.location.pathname;
-            if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
-                cols = Number(this.settings?.channelColumns || 4);
-            } else if (path.startsWith('/results')) {
-                cols = Number(this.settings?.searchColumns || 4);
-            } else if (path === '/feed/subscriptions') {
-                cols = Number(this.settings?.subscriptionsColumns || 4);
+        // ── Determine column count per page type ──────────────────────────────
+        const path = window.location.pathname;
+        let cols;
+
+        if (path.startsWith('/@') || path.startsWith('/channel') || path.startsWith('/c/')) {
+            // Channel page — always use channelColumns (never falls to homeColumns)
+            cols = Number(this.settings?.channelColumns || 4);
+        } else if (path.startsWith('/results')) {
+            // Search page — always use searchColumns
+            cols = Number(this.settings?.searchColumns || 4);
+        } else if (path === '/feed/subscriptions') {
+            // Subscriptions page — always use subscriptionsColumns
+            cols = Number(this.settings?.subscriptionsColumns || 4);
+        } else {
+            // Home page
+            const manualCols = Number(this.settings?.homeColumns || 0);
+
+            if (manualCols > 0) {
+                // Manual override wins — ignore AutoScaleGrid entirely
+                cols = manualCols;
+            } else {
+                // Auto mode: read --ypp-dynamic-cols published by AutoScaleGrid
+                const dynamicCols = document.documentElement.style.getPropertyValue('--ypp-dynamic-cols');
+                cols = dynamicCols ? parseInt(dynamicCols, 10) : 4;
             }
+        }
 
-            // Auto mode on home page: call AutoScaleGrid directly (no CSS var middleman).
-            // This eliminates any race condition — the calculation is synchronous and pure.
-            const isHome = path === '/' || path === '/index';
-            if (isHome && cols === 0) {
-                if (this.settings?.autoScaleLayout &&
-                    typeof window.YPP?.features?.AutoScaleGrid?.calculateColumns === 'function') {
-                    cols = window.YPP.features.AutoScaleGrid.calculateColumns();
-                    this.utils.log?.('Auto mode: AutoScaleGrid.calculateColumns()=' + cols, 'LAYOUT');
-                } else {
-                    cols = 4; // AutoScaleGrid off + no manual value → safe default
-                    this.utils.log?.('Auto mode: AutoScaleGrid disabled, defaulting to 4', 'LAYOUT');
-                }
-            }
+        this.utils.log?.('applyGridLayout cols=' + cols + ' path=' + path, 'LAYOUT');
 
-            
-            this.utils.log?.('applyGridLayout cols evaluated to: ' + cols + ' for path: ' + path, 'LAYOUT');
+        // cols === 0 should never happen now, but guard just in case
+        if (!cols || cols === 0) {
+            contents.classList.remove('ypp-grid-container');
+            contents.style.removeProperty('grid-template-columns');
+            contents.style.removeProperty('grid-auto-flow');
+            contents.removeAttribute('data-ypp-cols');
+            this._processedContainers.delete(contents);
+            return true;
+        }
 
-            // If cols is 0 (Auto), remove the custom grid container styling to let YouTube handle it natively
-            if (cols === 0) {
-                contents.classList.remove('ypp-grid-container');
-                contents.style.removeProperty('grid-template-columns');
-                contents.style.removeProperty('grid-auto-flow');
-                contents.removeAttribute('data-ypp-cols');
-                this._processedContainers.delete(contents);
-                applied = true;
+        // Apply ypp-grid-item to newly loaded items
+        const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
+        items.forEach(item => {
+            // Skip nested renderers
+            if (item.parentElement && item.parentElement.closest('.ypp-grid-item')) {
+                item.classList.remove('ypp-grid-item');
                 return;
             }
-
-            // Apply ypp-grid-item to any newly loaded items immediately, but ONLY to the top-level cards
-            const items = contents.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ITEMS);
-            items.forEach(item => {
-                // Skip if it's a nested renderer (e.g. lockup inside rich-item)
-                if (item.parentElement && item.parentElement.closest('.ypp-grid-item')) {
-                    item.classList.remove('ypp-grid-item');
-                    return;
-                }
-                if (!item.classList.contains('ypp-grid-item')) {
-                    item.classList.add('ypp-grid-item');
-                }
-            });
-
-            // Cleanup any nested .ypp-grid-items that might have sneaked in
-            const allGridItems = contents.querySelectorAll('.ypp-grid-item');
-            allGridItems.forEach(item => {
-                if (item.parentElement && item.parentElement.closest('.ypp-grid-item')) {
-                    item.classList.remove('ypp-grid-item');
-                }
-            });
-
-            // Performance: Skip if already processed and unchanged
-            if (this._processedContainers.has(contents)) {
-                const lastCols = parseInt(contents.getAttribute('data-ypp-cols'), 10);
-                if (lastCols !== cols || !contents.style.gridTemplateColumns) {
-                    contents.setAttribute('data-ypp-cols', cols);
-                    contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
-                    contents.style.setProperty('grid-auto-flow', 'dense', 'important');
-                    document.documentElement.style.setProperty('--ypp-active-columns', cols);
-                    document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
-                }
-                applied = true;
-                return;
+            if (!item.classList.contains('ypp-grid-item')) {
+                item.classList.add('ypp-grid-item');
             }
-
-            // Apply grid container class
-            contents.classList.add('ypp-grid-container');
-            contents.setAttribute('data-ypp-cols', cols);
-
-            // Use repeat(N, 1fr) — reliable exact column count.
-            // minmax(0, 1fr) ensures columns never overflow when cards have wide content.
-            contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
-
-            // Also set dense auto-flow so hidden items (Shorts, watched, filtered) don't leave blank cells
-            contents.style.setProperty('grid-auto-flow', 'dense', 'important');
-
-            // Ensure CSS knows the active column count (drives --ytd-rich-grid-items-per-row via CSS rule)
-            document.documentElement.style.setProperty('--ypp-active-columns', cols);
-
-            // Update the CSS min-column variable so responsive breakpoints in styles.css stay consistent
-            document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
-
-            // Mark as processed
-            this._processedContainers.add(contents);
-            
-            applied = true;
         });
 
-        return applied;
+        // Performance: skip if already processed at the same column count
+        if (this._processedContainers.has(contents)) {
+            const lastCols = parseInt(contents.getAttribute('data-ypp-cols'), 10);
+            if (lastCols !== cols || !contents.style.gridTemplateColumns) {
+                contents.setAttribute('data-ypp-cols', cols);
+                contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+                contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+                document.documentElement.style.setProperty('--ypp-active-columns', cols);
+                document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
+            }
+            return true;
+        }
+
+        // First-time apply
+        contents.classList.add('ypp-grid-container');
+        contents.setAttribute('data-ypp-cols', cols);
+        contents.style.setProperty('grid-template-columns', `repeat(${cols}, minmax(0, 1fr))`, 'important');
+        contents.style.setProperty('grid-auto-flow', 'dense', 'important');
+        document.documentElement.style.setProperty('--ypp-active-columns', cols);
+        document.documentElement.style.setProperty('--ypp-grid-column-min', `${Math.floor(100 / cols)}vw`);
+
+        this._processedContainers.add(contents);
+
+        return true;
     }
 
     /**
      * Check if current page should have grid layout
      * @private
-     * @param {string} path - URL pathname
-     * @returns {boolean} True if page is valid for grid
      */
     _isValidPage(path) {
         return path === '/' || 
@@ -364,21 +315,17 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
      * @private
      */
     _cleanup() {
-        // Disconnect observer
         if (this.observer) {
             this.observer.unregister('layout-manager');
         }
 
-        // Cancel pending animation frame
         if (this._rafId) {
             cancelAnimationFrame(this._rafId);
             this._rafId = null;
         }
 
-        // Clear processed containers
         this._processedContainers = new WeakSet();
 
-        // Remove applied classes and inline grid styles
         const containers = document.querySelectorAll('.ypp-grid-container, #contents[data-ypp-cols]');
         containers.forEach(el => {
             el.classList.remove('ypp-grid-container');
@@ -390,7 +337,6 @@ window.YPP.features.Layout = class GridLayoutManager extends window.YPP.features
         const items = document.querySelectorAll('.ypp-grid-item');
         items.forEach(el => el.classList.remove('ypp-grid-item'));
         
-        // Reset row displays
         const rows = document.querySelectorAll(GridLayoutManager.SELECTORS.GRID_ROWS);
         rows.forEach(row => {
             row.style.display = '';

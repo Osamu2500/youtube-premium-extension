@@ -77,23 +77,23 @@ html[style*="--ypp-dynamic-cols"] yt-rich-grid-renderer,
 html[style*="--ypp-dynamic-cols"] yt-rich-grid-view-model {
   --ytd-rich-grid-items-per-row: var(--ypp-dynamic-cols) !important;
 }
-/* --ypp-active-columns (manual home slider or AutoScaleGrid calculation) */
+/* --ypp-active-columns (set by applyGridLayout for ALL pages including home manual mode) */
 :root[style*="--ypp-active-columns"] ytd-rich-grid-renderer,
 :root[style*="--ypp-active-columns"] yt-rich-grid-renderer,
 :root[style*="--ypp-active-columns"] yt-rich-grid-view-model {
   --ytd-rich-grid-items-per-row: var(--ypp-active-columns) !important;
 }
-/* Subscription page columns — scoped so they don't bleed into home/channel pages */
-:root[style*="--ypp-subscriptions-columns"] body.ypp-subscriptions-page ytd-rich-grid-renderer,
-:root[style*="--ypp-subscriptions-columns"] body.ypp-subscriptions-page yt-rich-grid-renderer,
-:root[style*="--ypp-subscriptions-columns"] body.ypp-feed-page ytd-rich-grid-renderer {
+/* Subscriptions columns — global var rule (applyGridLayout sets inline style too) */
+:root[style*="--ypp-subscriptions-columns"] ytd-rich-grid-renderer,
+:root[style*="--ypp-subscriptions-columns"] yt-rich-grid-renderer {
   --ytd-rich-grid-items-per-row: var(--ypp-subscriptions-columns) !important;
 }
-/* Channel / @handle page columns */
-:root[style*="--ypp-channel-columns"] body.ypp-channel-page ytd-rich-grid-renderer,
-:root[style*="--ypp-channel-columns"] body.ypp-channel-page yt-rich-grid-renderer {
+/* Channel page columns — global var rule (applyGridLayout sets inline style too) */
+:root[style*="--ypp-channel-columns"] ytd-rich-grid-renderer,
+:root[style*="--ypp-channel-columns"] yt-rich-grid-renderer {
   --ytd-rich-grid-items-per-row: var(--ypp-channel-columns) !important;
 }
+
 body.yt-premium-plus-theme ytd-playlist-renderer:hover ytd-thumbnail-overlay-side-panel-renderer {
   background: rgba(99, 102, 241, 0.75) !important;
   box-shadow: -8px 0 24px rgba(99, 102, 241, 0.5) !important;
