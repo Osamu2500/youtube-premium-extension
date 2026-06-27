@@ -69,8 +69,7 @@ html body.ypp-cinematic-mode ytd-rich-grid-row {
 /* Base App Container */
 #ypp-cinematic-app {
     width: 100%;
-    min-height: 100vh;
-    background-color: #0f0f0f; /* YouTube Dark Theme Base */
+    /* Remove min-height and solid background so the grid beneath can be seen */
     color: #fff;
     font-family: "YouTube Noto", Roboto, Arial, sans-serif;
     position: relative;
@@ -102,7 +101,7 @@ html body.ypp-cinematic-mode ytd-rich-grid-row {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    z-index: 0;
+    z-index: 0; /* Behind the video */
     animation: kenBurns 20s ease-in-out infinite alternate;
 }
 
@@ -120,7 +119,7 @@ html body.ypp-cinematic-mode ytd-rich-grid-row {
     width: 100%;
     height: 100%;
     background: linear-gradient(to top, #0f0f0f 0%, transparent 40%, rgba(15, 15, 15, 0.4) 100%);
-    z-index: 1;
+    z-index: 2; /* Above the video and bg */
     pointer-events: none;
 }
 
@@ -132,10 +131,15 @@ html body.ypp-cinematic-mode ytd-rich-grid-row {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: -1; /* Behind the gradient and content */
+    z-index: 1; /* Above the bg, below the gradient and content */
     pointer-events: none; /* Let clicks pass through */
     opacity: 0;
-    transition: opacity 1s ease-in;
+    /* Fade the video in after 2 seconds to ensure it has loaded */
+    animation: fadeInVideo 1s ease-in 1.5s forwards;
+}
+
+@keyframes fadeInVideo {
+    to { opacity: 1; }
 }
 
 .ypp-cinematic-hero-video.playing {
