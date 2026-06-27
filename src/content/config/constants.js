@@ -430,7 +430,7 @@ window.YPP.CONSTANTS = {
         loopButton: 'LoopButton',
         splitScrolling: 'SplitScrolling',
         // --- Missing Toggles & Layouts ---
-        layout: 'GridLayoutManager',
+        layout: 'Layout',
         autoScaleLayout: 'AutoScaleGrid',
         displayFullTitle: 'FullVideoTitles',
         // --- Subscription Hub ---
