@@ -33,7 +33,10 @@ async function findBackupFile(token, fileName = FILE_NAME) {
         }
     });
 
-    if (!response.ok) throw new Error('Failed to search Drive files.');
+    if (!response.ok) {
+        chrome.identity.removeCachedAuthToken({ token }, () => {});
+        throw new Error('Failed to search Drive files.');
+    }
     
     const data = await response.json();
     return data.files && data.files.length > 0 ? data.files[0] : null;
@@ -47,6 +50,11 @@ export async function syncUp() {
         const token = await getAuthToken(true);
         // Get ALL local storage data by passing null
         const storage = await chrome.storage.local.get(null);
+        
+        // Exclude internal state keys from backup
+        const keysToExclude = ['timerState', 'ypp_last_sync_time', 'ypp_backup_time', 'ypp_settings_backup'];
+        keysToExclude.forEach(key => delete storage[key]);
+        
         const fileContent = JSON.stringify(storage);
 
         const existingFile = await findBackupFile(token, FILE_NAME);
@@ -77,7 +85,10 @@ export async function syncUp() {
             body: form
         });
 
-        if (!response.ok) throw new Error('Failed to upload sync data to Drive');
+        if (!response.ok) {
+            chrome.identity.removeCachedAuthToken({ token }, () => {});
+            throw new Error('Failed to upload sync data to Drive');
+        }
         
         console.log('[YPP] Successfully backed up all data to Google Drive.');
         
@@ -120,7 +131,10 @@ export async function syncDown() {
             }
         });
 
-        if (!response.ok) throw new Error('Failed to download sync data from Drive');
+        if (!response.ok) {
+            chrome.identity.removeCachedAuthToken({ token }, () => {});
+            throw new Error('Failed to download sync data from Drive');
+        }
         
         const downloadedData = await response.json();
         
@@ -129,7 +143,10 @@ export async function syncDown() {
             await chrome.storage.local.set({ ypp_subscription_folders: downloadedData });
             console.log('[YPP] Successfully restored legacy subscription groups from Google Drive.');
         } else {
-            // Full backup: it contains all keys, so we just set them directly
+            // Full backup: remove keys that shouldn't overwrite local device state
+            const keysToExclude = ['timerState', 'ypp_last_sync_time', 'ypp_backup_time', 'ypp_settings_backup'];
+            keysToExclude.forEach(key => delete downloadedData[key]);
+            
             await chrome.storage.local.set(downloadedData);
             console.log('[YPP] Successfully restored all memory from Google Drive.');
         }

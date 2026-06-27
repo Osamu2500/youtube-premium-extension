@@ -6,8 +6,7 @@ class HomePageManager extends window.YPP.BasePageManager {
         
         // Initialize features managed by this page
         this.features = {
-            homeOrganizer: new window.YPP.features.HomeOrganizer(),
-            cinematicMode: new window.YPP.features.CinematicMode()
+            homeOrganizer: new window.YPP.features.HomeOrganizer()
         };
     }
 
@@ -39,15 +38,6 @@ class HomePageManager extends window.YPP.BasePageManager {
                 } else if (this.features.homeOrganizer.enable) {
                     this.features.homeOrganizer.enable();
                 }
-            }
-        }
-
-        // Cinematic Mode
-        if (this.features.cinematicMode) {
-            if (this.settings.cinematicMode && !this.settings.hideFeed) {
-                this.features.cinematicMode.enable();
-            } else {
-                this.features.cinematicMode.disable();
             }
         }
     }

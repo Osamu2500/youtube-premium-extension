@@ -12,6 +12,7 @@ const ALARM_NAME = 'ypp-focus-timer';
 import { DEFAULT_SETTINGS } from '../shared/default-settings.js';
 
 const BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+let broadcastTimeout = null;
 
 // =========================================================================
 // TIMER LOGIC (Robust End-Time Based)
@@ -120,21 +121,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const backupData = await chrome.storage.local.get('ypp_backup_time');
                     const now = Date.now();
                     if (!backupData.ypp_backup_time || (now - backupData.ypp_backup_time > BACKUP_INTERVAL_MS)) {
-                        await chrome.storage.local.set({ 
-                            ypp_settings_backup: currentSettings, // backup the pre-update state
-                            ypp_backup_time: now
-                        });
-                        console.log('[YPP] Automated daily backup created.');
+                        if (Object.keys(currentSettings).length > 0) {
+                            await chrome.storage.local.set({ 
+                                ypp_settings_backup: currentSettings, // backup the pre-update state
+                                ypp_backup_time: now
+                            });
+                            console.log('[YPP] Automated daily backup created.');
+                        }
                     }
 
                     // 5. Broadcast update to all tabs
-                    const tabs = await chrome.tabs.query({ url: "*://*.youtube.com/*" });
-                    tabs.forEach(tab => {
-                        chrome.tabs.sendMessage(tab.id, {
-                            action: 'UPDATE_SETTINGS',
-                            settings: request.delta // Broadcast the delta or full state
-                        }).catch(() => {}); // Ignore errors for inactive tabs
-                    });
+                    clearTimeout(broadcastTimeout);
+                    broadcastTimeout = setTimeout(async () => {
+                        const tabs = await chrome.tabs.query({ url: "*://*.youtube.com/*" });
+                        tabs.forEach(tab => {
+                            if (tab.id) {
+                                chrome.tabs.sendMessage(tab.id, {
+                                    action: 'UPDATE_SETTINGS',
+                                    settings: request.delta // Broadcast the delta or full state
+                                }).catch(() => {}); // Ignore errors for inactive tabs
+                            }
+                        });
+                    }, 250);
 
                     sendResponse({ success: true, settings: newSettings });
                 } catch (error) {
@@ -158,10 +166,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         // Broadcast update
                         const tabs = await chrome.tabs.query({ url: "*://*.youtube.com/*" });
                         tabs.forEach(tab => {
-                            chrome.tabs.sendMessage(tab.id, {
-                                action: 'UPDATE_SETTINGS',
-                                settings: restoredSettings
-                            }).catch(() => {});
+                            if (tab.id) {
+                                chrome.tabs.sendMessage(tab.id, {
+                                    action: 'UPDATE_SETTINGS',
+                                    settings: restoredSettings
+                                }).catch(() => {});
+                            }
                         });
 
                         sendResponse({ success: true });
@@ -232,6 +242,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 return true; // Keep channel open so sendResponse can fire
             }
             
+            const ALLOWED_DOMAINS = ['sponsor.ajay.app', 'returnyoutubedislikeapi.com'];
+            if (!ALLOWED_DOMAINS.includes(fetchUrl.hostname)) {
+                sendResponse({ error: `Disallowed domain: ${fetchUrl.hostname}.` });
+                return true;
+            }
+            
             // Apply a 15-second timeout to prevent hanging promises
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -266,6 +282,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case 'EXTRACT_COLOR': {
             (async () => {
                 try {
+                    if (typeof OffscreenCanvas === 'undefined') {
+                        return sendResponse({ success: false, error: 'OffscreenCanvas not supported' });
+                    }
                     const response = await fetch(request.url, { mode: 'cors', credentials: 'omit' });
                     if (!response.ok) throw new Error('Fetch failed');
                     
@@ -273,7 +292,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const bitmap = await createImageBitmap(blob);
                     
                     const size = 16;
-                    const canvas = new OffscreenCanvas(size, size);
+                    let canvas;
+                    try {
+                        canvas = new OffscreenCanvas(size, size);
+                    } catch (e) {
+                        return sendResponse({ success: false, error: 'Failed to create OffscreenCanvas' });
+                    }
                     const ctx = canvas.getContext('2d', { willReadFrequently: true });
                     ctx.drawImage(bitmap, 0, 0, size, size);
                     
@@ -317,6 +341,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // =========================================================================
 // INITIALIZATION
 // =========================================================================
+
+/**
+ * Handle extension updates
+ */
+chrome.runtime.onUpdateAvailable.addListener(() => {
+    chrome.runtime.reload();
+});
 
 /**
  * Initialize default settings on extension install

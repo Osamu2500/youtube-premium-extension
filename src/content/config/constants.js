@@ -429,6 +429,7 @@ window.YPP.CONSTANTS = {
         snapshotButton: 'SnapshotButton',
         loopButton: 'LoopButton',
         splitScrolling: 'SplitScrolling',
+        cinematicMode: 'CinematicMode',
         // --- Missing Toggles & Layouts ---
         layout: 'Layout',
         autoScaleLayout: 'AutoScaleGrid',

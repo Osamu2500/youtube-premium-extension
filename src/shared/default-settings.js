@@ -145,7 +145,6 @@ export const DEFAULT_SETTINGS = {
     sb_preview:          false,
     returnYouTubeDislike: true,
 
-    splitScrolling: false,
 
     // Night Mode
     blueLight: 0,
@@ -181,29 +180,21 @@ export const DEFAULT_SETTINGS = {
     intentionalDelay: false,
     intentionalDelayTime: 3,
     ambientMode: false,
-    audioModeEnabled: false,
     videoControlsEnabled: true,
-    playerActionStyle: 'premium',
-    subscriptionFolders: true,
     wheelControls: true,
     audioCompressor: false,
-    videoResumer: true,
     autoPause: false,
     commentFilter: false,
     commentFilterAction: 'dim',       // 'dim' | 'hide'
     commentFilterCustomKeywords: '',  // comma-separated user keywords
     contextMenu: true,
     enableBookmarks: true,
-    cinematicMode: false,
 
     // Study Mode
     studyMode: false,
 
     // Stats Visualizer
     statsVisualizer: false,
-
-    // Subscription Organizer (legacy)
-    enableSubsManager: false,
 
     // Watch Time Alert
     watchTimeAlert: false,

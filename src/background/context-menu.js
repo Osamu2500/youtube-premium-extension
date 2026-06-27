@@ -12,7 +12,7 @@ export function initContextMenu() {
             id: CONTEXT_MENU_ID,
             title: "Add Channel to YPP Group",
             contexts: ["page", "link", "video"],
-            documentUrlPatterns: ["*://*.youtube.com/*"]
+            documentUrlPatterns: ["*://www.youtube.com/*"]
         });
     });
 }
@@ -40,11 +40,15 @@ if (chrome.contextMenus) {
             }
 
             // Send message to the content script in the active tab to show the group selector
-            chrome.tabs.sendMessage(tab.id, {
-                action: 'SHOW_GROUP_SELECTOR',
-                channelIdentifier: channelIdentifier,
-                url: url
-            });
+            if (tab && tab.id) {
+                chrome.tabs.sendMessage(tab.id, {
+                    action: 'SHOW_GROUP_SELECTOR',
+                    channelIdentifier: channelIdentifier,
+                    url: url
+                }).catch(e => {
+                    console.error('[YPP] Failed to send context menu message. Is content script loaded?', e);
+                });
+            }
         }
     });
 }

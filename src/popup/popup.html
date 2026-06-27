@@ -91,7 +91,6 @@
         <header class="top-bar">
           <div class="top-bar-left">
             <h1 id="page-title" data-i18n="title_dashboard">Dashboard</h1>
-            <div class="status-badge">PRO</div>
           </div>
           <div class="top-bar-right">
             <div class="search-container">
@@ -501,16 +500,16 @@
 
               <div class="inline-setting-row" style="flex-wrap:wrap; gap:10px;">
                 <div class="info"><span class="name">Accent Color</span></div>
-                <div class="color-swatches" id="accentSwatches">
-                  <div class="color-swatch" data-color="#ff4e45" style="background: #ff4e45;"></div>
-                  <div class="color-swatch" data-color="#3ea6ff" style="background: #3ea6ff;"></div>
-                  <div class="color-swatch" data-color="#2ba640" style="background: #2ba640;"></div>
-                  <div class="color-swatch" data-color="#ffb340" style="background: #ffb340;"></div>
-                  <div class="color-swatch" data-color="#b62bcf" style="background: #b62bcf;"></div>
-                  <div class="color-swatch" data-color="#ff6b6b" style="background: #ff6b6b;"></div>
-                  <div class="color-swatch custom-color-picker">
+                <div class="color-swatches" id="accentSwatches" role="group" aria-label="Accent Color Selection">
+                  <div class="color-swatch" data-color="#ff4e45" style="background: #ff4e45;" role="button" tabindex="0" aria-label="Red Accent"></div>
+                  <div class="color-swatch" data-color="#3ea6ff" style="background: #3ea6ff;" role="button" tabindex="0" aria-label="Blue Accent"></div>
+                  <div class="color-swatch" data-color="#2ba640" style="background: #2ba640;" role="button" tabindex="0" aria-label="Green Accent"></div>
+                  <div class="color-swatch" data-color="#ffb340" style="background: #ffb340;" role="button" tabindex="0" aria-label="Orange Accent"></div>
+                  <div class="color-swatch" data-color="#b62bcf" style="background: #b62bcf;" role="button" tabindex="0" aria-label="Purple Accent"></div>
+                  <div class="color-swatch" data-color="#ff6b6b" style="background: #ff6b6b;" role="button" tabindex="0" aria-label="Pink Accent"></div>
+                  <div class="color-swatch custom-color-picker" role="button" tabindex="0" aria-label="Custom Color">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                    <input type="color" id="accentColor" value="#ff4e45" />
+                    <input type="color" id="accentColor" value="#ff4e45" tabindex="-1" />
                   </div>
                 </div>
               </div>
@@ -664,7 +663,7 @@
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                 Reset Extension to Defaults
               </button>
-              <div class="version-info">v2.3.0 • Premium Edition</div>
+              <div class="version-info">v2.3.0 • Community Edition</div>
             </div>
           </div>
 
