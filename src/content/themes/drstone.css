@@ -36,3 +36,20 @@ html.yt-premium-plus-theme.ypp-theme-effects::before {
     animation: ypp-drstone-chemical 20s linear infinite;
     opacity: 0.7;
 }
+
+/* --- Generative Layout Styles --- */
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer { background: #d8d3c5 !important; border: 1px solid #b5b0a3 !important; }
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer ytd-thumbnail { border: 2px solid #304533 !important; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px) !important; }
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer #video-title, html[data-ypp-card-style="drstone"] ytd-rich-item-renderer #metadata-line { color: #111 !important; }
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer:nth-child(odd) ytd-rich-grid-media #dismissible::before {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%2050%22%3E%3Ctext%20x%3D%2210%22%20y%3D%2240%22%20font-family%3D%22Arial%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%20fill%3D%22%23304533%22%20transform%3D%22rotate(-10%2010%2040)%22%3EE%3Dmc%C2%B2%3C%2Ftext%3E%3C%2Fsvg%3E"), url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%2050%22%3E%3Ctext%20x%3D%2210%22%20y%3D%2240%22%20font-family%3D%22Impact%22%20font-size%3D%2224%22%20fill%3D%22%23304533%22%3EDr.STONE%3C%2Ftext%3E%3C%2Fsvg%3E") !important;
+  background-position: center 20%, center 60% !important;
+  background-repeat: no-repeat !important; background-size: 80% auto, 90% auto !important;
+}
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer:nth-child(even) { background: #111b14 !important; }
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer:nth-child(even) ytd-thumbnail { border-color: #5b8765 !important; }
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer:nth-child(even) #video-title, html[data-ypp-card-style="drstone"] ytd-rich-item-renderer:nth-child(even) #metadata-line { color: #fff !important; }
+html[data-ypp-card-style="drstone"] ytd-rich-item-renderer:nth-child(even) ytd-rich-grid-media #dismissible::before {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20150%22%3E%3Cpath%20d%3D%22M%2050%2020%20Q%2070%200%2090%2020%20Q%2070%2040%2080%2060%20Q%2060%2060%2060%2090%20L%2050%20120%20L%2040%2090%20Q%2040%2060%2020%2060%20Q%2030%2040%2010%2020%20Q%2030%200%2050%2020%20Z%22%20fill%3D%22%2399cfa3%22%2F%3E%3C%2Fsvg%3E") !important;
+  background-position: center 20% !important; background-repeat: no-repeat !important; background-size: 80% !important;
+}

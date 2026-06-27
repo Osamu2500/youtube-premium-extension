@@ -36,3 +36,18 @@ html.yt-premium-plus-theme.ypp-theme-effects::before {
     animation: ypp-aot-steam 10s ease-out infinite;
     opacity: 0.8;
 }
+
+/* --- Generative Layout Styles --- */
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer { background: #1a1815 !important; }
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer ytd-thumbnail { border: 2px solid #5a544a !important; clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px) !important;}
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer #video-title, html[data-ypp-card-style="aot"] ytd-rich-item-renderer #metadata-line { color: #fff !important; }
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer:nth-child(odd) { background: #d3ccb9 !important; }
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer:nth-child(odd) #video-title, html[data-ypp-card-style="aot"] ytd-rich-item-renderer:nth-child(odd) #metadata-line { color: #111 !important; }
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer:nth-child(odd) ytd-rich-grid-media #dismissible::before {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20120%22%3E%3Cpath%20d%3D%22M%2010%2010%20L%2090%2010%20L%2090%2070%20Q%2050%20120%2010%2070%20Z%22%20fill%3D%22%23295bb8%22%20stroke%3D%22%23f0f0f0%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M%2050%2020%20L%2010%2080%20L%2040%2080%20L%2020%20110%20L%2060%2060%20L%2030%2060%20Z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M%2050%2020%20L%2090%2080%20L%2060%2080%20L%2080%20110%20L%2040%2060%20L%2070%2060%20Z%22%20fill%3D%22%23a0a0a0%22%2F%3E%3C%2Fsvg%3E") !important;
+  background-position: center 20% !important; background-repeat: no-repeat !important; background-size: 60% !important;
+}
+html[data-ypp-card-style="aot"] ytd-rich-item-renderer:nth-child(even) ytd-rich-grid-media #dismissible::before {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20120%22%3E%3Cpath%20d%3D%22M%2010%2010%20L%2090%2010%20L%2090%2070%20Q%2050%20120%2010%2070%20Z%22%20fill%3D%22%23295bb8%22%20stroke%3D%22%23f0f0f0%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M%2050%2020%20L%2010%2080%20L%2040%2080%20L%2020%20110%20L%2060%2060%20L%2030%2060%20Z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M%2050%2020%20L%2090%2080%20L%2060%2080%20L%2080%20110%20L%2040%2060%20L%2070%2060%20Z%22%20fill%3D%22%23a0a0a0%22%2F%3E%3C%2Fsvg%3E") !important;
+  background-position: center 20% !important; background-repeat: no-repeat !important; background-size: 60% !important;
+}

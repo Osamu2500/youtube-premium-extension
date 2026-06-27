@@ -966,43 +966,43 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
         document.body.appendChild(overlay);
 
         overlay.innerHTML = String.raw`
-            <div class="ypp-modal-content ypp-organizer-modal" style="font-family: 'Roboto', 'Google Sans', sans-serif; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: rgba(20, 19, 24, 0.95); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); overflow: hidden;">
-                <div class="ypp-modal-header" style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+            <div class="ypp-modal-content ypp-organizer-modal" style="font-family: 'Inter', 'Outfit', sans-serif; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: rgba(10, 10, 15, 0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); overflow: hidden; color: #f1f5f9;">
+                <div class="ypp-modal-header" style="background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 10; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);">
                     <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 50%; padding: 8px;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                         </div>
-                        <span class="ypp-modal-title" style="font-size: 22px; font-weight: 500; color: #fff; letter-spacing: 0;">Channel Organizer</span>
+                        <span class="ypp-modal-title" style="font-size: 24px; font-weight: 600; color: #fff; letter-spacing: -0.5px;">Channel Organizer</span>
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <button id="ypp-health-create-folder-btn" class="ypp-btn-primary" style="background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='transparent'">Create Folder</button>
-                        <button id="ypp-health-delete-folder-btn" class="ypp-btn-primary" style="background: transparent; color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='transparent'">Delete Folder</button>
-                        <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Start Scan</button>
-                        <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255,78,69,0.3); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255,78,69,0.4)'" onmouseout="this.style.background='rgba(255,78,69,0.3)'">Unsubscribe Selected</button>
-                        <button id="ypp-health-add-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">Add to Folder</button>
-                        <button id="ypp-health-remove-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 152, 0, 0.2); color: #fff; border: none; padding: 8px 20px; border-radius: 100px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='rgba(255, 152, 0, 0.3)'" onmouseout="this.style.background='rgba(255, 152, 0, 0.2)'">Remove from Folder</button>
-                        <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
-                        <button class="ypp-modal-close" style="background: transparent; border: none; color: #CAC4D0; font-size: 28px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; line-height: 1;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">&times;</button>
+                        <button id="ypp-health-create-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 20px; border-radius: 20px; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.transform='translateY(0)';">Create Folder</button>
+                        <button id="ypp-health-delete-folder-btn" class="ypp-btn-primary" style="background: transparent; color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 20px; border-radius: 20px; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='rgba(255, 78, 69, 0.1)'; this.style.color='#ff4e45'; this.style.borderColor='rgba(255, 78, 69, 0.3)';" onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.6)'; this.style.borderColor='rgba(255, 255, 255, 0.1)';">Delete Folder</button>
+                        <button id="ypp-health-scan-btn" class="ypp-btn-primary" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border: none; padding: 8px 24px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(99, 102, 241, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(99, 102, 241, 0.3)';">Start Scan</button>
+                        <button id="ypp-health-unsub-btn" class="ypp-btn-primary" style="background: rgba(255,78,69,0.2); color: #ff6b6b; border: 1px solid rgba(255,78,69,0.3); padding: 8px 20px; border-radius: 20px; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: none;" onmouseover="this.style.background='rgba(255,78,69,0.3)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(255,78,69,0.2)'; this.style.transform='translateY(0)';">Unsubscribe Selected</button>
+                        <button id="ypp-health-add-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 20px; border-radius: 20px; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='translateY(0)';">Add to Folder</button>
+                        <button id="ypp-health-remove-folder-btn" class="ypp-btn-primary" style="background: rgba(255, 152, 0, 0.15); color: #ffb340; border: 1px solid rgba(255, 152, 0, 0.3); padding: 8px 20px; border-radius: 20px; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: none;" onmouseover="this.style.background='rgba(255, 152, 0, 0.25)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(255, 152, 0, 0.15)'; this.style.transform='translateY(0)';">Remove from Folder</button>
+                        <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 8px;"></div>
+                        <button class="ypp-modal-close" style="background: transparent; border: none; color: #94a3b8; font-size: 28px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; line-height: 1;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8';">&times;</button>
                     </div>
                 </div>
                 <div class="ypp-organizer-body" style="flex-direction: row; padding: 32px; overflow: hidden; display: flex; flex: 1; background: transparent; gap: 32px;">
                     <!-- LEFT PANE: Folders -->
-                    <div style="width: 280px; display: flex; flex-direction: column; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 24px; flex-shrink: 0;">
-                        <h3 style="color: #E6E1E5; font-size: 16px; font-weight: 500; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="width: 280px; display: flex; flex-direction: column; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px; flex-shrink: 0; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
+                        <h3 style="color: #f1f5f9; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center;">
                             Your Folders
-                            <span style="font-size:12px; color:rgba(255,255,255,0.4); font-weight:normal;">Drag to Add</span>
+                            <span style="font-size:11px; color:rgba(255,255,255,0.3); font-weight:normal; letter-spacing: 0;">Drag to Add</span>
                         </h3>
-                        <div id="ypp-organizer-folders-list" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                        <div id="ypp-organizer-folders-list" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
                             <!-- Populated dynamically -->
                         </div>
                         <div style="margin-top: 24px;">
-                            <h3 style="color: #E6E1E5; font-size: 14px; font-weight: 500; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,78,69,0.8)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                            <h3 style="color: #f1f5f9; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4e45" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
                                 Filter Keywords
                             </h3>
                             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                                <input type="text" id="ypp-blacklist-input" placeholder="e.g. spoiler, react" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none;">
-                                <button id="ypp-blacklist-add-btn" style="background: rgba(255,255,255,0.1); border: none; border-radius: 8px; padding: 0 12px; color: #fff; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Add</button>
+                                <input type="text" id="ypp-blacklist-input" placeholder="e.g. spoiler, react" style="flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 14px; color: #fff; font-size: 13px; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='rgba(99, 102, 241, 0.5)'; this.style.boxShadow='0 0 0 2px rgba(99, 102, 241, 0.2)';" onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.boxShadow='none';">
+                                <button id="ypp-blacklist-add-btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 0 16px; color: #fff; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 500;" onmouseover="this.style.background='rgba(255,255,255,0.12)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.transform='translateY(0)';">Add</button>
                             </div>
                             <div id="ypp-blacklist-tags" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
                         </div>
@@ -1010,44 +1010,44 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     <!-- RIGHT PANE: Channels -->
                     <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                         <div style="display: flex; gap: 24px; margin-bottom: 24px;">
-                            <div class="ypp-health-stat" data-filter="active" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
-                                <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Active (< 30 days)</div>
-                                <div style="color: rgba(255,255,255,0.9); font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-active">0</div>
+                            <div class="ypp-health-stat" data-filter="active" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 24px; border-radius: 20px; text-align: left; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(46, 213, 115, 0.15)'; this.style.borderColor='rgba(46, 213, 115, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                                <div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;"><div style="width:6px; height:6px; border-radius:50%; background:#2ed573;"></div> Active (< 30 days)</div>
+                                <div style="color: #f1f5f9; font-size: 42px; font-weight: 600; line-height: 1; letter-spacing: -1px;" id="ypp-health-active">0</div>
                             </div>
-                            <div class="ypp-health-stat" data-filter="warning" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
-                                <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Inactive (> 1 month)</div>
-                                <div style="color: rgba(255,255,255,0.6); font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-warning">0</div>
+                            <div class="ypp-health-stat" data-filter="warning" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 24px; border-radius: 20px; text-align: left; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(255, 179, 64, 0.15)'; this.style.borderColor='rgba(255, 179, 64, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                                <div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;"><div style="width:6px; height:6px; border-radius:50%; background:#ffb340;"></div> Inactive (> 1 month)</div>
+                                <div style="color: rgba(241, 245, 249, 0.8); font-size: 42px; font-weight: 600; line-height: 1; letter-spacing: -1px;" id="ypp-health-warning">0</div>
                             </div>
-                            <div class="ypp-health-stat" data-filter="dead" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 24px; text-align: left; cursor: pointer; transition: background 0.2s;">
-                                <div style="color: #CAC4D0; font-size: 13px; font-weight: 500; letter-spacing: 0.1px; margin-bottom: 8px;">Dead (> 3 months)</div>
-                                <div style="color: rgba(255,255,255,0.4); font-size: 40px; font-weight: 400; line-height: 1;" id="ypp-health-dead">0</div>
+                            <div class="ypp-health-stat" data-filter="dead" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 24px; border-radius: 20px; text-align: left; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(255, 78, 69, 0.15)'; this.style.borderColor='rgba(255, 78, 69, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                                <div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;"><div style="width:6px; height:6px; border-radius:50%; background:#ff4e45;"></div> Dead (> 3 months)</div>
+                                <div style="color: rgba(241, 245, 249, 0.5); font-size: 42px; font-weight: 600; line-height: 1; letter-spacing: -1px;" id="ypp-health-dead">0</div>
                             </div>
                         </div>
                         <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 16px; align-items: center;">
                             <div style="display: flex; gap: 8px; margin-right: auto;">
-                                <button id="ypp-health-select-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Select All Visible</button>
-                                <button id="ypp-health-unselect-all-btn" style="background: rgba(255,255,255,0.05); color: #CAC4D0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Unselect All</button>
+                                <button id="ypp-health-select-all-btn" style="background: rgba(255,255,255,0.05); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(0)';">Select All Visible</button>
+                                <button id="ypp-health-unselect-all-btn" style="background: rgba(255,255,255,0.02); color: #94a3b8; border: 1px solid rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#f1f5f9';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.color='#94a3b8';">Unselect All</button>
                             </div>
-                            <div style="position: relative; flex: 1; max-width: 320px; display: flex; align-items: center;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CAC4D0" stroke-width="2" style="position: absolute; left: 16px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                <input type="text" id="ypp-health-search-input" placeholder="Search channels..." style="width: 100%; background: rgba(255,255,255,0.05); color: #E6E1E5; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 42px; border-radius: 100px; outline: none; font-size: 14px; transition: background 0.2s;" />
+                            <div style="position: relative; flex: 1; max-width: 280px; display: flex; align-items: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="position: absolute; left: 14px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="ypp-health-search-input" placeholder="Search channels..." style="width: 100%; background: rgba(255,255,255,0.03); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px 10px 38px; border-radius: 12px; outline: none; font-size: 13px; transition: all 0.2s;" onfocus="this.style.borderColor='rgba(99, 102, 241, 0.5)'; this.style.boxShadow='0 0 0 2px rgba(99, 102, 241, 0.2)';" onblur="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.boxShadow='none';"/>
                             </div>
-                            <span style="color: #CAC4D0; font-size: 14px; font-weight: 500;">Filters & Sort:</span>
-                            <select id="ypp-health-folder-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                                <option value="all" style="background:#1D1B20">All Folders</option>
-                                <option value="__no_folder__" style="background:#1D1B20">Uncategorized (No Folder)</option>
-                                ${folderUI ? Object.keys(folderUI.storage.folders).map(f => '<option value="' + f + '" style="background:#1D1B20">' + f + '</option>').join('') : ''}
+                            <span style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Filters:</span>
+                            <select id="ypp-health-folder-filter-dropdown" style="background: rgba(255,255,255,0.03); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: all 0.2s; appearance: none; padding-right: 32px; background-image: url('data:image/svg+xml;utf8,<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%2394a3b8\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 12px center;">
+                                <option value="all" style="background:#0a0a0f">All Folders</option>
+                                <option value="__no_folder__" style="background:#0a0a0f">Uncategorized</option>
+                                ${folderUI ? Object.keys(folderUI.storage.folders).map(f => '<option value="' + f + '" style="background:#0a0a0f">' + f + '</option>').join('') : ''}
                             </select>
-                            <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                                <option value="all" style="background:#1D1B20">All Statuses</option>
-                                <option value="active" style="background:#1D1B20">Active (< 30 days)</option>
-                                <option value="warning" style="background:#1D1B20">Inactive (> 1 month)</option>
-                                <option value="dead" style="background:#1D1B20">Dead (> 3 months)</option>
+                            <select id="ypp-health-filter-dropdown" style="background: rgba(255,255,255,0.03); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: all 0.2s; appearance: none; padding-right: 32px; background-image: url('data:image/svg+xml;utf8,<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%2394a3b8\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 12px center;">
+                                <option value="all" style="background:#0a0a0f">All Statuses</option>
+                                <option value="active" style="background:#0a0a0f">Active</option>
+                                <option value="warning" style="background:#0a0a0f">Inactive</option>
+                                <option value="dead" style="background:#0a0a0f">Dead</option>
                             </select>
-                            <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.05); color: #E6E1E5; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none; font-size: 14px; font-weight: 500; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                                <option value="latest" style="background:#1D1B20">Latest Upload First</option>
-                                <option value="oldest" style="background:#1D1B20">Oldest Upload First</option>
-                                <option value="az" style="background:#1D1B20">Alphabetical (A-Z)</option>
+                            <select id="ypp-health-sort-dropdown" style="background: rgba(255,255,255,0.03); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: all 0.2s; appearance: none; padding-right: 32px; background-image: url('data:image/svg+xml;utf8,<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%2394a3b8\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 12px center;">
+                                <option value="latest" style="background:#0a0a0f">Latest First</option>
+                                <option value="oldest" style="background:#0a0a0f">Oldest First</option>
+                                <option value="az" style="background:#0a0a0f">Alphabetical</option>
                             </select>
                         </div>
                         <div id="ypp-health-results" class="ypp-scroll-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 8px;">
@@ -1584,8 +1584,8 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     }
                 }
 
-                const colorMap = { active: 'rgba(255,255,255,0.8)', warning: 'rgba(255,255,255,0.5)', dead: 'rgba(255,255,255,0.2)' };
-                const color = colorMap[c.status] || '#888';
+                const colorMap = { active: '#2ed573', warning: '#ffb340', dead: '#ff4e45' };
+                const color = colorMap[c.status] || '#94a3b8';
 
                 const row = document.createElement('div');
                 row.className = 'ypp-channel-health-row';
@@ -1594,17 +1594,19 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 row.dataset.uploadTime = c.lastUpload != null ? c.lastUpload : Infinity;
                 row.dataset.folders    = channelFolders.join(',');
                 row.setAttribute('draggable', 'true');
-                row.style.cssText = 'display:flex;align-items:center;padding:14px 18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;border-left:3px solid ' + color + ';transition:background 0.15s,transform 0.15s;animation:ypp-fade-in 0.2s ease;cursor:grab;';
+                row.style.cssText = 'display:flex;align-items:center;padding:14px 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;border-left:4px solid ' + color + ';transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);animation:ypp-fade-in 0.3s ease;cursor:grab;';
 
-                row.addEventListener('mouseover', () => { row.style.background = 'rgba(255,255,255,0.045)'; row.style.transform = 'translateY(-1px)'; });
-                row.addEventListener('mouseout',  () => { row.style.background = 'rgba(255,255,255,0.02)';  row.style.transform = 'translateY(0)'; });
+                row.addEventListener('mouseover', () => { row.style.background = 'rgba(255,255,255,0.06)'; row.style.transform = 'translateX(4px)'; row.style.borderColor = 'rgba(255,255,255,0.1)'; });
+                row.addEventListener('mouseout',  () => { row.style.background = 'rgba(255,255,255,0.03)';  row.style.transform = 'translateX(0)'; row.style.borderColor = 'rgba(255,255,255,0.06)'; });
                 row.addEventListener('dragstart', (e) => {
                     e.dataTransfer.setData('text/plain', c.name);
                     e.dataTransfer.effectAllowed = 'copyMove';
                     row.style.opacity = '0.5';
+                    row.style.transform = 'scale(0.98)';
                 });
                 row.addEventListener('dragend', () => {
                     row.style.opacity = '1';
+                    row.style.transform = 'scale(1)';
                 });
 
                 // Build inner DOM safely without template literals (avoids Vite JSX parse errors)
@@ -1618,12 +1620,12 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 infoDiv.style.cssText = 'flex:1;min-width:0;';
 
                 const nameDiv = document.createElement('div');
-                nameDiv.style.cssText = 'color:#E6E1E5;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                nameDiv.style.cssText = 'color:#f1f5f9;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;';
                 nameDiv.textContent = c.name;
                 infoDiv.appendChild(nameDiv);
 
                 const uploadDiv = document.createElement('div');
-                uploadDiv.style.cssText = 'color:#938F99;font-size:11px;margin-top:1px;';
+                uploadDiv.style.cssText = 'color:#94a3b8;font-size:12px;margin-top:2px;font-weight:500;';
                 uploadDiv.textContent = 'Last upload: ';
                 const uploadSpan = document.createElement('span');
                 uploadSpan.style.color = color;
@@ -1636,7 +1638,7 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                     badgesDiv.style.marginTop = '4px';
                     channelFolders.forEach(f => {
                         const badge = document.createElement('span');
-                        badge.style.cssText = 'background:rgba(255,255,255,0.12);padding:2px 7px;border-radius:20px;font-size:10px;margin-right:4px;color:#fff;display:inline-block;margin-bottom:2px;';
+                        badge.style.cssText = 'background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.05);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;margin-right:4px;color:#cbd5e1;display:inline-block;margin-bottom:2px;';
                         badge.textContent = f;
                         badgesDiv.appendChild(badge);
                     });
@@ -1645,44 +1647,44 @@ window.YPP.features.ChannelHealthUI = class ChannelHealthUI {
                 row.appendChild(infoDiv);
 
                 const actionsDiv = document.createElement('div');
-                actionsDiv.style.cssText = 'display:flex;align-items:center;gap:10px;flex-shrink:0;';
+                actionsDiv.style.cssText = 'display:flex;align-items:center;gap:12px;flex-shrink:0;';
 
                 const visitLink = document.createElement('a');
                 visitLink.href = '/channel/' + c.id;
                 visitLink.target = '_blank';
-                visitLink.style.cssText = 'color:#fff;text-decoration:none;font-size:12px;font-weight:500;opacity:0.8;transition:opacity 0.2s;';
+                visitLink.style.cssText = 'color:#f1f5f9;text-decoration:none;font-size:13px;font-weight:600;opacity:0.6;transition:all 0.2s;';
                 visitLink.textContent = 'Visit';
                 visitLink.addEventListener('mouseover', () => { visitLink.style.opacity = '1'; });
-                visitLink.addEventListener('mouseout',  () => { visitLink.style.opacity = '0.8'; });
+                visitLink.addEventListener('mouseout',  () => { visitLink.style.opacity = '0.6'; });
                 actionsDiv.appendChild(visitLink);
 
                 const label = document.createElement('label');
-                label.style.cssText = 'display:flex;align-items:center;cursor:pointer;color:#938F99;font-size:12px;font-weight:500;user-select:none;gap:6px;';
+                label.style.cssText = 'display:flex;align-items:center;cursor:pointer;color:#94a3b8;font-size:13px;font-weight:500;user-select:none;gap:8px;margin-left:4px;margin-right:8px;';
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.className = 'ypp-unsub-checkbox';
                 cb.value = c.id;
                 cb.dataset.params = c.unsubParams || '';
-                cb.style.cssText = 'width:15px;height:15px;cursor:pointer;accent-color:#fff;';
+                cb.style.cssText = 'width:16px;height:16px;cursor:pointer;accent-color:#6366f1;';
                 label.appendChild(cb);
                 label.appendChild(document.createTextNode('Select'));
                 actionsDiv.appendChild(label);
 
                 const folderBtn = document.createElement('button');
                 folderBtn.className = 'ypp-indiv-folder-btn';
-                folderBtn.style.cssText = 'background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+                folderBtn.style.cssText = 'background:rgba(255,255,255,0.05);color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);';
                 folderBtn.textContent = 'Folders';
-                folderBtn.addEventListener('mouseover', () => { folderBtn.style.background = 'rgba(208,188,255,0.18)'; });
-                folderBtn.addEventListener('mouseout',  () => { folderBtn.style.background = 'rgba(208,188,255,0.08)'; });
+                folderBtn.addEventListener('mouseover', () => { folderBtn.style.background = 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25))'; folderBtn.style.borderColor = 'rgba(168, 85, 247, 0.4)'; folderBtn.style.transform = 'translateY(-1px)'; });
+                folderBtn.addEventListener('mouseout',  () => { folderBtn.style.background = 'rgba(255,255,255,0.05)'; folderBtn.style.borderColor = 'rgba(255,255,255,0.1)'; folderBtn.style.transform = 'translateY(0)'; });
                 folderBtn.addEventListener('click', (e) => { e.stopPropagation(); if (folderUI) folderUI.renderChannelPopover(folderBtn, c.name); });
                 actionsDiv.appendChild(folderBtn);
 
                 const indivBtn = document.createElement('button');
                 indivBtn.className = 'ypp-indiv-unsub-btn';
-                indivBtn.style.cssText = 'background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+                indivBtn.style.cssText = 'background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);';
                 indivBtn.textContent = 'Unsub';
-                indivBtn.addEventListener('mouseover', () => { indivBtn.style.background = 'rgba(242,184,181,0.18)'; });
-                indivBtn.addEventListener('mouseout',  () => { indivBtn.style.background = 'rgba(242,184,181,0.08)'; });
+                indivBtn.addEventListener('mouseover', () => { indivBtn.style.background = 'rgba(255,78,69,0.2)'; indivBtn.style.color = '#ff6b6b'; indivBtn.style.borderColor = 'rgba(255,78,69,0.3)'; indivBtn.style.transform = 'translateY(-1px)'; });
+                indivBtn.addEventListener('mouseout',  () => { indivBtn.style.background = 'rgba(255,255,255,0.05)'; indivBtn.style.color = 'rgba(255,255,255,0.8)'; indivBtn.style.borderColor = 'rgba(255,255,255,0.1)'; indivBtn.style.transform = 'translateY(0)'; });
                 indivBtn.addEventListener('click', () => this.individualUnsubscribe(c.id, c.unsubParams, c.name, row, indivBtn));
                 actionsDiv.appendChild(indivBtn);
 

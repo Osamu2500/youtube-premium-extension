@@ -57,6 +57,15 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this._sortFilter = filters.sort || 'latest';
             this.applyFeedFilters();
         });
+
+        this._storageChangedUnsub = window.YPP.events?.on('storage:changed:ypp_subscription_folders', async (newFolders) => {
+            if (newFolders) {
+                this.storage.folders = newFolders;
+                if (this.activeFolder) {
+                    this.forceRefreshFeed();
+                }
+            }
+        });
     }
 
     getConfigKey() { return null; }
@@ -181,6 +190,11 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this._filterChangedUnsub = null;
         }
 
+        if (this._storageChangedUnsub) {
+            this._storageChangedUnsub();
+            this._storageChangedUnsub = null;
+        }
+
         // Delegate to disable() for full cleanup
         this.disable();
     }
@@ -201,6 +215,11 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         if (this._filterChangedUnsub) {
             this._filterChangedUnsub();
             this._filterChangedUnsub = null;
+        }
+        
+        if (this._storageChangedUnsub) {
+            this._storageChangedUnsub();
+            this._storageChangedUnsub = null;
         }
 
         // Remove popover click-outside handler
@@ -702,15 +721,22 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                     channelName = lockup ?? legacy ?? null;
                 }
 
-                // Fallback 1: DOM attribute — avatar link title is the most reliable DOM source
-                // and doesn't include badge characters (unlike textContent).
+                // Fallback 1: Text content of the channel name link (resilient to structural changes).
+                // Selecting the <a> avoids including the verified badge text.
+                if (!channelName) {
+                    const linkEl = card.querySelector('ytd-channel-name a, #channel-name a');
+                    if (linkEl && linkEl.textContent) {
+                        channelName = linkEl.textContent.trim();
+                    }
+                }
+
+                // Fallback 2: DOM attribute — avatar link title.
                 // ⚠️ YouTube-Fragile: a#avatar-link[title] attribute
                 if (!channelName) {
                     channelName = card.querySelector('a#avatar-link')?.title?.trim() || null;
                 }
 
-                // Fallback 2: Text content of the channel name element (most resilient to structural changes,
-                // but requires _normChannel to strip out verified checkmarks later).
+                // Fallback 3: Text content of the channel name container (might contain checkmarks).
                 if (!channelName) {
                     const textEl = card.querySelector('ytd-channel-name, #channel-name');
                     if (textEl && textEl.textContent) {
