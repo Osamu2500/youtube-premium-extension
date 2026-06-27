@@ -8,10 +8,8 @@
 
 /* ─── HORIZONTAL GRID RESTORATION ─── */
 /* Force the YouTube grid to become a horizontal scrolling row */
-html body.ypp-cinematic-mode ytd-rich-grid-renderer,
-html body.ypp-cinematic-mode #contents.ytd-rich-grid-renderer,
-html body.ypp-cinematic-mode #contents.ypp-grid-container,
-html body.ypp-cinematic-mode #contents[data-ypp-cols] {
+html body.ypp-cinematic-mode ytd-rich-grid-renderer > #contents,
+html body.ypp-cinematic-mode ytd-rich-grid-renderer {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -23,8 +21,14 @@ html body.ypp-cinematic-mode #contents[data-ypp-cols] {
     /* Hide scrollbar */
     scrollbar-width: none; 
 }
-html body.ypp-cinematic-mode #contents::-webkit-scrollbar {
+html body.ypp-cinematic-mode ytd-rich-grid-renderer > #contents::-webkit-scrollbar {
     display: none;
+}
+
+/* Flatten the rows so individual items form a single horizontal line */
+html body.ypp-cinematic-mode ytd-rich-grid-row,
+html body.ypp-cinematic-mode ytd-rich-grid-row > #contents {
+    display: contents !important;
 }
 
 /* Fix individual video cards to fit the horizontal row */
@@ -41,9 +45,6 @@ html body.ypp-cinematic-mode ytd-rich-item-renderer {
 html body.ypp-cinematic-mode ytd-rich-item-renderer ytd-thumbnail {
     width: 100% !important;
     height: 180px !important;
-}
-html body.ypp-cinematic-mode ytd-rich-grid-row {
-    display: contents !important;
 }
 .ypp-cinematic-toggle-btn {
     background: #e50914; /* Netflix Red */

@@ -104,15 +104,7 @@ window.YPP.features.CinematicMode = class CinematicMode extends window.YPP.featu
         
         appContainer.innerHTML = `
             <div class="ypp-cinematic-hero">
-                <!-- Fallback thumbnail while video loads -->
                 <div class="ypp-cinematic-hero-bg" style="background-image: url('https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg')"></div>
-                <!-- Autoplaying background video -->
-                <iframe class="ypp-cinematic-hero-video playing" 
-                    src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&showinfo=0&rel=0" 
-                    frameborder="0" 
-                    allow="autoplay; encrypted-media" 
-                    allowfullscreen>
-                </iframe>
                 <div class="ypp-cinematic-hero-content">
                     <div class="ypp-cinematic-hero-channel">
                         ${avatar ? `<img src="${avatar}" class="channel-avatar" onerror="this.style.display='none'">` : ''}
