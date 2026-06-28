@@ -30,6 +30,9 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this._compressorEnabled = true;
         this._monoEnabled = false;
         this._eqGains = new Array(10).fill(0);   // current dB per band
+        this._eqFreqs = [60, 170, 310, 600, 1000, 3000, 6000, 10000, 14000, 16000];
+        this._eqQs = new Array(10).fill(1.4);
+
         this._volumeGain = 1.0;                  // 1.0 = 100%
         this._balance = 0.0;                     // -1.0 (Left) to 1.0 (Right)
         this._widenerEnabled = false;
@@ -92,6 +95,18 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             } catch (e) {
                 this.utils?.log?.('[YPP:VolumeBooster] Failed to parse EQ bands: ' + e.message, 'VolumeBooster', 'warn');
             }
+        }
+        if (settings.volumeEqFreqs) {
+            try {
+                const freqs = JSON.parse(settings.volumeEqFreqs);
+                if (Array.isArray(freqs) && freqs.length === 10) this._eqFreqs = freqs;
+            } catch (e) {}
+        }
+        if (settings.volumeEqQs) {
+            try {
+                const qs = JSON.parse(settings.volumeEqQs);
+                if (Array.isArray(qs) && qs.length === 10) this._eqQs = qs;
+            } catch (e) {}
         }
     }
 
@@ -290,13 +305,17 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
      * Topology: source -> eqNodes -> panner -> compressor -> gain -> analyser -> destination
      */
     _buildAudioGraph() {
+        // AGC Gain (Loudness Normalization)
+        this.agcGain = this.ctx.createGain();
+        this.agcGain.gain.value = 1.0;
+
         // 1. Build 10 EQ band nodes
         this._eqNodes = this._bands.map((band, i) => {
             const f = this.ctx.createBiquadFilter();
             f.type = band.type;
-            f.frequency.value = band.freq;
+            f.frequency.value = this._eqFreqs[i];
             f.gain.value = this._eqGains[i];
-            if (band.type === 'peaking') f.Q.value = 1.4;
+            if (band.type === 'peaking') f.Q.value = this._eqQs[i];
             return f;
         });
 
@@ -309,36 +328,77 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.pannerNode = this.ctx.createStereoPanner();
         this.pannerNode.pan.value = this._balance;
 
-        // 3. Compressor (Prevents clipping at high gain)
+        // 3. Multi-Band Compression (Replacing Single-Band)
+        this.mbcLowFilter = this.ctx.createBiquadFilter();
+        this.mbcLowFilter.type = 'lowpass';
+        this.mbcLowFilter.frequency.value = 250;
+        
+        this.mbcMidFilterHP = this.ctx.createBiquadFilter();
+        this.mbcMidFilterHP.type = 'highpass';
+        this.mbcMidFilterHP.frequency.value = 250;
+        this.mbcMidFilterLP = this.ctx.createBiquadFilter();
+        this.mbcMidFilterLP.type = 'lowpass';
+        this.mbcMidFilterLP.frequency.value = 4000;
+        
+        this.mbcHighFilter = this.ctx.createBiquadFilter();
+        this.mbcHighFilter.type = 'highpass';
+        this.mbcHighFilter.frequency.value = 4000;
+
+        this.mbcLowComp = this.ctx.createDynamicsCompressor();
+        this.mbcMidComp = this.ctx.createDynamicsCompressor();
+        this.mbcHighComp = this.ctx.createDynamicsCompressor();
+        
+        this.mbcSumNode = this.ctx.createGain();
+        this.mbcSumNode.gain.value = 1.0;
+
+        // Fallback/Bypass route
         this.compressorNode = this.ctx.createDynamicsCompressor();
+        this.mbcBypassNode = this.ctx.createGain();
+
         this._applyCompressorState();
 
         // 4. Master Gain
         this.gainNode = this.ctx.createGain();
         this.gainNode.gain.value = this._volumeGain;
 
-        // 4.5 Stereo Widener (Haas effect)
-        this.widenerSplitter = this.ctx.createChannelSplitter(2);
-        this.widenerMerger = this.ctx.createChannelMerger(2);
-        this.widenerDelay = this.ctx.createDelay();
-        this.widenerDelay.delayTime.value = 0.02; // 20ms
-        this.widenerGain = this.ctx.createGain();
-        this.widenerGain.gain.value = this._widenerEnabled ? 0.3 : 0;
+        // 4.5 Spatial Audio (HRTF)
+        this.spatialSplitter = this.ctx.createChannelSplitter(2);
+        this.spatialMerger = this.ctx.createChannelMerger(2);
         
-        // Wire widener: Left -> Delay -> Merge Right
-        this.widenerSplitter.connect(this.widenerDelay, 0); // Left channel
-        this.widenerSplitter.connect(this.widenerMerger, 0, 0); // L -> L
-        this.widenerSplitter.connect(this.widenerMerger, 1, 1); // R -> R
-        this.widenerDelay.connect(this.widenerGain);
-        this.widenerGain.connect(this.widenerMerger, 0, 1); // Delayed L -> R
+        this.spatialLeftPanner = this.ctx.createPanner();
+        this.spatialLeftPanner.panningModel = 'HRTF';
+        this.spatialLeftPanner.distanceModel = 'inverse';
+        this.spatialLeftPanner.positionX.value = -1.2;
+        this.spatialLeftPanner.positionY.value = 0.2;
+        this.spatialLeftPanner.positionZ.value = -1.5;
+        
+        this.spatialRightPanner = this.ctx.createPanner();
+        this.spatialRightPanner.panningModel = 'HRTF';
+        this.spatialRightPanner.distanceModel = 'inverse';
+        this.spatialRightPanner.positionX.value = 1.2;
+        this.spatialRightPanner.positionY.value = 0.2;
+        this.spatialRightPanner.positionZ.value = -1.5;
 
-        // 5. Analyser for Visualization
+        this.spatialSplitter.connect(this.spatialLeftPanner, 0); 
+        this.spatialSplitter.connect(this.spatialRightPanner, 1); 
+        this.spatialLeftPanner.connect(this.spatialMerger, 0, 0);
+        this.spatialRightPanner.connect(this.spatialMerger, 0, 1);
+
+        this.spatialBypassGain = this.ctx.createGain();
+        this.spatialBypassGain.gain.value = this._widenerEnabled ? 0 : 1;
+        this.spatialEffectGain = this.ctx.createGain();
+        this.spatialEffectGain.gain.value = this._widenerEnabled ? 1 : 0;
+
+        // 5. Analyser for Visualization & AGC
         this.analyserNode = this.ctx.createAnalyser();
-        this.analyserNode.fftSize = 128; // 64 bins, smooth enough for mini spectrum
+        this.analyserNode.fftSize = 256; 
         this.analyserNode.smoothingTimeConstant = 0.85;
 
         // Chain the nodes sequentially
         let node = this.source;
+        node.connect(this.agcGain);
+        node = this.agcGain;
+        
         node.connect(this.waveShaperNode);
         node = this.waveShaperNode;
 
@@ -348,12 +408,38 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         });
         
         node.connect(this.pannerNode);
-        this.pannerNode.connect(this.compressorNode);
-        this.compressorNode.connect(this.gainNode);
-        this.gainNode.connect(this.widenerSplitter);
-        this.widenerMerger.connect(this.analyserNode);
 
-        // Chain to AudioCompressor if it is active, otherwise go straight to destination
+        // MBC Route
+        this.pannerNode.connect(this.mbcLowFilter);
+        this.pannerNode.connect(this.mbcMidFilterHP);
+        this.mbcMidFilterHP.connect(this.mbcMidFilterLP);
+        this.pannerNode.connect(this.mbcHighFilter);
+        
+        this.mbcLowFilter.connect(this.mbcLowComp);
+        this.mbcMidFilterLP.connect(this.mbcMidComp);
+        this.mbcHighFilter.connect(this.mbcHighComp);
+
+        this.mbcLowComp.connect(this.mbcSumNode);
+        this.mbcMidComp.connect(this.mbcSumNode);
+        this.mbcHighComp.connect(this.mbcSumNode);
+
+        // Bypass Route
+        this.pannerNode.connect(this.compressorNode);
+        this.compressorNode.connect(this.mbcBypassNode);
+        
+        this.mbcSumNode.connect(this.gainNode);
+        this.mbcBypassNode.connect(this.gainNode);
+
+        // Spatial Audio Route
+        this.gainNode.connect(this.spatialBypassGain);
+        this.gainNode.connect(this.spatialSplitter);
+        
+        this.spatialMerger.connect(this.spatialEffectGain);
+        
+        this.spatialBypassGain.connect(this.analyserNode);
+        this.spatialEffectGain.connect(this.analyserNode);
+
+        // Output
         const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
         if (video && video.__ypp_ext_compressor) {
             this.analyserNode.connect(video.__ypp_ext_compressor.input);
@@ -361,6 +447,8 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         } else {
             this.analyserNode.connect(this.ctx.destination);
         }
+        
+        this._startAGC();
     }
 
     /**
@@ -375,25 +463,88 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         this.setWarmth(this._warmthLevel);
         this._applyCompressorState();
         
-        // Restore EQ gains safely
+        // Restore EQ parameters safely
         this._eqNodes.forEach((n, i) => { 
-            if (n) n.gain.setTargetAtTime(this._eqGains[i], this.ctx.currentTime, 0.05); 
+            if (n) {
+                n.gain.setTargetAtTime(this._eqGains[i], this.ctx.currentTime, 0.05); 
+                n.frequency.setTargetAtTime(this._eqFreqs[i], this.ctx.currentTime, 0.05);
+                if (this._bands[i].type === 'peaking') {
+                    n.Q.setTargetAtTime(this._eqQs[i], this.ctx.currentTime, 0.05);
+                }
+            }
         });
     }
 
     _applyCompressorState() {
         if (!this.compressorNode) return;
+        
         if (this._compressorEnabled) {
-            this.compressorNode.threshold.value = -24;
-            this.compressorNode.knee.value = 10;
-            this.compressorNode.ratio.value = 4;
-            this.compressorNode.attack.value = 0.003;
-            this.compressorNode.release.value = 0.25;
+            // Enable Multi-Band Compression
+            if (this.mbcSumNode) this.mbcSumNode.gain.value = 1;
+            if (this.mbcBypassNode) this.mbcBypassNode.gain.value = 0;
+            
+            // Low (Punchy, controlled)
+            if (this.mbcLowComp) {
+                this.mbcLowComp.threshold.value = -30;
+                this.mbcLowComp.ratio.value = 6;
+                this.mbcLowComp.attack.value = 0.01;
+                this.mbcLowComp.release.value = 0.1;
+            }
+            
+            // Mid (Preserve vocals)
+            if (this.mbcMidComp) {
+                this.mbcMidComp.threshold.value = -20;
+                this.mbcMidComp.ratio.value = 2.5;
+                this.mbcMidComp.attack.value = 0.05;
+                this.mbcMidComp.release.value = 0.2;
+            }
+            
+            // High (Tame harshness)
+            if (this.mbcHighComp) {
+                this.mbcHighComp.threshold.value = -24;
+                this.mbcHighComp.ratio.value = 4;
+                this.mbcHighComp.attack.value = 0.02;
+                this.mbcHighComp.release.value = 0.15;
+            }
         } else {
-            // Transparent bypass values
+            // Bypass Multi-Band
+            if (this.mbcSumNode) this.mbcSumNode.gain.value = 0;
+            if (this.mbcBypassNode) this.mbcBypassNode.gain.value = 1;
+            
             this.compressorNode.threshold.value = 0;
             this.compressorNode.ratio.value = 1;
         }
+    }
+
+    _startAGC() {
+        if (this._agcInterval) clearInterval(this._agcInterval);
+        
+        // Simple AGC: Measure RMS every 100ms, adjust agcGain to hit ~ -14dBFS
+        const dataArray = new Float32Array(this.analyserNode.fftSize);
+        const targetRMS = 0.15; // Approx -16 LUFS
+        
+        this._agcInterval = setInterval(() => {
+            if (!this.analyserNode || !this.agcGain || (this._boundVideo && this._boundVideo.paused)) return;
+            
+            this.analyserNode.getFloatTimeDomainData(dataArray);
+            let sumSquares = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sumSquares += dataArray[i] * dataArray[i];
+            }
+            const rms = Math.sqrt(sumSquares / dataArray.length);
+            
+            // Very slow, cinematic volume riding
+            if (rms > 0.01) {
+                const currentGain = this.agcGain.gain.value;
+                let desiredGain = targetRMS / rms;
+                // Clamp desired gain to prevent insane boosting or cutting
+                desiredGain = Math.max(0.2, Math.min(3.0, desiredGain));
+                
+                // Low-pass filter the gain adjustment (slow riding)
+                const newGain = currentGain + (desiredGain - currentGain) * 0.05;
+                this.agcGain.gain.setTargetAtTime(newGain, this.ctx.currentTime, 0.5);
+            }
+        }, 100);
     }
 
     setVolume(multiplier) {
@@ -445,9 +596,12 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
             if (video) this.initAudioContext(video);
         }
-        if (this.widenerGain && this.ctx) {
+        if (this.spatialBypassGain && this.spatialEffectGain && this.ctx) {
             if (this.ctx.state === 'suspended') this.ctx.resume();
-            this.widenerGain.gain.setTargetAtTime(enabled ? 0.3 : 0, this.ctx.currentTime, 0.05);
+            
+            // Crossfade between normal and HRTF spatial audio
+            this.spatialBypassGain.gain.setTargetAtTime(enabled ? 0 : 1, this.ctx.currentTime, 0.05);
+            this.spatialEffectGain.gain.setTargetAtTime(enabled ? 1 : 0, this.ctx.currentTime, 0.05);
         }
     }
 
@@ -488,11 +642,41 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         }
     }
 
+    _setEQBandFreq(index, freq) {
+        this._eqFreqs[index] = freq;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
+        if (this._eqNodes[index] && this.ctx) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            this._eqNodes[index].frequency.setTargetAtTime(freq, this.ctx.currentTime, 0.05);
+        }
+    }
+
+    _setEQBandQ(index, q) {
+        this._eqQs[index] = q;
+        if (!this._audioConnected && this._needsAudioGraph()) {
+            const video = this._boundVideo || document.querySelector('.html5-main-video') || document.querySelector('video');
+            if (video) this.initAudioContext(video);
+        }
+        if (this._eqNodes[index] && this.ctx) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            if (this._bands[index].type === 'peaking') {
+                this._eqNodes[index].Q.setTargetAtTime(q, this.ctx.currentTime, 0.05);
+            }
+        }
+    }
+
     _applyPreset(name) {
         const gains = this._presets[name];
         if (!gains) return;
         if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-        gains.forEach((db, i) => this._setEQBand(i, db));
+        gains.forEach((db, i) => {
+            this._setEQBand(i, db);
+            this._setEQBandFreq(i, this._bands[i].freq); // Reset freq
+            this._setEQBandQ(i, 1.4); // Reset Q
+        });
     }
 
     createButton(initialVideo) {

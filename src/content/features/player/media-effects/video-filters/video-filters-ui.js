@@ -235,7 +235,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // Tab content — uses opacity crossfade instead of instant show/hide
         const tabContent = document.createElement('div');
         Object.assign(tabContent.style, {
-            padding: '0', maxHeight: isGlobalBar ? '480px' : '520px', overflowY: 'auto', overflowX: 'hidden',
+            padding: '0', maxHeight: '520px', overflowY: 'auto', overflowX: 'hidden',
             background: 'transparent', scrollbarWidth: 'none', position: 'relative'
         });
 
@@ -333,31 +333,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             // Inject scale-in keyframe once
             this._injectStyle('ypp-scale-anim', '@keyframes ypp-panel-scale-in{from{opacity:0;transform:scale(calc(0.92 * var(--ypp-auto-scale, 1)))}to{opacity:1;transform:scale(var(--ypp-auto-scale, 1))}}');
 
-            // Position now (estimate), then reposition after first layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, btn, video, 480);
-            reposition();
-            requestAnimationFrame(reposition);
-
-            // Keep popup correctly placed when user resizes the window
-            let resizeTicking = false;
-            const onResize = () => {
-                if (!ctx._filterPanel) {
-                    if (ctx._filterPanelResizeHandler) { 
-                        window.removeEventListener('resize', ctx._filterPanelResizeHandler); 
-                    }
-                    return;
-                }
-                if (!resizeTicking) {
-                    resizeTicking = true;
-                    requestAnimationFrame(() => {
-                        reposition();
-                        resizeTicking = false;
-                    });
-                }
-            };
-            ctx._filterPanelResizeHandler = onResize;
-            if (ctx.addListener) ctx.addListener(window, 'resize', onResize, { passive: true });
-            else window.addEventListener('resize', onResize, { passive: true });
+            // Popup positioned in bottom-right by default via CSS.
         } else {
             document.body.appendChild(panel);
         }
@@ -395,11 +371,6 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 if (ctx.removeListener) ctx.removeListener(document, 'click', ctx._filterPanelOutsideHandler);
                 else document.removeEventListener('click', ctx._filterPanelOutsideHandler);
                 ctx._filterPanelOutsideHandler = null;
-            }
-            if (ctx._filterPanelResizeHandler) {
-                if (ctx.removeListener) ctx.removeListener(window, 'resize', ctx._filterPanelResizeHandler);
-                else window.removeEventListener('resize', ctx._filterPanelResizeHandler);
-                ctx._filterPanelResizeHandler = null;
             }
             ctx._removeFilterPanel = origRemove; // restore
             origRemove();

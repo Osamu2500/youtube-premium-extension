@@ -19,7 +19,9 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                     volumeMono: ctxArg._monoEnabled,
                     volumeWidener: ctxArg._widenerEnabled,
                     volumeWarmth: ctxArg._warmthLevel,
-                    volumeEqBands: JSON.stringify(ctxArg._eqGains)
+                    volumeEqBands: JSON.stringify(ctxArg._eqGains),
+                    volumeEqFreqs: JSON.stringify(ctxArg._eqFreqs),
+                    volumeEqQs: JSON.stringify(ctxArg._eqQs)
                 });
             }, 300);
         }
@@ -57,16 +59,21 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         const isGlobalBar = !!anchorBtn.closest('.ypp-global-player-bar');
         if (isGlobalBar) {
             panel.classList.add('ypp-panel-transparent');
-            panel.style.background = 'rgba(8, 8, 18, 0.62)';
-            panel.style.backdropFilter = 'blur(24px) saturate(160%)';
-            panel.style.webkitBackdropFilter = 'blur(24px) saturate(160%)';
+            panel.style.background = 'transparent'; // Replaced by live blur
             panel.style.boxShadow = '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)';
             panel.style.border = '1px solid rgba(255,255,255,0.1)';
-            // Width is set dynamically by positionPopupBesideVideo (auto-scaled to fit)
-            // max-height caps it so it never overflows the viewport
-            panel.style.maxHeight = Math.min(window.innerHeight * 0.85, 580) + 'px';
-            panel.style.overflowY = 'auto';
-            panel.style.overflowX = 'hidden';
+
+            // Live Blur Canvas Container
+            const blurWrap = document.createElement('div');
+            blurWrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;border-radius:inherit;overflow:hidden;background:rgba(8,8,18,0.72);';
+            const blurCanvas = document.createElement('canvas');
+            blurCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;filter:blur(32px) saturate(200%);transform:scale(1.2);opacity:0.85;mix-blend-mode:screen;';
+            blurWrap.appendChild(blurCanvas);
+            panel.appendChild(blurWrap);
+            
+            ctx._liveBlurCanvas = blurCanvas;
+            ctx._liveBlurCtx = blurCanvas.getContext('2d', { alpha: false });
+            // Width and max-height are handled by CSS.
         }
 
 
@@ -193,77 +200,93 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         });
         panel.appendChild(presetsRow);
 
-        // ── Canvas Curve (will be moved to eqContentWrap)
+        // ── Interactive Parametric EQ Canvas
         const canvasEl = document.createElement('canvas');
-        canvasEl.width  = isGlobalBar ? 268 : 340;
-        canvasEl.height = isGlobalBar ? 52  : 72;
+        canvasEl.width  = 340;
+        canvasEl.height = 140; // Taller for interactive dragging
         canvasEl.className = 'ypp-eq-canvas';
-        // NOTE: NOT appended to panel here — appended via eqContentWrap below
+        canvasEl.style.cssText = 'cursor: crosshair; touch-action: none; margin: 10px 18px 12px; border-radius: 10px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); width: calc(100% - 36px);';
+        
+        let draggingBand = -1;
+        const logMin = Math.log10(20), logMax = Math.log10(20000);
+        
+        const getBandFromMouse = (e) => {
+            const rect = canvasEl.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            let closest = -1, minD = 24;
+            ctx._bands.forEach((band, i) => {
+                const bx = ((Math.log10(ctx._eqFreqs[i] || band.freq) - logMin) / (logMax - logMin)) * canvasEl.width;
+                const by = canvasEl.height / 2 - (ctx._eqGains[i] / 13) * (canvasEl.height / 2 - 10);
+                const d = Math.hypot(bx - x, by - y);
+                if (d < minD) { minD = d; closest = i; }
+            });
+            return closest;
+        };
 
-        // ── 10-Band Vertical EQ Faders
-        const bandsSection = document.createElement('div');
-        bandsSection.className = 'ypp-eq-bands';
-        const sliderEls = [];
-        const dbLabelEls = [];
+        const updateFromMouse = (e, idx) => {
+            if (idx < 0) return;
+            const rect = canvasEl.getBoundingClientRect();
+            const x = Math.max(0, Math.min(canvasEl.width, e.clientX - rect.left));
+            const y = Math.max(0, Math.min(canvasEl.height, e.clientY - rect.top));
+            
+            // Gain (-12 to +12)
+            const db = ((canvasEl.height / 2 - y) / (canvasEl.height / 2 - 10)) * 13;
+            ctx._setEQBand(idx, Math.max(-12, Math.min(12, Math.round(db * 2) / 2)));
+            
+            // Freq
+            const logFreq = logMin + (x / canvasEl.width) * (logMax - logMin);
+            const freq = Math.pow(10, logFreq);
+            ctx._setEQBandFreq(idx, Math.max(20, Math.min(20000, freq)));
+            
+            this.drawCurve(ctx, canvasEl);
+            if (activePresetBtn) { activePresetBtn.classList.remove('active'); activePresetBtn = null; }
+        };
 
-        ctx._bands.forEach((band, i) => {
-            const col = document.createElement('div');
-            col.className = 'ypp-eq-band-col';
-
-            const dbLabel = document.createElement('div');
-            dbLabel.className = 'ypp-eq-band-db';
-            dbLabel.style.color = band.color;
-            const cur = ctx._eqGains[i];
-            dbLabel.textContent = (cur >= 0 ? '+' : '') + cur;
-            dbLabelEls.push(dbLabel);
-
-            const track = document.createElement('div');
-            track.className = 'ypp-eq-band-track';
-
-            const centerLine = document.createElement('div');
-            centerLine.className = 'ypp-eq-band-center';
-
-            const slider = document.createElement('input');
-            slider.type = 'range'; slider.min = -12; slider.max = 12; slider.step = 0.5;
-            slider.value = ctx._eqGains[i];
-            slider.className = 'ypp-eq-vslider';
-            slider.style.setProperty('--band-color', band.color);
-            slider.dataset.band = i;
-            slider.oninput = (e) => {
-                if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
-                const db = parseFloat(e.target.value);
-                ctx._setEQBand(i, db);
-                dbLabel.textContent = (db >= 0 ? '+' : '') + db;
+        canvasEl.onpointerdown = (e) => {
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            canvasEl.setPointerCapture(e.pointerId);
+            draggingBand = getBandFromMouse(e);
+            if (draggingBand >= 0) updateFromMouse(e, draggingBand);
+        };
+        canvasEl.onpointermove = (e) => {
+            if (draggingBand >= 0) {
+                updateFromMouse(e, draggingBand);
+            } else {
+                canvasEl.style.cursor = getBandFromMouse(e) >= 0 ? 'grab' : 'crosshair';
+            }
+        };
+        canvasEl.onpointerup = (e) => {
+            canvasEl.releasePointerCapture(e.pointerId);
+            if (draggingBand >= 0) VolumeBoosterUI.saveVolumeSettings(ctx);
+            draggingBand = -1;
+        };
+        canvasEl.ondblclick = (e) => {
+            if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
+            const idx = getBandFromMouse(e);
+            if (idx >= 0) {
+                ctx._setEQBand(idx, 0);
                 this.drawCurve(ctx, canvasEl);
-                if (activePresetBtn) { activePresetBtn.classList.remove('active'); activePresetBtn = null; }
                 VolumeBoosterUI.saveVolumeSettings(ctx);
-            };
-            slider.ondblclick = () => {
-                if (ctx.ctx && ctx.ctx.state === 'suspended') ctx.ctx.resume();
-                ctx._setEQBand(i, 0);
-                slider.value = 0;
-                dbLabel.textContent = '0';
+            }
+        };
+        canvasEl.onwheel = (e) => {
+            e.preventDefault();
+            const idx = getBandFromMouse(e);
+            if (idx >= 0 && ctx._bands[idx].type === 'peaking') {
+                const delta = e.deltaY > 0 ? -0.2 : 0.2;
+                const newQ = Math.max(0.1, Math.min(10, (ctx._eqQs[idx] || 1.4) + delta));
+                ctx._setEQBandQ(idx, newQ);
                 this.drawCurve(ctx, canvasEl);
                 VolumeBoosterUI.saveVolumeSettings(ctx);
-            };
-            sliderEls.push(slider);
-
-            const freqLabel = document.createElement('div');
-            freqLabel.className = 'ypp-eq-band-freq';
-            freqLabel.textContent = band.label;
-
-            track.append(centerLine, slider);
-            col.append(dbLabel, track, freqLabel);
-            bandsSection.appendChild(col);
-        });
-        // NOTE: bandsSection is NOT appended to panel directly — appended via eqContentWrap below
+            }
+        };
 
         // ── Footer: tabbed content panels ──
         // --- EQ content wrapper (bands + canvas)
         const eqContentWrap = document.createElement('div');
         eqContentWrap.id = 'ypp-eq-tab-eq';
         eqContentWrap.appendChild(canvasEl);
-        eqContentWrap.appendChild(bandsSection);
         panel.appendChild(eqContentWrap);
 
         // --- Dynamics tab panel
@@ -409,25 +432,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             panel.style.clipPath = 'none';
             dlg.appendChild(panel);
 
-            // Position now (estimate), reposition after layout (actual scrollHeight)
-            const reposition = () => window.YPP.Utils?.positionPopupBesideVideo(panel, anchorBtn, video, 400);
-            reposition();
-            requestAnimationFrame(reposition);
-
-            // Self-cleaning throttled resize listener
-            let resizeTicking = false;
-            const onResize = () => {
-                if (!ctx._volumePopup) { window.removeEventListener('resize', onResize); return; }
-                if (!resizeTicking) {
-                    resizeTicking = true;
-                    requestAnimationFrame(() => {
-                        reposition();
-                        resizeTicking = false;
-                    });
-                }
-            };
-            if (ctx.addListener) ctx.addListener(window, 'resize', onResize, { passive: true });
-            else window.addEventListener('resize', onResize, { passive: true });
+            // Popup positioned in bottom-right by default via CSS.
         } else {
             document.body.appendChild(panel);
         }
@@ -442,16 +447,30 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             duration: 600,
         });
 
-        // Visualizer Loop
+        // Visualizer & Blur Loop
         let animFrameId = null;
-        const renderLoop = () => {
+        let lastBlurRender = 0;
+        const renderLoop = (timestamp) => {
             if (!ctx._volumePopup) return; // Stop if closed
             if (ctx.analyserNode) {
                 this.drawCurve(ctx, canvasEl, true);
             }
+            if (ctx._liveBlurCanvas && timestamp - lastBlurRender > 33) { // ~30fps throttle
+                lastBlurRender = timestamp;
+                const bCanvas = ctx._liveBlurCanvas;
+                const bCtx = ctx._liveBlurCtx;
+                if (!bCanvas._setupDone && video.videoWidth > 0) {
+                    bCanvas.width = 160; // downscale heavily for blur perf
+                    bCanvas.height = (video.videoHeight / video.videoWidth) * 160;
+                    bCanvas._setupDone = true;
+                }
+                if (bCanvas._setupDone) {
+                    bCtx.drawImage(video, 0, 0, bCanvas.width, bCanvas.height);
+                }
+            }
             animFrameId = requestAnimationFrame(renderLoop);
         };
-        renderLoop();
+        requestAnimationFrame(renderLoop);
 
         // Initial curve draw (if no analyser yet)
         if (!ctx.analyserNode) this.drawCurve(ctx, canvasEl);
@@ -481,15 +500,6 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     }
 
     static syncBandUI(ctx, panel, canvas) {
-        const sliders = panel.querySelectorAll('.ypp-eq-vslider');
-        const dbLabels = panel.querySelectorAll('.ypp-eq-band-db');
-        sliders.forEach((s, i) => {
-            s.value = ctx._eqGains[i];
-        });
-        dbLabels.forEach((el, i) => {
-            const db = ctx._eqGains[i];
-            el.textContent = (db >= 0 ? '+' : '') + db;
-        });
         if (!ctx.analyserNode) this.drawCurve(ctx, canvas);
     }
 
@@ -541,8 +551,9 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
 
         // Vertical band markers
-        ctxRef._bands.forEach(band => {
-            const x = ((Math.log10(band.freq) - logMin) / (logMax - logMin)) * W;
+        ctxRef._bands.forEach((band, i) => {
+            const freq = ctxRef._eqFreqs ? (ctxRef._eqFreqs[i] || band.freq) : band.freq;
+            const x = ((Math.log10(freq) - logMin) / (logMax - logMin)) * W;
             ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             ctx.setLineDash([2, 5]);
@@ -556,8 +567,10 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             ctxRef._bands.forEach((band, i) => {
                 const db = ctxRef._eqGains[i];
                 if (db === 0) return;
-                const bw = band.type === 'peaking' ? 0.85 : 1.6;
-                const logDist = Math.log2(freq / band.freq) / bw;
+                const bFreq = ctxRef._eqFreqs ? (ctxRef._eqFreqs[i] || band.freq) : band.freq;
+                const Q = ctxRef._eqQs ? (ctxRef._eqQs[i] || 1.4) : 1.4;
+                const bw = band.type === 'peaking' ? (1.5 / Q) : 1.6;
+                const logDist = Math.log2(freq / bFreq) / bw;
                 total += db * Math.exp(-logDist * logDist * 2.2);
             });
             return Math.max(-dbRange, Math.min(dbRange, total));
@@ -591,6 +604,22 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         ctx.lineWidth = 2.5;
         ctx.lineJoin = 'round';
         ctx.stroke();
+
+        // Draw interactive nodes
+        ctxRef._bands.forEach((band, i) => {
+            const freq = ctxRef._eqFreqs ? (ctxRef._eqFreqs[i] || band.freq) : band.freq;
+            const db = ctxRef._eqGains[i];
+            const x = ((Math.log10(freq) - logMin) / (logMax - logMin)) * W;
+            const y = H / 2 - (db / dbRange) * (H / 2 - 10);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = band.color || '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+            ctx.stroke();
+        });
     }
 
     static injectEQStyles() {

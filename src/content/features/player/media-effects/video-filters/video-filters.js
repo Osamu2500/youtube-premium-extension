@@ -150,30 +150,31 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
         if (adj.clarity > 0) {
             baseContrast += adj.clarity * 0.3;
         }
-        // Temperature: warm = +brightness/contrast, cool = blue hue
-        if (adj.temperature !== 0) {
-            const t = adj.temperature;
-            if (t > 0) { // warm
-                baseBrightness += t * 0.05;
-                baseContrast += t * 0.02;
-            } else { // cool
-                baseBrightness += t * 0.03;
-            }
+        // We use SVG ComponentTransfer for true RGB curve manipulation
+        // (Handles Brightness, Contrast, Highlights, Shadows, Temperature)
+        let hasSVGCurves = false;
+        const needsCurves = baseContrast !== 100 || baseBrightness !== 100 || 
+                            adj.shadows !== 0 || adj.highlights !== 0 || adj.temperature !== 0;
+                            
+        if (needsCurves) {
+            window.YPP.features.VideoFiltersOverlay.updateDynamicSVGFilter({
+                brightness: baseBrightness,
+                contrast: baseContrast,
+                shadows: adj.shadows || 0,
+                highlights: adj.highlights || 0,
+                temperature: adj.temperature || 0
+            });
+            hasSVGCurves = true;
         }
+
         // Bug fix: use local variables so we never mutate this.filterAdjustments
-        // (Bug 7 — adj.saturate was permanently overwritten on every call)
         let localSaturate = adj.saturate;
         if (adj.vibrance !== undefined && adj.vibrance !== 100) {
-            // Vibrance approximated via saturation
             localSaturate = localSaturate * (adj.vibrance / 100);
         }
-        // Highlights/Shadows approximate via brightness layers (CSS limited)
-        if (adj.highlights !== 0) baseBrightness += adj.highlights * 0.15;
-        if (adj.shadows !== 0)    baseBrightness += adj.shadows * 0.08;
 
         const adjStr = [
-            baseBrightness !== 100 ? `brightness(${s(baseBrightness)}%)` : '',
-            baseContrast !== 100 ? `contrast(${s(baseContrast)}%)` : '',
+            hasSVGCurves ? `url(#ypp-dynamic-filter)` : '',
             localSaturate !== 100 ? `saturate(${s(localSaturate)}%)` : '',
             adj.hueRotate !== 0 ? `hue-rotate(${adj.hueRotate * inst}deg)` : '',
             adj.sepia > 0 ? `sepia(${adj.sepia * inst}%)` : '',

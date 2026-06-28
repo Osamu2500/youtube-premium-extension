@@ -336,4 +336,87 @@ window.YPP.features.VideoFiltersOverlay = class VideoFiltersOverlay {
         // NOTE: #ypp-svg-sharpness-defs and #ypp-special-fx-defs are intentionally
         // NOT removed here — they may still be referenced by the video's CSS filter string.
     }
+
+    static setupDynamicSVGFilter() {
+        if (document.getElementById('ypp-dynamic-svg-grade')) return;
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.id = 'ypp-dynamic-svg-grade';
+        svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;';
+        
+        svg.innerHTML = `
+            <defs>
+                <filter id="ypp-dynamic-filter" color-interpolation-filters="sRGB">
+                    <feComponentTransfer id="ypp-svg-curves">
+                        <feFuncR type="table" tableValues="0 1"/>
+                        <feFuncG type="table" tableValues="0 1"/>
+                        <feFuncB type="table" tableValues="0 1"/>
+                    </feComponentTransfer>
+                </filter>
+            </defs>
+        `;
+        document.body.appendChild(svg);
+    }
+
+    static updateDynamicSVGFilter(adj) {
+        this.setupDynamicSVGFilter();
+        const curves = document.getElementById('ypp-svg-curves');
+        if (!curves) return;
+        
+        // Generate a 20-point LUT table for R, G, B
+        const steps = 20;
+        const rTable = [], gTable = [], bTable = [];
+        
+        for (let i = 0; i <= steps; i++) {
+            let t = i / steps;
+            
+            // Shadows (lifts the bottom end of the curve)
+            if (adj.shadows !== 0) {
+                const shadowEffect = Math.max(0, 1 - (t * 2)); 
+                t += (adj.shadows / 100) * 0.4 * shadowEffect;
+            }
+            
+            // Highlights (boosts or cuts the top end)
+            if (adj.highlights !== 0) {
+                const highlightEffect = Math.max(0, (t - 0.5) * 2); 
+                t += (adj.highlights / 100) * 0.4 * highlightEffect;
+            }
+            
+            // Contrast
+            if (adj.contrast !== 100) {
+                const c = adj.contrast / 100;
+                t = (t - 0.5) * c + 0.5;
+            }
+            
+            // Brightness
+            if (adj.brightness !== 100) {
+                t = t * (adj.brightness / 100);
+            }
+            
+            // Clamp
+            t = Math.max(0, Math.min(1, t));
+            
+            let rt = t, gt = t, bt = t;
+
+            // Temperature (Warm/Cool)
+            if (adj.temperature !== 0) {
+                const temp = adj.temperature / 100;
+                if (temp > 0) {
+                    rt = Math.min(1, rt * (1 + temp * 0.2));
+                    bt = Math.max(0, bt * (1 - temp * 0.15));
+                } else {
+                    rt = Math.max(0, rt * (1 + temp * 0.15));
+                    bt = Math.min(1, bt * (1 - temp * 0.2));
+                }
+            }
+            
+            rTable.push(rt);
+            gTable.push(gt);
+            bTable.push(bt);
+        }
+        
+        curves.querySelector('feFuncR').setAttribute('tableValues', rTable.map(n=>n.toFixed(3)).join(' '));
+        curves.querySelector('feFuncG').setAttribute('tableValues', gTable.map(n=>n.toFixed(3)).join(' '));
+        curves.querySelector('feFuncB').setAttribute('tableValues', bTable.map(n=>n.toFixed(3)).join(' '));
+    }
 };
