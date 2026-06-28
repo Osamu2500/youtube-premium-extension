@@ -83,20 +83,6 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
                     { key: 'nebula', label: 'Nebula', meta: 'Purple Space', color: '#0f0518' },
                     { key: 'hologram', label: 'Hologram', meta: 'Sci-Fi Cyan', color: '#e0f7fa' }
                 ]
-            },
-            {
-                name: 'Anime',
-                themes: [
-                    { key: 'onepiece', label: 'One Piece', meta: 'Pirate King', color: '#0055a4' },
-                    { key: 'naruto', label: 'Naruto', meta: 'Shinobi', color: '#ff6600' },
-                    { key: 'bleach', label: 'Bleach', meta: 'Soul Reaper', color: '#cc0000' },
-                    { key: 'drstone', label: 'Dr. Stone', meta: 'Science', color: '#00cc66' },
-                    { key: 'gurrenlagann', label: 'Gurren Lagann', meta: 'Spiral Power', color: '#ff0033' },
-                    { key: 'sao', label: 'SAO', meta: 'Link Start', color: '#00bfff' },
-                    { key: 'zatchbell', label: 'Zatch Bell', meta: 'Spellbook', color: '#ffd700' },
-                    { key: 'aot', label: 'AOT', meta: 'Scout Regiment', color: '#8b4513' }
-                ]
-            }
         ];
 
         chrome.storage.local.get('settings', (data) => {

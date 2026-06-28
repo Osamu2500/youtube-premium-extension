@@ -174,6 +174,12 @@ export function updateDependencyUI(document) {
     if (hwToggle && hwOptions) {
         hwOptions.style.display = hwToggle.checked ? 'block' : 'none';
     }
+
+    const cssToggle = document.getElementById('enableCustomCSS');
+    const cssOptions = document.getElementById('customCSSOptions');
+    if (cssToggle && cssOptions) {
+        cssOptions.style.display = cssToggle.checked ? 'block' : 'none';
+    }
 }
 
 export function applyAccentColor(document, hex) {

@@ -31,6 +31,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
         // which calls setState() → _applyDOM(). Calling it here too would cause a double DOM apply.
         this._initFeatures(); // async — will call applySettings again once features load
         this._initPlayer();   // async — waits for video element
+        window.YPP.ui.manager.mount('watchPageTop', this.filterBar, 'prepend');
     }
 
     async _initFeatures() {
@@ -76,7 +77,7 @@ class WatchPageManager extends window.YPP.BasePageManager {
     applySettings(settings) {
         this.settings = { ...this.settings, ...settings };
         if (!this.isActive) return;
-        
+
         let newSidebar = 'default';
         let newMode = 'default';
 

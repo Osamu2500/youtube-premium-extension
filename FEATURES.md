@@ -112,6 +112,7 @@
 |---|---|---|---|---|---|---|---|
 | Account Menu | `AccountMenu` | `content/features/core/global/account-menu/index.js` | `enableAccountMenu` | all | stable | — | Redesigns the profile dropdown with disk account switcher and sign-out confirmation |
 | Theme | `Theme` | `content/features/core/global/theme.js` | `premiumTheme` | all | stable | — | Applies the active CSS theme and CSS variable overrides to YouTube |
+| Custom CSS | `CustomCSS` | `content/features/global/ui-tweaks/custom-css.js` | `enableCustomCSS` | all | stable | — | Injects arbitrary custom CSS (like userstyles) into the page |
 | Content Control | `ContentControl` | `content/features/core/global/content-control.js` | `null` | all | stable | — | Master toggle system for hiding comments, merch, live chat, end screens |
 | Night Mode | `NightModeManager` | `content/features/core/global/night-mode.js` | `blueLight` | all | stable | — | Blue light filter and dim overlay with adjustable intensity sliders |
 | Data API | `DataAPI` | `content/features/core/global/data-api.js` | `null` | all | stable | — | Bridges page context to extension context for accessing YouTube player APIs |

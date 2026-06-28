@@ -29,6 +29,10 @@ window.YPP.core.DOMObserver = class DOMObserver {
         this._hasMutatedListeners = false;
         /** @type {string|null} Cached combined selector to avoid string building on every frame */
         this._cachedSelector = null;
+        
+        // --- Lazy Loading state ---
+        this._lazyObserver = new IntersectionObserver(this._onIntersect.bind(this), { rootMargin: '400px 0px', threshold: 0 });
+        this._lazyMap = new WeakMap(); // Map<Element, Array<{id, callback}>>
     }
 
     /**
@@ -62,11 +66,12 @@ window.YPP.core.DOMObserver = class DOMObserver {
      * @param {string} selector - CSS selector
      * @param {Function} [callback] - Direct callback (optional, use EventBus preferably)
      * @param {boolean} [immediate=true] - Run immediately on existing elements
+     * @param {boolean} [lazy=false] - Only fire callback when element enters the viewport
      */
-    register(id, selector, callback, immediate = true) {
+    register(id, selector, callback, immediate = true, lazy = false) {
         if (!id || !selector) return;
 
-        this.registry.set(id, { selector, callback });
+        this.registry.set(id, { selector, callback, lazy });
         this._cachedSelector = null; // Invalidate cache
 
         if (immediate) {
@@ -79,16 +84,72 @@ window.YPP.core.DOMObserver = class DOMObserver {
             }
 
             if (existingElements.length > 0) {
-                if (callback) {
-                    try {
-                        callback(existingElements);
-                    } catch (e) {
-                        console.error(`[YPP:DOMObserver] Error in immediate callback for '${id}':`, e);
+                if (lazy) {
+                    this._observeLazy(existingElements, id, callback);
+                } else {
+                    if (callback) {
+                        try {
+                            callback(existingElements);
+                        } catch (e) {
+                            console.error(`[YPP:DOMObserver] Error in immediate callback for '${id}':`, e);
+                        }
+                    }
+                    if (this.events) {
+                        this.events.emit(`dom:found:${id}`, existingElements);
                     }
                 }
-                if (this.events) {
-                    this.events.emit(`dom:found:${id}`, existingElements);
+            }
+        }
+    }
+
+    _observeLazy(elements, id, callback) {
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[i];
+            if (!this._lazyMap.has(el)) {
+                this._lazyMap.set(el, []);
+                this._lazyObserver.observe(el);
+            }
+            // Avoid duplicate registrations
+            const listeners = this._lazyMap.get(el);
+            if (!listeners.some(l => l.id === id)) {
+                listeners.push({ id, callback });
+            }
+        }
+    }
+
+    _onIntersect(entries) {
+        const triggered = new Map(); // listenerId -> { callback, nodes }
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+            if (entry.isIntersecting) {
+                const node = entry.target;
+                this._lazyObserver.unobserve(node);
+                const listeners = this._lazyMap.get(node);
+                if (listeners) {
+                    for (let j = 0; j < listeners.length; j++) {
+                        const listener = listeners[j];
+                        // Ensure listener is still registered
+                        if (!this.registry.has(listener.id)) continue;
+                        
+                        if (!triggered.has(listener.id)) {
+                            triggered.set(listener.id, { callback: listener.callback, nodes: [] });
+                        }
+                        triggered.get(listener.id).nodes.push(node);
+                    }
+                    this._lazyMap.delete(node);
                 }
+            }
+        }
+        for (const [id, data] of triggered.entries()) {
+            if (data.callback) {
+                try {
+                    data.callback(data.nodes);
+                } catch (e) {
+                    console.error(`[YPP:DOMObserver] Lazy callback error for '${id}':`, e);
+                }
+            }
+            if (this.events) {
+                this.events.emit(`dom:found:${id}`, data.nodes);
             }
         }
     }
@@ -230,16 +291,20 @@ window.YPP.core.DOMObserver = class DOMObserver {
             const data = this.registry.get(id);
             if (!data) continue; // Guard against concurrent unregister
 
-            if (data.callback) {
-                try {
-                    data.callback(matches);
-                } catch (e) {
-                    console.error(`[YPP:DOMObserver] Direct callback error for '${id}':`, e);
+            if (data.lazy) {
+                this._observeLazy(matches, id, data.callback);
+            } else {
+                if (data.callback) {
+                    try {
+                        data.callback(matches);
+                    } catch (e) {
+                        console.error(`[YPP:DOMObserver] Direct callback error for '${id}':`, e);
+                    }
                 }
-            }
 
-            if (this.events) {
-                this.events.emit(`dom:found:${id}`, matches);
+                if (this.events) {
+                    this.events.emit(`dom:found:${id}`, matches);
+                }
             }
         }
     }

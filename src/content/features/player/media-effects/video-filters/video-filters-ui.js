@@ -359,22 +359,6 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         if (ctx.addListener) ctx.addListener(document, 'keydown', onKeyDown);
         else document.addEventListener('keydown', onKeyDown);
         
-        // Piggyback cleanup on the existing outside handler removal
-        const origRemove = ctx._removeFilterPanel.bind(ctx);
-        ctx._removeFilterPanel = function() {
-            if (ctx._filterPanelKeydownHandler) {
-                if (ctx.removeListener) ctx.removeListener(document, 'keydown', ctx._filterPanelKeydownHandler);
-                else document.removeEventListener('keydown', ctx._filterPanelKeydownHandler);
-                ctx._filterPanelKeydownHandler = null;
-            }
-            if (ctx._filterPanelOutsideHandler) {
-                if (ctx.removeListener) ctx.removeListener(document, 'click', ctx._filterPanelOutsideHandler);
-                else document.removeEventListener('click', ctx._filterPanelOutsideHandler);
-                ctx._filterPanelOutsideHandler = null;
-            }
-            ctx._removeFilterPanel = origRemove; // restore
-            origRemove();
-        };
     }
 
     static buildPresetsTab(ctx, video, btn) {

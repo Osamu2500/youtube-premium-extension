@@ -194,6 +194,7 @@ export const POPUP_SCHEMA = [
             {
                 title: 'Player Page Filters',
                 items: [
+                    { type:'toggle', id:'hideExploreTopics', label:'Hide Topics Bar',   desc:'Remove category chips',    icon:P('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M3.6 9h16.8 M3.6 15h16.8') },
                     { type:'toggle', id:'hideComments',   label:'Hide Comments',       icon:P('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z') },
                     { type:'toggle', id:'commentFilter',  label:'Comment Spam Filter', desc:'Hide suspected bots',        icon:P('M22 3L2 3l8 9.46V19l4 2v-8.54L22 3z') },
                     { type:'select', id:'commentFilterAction', label:'Spam Action', desc:'What to do with spam', icon:P('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'), options: [{value:'dim',label:'Dim (Hover to reveal)'},{value:'hide',label:'Hide completely'}] },
@@ -385,6 +386,12 @@ export const POPUP_SCHEMA = [
                     { type:'toggle', id:'gpb_showLoop', label:'Loop', desc:'Native Loop toggle', icon:P('M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z') },
                     { type:'toggle', id:'gpb_showPip', label:'PiP', desc:'Picture-in-Picture', icon:P('M3 3h18v14H3zM12 14h7v5h-7z') },
                     { type:'toggle', id:'gpb_showFullscreen', label:'Fullscreen', desc:'Native Fullscreen', icon:P('M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z') },
+                ]
+            },
+            {
+                title: 'Custom CSS (Userstyles)',
+                items: [
+                    { type:'toggle', id:'enableCustomCSS', label:'Enable Custom CSS', desc:'Import or write your own styles', icon:P('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'), slot:'customCSSOptions' },
                 ]
             },
             {

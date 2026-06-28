@@ -67,6 +67,8 @@ window.YPP.SettingsSchema = {
 
         // --- Customization ---
         customThemes:        { type: 'object',  default: {} },
+        enableCustomCSS:     { type: 'boolean', default: false },
+        customCSSCode:       { type: 'string',  default: '' },
         fontScale:           { type: 'number',  default: 100, min: 80, max: 130 },
         accentColor:         { type: 'string',  default: '#ff4e45' },
         enableAnimations:    { type: 'boolean', default: true },

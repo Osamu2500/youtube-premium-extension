@@ -7,6 +7,7 @@ export class ThumbnailColorManager {
         this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         this.enabled = false;
         this.activeStyle = '';
+        this.activeWaitObservers = new Set();
 
         this.observer = new IntersectionObserver((entries) => {
             if (!this.enabled) return;
@@ -61,6 +62,8 @@ export class ThumbnailColorManager {
         this.enabled = false;
         this.observer.disconnect();
         this.mutationObserver.disconnect();
+        this.activeWaitObservers.forEach(mo => mo.disconnect());
+        this.activeWaitObservers.clear();
         document.querySelectorAll('[data-ypp-thumb-color]').forEach(el => {
             el.style.removeProperty('--ypp-thumb-color');
             el.removeAttribute('data-ypp-thumb-color');
@@ -104,10 +107,12 @@ export class ThumbnailColorManager {
                     const currentSrc = currentImg ? currentImg.src : null;
                     if (currentSrc && !currentSrc.includes('data:image')) {
                         mo.disconnect();
+                        this.activeWaitObservers.delete(mo);
                         el.removeAttribute('data-ypp-color-wait');
                         this.processElement(el);
                     }
                 });
+                this.activeWaitObservers.add(mo);
                 // Observe the entire element for both DOM swaps and attribute changes
                 mo.observe(el, { 
                     childList: true, 

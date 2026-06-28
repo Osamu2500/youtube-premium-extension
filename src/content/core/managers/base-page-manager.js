@@ -1,7 +1,7 @@
 class BasePageManager {
     constructor(utils, settings) {
         this.utils = utils;
-        this.settings = settings;
+        this.settings = { ...(window.YPP?.CONSTANTS?.DEFAULT_SETTINGS || {}), ...settings };
         this.isActive = false;
         this.currentUrl = '';
         this.matchPatterns = []; // e.g. [/^\/watch/]

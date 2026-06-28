@@ -225,6 +225,10 @@
             window.YPP.sharedObserver = window.YPP.sharedObserver || new window.YPP.core.DOMObserver();
             window.YPP.sharedObserver.start();
 
+            // Initialize EventDelegator
+            window.YPP.sharedEventDelegator = window.YPP.sharedEventDelegator || new window.YPP.core.EventDelegator();
+            window.YPP.sharedEventDelegator.start();
+
             this.featureManager = new window.YPP.FeatureManager();
             window.YPP.featureManager = this.featureManager;
 
@@ -424,6 +428,19 @@
                 };
                 chrome.runtime.onMessage.addListener(messageHandler);
                 this._chromeListeners.push({ api: chrome.runtime.onMessage, handler: messageHandler });
+            }
+            
+            // Listen for page-level filter toggles (from PageFilterBar)
+            if (window.YPP.events) {
+                const toggleHandler = async ({ id, active }) => {
+                    const delta = { [id]: active };
+                    this.Utils?.log(`Filter toggled: ${id} = ${active}`, 'MAIN', 'info');
+                    await this.saveSettings(delta);
+                    this._queueSettingsUpdate();
+                };
+                window.YPP.events.on('filter:toggle', toggleHandler);
+                // Cannot easily remove this upon cleanup without tracking it, 
+                // but since events is a singleton, it's fine for the app lifecycle.
             }
         },
 
@@ -716,6 +733,10 @@
 
             if (this.featureManager) {
                 this.featureManager.disableAll?.();
+            }
+
+            if (window.YPP.sharedEventDelegator) {
+                window.YPP.sharedEventDelegator.stop();
             }
 
             this.isInitialized = false;

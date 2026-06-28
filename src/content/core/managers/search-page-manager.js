@@ -34,6 +34,7 @@ class SearchPageManager extends window.YPP.BasePageManager {
 
     applySettings(settings) {
         this.settings = { ...this.settings, ...settings };
+        
         if (this.features.searchRedesign) {
             this.features.searchRedesign.run(this.settings);
         }

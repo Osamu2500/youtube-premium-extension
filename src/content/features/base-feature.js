@@ -21,6 +21,7 @@ window.YPP.features.BaseFeature = class BaseFeature {
         this.events = window.YPP.events;
         this.domApi = window.YPP.DomAPI;
         this.observer = window.YPP.sharedObserver;
+        this.delegator = window.YPP.sharedEventDelegator;
         
         this.eventListeners = [];
         this.busListeners = [];
@@ -193,5 +194,27 @@ window.YPP.features.BaseFeature = class BaseFeature {
      */
     async run(settings) {
         return this.update(settings);
+    }
+
+    /**
+     * Mark an element as processed for a specific uniqueId.
+     * Automatically handles DOM recycling by tearing down previous state.
+     * @param {HTMLElement} element 
+     * @param {string} uniqueId 
+     * @param {Function} [onRecycled] - Callback to clean up old state if recycled
+     * @returns {boolean} True if already processed for THIS id, False if needs processing
+     */
+    isProcessed(element, uniqueId, onRecycled) {
+        if (!element || !uniqueId) return false;
+        
+        const currentId = element.getAttribute(`data-ypp-processed-${this.name}`);
+        if (currentId === uniqueId) return true;
+        
+        if (currentId) {
+            if (typeof onRecycled === 'function') onRecycled(element, currentId);
+        }
+        
+        element.setAttribute(`data-ypp-processed-${this.name}`, uniqueId);
+        return false;
     }
 };

@@ -304,7 +304,7 @@ const initUniversalListeners = (document, state, UI, saveSettings) => {
                     }
                 }
             });
-            if (el.type === 'color') {
+            if (el.type === 'color' || el.tagName === 'TEXTAREA') {
                 el.addEventListener('input', () => {
                     UI.updateDependencyUI(document);
                     UI.updateCustomizationPreview(document, state);

@@ -13,7 +13,7 @@ export const state = {
 };
 
 export function initStorage(document) {
-    const inputs = document.querySelectorAll('input[id]:not(#featureSearch), select[id]');
+    const inputs = document.querySelectorAll('input[id]:not(#featureSearch), select[id], textarea[id]');
     inputs.forEach(el => {
         state.settingKeys.push(el.id);
         state.elements[el.id] = el;

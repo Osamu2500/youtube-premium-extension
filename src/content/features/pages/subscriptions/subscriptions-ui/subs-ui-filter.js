@@ -16,56 +16,62 @@ window.YPP.features.SubsUIFilter = class SubsUIFilter {
 
         if (!container) return;
 
-        const bar = document.createElement('div');
-        bar.id = 'ypp-subs-filter-bar';
-        bar.className = 'ypp-glass-panel';
-        this.renderFilterBar(ctx, bar);
+        const groups = ctx.manager.getGroups();
+        
+        const filters = [];
+        
+        // Group Filters (Singular selection)
+        filters.push({
+            id: 'group_All',
+            label: 'All',
+            isActive: true,
+            isToggle: false,
+            onClick: (btn) => {
+                ctx.filterFeed(null);
+            }
+        });
+        
+        Object.keys(groups).forEach(groupName => {
+            filters.push({
+                id: `group_${groupName}`,
+                label: groupName,
+                isActive: false,
+                isToggle: false,
+                onClick: (btn) => {
+                    ctx.filterFeed(groupName);
+                }
+            });
+        });
+        
+        filters.push({ type: 'separator' });
+        
+        // Toggles
+        filters.push({
+            id: 'hideShortsLocal',
+            label: 'Hide Shorts',
+            isToggle: true,
+            isActive: false,
+            onClick: (btn) => {
+                btn.classList.toggle('active');
+                ctx.reapplyFilters();
+            }
+        });
+        
+        filters.push({
+            id: 'hideWatchedLocal',
+            label: 'Hide Watched',
+            isToggle: true,
+            isActive: false,
+            onClick: (btn) => {
+                btn.classList.toggle('active');
+                ctx.reapplyFilters();
+            }
+        });
+
+        const bar = new window.YPP.ui.components.PageFilterBar('ypp-subs-filter-bar', filters);
 
         const grid = container.querySelector('ytd-rich-grid-renderer');
-        container.insertBefore(bar, grid ?? container.firstChild);
-    }
-
-    static renderFilterBar(ctx, container) {
-        container.innerHTML = '';
-        const groups = ctx.manager.getGroups();
-
-        const allBtn = document.createElement('button');
-        allBtn.className = 'ypp-filter-chip active';
-        allBtn.textContent = 'All';
-        ctx.addListener(allBtn, 'click', () => ctx.filterFeed(null));
-        container.appendChild(allBtn);
-
-        Object.keys(groups).forEach(groupName => {
-            const btn = document.createElement('button');
-            btn.className = 'ypp-filter-chip';
-            btn.textContent = groupName;
-            ctx.addListener(btn, 'click', () => ctx.filterFeed(groupName));
-            container.appendChild(btn);
-        });
-
-        const sep = document.createElement('div');
-        sep.className = 'ypp-filter-separator';
-        container.appendChild(sep);
-
-        const toggleShorts = document.createElement('button');
-        toggleShorts.className = 'ypp-filter-chip ypp-toggle-chip';
-        toggleShorts.textContent = 'Hide Shorts';
-        toggleShorts.dataset.toggle = 'shorts';
-        ctx.addListener(toggleShorts, 'click', () => {
-            toggleShorts.classList.toggle('active');
-            ctx.reapplyFilters();
-        });
-        container.appendChild(toggleShorts);
-
-        const toggleWatched = document.createElement('button');
-        toggleWatched.className = 'ypp-filter-chip ypp-toggle-chip';
-        toggleWatched.textContent = 'Hide Watched';
-        toggleWatched.dataset.toggle = 'watched';
-        ctx.addListener(toggleWatched, 'click', () => {
-            toggleWatched.classList.toggle('active');
-            ctx.reapplyFilters();
-        });
-        container.appendChild(toggleWatched);
+        container.insertBefore(bar.el, grid ?? container.firstChild);
     }
 
     static reapplyFilters(ctx) {
@@ -83,8 +89,8 @@ window.YPP.features.SubsUIFilter = class SubsUIFilter {
         const targetChip = Array.from(groupChips).find(c => c.textContent === (groupName || 'All'));
         if (targetChip) targetChip.classList.add('active');
 
-        const hideShorts = bar.querySelector('[data-toggle="shorts"]')?.classList.contains('active') ?? false;
-        const hideWatched = bar.querySelector('[data-toggle="watched"]')?.classList.contains('active') ?? false;
+        const hideShorts = bar.querySelector('[data-id="hideShortsLocal"]')?.classList.contains('active') ?? false;
+        const hideWatched = bar.querySelector('[data-id="hideWatchedLocal"]')?.classList.contains('active') ?? false;
 
         let allowedChannelSet = null;
         if (groupName) {

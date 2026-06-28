@@ -52,6 +52,12 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
             this.organizeFeed();
         });
 
+        if (this.delegator) {
+            this.delegator.register('home-organizer:tag-click', (e, target, payload) => {
+                this.handleTagClick(e, payload, target);
+            });
+        }
+
         // Initial run
         this.organizeFeed();
 
@@ -79,18 +85,37 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         // Only unregister our slot — never call stop() on the shared observer
         // as it is used by every other feature (SponsorBlock, HeaderNav, etc.)
         this.domObserver.unregister('home-grid');
+        
+        if (this.delegator) {
+            this.delegator.unregister('home-organizer:tag-click');
+        }
 
         document.querySelectorAll('.ypp-tag-btn').forEach(el => el.remove());
         document.querySelectorAll('.ypp-feed-separator').forEach(el => el.remove());
         this.removePopover();
         
         // TEARDOWN: remove processed stamps
-        document.querySelectorAll('ytd-rich-shelf-renderer[data-ypp-processed], ytd-reel-shelf-renderer[data-ypp-processed], ytd-rich-item-renderer[data-ypp-processed]').forEach(el => {
+        document.querySelectorAll(`[data-ypp-processed-${this.name}]`).forEach(el => {
+            el.removeAttribute(`data-ypp-processed-${this.name}`);
+            el.classList.remove('ypp-priority-low');
+        });
+        document.querySelectorAll('ytd-rich-shelf-renderer[data-ypp-processed], ytd-reel-shelf-renderer[data-ypp-processed]').forEach(el => {
             el.removeAttribute('data-ypp-processed');
             el.classList.remove('ypp-priority-low');
         });
         
         this.Utils.log('Home Organizer Disabled', 'HOME');
+    }
+
+    /**
+     * Handle SPA navigation
+     * @param {string} url 
+     */
+    onPageChange(url) {
+        if (this.isActive) {
+            this.removePopover();
+            this.organizeFeed();
+        }
     }
 
     /**
@@ -203,8 +228,17 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
         const videoItems = contents.querySelectorAll('ytd-rich-item-renderer');
         videoItems.forEach(el => {
             const item = /** @type {HTMLElement} */ (el);
-            if (item.hasAttribute('data-ypp-processed')) return;
-            item.setAttribute('data-ypp-processed', 'true');
+            
+            // Get unique identifier for the video to handle DOM recycling
+            const videoLink = item.querySelector('a#video-title');
+            const videoId = videoLink ? videoLink.getAttribute('href') : 'unknown';
+            
+            // Handle recycling via BaseFeature abstraction
+            if (this.isProcessed(item, videoId, (el) => {
+                el.classList.remove('ypp-priority-low');
+                const oldBtn = el.querySelector('.ypp-tag-btn');
+                if (oldBtn) oldBtn.remove();
+            })) return;
 
             // 1. Shorts Check Priority
             if (item.querySelector('a[href^="/shorts/"]')) {
@@ -229,11 +263,10 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
                         }
                     }
             
-                    btn.onclick = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.handleTagClick(e, channelName, btn);
-                    };
+                    // Delegate click events to the global handler
+                    btn.setAttribute('data-ypp-action', 'home-organizer:tag-click');
+                    btn.setAttribute('data-ypp-payload', channelName);
+
                     thumbnail.appendChild(btn);
                 }
             }
@@ -242,11 +275,11 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
 
     /**
      * Handle click on tag button
-     * @param {Event} _e 
+     * @param {Event} e 
      * @param {string} channelName 
      * @param {HTMLElement} btn 
      */
-    handleTagClick(_e, channelName, btn) {
+    handleTagClick(e, channelName, btn) {
         this.removePopover();
         if (!channelName) return;
 
@@ -279,10 +312,11 @@ window.YPP.features.HomeOrganizer = class HomeOrganizer extends window.YPP.featu
             });
         }
 
-        // Position popover
+        // Position popover relative to viewport to avoid scroll issues
         const rect = btn.getBoundingClientRect();
-        popover.style.top = `${rect.bottom + window.scrollY + 8}px`;
-        popover.style.left = `${rect.left + window.scrollX}px`;
+        popover.style.position = 'fixed';
+        popover.style.top = `${rect.bottom + 8}px`;
+        popover.style.left = `${rect.left}px`;
 
         document.body.appendChild(popover);
     }

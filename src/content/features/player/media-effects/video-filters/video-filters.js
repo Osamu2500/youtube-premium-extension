@@ -113,6 +113,11 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
             else document.removeEventListener('click', this._filterPanelOutsideHandler);
             this._filterPanelOutsideHandler = null;
         }
+        if (this._filterPanelKeydownHandler) {
+            if (this.removeListener) this.removeListener(document, 'keydown', this._filterPanelKeydownHandler);
+            else document.removeEventListener('keydown', this._filterPanelKeydownHandler);
+            this._filterPanelKeydownHandler = null;
+        }
         if (this._filterPanelResizeHandler) {
             if (this.removeListener) this.removeListener(window, 'resize', this._filterPanelResizeHandler);
             else window.removeEventListener('resize', this._filterPanelResizeHandler);

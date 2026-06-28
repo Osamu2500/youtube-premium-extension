@@ -30,7 +30,11 @@ class UIManager {
         headerRight: () => window.YPP.DomAPI?.getMasthead()?.querySelector('#buttons') || window.YPP.DomAPI?.getMasthead()?.querySelector('#end'),
         sidebar: () => window.YPP.DomAPI?.getSecondary(), // We need to add this to DomAPI
         related: () => window.YPP.DomAPI?.getRelatedItems(),
-        watchPage: () => window.YPP.DomAPI?.getWatchFlexy()
+        watchPage: () => window.YPP.DomAPI?.getWatchFlexy(),
+        homePageTop: () => document.querySelector('ytd-browse[page-subtype="home"] #contents'),
+        searchPageTop: () => document.querySelector('ytd-search #contents'),
+        watchPageTop: () => document.querySelector('#secondary-inner') || document.querySelector('#comments'),
+        subsPageTop: () => document.querySelector('ytd-browse[page-subtype="subscriptions"] #contents')
     };
 
     /**

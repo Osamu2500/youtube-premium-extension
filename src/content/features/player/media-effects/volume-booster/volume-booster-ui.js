@@ -33,6 +33,10 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         video = document.querySelector('.html5-main-video') || document.querySelector('video');
 
         if (ctx._volumePopup) {
+            if (ctx._volumeAnimCancel) {
+                ctx._volumeAnimCancel();
+                ctx._volumeAnimCancel = null;
+            }
             ctx._volumePopup.remove();
             ctx._volumePopup = null;
             anchorBtn.classList.remove('active');
@@ -449,6 +453,11 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
         // Visualizer & Blur Loop
         let animFrameId = null;
+        ctx._volumeAnimCancel = () => {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            animFrameId = null;
+        };
+
         let lastBlurRender = 0;
         const renderLoop = (timestamp) => {
             if (!ctx._volumePopup) return; // Stop if closed
@@ -478,7 +487,6 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         // Click-outside to close
         const outside = (e) => {
             if (ctx._volumePopup && !ctx._volumePopup.contains(e.target) && !anchorBtn.contains(e.target)) {
-                if (animFrameId) cancelAnimationFrame(animFrameId);
                 this.toggleEQPanel(ctx, video, anchorBtn);
             }
         };
@@ -490,7 +498,6 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
             if (e.key === 'Escape' && ctx._volumePopup) {
                 // DO NOT stop propagation here; allow YouTube to handle the ESC key natively
                 // (e.g. to exit fullscreen) to prevent the "ESC button toggle issue"
-                if (animFrameId) cancelAnimationFrame(animFrameId);
                 this.toggleEQPanel(ctx, video, anchorBtn);
             }
         };

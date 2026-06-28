@@ -9,6 +9,7 @@ import './core/event-bus.js';
 import './core/dom-api.js';
 import './core/dom-observer.js';
 import './core/storage-manager.js';
+import './core/event-delegator.js';
 
 // CSS Imports
 import './features/global/core-styles.css';
@@ -53,6 +54,7 @@ import './features/global/account-menu/index.js';
 import './features/global/ui-tweaks/grid-animator.js';
 // Toggles handled by GlobalLayoutManager
 import './features/global/ui-tweaks/screen-filters.js';
+import './features/global/ui-tweaks/custom-css.js';
 
 import './features/global/behavior/watched-store.js';
 import './features/global/behavior/mark-watched.js';

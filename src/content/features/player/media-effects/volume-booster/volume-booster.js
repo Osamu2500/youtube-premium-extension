@@ -123,8 +123,16 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
             this._volumePopup.remove();
             this._volumePopup = null;
         }
-        this._volumePopupOutsideHandler = null;
-        this._volumePopupEscapeHandler = null;
+        if (this._volumePopupOutsideHandler) {
+            if (this.removeListener) this.removeListener(document, 'click', this._volumePopupOutsideHandler);
+            else document.removeEventListener('click', this._volumePopupOutsideHandler);
+            this._volumePopupOutsideHandler = null;
+        }
+        if (this._volumePopupEscapeHandler) {
+            if (this.removeListener) this.removeListener(document, 'keydown', this._volumePopupEscapeHandler);
+            else document.removeEventListener('keydown', this._volumePopupEscapeHandler);
+            this._volumePopupEscapeHandler = null;
+        }
         
         // Call super to run cleanupEvents and remove all tracked listeners
         await super.disable();
