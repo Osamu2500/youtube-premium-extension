@@ -83,7 +83,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         header.innerHTML = `
             <div class="ypp-eq-title-group">
                 <div class="ypp-eq-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="white">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="white">
                         <path d="M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z"/>
                     </svg>
                 </div>
@@ -93,7 +93,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
                 </div>
             </div>
             <button class="ypp-eq-close-btn" id="ypp-eq-close">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
             </button>
@@ -165,8 +165,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         const mkTab = (label, active) => {
             const t = document.createElement('button');
             t.textContent = label;
-            const pad = isGlobalBar ? '6px' : '10px';
-            const fs  = isGlobalBar ? '10px' : '12px';
+            const pad = isGlobalBar ? '6px' : '8px';
+            const fs  = isGlobalBar ? '10px' : '11px';
             t.style.cssText = `flex:1;padding:${pad};background:transparent;border:none;color:${active ? '#fff' : 'rgba(255,255,255,0.45)'};font-size:${fs};font-weight:600;cursor:pointer;border-bottom:2px solid ${active ? 'rgba(255,255,255,0.7)' : 'transparent'};transition:all 0.2s;font-family:inherit;`;
             t.onmouseenter = () => { if (!t.classList.contains('active')) t.style.color = 'rgba(255,255,255,0.75)'; };
             t.onmouseleave = () => { if (!t.classList.contains('active')) t.style.color = 'rgba(255,255,255,0.45)'; };
@@ -205,7 +205,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         canvasEl.width  = 340;
         canvasEl.height = 140; // Taller for interactive dragging
         canvasEl.className = 'ypp-eq-canvas';
-        canvasEl.style.cssText = 'cursor: crosshair; touch-action: none; margin: 10px 18px 12px; border-radius: 10px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); width: calc(100% - 36px);';
+        canvasEl.style.cssText = 'cursor: crosshair; touch-action: none; margin: 10px 16px 10px; border-radius: 10px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); width: calc(100% - 32px);';
         
         let draggingBand = -1;
         const logMin = Math.log10(20), logMax = Math.log10(20000);
@@ -293,12 +293,12 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         const dynPanel = document.createElement('div');
         dynPanel.id = 'ypp-eq-tab-dyn';
         dynPanel.style.display = 'none';
-        dynPanel.style.cssText = 'padding:16px 18px;display:none;';
+        dynPanel.style.cssText = 'padding:12px 16px;display:none;';
         const mkDynRow = (label, min, max, step, val, unit, onChange) => {
             const row = document.createElement('div');
-            row.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:14px;';
+            row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px;';
             const lbl = document.createElement('span');
-            lbl.style.cssText = 'font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.5px;min-width:80px;';
+            lbl.style.cssText = 'font-size:9px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.5px;min-width:76px;';
             lbl.textContent = label;
             const valEl = document.createElement('span');
             valEl.style.cssText = 'font-size:11px;font-weight:800;color:#fff;min-width:36px;text-align:right;';
@@ -329,7 +329,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
         // --- Spatial tab panel
         const spaPanel = document.createElement('div');
         spaPanel.id = 'ypp-eq-tab-spa';
-        spaPanel.style.cssText = 'padding:16px 18px;display:none;';
+        spaPanel.style.cssText = 'padding:12px 16px;display:none;';
         const stereoRow = mkDynRow('Stereo Width', 0, 100, 1, ctx._widenerEnabled ? 100 : 0, '%', v => {
             if (ctx.setWidener) {
                 ctx.setWidener(v > 50);
@@ -631,8 +631,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 #ypp-eq-panel {
     position: fixed;
     bottom: 80px;
-    right: 80px;
-    width: 380px;
+    right: 16px;
+    width: 430px;
     background: rgba(0, 0, 0, 0.15); /* Fully transparent with heavy blur */
     border: 1px solid rgba(255,255,255,0.15);
     border-top: 1px solid rgba(255,255,255,0.25);
@@ -656,21 +656,21 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 /* Header */
 .ypp-eq-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px 13px;
+    padding: 12px 16px 11px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
 }
-.ypp-eq-title-group { display:flex; align-items:center; gap:10px; }
+.ypp-eq-title-group { display:flex; align-items:center; gap:8px; }
 .ypp-eq-icon {
-    width: 32px; height: 32px; border-radius: 10px;
+    width: 28px; height: 28px; border-radius: 8px;
     background: rgba(255, 255, 255, 0.15);
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
-.ypp-eq-title { font-size:14px; font-weight:700; letter-spacing:-0.3px; }
-.ypp-eq-subtitle { font-size:10px; color:rgba(255,255,255,0.38); font-weight:500; margin-top:1px; }
+.ypp-eq-title { font-size:13px; font-weight:700; letter-spacing:-0.2px; }
+.ypp-eq-subtitle { font-size:9px; color:rgba(255,255,255,0.38); font-weight:500; margin-top:1px; }
 .ypp-eq-close-btn {
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
-    color: rgba(255,255,255,0.7); border-radius: 50%; width:28px; height:28px;
+    color: rgba(255,255,255,0.7); border-radius: 50%; width:24px; height:24px;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; transition: background 0.2s, color 0.2s;
 }
@@ -678,17 +678,17 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
 /* Gain Row */
 .ypp-eq-gain-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 18px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .ypp-eq-row-label {
-    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.45);
-    text-transform: uppercase; letter-spacing: 0.6px; min-width: 72px;
+    font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.45);
+    text-transform: uppercase; letter-spacing: 0.6px; min-width: 68px;
 }
 .ypp-eq-gain-value {
-    font-size: 12px; font-weight: 800; color: #ffffff;
-    min-width: 40px; text-align: right;
+    font-size: 11px; font-weight: 800; color: #ffffff;
+    min-width: 36px; text-align: right;
 }
 
 /* Horizontal slider */
@@ -699,19 +699,19 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 }
 .ypp-eq-hslider:hover { height: 6px; }
 .ypp-eq-hslider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
     background: #fff; border: 2.5px solid #fff; cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(255,255,255,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.2);
     transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
 }
 .ypp-eq-hslider::-webkit-slider-thumb:hover {
     transform: scale(1.35);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 0 5px rgba(255,255,255,0.3), 0 0 16px rgba(255,255,255,0.4);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.3), 0 0 12px rgba(255,255,255,0.4);
 }
 
 /* Presets */
 .ypp-eq-presets-row {
-    display: flex; gap: 6px; padding: 9px 18px;
+    display: flex; gap: 5px; padding: 8px 16px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -721,8 +721,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 .ypp-eq-presets-row::-webkit-scrollbar { display: none; }
 .ypp-eq-preset-btn {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
-    color: rgba(255,255,255,0.6); border-radius: 20px; cursor: pointer;
-    font-size: 11px; font-weight: 600; padding: 4px 13px;
+    color: rgba(255,255,255,0.6); border-radius: 16px; cursor: pointer;
+    font-size: 10px; font-weight: 600; padding: 4px 10px;
     font-family: inherit; transition: all 0.2s ease;
     white-space: nowrap;
     flex-shrink: 0;
@@ -737,15 +737,15 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 
 /* Canvas */
 .ypp-eq-canvas {
-    display: block; width: calc(100% - 36px); height: 72px;
-    margin: 0 18px 2px; border-radius: 10px;
+    display: block; width: calc(100% - 32px); height: 90px;
+    margin: 0 16px 2px; border-radius: 10px;
     background: rgba(255,255,255,0.025);
     border: 1px solid rgba(255,255,255,0.06);
 }
 
 /* Band columns */
 .ypp-eq-bands {
-    display: flex; gap: 0; padding: 6px 14px 12px;
+    display: flex; gap: 0; padding: 5px 12px 10px;
     justify-content: space-between;
 }
 .ypp-eq-band-col {
@@ -753,10 +753,10 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     gap: 3px; flex: 1; padding: 0 2px;
 }
 .ypp-eq-band-db {
-    font-size: 9px; font-weight: 800; min-height: 13px; line-height: 1;
+    font-size: 9px; font-weight: 800; min-height: 12px; line-height: 1;
 }
 .ypp-eq-band-track {
-    position: relative; height: 80px; width: 100%;
+    position: relative; height: 110px; width: 100%;
     display: flex; align-items: center; justify-content: center;
 }
 .ypp-eq-band-center {
@@ -771,7 +771,7 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 /* Vertical slider (rotated horizontal) */
 .ypp-eq-vslider {
     -webkit-appearance: none; appearance: none;
-    width: 80px;
+    width: 70px;
     height: 3px; border-radius: 3px; outline: none; cursor: pointer;
     background: rgba(255,255,255,0.1); border: none;
     transform: rotate(-90deg);
@@ -782,24 +782,24 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 .ypp-eq-vslider:hover { height: 5px; }
 .ypp-eq-vslider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 13px; height: 13px; border-radius: 50%;
+    width: 12px; height: 12px; border-radius: 50%;
     background: var(--band-color, #ffffff);
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+    box-shadow: 0 0 8px rgba(255,255,255,0.3);
     transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
 }
 .ypp-eq-vslider::-webkit-slider-thumb:hover { transform: scale(1.45); }
 
 /* Footer */
 .ypp-eq-footer {
-    display: flex; align-items: center; gap: 8px;
-    padding: 0 18px 14px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 16px 12px;
 }
 .ypp-eq-comp-btn {
-    display: flex; align-items: center; gap: 5px;
+    display: flex; align-items: center; gap: 4px;
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
-    color: rgba(255,255,255,0.55); border-radius: 20px; cursor: pointer;
-    font-size: 11px; font-weight: 600; padding: 5px 13px;
+    color: rgba(255,255,255,0.55); border-radius: 16px; cursor: pointer;
+    font-size: 10px; font-weight: 600; padding: 4px 10px;
     font-family: inherit; transition: all 0.2s ease;
 }
 .ypp-eq-comp-btn.active {
@@ -809,8 +809,8 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
 .ypp-eq-comp-btn:hover { background: rgba(255,255,255,0.1); }
 .ypp-eq-reset-btn {
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.22);
-    color: #ffffff; border-radius: 20px; cursor: pointer;
-    font-size: 11px; font-weight: 600; padding: 5px 14px;
+    color: #ffffff; border-radius: 16px; cursor: pointer;
+    font-size: 10px; font-weight: 600; padding: 4px 10px;
     font-family: inherit; transition: all 0.2s ease;
 }
 .ypp-eq-reset-btn:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); }

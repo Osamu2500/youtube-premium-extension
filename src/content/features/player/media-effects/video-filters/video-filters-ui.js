@@ -48,7 +48,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         Object.assign(panel.style, {
             position: 'fixed',
             bottom: '80px',
-            right: '80px',
+            right: '16px',
             background: 'rgba(0, 0, 0, 0.15)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderTop: '1px solid rgba(255, 255, 255, 0.25)',
@@ -90,14 +90,14 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 to   { opacity: 1; transform: translateY(0) scale(var(--ypp-auto-scale, 1)); }
             }
             .ypp-cinema-tab-btn {
-                flex: 1; padding: 14px; background: transparent; border: none; color: rgba(255,255,255,0.5);
-                font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
+                flex: 1; padding: 10px; background: transparent; border: none; color: rgba(255,255,255,0.5);
+                font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
                 transition: all 0.2s;
             }
             .ypp-cinema-tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
             .ypp-cinema-tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
             .ypp-filter-cat-details summary {
-                list-style: none; padding: 12px 20px; cursor: pointer; font-size: 14px; font-weight: 600;
+                list-style: none; padding: 10px 16px; cursor: pointer; font-size: 13px; font-weight: 600;
                 background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.9);
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 display: flex; align-items: center; justify-content: space-between;
@@ -108,13 +108,13 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             .ypp-filter-cat-details[open] summary::after { transform: rotate(180deg); }
             
             .ypp-filter-card-grid { 
-                display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; 
+                display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 14px; 
             }
             .ypp-filter-card {
                 background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column;
+                border-radius: 8px; padding: 6px 4px; display: flex; flex-direction: column;
                 align-items: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.2,0,0,1);
-                text-align: center; position: relative; gap: 6px; overflow: hidden;
+                text-align: center; position: relative; gap: 2px; overflow: hidden;
             }
             .ypp-filter-card:hover {
                 background: rgba(255,255,255,0.08); transform: translateY(-2px);
@@ -139,7 +139,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 50%       { opacity: 1; }
             }
             .ypp-filter-lut-preview {
-                width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+                width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
                 background: linear-gradient(135deg, #ff4b4b, #4b6fff, #4bff8b);
                 border: 1px solid rgba(255,255,255,0.2);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -150,20 +150,20 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             }
             
             .ypp-adjust-grid {
-                display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px;
+                display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px;
             }
             .ypp-adjust-card {
                 background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+                border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px;
             }
             .ypp-adjust-card-header {
                 display: flex; justify-content: space-between; align-items: center;
             }
             .ypp-adjust-card-title {
-                display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9);
+                display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.9);
             }
             .ypp-adjust-card-val {
-                font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 10px;
+                font-size: 10px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 8px;
             }
             
             .ypp-vcp-slider {
@@ -171,7 +171,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 background: rgba(255,255,255,0.1); outline: none; margin: 8px 0;
             }
             .ypp-vcp-slider::-webkit-slider-thumb {
-                -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+                -webkit-appearance: none; appearance: none; width: 14px; height: 14px;
                 border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
                 transition: transform 0.1s;
             }
@@ -180,18 +180,18 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
         const header = document.createElement('div');
         Object.assign(header.style, {
-            display: 'flex', alignItems: 'center', padding: '16px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '16px', fontWeight: '600'
+            display: 'flex', alignItems: 'center', padding: '12px 16px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '15px', fontWeight: '600'
         });
 
         header.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px; margin-right: auto;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <div style="display: flex; align-items: center; gap: 10px; margin-right: auto;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
                 </svg>
                 Cinematic Filters
             </div>
-            <div id="ypp-header-actions" style="display: flex; align-items: center; gap: 12px;"></div>
+            <div id="ypp-header-actions" style="display: flex; align-items: center; gap: 10px;"></div>
         `;
 
         const compareBtn = document.createElement('div');
@@ -206,7 +206,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         header.querySelector('#ypp-header-actions').appendChild(compareBtn);
 
         const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+        closeBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
         Object.assign(closeBtn.style, {
             background: 'transparent', border: 'none', color: '#f1f1f1',
             cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center'
@@ -281,22 +281,22 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // -- FOOTER --
         const footer = document.createElement('div');
         Object.assign(footer.style, {
-            padding: '12px 16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '10px 16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         });
 
         const activeFilterName = window.YPP?.features?.VideoFiltersPresets?.FILTERS?.[ctx.currentFilterIndex]?.name || 'Normal';
         const activePill = document.createElement('div');
         activePill.id = 'ypp-active-filter-name';
-        Object.assign(activePill.style, { fontSize: '13px', color: '#aaaaaa' });
+        Object.assign(activePill.style, { fontSize: '12px', color: '#aaaaaa' });
         activePill.textContent = activeFilterName;
         footer.appendChild(activePill);
         
         const resetBtn = document.createElement('button');
         resetBtn.innerHTML = `<span>Reset All</span>`;
         Object.assign(resetBtn.style, {
-            background: 'rgba(255,255,255,0.1)', border: 'none', color: '#ffffff', borderRadius: '16px',
-            cursor: 'pointer', fontSize: '12px', fontWeight: '500', padding: '6px 12px'
+            background: 'rgba(255,255,255,0.1)', border: 'none', color: '#ffffff', borderRadius: '14px',
+            cursor: 'pointer', fontSize: '11px', fontWeight: '500', padding: '5px 10px'
         });
         resetBtn.onmouseenter = () => { resetBtn.style.background = 'rgba(255,255,255,0.2)'; };
         resetBtn.onmouseleave = () => { resetBtn.style.background = 'rgba(255,255,255,0.1)'; };
@@ -400,7 +400,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // ── Search bar
         const searchWrap = document.createElement('div');
         searchWrap.className = 'ypp-vcp-search-wrap';
-        Object.assign(searchWrap.style, { margin: '16px', marginBottom: '8px' });
+        Object.assign(searchWrap.style, { margin: '12px 14px', marginBottom: '6px' });
         searchWrap.innerHTML = `
             <span class="ypp-vcp-search-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
             <input type="text" class="ypp-vcp-search-input" placeholder="Search presets (e.g. Night Vision)...">
@@ -423,8 +423,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             const cssFilter = filter.css === 'none' ? 'grayscale(0%)' : filter.css;
             card.innerHTML = `
                 <div class="ypp-filter-lut-preview" style="filter:${cssFilter}"></div>
-                <span style="font-size:13px;font-weight:600;color:${isActive ? '#fff' : 'rgba(255,255,255,0.8)'};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${filter.name}</span>
-                ${isActive ? '<div class="ypp-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>' : ''}
+                <span style="font-size:10px;font-weight:600;color:${isActive ? '#fff' : 'rgba(255,255,255,0.8)'};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">${filter.name}</span>
+                ${isActive ? '<div class="ypp-card-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>' : ''}
                 <button class="ypp-star-btn" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}" data-fav="${isFav}">${isFav ? starFilled : starOutline}</button>
             `;
             const starBtn = card.querySelector('.ypp-star-btn');
@@ -453,7 +453,7 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                 card.classList.add('active');
                 const sp = card.querySelector('span'); if (sp) sp.style.color = '#fff';
                 if (!card.querySelector('.ypp-card-check')) {
-                    starBtn.insertAdjacentHTML('beforebegin', '<div class="ypp-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>');
+                    starBtn.insertAdjacentHTML('beforebegin', '<div class="ypp-card-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>');
                 }
             };
             card.onmouseenter = () => {
@@ -525,10 +525,10 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
 
         // Star button styles (once)
         this._injectStyle('ypp-star-btn-style', `
-            .ypp-star-btn{background:transparent;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;width:22px;height:22px;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.85);}
+            .ypp-star-btn{background:transparent;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;width:20px;height:20px;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.85);}
             .ypp-filter-card:hover .ypp-star-btn,.ypp-star-btn[data-fav="true"]{opacity:1;transform:scale(1);}
             .ypp-star-btn:hover{background:rgba(255,215,0,0.12);transform:scale(1.15)!important;}
-            .ypp-card-check{background:#fff;color:#000;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+            .ypp-card-check{background:#fff;color:#000;border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
         `);
 
         return wrap;
@@ -542,21 +542,21 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         const intensitySection = document.createElement('div');
         intensitySection.className = 'ypp-intensity-section';
         Object.assign(intensitySection.style, {
-            padding: '12px 20px 16px',
+            padding: '10px 16px 12px',
             borderBottom: '1px solid rgba(255,255,255,0.07)',
             background: 'rgba(255,255,255,0.03)'
         });
         const intHeader = document.createElement('div');
         Object.assign(intHeader.style, {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            marginBottom: '10px'
+            marginBottom: '8px'
         });
         intHeader.innerHTML = `
-            <span style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
                 Global Intensity
             </span>
-            <span id="ypp-int-val" style="color:#ffffff;font-weight:800;font-size:13px;background:rgba(255,255,255,0.1);padding:2px 10px;border-radius:20px;">${ctx.filterIntensity}%</span>
+            <span id="ypp-int-val" style="color:#ffffff;font-weight:800;font-size:11px;background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:20px;">${ctx.filterIntensity}%</span>
         `;
         intensitySection.appendChild(intHeader);
         const intSlider = document.createElement('input');

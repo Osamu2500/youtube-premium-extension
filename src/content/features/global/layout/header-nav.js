@@ -193,8 +193,7 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
     if (activeButtons.length === 0) return true; // nothing to inject — not an error
 
     // If already mounted and still in DOM, just update active states
-    const existing = document.querySelector('[data-ypp-id="header-nav-group"]');
-    if (existing && existing.isConnected && document.contains(existing)) {
+    if (this.navGroup && document.contains(this.navGroup)) {
       this._updateActiveStates();
       return true; // already injected
     }
@@ -204,22 +203,24 @@ window.YPP.features.HeaderNav = class HeaderNav extends window.YPP.features.Base
       return false; // signal to caller: retry needed
     }
 
-    // ALWAYS create fresh — don't cache orphaned elements
-    const navGroup = document.createElement('div');
-    navGroup.className = 'ypp-nav-group';
-    navGroup.dataset.yppId = 'header-nav-group';
-    this.navGroup = navGroup;
+    // Reuse existing container if available to prevent listener leaks and race conditions
+    if (!this.navGroup) {
+      this.navGroup = document.createElement('div');
+      this.navGroup.className = 'ypp-nav-group';
+      this.navGroup.dataset.yppId = 'header-nav-group';
 
-    activeButtons.forEach((cfg) => {
-      this._createButton(this.navGroup, cfg.label, cfg.url, cfg.icon, cfg.setting);
-    });
+      activeButtons.forEach((cfg) => {
+        this._createButton(this.navGroup, cfg.label, cfg.url, cfg.icon, cfg.setting);
+      });
+    }
 
-    const mounted = window.YPP.ui.manager.mount('headerRight', {
+    // Attempt to mount
+    window.YPP.ui.manager.mount('headerRight', {
       id: 'header-nav-group',
       el: this.navGroup,
-    });
+    }, 'prepend');
 
-    if (!mounted || !document.contains(this.navGroup)) {
+    if (!document.contains(this.navGroup)) {
       // Target was not ready or mount failed, retry needed
       return false;
     }
