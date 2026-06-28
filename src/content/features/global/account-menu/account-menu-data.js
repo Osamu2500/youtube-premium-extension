@@ -20,6 +20,12 @@ window.YPP.features.AccountMenuData = class AccountMenuData {
      * @returns {string} URL or empty string
      */
     static getAvatarUrl(el, { isActive = false } = {}) {
+        // ── Strategy 0: Page-world injected data (Polymer bypass) ────────────
+        const pageWorldAvatar = el.getAttribute('data-ypp-avatar');
+        if (pageWorldAvatar && !pageWorldAvatar.startsWith('data:') && pageWorldAvatar !== window.location.href) {
+            return pageWorldAvatar;
+        }
+
         // ── Strategy 1: yt-img-shadow[src] or yt-image[src] HTML attribute ───
         const ytImg = el.querySelector('yt-img-shadow, yt-image');
         const ytAttr = ytImg?.getAttribute('src');
@@ -78,6 +84,34 @@ window.YPP.features.AccountMenuData = class AccountMenuData {
      * @returns {{ accounts: Array, channelHref: string }}
      */
     static extractData(menu) {
+        // ── Inject Page-World Script to bypass MV3 isolated world and grab Polymer data directly ──
+        try {
+            const script = document.createElement('script');
+            script.textContent = `
+                (function() {
+                    const items = document.querySelectorAll('ytd-active-account-header-renderer, ytd-account-item-renderer, ytd-account-item');
+                    for (const el of items) {
+                        try {
+                            const d = el.data || el.__data;
+                            if (d) {
+                                const thumbs = d.accountPhoto?.thumbnails || d.thumbnail?.thumbnails || d.photo?.thumbnails || d.thumbnails;
+                                if (Array.isArray(thumbs) && thumbs.length) {
+                                    const best = thumbs[thumbs.length - 1];
+                                    if (best?.url) el.setAttribute('data-ypp-avatar', best.url);
+                                } else if (d.accountPhoto?.url) {
+                                    el.setAttribute('data-ypp-avatar', d.accountPhoto.url);
+                                } else if (d.thumbnail?.url) {
+                                    el.setAttribute('data-ypp-avatar', d.thumbnail.url);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                })();
+            `;
+            document.documentElement.appendChild(script);
+            script.remove();
+        } catch (_) {}
+
         const accounts = [];
         let activeName = '';
 

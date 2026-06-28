@@ -37,6 +37,14 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
     async enable() {
         await super.enable();
         try {
+            // Track which topbar button was clicked to definitively separate Account from Notifications!
+            this.addListener(document, 'click', e => {
+                const btn = e.target.closest('#avatar-btn, yt-notification-topbar-button-renderer, ytd-topbar-menu-button-renderer');
+                if (btn) {
+                    window.YPP.lastMenuClick = btn.id || btn.tagName;
+                }
+            }, { capture: true });
+
             // Use sharedObserver (architecture rule: never new MutationObserver)
             if (window.YPP?.sharedObserver) {
                 window.YPP.sharedObserver.register(
@@ -106,18 +114,25 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
         return null;
     }
 
-    /**
-     * Returns true if the given menu element is the account menu.
-     * It must contain either an active-account-header or an account-item.
-     *
-     * @param {Element} menu
-     * @returns {boolean}
-     */
     _isAccountMenu(menu) {
+        // If the user definitively clicked the Notification button, abort.
+        if (window.YPP.lastMenuClick && window.YPP.lastMenuClick.includes('NOTIFICATION')) {
+            return false;
+        }
+        
+        // If the user definitively clicked the Avatar button, accept it!
+        if (window.YPP.lastMenuClick && window.YPP.lastMenuClick.includes('avatar-btn')) {
+            return true;
+        }
+
+        // Fallback check (for keyboard navigation or untracked clicks)
         return !!(
             menu.querySelector('ytd-active-account-header-renderer') ||
             menu.querySelector('ytd-account-item-renderer') ||
-            menu.querySelector('ytd-account-item')
+            menu.querySelector('ytd-account-item') ||
+            menu.querySelector('a[href*="studio.youtube.com"]') ||
+            menu.querySelector('a[href*="logout"]') ||
+            menu.querySelector('a[href*="myaccount.google.com"]')
         );
     }
 
@@ -135,10 +150,24 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
 
         Array.from(menu.children).forEach(child => {
             if (!child.classList.contains('ypp-account-menu')) {
-                child.style.setProperty('position', 'absolute', 'important');
+                // Use fixed positioning at top-left to ABSOLUTELY GUARANTEE IntersectionObserver fires!
+                child.style.setProperty('position', 'fixed', 'important');
+                child.style.setProperty('top', '0', 'important');
+                child.style.setProperty('left', '0', 'important');
+                child.style.setProperty('width', '10px', 'important');
+                child.style.setProperty('height', '10px', 'important');
                 child.style.setProperty('opacity', '0.001', 'important');
                 child.style.setProperty('pointer-events', 'none', 'important');
                 child.style.setProperty('z-index', '-1', 'important');
+                
+                // Force all account items to the top so they intersect the viewport and trigger lazy-loaded avatars!
+                child.querySelectorAll('ytd-account-item-renderer, ytd-account-item, yt-img-shadow').forEach(item => {
+                    item.style.setProperty('position', 'absolute', 'important');
+                    item.style.setProperty('top', '0', 'important');
+                    item.style.setProperty('left', '0', 'important');
+                    item.style.setProperty('width', '10px', 'important');
+                    item.style.setProperty('height', '10px', 'important');
+                });
             }
         });
     }
@@ -161,6 +190,25 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 if (!menu.isConnected) return true; // abort
                 this._cloakNativeChildren(menu);
                 const data = window.YPP.features.AccountMenuData.extractData(menu);
+                
+                // If we don't have switchable accounts loaded yet (i.e. only 1 or 0 accounts), 
+                // we are probably on the Main Profile Menu page. Let's auto-click "Switch account"!
+                if (data.accounts.length <= 1) {
+                    const switchBtn = Array.from(menu.querySelectorAll('ytd-compact-link-renderer, ytd-menu-navigation-item-renderer'))
+                        .find(el => {
+                            const text = (el.textContent || '').toLowerCase();
+                            const icon = el.querySelector('yt-icon')?.getAttribute('icon') || '';
+                            return text.includes('switch') || text.includes('cambiar') || icon.includes('switch_account') || icon.includes('switch-account');
+                        });
+                        
+                    if (switchBtn) {
+                        // Click the inner anchor or paper item for reliable navigation
+                        const target = switchBtn.querySelector('a#endpoint, tp-yt-paper-item') || switchBtn;
+                        target.click();
+                        return false; // keep polling, wait for the DOM mutation to load the accounts!
+                    }
+                }
+
                 const hasActiveAccount = data.accounts.some(a => a.isActive && a.name);
                 if (hasActiveAccount) {
                     this._pollTimer = null;
@@ -452,11 +500,15 @@ window.YPP.features.AccountMenu = class AccountMenu extends window.YPP.features.
                 }
             });
             // Clean up any nested account items too
-            el.querySelectorAll('ytd-account-item-renderer, ytd-account-item').forEach(item => {
+            el.querySelectorAll('ytd-account-item-renderer, ytd-account-item, yt-img-shadow').forEach(item => {
                 item.style.removeProperty('position');
                 item.style.removeProperty('opacity');
                 item.style.removeProperty('pointer-events');
                 item.style.removeProperty('z-index');
+                item.style.removeProperty('top');
+                item.style.removeProperty('left');
+                item.style.removeProperty('width');
+                item.style.removeProperty('height');
             });
             delete el.dataset.yppRedesigned;
             delete el.dataset.yppCloaked;
