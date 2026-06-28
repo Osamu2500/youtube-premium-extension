@@ -83,6 +83,7 @@ export function initComponents(document, state, ui, updateSetting, notifyThemeCh
                     { key: 'nebula', label: 'Nebula', meta: 'Purple Space', color: '#0f0518' },
                     { key: 'hologram', label: 'Hologram', meta: 'Sci-Fi Cyan', color: '#e0f7fa' }
                 ]
+            }
         ];
 
         chrome.storage.local.get('settings', (data) => {
