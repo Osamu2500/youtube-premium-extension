@@ -239,12 +239,31 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         return false;
     }
 
+    _isSafeToBoost(video) {
+        if (!video) return false;
+        if (video.srcObject) return true;
+        const src = video.currentSrc || video.src;
+        if (!src) return false;
+        if (src.startsWith('blob:') || src.startsWith('data:')) return true;
+        try {
+            const url = new URL(src);
+            if (url.origin === window.location.origin) return true;
+        } catch(e) {}
+        if (video.crossOrigin === 'anonymous' || video.crossOrigin === 'use-credentials') return true;
+        return false;
+    }
+
     /**
      * Initializes the Web Audio API context and binds it to the video element.
      * Uses lazy initialization on 'play' or 'volumechange' to respect browser autoplay policies.
      * @param {HTMLVideoElement} video 
      */
     initAudioContext(video) {
+        if (!this._isSafeToBoost(video)) {
+            this.utils?.log?.('Volume Booster disabled: Cross-Origin Video detected without CORS.', 'VolumeBooster', 'warn');
+            return;
+        }
+
         // If we are already connected to THIS video, do nothing.
         // If video changed, we must disconnect the old and reconnect.
         if (this._audioConnected && this._boundVideo === video) return;

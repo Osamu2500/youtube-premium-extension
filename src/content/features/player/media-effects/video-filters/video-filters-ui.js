@@ -14,9 +14,8 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
             const debounce = window.YPP?.Utils?.debounce
                 || ((fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; });
             this._debouncedFilterSave = debounce((ctxArg) => {
-                if (!window.YPP?.MainApp?.saveSettings) return;
                 const adj = ctxArg.filterAdjustments;
-                window.YPP.MainApp.saveSettings({
+                const newSettings = {
                     cinemaFilterIndex:       ctxArg.currentFilterIndex,
                     cinemaFilterIntensity:   ctxArg.filterIntensity,
                     cinemaFilterBrightness:  adj.brightness,
@@ -37,7 +36,17 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
                     cinemaFilterHighlights:  adj.highlights,
                     cinemaFilterShadows:     adj.shadows,
                     cinemaFilterVignette:    adj.vignette,
-                });
+                };
+                
+                if (window.YPP?.MainApp?.saveSettings) {
+                    window.YPP.MainApp.saveSettings(newSettings);
+                } else if (chrome?.storage?.local) {
+                    // Fallback for external sites without MainApp
+                    chrome.storage.local.get('settings').then(data => {
+                        const updated = { ...(data.settings || {}), ...newSettings };
+                        chrome.storage.local.set({ settings: updated });
+                    }).catch(() => {});
+                }
             }, 300);
         }
         this._debouncedFilterSave(ctx);
