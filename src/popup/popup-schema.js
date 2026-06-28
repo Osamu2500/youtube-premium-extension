@@ -277,6 +277,39 @@ export const POPUP_SCHEMA = [
     },
 
     // ──────────────────────────────────────────────────────────────────
+    // FEED FILTERS (Subscription Filters)
+    // ──────────────────────────────────────────────────────────────────
+    {
+        id: 'filters', label: 'Filters',
+        icon: P('M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'),
+        sections: [
+            {
+                title: 'Global Settings',
+                items: [
+                    { type:'toggle', id:'ff_opt_multiselect', label:'Multi-select Chips', desc:'Allow selecting multiple filters at once', icon:P('M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z') },
+                    { type:'toggle', id:'ff_search_visible', label:'Show Search Bar', desc:'Search within the subscription feed', icon:P('M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z') }
+                ]
+            },
+            {
+                title: 'Chip Visibility (Show in Bar)',
+                items: [
+                    { type:'toggle', id:'ff_live_visible', label:'Live' },
+                    { type:'toggle', id:'ff_streamed_visible', label:'Streamed' },
+                    { type:'toggle', id:'ff_video_visible', label:'Video' },
+                    { type:'toggle', id:'ff_shorts_visible', label:'Shorts' },
+                    { type:'toggle', id:'ff_scheduled_visible', label:'Scheduled' },
+                    { type:'toggle', id:'ff_notifon_visible', label:'Notification On' },
+                    { type:'toggle', id:'ff_notifoff_visible', label:'Notification Off' },
+                    { type:'toggle', id:'ff_posts_visible', label:'Posts' },
+                    { type:'toggle', id:'ff_playlist_visible', label:'Playlist' },
+                    { type:'toggle', id:'ff_unwatched_visible', label:'Unwatched' },
+                    { type:'toggle', id:'ff_watched_visible', label:'Watched' }
+                ]
+            }
+        ]
+    },
+
+    // ──────────────────────────────────────────────────────────────────
     // SUBSCRIPTIONS
     // ──────────────────────────────────────────────────────────────────
     {

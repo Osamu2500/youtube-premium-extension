@@ -73,6 +73,24 @@ These features perfectly adhere to the extension's architecture, including exten
 *   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
 *   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses SharedObserver
 
+### Global Bar
+*   **File:** `src/content/features/player/global-bar.js`
+*   **What it does:** Global Player Bar — Orchestrator
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
+
+### Video Filters
+*   **File:** `src/content/features/player/media-effects/video-filters/video-filters.js`
+*   **What it does:** Video Filters Feature Orchestrator
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
+
+### Volume Booster
+*   **File:** `src/content/features/player/media-effects/volume-booster/volume-booster.js`
+*   **What it does:** Volume Booster / 10-Band Graphic Equalizer Orchestrator
+*   **Status:** Stable. Properly extends BaseFeature, cleans up, and handles errors.
+*   **Architecture Notes:** Extends BaseFeature: Yes | Cleans up: Yes | Stamps DOM: Yes | Uses `this.addListener`: Yes
+
 ## 🔧 Needs Improvement / Architectural Violations
 These features function, but contain architectural violations (leaking event listeners, raw chrome.storage, missing DOM stamps, etc.) that need to be refactored before they are considered fully stable.
 
@@ -228,11 +246,7 @@ These features function, but contain architectural violations (leaking event lis
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes
 
-### Global Bar
-*   **File:** `content/features/player/global-bar.js`
-*   **What it does:** Global Player Bar — Orchestrator
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, Raw setTimeout polling, Missing DOM stamp guards
+
 
 ### Intentional Delay
 *   **File:** `src/content/features/player/enhancements/intentional-delay.js`
@@ -276,11 +290,7 @@ These features function, but contain architectural violations (leaking event lis
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Missing DOM stamp guards
 
-### Video Filters
-*   **File:** `src/content/features/player/media-effects/video-filters/video-filters.js`
-*   **What it does:** Video Filters Feature Orchestrator
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: console.* usage, Raw setTimeout polling
+
 
 ### Video Resumer
 *   **File:** `src/content/features/player/automation/video-resumer.js`
@@ -288,11 +298,7 @@ These features function, but contain architectural violations (leaking event lis
 *   **Status:** Needs Refactor. Contains architectural violations.
 *   **Architecture Notes:** Extends BaseFeature: Yes
 
-### Volume Booster
-*   **File:** `src/content/features/player/media-effects/volume-booster/volume-booster.js`
-*   **What it does:** Volume Booster / 10-Band Graphic Equalizer Orchestrator
-*   **Status:** Needs Refactor. Contains architectural violations.
-*   **Architecture Notes:** Extends BaseFeature: Yes | WARNINGS: Raw addEventListener, console.* usage
+
 
 ### Wheel Controls
 *   **File:** `src/content/features/player/controls/wheel-controls.js`

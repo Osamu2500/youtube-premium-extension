@@ -40,14 +40,18 @@ window.YPP.features.VolumeBoosterUI = class VolumeBoosterUI {
     video = document.querySelector('.html5-main-video') || document.querySelector('video');
 
     if (ctx._isSafeToBoost && !ctx._isSafeToBoost(video)) {
-        if (window.YPP?.Utils?.createToast) {
-            window.YPP.Utils.createToast("Audio Booster unavailable: Browser Cross-Origin security restricts audio manipulation on this video.");
-        } else {
-            alert("Audio Booster unavailable: Browser Cross-Origin security restricts audio manipulation on this video.");
-        }
-        // Ensure the button isn't stuck looking active
-        anchorBtn.classList.remove('active');
-        return;
+      if (window.YPP?.Utils?.createToast) {
+        window.YPP.Utils.createToast(
+          'Audio Booster unavailable: Browser Cross-Origin security restricts audio manipulation on this video.'
+        );
+      } else {
+        alert(
+          'Audio Booster unavailable: Browser Cross-Origin security restricts audio manipulation on this video.'
+        );
+      }
+      // Ensure the button isn't stuck looking active
+      anchorBtn.classList.remove('active');
+      return;
     }
 
     if (ctx._volumePopup) {

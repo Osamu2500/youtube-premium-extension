@@ -140,14 +140,14 @@ This file serves as a wayfinding index for AI agents and developers. It maps eve
 - vsc-remember-speed.js: `F:\Youtube 2.0\src\content\features\player\enhancements\vsc-remember-speed.js`
 - classic-progress-bar.js: `F:\Youtube 2.0\src\content\features\player\video-controls\classic-progress-bar.js`
 - video-controls.js: `F:\Youtube 2.0\src\content\features\player\video-controls\video-controls.js`
-- index.js: `F:\Youtube 2.0\src\content\features\player\video-filters\index.js`
-- video-filters-overlay.js: `F:\Youtube 2.0\src\content\features\player\video-filters\video-filters-overlay.js`
-- video-filters-presets.js: `F:\Youtube 2.0\src\content\features\player\video-filters\video-filters-presets.js`
-- video-filters-ui.js: `F:\Youtube 2.0\src\content\features\player\video-filters\video-filters-ui.js`
-- video-filters.js: `F:\Youtube 2.0\src\content\features\player\video-filters\video-filters.js`
-- index.js: `F:\Youtube 2.0\src\content\features\player\volume-booster\index.js`
-- volume-booster-ui.js: `F:\Youtube 2.0\src\content\features\player\volume-booster\volume-booster-ui.js`
-- volume-booster.js: `F:\Youtube 2.0\src\content\features\player\volume-booster\volume-booster.js`
+- index.js: `F:\Youtube 2.0\src\content\features\player\media-effects\video-filters\index.js`
+- video-filters-overlay.js: `F:\Youtube 2.0\src\content\features\player\media-effects\video-filters\video-filters-overlay.js`
+- video-filters-presets.js: `F:\Youtube 2.0\src\content\features\player\media-effects\video-filters\video-filters-presets.js`
+- video-filters-ui.js: `F:\Youtube 2.0\src\content\features\player\media-effects\video-filters\video-filters-ui.js`
+- video-filters.js: `F:\Youtube 2.0\src\content\features\player\media-effects\video-filters\video-filters.js`
+- index.js: `F:\Youtube 2.0\src\content\features\player\media-effects\volume-booster\index.js`
+- volume-booster-ui.js: `F:\Youtube 2.0\src\content\features\player\media-effects\volume-booster\volume-booster-ui.js`
+- volume-booster.js: `F:\Youtube 2.0\src\content\features\player\media-effects\volume-booster\volume-booster.js`
 
 ## Shorts Enhancements
 - aggressive-shorts-block.js: `F:\Youtube 2.0\src\content\features\global\modifiers\toggles\aggressive-shorts-block.js`

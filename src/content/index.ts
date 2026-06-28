@@ -67,6 +67,7 @@ import './features/global/ui-tweaks/hide-metrics.js';
 import './features/global/behavior/keyboard-shortcuts.js';
 import './features/global/filters/duration-filter.js';
 import './features/global/filters/blocklist-filter.js';
+import './features/global/filters/feed-filter.js';
 import './features/global/ui-tweaks/full-video-titles.js';
 
 

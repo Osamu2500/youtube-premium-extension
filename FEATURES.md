@@ -25,14 +25,14 @@
 | Feature Name | Class Name | File Path | Settings Key | Pages | Status | Depends On | Description |
 |---|---|---|---|---|---|---|---|
 | Player Core | `Player` | `content/features/player/player.js` | `null` | watch | stable | — | Core player enhancements: PiP, speed, loop, and snapshot |
-| Volume Booster | `VolumeBooster` | `content/features/player/volume-booster/index.js` | `enableVolumeBoost` | watch | stable | Player | Increases audio gain past 100% using Web Audio API |
+| Volume Booster | `VolumeBooster` | `content/features/player/media-effects/volume-booster/index.js` | `enableVolumeBoost` | watch | stable | Player | Increases audio gain past 100% using Web Audio API |
 | Auto Quality | `AutoQuality` | `content/features/player/auto-quality.js` | `autoQuality`, `autoCinema` | watch | stable | — | Forces highest video quality and theater mode |
 | Time Display | `TimeDisplay` | `content/features/player/time-display.js` | `enableRemainingTime` | watch | stable | — | Shows remaining time and saved time adjusted for speed |
 | Player Tools | `PlayerTools` | `content/features/player/player-tools.js` | `enableCustomSpeed` | watch | stable | Player | Custom speed slider, cinema filters panel, brightness/contrast controls |
 | Return Dislike | `ReturnDislike` | `content/features/player/return-dislike.js` | `returnYouTubeDislike` | watch | stable | — | Fetches and displays dislike count via Return YouTube Dislike API |
 | SponsorBlock | `SponsorBlock` | `content/features/player/sponsor-block.js` | `sponsorBlock` | watch | stable | — | Skips sponsored segments using SponsorBlock community database |
 | Mini Player | `MiniPlayer` | `content/features/player/mini-player.js` | `enablePiP` | watch | stable | — | Picture-in-picture and mini player controls |
-| Video Filters | `VideoFilters` | `content/features/player/video-filters/index.js` | `enableCinemaFilters` | watch | stable | — | Brightness, contrast, saturation, hue CSS filters on the video element |
+| Video Filters | `VideoFilters` | `content/features/player/media-effects/video-filters/index.js` | `enableCinemaFilters` | watch | stable | — | Brightness, contrast, saturation, hue CSS filters on the video element |
 | Ambient Mode | `AmbientMode` | `content/features/player/ambient-mode/ambient-mode.js` | `ambientMode` | watch | stable | — | Projects video colors as a glowing backdrop behind the player |
 | Audio Mode | `AudioMode` | `content/features/player/ambient-mode/audio-mode.js` | `audioModeEnabled` | watch | stable | — | Minimises video to audio-only mode with album-art style display |
 | Video Controls | `VideoControls` | `content/features/player/video-controls/video-controls.js` | `videoControlsEnabled` | watch | stable | Player | Injects custom buttons (snapshot, loop, PiP) into player controls bar |
@@ -123,6 +123,7 @@
 | Hide Playlists & Podcasts | `HidePlaylistsPodcasts` | `content/features/core/global/hide-playlists-podcasts.js` | `hidePlaylists`, `hidePodcasts` | home, search | stable | — | Removes playlist and podcast cards from feeds and search |
 | Multi-Select Videos | `MultiSelect` | `content/features/core/global/multi-select.js` | `multiSelect` | all | stable | — | Allows selecting multiple videos to perform batch actions like add to queue or watch later |
 | Hide Metrics | `HideMetrics` | `content/features/core/global/hide-metrics.js` | `hideMetrics` | all | stable | — | Hides views, likes, and subscriber counts to reduce vanity metrics |
+| Feed Filter | `FeedFilter` | `content/features/global/filters/feed-filter.js` | `feedFilter` | home, search, subscriptions | stable | — | Hides live streams, upcoming premieres, posts, and videos matching specific keywords |
 
 ---
 

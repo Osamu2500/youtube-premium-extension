@@ -428,6 +428,7 @@ window.YPP.CONSTANTS = {
         loopButton: 'LoopButton',
         splitScrolling: 'SplitScrolling',
         customCSS: 'CustomCSS',
+        feedFilter: 'FeedFilter',
         // --- Missing Toggles & Layouts ---
         layout: 'Layout',
         autoScaleLayout: 'AutoScaleGrid',

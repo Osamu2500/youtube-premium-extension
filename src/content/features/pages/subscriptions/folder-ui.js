@@ -551,14 +551,197 @@ window.YPP.features.FolderUI = class FolderUI {
             leftContainer.className = 'ypp-folder-chips-left';
             leftContainer.appendChild(folderSelectContainer);
 
-            this._createToggleChip(leftContainer, 'Hide Shorts', this.orchestrator.getHideShorts(), (val) => {
-                this.orchestrator.setHideShorts(val);
-                this.orchestrator.applyFeedFilters();
+            const ffSettings = this.orchestrator.settings || {};
+
+            // --- Subscription Feed Filter Chip Bar ---
+            const feedFilterBar = document.createElement('div');
+            feedFilterBar.className = 'ypp-sub-filter-group ypp-feed-filter-chips';
+            feedFilterBar.style.cssText = 'display: flex; align-items: center; gap: 4px;';
+            
+            // Get state from Orchestrator or init
+            this.orchestrator.ffActiveChips = this.orchestrator.ffActiveChips || {};
+
+            const getChipBg = (state) => {
+                if (state === 'show') return 'rgba(43, 166, 64, 0.2)'; // Green tint
+                if (state === 'hide') return 'rgba(235, 64, 52, 0.2)'; // Red tint
+                return 'rgba(255,255,255,0.1)'; // Neutral
+            };
+            
+            const getChipBorder = (state) => {
+                if (state === 'show') return '1px solid rgba(43, 166, 64, 0.5)';
+                if (state === 'hide') return '1px solid rgba(235, 64, 52, 0.5)';
+                return '1px solid transparent';
+            };
+
+            const getChipColor = (state) => {
+                if (state === 'show') return '#4ade80';
+                if (state === 'hide') return '#f87171';
+                return '#f1f1f1';
+            };
+
+            const createFfChip = (id, label, iconSvg = '', isDefault = false) => {
+                if (ffSettings[`ff_${id}_visible`] === false) return;
+                
+                // Initialize default state if first load
+                if (!this.orchestrator.ffInitialized) {
+                    if (ffSettings[`ff_${id}_default`] || isDefault) {
+                        this.orchestrator.ffActiveChips[id] = 'show';
+                    } else {
+                        this.orchestrator.ffActiveChips[id] = 'neutral';
+                    }
+                }
+
+                const chip = document.createElement('button');
+                let state = this.orchestrator.ffActiveChips[id] || 'neutral';
+                chip.className = `ypp-filter-chip ypp-ff-chip ypp-ff-${state}`;
+                chip.dataset.id = id;
+                chip.innerHTML = (iconSvg ? `<span style="margin-right:4px;">${iconSvg}</span>` : '') + label;
+                chip.style.cssText = `
+                    padding: 6px 12px;
+                    border-radius: 16px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    background: ${getChipBg(state)};
+                    color: ${getChipColor(state)};
+                    border: ${getChipBorder(state)};
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    transition: 0.2s;
+                `;
+
+                chip.addEventListener('click', () => {
+                    const multiSelect = ffSettings.ff_opt_multiselect;
+                    
+                    if (id === 'all') {
+                        // Reset all to neutral, set 'all' to show
+                        Object.keys(this.orchestrator.ffActiveChips).forEach(k => {
+                            this.orchestrator.ffActiveChips[k] = 'neutral';
+                        });
+                        this.orchestrator.ffActiveChips['all'] = 'show';
+                    } else {
+                        if (!multiSelect) {
+                            // If not multiselect, reset all others to neutral (except if we're just toggling the current one)
+                            const currentState = this.orchestrator.ffActiveChips[id] || 'neutral';
+                            Object.keys(this.orchestrator.ffActiveChips).forEach(k => {
+                                this.orchestrator.ffActiveChips[k] = 'neutral';
+                            });
+                            // Restore state so it can progress
+                            this.orchestrator.ffActiveChips[id] = currentState;
+                        }
+                        
+                        this.orchestrator.ffActiveChips['all'] = 'neutral';
+                        
+                        // Progress state: neutral -> show -> hide -> neutral
+                        const current = this.orchestrator.ffActiveChips[id] || 'neutral';
+                        if (current === 'neutral') this.orchestrator.ffActiveChips[id] = 'show';
+                        else if (current === 'show') this.orchestrator.ffActiveChips[id] = 'hide';
+                        else this.orchestrator.ffActiveChips[id] = 'neutral';
+                        
+                        // If everything is neutral, select 'All'
+                        const anyActive = Object.values(this.orchestrator.ffActiveChips).some(s => s !== 'neutral');
+                        if (!anyActive) {
+                            this.orchestrator.ffActiveChips['all'] = 'show';
+                        }
+                    }
+                    
+                    // Re-render chips visual state
+                    feedFilterBar.querySelectorAll('.ypp-ff-chip').forEach(c => {
+                        const s = this.orchestrator.ffActiveChips[c.dataset.id] || 'neutral';
+                        c.className = `ypp-filter-chip ypp-ff-chip ypp-ff-${s}`;
+                        c.style.background = getChipBg(s);
+                        c.style.color = getChipColor(s);
+                        c.style.border = getChipBorder(s);
+                    });
+                    
+                    window.YPP.events?.emit('feed-filter:update-chips', this.orchestrator.ffActiveChips);
+                    this.orchestrator.updateFilterState();
+                });
+                feedFilterBar.appendChild(chip);
+            };
+
+            createFfChip('all', 'All', '', true);
+            createFfChip('live', 'Live', '<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-5.5l6-4.5-6-4.5v9z"/></svg>');
+            createFfChip('streamed', 'Streamed', '<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>');
+            createFfChip('video', 'Video', '<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.11-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z"/></svg>');
+            createFfChip('shorts', 'Shorts', '<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 14.65v-5.3L15 12l-5 2.65zm7.77-4.33c-.77-.32-1.2-.5-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.24-2.53-5.07-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.42.93 2.67 2.22 3.25.03.01 1.2.5 1.2.5L6 14.93c-1.83.97-2.53 3.24-1.56 5.07.97 1.83 3.24 2.53 5.07 1.56l8.5-4.5c1.29-.68 2.06-2.04 1.99-3.49-.07-1.42-.94-2.68-2.23-3.25zm-.23 5.86l-8.5 4.5c-1.34.71-3.01.2-3.72-1.14-.71-1.34-.2-3.01 1.14-3.72l1.2-.63s-1.16-.49-1.19-.5c-1.38-.6-2.08-2.14-1.59-3.57.48-1.39 1.96-2.19 3.4-1.92L6 8.52l8.5-4.5c1.34-.71 3.01-.2 3.72 1.14.71 1.34.2 3.01-1.14 3.72l-1.2.63s1.16.49 1.19.5c1.38.6 2.08 2.14 1.59 3.57-.48 1.39-1.96 2.19-3.4 1.92L18 15.48z"/></svg>');
+            createFfChip('scheduled', 'Scheduled', '<svg height="14" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>');
+            createFfChip('notifon', 'Notification on', '');
+            createFfChip('notifoff', 'Notification off', '');
+            createFfChip('posts', 'Posts', '');
+            createFfChip('playlist', 'Playlist', '');
+
+            // Unwatched / Watched dropdown
+            const watchSelectStyle = 'background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; border-radius: 16px; cursor: pointer; outline: none; font-size: 13px; font-weight: 500; transition: 0.2s; height: 30px;';
+            const watchDropdown = document.createElement('select');
+            watchDropdown.style.cssText = watchSelectStyle;
+            
+            ['All', 'Unwatched', 'Watched'].forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt.toLowerCase();
+                el.textContent = opt;
+                el.style.background = '#222';
+                watchDropdown.appendChild(el);
             });
-            this._createToggleChip(leftContainer, 'Hide Watched', this.orchestrator.getHideWatched(), (val) => {
-                this.orchestrator.setHideWatched(val);
-                this.orchestrator.applyFeedFilters();
+            
+            // Set initial state from default
+            if (!this.orchestrator.ffInitialized) {
+                if (ffSettings.ff_unwatched_default) {
+                    watchDropdown.value = 'unwatched';
+                    this.orchestrator.ffActiveWatch = 'unwatched';
+                } else if (ffSettings.ff_watched_default) {
+                    watchDropdown.value = 'watched';
+                    this.orchestrator.ffActiveWatch = 'watched';
+                } else {
+                    this.orchestrator.ffActiveWatch = 'all';
+                }
+            } else {
+                watchDropdown.value = this.orchestrator.ffActiveWatch || 'all';
+            }
+            
+            watchDropdown.addEventListener('change', (e) => {
+                this.orchestrator.ffActiveWatch = e.target.value;
+                this.orchestrator.updateFilterState();
             });
+            feedFilterBar.appendChild(watchDropdown);
+
+            // Search input
+            if (ffSettings.ff_search_visible !== false) {
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.placeholder = 'Subscription Feed Filter...';
+                searchInput.style.cssText = 'background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 16px; font-size: 13px; outline: none; width: 160px; height: 30px; transition: width 0.2s;';
+                
+                if (!this.orchestrator.ffInitialized) {
+                    this.orchestrator.ffActiveSearch = ffSettings.ff_search_default || '';
+                }
+                searchInput.value = this.orchestrator.ffActiveSearch || '';
+                
+                searchInput.addEventListener('focus', () => searchInput.style.width = '240px');
+                searchInput.addEventListener('blur', () => searchInput.style.width = '160px');
+                searchInput.addEventListener('input', (e) => {
+                    this.orchestrator.ffActiveSearch = e.target.value.toLowerCase();
+                    this.orchestrator.updateFilterState();
+                });
+                feedFilterBar.appendChild(searchInput);
+            }
+            
+            // Options Gear Button
+            const gearBtn = document.createElement('button');
+            gearBtn.innerHTML = '<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>';
+            gearBtn.style.cssText = 'background: transparent; color: #aaa; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.2s;';
+            gearBtn.addEventListener('mouseover', () => { gearBtn.style.background = 'rgba(255,255,255,0.1)'; gearBtn.style.color = '#fff'; });
+            gearBtn.addEventListener('mouseout', () => { gearBtn.style.background = 'transparent'; gearBtn.style.color = '#aaa'; });
+            gearBtn.addEventListener('click', () => {
+                if (window.YPP.features.CustomDialog) {
+                    // We will implement the advanced options modal here soon
+                    window.YPP.features.CustomDialog.alert('Subscription Feed Filter', 'Advanced filter options menu coming soon!');
+                }
+            });
+            feedFilterBar.appendChild(gearBtn);
+
+            this.orchestrator.ffInitialized = true;
+            leftContainer.appendChild(feedFilterBar);
 
             // Insert the left container BEFORE the separator / right container
             const separator = chipsBar.querySelector('.ypp-filter-separator');
@@ -619,30 +802,30 @@ window.YPP.features.FolderUI = class FolderUI {
                 <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
                     <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Duration</span>
                     <select class="ypp-filter-dropdown" id="ypp-duration-filter" style="${selectStyle}">
-                        <option value="all" style="background:#222">All</option>
-                        <option value="short" style="background:#222">Under 5 min</option>
-                        <option value="medium" style="background:#222">5 – 20 min</option>
-                        <option value="long" style="background:#222">Over 20 min</option>
-                        <option value="custom" style="background:#222">Custom...</option>
+                        <option value="all" style="background:#222; color:#fff;">All</option>
+                        <option value="short" style="background:#222; color:#fff;">Under 5 min</option>
+                        <option value="medium" style="background:#222; color:#fff;">5 – 20 min</option>
+                        <option value="long" style="background:#222; color:#fff;">Over 20 min</option>
+                        <option value="custom" style="background:#222; color:#fff;">Custom...</option>
                     </select>
                 </div>
                 <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
                     <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Uploaded</span>
                     <select class="ypp-filter-dropdown" id="ypp-date-filter" style="${selectStyle}">
-                        <option value="all" style="background:#222">All time</option>
-                        <option value="today" style="background:#222">Today</option>
-                        <option value="week" style="background:#222">This week</option>
-                        <option value="month" style="background:#222">This month</option>
-                        <option value="custom" style="background:#222">Custom...</option>
+                        <option value="all" style="background:#222; color:#fff;">All time</option>
+                        <option value="today" style="background:#222; color:#fff;">Today</option>
+                        <option value="week" style="background:#222; color:#fff;">This week</option>
+                        <option value="month" style="background:#222; color:#fff;">This month</option>
+                        <option value="custom" style="background:#222; color:#fff;">Custom...</option>
                     </select>
                 </div>
                 <div class="ypp-sub-filter-group" style="display: flex; align-items: center; gap: 8px;">
                     <span class="ypp-sub-filter-label" style="color: #aaa; font-size: 13px; font-weight: 500; text-transform: uppercase;">Sort by</span>
                     <select class="ypp-filter-dropdown" id="ypp-sort-filter" style="${selectStyle}">
-                        <option value="latest" style="background:#222">Latest</option>
-                        <option value="oldest" style="background:#222">Oldest</option>
-                        <option value="longest" style="background:#222">Longest</option>
-                        <option value="shortest" style="background:#222">Shortest</option>
+                        <option value="latest" style="background:#222; color:#fff;">Latest</option>
+                        <option value="oldest" style="background:#222; color:#fff;">Oldest</option>
+                        <option value="longest" style="background:#222; color:#fff;">Longest</option>
+                        <option value="shortest" style="background:#222; color:#fff;">Shortest</option>
                     </select>
                 </div>
             `;

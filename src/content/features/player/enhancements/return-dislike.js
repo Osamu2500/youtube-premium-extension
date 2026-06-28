@@ -124,15 +124,6 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
         const data = this.currentDislikesData;
         const buttons = this.buttonsElement;
 
-        // Fast path: if we already injected the text span, just update the number and return.
-        // Skips all the expensive DOM walking below on subsequent navigations to the same video.
-        const existingText = buttons.querySelector('.ypp-dislike-text');
-        if (existingText) {
-            existingText.textContent = this.formatNumber(data.dislikes);
-            existingText.title = data.dislikes.toLocaleString();
-            return;
-        }
-
         // Find the dislike button
         // 1. Try finding by specific icon path or aria-label if possible, but structure varies.
         // 2. Fallback: assumption that it's the 2nd button in the segmented button group.
@@ -152,30 +143,46 @@ window.YPP.features.ReturnDislike = class ReturnDislike extends window.YPP.featu
 
         if (!dislikeButton) return;
 
-        // --- 1. Text Update ---
-        let textEl = dislikeButton.querySelector('.ypp-dislike-text');
-        if (!textEl) {
-            textEl = document.createElement('span');
-            textEl.className = 'ypp-dislike-text';
-            Object.assign(textEl.style, {
-                marginLeft: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                lineHeight: 'normal',
-                opacity: '0.9',
-                display: 'inline-flex',
-                alignItems: 'center'
-            });
-            
-            // Insert into the button content
-            const buttonContent = dislikeButton.querySelector('button') || dislikeButton.querySelector('a') || dislikeButton;
-            const icon = buttonContent.querySelector('yt-icon') || buttonContent.querySelector('.yt-spec-button-shape-next__icon');
-            
-            if (icon && icon.parentNode) {
-                icon.parentNode.insertBefore(textEl, icon.nextSibling);
+        if (dislikeButton.hasAttribute('data-ypp-processed-dislikes')) {
+            // If stamped but our text was destroyed by SPA navigation/re-render, we need to recover it
+            if (!dislikeButton.querySelector('.ypp-dislike-text')) {
+                dislikeButton.removeAttribute('data-ypp-processed-dislikes');
             } else {
-                buttonContent.appendChild(textEl);
+                // Just update the text if it exists
+                const existingText = dislikeButton.querySelector('.ypp-dislike-text');
+                existingText.textContent = this.formatNumber(data.dislikes);
+                existingText.title = data.dislikes.toLocaleString();
+                return;
             }
+        }
+
+        dislikeButton.setAttribute('data-ypp-processed-dislikes', 'true');
+
+        // --- 1. Text Update ---
+        let textEl = document.createElement('span');
+        textEl.className = 'ypp-dislike-text';
+        
+        // Ensure our CSS is injected (BaseFeature handles deduplication)
+        this.addStyle(`
+            .ypp-dislike-text {
+                margin-left: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                line-height: normal;
+                opacity: 0.9;
+                display: inline-flex;
+                align-items: center;
+            }
+        `);
+        
+        // Insert into the button content
+        const buttonContent = dislikeButton.querySelector('button') || dislikeButton.querySelector('a') || dislikeButton;
+        const icon = buttonContent.querySelector('yt-icon') || buttonContent.querySelector('.yt-spec-button-shape-next__icon');
+        
+        if (icon && icon.parentNode) {
+            icon.parentNode.insertBefore(textEl, icon.nextSibling);
+        } else {
+            buttonContent.appendChild(textEl);
         }
 
         const formattedDate = this.formatNumber(data.dislikes);

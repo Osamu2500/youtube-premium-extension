@@ -52,35 +52,37 @@ window.YPP.features.AutoQuality = class AutoQuality extends window.YPP.features.
             this.utils?.log('Failed to write localStorage', this.name, 'warn', e);
         }
 
-        // 2. Fallback: Player might not have quality levels ready immediately
-        this.pollFor(() => {
-            if (!this.settings?.autoQuality || this.settings.autoQuality === 'off') return true; 
-            const player = document.getElementById('movie_player');
-            if (player && typeof player.getAvailableQualityLevels === 'function') {
-                const available = player.getAvailableQualityLevels();
-                if (available && available.length > 0 && available[0] !== 'auto') {
-                    this.applyAutoQuality(player);
-                    return true; // Stop polling
-                }
+        // Try immediately
+        const player = document.getElementById('movie_player');
+        if (player && typeof player.getAvailableQualityLevels === 'function') {
+            const available = player.getAvailableQualityLevels();
+            if (available && available.length > 0 && available[0] !== 'auto') {
+                this.applyAutoQuality(player);
             }
-            return false;
-        }, 5000, 500).catch(() => {});
+        }
     }
 
     startEnforcer() {
         if (this._enforcerBound) return;
-        this._enforcerBound = () => {
+        this._enforcerBound = (e) => {
             if (document.hidden) return;
             if (!this.settings?.autoQuality || this.settings.autoQuality === 'off') return;
+            
+            // If this is a loadstart event, ensure it's from a video element
+            if (e && e.type === 'loadstart' && e.target.tagName !== 'VIDEO') return;
+
             const player = document.getElementById('movie_player');
             if (player && typeof player.getPlaybackQuality === 'function') {
                 this.applyAutoQuality(player);
             }
         };
         
-        // Listen to navigation and player updates instead of polling
+        // Listen to navigation and player updates
         this.addListener(document, 'yt-navigate-finish', this._enforcerBound);
         this.addListener(document, 'yt-player-updated', this._enforcerBound);
+        
+        // Superior method from imported extension: capture loadstart on window to reliably catch video init
+        this.addListener(window, 'loadstart', this._enforcerBound, true);
         
         // Handle network changes for smart auto-quality
         if (navigator.connection) {

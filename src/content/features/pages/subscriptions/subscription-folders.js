@@ -55,7 +55,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             this._durationFilter = filters.duration || 'all';
             this._dateFilter = filters.date || 'all';
             this._sortFilter = filters.sort || 'latest';
-            this.applyFeedFilters();
+            this.updateFilterState();
         });
 
         this._storageChangedUnsub = window.YPP.events?.on('storage:changed:ypp_subscription_folders', async (newFolders) => {
@@ -380,6 +380,15 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     // ENGINE: FEED FILTERING
     // =========================================================================
 
+    _isAnyFilterActive() {
+        const hasActiveChip = Object.values(this.ffActiveChips || {}).some(s => s !== 'neutral' && s !== 'all');
+        const hasExplicitAll = this.ffActiveChips?.['all'] === 'show';
+        const hasSearch = !!(this.ffActiveSearch && this.ffActiveSearch.trim() !== '');
+        const hasWatch = this.ffActiveWatch && this.ffActiveWatch !== 'all';
+        
+        return (this.activeFolder || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest' || hasActiveChip || hasSearch || hasWatch || (!hasExplicitAll && Object.keys(this.ffActiveChips || {}).length > 0) || (this.storage.keywordBlacklist && this.storage.keywordBlacklist.length > 0));
+    }
+
     setupFeedFilters() {
         if (!document.getElementById('ypp-filter-styles')) {
             const style = document.createElement('style');
@@ -389,6 +398,14 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 ytd-video-renderer[data-ypp-hidden="true"],
                 ytd-grid-video-renderer[data-ypp-hidden="true"] {
                     display: none !important;
+                }
+
+                /* CSS trick to make filtering "instant" without breaking thumbnail lazy-loading.
+                   opacity: 0 keeps the bounding box intact so YouTube's IntersectionObserver can load images,
+                   but prevents the user from seeing a flash of videos before JS evaluates them. */
+                body.ypp-feed-filters-active ytd-rich-item-renderer:not([data-ypp-filter-checked="true"]) {
+                    opacity: 0 !important;
+                    pointer-events: none !important;
                 }
             `;
             document.head.appendChild(style);
@@ -412,7 +429,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         this.updateFilterState();
         
         this.observer.register('feed-filter-loop', SubscriptionFolders.SELECTORS.FEED_CARDS, () => {
-            if (this.activeFolder || this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest' || (this.storage.keywordBlacklist && this.storage.keywordBlacklist.length > 0)) {
+            if (this._isAnyFilterActive()) {
                 // Debounced: rapid card additions (lazy-load batches) coalesce into one pass
                 this._debouncedApplyFilters();
             }
@@ -432,6 +449,17 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         localStorage.setItem('ypp_active_folder', this.activeFolder || '');
         localStorage.setItem('ypp_folder_data', JSON.stringify(this.storage.folders || {}));
 
+        if (this._isAnyFilterActive()) {
+            document.body.classList.add('ypp-feed-filters-active');
+            
+            // Remove the checked tag so they get hidden instantly until evaluated
+            document.querySelectorAll('ytd-rich-item-renderer[data-ypp-filter-checked="true"]').forEach(el => {
+                el.removeAttribute('data-ypp-filter-checked');
+            });
+        } else {
+            document.body.classList.remove('ypp-feed-filters-active');
+        }
+
         if (this.activeFolder) {
             document.body.classList.add('ypp-sub-folders-active');
             let channels = [];
@@ -444,10 +472,14 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 }
             }
             this.activeChannelSet = new Set(channels);
-            this.applyFeedFilters();
         } else {
             document.body.classList.remove('ypp-sub-folders-active');
             this.activeChannelSet = new Set();
+        }
+
+        if (this._isAnyFilterActive()) {
+            this.applyFeedFilters();
+        } else {
             this.resetFeedVisibility();
         }
     }
@@ -461,13 +493,10 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     }
 
     _parseDurationSeconds(card) {
-        const badge = card.querySelector(
-            'ytd-thumbnail-overlay-time-status-renderer span, ' +
-            '.badge-shape-wiz__text'
-        );
-        if (!badge) return null;
+        const overlay = card.querySelector('ytd-thumbnail-overlay-time-status-renderer');
+        if (!overlay) return null;
 
-        const text = badge.textContent.trim().replace(/\s+/g, '');
+        const text = overlay.textContent.trim().replace(/\s+/g, '');
         const parts = text.split(':').map(Number);
 
         if (parts.length === 2) return parts[0] * 60 + parts[1];
@@ -477,20 +506,21 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
 
     _parseDateScore(card) {
         // Returns a score — higher = more recent
-        const meta = card.querySelector('#metadata-line span:last-child, ' +
-            '.inline-metadata-item:last-child');
-        if (!meta) return 0;
+        const metaLine = card.querySelector('#metadata-line, .inline-metadata-item, #metadata');
+        if (!metaLine) return 0;
 
-        const text = meta.textContent.toLowerCase().trim();
+        const text = metaLine.textContent.toLowerCase().trim();
 
         if (text.includes('hour') || text.includes('minute') || 
-            text.includes('just now')) return 4; // today
+            text.includes('second') || text.includes('just now')) return 4; // today
         if (text.includes('day') && !text.includes('week')) {
-            const days = parseInt(text) || 1;
+            const match = text.match(/(\d+)\s*day/);
+            const days = match ? parseInt(match[1]) : 1;
             return days <= 7 ? 3 : days <= 30 ? 2 : 1;
         }
         if (text.includes('week')) {
-            const weeks = parseInt(text) || 1;
+            const match = text.match(/(\d+)\s*week/);
+            const weeks = match ? parseInt(match[1]) : 1;
             return weeks <= 4 ? 2 : 1;
         }
         if (text.includes('month')) return 1;
@@ -498,14 +528,24 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     }
 
     _parseDaysAgo(card) {
-        const meta = card.querySelector('#metadata-line span:last-child, .inline-metadata-item:last-child');
-        if (!meta) return 9999;
-        const text = meta.textContent.toLowerCase().trim();
-        if (text.includes('hour') || text.includes('minute') || text.includes('just now')) return 0;
-        if (text.includes('day') && !text.includes('week')) return parseInt(text) || 1;
-        if (text.includes('week')) return (parseInt(text) || 1) * 7;
-        if (text.includes('month')) return (parseInt(text) || 1) * 30;
-        if (text.includes('year')) return (parseInt(text) || 1) * 365;
+        const metaLine = card.querySelector('#metadata-line, .inline-metadata-item, #metadata');
+        if (!metaLine) return 9999;
+        
+        const text = metaLine.textContent.toLowerCase().trim();
+        const match = text.match(/(\d+)\s*(minute|hour|day|week|month|year)/);
+        
+        if (text.includes('just now') || text.includes('second')) return 0;
+        
+        if (match) {
+            const val = parseInt(match[1]) || 1;
+            const unit = match[2];
+            if (unit === 'minute' || unit === 'hour') return 0;
+            if (unit === 'day') return val;
+            if (unit === 'week') return val * 7;
+            if (unit === 'month') return val * 30;
+            if (unit === 'year') return val * 365;
+        }
+        
         return 9999;
     }
 
@@ -571,11 +611,153 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     }
 
     /**
-     * The real filter implementation — called at most once per 50ms window.
-     * Caches channel names on card elements (dataset.yppChannel) to avoid
-     * repeated textContent lookups across filter passes.
+     * Applies all active UI filters (chips, duration, date, search, folder).
+     * @public
+     */
+    applyFeedFilters() {
+        if (this._filterTimeout) {
+            cancelAnimationFrame(this._filterTimeout);
+        }
+        this._filterTimeout = requestAnimationFrame(() => {
+            this._applyFeedFiltersNow();
+        });
+    }
+
+    /**
+     * The real filter implementation.
      * @private
      */
+    _applyFeedFiltersNow() {
+        const container = document.querySelector('ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents');
+        if (!container) return;
+
+        const cards = container.querySelectorAll('ytd-rich-item-renderer');
+        if (!cards || cards.length === 0) return;
+
+        // Folder constraints
+        const normSet = this.activeFolder && this.activeFolder !== '__no_folder__' 
+            ? new Set([...this.activeChannelSet].map(n => this._normChannel(n)))
+            : null;
+
+        // Feed Filter Chips
+        const chips = this.ffActiveChips || {};
+        const activeWatch = this.ffActiveWatch || 'all';
+        const searchStr = (this.ffActiveSearch || '').toLowerCase();
+        
+        let visibleCount = 0;
+        let hiddenCount = 0;
+
+        cards.forEach(card => {
+            // 1. Core Video Details
+            const channelLink = card.querySelector('#channel-name a, ytd-channel-name a');
+            const titleLink = card.querySelector('#video-title, #video-title-link');
+            const overlay = card.querySelector('ytd-thumbnail-overlay-time-status-renderer');
+            const metaLine = card.querySelector('#metadata-line, .inline-metadata-item, #metadata');
+            const badge = card.querySelector('ytd-badge-supported-renderer, .badge-shape-wiz__text');
+            
+            const title = (titleLink?.textContent || '').toLowerCase();
+            const channelName = (channelLink?.textContent || '').trim();
+            const metaText = (metaLine?.textContent || '').toLowerCase();
+            const badgeText = (badge?.textContent || '').toLowerCase();
+            const isShort = overlay?.getAttribute('overlay-style') === 'SHORTS' || card.querySelector('ytd-shorts-lockup-view-model') !== null;
+            
+            // Determine video type
+            const isLive = badgeText.includes('live') && !metaText.includes('streamed');
+            const isStreamed = metaText.includes('streamed');
+            const isScheduled = badgeText.includes('premiere') || metaText.includes('premieres') || metaText.includes('scheduled');
+            const isPost = card.querySelector('ytd-post-renderer, ytd-shared-post-renderer') !== null;
+            const isPlaylist = card.querySelector('ytd-playlist-renderer') !== null;
+            const isVideo = !isLive && !isStreamed && !isScheduled && !isShort && !isPost && !isPlaylist;
+            
+            // Notification Status
+            const notifBtn = card.querySelector('ytd-subscription-notification-toggle-button-renderer button');
+            const isNotifOn = notifBtn?.getAttribute('aria-label')?.toLowerCase().includes('all') || false; // Approximation, YT DOM is complex here
+            
+            // Watched Status
+            const progress = card.querySelector('#progress, .ytd-thumbnail-overlay-resume-playback-renderer');
+            const isWatched = progress !== null;
+            
+            // Default visibility
+            let show = true;
+
+            // 2. Folder Filtering
+            if (normSet && show) {
+                const norm = this._normChannel(channelName);
+                if (norm && !normSet.has(norm)) {
+                    show = false;
+                }
+            }
+            
+            // 3. Right-side Filters (Duration & Date)
+            if (show && !this._matchesDurationFilter(card)) show = false;
+            if (show && !this._matchesDateFilter(card)) show = false;
+            
+            // 4. Chip Bar State Logic (3-state)
+            if (show) {
+                // If 'all' is explicitly green, we don't hide by exclusion.
+                // But if 'all' is neutral and other things are green, we use exclusion.
+                
+                let greenCount = 0;
+                for (const state of Object.values(chips)) {
+                    if (state === 'show') greenCount++;
+                }
+                
+                // If anything except 'all' is explicitly SHOW (green), we implicitly hide things that aren't matching a SHOW chip.
+                const hasExplicitShow = greenCount > 0 && chips['all'] !== 'show';
+                
+                if (hasExplicitShow) {
+                    show = false;
+                    // Check if this card matches ANY of the green chips
+                    if (isLive && chips['live'] === 'show') show = true;
+                    if (isStreamed && chips['streamed'] === 'show') show = true;
+                    if (isVideo && chips['video'] === 'show') show = true;
+                    if (isShort && chips['shorts'] === 'show') show = true;
+                    if (isScheduled && chips['scheduled'] === 'show') show = true;
+                    if (isPost && chips['posts'] === 'show') show = true;
+                    if (isPlaylist && chips['playlist'] === 'show') show = true;
+                    if (isNotifOn && chips['notifon'] === 'show') show = true;
+                    if (!isNotifOn && chips['notifoff'] === 'show') show = true;
+                }
+                
+                // Now evaluate explicitly HIDDEN (red) chips (these override SHOW if conflict somehow exists)
+                if (isLive && chips['live'] === 'hide') show = false;
+                if (isStreamed && chips['streamed'] === 'hide') show = false;
+                if (isVideo && chips['video'] === 'hide') show = false;
+                if (isShort && chips['shorts'] === 'hide') show = false;
+                if (isScheduled && chips['scheduled'] === 'hide') show = false;
+                if (isPost && chips['posts'] === 'hide') show = false;
+                if (isPlaylist && chips['playlist'] === 'hide') show = false;
+                if (isNotifOn && chips['notifon'] === 'hide') show = false;
+                if (!isNotifOn && chips['notifoff'] === 'hide') show = false;
+            }
+            
+            // 5. Watched Dropdown
+            if (show) {
+                if (activeWatch === 'unwatched' && isWatched) show = false;
+                if (activeWatch === 'watched' && !isWatched) show = false;
+            }
+            
+            // 6. Search String
+            if (show && searchStr) {
+                if (!title.includes(searchStr) && !channelName.toLowerCase().includes(searchStr)) {
+                    show = false;
+                }
+            }
+
+            // Apply Display
+            if (show) {
+                card.style.removeProperty('display');
+                visibleCount++;
+            } else {
+                card.style.setProperty('display', 'none', 'important');
+                hiddenCount++;
+            }
+        });
+
+        // Apply Sorting to visible elements
+        this._applySortOrder(container);
+    }
+
     /**
      * Console diagnostic helper — call from DevTools:
      *   window.YPP.Main.featureManager.getFeature('subscriptionFolders').diagnose()
@@ -806,6 +988,115 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
             if (isVisible && !this._matchesDurationFilter(card)) isVisible = false;
             if (isVisible && !this._matchesDateFilter(card))     isVisible = false;
 
+            // ── Subscription Feed Filter Extensions ──────────────
+            if (isVisible && this.ffActiveSearch && this.ffActiveSearch.trim() !== '') {
+                const searchLower = this.ffActiveSearch.toLowerCase();
+                let videoTitle = null;
+                const pd = card.data;
+                if (pd) {
+                    const lockup = pd.content?.lockupViewModel?.metadata?.lockupMetadataViewModel?.title?.content;
+                    const legacy = pd.videoRenderer?.title?.runs?.[0]?.text 
+                        ?? pd.content?.videoRenderer?.title?.runs?.[0]?.text 
+                        ?? pd.richItemRenderer?.content?.videoRenderer?.title?.runs?.[0]?.text;
+                    videoTitle = lockup ?? legacy ?? null;
+                }
+                if (!videoTitle) {
+                    const titleEl = card.querySelector('#video-title');
+                    if (titleEl) videoTitle = titleEl.textContent;
+                }
+                if (videoTitle) {
+                    if (!videoTitle.toLowerCase().includes(searchLower)) {
+                        isVisible = false;
+                    }
+                }
+            }
+
+            if (isVisible && this.ffActiveWatch && this.ffActiveWatch !== 'all') {
+                const progressEl = card.querySelector('#progress');
+                let watched = false;
+                if (progressEl) {
+                    const val = parseInt(progressEl.style.width, 10);
+                    if (!isNaN(val) && val >= 80) watched = true;
+                }
+                if (this.ffActiveWatch === 'unwatched' && watched) isVisible = false;
+                if (this.ffActiveWatch === 'watched' && !watched) isVisible = false;
+            }
+
+            if (isVisible && this.ffActiveChips) {
+                const chips = this.ffActiveChips;
+                let isLive = false;
+                let isStreamed = false;
+                let isScheduled = false;
+                let isShorts = !!(card.querySelector('ytd-reel-item-renderer') || card.hasAttribute('is-shorts') || card.querySelector('a[href^="/shorts/"]'));
+                let isVideo = false;
+                
+                if (!isShorts) {
+                    // Check new layout metadata
+                    let metaText = '';
+                    const newMeta = card.querySelector('yt-content-metadata-view-model > div > span[role="text"]:last-child');
+                    if (newMeta) {
+                        metaText = newMeta.textContent.trim();
+                    } else {
+                        // Check legacy layout metadata
+                        const oldMeta = card.querySelector('div#metadata-line');
+                        if (oldMeta) metaText = oldMeta.textContent.trim();
+                    }
+                    
+                    if (metaText) {
+                        // YouTube translations fallback to English keywords for our basic matching.
+                        // Ideally we'd use i18n, but string matching covers 90% of cases and matches original extension.
+                        if (metaText.includes('LIVE')) {
+                            isLive = true;
+                        } else if (metaText.includes('Streamed')) {
+                            isStreamed = true;
+                        } else if (metaText.includes('Premieres') || metaText.includes('Scheduled')) {
+                            isScheduled = true;
+                        } else {
+                            isVideo = true;
+                        }
+                    } else {
+                        // Fallback if metadata is missing but it's clearly a video
+                        isVideo = true; 
+                    }
+                }
+                
+                const matches = {
+                    live: isLive,
+                    streamed: isStreamed,
+                    video: isVideo,
+                    shorts: isShorts,
+                    scheduled: isScheduled
+                };
+                
+                // 1. Hide condition (AND NOT)
+                let matchesHide = false;
+                for (const [id, state] of Object.entries(chips)) {
+                    if (state === 'hide' && matches[id]) {
+                        matchesHide = true;
+                        break;
+                    }
+                }
+                
+                if (matchesHide) {
+                    isVisible = false;
+                } else {
+                    // 2. Show condition (OR)
+                    const activeShows = Object.entries(chips).filter(([id, state]) => state === 'show' && id !== 'all');
+                    if (activeShows.length > 0) {
+                        let matchesAnyShow = false;
+                        for (const [id] of activeShows) {
+                            if (matches[id]) {
+                                matchesAnyShow = true;
+                                break;
+                            }
+                        }
+                        if (!matchesAnyShow) {
+                            isVisible = false;
+                        }
+                    }
+                }
+            }
+
             if (isVisible) {
                 card.style.removeProperty('display');
                 card.removeAttribute('data-ypp-hidden');
@@ -816,6 +1107,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
                 card.setAttribute('data-ypp-hidden', 'true');
                 card.classList.remove('ypp-filtered-in');
             }
+            card.setAttribute('data-ypp-filter-checked', 'true');
         });
 
         // Close debug group and print table
@@ -841,7 +1133,7 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
     }
 
     resetFeedVisibility() {
-        if (this.hideShortsActive || this.hideWatchedActive || this._durationFilter !== 'all' || this._dateFilter !== 'all' || this._sortFilter !== 'latest' || (this.storage.keywordBlacklist && this.storage.keywordBlacklist.length > 0)) {
+        if (this._isAnyFilterActive()) {
             this.applyFeedFilters();
             return;
         }
@@ -849,6 +1141,8 @@ window.YPP.features.SubscriptionFolders = class SubscriptionFolders extends wind
         const videoCards = document.querySelectorAll(SubscriptionFolders.SELECTORS.FEED_CARDS);
         videoCards.forEach(card => {
             card.style.display = '';
+            card.removeAttribute('data-ypp-hidden');
+            card.removeAttribute('data-ypp-filter-checked');
             card.classList.remove('ypp-filtered-in');
             // Clear cached channel name — YouTube recycles DOM nodes across SPA navigations
             // so a stale cached name from a previous page visit could cause a false match.
