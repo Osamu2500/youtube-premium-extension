@@ -70,18 +70,32 @@ window.YPP.features.VideoFiltersUI = class VideoFiltersUI {
         // Check if opened from Global Bar
         const isGlobalBar = !!(btn?.closest?.('.ypp-global-player-bar'));
         if (isGlobalBar) {
-            panel.classList.add('ypp-panel-transparent');
             Object.assign(panel.style, {
-                background: 'rgba(8, 8, 18, 0.62)',
-                backdropFilter: 'blur(24px) saturate(160%)',
-                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                // Width is set dynamically by positionPopupBesideVideo (auto-scaled to fit)
                 maxHeight: Math.min(window.innerHeight * 0.85, 560) + 'px',
                 overflowY: 'auto',
-                overflowX: 'hidden'
+                overflowX: 'hidden',
+                bottom: 'auto'
             });
+
+            // Position it next to the global bar
+            const bar = btn.closest('.ypp-global-player-bar');
+            const panelHeight = 500; // approx height
+            const topPx = Math.max(16, (window.innerHeight - panelHeight) / 2);
+            
+            if (bar.classList.contains('ypp-bar-pos-right')) {
+                panel.style.right = '76px';
+                panel.style.left = 'auto';
+                panel.style.top = topPx + 'px';
+            } else if (bar.classList.contains('ypp-bar-pos-left')) {
+                panel.style.left = '76px';
+                panel.style.right = 'auto';
+                panel.style.top = topPx + 'px';
+            } else if (bar.classList.contains('ypp-bar-pos-top')) {
+                panel.style.top = '76px';
+                panel.style.left = 'calc(50% - 220px)'; // approx half of 440px
+                panel.style.right = 'auto';
+            }
         }
 
         this._injectStyle('ypp-glass-anim', `

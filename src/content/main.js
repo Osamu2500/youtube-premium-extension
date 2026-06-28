@@ -525,7 +525,8 @@
                     isTrending: pathname === '/feed/trending',
                     isSubscriptions: pathname === '/feed/subscriptions',
                     isLibrary: pathname === '/feed/library',
-                    isHistory: pathname === '/feed/history'
+                    isHistory: pathname === '/feed/history',
+                    isFeedPlaylists: pathname === '/feed/playlists'
                 };
 
                 const contextHashObj = {
@@ -556,7 +557,7 @@
                         'ypp-watch-page', 'ypp-shorts-page', 'ypp-home-page',
                         'ypp-search-page', 'ypp-channel-page', 'ypp-playlist-page',
                         'ypp-library-page', 'ypp-history-page', 'ypp-subscriptions-page',
-                        'ypp-feed-page'
+                        'ypp-feed-page', 'ypp-feed-playlists-page'
                     ];
 
                     for (const cls of classes) {
@@ -574,6 +575,7 @@
                     if (this.context.isLibrary) classes.add('ypp-library-page');
                     if (this.context.isHistory) classes.add('ypp-history-page');
                     if (this.context.isSubscriptions) classes.add('ypp-subscriptions-page');
+                    if (this.context.isFeedPlaylists) classes.add('ypp-feed-playlists-page');
 
                     if (this.settings?.premiumTheme) {
                         classes.add('yt-premium-plus-theme');

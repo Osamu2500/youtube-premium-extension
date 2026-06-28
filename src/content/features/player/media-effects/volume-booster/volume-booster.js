@@ -215,11 +215,11 @@ window.YPP.features.VolumeBooster = class VolumeBooster extends window.YPP.featu
         }
     }
 
-    onVideoChange() {
-        // Called by FeatureManager when a new videoId is detected (app:videoChange event)
+    onVideoChange(videoElement) {
+        // Called by FeatureManager when a new videoId is detected
         if (!this.settings || !this.settings.enableVolumeBoost) return;
         this._loadSettings(this.settings);
-        const video = document.querySelector('.html5-main-video') || document.querySelector('video');
+        const video = videoElement || document.querySelector('.html5-main-video') || document.querySelector('video');
         if (!video) return;
         if (this._audioConnected && this._boundVideo === video) {
             // Same video element: just restore the correct audio values

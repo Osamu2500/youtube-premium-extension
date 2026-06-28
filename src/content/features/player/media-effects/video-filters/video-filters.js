@@ -74,9 +74,9 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
         if (video) this._restoreFilterState(video);
     }
 
-    onVideoChange() {
+    onVideoChange(videoElement) {
         if (!this.settings || !this.settings.enableCinemaFilters) return;
-        const video = document.querySelector('video');
+        const video = videoElement || document.querySelector('.html5-main-video') || document.querySelector('video');
         if (video) this._restoreFilterState(video);
     }
 
@@ -127,8 +127,8 @@ window.YPP.features.VideoFilters = class VideoFilters extends window.YPP.feature
     }
 
     _applyComputedFilter(video) {
-        // Force fresh video lookup on every application
-        video = document.querySelector('.html5-main-video') || document.querySelector('video');
+        // Force fresh video lookup on every application if not explicitly provided
+        video = video || document.querySelector('.html5-main-video') || document.querySelector('video');
         if (!video) return;
 
         if (this.isComparing) {

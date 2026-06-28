@@ -116,15 +116,29 @@ window.YPP.features.GlobalPlayerBar = class GlobalPlayerBar extends window.YPP.f
             if (video.offsetWidth > 0 && video.offsetHeight > 0) {
                 video.setAttribute('data-ypp-processed', 'true');
                 this.ui.trackVideo(video);
+                this._notifyFeaturesOfNewVideo(video);
             } else {
                 this.pollFor(() => video.isConnected && video.offsetWidth > 0 ? video : null, 5000, 500)
                     .then(v => {
                         if (v && !v.hasAttribute('data-ypp-processed') && !this.ui.hasVideo(v)) {
                             v.setAttribute('data-ypp-processed', 'true');
                             this.ui.trackVideo(v);
+                            this._notifyFeaturesOfNewVideo(v);
                         }
                     })
                     .catch(() => {});
+            }
+        });
+    }
+
+    _notifyFeaturesOfNewVideo(video) {
+        if (this.isYouTube) return; // YouTube handles this natively via app:videoChange
+        if (!window.YPP.featureManager) return;
+        
+        ['volumeBoost', 'videoFilters', 'videoSpeedController'].forEach(name => {
+            const feature = window.YPP.featureManager.getFeature(name);
+            if (feature && feature.isEnabled && typeof feature.onVideoChange === 'function') {
+                feature.onVideoChange(video);
             }
         });
     }
